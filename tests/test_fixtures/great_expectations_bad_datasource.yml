@@ -12,13 +12,12 @@ datasources:
     credentials:
       drivername: postgresql
       host: fake_host
-      port: 'fake_port'
+      port: "fake_port"
       username: i_wont_work
-      password: ''
+      password: ""
       database: many_tables
     class_name: SqlAlchemyDatasource
 config_variables_file_path: uncommitted/config_variables.yml
-
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store

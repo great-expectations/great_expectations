@@ -2654,8 +2654,23 @@ class AbstractDataContext(ConfigPeer, ABC):
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
 
+    def _validate_datasource_names(
+        self, datasource_names: list[str] | str | None
+    ) -> list[str]:
+        if datasource_names is None:
+            datasource_names = [
+                datasource["name"] for datasource in self.list_datasources()
+            ]
+        elif isinstance(datasource_names, str):
+            datasource_names = [datasource_names]
+        elif not isinstance(datasource_names, list):
+            raise ValueError(
+                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
+            )
+        return datasource_names
+
     @public_api
-    def get_available_data_asset_names(  # noqa: PLR0912
+    def get_available_data_asset_names(  # noqa: PLR0912, C901 - 18
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -2675,17 +2690,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         data_asset_names = {}
         fluent_data_asset_names = {}
-        if datasource_names is None:
-            datasource_names = [
-                datasource["name"] for datasource in self.list_datasources()
-            ]
-        elif isinstance(datasource_names, str):
-            datasource_names = [datasource_names]
-        elif not isinstance(datasource_names, list):
-            raise ValueError(
-                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
-            )
+        datasource_names = self._validate_datasource_names(datasource_names)
 
+        # TODO: V1-222 batch_kwargs_generator_names is legacy and should be removed for V1
+        # TODO: conditional FDS vs BDS datasource logic should be removed for V1
         if batch_kwargs_generator_names is not None:
             if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
@@ -2989,7 +2997,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @staticmethod
-    def _get_metric_configuration_tuples(
+    def _get_metric_configuration_tuples(  # noqa: C901
         metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
     ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
@@ -3686,7 +3694,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._evaluation_parameter_dependencies_compiled = True
 
-    def get_validation_result(  # noqa: PLR0913
+    def get_validation_result(  # noqa: C901, PLR0913
         self,
         expectation_suite_name,
         run_id=None,

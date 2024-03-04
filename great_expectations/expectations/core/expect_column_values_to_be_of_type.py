@@ -505,7 +505,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
@@ -578,7 +578,7 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     return execution_engine.dialect_module
 
 
-def _native_type_type_map(type_):  # noqa: PLR0911
+def _native_type_type_map(type_):  # noqa: C901, PLR0911
     # We allow native python types in cases where the underlying type is "object":
     if type_.lower() == "none":
         return (type(None),)

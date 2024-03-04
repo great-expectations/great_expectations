@@ -16,7 +16,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901
         self,
         validation_result=None,
         validation_result_suite_identifier=None,

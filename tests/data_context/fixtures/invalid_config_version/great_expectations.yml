@@ -15,7 +15,6 @@ datasources:
           sep:
           engine: python
 
-
 config_variables_file_path: uncommitted/config_variables.yml
 
 expectations_store_name: expectations_store
@@ -24,8 +23,7 @@ evaluation_parameter_store_name: evaluation_parameter_store
 
 plugins_directory: plugins/
 
-data_docs_sites:
-  not_a_real_site
+data_docs_sites: not_a_real_site
 
 stores:
   expectations_store:

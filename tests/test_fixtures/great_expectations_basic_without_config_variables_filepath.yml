@@ -17,8 +17,6 @@ datasources:
           sep:
           engine: python
 
-
-
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store

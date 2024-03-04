@@ -23,9 +23,9 @@ stores:
   validations_store:
     class_name: ValidationsStore
   evaluation_parameter_store:
-      class_name: EvaluationParameterStore
+    class_name: EvaluationParameterStore
   checkpoint_store:
-      class_name: CheckpointStore
+    class_name: CheckpointStore
 
 evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: validations_store

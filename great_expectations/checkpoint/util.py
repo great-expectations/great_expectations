@@ -271,7 +271,9 @@ def get_substituted_batch_request(
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict:
+def substitute_runtime_config(  # noqa: C901 - 11
+    source_config: dict, runtime_kwargs: dict
+) -> dict:
     if not (runtime_kwargs and any(runtime_kwargs.values())):
         return source_config
 
