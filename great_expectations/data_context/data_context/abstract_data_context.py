@@ -2680,7 +2680,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource_names
 
     @public_api
-    def get_available_data_asset_names(
+    def get_available_data_asset_names(  # noqa: PLR0912, C901 - 18
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -2702,6 +2702,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         fluent_data_asset_names = {}
         datasource_names = self._validate_datasource_names(datasource_names)
 
+        # TODO: V1-222 batch_kwargs_generator_names is legacy and should be removed for V1
+        # TODO: conditional FDS vs BDS datasource logic should be removed for V1
         if not batch_kwargs_generator_names:
             batch_kwargs_generator_names = []
         elif isinstance(batch_kwargs_generator_names, str):
