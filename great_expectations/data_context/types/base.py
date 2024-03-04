@@ -1701,6 +1701,7 @@ class DataContextConfigDefaults(enum.Enum):
         "store_backend": {
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+            "filepath_suffix": ".json",
         },
     }
     DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "EvaluationParameterStore"}
