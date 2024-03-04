@@ -1,0 +1,72 @@
+:root {
+  --code-snippets-title-color: #FAFAFA;
+  --code-snippets-title-background-color: #292F43;
+}
+
+div.theme-code-block {
+  box-shadow: 3px 3px 10px var(--black-15);
+  position: relative;
+
+  pre code {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    font-size: var(--p-md-font-size);
+  }
+
+  &:hover {
+    & > div:not(:only-child):first-child + div button {
+      opacity: 1;
+    }
+  }
+
+  // Code Block Title
+  & > div:not(:only-child):first-child {
+    background-color: var(--code-snippets-title-background-color);
+    box-shadow: 3px 3px 10px var(--black-15);
+    align-items: center;
+    border-bottom: none;
+    color: var(--code-snippets-title-color);
+    display: flex;
+    font-size: var(--p-md-font-size);
+    opacity: 0.75;
+    text-transform: capitalize;
+
+    &::before {
+      background: url('/img/file-solid.svg') 0 50% no-repeat;
+      content: '';
+      display: inline-block;
+      height: 1em;
+      margin-right: 0.5rem;
+      width: 1em;
+    }
+
+    // Code Block Content
+    & + div {
+      position: static;
+    }
+  }
+
+  &.language-bash div:not(:only-child):first-child::before{
+    background: url('/img/terminal-input-icon.svg') 0 50% no-repeat;
+    width: 1.25em;
+  }
+
+  // Button group
+  .prism-code + div:has(button) {
+    top: calc(var(--ifm-pre-padding) / 2);
+
+    &:hover {
+      opacity: 0.75 !important;
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      opacity: 0.75 !important;
+
+      svg path {
+        fill: var(--code-snippets-title-color);
+      }
+    }
+  }
+}

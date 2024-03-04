@@ -137,7 +137,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -156,7 +156,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "timestamp",
@@ -175,7 +175,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "batch_request_param_2",

@@ -54,6 +54,7 @@ from great_expectations.validation_operators import ActionListValidationOperator
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
@@ -95,16 +96,14 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: AbstractDataContext,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         self._data_context = data_context
-
         self._checkpoint_config = checkpoint_config
-
         self._validator: Validator | None = None
 
     @public_api
-    def run(  # noqa: C901, PLR0913, PLR0912
+    def run(  # noqa: C901, PLR0913, PLR0912, PLR0915
         self,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
@@ -146,6 +145,12 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
+        context = self.data_context
+        if context is None:
+            raise ValueError(
+                "Must associate Checkpoint with a DataContext before running; please add using context.checkpoints.add"
+            )
+
         validations = convert_validations_list_to_checkpoint_validation_configs(
             validations
         )
@@ -213,8 +218,8 @@ class BaseCheckpoint(ConfigPeer):
             "expectation_suite_id": expectation_suite_id,
         }
 
-        substituted_runtime_config: dict = self.get_substituted_config(
-            runtime_kwargs=runtime_kwargs
+        substituted_runtime_config: dict = self._get_substituted_config(
+            config_provider=context.config_provider, runtime_kwargs=runtime_kwargs
         )
 
         batch_request = substituted_runtime_config.get("batch_request")
@@ -244,6 +249,7 @@ class BaseCheckpoint(ConfigPeer):
                     run_id=run_id,
                     idx=idx,
                     validation_dict=validation_dict,
+                    context=context,
                 )
                 validation_operator_results.append(result)
         else:
@@ -251,6 +257,7 @@ class BaseCheckpoint(ConfigPeer):
                 substituted_runtime_config=substituted_runtime_config,
                 result_format=result_format,
                 run_id=run_id,
+                context=context,
             )
             validation_operator_results.append(result)
 
@@ -288,8 +295,9 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_config=self.config,
         )
 
-    def get_substituted_config(
+    def _get_substituted_config(
         self,
+        config_provider: _ConfigurationProvider,
         runtime_kwargs: dict | None = None,
     ) -> dict:
         if runtime_kwargs is None:
@@ -297,37 +305,21 @@ class BaseCheckpoint(ConfigPeer):
 
         config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)  # type: ignore[assignment] # always returns a dict
 
-        substituted_runtime_config = self._get_substituted_runtime_kwargs(
-            source_config=config_kwargs, runtime_kwargs=runtime_kwargs
-        )
-
-        return substituted_runtime_config
-
-    def _get_substituted_runtime_kwargs(
-        self,
-        source_config: dict,
-        runtime_kwargs: dict | None = None,
-    ) -> dict:
-        if runtime_kwargs is None:
-            runtime_kwargs = {}
-
         substituted_config: dict = substitute_runtime_config(
-            source_config=source_config, runtime_kwargs=runtime_kwargs
+            source_config=config_kwargs, runtime_kwargs=runtime_kwargs
         )
 
         if self._using_cloud_context:
             return substituted_config
 
-        return self._substitute_config_variables(config=substituted_config)
-
-    def _substitute_config_variables(self, config: dict) -> dict:
-        return self.data_context.config_provider.substitute_config(config)
+        return config_provider.substitute_config(substituted_config)
 
     def _run_validation(  # noqa: PLR0913
         self,
         substituted_runtime_config: dict,
         result_format: dict | str | None,
         run_id: str | RunIdentifier | None,
+        context: AbstractDataContext,
         idx: int | None = 0,
         validation_dict: CheckpointValidationConfig | None = None,
     ) -> ValidationOperatorResult:
@@ -359,9 +351,11 @@ class BaseCheckpoint(ConfigPeer):
                 "include_rendered_content"
             )
             if include_rendered_content is None:
-                include_rendered_content = self._data_context._determine_if_expectation_validation_result_include_rendered_content()
+                include_rendered_content = (
+                    context._determine_if_expectation_validation_result_include_rendered_content()
+                )
 
-            validator: Validator = self._validator or self.data_context.get_validator(
+            validator: Validator = self._validator or context.get_validator(
                 batch_request=batch_request,
                 expectation_suite_name=expectation_suite_name
                 if not self._using_cloud_context
@@ -391,7 +385,7 @@ class BaseCheckpoint(ConfigPeer):
 
             action_list_validation_operator: ActionListValidationOperator = (
                 ActionListValidationOperator(
-                    data_context=self.data_context,
+                    data_context=context,
                     action_list=action_list,
                     result_format=result_format,
                     name=f"{self.name}-checkpoint-validation[{idx}]",
@@ -465,7 +459,7 @@ class BaseCheckpoint(ConfigPeer):
             return None
 
     @property
-    def data_context(self) -> AbstractDataContext:
+    def data_context(self) -> AbstractDataContext | None:
         return self._data_context
 
     @property
@@ -536,7 +530,7 @@ class Checkpoint(BaseCheckpoint):
     def __init__(  # noqa: PLR0913
         self,
         name: str,
-        data_context: AbstractDataContext,
+        data_context: AbstractDataContext | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,

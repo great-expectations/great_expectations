@@ -65,8 +65,6 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
@@ -106,7 +104,6 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
-    partitioner: Optional[SparkPartitioner] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -176,36 +173,10 @@ class _FilePathDataAsset(DataAsset):
             )
         return PartitionerClass(**abstract_partitioner.dict())
 
-    @property
-    @override
-    def batch_request_options(
-        self,
-    ) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year", "path")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
-        partitioner_options: tuple[str, ...] = tuple()
-        if self.partitioner:
-            partitioner_options = tuple(self.partitioner.param_names)
-        return (
-            tuple(self._all_group_names)
-            + (FILE_PATH_BATCH_SPEC_KEY,)
-            + partitioner_options
-        )
-
     @override
     def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner]
+        self,
+        partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (
             FILE_PATH_BATCH_SPEC_KEY,
@@ -228,7 +199,7 @@ class _FilePathDataAsset(DataAsset):
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
@@ -477,147 +448,4 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
-        )
-
-    def _add_partitioner(self: Self, partitioner: SparkPartitioner) -> Self:
-        self.partitioner = partitioner
-        return self
-
-    @public_api
-    def add_partitioner_year(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year partitioner with this data asset.
-        Args:
-            column_name: A column name of the date column where year will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerYear(
-                method_name="partition_on_year", column_name=column_name
-            )
-        )
-
-    @public_api
-    def add_partitioner_year_and_month(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month partitioner with this asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerYearAndMonth(
-                method_name="partition_on_year_and_month", column_name=column_name
-            )
-        )
-
-    @public_api
-    def add_partitioner_year_and_month_and_day(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month, day partitioner with this asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerYearAndMonthAndDay(
-                method_name="partition_on_year_and_month_and_day",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
-    def add_partitioner_datetime_part(
-        self: Self, column_name: str, datetime_parts: List[str]
-    ) -> Self:
-        """Associates a datetime part partitioner with this asset.
-        Args:
-            column_name: Name of the date column where parts will be parsed out.
-            datetime_parts: A list of datetime parts to partition on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerDatetimePart(
-                method_name="partition_on_date_parts",
-                column_name=column_name,
-                datetime_parts=datetime_parts,
-            )
-        )
-
-    @public_api
-    def add_partitioner_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value partitioner with this asset.
-        Args:
-            column_name: A column name of the column to partition on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerColumnValue(
-                method_name="partition_on_column_value",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
-    def add_partitioner_divided_integer(
-        self: Self, column_name: str, divisor: int
-    ) -> Self:
-        """Associates a divided integer partitioner with this asset.
-        Args:
-            column_name: A column name of the column to partition on.
-            divisor: The divisor to use when partitioning.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerDividedInteger(
-                method_name="partition_on_divided_integer",
-                column_name=column_name,
-                divisor=divisor,
-            )
-        )
-
-    @public_api
-    def add_partitioner_mod_integer(self: Self, column_name: str, mod: int) -> Self:
-        """Associates a mod integer partitioner with this asset.
-        Args:
-            column_name: A column name of the column to partition on.
-            mod: The mod to use when partitioning.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerModInteger(
-                method_name="partition_on_mod_integer",
-                column_name=column_name,
-                mod=mod,
-            )
-        )
-
-    @public_api
-    def add_partitioner_multi_column_values(
-        self: Self, column_names: list[str]
-    ) -> Self:
-        """Associates a multi-column value partitioner with this asset.
-        Args:
-            column_names: A list of column names to partition on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_partitioner(
-            SparkPartitionerMultiColumnValue(
-                column_names=column_names,
-                method_name="partition_on_multi_column_values",
-            )
         )
