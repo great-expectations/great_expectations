@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from functools import cached_property
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -49,7 +49,9 @@ class Validator:
         self._get_validator = project_manager.get_validator
 
     def validate_expectation(
-        self, expectation: Expectation
+        self,
+        expectation: Expectation,
+        evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult:
         """Run a single expectation against the batch config"""
         results = self._validate_expectation_configs([expectation.configuration])
@@ -58,11 +60,14 @@ class Validator:
         return results[0]
 
     def validate_expectation_suite(
-        self, expectation_suite: ExpectationSuite
+        self,
+        expectation_suite: ExpectationSuite,
+        evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationSuiteValidationResult:
         """Run an expectation suite against the batch config"""
         results = self._validate_expectation_configs(
-            expectation_suite.expectation_configurations
+            expectation_suite.expectation_configurations,
+            evaluation_parameters,
         )
         statistics = calc_validation_statistics(results)
 
@@ -86,11 +91,19 @@ class Validator:
         return self._get_validator(batch_request=batch_request)
 
     def _validate_expectation_configs(
-        self, expectation_configs: list[ExpectationConfiguration]
+        self,
+        expectation_configs: list[ExpectationConfiguration],
+        evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
+        processed_expectation_configs = (
+            self._wrapped_validator.process_expectations_for_validation(
+                expectation_configs, evaluation_parameters
+            )
+        )
+
         results = self._wrapped_validator.graph_validate(
-            configurations=expectation_configs,
+            configurations=processed_expectation_configs,
             runtime_configuration={"result_format": self.result_format.value},
         )
 
