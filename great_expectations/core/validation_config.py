@@ -22,7 +22,7 @@ class _IdentifierBundle(BaseModel):
     id: Union[str, None]
 
 
-class _EncodedData(BaseModel):
+class _EncodedValidationData(BaseModel):
     datasource: _IdentifierBundle
     asset: _IdentifierBundle
     batch_config: _IdentifierBundle
@@ -37,10 +37,10 @@ def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
     return _IdentifierBundle(name=suite.name, id=suite.id)
 
 
-def _encode_data(data: BatchConfig) -> _EncodedData:
+def _encode_data(data: BatchConfig) -> _EncodedValidationData:
     asset = data.data_asset
     ds = asset.datasource
-    return _EncodedData(
+    return _EncodedValidationData(
         datasource=_IdentifierBundle(
             name=ds.name,
             id=ds.id,
@@ -80,7 +80,7 @@ class ValidationConfig(BaseModel):
     name: str
     data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
     suite: ExpectationSuite
-    id: Union[str, None] = None
+    id: Union[str, None] = None  # TODO: Should be updated when persisted with a store.
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -133,7 +133,7 @@ class ValidationConfig(BaseModel):
     def _encode_data(cls, data_dict: dict) -> BatchConfig:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.
         try:
-            data_identifiers = _EncodedData.parse_obj(data_dict)
+            data_identifiers = _EncodedValidationData.parse_obj(data_dict)
         except ValidationError as e:
             raise ValueError(
                 "Serialized data did not contain expected identifiers"
