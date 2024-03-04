@@ -244,7 +244,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         base_directory,
         filepath_template=None,
         filepath_prefix=None,
-        filepath_suffix=None,
+        filepath_suffix=".json",
         forbidden_substrings=None,
         platform_specific_separator=True,
         root_directory=None,

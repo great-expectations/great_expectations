@@ -34,7 +34,7 @@ class ValidationConfigStore(Store):
 
         # In order to enable the custom json_encoders in ValidationConfig, we need to set `models_as_dict` off
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
-        return value.json(models_as_dict=False)
+        return value.json(models_as_dict=False, indent=2, sort_keys=True)
 
     @override
     def deserialize(self, value):
