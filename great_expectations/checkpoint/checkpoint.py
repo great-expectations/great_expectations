@@ -351,9 +351,7 @@ class BaseCheckpoint(ConfigPeer):
                 "include_rendered_content"
             )
             if include_rendered_content is None:
-                include_rendered_content = (
-                    context._determine_if_expectation_validation_result_include_rendered_content()
-                )
+                include_rendered_content = context._determine_if_expectation_validation_result_include_rendered_content()
 
             validator: Validator = self._validator or context.get_validator(
                 batch_request=batch_request,
