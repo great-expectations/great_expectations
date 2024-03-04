@@ -160,7 +160,7 @@ class ValidationConfig(BaseModel):
             batch_config = asset.get_batch_config(batch_config_name)
         except KeyError as e:
             raise ValueError(
-                f"Could not find batch_config named '{batch_config_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+                f"Could not find batch config named '{batch_config_name}' within '{asset_name}' asset and '{ds_name}' datasource."
             ) from e
 
         return batch_config
