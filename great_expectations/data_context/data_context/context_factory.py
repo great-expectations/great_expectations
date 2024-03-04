@@ -45,6 +45,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.types.base import DataContextConfig
     from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.validator.validator import Validator
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
@@ -124,6 +126,14 @@ class ProjectManager:
                 + "Please call `get_context()` first, then try your action again."
             )
         return self._project.datasources
+
+    def get_validator(self, batch_request: BatchRequest) -> Validator:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `get_context()` first, then try your action again."
+            )
+        return self._project.get_validator(batch_request=batch_request)
 
     def _build_context(  # noqa: PLR0913
         self,
