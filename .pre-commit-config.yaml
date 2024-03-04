@@ -31,7 +31,6 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        args: ['--single-quote']
         types_or: [yaml]
         exclude: tests/data_context/fixtures/bad_yml
   # Github Actions Linter
