@@ -31,13 +31,6 @@ Some environments and Data Sources utilize additional Python libraries or third 
   />
 <LinkCard 
     topIcon 
-    label="Databricks"
-    description="Install and set up support for Databricks and GX"
-    to="/core/installation_and_setup/additional_dependencies/databricks" 
-    icon="/img/expectation_icon.svg" 
-  />
-<LinkCard 
-    topIcon 
     label="Google Cloud Storage"
     description="Install and set up support for Google Cloud Storage and GX"
     to="/core/installation_and_setup/additional_dependencies/google_cloud_storage" 

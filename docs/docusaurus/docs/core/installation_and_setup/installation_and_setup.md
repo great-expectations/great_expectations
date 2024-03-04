@@ -34,7 +34,7 @@ import GxData from '../../components/_data.jsx';
   <LinkCard 
     topIcon 
     label="Install Great Expectations"
-    description="Install the GX Python library"
+    description="Install the GX Python library locally or in a hosted environment such as an EMR Spark cluster or Databricks cluster."
     to="/core/installation_and_setup/install_gx" 
     icon="/img/expectation_icon.svg" 
   />
@@ -58,13 +58,6 @@ Some environments and Data Sources utilize additional Python libraries or third 
     label="Azure Blob Storage"
     description="Install and set up support for Azure Blob Storage and GX"
     to="/core/installation_and_setup/additional_dependencies/azure_blob_storage" 
-    icon="/img/expectation_icon.svg" 
-  />
-<LinkCard 
-    topIcon 
-    label="Databricks"
-    description="Install and set up support for Databricks and GX"
-    to="/core/installation_and_setup/additional_dependencies/databricks" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 

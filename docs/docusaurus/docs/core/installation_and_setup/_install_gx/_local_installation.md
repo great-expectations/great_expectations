@@ -8,19 +8,19 @@ GX 1.0 is a Python library and as such can be used with a local Python installat
 
   If you created a virtual environment for your GX Python installation, navigate to the folder that contains your virtual environment and activate it by running the following command:
 
-  ```shell title="Terminal input"
+  ```bash title="Terminal input"
   source my_venv/bin/activate
   ```
 
 2. Ensure you have the latest version of `pip`:
 
-  ```shell title="Terminal input"
+  ```bash title="Terminal input"
   python -m ensurepip --upgrade
   ```
 
 3. Install the GX 1.0 library:
 
-  ```shell terminal="Terminal input"
+  ```bash title="Terminal input"
   pip install great_expectations
   ```
 
