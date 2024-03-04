@@ -11,6 +11,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.context_factory import ProjectManager
+from great_expectations.datasource.fluent.pandas_datasource import _PandasDataAsset
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -46,7 +47,6 @@ def mock_validator():
             mock_validator = OldValidator(
                 execution_engine=mock.MagicMock(spec=ExecutionEngine)
             )
-            # mock_validator = mock.MagicMock(spec=OldValidator)
             mock_get_validator.return_value = mock_validator
 
             yield mock_validator
@@ -103,7 +103,6 @@ def test_validation_config__run__passes_simple_data_to_validator(
         configurations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_max_to_be_between",
-                meta={},
                 kwargs={"column": "foo", "max_value": 1.0},
             )
         ],
@@ -111,8 +110,10 @@ def test_validation_config__run__passes_simple_data_to_validator(
     )
 
 
+@mock.patch.object(_PandasDataAsset, "build_batch_request", autospec=True)
 @pytest.mark.unit
 def test_validation_config__run__passes_complex_data(
+    mock_build_batch_request,
     mock_validator: mock.MagicMock,
     validation_config: ValidationConfig,
 ):
@@ -127,16 +128,16 @@ def test_validation_config__run__passes_complex_data(
 
     validation_config.run(
         batch_config_options={"year": 2024},
-        evaluation_parameters={"min_value": 9000},
+        evaluation_parameters={"max_value": 9000},
         result_format=ResultFormat.COMPLETE,
     )
 
-    mock_validator.graph_validate.assert_called_once_with(
+    mock_validator.graph_validate.assert_called_with(
         configurations=[
-            {
-                "expectation_type": "expect_column_max_to_be_between",
-                "kwargs": {"column": "foo", "max_value": 9000},
-            }
+            ExpectationConfiguration(
+                expectation_type="expect_column_max_to_be_between",
+                kwargs={"column": "foo", "max_value": 9000},
+            )
         ],
         runtime_configuration={"result_format": "COMPLETE"},
     )
