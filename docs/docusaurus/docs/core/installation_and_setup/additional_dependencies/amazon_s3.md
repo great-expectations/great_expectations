@@ -2,7 +2,7 @@
 title: Install and set up Amazon S3 support
 ---
 
-Amazon S3 is a service offered by [Amazon Web Services (AWS)](aws.amazon.com).  With it, you can access objects stored in S3 buckets through a web interface.  Great Expectations (GX) uses the Python library `boto3` to access S3, but you will need to configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
+Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon.com).  With it, you can access objects stored in S3 buckets through a web interface.  Great Expectations (GX) uses the Python library `boto3` to access S3, but you will need to configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
 
 ## Prerequisites
 

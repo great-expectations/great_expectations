@@ -33,7 +33,7 @@ Connect GX to data stored on filesystems, databases, or in memory.  Then tell GX
     topIcon 
     label="Connect to in-memory data"
     description="Connect GX to data to data that has been read into memory with pandas or Spark."
-    to="/core/manage_and_access_data/connect_to_data/file_system" 
+    to="/core/manage_and_access_data/connect_to_data/in_memory" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -41,7 +41,7 @@ Connect GX to data stored on filesystems, databases, or in memory.  Then tell GX
     topIcon 
     label="Connect to SQL database data"
     description="Connect GX to data stored in SQL databases, with support for some specific SQL dialects."
-    to="/core/manage_and_access_data/connect_to_data/file_system" 
+    to="/core/manage_and_access_data/connect_to_data/sql" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -49,7 +49,7 @@ Connect GX to data stored on filesystems, databases, or in memory.  Then tell GX
     topIcon 
     label="Request data"
     description="Request data from a previously defined Data Source and Data Asset."
-    to="/core/manage_and_access_data/connect_to_data/request_data" 
+    to="/core/manage_and_access_data/request_data" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -65,7 +65,7 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
     topIcon 
     label="Manage Data Sources"
     description="Manage the objects that connect GX to your data."
-    to="/core/manage_and_access_data/connect_to_data/manage_data_sources" 
+    to="/core/manage_and_access_data/manage_data_sources" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -73,7 +73,7 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
     topIcon 
     label="Manage Data Assets"
     description="Manage the objects that tell GX which sets of records are relevant to your use cases."
-    to="/core/manage_and_access_data/connect_to_data/manage_data_assets" 
+    to="/core/manage_and_access_data/manage_data_assets" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -81,7 +81,7 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
     topIcon 
     label="Manage Batch Requests"
     description="Manage the objects that retrieve data from a Data Asset."
-    to="/core/manage_and_access_data/connect_to_data/manage_batch_requests" 
+    to="/core/manage_and_access_data/manage_batch_requests" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -89,7 +89,7 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
     topIcon 
     label="Manage Batches"
     description="Manage the objects that represent your retrieved data."
-    to="/core/manage_and_access_data/connect_to_data/manage_batches" 
+    to="/core/manage_and_access_data/manage_batches" 
     icon="/img/expectation_icon.svg" 
   />
 
