@@ -117,7 +117,7 @@ class ValidationConfig(BaseModel):
     def _validate_suite(cls, v: dict | ExpectationSuite):
         # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.
         if isinstance(v, dict):
-            return cls._encode_suite(v)
+            return cls._decode_suite(v)
         elif isinstance(v, ExpectationSuite):
             return v
         raise ValueError(
@@ -128,7 +128,7 @@ class ValidationConfig(BaseModel):
     def _validate_data(cls, v: dict | BatchConfig):
         # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.
         if isinstance(v, dict):
-            return cls._encode_data(v)
+            return cls._decode_data(v)
         elif isinstance(v, BatchConfig):
             return v
         raise ValueError(
@@ -136,7 +136,7 @@ class ValidationConfig(BaseModel):
         )
 
     @classmethod
-    def _encode_suite(cls, suite_dict: dict) -> ExpectationSuite:
+    def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
@@ -161,7 +161,7 @@ class ValidationConfig(BaseModel):
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
     @classmethod
-    def _encode_data(cls, data_dict: dict) -> BatchConfig:
+    def _decode_data(cls, data_dict: dict) -> BatchConfig:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
