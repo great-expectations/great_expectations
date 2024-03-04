@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_config import ValidationConfig
@@ -14,6 +13,9 @@ from great_expectations.data_context.store import ValidationConfigStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
+        EphemeralDataContext,
+    )
     from tests.datasource.fluent._fake_cloud_api import CloudDetails
 
 
@@ -50,10 +52,18 @@ def cloud_backed_store(cloud_details: CloudDetails):
 
 
 @pytest.fixture
-def validation_config() -> ValidationConfig:
+def validation_config(
+    in_memory_runtime_context: EphemeralDataContext,
+) -> ValidationConfig:
+    context = in_memory_runtime_context
+    batch_config = (
+        context.sources.add_pandas("my_datasource")
+        .add_csv_asset("my_asset", "data.csv")
+        .add_batch_config("my_batch_config")
+    )
     return ValidationConfig(
         name="my_validation",
-        data=BatchConfig(name="my_batch_config"),
+        data=batch_config,
         suite=ExpectationSuite(name="my_suite"),
     )
 
