@@ -74,7 +74,7 @@ def test_create(tmp_path_factory):
 
 @pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 2
+    assert len(totally_empty_data_context.stores.keys()) == 6
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -84,7 +84,7 @@ def test_add_store(totally_empty_data_context):
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 3
+    assert len(totally_empty_data_context.stores.keys()) == 7
 
 
 @pytest.mark.filesystem
@@ -98,6 +98,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "evaluation_parameter_store",
         "profiler_store",
         "checkpoint_store",
+        "validation_config_store",
     }
 
     context.add_store(
@@ -114,5 +115,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "validations_store",
         "evaluation_parameter_store",
         "profiler_store",
+        "validation_config_store",
         "my_new_validations_store",
     }

@@ -142,6 +142,7 @@
         },
         "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -163,6 +164,7 @@
         },
         "PartitionerMultiColumnValue": {
             "title": "PartitionerMultiColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_names": {
@@ -187,6 +189,7 @@
         },
         "PartitionerDividedInteger": {
             "title": "PartitionerDividedInteger",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "divisor": {
@@ -213,6 +216,7 @@
         },
         "PartitionerModInteger": {
             "title": "PartitionerModInteger",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "mod": {
@@ -239,6 +243,7 @@
         },
         "PartitionerYear": {
             "title": "PartitionerYear",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -260,6 +265,7 @@
         },
         "PartitionerYearAndMonth": {
             "title": "PartitionerYearAndMonth",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -281,6 +287,7 @@
         },
         "PartitionerYearAndMonthAndDay": {
             "title": "PartitionerYearAndMonthAndDay",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -302,6 +309,7 @@
         },
         "PartitionerDatetimePart": {
             "title": "PartitionerDatetimePart",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "datetime_parts": {
@@ -327,6 +335,33 @@
             "required": [
                 "datetime_parts",
                 "column_name"
+            ]
+        },
+        "PartitionerConvertedDatetime": {
+            "title": "PartitionerConvertedDatetime",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_converted_datetime",
+                    "enum": [
+                        "partition_on_converted_datetime"
+                    ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name",
+                "date_format_string"
             ]
         },
         "BatchConfig": {
@@ -368,6 +403,9 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
                 }
@@ -375,211 +413,6 @@
             "required": [
                 "name"
             ]
-        },
-        "SparkPartitionerColumnValue": {
-            "title": "SparkPartitionerColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_column_value",
-                    "enum": [
-                        "partition_on_column_value"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerMultiColumnValue": {
-            "title": "SparkPartitionerMultiColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_names": {
-                    "title": "Column Names",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_multi_column_values",
-                    "enum": [
-                        "partition_on_multi_column_values"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_names"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerDividedInteger": {
-            "title": "SparkPartitionerDividedInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_divided_integer",
-                    "enum": [
-                        "partition_on_divided_integer"
-                    ],
-                    "type": "string"
-                },
-                "divisor": {
-                    "title": "Divisor",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "divisor"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerModInteger": {
-            "title": "SparkPartitionerModInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_mod_integer",
-                    "enum": [
-                        "partition_on_mod_integer"
-                    ],
-                    "type": "string"
-                },
-                "mod": {
-                    "title": "Mod",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "mod"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerYear": {
-            "title": "SparkPartitionerYear",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year",
-                    "enum": [
-                        "partition_on_year"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerYearAndMonth": {
-            "title": "SparkPartitionerYearAndMonth",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month",
-                    "enum": [
-                        "partition_on_year_and_month"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerYearAndMonthAndDay": {
-            "title": "SparkPartitionerYearAndMonthAndDay",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_year_and_month_and_day",
-                    "enum": [
-                        "partition_on_year_and_month_and_day"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ],
-            "additionalProperties": false
-        },
-        "SparkPartitionerDatetimePart": {
-            "title": "SparkPartitionerDatetimePart",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_date_parts",
-                    "enum": [
-                        "partition_on_date_parts"
-                    ],
-                    "type": "string"
-                },
-                "datetime_parts": {
-                    "title": "Datetime Parts",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "column_name",
-                "datetime_parts"
-            ],
-            "additionalProperties": false
         },
         "CSVAsset": {
             "title": "CSVAsset",
@@ -632,35 +465,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -968,35 +772,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1311,35 +1086,6 @@
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
                 },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
-                },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
                     "anyOf": [
@@ -1470,35 +1216,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1637,35 +1354,6 @@
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
                 },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
-                },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
                     "anyOf": [
@@ -1779,35 +1467,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1928,35 +1587,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2235,35 +1865,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2549,35 +2150,6 @@
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
                 },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
-                },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
                     "anyOf": [
@@ -2688,35 +2260,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2835,35 +2378,6 @@
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
                 },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
-                },
                 "timestampAsOf": {
                     "title": "Timestampasof",
                     "type": "string"
@@ -2929,35 +2443,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "partitioner": {
-                    "title": "Partitioner",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SparkPartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SparkPartitionerDatetimePart"
-                        }
-                    ]
                 },
                 "timestampAsOf": {
                     "title": "Timestampasof",

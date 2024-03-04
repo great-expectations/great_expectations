@@ -191,9 +191,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def test_connection(self) -> None:
         ...
 
-    @property
     @override
-    def batch_request_options(self) -> tuple[str, ...]:
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner] = None
+    ) -> tuple[str, ...]:
         return tuple()
 
     def _get_reader_method(self) -> str:

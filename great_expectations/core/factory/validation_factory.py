@@ -1,15 +1,21 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
 from great_expectations.core.validation_config import ValidationConfig
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.store.validation_config_store import (
+        ValidationConfigStore,
+    )
+
 
 # TODO: Add analytics as needed
 class ValidationFactory(Factory[ValidationConfig]):
-    def __init__(self, store) -> None:
-        # TODO: Update type hints when new ValidationConfigStore is implemented
+    def __init__(self, store: ValidationConfigStore) -> None:
         self._store = store
 
     @public_api
