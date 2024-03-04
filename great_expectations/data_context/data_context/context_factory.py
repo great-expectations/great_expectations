@@ -17,13 +17,6 @@ from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
 
-# TODO: update this for using ruff format
-try:
-    import black
-except ImportError:
-    black = None  # type: ignore[assignment]
-
-
 logger = logging.getLogger(__name__)
 
 
