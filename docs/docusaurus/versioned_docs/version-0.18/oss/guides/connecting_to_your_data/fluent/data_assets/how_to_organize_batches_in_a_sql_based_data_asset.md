@@ -73,14 +73,14 @@ For this guide, we will use a previously defined SQL Data Source named `"my_data
 
 To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
-```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
+```python title="Python" name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_datasource"
 ```
 
 ### 3. Add a Splitter to the Data Asset
 
 Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
 
-```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
+```python title="Python" name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month"
 ```
 
 ### 4. (Optional) Add Batch Sorters to the Data Asset
@@ -89,19 +89,19 @@ We will now add Batch Sorters to our Data Asset.  This will allow us to explicit
 
 In this example we split `"pickup_datetime"` column on `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
 
-```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
+```python title="Python" name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters"
 ```
 
 ### 5. Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
-```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list"
+```python title="Python" name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list"
 ```
 
 Because a Batch List contains a lot of metadata, it will be easiest to verify which files were included in the returned Batches if we only look at the `batch_spec` of each returned Batch:
 
-```python name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec"
+```python title="Python" name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py print_batch_spec"
 ```
 
 ## Next steps
