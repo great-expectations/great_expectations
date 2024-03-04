@@ -2704,15 +2704,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # TODO: V1-222 batch_kwargs_generator_names is legacy and should be removed for V1
         # TODO: conditional FDS vs BDS datasource logic should be removed for V1
-        if not batch_kwargs_generator_names:
-            batch_kwargs_generator_names = []
-        elif isinstance(batch_kwargs_generator_names, str):
-            batch_kwargs_generator_names = [batch_kwargs_generator_names]
-
-            raise ValueError(
-                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
-            )
-
         if batch_kwargs_generator_names is not None:
             if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
