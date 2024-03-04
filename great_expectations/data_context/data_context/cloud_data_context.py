@@ -13,7 +13,6 @@ from typing import (
     Optional,
     Sequence,
     Union,
-    cast,
     overload,
 )
 
@@ -693,9 +692,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
         try:
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
+            expectations_schema_dict: dict = self.expectations_store.get(key)
         except StoreBackendError:
             raise DataContextError(
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
