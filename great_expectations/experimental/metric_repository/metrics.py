@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import uuid
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +22,24 @@ from great_expectations.compatibility.typing_extensions import override
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+
+
+class MetricTypes(str, enum.Enum):
+    """Represents Metric types in OSS that are used for ColumnDescriptiveMetrics and MetricRepository.
+
+    More Metric types may be added in the future.
+    """
+
+    # Table metrics
+    TABLE_COLUMNS = ("table.columns",)
+    TABLE_ROW_COUNT = ("table.row_count",)
+    TABLE_COLUMN_TYPES = ("table.column_types",)
+
+    # Column metrics
+    COLUMN_MIN = ("column.min",)
+    COLUMN_MAX = ("column.max",)
+    COLUMN_MEDIAN = ("column.median",)
+    COLUMN_MEAN = ("column.mean",)
 
 
 class MetricRepositoryBaseModel(BaseModel):
