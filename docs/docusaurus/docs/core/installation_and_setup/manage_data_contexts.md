@@ -118,4 +118,4 @@ When you [create an Ephemeral Data Context](/core/installation_and_setup/manage_
 - [Configure credentials](/core/installation_and_setup/manage_credentials.md)
 - [(Optional) Configure Stores](/core/installation_and_setup//manage_metadata_stores.md)
 - [(Optional) Configure Data Docs](/core/installation_and_setup//manage_metadata_stores.md)
-- [Connect to data](/core/connect_to_data/connect_to_data.md)
+- [Manage and access data](/core/manage_and_access_data/manage_and_access_data.md)
