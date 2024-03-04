@@ -34,7 +34,7 @@ class _EncodedValidationData(BaseModel):
 def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
     if not suite.id:
         expectation_store = project_manager.get_expectations_store()
-        key = expectation_store.get_key(name=suite.name, id=suite.id)
+        key = expectation_store.get_key(name=suite.name, id=None)
         expectation_store.add(key=key, value=suite)
 
     return _IdentifierBundle(name=suite.name, id=suite.id)

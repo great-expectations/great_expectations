@@ -51,9 +51,19 @@ class TestValidationConfigSerialization:
                 "9b35aa4d-7f01-420d-9d45-b45658e60afd",
                 "782c4aaf-8d56-4d8f-9982-49821f4c86c2",
             ),
+            (
+                None,
+                None,
+                "782c4aaf-8d56-4d8f-9982-49821f4c86c2",
+            ),
+            (
+                "9a88975e-6426-481e-8248-7ce90fad51c4",
+                "9b35aa4d-7f01-420d-9d45-b45658e60afd",
+                None,
+            ),
             (None, None, None),
         ],
-        ids=["with_data_ids", "without_data_ids"],
+        ids=["with_data_ids", "no_parent_ids", "no_child_id", "without_data_ids"],
     )
     @pytest.mark.parametrize(
         "suite_id",
