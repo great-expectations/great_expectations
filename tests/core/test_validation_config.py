@@ -229,6 +229,18 @@ class TestValidationConfigSerialization:
                 "suite did not contain expected identifiers",
                 id="bad_suite_format",
             ),
+        ],
+    )
+    def test_validation_config_deserialization_bad_format(
+        self, serialized_config: dict, error_substring: str
+    ):
+        with pytest.raises(ValueError, match=f"{error_substring}*."):
+            ValidationConfig.parse_obj(serialized_config)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "serialized_config, error_substring",
+        [
             pytest.param(
                 {
                     "name": validation_config_name,
@@ -335,7 +347,7 @@ class TestValidationConfigSerialization:
             ),
         ],
     )
-    def test_validation_config_deserialization_bad_format(
+    def test_validation_config_deserialization_non_existant_resource(
         self,
         validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
         validation_config_suite: ExpectationSuite,
