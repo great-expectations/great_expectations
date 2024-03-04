@@ -306,7 +306,7 @@ class ExpectationsStore(Store):
         return local_suite
 
     @override
-    def get(self, key) -> ExpectationSuite:
+    def get(self, key) -> dict:
         return super().get(key)  # type: ignore[return-value]
 
     @override

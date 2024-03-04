@@ -15,6 +15,9 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.datasource.new_datasource import (
+    BaseDatasource as LegacyDatasource,
+)
 
 
 class _IdentifierBundle(BaseModel):
@@ -47,7 +50,7 @@ def _encode_data(data: BatchConfig) -> _EncodedValidationData:
         ),
         asset=_IdentifierBundle(
             name=asset.name,
-            id=asset.id,
+            id=str(asset.id) if asset.id else None,
         ),
         batch_config=_IdentifierBundle(
             name=data.name,
@@ -176,6 +179,10 @@ class ValidationConfig(BaseModel):
             ds = datasource_dict[ds_name]
         except KeyError as e:
             raise ValueError(f"Could not find datasource named '{ds_name}'.") from e
+
+        # Should never be raised but necessary for type checking until we delete non-FDS support.
+        if isinstance(ds, LegacyDatasource):
+            raise ValueError("Legacy datasources are not supported.")
 
         try:
             asset = ds.get_asset(asset_name)
