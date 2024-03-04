@@ -115,13 +115,13 @@ class TestValidationConfigSerialization:
 
         # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
         if suite_id is None:
-            id = actual["suite"].pop("id")
-            actual["suite"]["id"] = mock.ANY
-            self._test_is_valid_uuid(id)
+            self._assert_contains_valid_uuid(actual["suite"])
 
         assert actual == expected
 
-    def _test_is_valid_uuid(self, id: str):
+    def _assert_contains_valid_uuid(self, data: dict):
+        id = data.pop("id")
+        data["id"] = mock.ANY
         try:
             uuid.UUID(id)
         except ValueError:
