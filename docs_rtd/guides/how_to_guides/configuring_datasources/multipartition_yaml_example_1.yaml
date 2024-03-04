@@ -1,7 +1,7 @@
 class_name: InferredAssetFilesystemDataConnector
 base_directory: my_directory/
 
-glob_directive: '*/*/*.csv'
+glob_directive: "*/*/*.csv"
 default_regex:
   pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
   group_names:

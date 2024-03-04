@@ -30,7 +30,7 @@ stages:
     jobs:
       - template: user-install-matrix.yml
         parameters:
-          vmImage: 'ubuntu-latest'
+          vmImage: "ubuntu-latest"
 
   - stage: dev_install_linux
     dependsOn: user_install_linux
@@ -38,7 +38,7 @@ stages:
     jobs:
       - template: dev-install-matrix.yml
         parameters:
-          vmImage: 'ubuntu-latest'
+          vmImage: "ubuntu-latest"
 
   - stage: user_install_macOS
     dependsOn: []
@@ -46,7 +46,7 @@ stages:
     jobs:
       - template: user-install-matrix.yml
         parameters:
-          vmImage: 'macOS-latest'
+          vmImage: "macOS-latest"
 
   - stage: dev_install_macOS
     dependsOn: user_install_macOS
@@ -54,7 +54,7 @@ stages:
     jobs:
       - template: dev-install-matrix.yml
         parameters:
-          vmImage: 'macOS-latest'
+          vmImage: "macOS-latest"
 
   - stage: user_install_windows
     dependsOn: []
@@ -62,7 +62,7 @@ stages:
     jobs:
       - template: user-install-matrix.yml
         parameters:
-          vmImage: 'windows-latest'
+          vmImage: "windows-latest"
 
   - stage: dev_install_windows
     dependsOn: user_install_windows
@@ -70,4 +70,4 @@ stages:
     jobs:
       - template: dev-install-matrix.yml
         parameters:
-          vmImage: 'windows-latest'
+          vmImage: "windows-latest"

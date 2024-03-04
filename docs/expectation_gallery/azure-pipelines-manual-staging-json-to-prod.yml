@@ -11,27 +11,27 @@ variables:
 stages:
   - stage: deploy_gallery_prod
     pool:
-      vmImage: 'ubuntu-22.04'
+      vmImage: "ubuntu-22.04"
 
     jobs:
       - job: copy_staging_to_prod
         condition: eq(variables.isManual, true)
         timeoutInMinutes: 15
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip awscli
-            displayName: 'Update pip and install awscli'
+            displayName: "Update pip and install awscli"
 
           - bash: bash ./copy_s3_staging_to_prod.sh
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Copy staging JSON files in S3 to prod'
+            displayName: "Copy staging JSON files in S3 to prod"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -40,11 +40,11 @@ stages:
 
           - task: NodeTool@0
             inputs:
-              versionSpec: '16.16'
+              versionSpec: "16.16"
 
           - bash: bash ./trigger_algolia.sh
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Update Algolia indexes from S3'
+            displayName: "Update Algolia indexes from S3"
             env:
               # algolia credentials
               ALGOLIA_ACCOUNT: $(ALGOLIA_ACCOUNT)

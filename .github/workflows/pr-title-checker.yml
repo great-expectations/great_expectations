@@ -1,5 +1,5 @@
 # Validate that PR titles are prefixed with one of our accepted labels
-name: 'PR Title Checker'
+name: "PR Title Checker"
 on:
   pull_request:
     types:

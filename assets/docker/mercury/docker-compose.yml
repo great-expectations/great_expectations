@@ -1,11 +1,11 @@
-version: '3.4'
+version: "3.4"
 
 services:
   db:
     image: postgres:13.7
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
-    command: ['postgres', '-c', 'log_statement=none']
+    command: ["postgres", "-c", "log_statement=none"]
     environment:
       POSTGRES_DB: mercury
       POSTGRES_USER: postgres
@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
     healthcheck:
-      test: ['CMD-SHELL', "sh -c 'pg_isready -U postgres -d mercury'"]
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d mercury'"]
       interval: 5s
       timeout: 2s
       retries: 5

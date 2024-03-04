@@ -105,7 +105,7 @@ fluent_datasources:
         type: csv
         batching_regex: visits.csv
         connect_options:
-          glob_directive: '*.csv'
+          glob_directive: "*.csv"
         delimiter: "\t"
     base_directory: ../../../data
 include_rendered_content:

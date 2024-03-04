@@ -5,14 +5,14 @@ on:
     types:
       - opened
     branches:
-      - 'main'
+      - "main"
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   run:
-    name: '[${{matrix.type}}, ${{matrix.os}}, py${{matrix.python}}]'
-    runs-on: '${{ matrix.os }}'
+    name: "[${{matrix.type}}, ${{matrix.os}}, py${{matrix.python}}]"
+    runs-on: "${{ matrix.os }}"
     strategy:
       matrix:
         python: [3.7, 3.8, 3.9]

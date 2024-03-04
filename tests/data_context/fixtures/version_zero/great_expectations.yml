@@ -32,7 +32,7 @@ data_docs:
         run_name_filter:
           eq: profiling
 
-      datasources: '*'
+      datasources: "*"
       sections:
         index:
           renderer:
@@ -69,7 +69,7 @@ data_docs:
         type: filesystem
         base_directory: uncommitted/documentation/team_site
 
-      datasources: '*'
+      datasources: "*"
       sections:
         index:
           renderer:

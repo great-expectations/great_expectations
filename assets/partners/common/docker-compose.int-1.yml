@@ -1,5 +1,5 @@
 ## Docker Compose file for running e2e tests
-version: '3'
+version: "3"
 
 services:
   integration_test:

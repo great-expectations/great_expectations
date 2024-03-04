@@ -1,4 +1,4 @@
-version: '3.2'
+version: "3.2"
 services:
   mysql_db:
     platform: linux/amd64
@@ -6,12 +6,12 @@ services:
     volumes:
       - ./conf.d:/etc/mysql/conf.d
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: test_ci
     networks:
       - dbnet
     ports:
-      - '3306:3306'
+      - "3306:3306"
 
 networks:
   dbnet:

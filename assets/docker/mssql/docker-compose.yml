@@ -1,4 +1,4 @@
-version: '3.2'
+version: "3.2"
 services:
   mssql-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -10,7 +10,7 @@ services:
     networks:
       - dbnet
     ports:
-      - '1433:1433'
+      - "1433:1433"
   load-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     command: sh -c 'sleep 10 && /opt/mssql-tools/bin/sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;"'

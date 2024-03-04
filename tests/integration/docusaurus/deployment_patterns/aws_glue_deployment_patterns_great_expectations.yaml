@@ -30,15 +30,15 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: 'bucket_name'
-      prefix: 'path_from_root/great_expectations/expectations/'
+      bucket: "bucket_name"
+      prefix: "path_from_root/great_expectations/expectations/"
 
   validations_S3_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: 'bucket_name'
-      prefix: 'path_from_root/great_expectations/uncommitted/validations/'
+      bucket: "bucket_name"
+      prefix: "path_from_root/great_expectations/uncommitted/validations/"
 
   evaluation_parameter_store:
     class_name: EvaluationParameterStore
@@ -47,8 +47,8 @@ stores:
     class_name: CheckpointStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: 'bucket_name'
-      prefix: 'path_from_root/great_expectations/checkpoints/'
+      bucket: "bucket_name"
+      prefix: "path_from_root/great_expectations/checkpoints/"
 
 expectations_store_name: expectations_S3_store
 validations_store_name: validations_S3_store

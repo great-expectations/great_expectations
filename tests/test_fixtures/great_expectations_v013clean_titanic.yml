@@ -21,7 +21,7 @@ datasources:
       my_other_data_connector:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: ../data
-        glob_directive: '*.csv'
+        glob_directive: "*.csv"
 
         default_regex:
           pattern: (.+).csv

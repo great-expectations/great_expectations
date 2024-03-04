@@ -8,7 +8,7 @@ services:
     environment:
       SNOWFLAKE_CONNECTION_STRING: ${SNOWFLAKE_CONNECTION_STRING}
     ports:
-      - '8888:8888'
+      - "8888:8888"
     volumes:
       - gx_stores:/gx/gx_stores
     networks:
@@ -23,7 +23,7 @@ services:
     networks:
       - dbnet
     ports:
-      - '3000:3000'
+      - "3000:3000"
     volumes:
       - gx_stores:/gx/gx_stores:ro
 
