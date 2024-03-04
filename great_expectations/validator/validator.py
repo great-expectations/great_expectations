@@ -1501,7 +1501,7 @@ class Validator:
         NO_COLUMN = (
             "_nocolumn"  # just used to group expectations that don't specify a column
         )
-        columns: dict[Any, list[ExpectationConfiguration]] = {}
+        columns: dict[str, list[ExpectationConfiguration]] = {}
 
         for expectation in expectation_configurations:
             expectation.process_evaluation_parameters(
