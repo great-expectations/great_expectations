@@ -3,11 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility.pydantic import (
+    root_validator,
+)
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -124,48 +125,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "max_value",
     )
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
-        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
-        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
-
-         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-         superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-
-        configuration = configuration or self.configuration
-
-        try:
-            assert (
-                configuration.kwargs.get("min_value") is not None
-                or configuration.kwargs.get("max_value") is not None
-            ), "min_value and max_value cannot both be None"
-            if configuration.kwargs.get("min_value"):
-                assert (
-                    isinstance(configuration.kwargs["min_value"], dict)
-                    or float(configuration.kwargs.get("min_value")).is_integer()
-                ), "min_value and max_value must be integers"
-            if configuration.kwargs.get("max_value"):
-                assert (
-                    isinstance(configuration.kwargs["max_value"], dict)
-                    or float(configuration.kwargs.get("max_value")).is_integer()
-                ), "min_value and max_value must be integers"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+    @root_validator
+    def _validate_min_or_max_set(cls, values):
+        min_value = values.get("min_value")
+        max_value = values.get("max_value")
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+        return values
 
     @classmethod
     def _prescriptive_template(  # noqa: PLR0912
