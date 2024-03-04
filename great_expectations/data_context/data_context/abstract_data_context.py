@@ -2664,8 +2664,23 @@ class AbstractDataContext(ConfigPeer, ABC):
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
 
+    def _validate_datasource_names(
+        self, datasource_names: list[str] | str | None
+    ) -> list[str]:
+        if datasource_names is None:
+            datasource_names = [
+                datasource["name"] for datasource in self.list_datasources()
+            ]
+        elif isinstance(datasource_names, str):
+            datasource_names = [datasource_names]
+        elif not isinstance(datasource_names, list):
+            raise ValueError(
+                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
+            )
+        return datasource_names
+
     @public_api
-    def get_available_data_asset_names(  # noqa: C901, PLR0912
+    def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -2685,13 +2700,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         data_asset_names = {}
         fluent_data_asset_names = {}
-        if datasource_names is None:
-            datasource_names = [
-                datasource["name"] for datasource in self.list_datasources()
-            ]
-        elif isinstance(datasource_names, str):
-            datasource_names = [datasource_names]
-        elif not isinstance(datasource_names, list):
+        datasource_names = self._validate_datasource_names(datasource_names)
+
+        if not batch_kwargs_generator_names:
+            batch_kwargs_generator_names = []
+        elif isinstance(batch_kwargs_generator_names, str):
+            batch_kwargs_generator_names = [batch_kwargs_generator_names]
+
             raise ValueError(
                 "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
             )
