@@ -31,15 +31,15 @@ class MetricTypes(str, enum.Enum):
     """
 
     # Table metrics
-    TABLE_COLUMNS = ("table.columns",)
-    TABLE_ROW_COUNT = ("table.row_count",)
-    TABLE_COLUMN_TYPES = ("table.column_types",)
+    TABLE_COLUMNS = "table.columns"
+    TABLE_ROW_COUNT = "table.row_count"
+    TABLE_COLUMN_TYPES = "table.column_types"
 
     # Column metrics
-    COLUMN_MIN = ("column.min",)
-    COLUMN_MAX = ("column.max",)
-    COLUMN_MEDIAN = ("column.median",)
-    COLUMN_MEAN = ("column.mean",)
+    COLUMN_MIN = "column.min"
+    COLUMN_MAX = "column.max"
+    COLUMN_MEDIAN = "column.median"
+    COLUMN_MEAN = "column.mean"
 
 
 class MetricRepositoryBaseModel(BaseModel):
