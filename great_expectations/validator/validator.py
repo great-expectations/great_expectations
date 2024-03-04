@@ -9,7 +9,6 @@ import logging
 import traceback
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -1434,29 +1433,10 @@ class Validator:
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
 
-            # Group expectations by column
-            columns: dict[Any, list[ExpectationConfiguration]] = {}
-
-            for expectation in expectation_suite.expectation_configurations:
-                expectation.process_evaluation_parameters(
-                    evaluation_parameters=runtime_evaluation_parameters,
-                    interactive_evaluation=self.interactive_evaluation,
-                    data_context=self._data_context,
-                )
-                if "column" in expectation.kwargs and isinstance(
-                    expectation.kwargs["column"], Hashable
-                ):
-                    column = expectation.kwargs["column"]
-                else:
-                    # noinspection SpellCheckingInspection
-                    column = "_nocolumn"
-                if column not in columns:
-                    columns[column] = []
-                columns[column].append(expectation)
-
-            expectations_to_evaluate = []
-            for col in columns:
-                expectations_to_evaluate.extend(columns[col])
+            expectations_to_evaluate = self.process_expectations_for_validation(
+                expectation_suite.expectation_configurations,
+                runtime_evaluation_parameters,
+            )
 
             runtime_configuration = self._get_runtime_configuration(
                 catch_exceptions=catch_exceptions, result_format=result_format
@@ -1510,6 +1490,39 @@ class Validator:
             self._active_validation = False
 
         return result
+
+    def process_expectations_for_validation(
+        self,
+        expectation_configurations: list[ExpectationConfiguration],
+        evaluation_parameters: Optional[dict[str, Any]] = None,
+    ) -> list[ExpectationConfiguration]:
+        """Substitute evaluation parameters into the provided expectations and sort by column."""
+        NO_COLUMN = (
+            "_nocolumn"  # just used to group expectations that don't specify a column
+        )
+        columns: dict[str, list[ExpectationConfiguration]] = {}
+
+        for expectation in expectation_configurations:
+            expectation.process_evaluation_parameters(
+                evaluation_parameters=evaluation_parameters,
+                interactive_evaluation=self.interactive_evaluation,
+                data_context=self._data_context,
+            )
+            if "column" in expectation.kwargs and isinstance(
+                expectation.kwargs["column"], str
+            ):
+                column = expectation.kwargs["column"]
+            else:
+                column = NO_COLUMN
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(expectation)
+
+        expectations_to_evaluate = []
+        for col in columns:
+            expectations_to_evaluate.extend(columns[col])
+
+        return expectations_to_evaluate
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """
