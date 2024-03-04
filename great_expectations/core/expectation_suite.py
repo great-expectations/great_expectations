@@ -76,7 +76,6 @@ class ExpectationSuite(SerializableDictDot):
         name: Name of the Expectation Suite
         expectation_suite_name (deprecated): Name of the Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
-        evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
         data_asset_type: Type of data asset to associate with this suite.
         execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
@@ -89,7 +88,6 @@ class ExpectationSuite(SerializableDictDot):
         expectations: Optional[
             Sequence[Union[dict, ExpectationConfiguration, Expectation]]
         ] = None,
-        evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
@@ -111,9 +109,6 @@ class ExpectationSuite(SerializableDictDot):
             self._process_expectation(exp) for exp in expectations or []
         ]
 
-        if evaluation_parameters is None:
-            evaluation_parameters = {}
-        self.evaluation_parameters = evaluation_parameters
         self.data_asset_type = data_asset_type
         self.execution_engine_type = execution_engine_type
         if meta is None:
@@ -401,7 +396,6 @@ class ExpectationSuite(SerializableDictDot):
             (
                 self.expectation_suite_name == other.expectation_suite_name,
                 self.expectations == other.expectations,
-                self.evaluation_parameters == other.evaluation_parameters,
                 self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
             )
@@ -444,12 +438,6 @@ class ExpectationSuite(SerializableDictDot):
         myself["expectations"] = convert_to_json_serializable(
             expectation_configurations
         )
-        try:
-            myself["evaluation_parameters"] = convert_to_json_serializable(
-                myself["evaluation_parameters"]
-            )
-        except KeyError:
-            pass  # Allow evaluation parameters to be missing if empty
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
@@ -1137,7 +1125,6 @@ class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
-    evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
     notes = fields.Raw(required=False, allow_none=True)
@@ -1147,11 +1134,6 @@ class ExpectationSuiteSchema(Schema):
     # noinspection PyMethodMayBeStatic
     def clean_empty(self, data):
         if isinstance(data, ExpectationSuite):
-            if not hasattr(data, "evaluation_parameters"):
-                pass
-            elif len(data.evaluation_parameters) == 0:
-                del data.evaluation_parameters
-
             if not hasattr(data, "meta"):
                 pass
             elif data.meta is None or data.meta == []:
@@ -1159,11 +1141,6 @@ class ExpectationSuiteSchema(Schema):
             elif len(data.meta) == 0:
                 del data.meta
         elif isinstance(data, dict):
-            if not data.get("evaluation_parameters"):
-                pass
-            elif len(data.get("evaluation_parameters")) == 0:
-                data.pop("evaluation_parameters")
-
             if not data.get("meta"):
                 pass
             elif len(data.get("meta")) == 0:

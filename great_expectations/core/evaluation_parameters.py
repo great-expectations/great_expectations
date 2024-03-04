@@ -270,25 +270,17 @@ def build_evaluation_parameters(
             if not interactive_evaluation:
                 continue
 
-            # First, check to see whether an argument was supplied at runtime
-            # If it was, use that one, but remove it from the stored config
-            param_key = f"$PARAMETER.{value['$PARAMETER']}"
-            if param_key in value:
-                evaluation_args[key] = evaluation_args[key][param_key]
-                del expectation_args[key][param_key]
-
-            # If not, try to parse the evaluation parameter and substitute, which will raise
+            # Try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
-            else:
-                raw_value = value["$PARAMETER"]
-                parameter_value = parse_evaluation_parameter(
-                    raw_value,
-                    evaluation_parameters=evaluation_parameters,
-                    data_context=data_context,
-                )
-                evaluation_args[key] = parameter_value
-                # Once we've substituted, we also track that we did so
-                substituted_parameters[key] = parameter_value
+            raw_value = value["$PARAMETER"]
+            parameter_value = parse_evaluation_parameter(
+                raw_value,
+                evaluation_parameters=evaluation_parameters,
+                data_context=data_context,
+            )
+            evaluation_args[key] = parameter_value
+            # Once we've substituted, we also track that we did so
+            substituted_parameters[key] = parameter_value
 
     return evaluation_args, substituted_parameters
 
