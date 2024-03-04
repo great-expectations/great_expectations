@@ -20,7 +20,7 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
 
 ## Install the GX 1.0 Python library
 
-<Tabs queryString="install-location" groupId="install-location" defaultValue='local' values={[{label: 'Local', value:'local'}, {label: 'EMR Spark notebook', value:'spark-notebook'}]}>
+<Tabs queryString="install-location" groupId="install-location" defaultValue='local' values={[{label: 'Local', value:'local'}, {label: 'EMR Spark notebook', value:'spark-notebook'}, {label: 'GX Cloud', value:'gx-cloud'}]}>
 
   <TabItem value="local" label="Local">
 
@@ -60,6 +60,18 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
   <TabItem value="spark-notebook" label="EMR Spark notebook">
 
 <InProgress/>
+
+  </TabItem>
+
+  <TabItem value="gx-cloud" label="GX Cloud">
+
+GX Cloud provides a web interface for using GX to validate your data without creating and running complex Python code.  However, GX Core is also capable of connecting to a GX Cloud account should you wish to engage in further customization or automation with Python scripts.
+
+To deploy a GX Agent, which will run the jobs sent from the GX Cloud interface, see [Connect GX Cloud](/cloud/connect/connect_lp.md).
+
+To connect to GX Cloud from a Python script utilizing a [local installation of GX 1.0](/core/installation_and_setup/install_gx.md?install-location=local), see [Connect to an existing Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=gx_cloud#connect-to-an-existing-data-context).
+
+
 
   </TabItem>
 
