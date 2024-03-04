@@ -11,32 +11,31 @@
 trigger:
   branches:
     include:
-    - develop
+      - develop
 
 resources:
   containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-
+    - container: postgres
+      image: postgres:11
+      ports:
+        - 5432:5432
+      env:
+        POSTGRES_DB: "test_ci"
+        POSTGRES_HOST_AUTH_METHOD: "trust"
+    - container: mssql
+      image: mcr.microsoft.com/mssql/server:2019-latest
+      env:
+        ACCEPT_EULA: Y
+        MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+        MSSQL_DB: test_ci
+        MSSQL_PID: Developer
+      ports:
+        - 1433:1433
 
 stages:
   - stage: scope_check
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: "ubuntu-latest"
     jobs:
       - job: changes
         steps:
@@ -64,7 +63,7 @@ stages:
   - stage: lint
     dependsOn: scope_check
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: "ubuntu-latest"
 
     jobs:
       - job: lint
@@ -73,7 +72,7 @@ stages:
           - task: UsePythonVersion@0
             inputs:
               versionSpec: 3.8
-            displayName: 'Use Python 3.8'
+            displayName: "Use Python 3.8"
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -85,29 +84,29 @@ stages:
   - stage: import_ge
     dependsOn: scope_check
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: "ubuntu-latest"
 
     jobs:
       - job: import_ge
 
         steps:
-         - task: UsePythonVersion@0
-           inputs:
-             versionSpec: '3.8'
-           displayName: 'Use Python 3.8'
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.8"
+            displayName: "Use Python 3.8"
 
-         - script: |
-             pip install .
-           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+          - script: |
+              pip install .
+            displayName: "Install GX and required dependencies (i.e. not sqlalchemy)"
 
-         - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
-           displayName: 'Import Great Expectations'
+          - script: |
+              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+            displayName: "Import Great Expectations"
 
   - stage: sqlalchemy_and_pandas_compatibility
     dependsOn: [scope_check, lint, import_ge]
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: "ubuntu-latest"
 
     jobs:
       - job: compatibility_postgres
@@ -119,9 +118,9 @@ stages:
           # (versions as semver major.minor.patch)
           matrix:
             less_than_2:
-              comparison: '<'
+              comparison: "<"
             greater_than_2:
-              comparison: '>='
+              comparison: ">="
 
         services:
           postgres: postgres
@@ -129,11 +128,11 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: "3.8"
+            displayName: "Use Python 3.8"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
@@ -141,14 +140,14 @@ stages:
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
-            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+            displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"
 
           - script: |
               # Run pytest
               pytest --postgresql -m sqlalchemy_version_compatibility
               pytest --postgresql -m unit
 
-            displayName: 'pytest'
+            displayName: "pytest"
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
@@ -156,14 +155,14 @@ stages:
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
+              testResultsFiles: "**/test-*.xml"
+              testRunTitle: "Publish test results for Python $(python.version)"
 
           - task: PublishCodeCoverageResults@1
             inputs:
               codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+              summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/coverage.xml"
+              reportDirectory: "$(System.DefaultWorkingDirectory)/**/htmlcov"
 
       - job: compatibility_mssql
         timeoutInMinutes: 90
@@ -174,9 +173,9 @@ stages:
           # (versions as semver major.minor.patch)
           matrix:
             less_than_2:
-              comparison: '<'
+              comparison: "<"
             greater_than_2:
-              comparison: '>='
+              comparison: ">="
 
         services:
           mssql: mssql
@@ -184,11 +183,11 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: "3.8"
+            displayName: "Use Python 3.8"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
@@ -199,14 +198,14 @@ stages:
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
 
               pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
-            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+            displayName: "Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)"
 
           - script: |
               # Run pytest
               pytest --mssql -m sqlalchemy_version_compatibility
               pytest --mssql -m unit
 
-            displayName: 'pytest'
+            displayName: "pytest"
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
@@ -214,11 +213,11 @@ stages:
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
+              testResultsFiles: "**/test-*.xml"
+              testRunTitle: "Publish test results for Python $(python.version)"
 
           - task: PublishCodeCoverageResults@1
             inputs:
               codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+              summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/coverage.xml"
+              reportDirectory: "$(System.DefaultWorkingDirectory)/**/htmlcov"
