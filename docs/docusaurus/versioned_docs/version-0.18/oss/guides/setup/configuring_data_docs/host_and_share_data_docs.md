@@ -161,7 +161,7 @@ You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectat
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
 ```
 
 ### Limit Data Docs access (Optional)
@@ -198,14 +198,14 @@ To view the code used in the examples, see [how_to_host_and_share_data_docs_on_g
 
 Run the following command to create a GCS bucket: 
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command"
+```bash title="Terminal input" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command"
 ```
 
 Modify the project name, bucket name, and region.
 
 This is the output after you run the command:
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output"
+```bash title="Terminal output" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output"
 ```
 
 ### Create a directory for your Google App Engine app
@@ -214,31 +214,31 @@ GX recommends adding the directory to your project directory. For example, `grea
 
 1. Create and then open ``app.yaml`` and then add the following entry:
 
-    ```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml"
+    ```yaml title="app.yaml" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml"
     ```
 
 2. Create and then open `requirements.txt` and then add the following entry:
 
-    ```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt"
+    ```yaml title="requirements.txt" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt"
     ```
 
 3. Create and then open `main.py` and then dd the following entry:
 
-    ```python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
+    ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
     ```
 
 ### Authenticate the gcloud CLI
 
 Run the following command to authenticate the gcloud CLI and set the project:
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project"
+```bash title="Terminal input" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project"
 ```
 
 ### Deploy your Google App Engine app
 
 Run the following CLI command from within the app directory you created previously:
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
+```bash title="Terminal input" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
 ```
 
 ### Set up the Google App Engine firewall
@@ -249,7 +249,7 @@ See [Creating firewall rules](https://cloud.google.com/appengine/docs/standard/p
 
 Open `great_expectations.yml` and add the following entry:
 
-```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml"
+```yaml title="great_expectations.yml" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml"
 ```
 
 Replace the default ``local_site`` to maintain a single GCS Data Docs site.
@@ -273,7 +273,7 @@ To host a Data Docs site with a private DNS, you can configure a ``base_public_p
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site"
 ```
 
 ### Test the configuration
@@ -319,7 +319,7 @@ data_docs_sites:
 
 Run the following Python code to build and open your Data Docs:
 
-``` python name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs"
 ```
 
 To share the site, compress and distribute the directory in the ``base_directory`` key in your site configuration.

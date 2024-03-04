@@ -32,7 +32,7 @@ For this guide we will be working with Python code in a Jupyter Notebook. Jupyte
 
 Run the following code to import Great Expectations and instantiate a Data Context:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
 ```
 
 :::info Data Contexts and persisting data
@@ -45,7 +45,7 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
 ```
 
 :::info Limit the Batches returned by a Batch Request
@@ -62,26 +62,26 @@ When you use a Validator to interactively create your Expectations, the Validato
 
 If you're using a Jupyter Notebook you'll automatically see the results of the code you run in a new cell when you run the code. If you're using a different interpreter, you might need to explicitly print these results to view them. For example:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py inspect_data_no_jupyter"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py inspect_data_no_jupyter"
 ```
 
 :::
 
 1. Optional. Run the following command if you haven't created an Expectation Suite:
 
-    ```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite"
+    ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite"
     ```
 
 2. Run the following command to create a Validator:
 
-    ```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
+    ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
     ```
 
 ## Use the Validator to create and run an Expectation
 
 The Validator provides access to all the available Expectations as methods.  When an `expect_*()` method is run from the Validator, the Validator adds the specified Expectation to an Expectation Suite (or edits an existing Expectation in the Expectation Suite, if applicable) in its configuration, and then the specified Expectation is run against the data that was provided when the Validator was initialized with a Batch Request.
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
 ```
 
 Since we are working in a Jupyter Notebook, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
@@ -89,7 +89,7 @@ Since we are working in a Jupyter Notebook, the results of the Validation are pr
 :::info Working outside a Jupyter Notebook
 If you are not working in a Jupyter Notebook you may need to explicitly print your results:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
 ```
 
 :::
@@ -110,7 +110,7 @@ The Expectations you create with the interactive method are saved in an Expectat
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 
-```python name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py save_expectation_suite"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py save_expectation_suite"
 ```
 
 :::caution Ephemeral Data Contexts and persistence
