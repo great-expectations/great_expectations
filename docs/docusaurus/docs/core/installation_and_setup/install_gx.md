@@ -15,7 +15,7 @@ Greate Expectations (GX) is the leading tool for validating and documenting your
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
-- (Recommended) [A Python virtual environment](./set_up_a_python_environment#optional-create-a-virtual-environment).
+- (Recommended) [A Python virtual environment](/docs/core/installation_and_setup/set_up_a_python_environment.md#optional-create-a-virtual-environment).
 
 ## Install the GX 1.0 Python library
 
