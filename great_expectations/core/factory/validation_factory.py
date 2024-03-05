@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
@@ -74,4 +74,4 @@ class ValidationFactory(Factory[ValidationConfig]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"ValidationConfig with name {name} was not found.")
 
-        return self._store.get(key=key)
+        return cast(ValidationConfig, self._store.get(key=key))
