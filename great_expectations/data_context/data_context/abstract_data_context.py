@@ -457,14 +457,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs: Optional[dict],
     ) -> None:
         if expectation_suite_name is None:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(name=expectation_suite.name)
         else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
+            expectation_suite.name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
@@ -1068,9 +1064,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(expectation_suite_name, ExpectationSuite):
             expectation_suite = expectation_suite_name
         elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
-            expectation_suite = self.get_expectation_suite(
-                expectation_suite_name.expectation_suite_name
-            )
+            expectation_suite = self.get_expectation_suite(expectation_suite_name.name)
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
@@ -1720,7 +1714,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
+            suite.name for suite in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
@@ -2267,7 +2261,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2288,9 +2282,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
-        key = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite.expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(name=expectation_suite.name)
 
         persistence_fn: Callable
         if overwrite_existing:
@@ -2324,7 +2316,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         Like `update_expectation_suite` but without the usage statistics logging.
         """
-        name = expectation_suite.expectation_suite_name
+        name = expectation_suite.name
         id = expectation_suite.id
         key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
@@ -2412,7 +2404,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2485,9 +2477,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if expectation_suite_name:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         else:
             raise ValueError("expectation_suite_name must be provided")
 
@@ -3766,7 +3756,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
+                name=expectation_suite_name
             ),
             run_id=run_id,
             batch_identifier=batch_identifier,

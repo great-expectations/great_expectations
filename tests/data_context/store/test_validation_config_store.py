@@ -104,7 +104,7 @@ def test_add_cloud(
                             "partitioner": None,
                         },
                         "suite": {
-                            "expectation_suite_name": "my_suite",
+                            "name": "my_suite",
                             "id": None,
                             "expectations": [],
                             "data_asset_type": None,

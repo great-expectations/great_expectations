@@ -486,8 +486,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         exp_suite_list = [
             d["data"]
             for d in exp_suite_list
-            if d["data"]["attributes"]["suite"]["expectation_suite_name"]
-            in queried_names
+            if d["data"]["attributes"]["suite"]["name"] in queried_names
         ]
 
     resp_body = {"data": exp_suite_list}
@@ -526,7 +525,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -575,7 +574,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]

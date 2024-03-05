@@ -445,7 +445,7 @@ def send_sns_notification(
 
 
     :param sns_topic_arn:  The SNS Arn to publish messages to
-    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
     :return:  Message ID that was published or error message
