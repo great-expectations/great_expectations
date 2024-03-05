@@ -447,7 +447,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 
 
 ## Redirects for GX Core prerelease
-/docs/oss/*  /docs/1.0-prerelease/core/introduction/about_gx
+/docs/1.0-prerelease/oss/*  /docs/1.0-prerelease/core/introduction/about_gx
   # /docs/oss/guides/expectations/creating_custom_expectations/*    /docs/core/expectations/manage_expectations#customize-an-expectation-class
   # /docs/oss/guides/expectations/how_to_edit_an_existing_expectationsuite  /docs/core/expectation_suites/manage_expectation_suites
   # /docs/oss/guides/expectations/* /docs/core/expectations/manage_expectations

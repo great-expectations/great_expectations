@@ -1,4 +1,7 @@
 module.exports = {
+  default_landing: [
+    {type: 'doc', id: 'gx_welcome'}
+  ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
