@@ -337,7 +337,7 @@ class ExpectationValidationResult(SerializableDictDot):
             )
         return myself
 
-    def get_metric(self, metric_name, **kwargs):
+    def get_metric(self, metric_name, **kwargs):  # noqa: C901
         if not self.expectation_config:
             raise gx_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "

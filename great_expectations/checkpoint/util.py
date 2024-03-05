@@ -271,7 +271,9 @@ def get_substituted_batch_request(
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict:
+def substitute_runtime_config(  # noqa: C901 - 11
+    source_config: dict, runtime_kwargs: dict
+) -> dict:
     if not (runtime_kwargs and any(runtime_kwargs.values())):
         return source_config
 
@@ -443,7 +445,7 @@ def send_sns_notification(
 
 
     :param sns_topic_arn:  The SNS Arn to publish messages to
-    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
     :return:  Message ID that was published or error message

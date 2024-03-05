@@ -67,7 +67,7 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
 @pytest.fixture
 def empty_suite_with_meta(fake_expectation_suite_name: str) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name=fake_expectation_suite_name,
+        name=fake_expectation_suite_name,
         meta={"notes": "This is an expectation suite."},
     )
 
@@ -88,11 +88,11 @@ class TestInit:
 
     @pytest.mark.unit
     def test_expectation_suite_init_defaults(self, fake_expectation_suite_name: str):
-        suite = ExpectationSuite(expectation_suite_name=fake_expectation_suite_name)
+        suite = ExpectationSuite(name=fake_expectation_suite_name)
 
         default_meta = {"great_expectations_version": ge_version}
 
-        assert suite.expectation_suite_name == fake_expectation_suite_name
+        assert suite.name == fake_expectation_suite_name
         assert suite.expectations == []
         assert suite.evaluation_parameters == {}
         assert suite.data_asset_type is None
@@ -118,7 +118,7 @@ class TestInit:
         test_id = "test_id"
 
         suite = ExpectationSuite(
-            expectation_suite_name=fake_expectation_suite_name,
+            name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             evaluation_parameters=test_evaluation_parameters,
             data_asset_type=test_data_asset_type,
@@ -126,7 +126,7 @@ class TestInit:
             meta=test_meta,
             id=test_id,
         )
-        assert suite.expectation_suite_name == fake_expectation_suite_name
+        assert suite.name == fake_expectation_suite_name
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
@@ -154,10 +154,10 @@ class TestInit:
         ]
 
         suite = ExpectationSuite(
-            expectation_suite_name=fake_expectation_suite_name,
+            name=fake_expectation_suite_name,
             expectations=test_expectations_input,  # type: ignore[arg-type]
         )
-        assert suite.expectation_suite_name == fake_expectation_suite_name
+        assert suite.name == fake_expectation_suite_name
 
         test_expected_expectations = [
             ExpectationConfiguration(
@@ -186,7 +186,7 @@ class TestInit:
 
         with pytest.raises(InvalidExpectationConfigurationError) as e:
             ExpectationSuite(
-                expectation_suite_name=fake_expectation_suite_name,
+                name=fake_expectation_suite_name,
                 meta=test_meta,  # type: ignore[arg-type]
             )
         assert "is of type NotSerializable which cannot be serialized to json" in str(
@@ -241,7 +241,7 @@ class TestCRUDMethods:
     def test_add_success_with_saved_suite(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
-        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+        suite = ExpectationSuite(name=self.expectation_suite_name)
 
         with mock.patch.object(ExpectationSuite, "_submit_expectation_created_event"):
             created_expectation = suite.add_expectation(expectation=expectation)
@@ -259,7 +259,7 @@ class TestCRUDMethods:
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.has_key.return_value = False
         set_context(project=context)
-        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+        suite = ExpectationSuite(name=self.expectation_suite_name)
 
         created_expectation = suite.add_expectation(expectation=expectation)
 
@@ -276,7 +276,7 @@ class TestCRUDMethods:
         context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
-            expectation_suite_name=self.expectation_suite_name,
+            name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
 
@@ -294,7 +294,7 @@ class TestCRUDMethods:
         context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
-            expectation_suite_name="test-suite",
+            name="test-suite",
         )
 
         with pytest.raises(ConnectionError):  # exception type isn't important
@@ -308,7 +308,7 @@ class TestCRUDMethods:
         set_context(project=context)
         context.expectations_store.has_key.return_value = True
         suite = ExpectationSuite(
-            expectation_suite_name=self.expectation_suite_name,
+            name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
 
@@ -328,7 +328,7 @@ class TestCRUDMethods:
         set_context(project=context)
         context.expectations_store.has_key.return_value = False
         suite = ExpectationSuite(
-            expectation_suite_name=self.expectation_suite_name,
+            name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
 
@@ -345,7 +345,7 @@ class TestCRUDMethods:
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(
-            expectation_suite_name="test-suite",
+            name="test-suite",
         )
 
         with pytest.raises(KeyError, match="No matching expectation was found."):
@@ -362,7 +362,7 @@ class TestCRUDMethods:
         )  # arbitrary exception
         set_context(project=context)
         suite = ExpectationSuite(
-            expectation_suite_name="test-suite",
+            name="test-suite",
             expectations=[
                 expectation.configuration,
             ],
@@ -379,7 +379,7 @@ class TestCRUDMethods:
         context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
-            expectation_suite_name=self.expectation_suite_name,
+            name=self.expectation_suite_name,
         )
         store_key = context.expectations_store.get_key.return_value
 
@@ -914,7 +914,7 @@ class TestIsEquivalentTo:
     ):
         """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
-        different_but_equivalent_suite.expectation_suite_name = "different_name"
+        different_but_equivalent_suite.name = "different_name"
         different_but_equivalent_suite.meta = {"notes": "Different meta."}
         different_but_equivalent_suite.data_asset_type = "different_data_asset_type"
         different_but_equivalent_suite.id = "different_id"
@@ -996,7 +996,7 @@ class TestEqDunder:
     @pytest.mark.parametrize(
         "attribute,new_value",
         [
-            pytest.param("expectation_suite_name", "different_name"),
+            pytest.param("name", "different_name"),
             pytest.param(
                 "data_context",
                 MagicMock(),
@@ -1123,7 +1123,7 @@ def table_exp3() -> ExpectationConfiguration:
 @pytest.fixture
 def empty_suite() -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
     )
@@ -1141,7 +1141,7 @@ def suite_with_table_and_column_expectations(
     table_exp3,
 ) -> ExpectationSuite:
     suite = ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[
             expect_column_values_to_be_in_set_col_a_with_meta,
             exp2,
@@ -1162,7 +1162,7 @@ def baseline_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp2
 ) -> ExpectationSuite:
     return ExpectationSuite(
-        expectation_suite_name="warning",
+        name="warning",
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
         meta={"notes": "This is an expectation suite."},
     )

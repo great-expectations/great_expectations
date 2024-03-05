@@ -266,7 +266,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(  # noqa: PLR0912
+    def _validate_pandas(  # noqa: C901, PLR0912
         self,
         actual_column_type,
         expected_types_list,

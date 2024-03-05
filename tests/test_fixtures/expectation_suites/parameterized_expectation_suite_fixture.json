@@ -1,5 +1,5 @@
 {
-    "expectation_suite_name": "my_dag_node.default",
+    "name": "my_dag_node.default",
     "data_asset_type": "Dataset",
     "meta": {
         "great_expectations_version": "0.9.4"

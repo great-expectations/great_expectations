@@ -43,7 +43,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100",
         batch_identifier="batch_id",
@@ -55,7 +55,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200",
         batch_identifier="batch_id",
@@ -265,7 +265,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100",
         batch_identifier="batch_id",
@@ -277,7 +277,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200",
         batch_identifier="batch_id",
