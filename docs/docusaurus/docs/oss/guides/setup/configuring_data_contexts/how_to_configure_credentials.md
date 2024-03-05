@@ -1,7 +1,7 @@
 ---
 title: Configure credentials
 ---
-import Prerequisites from '../../../../components/_prerequisites.jsx'
+import Prerequisites from '../../../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
