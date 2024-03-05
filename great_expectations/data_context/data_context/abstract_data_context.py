@@ -4140,7 +4140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         os.makedirs(  # noqa: PTH103
-            os.path.dirname(config_variables_filepath),
+            os.path.dirname(config_variables_filepath),  # noqa: PTH120
             exist_ok=True,
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113

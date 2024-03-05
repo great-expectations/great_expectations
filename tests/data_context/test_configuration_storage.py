@@ -51,7 +51,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"),
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(

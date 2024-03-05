@@ -20,11 +20,11 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"),
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
         exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"),
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
         exist_ok=True,
     )
     data_path = os.path.join(context_path, "../data")  # noqa: PTH118

@@ -13,7 +13,7 @@ from great_expectations_contrib.package import GreatExpectationsContribPackageMa
 # The following link points to the repo where the Cookiecutter template is hosted
 URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecutter"
 PACKAGE_PATH = os.path.join(  # noqa: PTH118
-    os.getcwd(),
+    os.getcwd(),  # noqa: PTH109
     ".great_expectations_package.json",
 )
 

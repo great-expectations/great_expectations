@@ -192,7 +192,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"),
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
         exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118

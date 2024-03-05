@@ -61,7 +61,7 @@ def yellow_trip_pandas_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"),
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
         exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118

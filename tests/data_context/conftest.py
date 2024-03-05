@@ -93,7 +93,7 @@ def create_data_context_files(
     if config_variables_fixture_filename:
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         os.makedirs(  # noqa: PTH103
-            os.path.join(context_path, "uncommitted"),
+            os.path.join(context_path, "uncommitted"),  # noqa: PTH118
             exist_ok=True,
         )
         copy_relative_path(
@@ -132,7 +132,7 @@ def create_common_data_context_files(context_path, asset_config_path):
         ),
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"),
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
     copy_relative_path(
