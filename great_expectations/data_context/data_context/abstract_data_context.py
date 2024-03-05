@@ -3679,9 +3679,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
             try:
-                expectation_suite_dict: dict = cast(
-                    dict, self.expectations_store.get(key)
-                )
+                expectation_suite_dict: dict = self.expectations_store.get(key)
             except ValidationError as e:
                 # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
                 # we should ignore that instead of breaking all checkpoints in the entire context
@@ -3692,7 +3690,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
                 continue
 
-            expectation_suite_dict: dict = self.expectations_store.get(key)
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
