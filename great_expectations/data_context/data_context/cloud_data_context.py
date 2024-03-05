@@ -483,10 +483,10 @@ class CloudDataContext(SerializableDataContext):
         GX Cloud ids is returned instead.
         """
         return [
-            suite_key.resource_name
-            for suite_key in self.list_expectation_suites()
-            if suite_key.resource_name
-        ]  # type: ignore[union-attr]
+            suite_key.resource_name  # type: ignore[union-attr]
+            for suite_key in self.list_expectation_suites()  # type: ignore[union-attr]
+            if suite_key.resource_name  # type: ignore[union-attr]
+        ]
 
     @property
     def ge_cloud_config(self) -> GXCloudConfig:

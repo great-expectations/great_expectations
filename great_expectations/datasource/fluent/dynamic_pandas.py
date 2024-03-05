@@ -187,8 +187,8 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "con": {"con": _FieldSpec(Union[ConfigStr, str, Any], ...)},  # type: ignore[arg-type]
     # misc
     "filepath_or_buffer": {
-        "filepath_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)
-    },  # type: ignore[arg-type]
+        "filepath_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)  # type: ignore[arg-type]
+    },
     "io": {"io": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path": {"path": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buf": {"path_or_buf": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]

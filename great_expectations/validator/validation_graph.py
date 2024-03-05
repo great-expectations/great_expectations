@@ -263,9 +263,9 @@ class ValidationGraph:
             for metric in ready_metrics:
                 if (
                     metric.id in failed_metric_info
-                    and failed_metric_info[metric.id]["num_failures"]
+                    and failed_metric_info[metric.id]["num_failures"]  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
                     >= MAX_METRIC_COMPUTATION_RETRIES
-                ):  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
+                ):
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)

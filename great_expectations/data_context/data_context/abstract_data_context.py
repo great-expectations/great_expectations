@@ -634,8 +634,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             return name
 
         if CheckpointStore.default_checkpoints_exist(
-            directory_path=self.root_directory
-        ):  # type: ignore[arg-type]
+            directory_path=self.root_directory  # type: ignore[arg-type]
+        ):
             return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
 
         return None
