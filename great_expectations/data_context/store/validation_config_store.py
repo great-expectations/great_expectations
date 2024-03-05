@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.validation_config import ValidationConfig
@@ -26,6 +28,29 @@ class ValidationConfigStore(Store):
         return StringKey(key=name)
 
     @override
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
+        response_data = response_json["data"]
+
+        validation_data: dict
+        if isinstance(response_data, list):
+            if len(response_data) == 0:
+                raise ValueError(
+                    f"Cannot parse empty data from GX Cloud payload: {response_json}"
+                )
+            validation_data = response_data[0]
+        else:
+            validation_data = response_data
+
+        id: str = validation_data["id"]
+        validation_config_dict: dict = validation_data["attributes"][
+            "validation_config"
+        ]
+        validation_config_dict["id"] = id
+
+        return validation_config_dict
+
+    @override
     def serialize(self, value):
         if self.cloud_mode:
             data = value.dict()
@@ -39,3 +64,14 @@ class ValidationConfigStore(Store):
     @override
     def deserialize(self, value):
         return ValidationConfig.parse_raw(value)
+
+    @override
+    def _add(self, key, value, **kwargs):
+        if not self.cloud_mode:
+            # this logic should move to the store backend, but is implemented here for now
+            value = self._add_id_on_create(value)
+        return super()._add(key=key, value=value, **kwargs)
+
+    def _add_id_on_create(self, value):
+        value.id = str(uuid.uuid4())
+        return value

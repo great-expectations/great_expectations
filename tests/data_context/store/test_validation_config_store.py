@@ -142,3 +142,100 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
     key = cloud_backed_store.get_key(name="my_validation")
     assert key.resource_type == GXCloudRESTResource.VALIDATION_CONFIG
     assert key.resource_name == "my_validation"
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",
+                    "attributes": {
+                        "validation_config": {
+                            "name": "my_validation",
+                            "data": {
+                                "datasource": {
+                                    "name": "my_datasource",
+                                    "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+                                },
+                                "asset": {
+                                    "name": "my_asset",
+                                    "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+                                },
+                                "batch_config": {
+                                    "name": "my_batch_config",
+                                    "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+                                },
+                            },
+                            "suite": {
+                                "name": "my_suite",
+                                "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+                            },
+                        }
+                    },
+                }
+            },
+            id="single_validation_config",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",
+                        "attributes": {
+                            "validation_config": {
+                                "name": "my_validation",
+                                "data": {
+                                    "datasource": {
+                                        "name": "my_datasource",
+                                        "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+                                    },
+                                    "asset": {
+                                        "name": "my_asset",
+                                        "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+                                    },
+                                    "batch_config": {
+                                        "name": "my_batch_config",
+                                        "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+                                    },
+                                },
+                                "suite": {
+                                    "name": "my_suite",
+                                    "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+                                },
+                            }
+                        },
+                    }
+                ]
+            },
+            id="list_with_single_validation_config",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(response_json: dict):
+    actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+    expected = {
+        "name": "my_validation",
+        "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",  # ID should have been retrieved from the top-level payload
+        "data": {
+            "datasource": {
+                "name": "my_datasource",
+                "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+            },
+            "asset": {
+                "name": "my_asset",
+                "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+            },
+            "batch_config": {
+                "name": "my_batch_config",
+                "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+            },
+        },
+        "suite": {
+            "name": "my_suite",
+            "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+    }
+    assert actual == expected
