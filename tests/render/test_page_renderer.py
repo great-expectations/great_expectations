@@ -22,7 +22,7 @@ pytestmark = pytest.mark.filesystem
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(expectation_suite_name="test", notes="*hi*")
+        ExpectationSuite(name="test", notes="*hi*")
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
@@ -36,7 +36,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
@@ -62,7 +62,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             notes="*alpha*",
         )
     )
@@ -86,7 +86,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
@@ -124,7 +124,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
 def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=None,
         )
@@ -136,7 +136,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             notes=["hi"],
         )
     )
@@ -160,7 +160,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=[
                 ExpectationConfiguration(

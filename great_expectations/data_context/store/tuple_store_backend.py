@@ -131,7 +131,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return converted_string
 
-    def _convert_filepath_to_key(self, filepath):  # noqa: PLR0912
+    def _convert_filepath_to_key(self, filepath):  # noqa: C901, PLR0912
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
             return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:

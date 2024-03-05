@@ -314,7 +314,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     context._cloud_mode = True
 
     suite = ExpectationSuite(
-        expectation_suite_name="validating_taxi_data",
+        name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
@@ -371,7 +371,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
     mock_suite = ExpectationSuite(
-        expectation_suite_name="validating_taxi_data",
+        name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",

@@ -497,7 +497,7 @@ def test_add_expectation_suite_success(
                 kwargs={"column": "x", "value_set": [1, 2, 4]},
             ),
         ],
-        expectation_suite_name="default",
+        name="default",
         meta={"great_expectations_version": "0.15.44"},
     )
 
@@ -543,7 +543,7 @@ def test_add_expectation_suite_conflicting_args_failure(
     context = in_memory_data_context
     project_manager.set_project(context)
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
 
@@ -562,7 +562,7 @@ def test_update_expectation_suite_failure(
     context = in_memory_data_context
 
     suite_name = "my_brand_new_suite"
-    suite = ExpectationSuite(expectation_suite_name=suite_name)
+    suite = ExpectationSuite(name=suite_name)
 
     with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
@@ -612,7 +612,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
                         kwargs={"column": "x", "value_set": [1, 2, 4]},
                     ),
                 ],
-                expectation_suite_name="default",
+                name="default",
                 meta={"great_expectations_version": "0.15.44"},
             ),
         },
@@ -631,7 +631,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
 
     suite = context.add_or_update_expectation_suite(**kwargs)
 
-    assert suite.expectation_suite_name == expectation_suite_name
+    assert suite.name == expectation_suite_name
     assert suite.expectation_configurations == expectations
     assert suite.meta == meta
     assert context.expectations_store.save_count == 1
@@ -704,7 +704,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
     project_manager.set_project(in_memory_data_context)
 
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
     context = in_memory_data_context

@@ -1063,7 +1063,6 @@ class Batch:
             )
         )
         return V1Validator(
-            context=context,
             batch_config=batch_config,
             batch_request_options=self.batch_request.options,
         )

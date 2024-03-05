@@ -9,7 +9,6 @@ import logging
 import traceback
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -296,18 +295,18 @@ class Validator:
     def expectation_suite(self, value: ExpectationSuite) -> None:
         self._initialize_expectations(
             expectation_suite=value,
-            expectation_suite_name=value.expectation_suite_name,
+            expectation_suite_name=value.name,
         )
 
     @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self._expectation_suite.name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name: str) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self._expectation_suite.name = expectation_suite_name
 
     def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
@@ -460,7 +459,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:  # noqa: PLR0915
+    def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -473,7 +472,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args: dict, **kwargs):  # noqa: PLR0912
+        def inst_expectation(*args: dict, **kwargs):  # noqa: C901, PLR0912
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
@@ -1434,29 +1433,10 @@ class Validator:
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
 
-            # Group expectations by column
-            columns: dict[Any, list[ExpectationConfiguration]] = {}
-
-            for expectation in expectation_suite.expectation_configurations:
-                expectation.process_evaluation_parameters(
-                    evaluation_parameters=runtime_evaluation_parameters,
-                    interactive_evaluation=self.interactive_evaluation,
-                    data_context=self._data_context,
-                )
-                if "column" in expectation.kwargs and isinstance(
-                    expectation.kwargs["column"], Hashable
-                ):
-                    column = expectation.kwargs["column"]
-                else:
-                    # noinspection SpellCheckingInspection
-                    column = "_nocolumn"
-                if column not in columns:
-                    columns[column] = []
-                columns[column].append(expectation)
-
-            expectations_to_evaluate = []
-            for col in columns:
-                expectations_to_evaluate.extend(columns[col])
+            expectations_to_evaluate = self.process_expectations_for_validation(
+                expectation_suite.expectation_configurations,
+                runtime_evaluation_parameters,
+            )
 
             runtime_configuration = self._get_runtime_configuration(
                 catch_exceptions=catch_exceptions, result_format=result_format
@@ -1479,7 +1459,7 @@ class Validator:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            expectation_suite_name = expectation_suite.expectation_suite_name
+            expectation_suite_name = expectation_suite.name
 
             result = ExpectationSuiteValidationResult(
                 results=results,
@@ -1510,6 +1490,39 @@ class Validator:
             self._active_validation = False
 
         return result
+
+    def process_expectations_for_validation(
+        self,
+        expectation_configurations: list[ExpectationConfiguration],
+        evaluation_parameters: Optional[dict[str, Any]] = None,
+    ) -> list[ExpectationConfiguration]:
+        """Substitute evaluation parameters into the provided expectations and sort by column."""
+        NO_COLUMN = (
+            "_nocolumn"  # just used to group expectations that don't specify a column
+        )
+        columns: dict[str, list[ExpectationConfiguration]] = {}
+
+        for expectation in expectation_configurations:
+            expectation.process_evaluation_parameters(
+                evaluation_parameters=evaluation_parameters,
+                interactive_evaluation=self.interactive_evaluation,
+                data_context=self._data_context,
+            )
+            if "column" in expectation.kwargs and isinstance(
+                expectation.kwargs["column"], str
+            ):
+                column = expectation.kwargs["column"]
+            else:
+                column = NO_COLUMN
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(expectation)
+
+        expectations_to_evaluate = []
+        for col in columns:
+            expectations_to_evaluate.extend(columns[col])
+
+        return expectations_to_evaluate
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """
@@ -1638,7 +1651,7 @@ class Validator:
                 key value `data_asset_name` as `data_asset_name`.
 
             expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
+                The name to assign to the `expectation_suite.name`
 
         Returns:
             None
@@ -1662,24 +1675,19 @@ class Validator:
             self._expectation_suite: ExpectationSuite = expectation_suite
 
             if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
+                if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
+                            n1=self._expectation_suite.name,
                             n2=expectation_suite_name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self._expectation_suite.name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
-            self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
-            )
+            self._expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
         self._expectation_suite.execution_engine_type = type(self._execution_engine)
 

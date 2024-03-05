@@ -302,7 +302,7 @@ def _expectation_suite():
                 "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
                 "suite": {
                     "data_asset_type": None,
-                    "expectation_suite_name": "single-snippet-suite-2",
+                    "name": "single-snippet-suite-2",
                     "expectations": [
                         {
                             "expectation_type": "expect_column_to_exist",

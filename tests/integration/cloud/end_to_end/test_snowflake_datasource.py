@@ -146,6 +146,11 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name which mercury currently doesn't support",
+    strict=True,
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,

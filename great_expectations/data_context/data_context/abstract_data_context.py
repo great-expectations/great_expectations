@@ -457,14 +457,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs: Optional[dict],
     ) -> None:
         if expectation_suite_name is None:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(name=expectation_suite.name)
         else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
+            expectation_suite.name = expectation_suite_name
+            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
@@ -1068,9 +1064,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(expectation_suite_name, ExpectationSuite):
             expectation_suite = expectation_suite_name
         elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
-            expectation_suite = self.get_expectation_suite(
-                expectation_suite_name.expectation_suite_name
-            )
+            expectation_suite = self.get_expectation_suite(expectation_suite_name.name)
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
@@ -1720,7 +1714,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
+            suite.name for suite in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
@@ -2267,7 +2261,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2288,9 +2282,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
-        key = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite.expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(name=expectation_suite.name)
 
         persistence_fn: Callable
         if overwrite_existing:
@@ -2324,7 +2316,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         Like `update_expectation_suite` but without the usage statistics logging.
         """
-        name = expectation_suite.expectation_suite_name
+        name = expectation_suite.name
         id = expectation_suite.id
         key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
@@ -2412,7 +2404,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ), "expectation_suite_name must be specified."
 
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
                 evaluation_parameters=evaluation_parameters,
@@ -2485,9 +2477,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if expectation_suite_name:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         else:
             raise ValueError("expectation_suite_name must be provided")
 
@@ -2497,9 +2487,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
+            expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             expectation_suite = ExpectationSuite(**expectations_schema_dict)
             if include_rendered_content:
@@ -2664,8 +2652,23 @@ class AbstractDataContext(ConfigPeer, ABC):
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
 
+    def _validate_datasource_names(
+        self, datasource_names: list[str] | str | None
+    ) -> list[str]:
+        if datasource_names is None:
+            datasource_names = [
+                datasource["name"] for datasource in self.list_datasources()
+            ]
+        elif isinstance(datasource_names, str):
+            datasource_names = [datasource_names]
+        elif not isinstance(datasource_names, list):
+            raise ValueError(
+                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
+            )
+        return datasource_names
+
     @public_api
-    def get_available_data_asset_names(  # noqa: PLR0912
+    def get_available_data_asset_names(  # noqa: PLR0912, C901 - 18
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -2685,17 +2688,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         data_asset_names = {}
         fluent_data_asset_names = {}
-        if datasource_names is None:
-            datasource_names = [
-                datasource["name"] for datasource in self.list_datasources()
-            ]
-        elif isinstance(datasource_names, str):
-            datasource_names = [datasource_names]
-        elif not isinstance(datasource_names, list):
-            raise ValueError(
-                "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"
-            )
+        datasource_names = self._validate_datasource_names(datasource_names)
 
+        # TODO: V1-222 batch_kwargs_generator_names is legacy and should be removed for V1
+        # TODO: conditional FDS vs BDS datasource logic should be removed for V1
         if batch_kwargs_generator_names is not None:
             if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
@@ -2999,7 +2995,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return None
 
     @staticmethod
-    def _get_metric_configuration_tuples(
+    def _get_metric_configuration_tuples(  # noqa: C901
         metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
     ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
@@ -3679,11 +3675,21 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
-        # https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        # we have to iterate through all expectation suites because evaluation parameters
+        # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
+            try:
+                expectation_suite_dict: dict = self.expectations_store.get(key)
+            except ValidationError as e:
+                # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
+                # we should ignore that instead of breaking all checkpoints in the entire context
+                warnings.warn(
+                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                    f"because it failed to load with message: {e}",
+                    UserWarning,
+                )
+                continue
+
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
@@ -3696,7 +3702,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._evaluation_parameter_dependencies_compiled = True
 
-    def get_validation_result(  # noqa: PLR0913
+    def get_validation_result(  # noqa: C901, PLR0913
         self,
         expectation_suite_name,
         run_id=None,
@@ -3758,7 +3764,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
+                name=expectation_suite_name
             ),
             run_id=run_id,
             batch_identifier=batch_identifier,
