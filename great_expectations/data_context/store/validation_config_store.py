@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextKey, StringKey
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
@@ -34,10 +34,12 @@ class ValidationConfigStore(Store):
 
         validation_data: dict
         if isinstance(response_data, list):
-            if len(response_data) == 0:
-                raise ValueError(
-                    f"Cannot parse empty data from GX Cloud payload: {response_json}"
-                )
+            if len(response_data) != 1:
+                if len(response_data) == 0:
+                    msg = f"Cannot parse empty data from GX Cloud payload: {response_json}"
+                else:
+                    msg = f"Cannot parse multiple items from GX Cloud payload: {response_json}"
+                raise ValueError(msg)
             validation_data = response_data[0]
         else:
             validation_data = response_data
@@ -66,12 +68,8 @@ class ValidationConfigStore(Store):
         return ValidationConfig.parse_raw(value)
 
     @override
-    def _add(self, key, value, **kwargs):
+    def _add(self, key: DataContextKey, value: ValidationConfig, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
-            value = self._add_id_on_create(value)
+            value.id = str(uuid.uuid4())
         return super()._add(key=key, value=value, **kwargs)
-
-    def _add_id_on_create(self, value):
-        value.id = str(uuid.uuid4())
-        return value

@@ -147,6 +147,30 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
     assert key.resource_name == "my_validation"
 
 
+_VALIDATION_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
+_VALIDATION_CONFIG = {
+    "name": "my_validation",
+    "data": {
+        "datasource": {
+            "name": "my_datasource",
+            "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+        "asset": {
+            "name": "my_asset",
+            "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+        "batch_config": {
+            "name": "my_batch_config",
+            "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+    },
+    "suite": {
+        "name": "my_suite",
+        "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+    },
+}
+
+
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "response_json",
@@ -154,29 +178,9 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
         pytest.param(
             {
                 "data": {
-                    "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",
+                    "id": _VALIDATION_ID,
                     "attributes": {
-                        "validation_config": {
-                            "name": "my_validation",
-                            "data": {
-                                "datasource": {
-                                    "name": "my_datasource",
-                                    "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
-                                },
-                                "asset": {
-                                    "name": "my_asset",
-                                    "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
-                                },
-                                "batch_config": {
-                                    "name": "my_batch_config",
-                                    "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
-                                },
-                            },
-                            "suite": {
-                                "name": "my_suite",
-                                "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
-                            },
-                        }
+                        "validation_config": _VALIDATION_CONFIG,
                     },
                 }
             },
@@ -186,29 +190,9 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
             {
                 "data": [
                     {
-                        "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",
+                        "id": _VALIDATION_ID,
                         "attributes": {
-                            "validation_config": {
-                                "name": "my_validation",
-                                "data": {
-                                    "datasource": {
-                                        "name": "my_datasource",
-                                        "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
-                                    },
-                                    "asset": {
-                                        "name": "my_asset",
-                                        "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
-                                    },
-                                    "batch_config": {
-                                        "name": "my_batch_config",
-                                        "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
-                                    },
-                                },
-                                "suite": {
-                                    "name": "my_suite",
-                                    "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
-                                },
-                            }
+                            "validation_config": _VALIDATION_CONFIG,
                         },
                     }
                 ]
@@ -217,28 +201,47 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
         ),
     ],
 )
-def test_gx_cloud_response_json_to_object_dict(response_json: dict):
+def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
     actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
-    expected = {
-        "name": "my_validation",
-        "id": "a4sdfd-64c8-46cb-8f7e-03c12cea1d67",  # ID should have been retrieved from the top-level payload
-        "data": {
-            "datasource": {
-                "name": "my_datasource",
-                "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
-            },
-            "asset": {
-                "name": "my_asset",
-                "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
-            },
-            "batch_config": {
-                "name": "my_batch_config",
-                "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
-            },
-        },
-        "suite": {
-            "name": "my_suite",
-            "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
-        },
-    }
+    expected = {**_VALIDATION_CONFIG, "id": _VALIDATION_ID}
     assert actual == expected
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json, error_substring",
+    [
+        pytest.param(
+            {
+                "data": [],
+            },
+            "Cannot parse empty data",
+            id="empty_list",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": _VALIDATION_ID,
+                        "attributes": {
+                            "validation_config": _VALIDATION_CONFIG,
+                        },
+                    },
+                    {
+                        "id": _VALIDATION_ID,
+                        "attributes": {
+                            "validation_config": _VALIDATION_CONFIG,
+                        },
+                    },
+                ],
+            },
+            "Cannot parse multiple items",
+            id="list_with_multiple_validation_configs",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict_failure(
+    response_json: dict, error_substring: str
+):
+    with pytest.raises(ValueError, match=f"{error_substring}*."):
+        ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
