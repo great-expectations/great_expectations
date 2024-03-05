@@ -463,17 +463,18 @@ def test_add_expectation_with_ge_cloud_id(
         == expectation_ge_cloud_id
     )
     # make sure expectation config was actually updated
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-        0
-    ].kwargs[
-        "value_set"
-    ] == [
-        11,
-        22,
-        33,
-        44,
-        55,
-    ]
+    assert (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+            0
+        ].kwargs["value_set"]
+        == [
+            11,
+            22,
+            33,
+            44,
+            55,
+        ]
+    )
 
 
 @pytest.mark.filesystem

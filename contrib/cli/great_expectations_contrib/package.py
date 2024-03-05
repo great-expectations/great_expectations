@@ -106,9 +106,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
         """
-        diagnostics = (
-            GreatExpectationsContribPackageManifest.retrieve_package_expectations_diagnostics()
-        )
+        diagnostics = GreatExpectationsContribPackageManifest.retrieve_package_expectations_diagnostics()
         self._update_attrs_with_diagnostics(diagnostics)
 
     def _update_attrs_with_diagnostics(

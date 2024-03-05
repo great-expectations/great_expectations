@@ -98,15 +98,13 @@ def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
 
 
 @overload
-def wrap_identifier(indentifier: str, dialect: GXSqlDialect = ...) -> quoted_name:
-    ...
+def wrap_identifier(indentifier: str, dialect: GXSqlDialect = ...) -> quoted_name: ...
 
 
 @overload
 def wrap_identifier(
     indentifier: quoted_name, dialect: GXSqlDialect | None = ...
-) -> quoted_name:
-    ...
+) -> quoted_name: ...
 
 
 def wrap_identifier(

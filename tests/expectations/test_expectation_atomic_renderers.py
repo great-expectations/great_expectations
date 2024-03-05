@@ -25,7 +25,7 @@ def expectation_configuration_kwargs():
 
 @pytest.fixture
 def get_prescriptive_rendered_content(
-    expectation_configuration_kwargs: Dict[str, Union[str, dict]]
+    expectation_configuration_kwargs: Dict[str, Union[str, dict]],
 ) -> Callable:
     def _get_prescriptive_rendered_content(
         update_dict: Dict[str, Union[str, dict]],
@@ -62,7 +62,7 @@ def evr_kwargs(expectation_configuration_kwargs):
 
 @pytest.fixture
 def get_diagnostic_rendered_content(
-    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]]
+    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]],
 ) -> Callable:
     def _get_diagnostic_rendered_content(
         update_dict: Dict[str, Union[dict, ExpectationConfiguration]],

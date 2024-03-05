@@ -44,9 +44,9 @@ MISSING: Final = object()
 
 GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
 
-DUMMY_JWT_TOKEN: Final[
-    str
-] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+DUMMY_JWT_TOKEN: Final[str] = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+)
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
 FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
@@ -863,12 +863,12 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/expectation-suites",
             post_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.PUT,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
             put_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.DELETE,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",

@@ -419,8 +419,7 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs
-            | class_expectation_impls
+            validator_attrs | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
@@ -494,9 +493,9 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[
-                str, ...
-            ] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[str, ...] = (
+                expectation_impl.get_allowed_config_keys()
+            )
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -633,11 +632,11 @@ class Validator:
         override_variables: Dict[str, Any] = override_profiler_config_dict.get(
             "variables", {}
         )
-        effective_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(
-            variables=override_variables,
-            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        effective_variables: Optional[ParameterContainer] = (
+            profiler.reconcile_profiler_variables(
+                variables=override_variables,
+                reconciliation_strategy=ReconciliationStrategy.UPDATE,
+            )
         )
         profiler.variables = effective_variables
 

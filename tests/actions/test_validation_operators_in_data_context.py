@@ -260,9 +260,9 @@ def test_action_list_operator(validation_operators_data_context):
         ][0]
     )
 
-    first_validation_result = data_context.stores[  # noqa: F841
-        "validation_result_store"
-    ].get(validation_result_store_keys[0])
+    first_validation_result = data_context.stores["validation_result_store"].get(  # noqa: F841
+        validation_result_store_keys[0]
+    )
     assert (
         data_context.stores["validation_result_store"]
         .get(validation_result_store_keys[0])

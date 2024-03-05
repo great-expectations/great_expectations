@@ -135,7 +135,8 @@ class CardinalityChecker:
         return self._cardinality_limit_mode
 
     def cardinality_within_limit(
-        self, metric_value: Union[int, float]  # noqa: PYI041
+        self,
+        metric_value: Union[int, float],  # noqa: PYI041
     ) -> bool:
         """Determine if the cardinality is within configured limit.
 

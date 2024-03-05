@@ -255,9 +255,9 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        rendered_content: List[
-            RenderedAtomicContent
-        ] = inline_renderer.get_rendered_content()
+        rendered_content: List[RenderedAtomicContent] = (
+            inline_renderer.get_rendered_content()
+        )
 
         diagnostic_rendered_content: List[RenderedAtomicContent] = [
             content_block
@@ -279,10 +279,12 @@ class ExpectationValidationResult(SerializableDictDot):
             if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
         ]
 
-        self.expectation_config.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(  # type: ignore[union-attr] # config could be None
-            existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
-            new_rendered_content=prescriptive_rendered_content,
-            failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+        self.expectation_config.rendered_content = (  # type: ignore[union-attr] # config could be None
+            inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
+                new_rendered_content=prescriptive_rendered_content,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+            )
         )
 
     @staticmethod
@@ -290,13 +292,11 @@ class ExpectationValidationResult(SerializableDictDot):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0
-            or result["unexpected_percent"] > 100  # noqa: PLR2004
+            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0
-            or result["missing_percent"] > 100  # noqa: PLR2004
+            result["missing_percent"] < 0 or result["missing_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
@@ -411,7 +411,9 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: "ExpectationConfigurationSchema", required=False, allow_none=True  # type: ignore[arg-type,return-value]
+        lambda: "ExpectationConfigurationSchema",  # type: ignore[arg-type,return-value]
+        required=False,
+        allow_none=True,
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)

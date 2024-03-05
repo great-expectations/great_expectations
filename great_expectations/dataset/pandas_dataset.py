@@ -762,9 +762,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
         else:
             res = self._expect_column_values_to_be_of_type__map(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
@@ -804,9 +804,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
 
         return res
 
@@ -996,9 +996,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
                 column, type_list, **kwargs
@@ -1040,9 +1040,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
 
         return res
 

@@ -434,11 +434,10 @@ def test_SlackRenderer_show_failed_expectations(
         show_failed_expectations=True,
     )
 
-    assert (
-        """*Failed Expectations*:
-:x:expect_column_values_to_be_between (my_column)"""
-        in rendered_msg["blocks"][0]["text"]["text"]
-    )
+    assert """*Failed Expectations*:
+:x:expect_column_values_to_be_between (my_column)""" in rendered_msg["blocks"][0][
+        "text"
+    ]["text"]
 
 
 def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_result):

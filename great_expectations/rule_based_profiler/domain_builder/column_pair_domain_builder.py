@@ -27,17 +27,18 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses "include_column_names" property of its parent class to specify "column_A" and "column_B" (order-preserving).
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = ColumnDomainBuilder.exclude_field_names | {
-        "exclude_column_names",
-        "include_column_name_suffixes",
-        "exclude_column_name_suffixes",
-        "semantic_type_filter_module_name",
-        "semantic_type_filter_class_name",
-        "include_semantic_types",
-        "exclude_semantic_types",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        ColumnDomainBuilder.exclude_field_names
+        | {
+            "exclude_column_names",
+            "include_column_name_suffixes",
+            "exclude_column_name_suffixes",
+            "semantic_type_filter_module_name",
+            "semantic_type_filter_class_name",
+            "include_semantic_types",
+            "exclude_semantic_types",
+        }
+    )
 
     def __init__(
         self,
@@ -94,8 +95,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
         )
 
         if not (
-            effective_column_names
-            and (len(effective_column_names) == 2)  # noqa: PLR2004
+            effective_column_names and (len(effective_column_names) == 2)  # noqa: PLR2004
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
