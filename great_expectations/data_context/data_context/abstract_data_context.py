@@ -3675,11 +3675,21 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
-        # https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        # we have to iterate through all expectation suites because evaluation parameters
+        # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = self.expectations_store.get(key)
+            try:
+                expectation_suite_dict: dict = self.expectations_store.get(key)
+            except ValidationError as e:
+                # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
+                # we should ignore that instead of breaking all checkpoints in the entire context
+                warnings.warn(
+                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                    f"because it failed to load with message: {e}",
+                    UserWarning,
+                )
+                continue
+
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)

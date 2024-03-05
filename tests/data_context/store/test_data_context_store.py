@@ -38,16 +38,16 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {
-            "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
-                "module_name": "great_expectations.data_context.store",
-            },
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "base_directory": "checkpoints/",
                     "class_name": "TupleFilesystemStoreBackend",
                 },
+            },
+            "evaluation_parameter_store": {
+                "class_name": "EvaluationParameterStore",
+                "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",
