@@ -577,7 +577,7 @@ class TestTableIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
@@ -877,7 +877,7 @@ class TestColumnIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,

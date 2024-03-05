@@ -16,7 +16,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901
         self,
         validation_result=None,
         validation_result_suite_identifier=None,
@@ -117,7 +117,9 @@ class MicrosoftTeamsRenderer(Renderer):
                 )
                 validation_result_elements.append(data_asset_name_element)
 
-                expectation_suite_name = validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name
+                expectation_suite_name = (
+                    validation_result_suite_identifier.expectation_suite_identifier.name
+                )
                 expectation_suite_name_element = self._render_validation_result_element(
                     key="Expectation suite name", value=expectation_suite_name
                 )

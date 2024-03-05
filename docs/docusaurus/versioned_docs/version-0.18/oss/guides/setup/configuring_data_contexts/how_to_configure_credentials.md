@@ -1,7 +1,6 @@
 ---
 title: Configure credentials
 ---
-import Prerequisites from '../../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
@@ -12,7 +11,9 @@ If your Great Expectations deployment is in an environment without a file system
 
 ## Prerequisites
 
-<Prerequisites></Prerequisites>
+- Permissions to set environment variables
+
+- A Data Context
 
 ## Using Environment Variables
 

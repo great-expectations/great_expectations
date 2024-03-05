@@ -320,7 +320,7 @@ class DataAsset:
                 key value `data_asset_name` as `data_asset_name`.
 
             expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
+                The name to assign to the `expectation_suite.name`
 
         Returns:
             None
@@ -337,23 +337,20 @@ class DataAsset:
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
+                if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
+                            n1=self._expectation_suite.name,
                             n2=expectation_suite_name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self._expectation_suite.name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
+                name=expectation_suite_name,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -844,7 +841,7 @@ class DataAsset:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            expectation_suite_name = expectation_suite.expectation_suite_name
+            expectation_suite_name = expectation_suite.name
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
@@ -931,12 +928,12 @@ class DataAsset:
     @property
     def expectation_suite_name(self):
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self._expectation_suite.name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self._expectation_suite.name = expectation_suite_name
 
     ###
     #
@@ -944,7 +941,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: PLR0912, PLR0913
+    def _format_map_output(  # noqa: C901, PLR0912, PLR0913
         self,
         result_format,
         success,

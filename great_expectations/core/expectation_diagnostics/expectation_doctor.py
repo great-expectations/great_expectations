@@ -408,7 +408,7 @@ class ExpectationDoctor:
             results = data["datasets"]
         return results
 
-    def _get_examples(
+    def _get_examples(  # noqa: C901
         self, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
         """

@@ -814,7 +814,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
-    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912
+    def _diagnostic_unexpected_table_renderer(  # noqa: C901, PLR0912
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -1561,7 +1561,7 @@ class BatchExpectation(Expectation, ABC):
 
         return validation_dependencies
 
-    def _validate_metric_value_between(  # noqa: PLR0912
+    def _validate_metric_value_between(  # noqa: C901, PLR0912
         self,
         metric_name,
         metrics: Dict,

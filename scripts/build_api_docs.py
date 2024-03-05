@@ -449,7 +449,7 @@ def build_relevant_documentation_block(docstring: str) -> List[str]:
     return relevant_documentation_block
 
 
-def build_method_document(
+def build_method_document(  # noqa: C901
     method_name: str, method: Any, qualified_path: str, github_path: str
 ) -> Tuple[str, Set[str], str]:
     """Create API documentation for a given method.

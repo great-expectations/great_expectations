@@ -13,7 +13,6 @@ from typing import (
     Optional,
     Sequence,
     Union,
-    cast,
     overload,
 )
 
@@ -584,9 +583,7 @@ class CloudDataContext(SerializableDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("overwrite_existing must be of type bool.")
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
-        )
+        expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
         existing_suite_names = self.list_expectation_suite_names()
         cloud_id: Optional[str] = None
@@ -696,9 +693,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
         try:
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
+            expectations_schema_dict: dict = self.expectations_store.get(key)
         except StoreBackendError:
             raise DataContextError(
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
@@ -728,7 +723,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
-            resource_name=expectation_suite.expectation_suite_name,
+            resource_name=expectation_suite.name,
         )
 
         if not overwrite_existing:
@@ -902,7 +897,7 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            resource_name=expectation_suite.expectation_suite_name,
+            resource_name=expectation_suite.name,
             id=cloud_id,
         )
 

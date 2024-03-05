@@ -444,7 +444,7 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
     return code
 
 
-def filter_properties_dict(  # noqa: PLR0913, PLR0912
+def filter_properties_dict(  # noqa: C901, PLR0912, PLR0913
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -619,7 +619,7 @@ def deep_filter_properties_iterable(
 ) -> None: ...
 
 
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(  # noqa: C901, PLR0913
     properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,

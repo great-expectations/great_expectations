@@ -962,7 +962,7 @@ continue.
 
 
 class ExecutionEngineConfig(DictDot):
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         class_name,
         module_name=None,
@@ -2043,7 +2043,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
@@ -2306,7 +2306,7 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[

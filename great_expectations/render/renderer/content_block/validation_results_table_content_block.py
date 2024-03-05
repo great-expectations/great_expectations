@@ -93,7 +93,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
     @override
     @classmethod
-    def _get_content_block_fn(  # noqa: PLR0915
+    def _get_content_block_fn(  # noqa: C901, PLR0915
         cls,
         expectation_type: str,
         expectation_config: ExpectationConfiguration | None = None,

@@ -238,7 +238,7 @@ def marker_coverage(
         " Default to version set in pyproject.toml",
     },
 )
-def type_check(  # noqa: PLR0913, PLR0912
+def type_check(  # noqa: C901, PLR0912, PLR0913
     ctx: Context,
     packages: list[str],
     install_types: bool = False,

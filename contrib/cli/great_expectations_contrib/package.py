@@ -117,7 +117,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         self._update_dependencies("requirements.txt")
         self._update_contributors(diagnostics)
 
-    def _update_from_package_info(self, path: str) -> None:
+    def _update_from_package_info(self, path: str) -> None:  # noqa: C901
         if not os.path.exists(path):  # noqa: PTH110
             logger.warning(f"Could not find package info file {path}")
             return

@@ -59,7 +59,7 @@ def _models_and_schema_dirs() -> (
     ["fluent_ds_or_asset_model", "schema_dir"],
     [pytest.param(t[0], t[1], id=t[2]) for t in _models_and_schema_dirs()],
 )
-def test_vcs_schemas_match(
+def test_vcs_schemas_match(  # noqa: C901
     fluent_ds_or_asset_model: Type[Datasource | DataAsset], schema_dir: pathlib.Path
 ):
     """

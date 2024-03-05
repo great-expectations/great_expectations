@@ -425,7 +425,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     @override
-    def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
+    def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe

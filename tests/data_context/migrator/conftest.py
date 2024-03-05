@@ -152,7 +152,7 @@ class StubBaseDataContext:
     def suites(self):
         class _MockSuites:
             def get(self, name: str) -> ExpectationSuite:
-                return ExpectationSuite(expectation_suite_name=name)
+                return ExpectationSuite(name=name)
 
         return _MockSuites()
 
@@ -262,7 +262,7 @@ def serialized_configuration_bundle() -> dict:
         "expectation_suites": [
             {
                 "data_asset_type": None,
-                "expectation_suite_name": "my_suite",
+                "name": "my_suite",
                 "expectations": [],
                 "id": None,
             }

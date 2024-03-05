@@ -124,7 +124,7 @@ class ValidationOperatorResult(DictDot):
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
-                    validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                    validation_result_identifier.expectation_suite_identifier.name
                     for validation_result_identifier in self.run_results.keys()
                 }
             )

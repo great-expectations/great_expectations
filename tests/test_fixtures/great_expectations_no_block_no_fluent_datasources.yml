@@ -25,8 +25,8 @@ stores:
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
-      module_name: great_expectations.data_context.store
-      class_name: EvaluationParameterStore
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
 
   checkpoint_store:
     class_name: CheckpointStore
@@ -35,7 +35,7 @@ stores:
       base_directory: checkpoints/
 
 data_docs_sites:
-  local_site:  # this is a user-selected name - you may select your own
+  local_site: # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleFilesystemStoreBackend

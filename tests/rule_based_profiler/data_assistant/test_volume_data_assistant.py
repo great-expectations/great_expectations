@@ -1344,7 +1344,7 @@ def quentin_expected_expectation_suite(
         expectation_suite_name: str = "my_suite"
 
         expected_expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
+            name=expectation_suite_name,
         )
 
         expectation_configuration: ExpectationConfiguration

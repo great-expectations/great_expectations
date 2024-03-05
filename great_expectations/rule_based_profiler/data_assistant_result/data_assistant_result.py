@@ -1376,7 +1376,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
+    def _get_expect_domain_values_to_be_between_chart(  # noqa: C901, PLR0912, PLR0915
         expectation_type: str,
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
@@ -3099,7 +3099,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             return default_theme
 
-    def _plot_table_domain_charts(  # noqa: PLR0913
+    def _plot_table_domain_charts(  # noqa: C901, PLR0913
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3716,7 +3716,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ]
 
-    def _create_df_for_charting(  # noqa: PLR0912
+    def _create_df_for_charting(  # noqa: C901, PLR0912
         self,
         metric_name: str,
         attributed_values: List[ParameterNode],

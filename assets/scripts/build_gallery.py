@@ -113,7 +113,7 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
-def get_expectations_info_dict(
+def get_expectations_info_dict(  # noqa: C901
     include_core: bool = True,
     include_contrib: bool = True,
     only_these_expectations: list[str] | None = None,
@@ -660,7 +660,7 @@ def build_gallery(  # noqa: C901 - 17
         )
 
 
-def format_docstring_to_markdown(docstr: str) -> str:
+def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
     """
     Add markdown formatting to a provided docstring
 
