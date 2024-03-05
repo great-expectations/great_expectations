@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         ValidationsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.validator.validator import Validator
 
@@ -90,7 +91,7 @@ class ProjectManager:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.expectations_store
 
@@ -98,7 +99,7 @@ class ProjectManager:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.checkpoint_store
 
@@ -106,7 +107,7 @@ class ProjectManager:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.validations_store
 
@@ -114,15 +115,23 @@ class ProjectManager:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.evaluation_parameter_store
+
+    def get_datasources(self) -> DatasourceDict:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+        return self._project.datasources
 
     def get_validator(self, batch_request: BatchRequest) -> Validator:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.get_validator(batch_request=batch_request)
 
@@ -488,7 +497,7 @@ def get_context(  # noqa: PLR0913
 
     **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
 
-    Cloud configuration can be set up by passing `cloud_*` parameters to `get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
+    Cloud configuration can be set up by passing `cloud_*` parameters to `gx.get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
 
     Relevant parameters
 

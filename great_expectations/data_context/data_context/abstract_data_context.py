@@ -2487,9 +2487,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
+            expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             expectation_suite = ExpectationSuite(**expectations_schema_dict)
             if include_rendered_content:
@@ -3681,7 +3679,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
+            expectation_suite_dict: dict = self.expectations_store.get(key)
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
