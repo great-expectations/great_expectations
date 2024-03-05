@@ -8,6 +8,7 @@ import pathlib
 import random
 import re
 import shutil
+import warnings
 from abc import ABCMeta
 from typing import Any, List, Tuple
 
@@ -244,7 +245,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         base_directory,
         filepath_template=None,
         filepath_prefix=None,
-        filepath_suffix=None,
+        filepath_suffix=".json",
         forbidden_substrings=None,
         platform_specific_separator=True,
         root_directory=None,
@@ -254,6 +255,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         base_public_path=None,
         store_name=None,
     ) -> None:
+        if filepath_suffix and filepath_template:
+            warnings.warn("filepath_suffix is ignored when filepath_template is set")
+            filepath_suffix = None
+
         super().__init__(
             filepath_template=filepath_template,
             filepath_prefix=filepath_prefix,
