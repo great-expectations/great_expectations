@@ -8,7 +8,6 @@ from great_expectations.core.evaluation_parameters import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.render.components import (
     LegacyRendererType,
@@ -102,46 +101,6 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         "column",
         "like_pattern_list",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_not_match_like_pattern_list` it is required that:
-            - 'like_pattern_list' is present in configuration's kwarg
-            - assert 'like_pattern_list' is of type list or dict
-            - if 'like_pattern_list' is list, assert non-empty
-            - if 'like_pattern_list' is dict, assert a key "$PARAMETER" is present
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                  Expectation."
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "like_pattern_list" in configuration.kwargs
-            ), "Must provide like_pattern_list"
-            assert isinstance(
-                configuration.kwargs.get("like_pattern_list"), (list, dict)
-            ), "like_pattern_list must be a list or dict"
-            assert isinstance(configuration.kwargs.get("like_pattern_list"), dict) or (
-                len(configuration.kwargs.get("like_pattern_list")) > 0
-            ), "At least one like_pattern must be supplied in the like_pattern_list."
-            if isinstance(configuration.kwargs.get("like_pattern_list"), dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs.get("like_pattern_list")
-                ), 'Evaluation Parameter dict for like_pattern_list kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

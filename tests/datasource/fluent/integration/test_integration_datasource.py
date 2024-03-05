@@ -479,7 +479,6 @@ def test_success_with_partitioners_from_batch_configs(
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
     )
     validator = Validator(
-        context,
         batch_config=batch_config,
         batch_request_options={"year": 2020, "month": month},
     )
