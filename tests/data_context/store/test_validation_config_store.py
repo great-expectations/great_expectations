@@ -74,7 +74,10 @@ def test_add(request, store_fixture: str, validation_config: ValidationConfig):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     key = StringKey(key="my_validation")
+
+    assert not validation_config.id
     store.add(key=key, value=validation_config)
+    assert validation_config.id
 
     assert store.get(key) == validation_config
 
