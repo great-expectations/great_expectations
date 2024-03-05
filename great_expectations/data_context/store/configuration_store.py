@@ -94,9 +94,6 @@ class ConfigurationStore(Store):
 
         self._overwrite_existing = overwrite_existing
 
-    def remove_key(self, key):
-        return self.store_backend.remove_key(key)
-
     def serialize(self, value):
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
