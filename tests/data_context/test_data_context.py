@@ -304,7 +304,8 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    with pytest.warns(UserWarning):
+        data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {
