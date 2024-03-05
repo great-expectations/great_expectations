@@ -233,20 +233,23 @@ class SiteBuilder:
                 site_section_config.get("module_name")
                 or "great_expectations.render.renderer.site_builder"
             )
-            self.site_section_builders[
-                site_section_name
-            ] = instantiate_class_from_config(
-                config=site_section_config,
-                runtime_environment={
-                    "data_context": data_context,
-                    "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory,
-                    "custom_views_directory": custom_views_directory,
-                    "data_context_id": self.data_context_id,
-                    "show_how_to_buttons": self.show_how_to_buttons,
-                    "cloud_mode": self.cloud_mode,
-                },
-                config_defaults={"name": site_section_name, "module_name": module_name},
+            self.site_section_builders[site_section_name] = (
+                instantiate_class_from_config(
+                    config=site_section_config,
+                    runtime_environment={
+                        "data_context": data_context,
+                        "target_store": self.target_store,
+                        "custom_styles_directory": custom_styles_directory,
+                        "custom_views_directory": custom_views_directory,
+                        "data_context_id": self.data_context_id,
+                        "show_how_to_buttons": self.show_how_to_buttons,
+                        "cloud_mode": self.cloud_mode,
+                    },
+                    config_defaults={
+                        "name": site_section_name,
+                        "module_name": module_name,
+                    },
+                )
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
@@ -419,7 +422,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
+    def build(self, resource_identifiers=None) -> None:  # noqa: C901, PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -451,7 +454,7 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
-                expectation_suite_name = resource_key.expectation_suite_name
+                expectation_suite_name = resource_key.name
                 logger.debug(
                     f"        Rendering expectation suite {expectation_suite_name}"
                 )
@@ -459,9 +462,7 @@ class DefaultSiteSectionBuilder:
                 run_id = resource_key.run_id
                 run_name = run_id.run_name
                 run_time = run_id.run_time
-                expectation_suite_name = (
-                    resource_key.expectation_suite_identifier.expectation_suite_name
-                )
+                expectation_suite_name = resource_key.expectation_suite_identifier.name
                 if self.name == "profiling":
                     logger.debug(
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
@@ -818,7 +819,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             for expectation_suite_key in expectation_suite_site_keys:
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=expectation_suite_key.expectation_suite_name,
+                    expectation_suite_name=expectation_suite_key.name,
                     section_name="expectations",
                 )
 
@@ -888,7 +889,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=profiling_result_key.batch_identifier,
-                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         run_id=profiling_result_key.run_id,
                         validations_store_name=self.source_stores.get("profiling"),
                     )
@@ -898,7 +899,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
-                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         section_name="profiling",
                         batch_identifier=profiling_result_key.batch_identifier,
                         run_id=profiling_result_key.run_id,
@@ -943,7 +944,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=validation_result_key.batch_identifier,
-                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         run_id=validation_result_key.run_id,
                         validations_store_name=self.source_stores.get("validations"),
                     )
@@ -954,7 +955,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
-                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         section_name="validations",
                         batch_identifier=validation_result_key.batch_identifier,
                         run_id=validation_result_key.run_id,

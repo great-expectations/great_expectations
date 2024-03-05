@@ -55,7 +55,7 @@ class MockBlobServiceClient:
 
 
 def _build_spark_abs_datasource(
-    azure_options: Dict[str, Any] | None = None
+    azure_options: Dict[str, Any] | None = None,
 ) -> SparkAzureBlobStorageDatasource:
     azure_client: azure.BlobServiceClient = cast(
         azure.BlobServiceClient, MockBlobServiceClient()

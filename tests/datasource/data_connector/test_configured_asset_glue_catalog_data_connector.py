@@ -614,7 +614,9 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -667,7 +669,9 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -720,7 +724,9 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -777,7 +783,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -828,7 +836,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -884,7 +894,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -943,7 +955,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -1000,7 +1014,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -1057,7 +1073,9 @@ def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
@@ -1113,7 +1131,9 @@ def test_get_batch_data_and_metadata_with_partitions(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",

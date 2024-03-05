@@ -127,12 +127,12 @@ class SerializableDataContext(AbstractDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = project_config.anonymous_usage_statistics
-        context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = self.config.anonymous_usage_statistics
+        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            project_config.anonymous_usage_statistics
+        )
+        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            self.config.anonymous_usage_statistics
+        )
 
         if (
             project_config_usage_stats.enabled is False  # type: ignore[union-attr]
@@ -226,9 +226,7 @@ class SerializableDataContext(AbstractDataContext):
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(
-                uncommitted_dir
-            )
+    - No action was taken.""".format(uncommitted_dir)
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)

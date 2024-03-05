@@ -63,9 +63,9 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_converted_datetime"] = (
         "partition_on_converted_datetime"
-    ] = "partition_on_converted_datetime"
+    )
 
     @property
     @override
@@ -106,9 +106,9 @@ class SqliteTableAsset(SqlTableAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the Sqlite specific partitioner
-        self._partitioner_implementation_map[
-            PartitionerConvertedDatetime
-        ] = SqlitePartitionerConvertedDateTime
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
+            SqlitePartitionerConvertedDateTime
+        )
 
     type: Literal["table"] = "table"
 
@@ -117,9 +117,9 @@ class SqliteQueryAsset(SqlQueryAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the  Sqlite specific partitioner
-        self._partitioner_implementation_map[
-            PartitionerConvertedDatetime
-        ] = SqlitePartitionerConvertedDateTime
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
+            SqlitePartitionerConvertedDateTime
+        )
 
     type: Literal["query"] = "query"
 

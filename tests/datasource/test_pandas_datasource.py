@@ -346,7 +346,7 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
     )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
 

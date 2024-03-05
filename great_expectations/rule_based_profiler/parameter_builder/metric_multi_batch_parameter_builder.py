@@ -201,9 +201,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                     {
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].conditioned_metric_values[
-                            :, 0
-                        ],
+                        ].conditioned_metric_values[:, 0],
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
                         ].conditioned_attributed_metric_values,

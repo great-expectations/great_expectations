@@ -153,7 +153,7 @@ You can use the `result_format` parameter to define the level of detail you want
 
 Run the following code to apply `result_format` to every Expectation in a Suite:
 
-```python name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
+```python title="Python" name="docs/docusaurus/docs/snippets/result_format.py result_format_checkpoint_example"
 ```
 
 Replace `my_checkpoint` and `test_suite` with your own values. You define your Checkpoint configuration below the `runtime_configuration` key. The results are stored in the Validation Result after you run the Checkpoint.

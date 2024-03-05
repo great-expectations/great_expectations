@@ -232,13 +232,16 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert {
-            "loc": ("invalid_keyword_arg",),
-            "msg": "extra fields not permitted",
-            "type": "value_error.extra",
-        } == errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ]
+        assert (
+            {
+                "loc": ("invalid_keyword_arg",),
+                "msg": "extra fields not permitted",
+                "type": "value_error.extra",
+            }
+            == errors_dict[  # the extra keyword error will always be the last error
+                -1  # we don't care about any other errors for this test
+            ]
+        )
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -749,7 +752,7 @@ def datasource_test_connection_error_messages(
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
         PandasFilesystemDatasource, TestConnectionError
-    ]
+    ],
 ):
     (
         pandas_filesystem_datasource,

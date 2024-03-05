@@ -18,7 +18,6 @@ from great_expectations.util import (
     filter_properties_dict,
     hyphen,
     is_ndarray_datetime_dtype,
-    lint_code,
 )
 
 if TYPE_CHECKING:
@@ -131,24 +130,6 @@ def test_nested_update_lists():
         },
         "suite.failure": {"metric.blarg": [""]},
     }
-
-
-@pytest.mark.unit
-def test_linter_raises_error_on_non_string_input():
-    with pytest.raises(TypeError):
-        lint_code(99)
-
-
-@pytest.mark.unit
-def test_linter_changes_dirty_code():
-    code = "foo = [1,2,3]"
-    assert lint_code(code) == "foo = [1, 2, 3]\n"
-
-
-@pytest.mark.unit
-def test_linter_leaves_clean_code():
-    code = "foo = [1, 2, 3]\n"
-    assert lint_code(code) == "foo = [1, 2, 3]\n"
 
 
 @pytest.mark.unit

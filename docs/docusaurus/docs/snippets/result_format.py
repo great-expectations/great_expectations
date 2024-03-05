@@ -210,7 +210,7 @@ expectation_config = ExpectationConfiguration(
 )
 test_suite.add_expectation_configuration(expectation_configuration=expectation_config)
 
-test_suite.expectation_suite_name = "test_suite"
+test_suite.name = "test_suite"
 context.add_or_update_expectation_suite(
     expectation_suite=test_suite,
 )

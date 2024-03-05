@@ -68,15 +68,16 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "metric_name",
-        "single_batch_mode",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "metric_name",
+            "single_batch_mode",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,

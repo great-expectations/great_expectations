@@ -96,9 +96,9 @@ def column_function_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -170,9 +170,9 @@ def column_function_partial(  # noqa: C901, PLR0915
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
@@ -244,9 +244,9 @@ def column_function_partial(  # noqa: C901, PLR0915
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 column = data[column_name]
                 column_function = metric_fn(

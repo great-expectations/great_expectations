@@ -61,9 +61,9 @@ def publish_cmd() -> None:
 def perform_check(suppress_output: bool) -> bool:
     commands = [
         Command(
-            "black",
-            "black --check .",
-            "Please ensure that your files are linted properly with `black .`",
+            "ruff format",
+            "ruff format --check .",
+            "Please ensure that your files are linted properly with `ruff format .`",
         ),
         # TODO: update this (or don't)
         Command(

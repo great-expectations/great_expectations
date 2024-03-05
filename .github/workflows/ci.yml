@@ -17,16 +17,16 @@ on:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
-  workflow_dispatch:  # allows manual triggering with branch picker
+  workflow_dispatch: # allows manual triggering with branch picker
   push:
     # Semantic versioning syntax defined by PyPI: https://pythonpackaging.info/07-Package-Release.html#Versioning-your-code
     tags:
       # Stable release syntax
-      - '[0-9]+.[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+.[0-9]+"
       # Prerelease syntax
-      - '[0-9]+.[0-9]+.[0-9]+a[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+b[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
+      - "[0-9]+.[0-9]+.[0-9]+a[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -95,7 +95,7 @@ jobs:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
-      GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
+      GOOGLE_APPLICATION_CREDENTIALS: "gcp-credentials.json"
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -309,12 +309,11 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
 
-
   marker-tests:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-    # aws
+      # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -509,22 +508,23 @@ jobs:
         run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
 
   build-n-publish:
-    needs: [
-      ci-is-on-main-repo,
-      doc-checks,
-      static-analysis,
-      docs-snippets,
-      unit-tests,
-      cloud-tests,
-      marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
-      py311-min-versions,
-      pydantic-v1,
-      airflow-min-versions,
-      import_gx,
-    ]
+    needs:
+      [
+        ci-is-on-main-repo,
+        doc-checks,
+        static-analysis,
+        docs-snippets,
+        unit-tests,
+        cloud-tests,
+        marker-tests,
+        py38-min-versions,
+        py39-min-versions,
+        py310-min-versions,
+        py311-min-versions,
+        pydantic-v1,
+        airflow-min-versions,
+        import_gx,
+      ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
@@ -538,7 +538,7 @@ jobs:
       - name: Set up Python 3.8
         uses: actions/setup-python@v3
         with:
-          python-version: '3.8'
+          python-version: "3.8"
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Install Twine and Wheel, and prepare packaging
@@ -556,23 +556,24 @@ jobs:
           skip-existing: true # prevent against pushing duplicate versions
 
   notify_on_failure:
-    needs: [
-      ci-is-on-main-repo,
-      doc-checks,
-      static-analysis,
-      docs-snippets,
-      unit-tests,
-      cloud-tests,
-      marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
-      py311-min-versions,
-      pydantic-v1,
-      airflow-min-versions,
-      import_gx,
-      build-n-publish
-    ]
+    needs:
+      [
+        ci-is-on-main-repo,
+        doc-checks,
+        static-analysis,
+        docs-snippets,
+        unit-tests,
+        cloud-tests,
+        marker-tests,
+        py38-min-versions,
+        py39-min-versions,
+        py310-min-versions,
+        py311-min-versions,
+        pydantic-v1,
+        airflow-min-versions,
+        import_gx,
+        build-n-publish,
+      ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:

@@ -153,9 +153,9 @@ class DataAssistantRunner:
             1) obtain "Domain"-level attributes;
             2) split passed-in arguments/directives into "Domain"-level and "variables"-level.
             """
-            rule_based_profiler_domain_type_attributes: List[
-                str
-            ] = self._get_rule_based_profiler_domain_type_attributes()
+            rule_based_profiler_domain_type_attributes: List[str] = (
+                self._get_rule_based_profiler_domain_type_attributes()
+            )
             variables_directives_kwargs: dict = dict(
                 filter(
                     lambda element: element[0]
@@ -174,12 +174,12 @@ class DataAssistantRunner:
             Convert "dict"-typed "variables"-level and "Domain"-level arguments/directives into lists of corresponding
             "Enum" typed objects ("RuntimeEnvironmentVariablesDirectives" and "RuntimeEnvironmentDomainTypeDirectives").
             """
-            variables_directives_list: List[
-                RuntimeEnvironmentVariablesDirectives
-            ] = build_variables_directives(
-                exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
-                rules=self._profiler.rules,
-                **variables_directives_kwargs,
+            variables_directives_list: List[RuntimeEnvironmentVariablesDirectives] = (
+                build_variables_directives(
+                    exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
+                    rules=self._profiler.rules,
+                    **variables_directives_kwargs,
+                )
             )
             domain_type_directives_list: List[
                 RuntimeEnvironmentDomainTypeDirectives
@@ -326,12 +326,12 @@ class DataAssistantRunner:
         property_accessor_method: Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"
         property_accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
         property_value: Any  # default return value of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
-        parameter: Parameter | None  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
+        parameter: (
+            Parameter | None
+        )  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
-            assert (
-                domain_builder
-            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
+            assert domain_builder, "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 """

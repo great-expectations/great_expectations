@@ -67,9 +67,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     expected_available_data_asset_names: Dict[List[str]] = {
         "test_runtime_data_connector": ["asset_a", "asset_b"]
     }
-    available_data_asset_names: Dict[
-        List[str]
-    ] = (
+    available_data_asset_names: Dict[List[str]] = (
         datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_available_data_asset_names()
     )
     assert available_data_asset_names == expected_available_data_asset_names
@@ -97,10 +95,10 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list[0].head().columns) == 11
 
@@ -128,10 +126,10 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
         "batch_spec_passthrough": {"create_temp_table": False},
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list[0].head().columns) == 11
 
@@ -219,10 +217,10 @@ def test_set_data_asset_name_for_runtime_query_data(
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert batch_list[0].batch_definition.data_asset_name == "my_runtime_data_asset"
 
@@ -247,10 +245,10 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
@@ -279,10 +277,10 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset(
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
@@ -311,10 +309,10 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
@@ -339,10 +337,10 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data

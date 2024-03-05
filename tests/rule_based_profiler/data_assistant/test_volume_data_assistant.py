@@ -1344,7 +1344,7 @@ def quentin_expected_expectation_suite(
         expectation_suite_name: str = "my_suite"
 
         expected_expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
+            name=expectation_suite_name,
         )
 
         expectation_configuration: ExpectationConfiguration
@@ -1693,9 +1693,9 @@ def test_volume_data_assistant_result_get_expectation_suite(
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_volume_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_volume_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -2112,9 +2112,9 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     validator: Validator
     data_assistant_result: DataAssistantResult
     validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        data_assistant_result.metrics_by_domain
+    )
 
     batch: Batch
     expected_batch_ids: List[str] = [batch.id for batch in validator.batches.values()]

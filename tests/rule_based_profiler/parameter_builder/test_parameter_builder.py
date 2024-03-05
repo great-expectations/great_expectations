@@ -106,12 +106,12 @@ def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_speci
         runtime_configuration=None,
     )
 
-    all_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    all_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -161,12 +161,12 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
         runtime_configuration=None,
     )
 
-    all_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    all_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -237,12 +237,12 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     "get_fully_qualified_parameter_names()" is used as utility in order to faithfully track actual contents of shared
     memory as ParameterBuilders are executed; otherwise, initial state of shared memory would not be known exactly.
     """
-    dependencies_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    dependencies_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -277,12 +277,12 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    all_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -345,12 +345,12 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    all_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -414,12 +414,12 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     )
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
 
-    dependencies_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    dependencies_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """
@@ -440,12 +440,12 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[
-        str
-    ] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=None,
-        parameters=parameters,
+    all_fully_qualified_parameter_names: List[str] = (
+        get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=None,
+            parameters=parameters,
+        )
     )
 
     """

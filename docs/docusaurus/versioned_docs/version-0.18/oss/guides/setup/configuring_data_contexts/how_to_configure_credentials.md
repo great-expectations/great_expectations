@@ -1,7 +1,6 @@
 ---
 title: Configure credentials
 ---
-import Prerequisites from '../../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
@@ -12,7 +11,9 @@ If your Great Expectations deployment is in an environment without a file system
 
 ## Prerequisites
 
-<Prerequisites></Prerequisites>
+- Permissions to set environment variables
+
+- A Data Context
 
 ## Using Environment Variables
 
@@ -20,12 +21,12 @@ The quickest way to get started is by setting up your credentials as environment
 
 First set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+```bash title="Terminal" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
 These can then be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
 ```
 
 
@@ -47,7 +48,7 @@ A more advanced option is to use the config variables YAML file. YAML files make
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml``:
 
-```yaml name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
 ```
 
 :::note
@@ -59,7 +60,7 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 Then the config variable can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
-```bash name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
 ```
 
 ## Additional Notes

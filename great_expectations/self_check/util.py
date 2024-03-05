@@ -517,7 +517,6 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -1870,15 +1869,15 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include[
-            "pandas"
-        ] = execution_engine_diagnostics.PandasExecutionEngine
-        engines_to_include[
-            "spark"
-        ] = execution_engine_diagnostics.SparkDFExecutionEngine
-        engines_to_include[
-            "sqlalchemy"
-        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        engines_to_include["pandas"] = (
+            execution_engine_diagnostics.PandasExecutionEngine
+        )
+        engines_to_include["spark"] = (
+            execution_engine_diagnostics.SparkDFExecutionEngine
+        )
+        engines_to_include["sqlalchemy"] = (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        )
         if (
             engines_to_include.get("sqlalchemy") is True
             and raise_exceptions_for_backends is False
@@ -2115,7 +2114,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     return parametrized_tests
 
 
-def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
+def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2220,7 +2219,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2412,8 +2411,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     atol=ATOL,
                 ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
             else:
-                assert result == expectationValidationResultSchema.load(
-                    test["output"]
+                assert (
+                    result == expectationValidationResultSchema.load(test["output"])
                 ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
         else:
             assert result == expectationValidationResultSchema.load(
@@ -2444,8 +2443,9 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(result["result"]["observed_value"].keys()) == set(
-                            value.keys()
+                        assert (
+                            set(result["result"]["observed_value"].keys())
+                            == set(value.keys())
                         ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(

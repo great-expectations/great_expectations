@@ -35,14 +35,16 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
     shutil.copy(
-        ge_config_path, os.path.join(root_dir, FileDataContext.GX_YML)  # noqa: PTH118
+        ge_config_path,
+        os.path.join(root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     config_variables_path = file_relative_path(
         __file__,
         "../test_fixtures/config_variables.yml",
     )
     shutil.copy(
-        config_variables_path, os.path.join(root_dir, "uncommitted")  # noqa: PTH118
+        config_variables_path,
+        os.path.join(root_dir, "uncommitted"),  # noqa: PTH118
     )
     return get_context(context_root_dir=root_dir)
 

@@ -44,9 +44,9 @@ MISSING: Final = object()
 
 GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
 
-DUMMY_JWT_TOKEN: Final[
-    str
-] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+DUMMY_JWT_TOKEN: Final[str] = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+)
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
 FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
@@ -486,8 +486,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         exp_suite_list = [
             d["data"]
             for d in exp_suite_list
-            if d["data"]["attributes"]["suite"]["expectation_suite_name"]
-            in queried_names
+            if d["data"]["attributes"]["suite"]["name"] in queried_names
         ]
 
     resp_body = {"data": exp_suite_list}
@@ -526,7 +525,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -575,7 +574,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -864,12 +863,12 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/expectation-suites",
             post_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.PUT,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
             put_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.DELETE,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",

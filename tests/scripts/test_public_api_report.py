@@ -854,9 +854,7 @@ class TestCodeReferenceFilter:
         will not include multiple copies of the same definitions (when not
         accounting for different but equivalent ast definition object instances).
         """
-        observed = (
-            code_reference_filter_with_include_by_file_and_name_already_included.filter_definitions()
-        )
+        observed = code_reference_filter_with_include_by_file_and_name_already_included.filter_definitions()
         # There are two extra (8 vs 6) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 8
@@ -882,9 +880,7 @@ class TestCodeReferenceFilter:
 
         Include overrides exclude.
         """
-        observed = (
-            code_reference_filter_with_include_by_file_and_name_already_excluded.filter_definitions()
-        )
+        observed = code_reference_filter_with_include_by_file_and_name_already_excluded.filter_definitions()
         # There are two extra (4 vs 2) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 4
@@ -907,9 +903,7 @@ class TestCodeReferenceFilter:
         Include overrides exclude. Method that was not included in docs examples
         is still included if manually added.
         """
-        observed = (
-            code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file.filter_definitions()
-        )
+        observed = code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file.filter_definitions()
         assert len(observed) == 1
         assert {d.name for d in observed} == {
             "example_no_usages_in_sample_docs_example_python_file_string",

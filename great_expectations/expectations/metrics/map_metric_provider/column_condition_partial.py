@@ -106,9 +106,9 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -179,9 +179,9 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -266,9 +266,9 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 column = data[column_name]
                 expected_condition = metric_fn(

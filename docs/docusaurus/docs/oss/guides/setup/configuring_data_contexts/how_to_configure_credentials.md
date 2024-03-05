@@ -1,7 +1,6 @@
 ---
 title: Configure credentials
 ---
-import Prerequisites from '../../../../components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '../../../../reference/learn/term_tags/_tag.mdx';
@@ -12,7 +11,9 @@ If your Great Expectations deployment is in an environment without a file system
 
 ## Prerequisites
 
-<Prerequisites></Prerequisites>
+- Permissions to set environment variables
+
+- A Data Context
 
 ## Using Environment Variables
 
@@ -27,7 +28,6 @@ These can then be loaded into the `connection_string` parameter when we are addi
 
 ```python title="Python input" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
 ```
-
 
 ## Using YAML or Secret Manager 
 
