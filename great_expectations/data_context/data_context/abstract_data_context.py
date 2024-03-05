@@ -1714,7 +1714,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
-            suite.name
+            suite.name  # type: ignore[union-attr]
             for suite in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
@@ -4135,8 +4135,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         config_variables_filepath = os.path.join(  # noqa: PTH118
-            self.root_directory,
-            config_variables_filepath,  # type: ignore[arg-type]
+            self.root_directory,  # type: ignore[arg-type]
+            config_variables_filepath,
         )
 
         os.makedirs(  # noqa: PTH103

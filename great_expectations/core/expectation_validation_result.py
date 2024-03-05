@@ -279,8 +279,8 @@ class ExpectationValidationResult(SerializableDictDot):
             if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
         ]
 
-        self.expectation_config.rendered_content = (
-            inline_renderer.replace_or_keep_existing_rendered_content(  # type: ignore[union-attr] # config could be None
+        self.expectation_config.rendered_content = (  # type: ignore[union-attr] # config could be None
+            inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
                 new_rendered_content=prescriptive_rendered_content,
                 failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
@@ -411,9 +411,9 @@ class ExpectationValidationResult(SerializableDictDot):
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: "ExpectationConfigurationSchema",
+        lambda: "ExpectationConfigurationSchema",  # type: ignore[arg-type,return-value]
         required=False,
-        allow_none=True,  # type: ignore[arg-type,return-value]
+        allow_none=True,
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
