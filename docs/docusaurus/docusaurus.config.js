@@ -71,6 +71,7 @@ module.exports = {
     docs: {
       sidebar: {
         autoCollapseCategories: true,
+        hideable: true,
       },
     },
     algolia: {
