@@ -111,7 +111,7 @@ class ValidationConfig(BaseModel):
     name: str
     data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
     suite: ExpectationSuite
-    id: Union[str, None] = None  # TODO: Should be updated when persisted with a store.
+    id: Union[str, None] = None
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
