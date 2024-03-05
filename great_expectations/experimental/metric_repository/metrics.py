@@ -40,6 +40,7 @@ class MetricTypes(str, enum.Enum):
     COLUMN_MAX = "column.max"
     COLUMN_MEDIAN = "column.median"
     COLUMN_MEAN = "column.mean"
+    COLUMN_NULL_COUNT = "column_values.null.count"
 
 
 class MetricRepositoryBaseModel(BaseModel):
