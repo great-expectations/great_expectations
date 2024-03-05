@@ -12,12 +12,12 @@
 #  * User and developer workflows
 
 schedules:
-- cron: 0 8 * * *
-  displayName: Scheduled Runs
-  branches:
-    include:
-    - develop
-  always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
+  - cron: 0 8 * * *
+    displayName: Scheduled Runs
+    branches:
+      include:
+        - develop
+    always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
 
 variables:
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]

@@ -375,7 +375,7 @@ class ActionListValidationOperator(ValidationOperator):
                 )
             else:
                 expectation_suite_identifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                    name=batch._expectation_suite.name
                 )
                 validation_result_id = ValidationResultIdentifier(
                     batch_identifier=batch_identifier,
@@ -700,7 +700,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         if failure_level_run_results:
             failed_data_assets_msg_strings = [
-                validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                validation_result_identifier.expectation_suite_identifier.name
                 + "-"
                 + validation_result_identifier.batch_identifier
                 for validation_result_identifier, run_result in failure_level_run_results.items()
@@ -773,7 +773,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: PLR0912, PLR0913
+    def run(  # noqa: C901, PLR0912, PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -809,7 +809,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=base_expectation_suite_name
+                name=base_expectation_suite_name
                 + self.expectation_suite_name_suffixes[0]
             )
 
@@ -861,7 +861,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     break
 
             warning_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=base_expectation_suite_name
+                name=base_expectation_suite_name
                 + self.expectation_suite_name_suffixes[1]
             )
 

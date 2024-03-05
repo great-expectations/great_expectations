@@ -525,7 +525,7 @@ detected.
 
         return ExactNumericRangeEstimator()
 
-    def _estimate_metric_value_range(  # noqa: PLR0912, PLR0913, PLR0915
+    def _estimate_metric_value_range(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         metric_values: np.ndarray,
         numeric_range_estimator: NumericRangeEstimator,

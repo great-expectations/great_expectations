@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
+def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # noqa: C901
     def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
         # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
         if isinstance(

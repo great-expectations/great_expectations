@@ -116,9 +116,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
 @pytest.mark.filesystem
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(
-            expectation_suite_name=parameterized_expectation_suite_name
-        )
+        ExpectationSuiteIdentifier(name=parameterized_expectation_suite_name)
     ]
 
 
@@ -129,9 +127,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
             parameterized_expectation_suite_name
         )
     )
-    assert (
-        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
-    )
+    assert expectation_suite.name == parameterized_expectation_suite_name
     assert len(expectation_suite.expectations) == 2
 
 
@@ -142,10 +138,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
             "this_data_asset_does_not_exist.default"
         )
     )
-    assert (
-        expectation_suite.expectation_suite_name
-        == "this_data_asset_does_not_exist.default"
-    )
+    assert expectation_suite.name == "this_data_asset_does_not_exist.default"
     assert len(expectation_suite.expectations) == 0
 
 
@@ -496,7 +489,7 @@ def test_data_context_updates_expectation_suite_names(
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
 
-    expectation_suite_name = expectation_suites[0].expectation_suite_name
+    expectation_suite_name = expectation_suites[0].name
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
@@ -508,7 +501,7 @@ def test_data_context_updates_expectation_suite_names(
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
-    assert expectation_suite.expectation_suite_name == expectation_suite_name
+    assert expectation_suite.name == expectation_suite_name
 
     # We will now change the data_asset_name and then save the suite in three ways:
     #   1. Directly using the new name,
@@ -517,7 +510,7 @@ def test_data_context_updates_expectation_suite_names(
 
     # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.
 
-    expectation_suite.expectation_suite_name = "a_new_suite_name"
+    expectation_suite.name = "a_new_suite_name"
 
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
@@ -529,7 +522,7 @@ def test_data_context_updates_expectation_suite_names(
         )
     )
 
-    assert fetched_expectation_suite.expectation_suite_name == "a_new_suite_name"
+    assert fetched_expectation_suite.name == "a_new_suite_name"
 
     #   2. Using a different name that should be overwritten
     data_context_parameterized_expectation_suite.save_expectation_suite(
@@ -543,7 +536,7 @@ def test_data_context_updates_expectation_suite_names(
         )
     )
 
-    assert fetched_expectation_suite.expectation_suite_name == "a_new_new_suite_name"
+    assert fetched_expectation_suite.name == "a_new_new_suite_name"
 
     # Check that the saved name difference is actually persisted on disk
     with open(
@@ -557,10 +550,10 @@ def test_data_context_updates_expectation_suite_names(
         loaded_suite = ExpectationSuite(
             **loaded_suite_dict,
         )
-        assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
+        assert loaded_suite.name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
-    expectation_suite.expectation_suite_name = "a_third_suite_name"
+    expectation_suite.name = "a_third_suite_name"
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite=expectation_suite
     )
@@ -570,7 +563,7 @@ def test_data_context_updates_expectation_suite_names(
             "a_third_suite_name"
         )
     )
-    assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
+    assert fetched_expectation_suite.name == "a_third_suite_name"
 
 
 @pytest.mark.filesystem

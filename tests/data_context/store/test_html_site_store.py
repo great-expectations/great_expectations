@@ -119,7 +119,7 @@ def test_HtmlSiteStore_S3_backend(aws_credentials):
         site_section_name="validations",
         resource_identifier=ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="asset.quarantine",
+                name="asset.quarantine",
             ),
             run_id=RunIdentifier(run_name="20191007T151224.1234Z_prod_100"),
             batch_identifier="1234",
@@ -130,7 +130,7 @@ def test_HtmlSiteStore_S3_backend(aws_credentials):
     ns_2 = SiteSectionIdentifier(
         site_section_name="expectations",
         resource_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
     )
     my_store.set(ns_2, "bbb")

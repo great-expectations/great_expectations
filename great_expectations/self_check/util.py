@@ -2114,7 +2114,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     return parametrized_tests
 
 
-def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
+def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2219,7 +2219,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],

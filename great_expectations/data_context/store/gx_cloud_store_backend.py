@@ -488,14 +488,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             response_json = self._send_get_request_to_api(url=url)
 
-            # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
-            # Once 'expectation_suite_name' is renamed, this can be removed.
-            name_attr: str
-            if resource_type is GXCloudRESTResource.EXPECTATION_SUITE:
-                name_attr = "expectation_suite_name"
-            else:
-                name_attr = "name"
-
             keys = []
             for resource in response_json["data"]:
                 id: str = resource["id"]
@@ -503,7 +495,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 resource_dict: dict = resource.get("attributes", {}).get(
                     attributes_key, {}
                 )
-                resource_name: str = resource_dict.get(name_attr, "")
+                resource_name: str = resource_dict.get("name", "")
 
                 key = (resource_type, id, resource_name)
                 keys.append(key)
