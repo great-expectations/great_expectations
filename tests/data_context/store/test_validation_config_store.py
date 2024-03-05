@@ -74,7 +74,10 @@ def test_add(request, store_fixture: str, validation_config: ValidationConfig):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     key = StringKey(key="my_validation")
+
+    assert not validation_config.id
     store.add(key=key, value=validation_config)
+    assert validation_config.id
 
     assert store.get(key) == validation_config
 
@@ -142,3 +145,103 @@ def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
     key = cloud_backed_store.get_key(name="my_validation")
     assert key.resource_type == GXCloudRESTResource.VALIDATION_CONFIG
     assert key.resource_name == "my_validation"
+
+
+_VALIDATION_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
+_VALIDATION_CONFIG = {
+    "name": "my_validation",
+    "data": {
+        "datasource": {
+            "name": "my_datasource",
+            "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+        "asset": {
+            "name": "my_asset",
+            "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+        "batch_config": {
+            "name": "my_batch_config",
+            "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+        },
+    },
+    "suite": {
+        "name": "my_suite",
+        "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+    },
+}
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": _VALIDATION_ID,
+                    "attributes": {
+                        "validation_config": _VALIDATION_CONFIG,
+                    },
+                }
+            },
+            id="single_validation_config",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": _VALIDATION_ID,
+                        "attributes": {
+                            "validation_config": _VALIDATION_CONFIG,
+                        },
+                    }
+                ]
+            },
+            id="list_with_single_validation_config",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
+    actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+    expected = {**_VALIDATION_CONFIG, "id": _VALIDATION_ID}
+    assert actual == expected
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json, error_substring",
+    [
+        pytest.param(
+            {
+                "data": [],
+            },
+            "Cannot parse empty data",
+            id="empty_list",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": _VALIDATION_ID,
+                        "attributes": {
+                            "validation_config": _VALIDATION_CONFIG,
+                        },
+                    },
+                    {
+                        "id": _VALIDATION_ID,
+                        "attributes": {
+                            "validation_config": _VALIDATION_CONFIG,
+                        },
+                    },
+                ],
+            },
+            "Cannot parse multiple items",
+            id="list_with_multiple_validation_configs",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict_failure(
+    response_json: dict, error_substring: str
+):
+    with pytest.raises(ValueError, match=f"{error_substring}*."):
+        ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
