@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, ClassVar, List, NoReturn, Type, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Final,
+    List,
+    NoReturn,
+    Type,
+    Union,
+    overload,
+)
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
@@ -12,13 +22,19 @@ from great_expectations.datasource.fluent import (
     GxDatasourceWarning,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
     from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.datasource.fluent.interfaces import Batch
+
+
+# Controls which methods should raise an error when called on an InvalidDatasource
+METHOD_SHOULD_RAISE_ERROR: Final[set] = {
+    "get_batch_list_from_batch_request",
+    "add_batch_config",
+}
 
 
 class GxInvalidDatasourceWarning(GxDatasourceWarning):
@@ -177,32 +193,15 @@ class InvalidDatasource(Datasource):
     def __getattribute__(self, attr: str):
         """
         Dynamically raise a TypeError with details of the original config error for
-        any attribute that is not a method or a valid Datasource attribute.
+        any methods and attributes that do not make sense for an InvalidDatasource.
         """
-        fluent_base_attrs: set[str] = {
-            a for a in dir(FluentBaseModel) if not a.startswith("_")
-        }
-        datasource_attrs: set[str] = {
-            a for a in dir(Datasource) if not a.startswith("_")
-        }
-        if attr in fluent_base_attrs:
-            # attrs like __str__, __repr__, yaml, dict, json etc.
-            return super().__getattribute__(attr)
-        if attr in datasource_attrs:
-            overridden_attrs: set[str] = {
-                a
-                for a in self.__class__.__dict__.keys()
-                if not a.startswith("_") and a != "Config"
-            }
-            if attr not in overridden_attrs:
-                # triggers __getattr__ which will raise a TypeError
-                raise AttributeError
+        if attr in METHOD_SHOULD_RAISE_ERROR:
+            raise AttributeError  # this causes __getattr__ to be called
         return super().__getattribute__(attr)
 
     def __getattr__(self, attr: str):
-        """
-        Raise a TypeError with details of the original config error for
-        any attribute that is not a method or valid Datasource attribute.
-        """
         # __getattr__ is only called if the attribute is not found by __getattribute__
+        if attr in ("add_dataframe_asset", "__deepcopy__"):
+            # these methods are part of protocol checks and should return None
+            return None
         return self._raise_type_error()
