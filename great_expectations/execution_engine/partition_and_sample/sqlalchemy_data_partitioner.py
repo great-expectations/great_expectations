@@ -169,14 +169,14 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             )
         )
 
-        query: Union[
-            sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList
-        ] = sa.and_(
-            *[
-                sa.extract(date_part.value, sa.column(column_name))
-                == date_parts_dict[date_part.value]
-                for date_part in date_parts
-            ]
+        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = (
+            sa.and_(
+                *[
+                    sa.extract(date_part.value, sa.column(column_name))
+                    == date_parts_dict[date_part.value]
+                    for date_part in date_parts
+                ]
+            )
         )
 
         return query
@@ -580,9 +580,9 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             selectable, column_name, date_parts
         )
 
-        result: List[
-            sqlalchemy.Row | sqlalchemy.LegacyRow
-        ] = self._execute_partitioned_query(execution_engine, partitioned_query)
+        result: List[sqlalchemy.Row | sqlalchemy.LegacyRow] = (
+            self._execute_partitioned_query(execution_engine, partitioned_query)
+        )
 
         return self._get_params_for_batch_identifiers_from_date_part_partitioner(
             column_name, result, date_parts

@@ -73,9 +73,9 @@ def glue_titanic_catalog():
             "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
         )
 
-    os.environ[
-        "AWS_DEFAULT_REGION"
-    ] = "testing"  # required when connecting to the glue client, even when mocked
+    os.environ["AWS_DEFAULT_REGION"] = (
+        "testing"  # required when connecting to the glue client, even when mocked
+    )
 
     with mock_glue():
         client = boto3.client("glue")

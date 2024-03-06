@@ -59,9 +59,9 @@ if TYPE_CHECKING:
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
-PYTHON_VERSION: Final[
-    Literal["py38", "py39", "py310", "py311"]
-] = f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
+PYTHON_VERSION: Final[Literal["py38", "py39", "py310", "py311"]] = (
+    f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
+)
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
@@ -213,8 +213,7 @@ class TableFactory(Protocol):
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(
@@ -578,7 +577,7 @@ class TestTableIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
@@ -878,7 +877,7 @@ class TestColumnIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,

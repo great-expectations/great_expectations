@@ -3,6 +3,7 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+
 from __future__ import annotations
 
 import json
@@ -239,7 +240,7 @@ class SlackNotificationAction(ValidationAction):
         self.show_failed_expectations = show_failed_expectations
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1248,7 +1249,7 @@ class SNSNotificationAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         sns_topic_arn: The SNS Arn to publish messages to.
-        sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name.
+        sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
     def __init__(
@@ -1289,7 +1290,7 @@ class SNSNotificationAction(ValidationAction):
                     f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
                 )
             else:
-                subject = expectation_suite_identifier.expectation_suite_name
+                subject = expectation_suite_identifier.name
                 logger.info(f"Using expectation_suite_name: {subject}")
         else:
             subject = self.sns_message_subject

@@ -10,7 +10,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: gx_example_db
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "example_user", "-d", "gx_example_db"]
+      test: ["CMD", "pg_isready", "-U", "example_user", "-d", "gx_example_db"]
       interval: 5s
       retries: 5
       start_period: 5s

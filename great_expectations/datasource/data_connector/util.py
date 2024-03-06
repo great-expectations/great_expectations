@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
-def batch_definition_matches_batch_request(  # noqa: PLR0911
+def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
     batch_definition: BatchDefinition,
     batch_request: BatchRequestBase,
 ) -> bool:
@@ -93,12 +93,12 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
-    processed_data_reference: Optional[
-        Tuple[str, IDDict]
-    ] = convert_data_reference_string_to_batch_identifiers_using_regex(
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    processed_data_reference: Optional[Tuple[str, IDDict]] = (
+        convert_data_reference_string_to_batch_identifiers_using_regex(
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
 
     if processed_data_reference is None:

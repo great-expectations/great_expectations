@@ -131,7 +131,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return converted_string
 
-    def _convert_filepath_to_key(self, filepath):  # noqa: PLR0912
+    def _convert_filepath_to_key(self, filepath):  # noqa: C901, PLR0912
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
             return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
@@ -180,7 +180,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             ]
             intermediate_filepath_regex = re.sub(
                 r"{\d+}",
-                lambda m, r=iter(  # noqa: B008 # function-call-in-default-argument
+                lambda m,
+                r=iter(  # noqa: B008 # function-call-in-default-argument
                     tuple_index_list
                 ): next(r),
                 filepath_template,

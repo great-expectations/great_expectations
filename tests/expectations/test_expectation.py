@@ -265,7 +265,10 @@ def test_expectation_configuration_property_recognizes_state_changes():
 def test_unrecognized_expectation_arg_raises_error():
     with pytest.raises(pydantic.ValidationError, match="extra fields not permitted"):
         gxe.ExpectColumnMaxToBeBetween(
-            column="foo", min_value=0, max_value=10, mostyl=0.95  # 'mostly' typo
+            column="foo",
+            min_value=0,
+            max_value=10,
+            mostyl=0.95,  # 'mostly' typo
         )
 
 

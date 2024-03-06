@@ -33,11 +33,12 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     and metric_name as arguments.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "single_batch_mode",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "single_batch_mode",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,

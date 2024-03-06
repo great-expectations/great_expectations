@@ -22,13 +22,13 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 
 stores:
-# Stores are configurable places to store things like Expectations, Validations
-# Data Docs, and more. These are for advanced users only - most users can simply
-# leave this section alone.
-#
-# Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, etc.
+  # Stores are configurable places to store things like Expectations, Validations
+  # Data Docs, and more. These are for advanced users only - most users can simply
+  # leave this section alone.
+  #
+  # Three stores are required: expectations, validations, and
+  # evaluation_parameters, and must exist with a valid store entry. Additional
+  # stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -53,7 +53,7 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
-# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml my_query_store">
+  # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml my_query_store">
   my_query_store:
     class_name: SqlAlchemyQueryStore
     credentials: ${my_query_store_creds}
@@ -62,7 +62,7 @@ stores:
       unique_passenger_counts: SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;
       max_passenger_counts:
         query: SELECT max(passenger_count) FROM postgres_taxi_data;
-        return_type: scalar  # return_type can be either "scalar" or "list" or omitted
+        return_type: scalar # return_type can be either "scalar" or "list" or omitted
 # </snippet>
 
 expectations_store_name: expectations_store

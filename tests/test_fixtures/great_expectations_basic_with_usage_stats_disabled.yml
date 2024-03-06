@@ -18,9 +18,7 @@ datasources:
           sep:
           engine: python
 
-
 config_variables_file_path: uncommitted/config_variables.yml
-
 
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store

@@ -595,7 +595,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(  # noqa: PLR0912, PLR0915
+def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """
@@ -692,7 +692,7 @@ def _execute_integration_test(  # noqa: PLR0912, PLR0915
         os.chdir(workdir)
 
 
-def _check_for_skipped_tests(  # noqa: PLR0912
+def _check_for_skipped_tests(  # noqa: C901, PLR0912
     pytest_args,
     integration_test_fixture,
 ) -> None:

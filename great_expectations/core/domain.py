@@ -57,7 +57,7 @@ class DomainKwargs(SerializableDotDict):
 
 class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
-    def __init__(
+    def __init__(  # noqa: C901
         self,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
@@ -215,7 +215,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
 
 def deep_convert_properties_iterable_to_domain_kwargs(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, DomainKwargs]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_domain_kwargs(

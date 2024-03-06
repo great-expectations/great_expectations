@@ -472,9 +472,9 @@ class AssetConfigSchema(Schema):
                     and pyspark.types
                     and isinstance(schema, pyspark.types.StructType)
                 ):
-                    data["batch_spec_passthrough"]["reader_options"][
-                        "schema"
-                    ] = schema.jsonValue()
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
+                        schema.jsonValue()
+                    )
         return data
 
     # noinspection PyUnusedLocal
@@ -955,14 +955,14 @@ continue.
                     and pyspark.types
                     and isinstance(schema, pyspark.types.StructType)
                 ):
-                    data["batch_spec_passthrough"]["reader_options"][
-                        "schema"
-                    ] = schema.jsonValue()
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
+                        schema.jsonValue()
+                    )
         return data
 
 
 class ExecutionEngineConfig(DictDot):
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         class_name,
         module_name=None,
@@ -2043,7 +2043,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
@@ -2306,7 +2306,7 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    def __init__(  # noqa: PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
