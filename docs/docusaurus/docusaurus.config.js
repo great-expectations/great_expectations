@@ -25,15 +25,6 @@ module.exports = {
         id: 'GTM-K63L45F', // GTM Container ID
       },
     ],
-    [
-      'posthog-docusaurus',
-      {
-        apiKey: process.env.POSTHOG_API_KEY,
-        enableInDevelopment: true
-        // for more information on how to set up this value go to
-        // https://greatexpectations.atlassian.net/wiki/spaces/DVRL/pages/956334083/Manage+the+feedback+survey
-      },
-    ],
   ],
 
   scripts: [
@@ -42,6 +33,9 @@ module.exports = {
       async: true,
       defer: true,
     },
+    {
+      src: '/scripts/init-posthog.js'
+    }
   ],
 
   themeConfig: {
