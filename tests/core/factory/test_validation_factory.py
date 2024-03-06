@@ -6,6 +6,15 @@ from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_factory import ValidationFactory
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store.validation_config_store import (
     ValidationConfigStore,
 )
@@ -119,7 +128,7 @@ def test_validation_factory_delete_uses_store_remove_key(
 
 
 @pytest.mark.unit
-def test_validation_factory_delete_raises_for_missing_checkpoint(
+def test_validation_factory_delete_raises_for_missing_validation(
     validation_config: ValidationConfig,
 ):
     # Arrange
@@ -140,68 +149,88 @@ def test_validation_factory_delete_raises_for_missing_checkpoint(
 
 
 @pytest.mark.filesystem
-def test_validation_factory_is_initialized_with_context_filesystem(empty_data_context):
+def test_validation_factory_is_initialized_with_context_filesystem(
+    empty_data_context: FileDataContext,
+):
     assert isinstance(empty_data_context.validations, ValidationFactory)
 
 
 @pytest.mark.cloud
-def test_validation_factory_is_initialized_with_context_cloud(empty_cloud_data_context):
+def test_validation_factory_is_initialized_with_context_cloud(
+    empty_cloud_data_context: CloudDataContext,
+):
     assert isinstance(empty_cloud_data_context.validations, ValidationFactory)
 
 
-# @pytest.mark.filesystem
-# def test_checkpoint_factory_add_success_filesystem(empty_data_context):
-#     _test_checkpoint_factory_add_success(empty_data_context)
+@pytest.mark.filesystem
+def test_validation_factory_add_success_filesystem(
+    empty_data_context: FileDataContext, validation_config: ValidationConfig
+):
+    _test_validation_factory_add_success(
+        context=empty_data_context, validation_config=validation_config
+    )
 
 
-# @pytest.mark.cloud
-# def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
-#     _test_checkpoint_factory_add_success(empty_cloud_context_fluent)
+@pytest.mark.cloud
+def test_validation_factory_add_success_cloud(
+    empty_cloud_context_fluent: CloudDataContext, validation_config: ValidationConfig
+):
+    _test_validation_factory_add_success(
+        context=empty_cloud_context_fluent, validation_config=validation_config
+    )
 
 
-# def _test_checkpoint_factory_add_success(context):
-#     # Arrange
-#     name = "test-checkpoint"
-#     checkpoint = Checkpoint(name=name)
-#     with pytest.raises(
-#         DataContextError, match=f"Checkpoint with name {name} was not found."
-#     ):
-#         context.checkpoints.get(name)
+def _test_validation_factory_add_success(
+    context: AbstractDataContext, validation_config: ValidationConfig
+):
+    # Arrange
+    name = validation_config.name
+    with pytest.raises(
+        DataContextError, match=f"ValidationConfig with name {name} was not found."
+    ):
+        context.validations.get(name)
 
-#     # Act
-#     created_checkpoint = context.checkpoints.add(checkpoint=checkpoint)
+    # Act
+    created_validation = context.validations.add(validation=validation_config)
 
-#     # Assert
-#     _assert_checkpoint_equality(
-#         actual=created_checkpoint, expected=context.checkpoints.get(name=name)
-#     )
-
-
-# @pytest.mark.filesystem
-# def test_checkpoint_factory_delete_success_filesystem(empty_data_context):
-#     _test_checkpoint_factory_delete_success(empty_data_context)
+    # Assert
+    assert created_validation == context.validations.get(name=name)
 
 
-# @pytest.mark.cloud
-# def test_checkpoint_factory_delete_success_cloud(empty_cloud_context_fluent):
-#     _test_checkpoint_factory_delete_success(empty_cloud_context_fluent)
+@pytest.mark.filesystem
+def test_validation_factory_delete_success_filesystem(
+    empty_data_context: FileDataContext, validation_config: ValidationConfig
+):
+    _test_validation_factory_delete_success(
+        context=empty_data_context, validation_config=validation_config
+    )
 
 
-# def _test_checkpoint_factory_delete_success(context):
-#     # Arrange
-#     name = "test-checkpoint"
-#     checkpoint = Checkpoint(name=name)
-#     checkpoint = context.checkpoints.add(checkpoint=checkpoint)
+@pytest.mark.cloud
+def test_validation_factory_delete_success_cloud(
+    empty_cloud_context_fluent: CloudDataContext, validation_config: ValidationConfig
+):
+    _test_validation_factory_delete_success(
+        context=empty_cloud_context_fluent, validation_config=validation_config
+    )
 
-#     # Act
-#     context.checkpoints.delete(checkpoint)
 
-#     # Assert
-#     with pytest.raises(
-#         DataContextError,
-#         match=f"Checkpoint with name {name} was not found.",
-#     ):
-#         context.checkpoints.get(name)
+def _test_validation_factory_delete_success(
+    context: AbstractDataContext, validation_config: ValidationConfig
+):
+    # Arrange
+    name = validation_config.name
+    validation_config = context.validations.add(validation=validation_config)
+
+    # Act
+    context.validations.delete(validation_config)
+
+    # Assert
+    with pytest.raises(
+        DataContextError,
+        match=f"ValidationConfig with name {name} was not found.",
+    ):
+        context.validations.get(name)
 
 
 class TestValidationFactoryAnalytics:
