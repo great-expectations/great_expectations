@@ -181,14 +181,12 @@ def multi_part_name_parameter_container():
         {
             "mean_values": ParameterNode(
                 {
-                    # fmt: off
                     "value": [
                         2.3, 9.8, 42.3, 8.1, 38.5, 53.7, 71.43, 16.34, 49.43, 74.35,
                         51.98, 46.42, 20.01, 69.44, 65.32, 8.83, 55.79, 82.2, 36.93, 83.78,
                         31.13, 76.93, 67.67, 25.12, 58.04, 79.78, 90.91, 15.26, 61.65, 78.78,
                         12.99,
                     ],
-                    # fmt: on
                     "details": ParameterNode(
                         {
                             "confidence": "low",
@@ -197,7 +195,7 @@ def multi_part_name_parameter_container():
                 }
             ),
         }
-    )
+    )  # fmt: skip
     daily_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
         {
             "mean_values": ParameterNode(
@@ -224,7 +222,6 @@ def multi_part_name_parameter_container():
         {
             "mean_values": ParameterNode(
                 {
-                    # fmt: off
                     "value": [
                         { "sunday": 71.43, "monday": 74.35, "tuesday": 42.3, "wednesday": 42.3, "thursday": 82.2, "friday": 78.78, "saturday": 91.39, },
                         { "sunday": 81.43, "monday": 84.35, "tuesday": 52.3, "wednesday": 43.3, "thursday": 22.2, "friday": 98.78, "saturday": 81.39, },
@@ -258,7 +255,6 @@ def multi_part_name_parameter_container():
                         { "sunday": 71.53, "monday": 73.35, "tuesday": 43.32, "wednesday": 42.23, "thursday": 82.32, "friday": 78.18, "saturday": 91.49, },
                         { "sunday": 71.53, "monday": 74.25, "tuesday": 52.3, "wednesday": 52.3, "thursday": 81.23, "friday": 78.78, "saturday": 78.39, },
                     ],
-                    # fmt: on
                     "details": ParameterNode(
                         {
                             "confidence": "high",
@@ -267,7 +263,7 @@ def multi_part_name_parameter_container():
                 }
             ),
         }
-    )
+    )  # fmt: skip
     parameter_multi_part_name_parameter_node: ParameterNode = ParameterNode(
         {
             "date_strings": date_strings_parameter_node,
@@ -337,7 +333,6 @@ def parameters_with_different_depth_level_values():
         "$parameter.daily_taxi_fairs.mean_values.details": {
             "confidence": "medium",
         },
-        # fmt: off
         "$parameter.weekly_taxi_fairs.mean_values.value": [
             { "sunday": 71.43, "monday": 74.35, "tuesday": 42.3, "wednesday": 42.3, "thursday": 82.2, "friday": 78.78, "saturday": 91.39, },
             { "sunday": 81.43, "monday": 84.35, "tuesday": 52.3, "wednesday": 43.3, "thursday": 22.2, "friday": 98.78, "saturday": 81.39, },
@@ -371,11 +366,10 @@ def parameters_with_different_depth_level_values():
             { "sunday": 71.53, "monday": 73.35, "tuesday": 43.32, "wednesday": 42.23, "thursday": 82.32, "friday": 78.18, "saturday": 91.49, },
             { "sunday": 71.53, "monday": 74.25, "tuesday": 52.3, "wednesday": 52.3, "thursday": 81.23, "friday": 78.78, "saturday": 78.39, },
         ],
-        # fmt: on
         "$parameter.weekly_taxi_fairs.mean_values.details": {
             "confidence": "high",
         },
-    }
+    }  # fmt: skip
 
     return parameter_values
 

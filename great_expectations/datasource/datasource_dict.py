@@ -31,11 +31,9 @@ logger = logging.getLogger(__name__)
 @runtime_checkable
 class SupportsInMemoryDataAssets(Protocol):
     @property
-    def assets(self) -> list[DataAsset]:
-        ...
+    def assets(self) -> list[DataAsset]: ...
 
-    def add_dataframe_asset(self, **kwargs) -> DataAsset:
-        ...
+    def add_dataframe_asset(self, **kwargs) -> DataAsset: ...
 
 
 class DatasourceDict(UserDict):
@@ -97,12 +95,10 @@ class DatasourceDict(UserDict):
         return datasources
 
     @overload
-    def set_datasource(self, name: str, ds: T) -> T:
-        ...
+    def set_datasource(self, name: str, ds: T) -> T: ...
 
     @overload
-    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
-        ...
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
 
     def set_datasource(
         self, name: str, ds: FluentDatasource | BaseDatasource
@@ -236,12 +232,10 @@ class CacheableDatasourceDict(DatasourceDict):
             return False
 
     @overload
-    def set_datasource(self, name: str, ds: T) -> T:
-        ...
+    def set_datasource(self, name: str, ds: T) -> T: ...
 
     @overload
-    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
-        ...
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
 
     @override
     def set_datasource(

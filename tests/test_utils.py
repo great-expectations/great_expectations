@@ -113,7 +113,8 @@ def create_files_in_directory(
 
     for subdirectory in subdirectories:
         os.makedirs(  # noqa: PTH103
-            os.path.join(directory, subdirectory), exist_ok=True  # noqa: PTH118
+            os.path.join(directory, subdirectory),  # noqa: PTH118
+            exist_ok=True,
         )
 
     for file_name in file_name_list:

@@ -145,9 +145,9 @@ class SparkPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SparkPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
-    ] = "partition_on_year_and_month_and_day"
+    )
 
     @property
     @override
@@ -206,9 +206,9 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
 class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal[
+    method_name: Literal["partition_on_divided_integer"] = (
         "partition_on_divided_integer"
-    ] = "partition_on_divided_integer"
+    )
 
     @property
     @override
@@ -281,9 +281,9 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SparkPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal[
+    method_name: Literal["partition_on_multi_column_values"] = (
         "partition_on_multi_column_values"
-    ] = "partition_on_multi_column_values"
+    )
 
     @property
     def columns(self):

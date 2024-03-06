@@ -600,14 +600,14 @@ class DataAssistantResult(SerializableDictDot):
             self.expectation_configurations or []
         )
 
-        table_domain_charts: List[
-            Union[alt.Chart, alt.LayerChart]
-        ] = self._plot_table_domain_charts(
-            expectation_configurations=expectation_configurations,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
+        table_domain_charts: List[Union[alt.Chart, alt.LayerChart]] = (
+            self._plot_table_domain_charts(
+                expectation_configurations=expectation_configurations,
+                plot_mode=plot_mode,
+                sequential=sequential,
+                include_column_names=include_column_names,
+                exclude_column_names=exclude_column_names,
+            )
         )
         display_charts.extend(table_domain_charts)
         return_charts.extend(table_domain_charts)
@@ -792,7 +792,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_chart_layer_title(
-        layer: Union[alt.Chart, alt.LayerChart]
+        layer: Union[alt.Chart, alt.LayerChart],
     ) -> Optional[str]:
         """Recursively searches through the chart layers for a title and returns one if it exists."""
         chart_title: Optional[str] = None
@@ -2671,9 +2671,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
             )
-            assert (
-                expectation_kwarg_plot_component.name
-            ), f"Expectation kwargs name must be set: {expectation_kwarg_plot_component}"
+            assert expectation_kwarg_plot_component.name, f"Expectation kwargs name must be set: {expectation_kwarg_plot_component}"
             expectation_kwargs_initial_dropdown_state.append(
                 expectation_kwarg_plot_component.name,
             )
@@ -3109,9 +3107,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Union[alt.Chart, alt.LayerChart]]:
-        metric_expectation_map: dict[
-            tuple[str, ...], str
-        ] = self._get_metric_expectation_map()
+        metric_expectation_map: dict[tuple[str, ...], str] = (
+            self._get_metric_expectation_map()
+        )
 
         table_based_expectations: List[str] = [
             expectation
@@ -3135,9 +3133,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         table_domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
-        attributed_metrics: Dict[
-            str, List[ParameterNode]
-        ] = attributed_metrics_by_table_domain[table_domain]
+        attributed_metrics: Dict[str, List[ParameterNode]] = (
+            attributed_metrics_by_table_domain[table_domain]
+        )
 
         table_based_metric_names: Set[tuple[str, ...]] = set()
         for metrics in metric_expectation_map.keys():
@@ -3217,9 +3215,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        metric_expectation_map: Dict[
-            tuple[str, ...], str
-        ] = self._get_metric_expectation_map()
+        metric_expectation_map: Dict[tuple[str, ...], str] = (
+            self._get_metric_expectation_map()
+        )
 
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
@@ -3227,9 +3225,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             expectation_configurations, include_column_names, exclude_column_names
         )
 
-        attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
-        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]] = (
+            self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
+        )
 
         attributed_metrics_by_column_domain: Dict[
             Domain, Dict[str, List[ParameterNode]]
@@ -3304,9 +3302,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
     ) -> Dict[str, List[ExpectationConfiguration]]:
-        metric_expectation_map: Dict[
-            tuple[str, ...], str
-        ] = self._get_metric_expectation_map()
+        metric_expectation_map: Dict[tuple[str, ...], str] = (
+            self._get_metric_expectation_map()
+        )
 
         column_based_expectations: Set[str] = {
             expectation
@@ -3381,9 +3379,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             filtered_attributed_metrics[domain] = {}
             for metric_name in metric_names:
                 if metric_name in attributed_metric_values.keys():
-                    filtered_attributed_metrics[domain][
-                        metric_name
-                    ] = attributed_metric_values[metric_name]
+                    filtered_attributed_metrics[domain][metric_name] = (
+                        attributed_metric_values[metric_name]
+                    )
             if filtered_attributed_metrics[domain] == {}:
                 filtered_attributed_metrics.pop(domain)
 
@@ -3398,10 +3396,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
+        sanitized_metric_names: Set[str] = (
+            self._get_sanitized_metric_names_from_metric_names(
+                metric_names=metric_names
+            )
         )
 
         nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
@@ -3410,10 +3408,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_altair_type(
-            altair_type=AltairDataTypes.QUANTITATIVE
+        quantitative_metrics: Set[str] = (
+            self._get_sanitized_metric_names_from_altair_type(
+                altair_type=AltairDataTypes.QUANTITATIVE
+            )
         )
         temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
@@ -3540,14 +3538,14 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[alt.Chart]:
-        metric_expectation_map: Dict[
-            tuple[str, ...], str
-        ] = self._get_metric_expectation_map()
+        metric_expectation_map: Dict[tuple[str, ...], str] = (
+            self._get_metric_expectation_map()
+        )
 
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
+        sanitized_metric_names: Set[str] = (
+            self._get_sanitized_metric_names_from_metric_names(
+                metric_names=metric_names
+            )
         )
 
         expectation_configuration: ExpectationConfiguration
@@ -3610,10 +3608,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        sanitized_metric_names: Set[
-            str
-        ] = DataAssistantResult._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
+        sanitized_metric_names: Set[str] = (
+            DataAssistantResult._get_sanitized_metric_names_from_metric_names(
+                metric_names=metric_names
+            )
         )
 
         nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
@@ -3622,10 +3620,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_altair_type(
-            altair_type=AltairDataTypes.QUANTITATIVE
+        quantitative_metrics: Set[str] = (
+            self._get_sanitized_metric_names_from_altair_type(
+                altair_type=AltairDataTypes.QUANTITATIVE
+            )
         )
         temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
@@ -3838,10 +3836,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
+        sanitized_metric_names: Set[str] = (
+            self._get_sanitized_metric_names_from_metric_names(
+                metric_names=metric_names
+            )
         )
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
@@ -3854,9 +3852,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
         for metric_domain in metric_domains:
-            attributed_values_by_metric_name: Dict[
-                str, List[ParameterNode]
-            ] = attributed_metrics_by_domain[metric_domain]
+            attributed_values_by_metric_name: Dict[str, List[ParameterNode]] = (
+                attributed_metrics_by_domain[metric_domain]
+            )
             column_name = metric_domain.domain_kwargs.column
 
             metric_domain_expectation_configuration: Optional[
@@ -3901,10 +3899,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
+        sanitized_metric_names: Set[str] = (
+            self._get_sanitized_metric_names_from_metric_names(
+                metric_names=metric_names
+            )
         )
 
         metric_df: pd.DataFrame
@@ -4024,12 +4022,12 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self, metric_domain_type: MetricDomainTypes
     ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, List[ParameterNode]]
-        ] = dict(
-            filter(
-                lambda element: element[0].domain_type == metric_domain_type,
-                self._get_attributed_metrics_by_domain().items(),
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]] = (
+            dict(
+                filter(
+                    lambda element: element[0].domain_type == metric_domain_type,
+                    self._get_attributed_metrics_by_domain().items(),
+                )
             )
         )
         return attributed_metrics_by_domain

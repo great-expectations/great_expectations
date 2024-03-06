@@ -48,7 +48,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   :::
 
-2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#get-an-expectation), or a pre-existing Expectation from your code.
+2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
   
   :::note
 
@@ -64,7 +64,7 @@ validation_result = batch.validate(expectation)
 
 4. (Optional) [Modify the Expectation](#modify-an-expectation) and test it again.
  
-5. (Optional) [Add the Expectation to an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#add-expectations-to-an-expectation-suite).
+5. (Optional) [Add the Expectation to an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#add-expectations-to-an-expectation-suite).
    
   :::caution 
 
@@ -74,7 +74,7 @@ validation_result = batch.validate(expectation)
 
 ## Modify an Expectation
 
-1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/expectation_suites/manage_expectation_suites.md#get-an-expectation), or a pre-existing Expectation from your code.  
+1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  
 
   This example uses an Expectation that was newly created in an Expectation Suite:
 

@@ -68,9 +68,9 @@ class FilesystemDataConnector(FilePathDataConnector):
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
-        self._data_context_root_directory: Optional[
-            pathlib.Path
-        ] = data_context_root_directory
+        self._data_context_root_directory: Optional[pathlib.Path] = (
+            data_context_root_directory
+        )
 
         super().__init__(
             datasource_name=datasource_name,

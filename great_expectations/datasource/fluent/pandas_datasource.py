@@ -112,8 +112,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
     @override
     def get_batch_request_options_keys(
@@ -662,8 +661,7 @@ class PandasDatasource(_PandasDatasource):
         return ds_dict
 
     @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
+    def test_connection(self, test_assets: bool = True) -> None: ...
 
     @staticmethod
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:
@@ -1780,17 +1778,35 @@ class PandasDatasource(_PandasDatasource):
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
-    add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_clipboard.__signature__ = _merge_signatures(read_clipboard, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_clipboard_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_clipboard_asset, ClipboardAsset, exclude={"type"}
+    )
+    read_clipboard.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_clipboard, ClipboardAsset, exclude={"type"}
+    )
+    add_csv_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_csv_asset, CSVAsset, exclude={"type"}
+    )
     read_csv.__signature__ = _merge_signatures(read_csv, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_excel.__signature__ = _merge_signatures(read_excel, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_feather.__signature__ = _merge_signatures(read_feather, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_fwf_asset.__signature__ = _merge_signatures(add_fwf_asset, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_excel_asset, ExcelAsset, exclude={"type"}
+    )
+    read_excel.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_excel, ExcelAsset, exclude={"type"}
+    )
+    add_feather_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_feather_asset, FeatherAsset, exclude={"type"}
+    )
+    read_feather.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_feather, FeatherAsset, exclude={"type"}
+    )
+    add_fwf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_fwf_asset, FWFAsset, exclude={"type"}
+    )
     read_fwf.__signature__ = _merge_signatures(read_fwf, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_gbq_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_gbq_asset, GBQAsset, exclude={"type"}
+    )
     read_gbq.__signature__ = _merge_signatures(read_gbq, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_hdf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_hdf_asset, HDFAsset, exclude={"type"}

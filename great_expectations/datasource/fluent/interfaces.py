@@ -763,7 +763,7 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[Sorter, str, dict]]] = None
+        order_by: Optional[List[Union[Sorter, str, dict]]] = None,
     ) -> List[Sorter]:
         order_by_sorters: list[Sorter] = []
         if order_by:
@@ -1015,12 +1015,12 @@ class Batch:
         self._validator.result_format = ResultFormat(result_format)
 
     @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult:
-        ...
+    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
-        ...
+    def validate(
+        self, expect: ExpectationSuite
+    ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(

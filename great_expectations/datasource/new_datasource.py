@@ -162,10 +162,10 @@ class BaseDatasource:
             batch_request.data_connector_name
         ]
 
-        batch_definition_list: List[
-            BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
+        batch_definition_list: List[BatchDefinition] = (
+            data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
         if isinstance(batch_request, RuntimeBatchRequest):
@@ -283,9 +283,9 @@ class BaseDatasource:
 
         for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            available_data_asset_names[data_connector_name] = (
+                data_connector.get_available_data_asset_names()
+            )
 
         return available_data_asset_names
 
@@ -322,9 +322,9 @@ class BaseDatasource:
 
         for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
-            available_data_asset_names_and_types[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names_and_types()
+            available_data_asset_names_and_types[data_connector_name] = (
+                data_connector.get_available_data_asset_names_and_types()
+            )
 
         return available_data_asset_names_and_types
 

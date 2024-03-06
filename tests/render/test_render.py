@@ -402,9 +402,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -437,9 +435,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

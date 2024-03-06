@@ -8,6 +8,7 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
 import logging
@@ -69,6 +70,7 @@ def sort(  # noqa: PLR0913
     if not isort:
         cmds = [
             "ruff",
+            "check",
             path,
             "--select I",
             "--diff" if check else "--fix",
@@ -107,7 +109,7 @@ def fmt(  # noqa: PLR0913
     if sort_:
         sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
-    cmds = ["black", path]
+    cmds = ["ruff", "format", path]
     if check:
         cmds.append("--check")
     if exclude:
@@ -132,12 +134,12 @@ def lint(  # noqa: PLR0913
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run formatter (black) and linter (ruff)"""
+    """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
@@ -1097,8 +1099,7 @@ def service(
             cmds = []
 
             if (
-                service_name == "mercury"
-                and os.environ.get("CI") != "true"  # noqa: TID251
+                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [

@@ -162,13 +162,16 @@ Metrics could be used to make inferences, but they'd never provide comparably co
 )
 @pytest.mark.unit
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
-    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
-        metric_diagnostics_list=[],
-        registered_metrics={},
-    ) == ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=False,
-        SqlAlchemyExecutionEngine=False,
-        SparkDFExecutionEngine=False,
+    assert (
+        ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+            metric_diagnostics_list=[],
+            registered_metrics={},
+        )
+        == ExpectationExecutionEngineDiagnostics(
+            PandasExecutionEngine=False,
+            SqlAlchemyExecutionEngine=False,
+            SparkDFExecutionEngine=False,
+        )
     )
 
 
@@ -190,13 +193,16 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
     registered_metrics = {
         "colum_values.something": {"providers": ["PandasExecutionEngine"]}
     }
-    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
-        metric_diagnostics_list=metrics_diagnostics_list,
-        registered_metrics=registered_metrics,
-    ) == ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=False,
-        SqlAlchemyExecutionEngine=False,
-        SparkDFExecutionEngine=False,
+    assert (
+        ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+            metric_diagnostics_list=metrics_diagnostics_list,
+            registered_metrics=registered_metrics,
+        )
+        == ExpectationExecutionEngineDiagnostics(
+            PandasExecutionEngine=False,
+            SqlAlchemyExecutionEngine=False,
+            SparkDFExecutionEngine=False,
+        )
     )
 
 

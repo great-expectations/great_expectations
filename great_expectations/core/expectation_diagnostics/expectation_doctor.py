@@ -148,18 +148,18 @@ class ExpectationDoctor:
             self._get_description_diagnostics()
         )
 
-        _expectation_config: Optional[
-            ExpectationConfiguration
-        ] = self._get_expectation_configuration_from_examples(examples)
+        _expectation_config: Optional[ExpectationConfiguration] = (
+            self._get_expectation_configuration_from_examples(examples)
+        )
         if not _expectation_config:
             _error(
                 f"Was NOT able to get Expectation configuration for {self._expectation.expectation_type}. "
                 "Is there at least one sample test where 'success' is True?"
             )
-        metric_diagnostics_list: List[
-            ExpectationMetricDiagnostics
-        ] = self._get_metric_diagnostics_list(
-            expectation_config=_expectation_config,
+        metric_diagnostics_list: List[ExpectationMetricDiagnostics] = (
+            self._get_metric_diagnostics_list(
+                expectation_config=_expectation_config,
+            )
         )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
@@ -190,16 +190,16 @@ class ExpectationDoctor:
             context=context,
         )
 
-        backend_test_result_counts: List[
-            ExpectationBackendTestResultCounts
-        ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts] = (
+            ExpectationDiagnostics._get_backends_from_test_results(test_results)
+        )
 
-        renderers: List[
-            ExpectationRendererDiagnostics
-        ] = self._get_renderer_diagnostics(
-            expectation_type=description_diagnostics.snake_name,
-            test_diagnostics=test_results,
-            registered_renderers=_registered_renderers,  # type: ignore[arg-type]
+        renderers: List[ExpectationRendererDiagnostics] = (
+            self._get_renderer_diagnostics(
+                expectation_type=description_diagnostics.snake_name,
+                test_diagnostics=test_results,
+                registered_renderers=_registered_renderers,  # type: ignore[arg-type]
+            )
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -446,9 +446,9 @@ class ExpectationDoctor:
                             copied_test["only_for"].extend(top_level_only_for)
                     if top_level_suppress_test_for:
                         if "suppress_test_for" not in copied_test:
-                            copied_test[
-                                "suppress_test_for"
-                            ] = top_level_suppress_test_for
+                            copied_test["suppress_test_for"] = (
+                                top_level_suppress_test_for
+                            )
                         else:
                             copied_test["suppress_test_for"].extend(
                                 top_level_suppress_test_for
