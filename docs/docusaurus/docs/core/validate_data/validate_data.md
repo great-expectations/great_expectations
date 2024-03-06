@@ -24,7 +24,7 @@ import InProgress from '../_core_components/_in_progress.md';
     topIcon 
     label="Manage Checkpoints"
     description="Use Checkpoints to validate Expectation Suites against Batches of data."
-    to="/core/validate_data/manage_checkpoints.md" 
+    to="/core/validate_data/manage_checkpoints" 
     icon="/img/expectation_icon.svg" 
   />
   
