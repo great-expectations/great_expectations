@@ -1,4 +1,5 @@
 """Rendering utility"""
+
 from __future__ import annotations
 
 import copy
@@ -287,7 +288,7 @@ def build_count_table(
     return header_row, table_rows
 
 
-def build_count_and_index_table(
+def build_count_and_index_table(  # noqa: C901
     partial_unexpected_counts: list[dict],
     unexpected_index_list: list[dict],
     unexpected_count: int,

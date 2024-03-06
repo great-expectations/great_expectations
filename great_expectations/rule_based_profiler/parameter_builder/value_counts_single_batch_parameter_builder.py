@@ -35,18 +35,19 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute value counts using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
-        "column_value_counts_metric_single_batch_parameter_builder_config",
-        "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricSingleBatchParameterBuilder.exclude_field_names
+        | {
+            "column_value_counts_metric_single_batch_parameter_builder_config",
+            "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
+            "metric_name",
+            "metric_domain_kwargs",
+            "metric_value_kwargs",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(
         self,

@@ -85,9 +85,9 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -172,9 +172,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -237,9 +237,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = (
+                    accessor_domain_kwargs["column"]
+                )
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(

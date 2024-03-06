@@ -87,14 +87,14 @@ def validator(
 ) -> Iterator[Validator]:
     validator: Validator = context.get_validator(
         batch_request=batch_request,
-        expectation_suite_name=expectation_suite.expectation_suite_name,
+        expectation_suite_name=expectation_suite.name,
     )
     validator.head()
     yield validator
     validator.save_expectation_suite()
     expectation_suite = validator.get_expectation_suite()
     _ = context.suites.get(
-        name=expectation_suite.expectation_suite_name,
+        name=expectation_suite.name,
     )
 
 
@@ -104,18 +104,16 @@ def checkpoint(
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
-    checkpoint_name = (
-        f"{batch_request.data_asset_name} | {expectation_suite.expectation_suite_name}"
-    )
+    checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
     _ = context.add_checkpoint(
         name=checkpoint_name,
         validations=[
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             },
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             },
         ],
@@ -124,7 +122,7 @@ def checkpoint(
         name=checkpoint_name,
         validations=[
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             }
         ],
@@ -161,8 +159,7 @@ class TableFactory(Protocol):
         gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema_name: str | None = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(scope="module")

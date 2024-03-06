@@ -57,7 +57,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
 def test_data_asset_expectation_suite():
     asset = DataAsset()
     default_suite = ExpectationSuite(
-        expectation_suite_name="default",
+        name="default",
         data_asset_type="DataAsset",
         meta={"great_expectations_version": ge_version},
         expectations=[],

@@ -3,6 +3,7 @@ Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow
     found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 """
+
 from __future__ import annotations
 
 import os
@@ -442,5 +443,5 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
     )
 
     # Save the expectation suite or else it doesn't show up in the data docs.
-    suite.expectation_suite_name = suite_name
+    suite.name = suite_name
     context.add_or_update_expectation_suite(expectation_suite=suite)

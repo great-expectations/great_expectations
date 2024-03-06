@@ -58,7 +58,7 @@ def mock_get_all_suites_json(
                     "rendered_data_doc_id": None,
                     "suite": {
                         "data_asset_type": None,
-                        "expectation_suite_name": suite_1.name,
+                        "name": suite_1.name,
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
@@ -86,7 +86,7 @@ def mock_get_all_suites_json(
                     "rendered_data_doc_id": None,
                     "suite": {
                         "data_asset_type": None,
-                        "expectation_suite_name": suite_2.name,
+                        "name": suite_2.name,
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
@@ -144,7 +144,7 @@ def mocked_get_response(
                         "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                         "suite": {
                             "data_asset_type": None,
-                            "expectation_suite_name": "my_mock_suite",
+                            "name": "my_mock_suite",
                             "expectations": [
                                 {
                                     "expectation_type": "expect_column_to_exist",
@@ -196,7 +196,7 @@ def mocked_get_by_name_response(
                             "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                             "suite": {
                                 "data_asset_type": None,
-                                "expectation_suite_name": "my_mock_suite",
+                                "name": "my_mock_suite",
                                 "expectations": [
                                     {
                                         "expectation_type": "expect_column_to_exist",
@@ -495,7 +495,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
     expected_suite_json = {
         "data_asset_type": None,
-        "expectation_suite_name": suite_name,
+        "name": suite_name,
         "expectations": [],
         "id": suite_id,
     }

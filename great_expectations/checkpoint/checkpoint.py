@@ -89,9 +89,9 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
-    DEFAULT_ACTION_LIST: ClassVar[
-        Sequence[ActionDict]
-    ] = ActionDicts.DEFAULT_ACTION_LIST
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
+        ActionDicts.DEFAULT_ACTION_LIST
+    )
 
     def __init__(
         self,
@@ -351,9 +351,7 @@ class BaseCheckpoint(ConfigPeer):
                 "include_rendered_content"
             )
             if include_rendered_content is None:
-                include_rendered_content = (
-                    context._determine_if_expectation_validation_result_include_rendered_content()
-                )
+                include_rendered_content = context._determine_if_expectation_validation_result_include_rendered_content()
 
             validator: Validator = self._validator or context.get_validator(
                 batch_request=batch_request,

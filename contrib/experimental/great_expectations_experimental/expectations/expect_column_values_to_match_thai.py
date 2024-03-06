@@ -4,7 +4,6 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
 """
 
-
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
 )
@@ -21,7 +20,7 @@ class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
 
     # These values will be used to configure the metric created by your expectation
     regex_camel_name = "RegexName"
-    regex = "[\u0E00-\u0E7F]+"
+    regex = "[\u0e00-\u0e7f]+"
     semantic_type_name_plural = None
 
     # These examples will be shown in the public gallery.

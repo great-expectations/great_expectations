@@ -123,7 +123,7 @@ def test_run_validation_operator_raises_error_if_no_matching_validation_operator
 def test_validation_operator_evaluation_parameters(
     validation_operators_data_context, parameterized_expectation_suite
 ):
-    parameterized_expectation_suite.expectation_suite_name = "param_suite"
+    parameterized_expectation_suite.name = "param_suite"
     validation_operators_data_context.add_expectation_suite(
         expectation_suite=parameterized_expectation_suite
     )
@@ -144,7 +144,7 @@ def test_validation_operator_evaluation_parameters(
     )
     assert res["success"] is True
 
-    parameterized_expectation_suite.expectation_suite_name = "param_suite.failure"
+    parameterized_expectation_suite.name = "param_suite.failure"
     validation_operators_data_context.add_expectation_suite(
         expectation_suite=parameterized_expectation_suite
     )
@@ -260,9 +260,9 @@ def test_action_list_operator(validation_operators_data_context):
         ][0]
     )
 
-    first_validation_result = data_context.stores[  # noqa: F841
-        "validation_result_store"
-    ].get(validation_result_store_keys[0])
+    first_validation_result = data_context.stores["validation_result_store"].get(  # noqa: F841
+        validation_result_store_keys[0]
+    )
     assert (
         data_context.stores["validation_result_store"]
         .get(validation_result_store_keys[0])
@@ -300,9 +300,6 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     assert (
         len(validations_keys) == 2
     )  # we should have run two suites even though there was only one batch
-    suite_names = [
-        key.expectation_suite_identifier.expectation_suite_name
-        for key in validations_keys
-    ]
+    suite_names = [key.expectation_suite_identifier.name for key in validations_keys]
     assert "f1.warning" in suite_names
     assert "f1.failure" in suite_names

@@ -327,9 +327,9 @@ def test_cacheable_datasource_dict___setitem___with_block_datasource(
     assert store.set_count == 0
 
     # non-FDS use both store and cache
-    empty_cacheable_datasource_dict[
-        pandas_block_datasource.name
-    ] = pandas_block_datasource
+    empty_cacheable_datasource_dict[pandas_block_datasource.name] = (
+        pandas_block_datasource
+    )
     assert store.set_count == 1
 
 

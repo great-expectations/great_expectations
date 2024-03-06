@@ -5,7 +5,7 @@ services:
     image: postgres:13.7
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
-    command: [ "postgres", "-c", "log_statement=none" ]
+    command: ["postgres", "-c", "log_statement=none"]
     environment:
       POSTGRES_DB: mercury
       POSTGRES_USER: postgres

@@ -4,7 +4,6 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-
 import simple_icd_10 as icd
 
 from great_expectations.execution_engine import PandasExecutionEngine

@@ -120,19 +120,19 @@ class _FilePathDataAsset(DataAsset):
     _test_connection_error_message: str = pydantic.PrivateAttr(
         "Could not connect to your asset"
     )
-    _partitioner_implementation_map: dict[
-        type[Partitioner], type[SparkPartitioner]
-    ] = pydantic.PrivateAttr(
-        default={
-            PartitionerYear: SparkPartitionerYear,
-            PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
-            PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
-            PartitionerColumnValue: SparkPartitionerColumnValue,
-            PartitionerDatetimePart: SparkPartitionerDatetimePart,
-            PartitionerDividedInteger: SparkPartitionerDividedInteger,
-            PartitionerModInteger: SparkPartitionerModInteger,
-            PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
-        }
+    _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
+        pydantic.PrivateAttr(
+            default={
+                PartitionerYear: SparkPartitionerYear,
+                PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
+                PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
+                PartitionerColumnValue: SparkPartitionerColumnValue,
+                PartitionerDatetimePart: SparkPartitionerDatetimePart,
+                PartitionerDividedInteger: SparkPartitionerDividedInteger,
+                PartitionerModInteger: SparkPartitionerModInteger,
+                PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
+            }
+        )
     )
 
     class Config:
@@ -407,10 +407,10 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_spec_options["partitioner_method"] = spark_partitioner.method_name
             partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
-            partitioner_kwargs[
-                "batch_identifiers"
-            ] = spark_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
-                batch_request.options
+            partitioner_kwargs["batch_identifiers"] = (
+                spark_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    batch_request.options
+                )
             )
             batch_spec_options["partitioner_kwargs"] = partitioner_kwargs
 

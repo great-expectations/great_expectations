@@ -1,6 +1,6 @@
 {
   "data_asset_type": null,
-  "expectation_suite_name": "visitors_exp",
+  "name": "visitors_exp",
   "expectations": [
     {
       "expectation_type": "expect_column_values_to_be_in_set",

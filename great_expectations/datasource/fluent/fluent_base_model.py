@@ -90,8 +90,7 @@ class FluentBaseModel(pydantic.BaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def yaml(
@@ -107,8 +106,7 @@ class FluentBaseModel(pydantic.BaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> pathlib.Path:
-        ...
+    ) -> pathlib.Path: ...
 
     def yaml(  # noqa: PLR0913
         self,

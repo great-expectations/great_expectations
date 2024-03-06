@@ -195,9 +195,9 @@ class ValidationResultsPageRenderer(Renderer):
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
             if meta_properties_to_render is not None:
-                evr.expectation_config.kwargs[
-                    "meta_properties_to_render"
-                ] = meta_properties_to_render
+                evr.expectation_config.kwargs["meta_properties_to_render"] = (
+                    meta_properties_to_render
+                )
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:
@@ -679,7 +679,7 @@ class ExpectationSuitePageRenderer(Renderer):
             columns,
             ordered_columns,
         ) = expectations.get_grouped_and_ordered_expectations_by_column()
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
 
         overview_content_blocks = [
             self._render_expectation_suite_header(),
@@ -764,7 +764,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     @classmethod
     def _render_expectation_suite_info(cls, expectations):
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
         # TODO: Deprecate "great_expectations.__version__"
         ge_version = expectations.meta.get(
             "great_expectations_version"
@@ -914,7 +914,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):  # noqa: PLR0912
+    def render(self, validation_results):  # noqa: C901, PLR0912
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:

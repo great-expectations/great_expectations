@@ -113,7 +113,7 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
-def get_expectations_info_dict(
+def get_expectations_info_dict(  # noqa: C901
     include_core: bool = True,
     include_contrib: bool = True,
     only_these_expectations: list[str] | None = None,
@@ -439,19 +439,19 @@ def combine_backend_results(
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
             )
-            expectations_info[expectation_name][
-                "maturity_checklist"
-            ] = maturity_checklist_object.to_dict()
-            expectations_info[expectation_name][
-                "coverage_score"
-            ] = Expectation._get_coverage_score(
-                backend_test_result_counts=backend_test_result_counts_object,
-                execution_engines=diagnostic_object.execution_engines,
+            expectations_info[expectation_name]["maturity_checklist"] = (
+                maturity_checklist_object.to_dict()
             )
-            expectations_info[expectation_name]["library_metadata"][
-                "maturity"
-            ] = Expectation._get_final_maturity_level(
-                maturity_checklist=maturity_checklist_object
+            expectations_info[expectation_name]["coverage_score"] = (
+                Expectation._get_coverage_score(
+                    backend_test_result_counts=backend_test_result_counts_object,
+                    execution_engines=diagnostic_object.execution_engines,
+                )
+            )
+            expectations_info[expectation_name]["library_metadata"]["maturity"] = (
+                Expectation._get_final_maturity_level(
+                    maturity_checklist=maturity_checklist_object
+                )
             )
 
         for bad_key_name in bad_key_names:
@@ -660,7 +660,7 @@ def build_gallery(  # noqa: C901 - 17
         )
 
 
-def format_docstring_to_markdown(docstr: str) -> str:
+def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
     """
     Add markdown formatting to a provided docstring
 

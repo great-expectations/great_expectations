@@ -42,7 +42,7 @@ def test_batch_validate_expectation(pandas_setup: Tuple[AbstractDataContext, Bat
 
 @pytest.mark.filesystem
 def test_batch_validate_expectation_suite(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
+    pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     context, batch = pandas_setup
 
@@ -62,7 +62,7 @@ def test_batch_validate_expectation_suite(
 
 @pytest.mark.filesystem
 def test_batch_validate_with_updated_expectation(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
+    pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     _, batch = pandas_setup
 
@@ -82,7 +82,7 @@ def test_batch_validate_with_updated_expectation(
 
 @pytest.mark.filesystem
 def test_batch_validate_expectation_suite_with_updated_expectation(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
+    pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     context, batch = pandas_setup
 
@@ -110,7 +110,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
 
 @pytest.mark.filesystem
 def test_batch_validate_change_expectation_result_format(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
+    pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     _, batch = pandas_setup
 
@@ -130,7 +130,7 @@ def test_batch_validate_change_expectation_result_format(
 
 @pytest.mark.filesystem
 def test_batch_validate_change_expectation_suite_result_format(
-    pandas_setup: Tuple[AbstractDataContext, Batch]
+    pandas_setup: Tuple[AbstractDataContext, Batch],
 ):
     context, batch = pandas_setup
 
