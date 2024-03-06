@@ -208,7 +208,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   ```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py get expectation to edit"
   ```
 
-5. [Modify the Expectation](/core/expectations/manage_expectations.md#modify-an-expectation):
+5. [Modify the Expectation](/core/create_expectations/expectations/manage_expectations.md#modify-an-expectation-in-an-expecatation-suite):
 
   ```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py edit attribute"
   ```
@@ -221,7 +221,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
   :::info
   `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.  If the Expectation is not part of an Expectation Suite, `expectation.save()` will fail.
   
-  You can [test changes to an Expectation](/core/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
+  You can [test changes to an Expectation](/core/create_expectations/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
   :::
 
 <details>
