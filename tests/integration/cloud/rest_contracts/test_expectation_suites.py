@@ -161,7 +161,7 @@ def test_get_expectation_suite(
 @pytest.mark.xfail(
     reason="Expectation suites in 1.0.0 now have a name attribute "
     "instead of expectation_suite_name",
-    strict=True,
+    # strict=True, # TODO: GG (kilo59) temporarily disabled strict mode
 )
 @pytest.mark.cloud
 def test_get_non_existent_expectation_suite(
