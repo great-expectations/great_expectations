@@ -10,6 +10,11 @@ from great_expectations.datasource.fluent.interfaces import (
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.invalid_datasource import (
+    InvalidAsset,
+    InvalidDatasource,
+    GxInvalidDatasourceWarning,
+)
 
 # Now that DataAsset has both been defined, we need to
 # provide it to the BatchConfig pydantic model.
