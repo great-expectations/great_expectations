@@ -104,42 +104,42 @@ core_tests = [
     # Expectation Suite example scripts
     IntegrationTestFixture(
         name="add_expectations_to_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="create_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/create_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/create_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="delete_an_expectation_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="delete_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/delete_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="edit_a_single_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/edit_a_single_expectation.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_a_single_expectation.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="edit_all_expectations_in_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="get_a_specific_expectation_from_an_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="get_an_existing_expectation_suite.py",
-        user_flow_script="docs/docusaurus/docs/core/expectation_suites/_examples/get_an_existing_expectation_suite.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/get_an_existing_expectation_suite.py",
         backend_dependencies=[],
     ),
 ]
