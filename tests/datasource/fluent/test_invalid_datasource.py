@@ -70,11 +70,13 @@ class TestPublicMethodsAreOverridden:
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
-        print(f"InvalidAsset.__dict__ attributes\n{pf(InvalidAsset.__dict__)}")
-        invalid_da_public_attributes = [
-            m for m in InvalidAsset.__dict__.keys() if not m.startswith("_")
-        ]
-        assert base_ds_method_name in invalid_da_public_attributes
+        for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
+            method = getattr(InvalidAsset, base_ds_method_name, None)
+            assert (
+                method
+            ), f"Expected {base_ds_method_name} to be defined on InvalidAsset"
+            with pytest.raises(TypeError):
+                method()
 
 
 @pytest.fixture(scope="module")
@@ -197,6 +199,25 @@ class TestInvalidDatasource:
             invalid_ds.get_batch_list_from_batch_request({})  # type: ignore[arg-type] # expect error
         assert invalid_ds.config_error == err.value.__cause__
 
+    def test_random_attribute_access_raises_informative_error(
+        self, invalid_ds_cfg: dict, invalid_datasource_factory: InvalidDSFactory
+    ):
+        invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
+        with pytest.raises(TypeError) as err:
+            _ = invalid_ds.random_attribute
+        assert invalid_ds.config_error == err.value.__cause__
+
+    @pytest.mark.parametrize("attr_name", ["name", "id", "type", "assets"])
+    def test_base_datasource_attribute_does_not_error(
+        self,
+        invalid_ds_cfg: dict,
+        invalid_datasource_factory: InvalidDSFactory,
+        attr_name: str,
+    ):
+        invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
+        attr_value = getattr(invalid_ds, attr_name)
+        print(attr_name, attr_value)
+
     def test_get_asset_raises_warning(
         self,
         invalid_ds_cfg: dict,
@@ -254,14 +275,35 @@ class TestInvalidDatasource:
                 ), f"Expected asset `{field}` to be ignored"
 
 
+@pytest.fixture
+def rand_invalid_datasource_with_assets(
+    invalid_datasource_factory: InvalidDSFactory,
+) -> InvalidDatasource:
+    random_ds_type = random.choice(
+        [t for t in _SourceFactories.type_lookup.type_names()]
+    )
+    invalid_ds = invalid_datasource_factory(
+        {
+            "name": "my invalid ds",
+            "type": random_ds_type,
+            "connection_string": "postgresql+psycopg2://postgres:@localhost/test_database",
+            "assets": [
+                {"name": "definitely_invalid", "type": "NOT_A_VALID_TYPE"},
+                {"name": "maybe_valid", "type": "table", "table_name": "my_table"},
+                {"name": "maybe_valid_2", "type": "csv", "sep": "|"},
+                {"name": "missing type"},
+            ],
+        }
+    )
+    return invalid_ds
+
+
 class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
         random_ds_type = random.choice(
-            # pandas datasource assets will fail with a key error due to the lack of a discriminator
-            # TODO: 2024-02-22 - (GG-kilo59) # will followup to handle this case
-            [t for t in _SourceFactories.type_lookup.type_names() if "pandas" not in t]
+            [t for t in _SourceFactories.type_lookup.type_names()]
         )
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
@@ -284,6 +326,17 @@ class TestInvalidDataAsset:
             with pytest.raises(TestConnectionError) as conn_err:
                 invalid_asset.test_connection()
                 assert invalid_datasource.config_error == conn_err.value.__cause__
+
+    @pytest.mark.parametrize("attr_name", ["name", "id", "type"])
+    def test_base_data_asset_attribute_does_not_error(
+        self, rand_invalid_datasource_with_assets: InvalidDatasource, attr_name: str
+    ):
+        assert (
+            rand_invalid_datasource_with_assets.assets
+        ), "Expected assets to be present"
+        for asset in rand_invalid_datasource_with_assets.assets:
+            value = getattr(asset, attr_name)
+            print(attr_name, value)
 
 
 if __name__ == "__main__":

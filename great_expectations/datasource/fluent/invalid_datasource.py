@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent import (
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
@@ -162,7 +163,7 @@ class InvalidDatasource(Datasource):
         )
         return super().get_asset(asset_name)
 
-    def _raise_type_error(self) -> NoReturn:
+    def _raise_type_error(self, *args, **kwargs) -> NoReturn:
         """
         Raise a TypeError indicating that the Datasource is invalid.
         Raise from the original config error that caused the Datasource to be invalid.
@@ -172,17 +173,36 @@ class InvalidDatasource(Datasource):
         )
         raise error from self.config_error
 
-    def __getattr__(self, attr: str):
+    @override
+    def __getattribute__(self, attr: str):
         """
         Dynamically raise a TypeError with details of the original config error for
         any attribute that is not a method or a valid Datasource attribute.
         """
+        fluent_base_attrs: set[str] = {
+            a for a in dir(FluentBaseModel) if not a.startswith("_")
+        }
         datasource_attrs: set[str] = {
             a for a in dir(Datasource) if not a.startswith("_")
         }
-        datasource_attrs.remove("get_asset")
+        if attr in fluent_base_attrs:
+            # attrs like __str__, __repr__, yaml, dict, json etc.
+            return super().__getattribute__(attr)
         if attr in datasource_attrs:
-            self._raise_type_error()
+            overridden_attrs: set[str] = {
+                a
+                for a in self.__class__.__dict__.keys()
+                if not a.startswith("_") and a != "Config"
+            }
+            if attr not in overridden_attrs:
+                # triggers __getattr__ which will raise a TypeError
+                raise AttributeError
+        return super().__getattribute__(attr)
 
-        # normal Attribute error if attr does not exist
-        super().__getattribute__(attr)
+    def __getattr__(self, attr: str):
+        """
+        Raise a TypeError with details of the original config error for
+        any attribute that is not a method or valid Datasource attribute.
+        """
+        # __getattr__ is only called if the attribute is not found by __getattribute__
+        return self._raise_type_error()
