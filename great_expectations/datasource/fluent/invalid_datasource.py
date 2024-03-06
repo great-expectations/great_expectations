@@ -15,7 +15,6 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch_config import BatchConfig
     from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.datasource.fluent.interfaces import Batch
@@ -163,12 +162,27 @@ class InvalidDatasource(Datasource):
         )
         return super().get_asset(asset_name)
 
-    @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> NoReturn:
-        raise TypeError(f"{self.name} Datasource is invalid") from self.config_error
+    def _raise_type_error(self) -> NoReturn:
+        """
+        Raise a TypeError indicating that the Datasource is invalid.
+        Raise from the original config error that caused the Datasource to be invalid.
+        """
+        error = TypeError(
+            f"{self.name} Datasource is configuration is invalid and cannot be used. Please fix the error and try again"
+        )
+        raise error from self.config_error
 
-    @override
-    def add_batch_config(self, batch_config: BatchConfig) -> NoReturn:
-        raise TypeError(f"{self.name} Datasource is invalid") from self.config_error
+    def __getattr__(self, attr: str):
+        """
+        Dynamically raise a TypeError with details of the original config error for
+        any attribute that is not a method or a valid Datasource attribute.
+        """
+        datasource_attrs: set[str] = {
+            a for a in dir(Datasource) if not a.startswith("_")
+        }
+        datasource_attrs.remove("get_asset")
+        if attr in datasource_attrs:
+            self._raise_type_error()
+
+        # normal Attribute error if attr does not exist
+        super().__getattribute__(attr)

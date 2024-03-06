@@ -59,13 +59,13 @@ class TestPublicMethodsAreOverridden:
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
-        print(
-            f"InvalidDatasource.__dict__ attributes\n{pf(InvalidDatasource.__dict__)}"
-        )
-        invalid_ds_public_attributes = [
-            m for m in InvalidDatasource.__dict__.keys() if not m.startswith("_")
-        ]
-        assert base_ds_method_name in invalid_ds_public_attributes
+        for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
+            method = getattr(InvalidDatasource, base_ds_method_name, None)
+            assert (
+                method
+            ), f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
+            with pytest.raises(TypeError):
+                method()
 
     @pytest.mark.parametrize("base_ds_method_name", DATA_ASSET_PUBLIC_METHODS)
     def test_data_asset(self, base_ds_method_name: str):
