@@ -19,8 +19,8 @@ You will almost always instantiate a Data Context as the first step when using G
 
 ## Prerequisites
 
-- [A valid Python environment](./set_up_a_python_environment.mdx).
-- [The Great Expectations Python library installed](./install_gx.md).
+- [A valid Python environment](/core/installation_and_setup/set_up_a_python_environment.mdx).
+- [The Great Expectations Python library installed](/core/installation_and_setup/install_gx.md).
 
 ## Quickstart with a Data Context
 
