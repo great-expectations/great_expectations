@@ -93,12 +93,12 @@ core_tests = [
     # Expectation example scripts
     IntegrationTestFixture(
         name="create_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/expectations/_examples/create_an_expectation.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/create_an_expectation.py",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
         name="edit_an_expectation.py",
-        user_flow_script="docs/docusaurus/docs/core/expectations/_examples/edit_an_expectation.py",
+        user_flow_script="docs/docusaurus/docs/core/create_expectations/expectations/_examples/edit_an_expectation.py",
         backend_dependencies=[],
     ),
     # Expectation Suite example scripts
