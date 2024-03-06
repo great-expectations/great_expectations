@@ -34,21 +34,27 @@ from great_expectations.validator.v1_validator import (
 )
 
 
-class TestValidationRun:
-    @pytest.fixture
-    def validation_config(self) -> ValidationConfig:
-        context = gx.get_context(mode="ephemeral")
-        batch_config = (
-            context.sources.add_pandas("my_datasource")
-            .add_csv_asset("csv_asset", "taxi.csv")  # type: ignore
-            .add_batch_config("my_batch_config")
-        )
-        return ValidationConfig(
-            name="my_validation",
-            data=batch_config,
-            suite=ExpectationSuite(name="my_suite"),
-        )
+@pytest.fixture
+def ephemeral_context():
+    return gx.get_context(mode="ephemeral")
 
+
+@pytest.fixture
+def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConfig:
+    context = ephemeral_context
+    batch_config = (
+        context.sources.add_pandas("my_datasource")
+        .add_csv_asset("csv_asset", "taxi.csv")  # type: ignore
+        .add_batch_config("my_batch_config")
+    )
+    return ValidationConfig(
+        name="my_validation",
+        data=batch_config,
+        suite=ExpectationSuite(name="my_suite"),
+    )
+
+
+class TestValidationRun:
     @pytest.fixture
     def mock_validator(self):
         """Set up our ProjectManager to return a mock Validator"""
@@ -491,3 +497,28 @@ class TestValidationConfigSerialization:
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationConfig.parse_obj(serialized_config)
+
+
+@pytest.mark.unit
+def test_validation_config_save_success(
+    ephemeral_context: EphemeralDataContext, validation_config: ValidationConfig
+):
+    context = ephemeral_context
+    vc = validation_config
+
+    vc = context.validations.add(vc)
+
+    other_suite = ExpectationSuite(name="my_other_suite")
+    vc.suite = other_suite
+    vc.save()
+
+    assert vc.suite == other_suite
+    assert context.validations.get(vc.name).suite == other_suite
+
+
+@pytest.mark.unit
+def test_validation_config_save_failure(validation_config: ValidationConfig):
+    with pytest.raises(
+        ValueError, match="ValidationConfig must be added to a store before saving."
+    ):
+        validation_config.save()

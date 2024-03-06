@@ -222,3 +222,12 @@ class ValidationConfig(BaseModel):
             result_format=result_format,
         )
         return validator.validate_expectation_suite(self.suite, evaluation_parameters)
+
+    def save(self) -> None:
+        store = project_manager.get_validation_config_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        try:
+            store.update(key=key, value=self)
+        except gx_exceptions.StoreBackendError:
+            raise ValueError("ValidationConfig must be added to a store before saving.")

@@ -105,6 +105,14 @@ class ProjectManager:
             )
         return self._project.validations_store
 
+    def get_validation_config_store(self) -> ValidationsStore:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+        return self._project.validation_config_store
+
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
         if not self._project:
             raise RuntimeError(
