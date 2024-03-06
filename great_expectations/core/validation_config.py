@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -14,6 +14,14 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.validator.v1_validator import ResultFormat, Validator
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.datasource.new_datasource import (
     BaseDatasource as LegacyDatasource,
@@ -201,5 +209,16 @@ class ValidationConfig(BaseModel):
         return batch_config
 
     @public_api
-    def run(self):
-        raise NotImplementedError
+    def run(
+        self,
+        *,
+        batch_config_options: Optional[BatchRequestOptions] = None,
+        evaluation_parameters: Optional[dict[str, Any]] = None,
+        result_format: ResultFormat = ResultFormat.SUMMARY,
+    ) -> ExpectationSuiteValidationResult:
+        validator = Validator(
+            batch_config=self.data,
+            batch_request_options=batch_config_options,
+            result_format=result_format,
+        )
+        return validator.validate_expectation_suite(self.suite, evaluation_parameters)
