@@ -1,5 +1,5 @@
 ---
-title: "Manage Batches"
+title: Manage Validators
 ---
 
 import InProgress from '../_core_components/_in_progress.md';

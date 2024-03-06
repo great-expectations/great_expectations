@@ -582,6 +582,23 @@ module.exports = {
         // },
       ]
     },
+    {
+      type: 'category',
+      label: 'Validate data',
+      link: {type: 'doc', id: 'core/validate_data/validate_data'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/validate_data/manage_validators',
+          label: 'Manage Validators'
+        },
+        {
+          type: 'doc',
+          id: 'core/validate_data/manage_checkpoints',
+          label: 'Manage Checkpoints'
+        },
+      ]
+    }
     <!--TODO: Validate Data -->
       <!-- TODO: Manage Validators -->
       <!-- TODO: Manage Checkpoints -->
