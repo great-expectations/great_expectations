@@ -283,6 +283,9 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
+    def remove_key(self, key):
+        return self.store_backend.remove_key(key)
+
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
         # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
