@@ -349,7 +349,8 @@ class TestValidationFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.validation_factory.submit_event",
+            autospec=True,
         ) as mock_submit:
             context.validations.delete(validation=validation_config)
 
