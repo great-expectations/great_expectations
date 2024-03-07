@@ -6,7 +6,7 @@ description: Create and manage Expectation Suites in GX Cloud.
 
 Expectation Suites contain multiple Expectations for a single Data Asset. Like Expectations, they can help you better understand your data and help you improve data quality. A default Expectation Suite is created when you create a Data Asset. 
 
-[//]: # (TODO: To learn more about Expectation Suites, see [Expectation Suites](/reference/learn/terms/expectation_suite.md).)
+<!-- [//]: # (TODO: To learn more about Expectation Suites, see Expectation Suites.) -->
 
 ## Prerequisites
 

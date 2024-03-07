@@ -116,7 +116,7 @@ For more information, see [Manage Checkpoints](/core/validate_data/manage_checkp
 
 The Validation Results returned by GX tell you how your data corresponds to what you expected of it. You can view this information in the Data Docs that are configured in your Data Context. Evaluating your Validation Results helps you identify issues with your data. If the Validation Results show that your data meets your Expectations, you can confidently use it.
 
-[//]: # (TODO: For more information, see [Validation Result](/reference/learn/terms/validation_result.md).)
+<!-- [//]: # (TODO: For more information, see Validation Result.) -->
 
 ### Actions
 
