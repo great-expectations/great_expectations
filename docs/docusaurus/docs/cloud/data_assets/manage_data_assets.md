@@ -55,7 +55,7 @@ Define the data you want GX Cloud to access within Snowflake.
 
     - **Username**: Enter the username you use to access Snowflake.
 
-    - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (oraganizationname-accountname) or a legacy account locator (accountname.region) separated by a period. The legacy account locator value must include the geographical region. For example, `us-east-1`. 
+    - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or a legacy account locator (`accountname.region`) separated by a period. The legacy account locator value must include the geographical region. For example, `us-east-1`. 
     
         To locate your Snowflake organization name, account name, or legacy account locator values see [Finding the Organization and Account Name for an Account](https://docs.snowflake.com/en/user-guide/admin-account-identifier#finding-the-organization-and-account-name-for-an-account) or [Using an Account Locator as an Identifier](https://docs.snowflake.com/en/user-guide/admin-account-identifier#using-an-account-locator-as-an-identifier).
 
