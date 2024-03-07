@@ -1,7 +1,8 @@
 !function (t, e) {
-    if(Array.from(document.querySelectorAll("script")).some((s) => s.src === "https://app.posthog.com/static/array.js")) return;
     var o, n, p, r;
     e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
+        if(Array.from(document.querySelectorAll("script")).some((s) => s.src === "https://app.posthog.com/static/array.js")) return;
+
         function g(t, e) {
             var o = e.split(".");
             2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () {
