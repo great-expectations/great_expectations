@@ -115,6 +115,3 @@ Now that you've learned about Expectation classes, you can use the following res
 
 - [Create and manage Expectations and Expectation Suites](/core/create_expectations/create_expectations.md)
 
-- [Standard arguments for Expectations](/reference/learn/expectations/standard_arguments.md)
-
-- [Result format](/reference/learn/expectations/result_format.md)
