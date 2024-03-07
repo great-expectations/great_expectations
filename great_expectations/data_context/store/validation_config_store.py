@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey, StringKey
-from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.validation_config import ValidationConfig
 
 
 class ValidationConfigStore(Store):
@@ -65,6 +68,8 @@ class ValidationConfigStore(Store):
 
     @override
     def deserialize(self, value):
+        from great_expectations.core.validation_config import ValidationConfig
+
         return ValidationConfig.parse_raw(value)
 
     @override
