@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
-from great_expectations.compatibility.pydantic import BaseModel
+from great_expectations.compatibility.pydantic import BaseModel, validator
 from great_expectations.core.validation_config import ValidationConfig
 
 if TYPE_CHECKING:
@@ -41,8 +41,8 @@ class Checkpoint(BaseModel):
     """
 
     name: str
-    validations: list[ValidationConfig]
-    actions: list[ValidationAction]
+    validations: List[ValidationConfig]
+    actions: List[ValidationAction]  # Should this be optional?
     id: Union[str, None] = None
 
     class Config:
@@ -80,6 +80,15 @@ class Checkpoint(BaseModel):
         json_encoders = {
             ValidationConfig: lambda v: _encode_validation_config(v),
         }
+
+    @validator("validations")
+    def _validate_validations(
+        cls, validations: list[ValidationConfig]
+    ) -> list[ValidationConfig]:
+        if len(validations) == 0:
+            raise ValueError("Checkpoint must contain at least one validation")
+
+        return validations
 
     @public_api
     def run(
