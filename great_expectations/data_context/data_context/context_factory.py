@@ -37,6 +37,9 @@ if TYPE_CHECKING:
         ExpectationsStore,
         ValidationsStore,
     )
+    from great_expectations.data_context.store.validation_config_store import (
+        ValidationConfigStore,
+    )
     from great_expectations.data_context.types.base import DataContextConfig
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.batch_request import BatchRequest
@@ -105,7 +108,7 @@ class ProjectManager:
             )
         return self._project.validations_store
 
-    def get_validation_config_store(self) -> ValidationsStore:
+    def get_validation_config_store(self) -> ValidationConfigStore:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
