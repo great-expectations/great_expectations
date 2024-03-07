@@ -328,7 +328,7 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
 @pytest.mark.filesystem
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
-    mock_update_by_name: mock.MagicMock,
+    mock_update_by_name: mock.MagicMock,  # noqa: TID251
     data_context_parameterized_expectation_suite,
 ) -> None:
     context = data_context_parameterized_expectation_suite

@@ -59,7 +59,7 @@ from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
-    from unittest.mock import Mock
+    from unittest.mock import Mock  # noqa: TID251
 
     from pytest_mock import MockFixture
     from typing_extensions import TypeAlias

@@ -650,7 +650,7 @@ def test_api_action_run(
     validation_result_suite_id,
     data_context_simple_expectation_suite,
 ):
-    mock_response = mock.MagicMock()
+    mock_response = mock.MagicMock()  # noqa: TID251
     mock_response.status_code = 200
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(

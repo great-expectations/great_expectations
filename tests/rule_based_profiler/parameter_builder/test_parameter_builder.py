@@ -190,7 +190,7 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     return_value="my_json_string",
 )
 def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if_precomputed(
-    mock_convert_to_json_serializable: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,  # noqa: TID251
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
@@ -303,7 +303,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     return_value="my_json_string",
 )
 def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_precomputed(
-    mock_convert_to_json_serializable: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,  # noqa: TID251
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
     domain = empty_rule_state["domain"]
@@ -376,7 +376,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     return_value="my_json_string",
 )
 def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precomputed(
-    mock_convert_to_json_serializable: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,  # noqa: TID251
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
     domain = empty_rule_state["domain"]

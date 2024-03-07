@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock  # noqa: TID251
 
 import pandas as pd
 import pytest
@@ -945,8 +945,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_without_dynamic_args(
-    mock_data_context: mock.MagicMock,
-    mock_profiler_run: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
+    mock_profiler_run: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -979,8 +979,8 @@ def test_run_profiler_without_dynamic_args(
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_with_dynamic_args(
-    mock_data_context: mock.MagicMock,
-    mock_profiler_run: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
+    mock_profiler_run: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1019,8 +1019,8 @@ def test_run_profiler_with_dynamic_args(
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_on_data_creates_suite_with_dict_arg(
-    mock_data_context: mock.MagicMock,
-    mock_rule_based_profiler_run: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
+    mock_rule_based_profiler_run: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1047,8 +1047,8 @@ def test_run_profiler_on_data_creates_suite_with_dict_arg(
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
-    mock_data_context: mock.MagicMock,
-    mock_rule_based_profiler_run: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
+    mock_rule_based_profiler_run: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1079,7 +1079,7 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler_with_too_many_args_raises_error(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
 ):
     with pytest.raises(AssertionError) as e:
@@ -1096,7 +1096,7 @@ def test_get_profiler_with_too_many_args_raises_error(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_serialize_profiler_config(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     profiler = BaseRuleBasedProfiler(
@@ -1158,7 +1158,7 @@ def test_serialize_profiler_config(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_profiler(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
@@ -1182,7 +1182,7 @@ def test_add_profiler(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
 ):
     name = "my_profiler_config"
     config_version = 1.0
@@ -1227,7 +1227,7 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     populated_profiler_store: ProfilerStore,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
@@ -1248,7 +1248,7 @@ def test_get_profiler(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler_non_existent_profiler_raises_error(
-    mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
+    mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore  # noqa: TID251
 ):
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(
@@ -1310,7 +1310,7 @@ def test_delete_profiler_non_existent_profiler_raises_error(
 
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
-def test_list_profilers(mock_profiler_store: mock.MagicMock):
+def test_list_profilers(mock_profiler_store: mock.MagicMock):  # noqa: TID251
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
     store.list_keys.return_value = [ConfigurationIdentifier(char) for char in keys]
@@ -1322,7 +1322,7 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
 
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
-def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
+def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):  # noqa: TID251
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
     store.list_keys.return_value = keys
@@ -1339,9 +1339,9 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_single_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: mock.MagicMock,  # noqa: TID251
+    mock_domain_builder: mock.MagicMock,  # noqa: TID251
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1377,9 +1377,9 @@ def test_add_single_rule(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_rule_overwrite_first_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: mock.MagicMock,  # noqa: TID251
+    mock_domain_builder: mock.MagicMock,  # noqa: TID251
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1405,9 +1405,9 @@ def test_add_rule_overwrite_first_rule(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_rule_add_second_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: mock.MagicMock,  # noqa: TID251
+    mock_domain_builder: mock.MagicMock,  # noqa: TID251
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1439,7 +1439,7 @@ def test_add_rule_add_second_rule(
 @pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_rule_bad_rule(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rbp",

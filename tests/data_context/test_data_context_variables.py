@@ -594,7 +594,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
 )
 def test_cloud_enabled_data_context_variables_e2e(
-    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch  # noqa: TID251
 ) -> None:
     """
     What does this test do and why?

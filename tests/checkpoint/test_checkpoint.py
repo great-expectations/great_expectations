@@ -2651,7 +2651,7 @@ def test_run_spark_checkpoint_with_schema(
 def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
     validator_with_mock_execution_engine,
 ):
-    context = mock.MagicMock()
+    context = mock.MagicMock()  # noqa: TID251
     validator = validator_with_mock_execution_engine
     validations = [
         {

@@ -67,7 +67,7 @@ def batch_fixture() -> Batch:
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.unit
 def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
 ):
     data_context = mock_data_context
 
@@ -100,7 +100,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.unit
 def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
 ):
     data_context = mock_data_context
 
@@ -370,7 +370,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
-def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
+def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):  # noqa: TID251
     batch: Batch = batch_fixture
     mock_data_context.get_batch_list.return_value = [batch]
     mock_data_context.get_validator.return_value = Validator(
@@ -419,7 +419,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
 def test_regex_single_candidate(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: mock.MagicMock,  # noqa: TID251
     batch_fixture: Batch,
 ):
     batch: Batch = batch_fixture
@@ -492,7 +492,7 @@ def test_regex_single_candidate(
 
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
-def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
+def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):  # noqa: TID251
     batch: Batch = batch_fixture
 
     data_context = mock_data_context
