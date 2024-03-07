@@ -207,7 +207,7 @@ warn_untyped_fields = true
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 120
 lint.preview = true  # This enables preview rules for specified rules e.g. NPY201
 lint.explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
 lint.select = [
@@ -250,7 +250,7 @@ lint.ignore = [
     "E111", # indentation-with-invalid-multiple
     "E114", # indentation-with-invalid-multiple-comment
     "E117", # over-idented
-    "E501", # line-too-long
+    # "E501", # line-too-long
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
