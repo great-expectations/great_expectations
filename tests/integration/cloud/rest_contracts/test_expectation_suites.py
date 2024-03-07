@@ -39,7 +39,6 @@ POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
                     },
                 ],
                 "expectation_suite_name": "brand new suite",
-                "data_asset_type": "pandas",
             },
             "organization_id": EXISTING_ORGANIZATION_ID,
         },

@@ -120,7 +120,6 @@ def test_add_cloud(
                             "name": "my_suite",
                             "id": None,
                             "expectations": [],
-                            "data_asset_type": None,
                             "meta": mock.ANY,  # GX version information
                             "notes": None,
                         },
