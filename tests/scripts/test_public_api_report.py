@@ -175,10 +175,7 @@ def sample_docs_example_python_file_string_filepath(
     repo_root: pathlib.Path,
 ) -> pathlib.Path:
     return (
-        repo_root
-        / pathlib.Path(
-            "tests/integration/docusaurus/sample_docs_example_python_file_string.py"
-        )
+        repo_root / pathlib.Path("tests/integration/docusaurus/sample_docs_example_python_file_string.py")
     ).relative_to(repo_root)
 
 
@@ -186,12 +183,9 @@ def sample_docs_example_python_file_string_filepath(
 def sample_with_definitions_python_file_string_filepath(
     repo_root: pathlib.Path,
 ) -> pathlib.Path:
-    return (
+    return (repo_root / pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")).relative_to(
         repo_root
-        / pathlib.Path(
-            "great_expectations/sample_with_definitions_python_file_string.py"
-        )
-    ).relative_to(repo_root)
+    )
 
 
 @pytest.fixture
@@ -230,9 +224,7 @@ def sample_markdown_doc_with_yaml_file_contents(
 def docs_example_parser(
     sample_docs_example_file_contents: FileContents,
 ) -> DocsExampleParser:
-    docs_example_parser = DocsExampleParser(
-        file_contents={sample_docs_example_file_contents}
-    )
+    docs_example_parser = DocsExampleParser(file_contents={sample_docs_example_file_contents})
     return docs_example_parser
 
 
@@ -299,9 +291,7 @@ class TestCodeParser:
             "example_staticmethod",
         }
 
-    def test_get_all_class_method_and_function_definitions(
-        self, code_parser: CodeParser
-    ):
+    def test_get_all_class_method_and_function_definitions(self, code_parser: CodeParser):
         definitions = code_parser.get_all_class_method_and_function_definitions()
 
         assert len(definitions) == 16
@@ -324,18 +314,17 @@ class TestCodeParser:
             "example_staticmethod",
         }
         assert {d.filepath for d in definitions} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
 
 def test_parse_docs_contents_for_class_names(
     sample_markdown_doc_with_yaml_file_contents: FileContents,
 ):
-    assert parse_docs_contents_for_class_names(
-        file_contents={sample_markdown_doc_with_yaml_file_contents}
-    ) == {"Datasource", "SqlAlchemyExecutionEngine"}
+    assert parse_docs_contents_for_class_names(file_contents={sample_markdown_doc_with_yaml_file_contents}) == {
+        "Datasource",
+        "SqlAlchemyExecutionEngine",
+    }
 
 
 def test_get_shortest_dotted_path(monkeypatch):
@@ -349,9 +338,7 @@ def test_get_shortest_dotted_path(monkeypatch):
     repo_root = pathlib.Path(__file__).parent.parent.parent
     monkeypatch.chdir(repo_root)
     filepath = pathlib.Path("great_expectations/core/expectation_suite.py")
-    definition = Definition(
-        name="ExpectationSuite", filepath=filepath, ast_definition=ast.ClassDef()
-    )
+    definition = Definition(name="ExpectationSuite", filepath=filepath, ast_definition=ast.ClassDef())
 
     # This is the actual path
     assert (
@@ -400,9 +387,7 @@ def test__get_import_names(various_imports: str):
 
 
 @pytest.fixture
-def public_api_checker(
-    docs_example_parser: DocsExampleParser, code_parser: CodeParser
-) -> PublicAPIChecker:
+def public_api_checker(docs_example_parser: DocsExampleParser, code_parser: CodeParser) -> PublicAPIChecker:
     return PublicAPIChecker(code_parser=code_parser)
 
 
@@ -422,9 +407,7 @@ class TestPublicAPIChecker:
             "example_public_staticmethod",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
     def _class_and_function_definitions(
@@ -442,9 +425,7 @@ class TestPublicAPIChecker:
 
         return definitions
 
-    def test_is_definition_marked_public_api_yes(
-        self, public_api_checker: PublicAPIChecker
-    ):
+    def test_is_definition_marked_public_api_yes(self, public_api_checker: PublicAPIChecker):
         file_string = """
 @public_api
 def example_public_api_module_level_function():
@@ -473,9 +454,7 @@ class ExamplePublicAPIClass:
         pass
 
 """
-        ast_definitions = self._class_and_function_definitions(
-            tree=ast.parse(file_string)
-        )
+        ast_definitions = self._class_and_function_definitions(tree=ast.parse(file_string))
         definitions = [
             Definition(
                 name="test_name",
@@ -484,14 +463,9 @@ class ExamplePublicAPIClass:
             )
             for ast_definition in ast_definitions
         ]
-        assert all(
-            public_api_checker.is_definition_marked_public_api(definition)
-            for definition in definitions
-        )
+        assert all(public_api_checker.is_definition_marked_public_api(definition) for definition in definitions)
 
-    def test_is_definition_marked_public_api_no(
-        self, public_api_checker: PublicAPIChecker
-    ):
+    def test_is_definition_marked_public_api_no(self, public_api_checker: PublicAPIChecker):
         file_string = """
 def example_module_level_function():
     pass
@@ -514,9 +488,7 @@ class ExampleClass:
         pass
 
 """
-        ast_definitions = self._class_and_function_definitions(
-            tree=ast.parse(file_string)
-        )
+        ast_definitions = self._class_and_function_definitions(tree=ast.parse(file_string))
         definitions = [
             Definition(
                 name="test_name",
@@ -525,10 +497,7 @@ class ExampleClass:
             )
             for ast_definition in ast_definitions
         ]
-        assert not all(
-            public_api_checker.is_definition_marked_public_api(definition)
-            for definition in definitions
-        )
+        assert not all(public_api_checker.is_definition_marked_public_api(definition) for definition in definitions)
 
 
 @pytest.fixture
@@ -558,16 +527,8 @@ def code_reference_filter_with_non_default_include_exclude(
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
-        includes=[
-            IncludeExcludeDefinition(
-                reason="test", name="test_name", filepath=pathlib.Path("test_path")
-            )
-        ],
-        excludes=[
-            IncludeExcludeDefinition(
-                reason="test", name="test_name", filepath=pathlib.Path("test_path")
-            )
-        ],
+        includes=[IncludeExcludeDefinition(reason="test", name="test_name", filepath=pathlib.Path("test_path"))],
+        excludes=[IncludeExcludeDefinition(reason="test", name="test_name", filepath=pathlib.Path("test_path"))],
     )
 
 
@@ -604,9 +565,7 @@ def code_reference_filter_with_exclude_by_file(
         excludes=[
             IncludeExcludeDefinition(
                 reason="test",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             )
         ],
     )
@@ -645,16 +604,12 @@ def code_reference_filter_with_exclude_by_file_and_name(
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_method",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_module_level_function",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
         ],
     )
@@ -676,16 +631,12 @@ def code_reference_filter_with_include_by_file_and_name_already_included(
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_method",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_module_level_function",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
         ],
         excludes=[],
@@ -708,24 +659,18 @@ def code_reference_filter_with_include_by_file_and_name_already_excluded(
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_method",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_module_level_function",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
         ],
         excludes=[
             IncludeExcludeDefinition(
                 reason="test",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             )
         ],
     )
@@ -747,17 +692,13 @@ def code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example
             IncludeExcludeDefinition(
                 reason="test",
                 name="example_no_usages_in_sample_docs_example_python_file_string",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             ),
         ],
         excludes=[
             IncludeExcludeDefinition(
                 reason="test",
-                filepath=pathlib.Path(
-                    "great_expectations/sample_with_definitions_python_file_string.py"
-                ),
+                filepath=pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py"),
             )
         ],
     )
@@ -797,29 +738,21 @@ class TestCodeReferenceFilter:
             "example_staticmethod",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
     def test_filter_definitions_with_references_from_docs_content(
         self,
         code_reference_filter_with_references_from_docs_content: CodeReferenceFilter,
     ):
-        observed = (
-            code_reference_filter_with_references_from_docs_content.filter_definitions()
-        )
+        observed = code_reference_filter_with_references_from_docs_content.filter_definitions()
         assert len(observed) == 1
         assert {d.name for d in observed} == {"ExampleClass"}
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
-    def test_filter_definitions_exclude_by_file(
-        self, code_reference_filter_with_exclude_by_file: CodeReferenceFilter
-    ):
+    def test_filter_definitions_exclude_by_file(self, code_reference_filter_with_exclude_by_file: CodeReferenceFilter):
         observed = code_reference_filter_with_exclude_by_file.filter_definitions()
         assert len(observed) == 0
         assert {d.name for d in observed} == set()
@@ -828,9 +761,7 @@ class TestCodeReferenceFilter:
     def test_filter_definitions_exclude_by_file_and_name(
         self, code_reference_filter_with_exclude_by_file_and_name: CodeReferenceFilter
     ):
-        observed = (
-            code_reference_filter_with_exclude_by_file_and_name.filter_definitions()
-        )
+        observed = code_reference_filter_with_exclude_by_file_and_name.filter_definitions()
         assert len(observed) == 4
         assert {d.name for d in observed} == {
             "ExampleClass",
@@ -839,9 +770,7 @@ class TestCodeReferenceFilter:
             "example_staticmethod",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
     def test_filter_definitions_include_by_file_and_name_already_included(
@@ -867,9 +796,7 @@ class TestCodeReferenceFilter:
             "example_staticmethod",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
     def test_filter_definitions_include_by_file_and_name_already_excluded(
@@ -889,9 +816,7 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
     def test_filter_definitions_include_by_file_and_name_already_excluded_not_used_in_docs_example(
@@ -909,9 +834,7 @@ class TestCodeReferenceFilter:
             "example_no_usages_in_sample_docs_example_python_file_string",
         }
         assert {d.filepath for d in observed} == {
-            pathlib.Path(
-                "great_expectations/sample_with_definitions_python_file_string.py"
-            )
+            pathlib.Path("great_expectations/sample_with_definitions_python_file_string.py")
         }
 
 
@@ -943,25 +866,18 @@ class TestPublicAPIReport:
 
     def test_generate_printable_definitions(self, public_api_report: PublicAPIReport):
         expected: List[str] = [
-            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
-            "ExampleClass",
-            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
-            "example_classmethod",
-            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
-            "example_method",
-            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
-            "example_method_with_args",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: " "ExampleClass",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: " "example_classmethod",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: " "example_method",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: " "example_method_with_args",
             "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
             "example_module_level_function",
-            "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
-            "example_staticmethod",
+            "File: great_expectations/sample_with_definitions_python_file_string.py Name: " "example_staticmethod",
         ]
         observed = public_api_report.generate_printable_definitions()
         assert observed == expected
 
-    def test_generate_printable_definitions_exclude_by_file(
-        self, public_api_report_filter_out_file: PublicAPIReport
-    ):
+    def test_generate_printable_definitions_exclude_by_file(self, public_api_report_filter_out_file: PublicAPIReport):
         expected: List[str] = []
         observed = public_api_report_filter_out_file.generate_printable_definitions()
         assert observed == expected
@@ -969,15 +885,11 @@ class TestPublicAPIReport:
 
 class TestIncludeExcludeDefinition:
     def test_instantiate_name_and_filepath(self):
-        definition = IncludeExcludeDefinition(
-            reason="reason", name="name", filepath=pathlib.Path("filepath")
-        )
+        definition = IncludeExcludeDefinition(reason="reason", name="name", filepath=pathlib.Path("filepath"))
         assert isinstance(definition, IncludeExcludeDefinition)
 
     def test_instantiate_filepath_only(self):
-        definition = IncludeExcludeDefinition(
-            reason="reason", filepath=pathlib.Path("filepath")
-        )
+        definition = IncludeExcludeDefinition(reason="reason", filepath=pathlib.Path("filepath"))
         assert isinstance(definition, IncludeExcludeDefinition)
 
     def test_instantiate_name_and_filepath_no_reason(self):
@@ -988,15 +900,10 @@ class TestIncludeExcludeDefinition:
         with pytest.raises(ValueError) as exc:
             IncludeExcludeDefinition(reason="reason", name="name")
 
-        assert (
-            "You must provide a filepath if also providing a name" in exc.value.args[0]
-        )
+        assert "You must provide a filepath if also providing a name" in exc.value.args[0]
 
     def test_instantiate_reason_only(self):
         with pytest.raises(ValueError) as exc:
             IncludeExcludeDefinition(reason="reason")
 
-        assert (
-            "You must provide at least a filepath or filepath and name"
-            in exc.value.args[0]
-        )
+        assert "You must provide at least a filepath or filepath and name" in exc.value.args[0]

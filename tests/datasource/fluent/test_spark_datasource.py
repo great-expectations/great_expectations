@@ -65,8 +65,7 @@ def test_dataframe_asset(
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
 
     assert all(
-        asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
-        for asset in datasource.assets
+        asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df) for asset in datasource.assets
     )
 
 
@@ -128,9 +127,7 @@ def test_spark_config_passed_to_execution_engine(
         spark_config=spark_config,
         persist=persist,
     )
-    execution_engine_spark_config = datasource.get_execution_engine().config[
-        "spark_config"
-    ]
+    execution_engine_spark_config = datasource.get_execution_engine().config["spark_config"]
     assert is_candidate_subset_of_target(
         candidate=spark_config,
         target=execution_engine_spark_config,
@@ -142,16 +139,14 @@ def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
     spark_session,
 ):
-    dataframe_asset = empty_data_context.sources.add_spark(
-        name="my_spark_datasource"
-    ).add_dataframe_asset(name="my_dataframe_asset")
+    dataframe_asset = empty_data_context.sources.add_spark(name="my_spark_datasource").add_dataframe_asset(
+        name="my_dataframe_asset"
+    )
 
     with pytest.raises(ValueError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
-        e.value
-    )
+    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)
 
 
 @pytest.mark.spark

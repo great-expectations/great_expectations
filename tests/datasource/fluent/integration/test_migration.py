@@ -26,7 +26,4 @@ def test_convert_to_file_context(
         migrated_context = context.convert_to_file_context()
 
     assert isinstance(migrated_context, FileDataContext)
-    assert (
-        len(migrated_context.datasources) == 1
-        and datasource_name in migrated_context.datasources
-    )
+    assert len(migrated_context.datasources) == 1 and datasource_name in migrated_context.datasources

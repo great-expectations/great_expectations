@@ -98,9 +98,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     args_keys = ("column",)
 
     @classmethod
-    def _prescriptive_template(
-        cls, renderer_configuration: RendererConfiguration
-    ) -> RendererConfiguration:
+    def _prescriptive_template(cls, renderer_configuration: RendererConfiguration) -> RendererConfiguration:
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
@@ -111,9 +109,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if params.mostly and params.mostly.value < 1.0:
-            renderer_configuration = cls._add_mostly_pct_param(
-                renderer_configuration=renderer_configuration
-            )
+            renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must be null."
@@ -145,9 +141,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "values must be null, at least $mostly_pct % of the time."
         else:
@@ -164,9 +158,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(
@@ -194,10 +186,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
         try:
             notnull_percent = result_dict["unexpected_percent"]
-            return (
-                num_to_str(100 - notnull_percent, precision=5, use_locale=True)
-                + "% null"
-            )
+            return num_to_str(100 - notnull_percent, precision=5, use_locale=True) + "% null"
         except KeyError:
             return "unknown % null"
         except TypeError:
@@ -209,8 +198,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(execution_engine, runtime_configuration)
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine, runtime_configuration
         )
         # We do not need this metric for a null metric
         validation_dependencies.remove_metric_configuration(
@@ -224,14 +213,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self._get_result_format(
-            runtime_configuration=runtime_configuration
-        )
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
         mostly = self._get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(
-            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        )
+        unexpected_count = metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}")
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -247,12 +232,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(
-                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-            ),
-            unexpected_list=metrics.get(
-                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
-            ),
+            unexpected_count=metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"),
+            unexpected_list=metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"),
             unexpected_index_list=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
             ),

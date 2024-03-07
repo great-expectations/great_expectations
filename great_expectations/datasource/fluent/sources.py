@@ -57,9 +57,7 @@ class _FieldDetails(NamedTuple):
     type_annotation: Type
 
 
-def _get_field_details(
-    model: Type[pydantic.BaseModel], field_name: str
-) -> _FieldDetails:
+def _get_field_details(model: Type[pydantic.BaseModel], field_name: str) -> _FieldDetails:
     """Get the default value of the requested field and its type annotation."""
     return _FieldDetails(
         default_value=model.__fields__[field_name].default,
@@ -145,8 +143,7 @@ class _SourceFactories:
         """
         if ds_type in datasource_type_lookup:
             raise TypeRegistrationError(
-                f"'{ds_type_name}' is already a registered typed and there can only be 1 type "
-                "for a given name."
+                f"'{ds_type_name}' is already a registered typed and there can only be 1 type " "for a given name."
             )
         datasource_type_lookup[ds_type] = ds_type_name
         logger.debug(f"'{ds_type_name}' added to `type_lookup`")
@@ -174,14 +171,10 @@ class _SourceFactories:
         def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
             return CrudMethodType.UPDATE, ds_type
 
-        cls._register_crud_method(
-            method_name, f"Updates a {ds_type_name} data source.", crud_method_info
-        )
+        cls._register_crud_method(method_name, f"Updates a {ds_type_name} data source.", crud_method_info)
 
     @classmethod
-    def _register_add_or_update_datasource(
-        cls, ds_type: Type[Datasource], ds_type_name: str
-    ):
+    def _register_add_or_update_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
         method_name = f"add_or_update_{ds_type_name}"
 
         def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
@@ -200,9 +193,7 @@ class _SourceFactories:
         def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
             return CrudMethodType.DELETE, ds_type
 
-        cls._register_crud_method(
-            method_name, f"Deletes a {ds_type_name} data source.", crud_method_info
-        )
+        cls._register_crud_method(method_name, f"Deletes a {ds_type_name} data source.", crud_method_info)
 
     @classmethod
     def _register_crud_method(
@@ -229,25 +220,17 @@ class _SourceFactories:
         asset_types: Sequence[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
-            logger.warning(
-                f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
-            )
+            logger.warning(f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`")
 
         for t in asset_types:
             if t.__name__.startswith("_"):
-                logger.debug(
-                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
-                )
+                logger.debug(f"{t} is private, assuming not intended as a public concrete type. Skipping registration")
                 continue
             try:
                 asset_type_name = _get_field_details(t, "type").default_value
                 if asset_type_name is None:
-                    raise TypeError(
-                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
-                    )
-                logger.debug(
-                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
-                )
+                    raise TypeError(f"{t.__name__} `type` field must be assigned and cannot be `None`")
+                logger.debug(f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'")
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
                 raise TypeRegistrationError(
@@ -271,20 +254,14 @@ class _SourceFactories:
                 f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
             )
 
-            def _add_asset_factory(
-                self: Datasource, name: str, **kwargs
-            ) -> pydantic.BaseModel:
+            def _add_asset_factory(self: Datasource, name: str, **kwargs) -> pydantic.BaseModel:
                 # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
                 if self.data_connector_type:
-                    logger.info(
-                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"
-                    )
+                    logger.info(f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}")
                     connect_options = {
-                        k: v
-                        for (k, v) in kwargs.items()
-                        if k in self.data_connector_type.asset_level_option_keys
+                        k: v for (k, v) in kwargs.items() if k in self.data_connector_type.asset_level_option_keys
                     }
                     if connect_options:
                         logger.info(
@@ -312,9 +289,7 @@ class _SourceFactories:
             # add the public api decorator
             public_api(getattr(ds_type, add_asset_factory_method_name))
 
-            def _read_asset_factory(
-                self: Datasource, asset_name: str | None = None, **kwargs
-            ) -> Validator:
+            def _read_asset_factory(self: Datasource, asset_name: str | None = None, **kwargs) -> Validator:
                 name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
                 asset = asset_type(name=name, **kwargs)
                 self._add_asset(asset)
@@ -329,9 +304,7 @@ class _SourceFactories:
             setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
 
         else:
-            logger.debug(
-                f"`{add_asset_factory_method_name}()` already defined `{ds_type.__name__}`"
-            )
+            logger.debug(f"`{add_asset_factory_method_name}()` already defined `{ds_type.__name__}`")
 
     @property
     def pandas_default(self) -> PandasDatasource:
@@ -343,9 +316,7 @@ class _SourceFactories:
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
-            return self._data_context.sources.add_pandas(
-                name=DEFAULT_PANDAS_DATASOURCE_NAME
-            )
+            return self._data_context.sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource
@@ -366,9 +337,7 @@ class _SourceFactories:
             current_datasource = self._data_context.get_datasource(name)
         except ValueError as e:
             if raise_if_none:
-                raise ValueError(
-                    f"There is no datasource {name} in the data context."
-                ) from e
+                raise ValueError(f"There is no datasource {name} in the data context.") from e
             current_datasource = None
         if current_datasource and not isinstance(current_datasource, datasource_type):
             raise ValueError(
@@ -388,15 +357,11 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None
         if name_or_datasource and isinstance(name_or_datasource, Datasource):
             if len(kwargs) != 0:
-                raise ValueError(
-                    f"The datasource must be the sole argument. We also received: {kwargs}"
-                )
+                raise ValueError(f"The datasource must be the sole argument. We also received: {kwargs}")
             datasource = name_or_datasource
         elif name_or_datasource is None and "datasource" in kwargs:
             if len(kwargs) != 1:
-                raise ValueError(
-                    f"The datasource must be the sole argument. We received: {kwargs}"
-                )
+                raise ValueError(f"The datasource must be the sole argument. We received: {kwargs}")
             datasource = kwargs["datasource"]
         if datasource and not isinstance(datasource, datasource_type):
             raise ValueError(
@@ -427,20 +392,12 @@ class _SourceFactories:
             ValueError: This is raised if a datasource is passed in with additional arguments or
                         a datasource is not passed in and no name argument is present.
         """
-        new_datasource = self._datasource_passed_in_as_only_argument(
-            datasource_type, name_or_datasource, **kwargs
-        )
+        new_datasource = self._datasource_passed_in_as_only_argument(datasource_type, name_or_datasource, **kwargs)
         if new_datasource:
             return new_datasource
         if (
-            name_or_datasource
-            and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"  # noqa: PLR0133
-        ) or (
-            name_or_datasource is None
-            and "name" in kwargs
-            and isinstance(kwargs["name"], str)
-        ):
+            name_or_datasource and isinstance(name_or_datasource, str) and "name" not in "kwargs"  # noqa: PLR0133
+        ) or (name_or_datasource is None and "name" in kwargs and isinstance(kwargs["name"], str)):
             return None
         raise ValueError(
             "A datasource object or a name string must be present. The datasource or "
@@ -454,18 +411,10 @@ class _SourceFactories:
         datasource_type: Type[Datasource],
         doc_string: str = "",
     ) -> SourceFactoryFn:
-        def add_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
-        ) -> Datasource:
+        def add_datasource(name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs) -> Datasource:
             # Because of the precedence of `or` and `if`, these grouping paranthesis are necessary.
-            datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
-            ) or (
-                datasource_type(name=name_or_datasource, **kwargs)
-                if name_or_datasource
-                else datasource_type(**kwargs)
+            datasource = (self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)) or (
+                datasource_type(name=name_or_datasource, **kwargs) if name_or_datasource else datasource_type(**kwargs)
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
@@ -489,20 +438,12 @@ class _SourceFactories:
         datasource_type: Type[Datasource],
         doc_string: str = "",
     ) -> SourceFactoryFn:
-        def update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
-        ) -> Datasource:
+        def update_datasource(name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs) -> Datasource:
             # circular import
             from great_expectations.datasource.fluent.interfaces import Datasource
 
-            updated_datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
-            ) or (
-                datasource_type(name=name_or_datasource, **kwargs)
-                if name_or_datasource
-                else datasource_type(**kwargs)
+            updated_datasource = (self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)) or (
+                datasource_type(name=name_or_datasource, **kwargs) if name_or_datasource else datasource_type(**kwargs)
             )
 
             datasource_name: str = updated_datasource.name
@@ -513,17 +454,13 @@ class _SourceFactories:
             )
 
             # preserve any pre-existing id for usage with cloud
-            id_: uuid.UUID | None = getattr(
-                self._data_context.datasources.get(datasource_name), "id", None
-            )
+            id_: uuid.UUID | None = getattr(self._data_context.datasources.get(datasource_name), "id", None)
             if id_:
                 updated_datasource.id = id_
 
             updated_datasource._data_context = self._data_context
             updated_datasource.test_connection()
-            return_obj = self._data_context._update_fluent_datasource(
-                datasource=updated_datasource
-            )
+            return_obj = self._data_context._update_fluent_datasource(datasource=updated_datasource)
             assert isinstance(return_obj, Datasource)
             return return_obj
 
@@ -548,42 +485,26 @@ class _SourceFactories:
             # circular import
             from great_expectations.datasource.fluent.interfaces import Datasource
 
-            new_datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
-            ) or (
-                datasource_type(name=name_or_datasource, **kwargs)
-                if name_or_datasource
-                else datasource_type(**kwargs)
+            new_datasource = (self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)) or (
+                datasource_type(name=name_or_datasource, **kwargs) if name_or_datasource else datasource_type(**kwargs)
             )
 
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
             datasource_name: str = new_datasource.name
-            logger.debug(
-                f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
-            )
-            self._validate_current_datasource_type(
-                datasource_name, datasource_type, raise_if_none=False
-            )
+            logger.debug(f"Adding or updating {datasource_type.__name__} with '{datasource_name}'")
+            self._validate_current_datasource_type(datasource_name, datasource_type, raise_if_none=False)
 
             # preserve any pre-existing id for usage with cloud
-            id_: uuid.UUID | None = getattr(
-                self._data_context.datasources.get(datasource_name), "id", None
-            )
+            id_: uuid.UUID | None = getattr(self._data_context.datasources.get(datasource_name), "id", None)
             if id_:
                 new_datasource.id = id_
 
             new_datasource._data_context = self._data_context
             new_datasource.test_connection()
             if datasource_name in self._data_context.datasources:
-                return_obj = self._data_context._update_fluent_datasource(
-                    datasource=new_datasource
-                )
+                return_obj = self._data_context._update_fluent_datasource(datasource=new_datasource)
             else:
-                return_obj = self._data_context._add_fluent_datasource(
-                    datasource=new_datasource
-                )
+                return_obj = self._data_context._add_fluent_datasource(datasource=new_datasource)
             assert isinstance(return_obj, Datasource)
             return return_obj
 
@@ -646,9 +567,7 @@ class _SourceFactories:
                     f"Unknown crud method registered for {attr_name} with type {crud_method_type}"
                 )
         except KeyError as e:
-            raise AttributeError(
-                f"No crud method '{attr_name}' in {self.factories}"
-            ) from e
+            raise AttributeError(f"No crud method '{attr_name}' in {self.factories}") from e
 
     @override
     def __dir__(self) -> List[str]:

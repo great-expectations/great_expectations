@@ -72,9 +72,7 @@ def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
 
 def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
-        pytest.skip(
-            "test_database_store_backend_duplicate_key_violation requires postgresql"
-        )
+        pytest.skip("test_database_store_backend_duplicate_key_violation requires postgresql")
 
     store_backend = DatabaseStoreBackend(
         credentials={
@@ -100,9 +98,7 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
     assert len(caplog.messages) == 0
     caplog.set_level(logging.INFO, "great_expectations")
 
-    store_backend.set(
-        key, "hello", allow_update=False
-    )  # the only place we are testing this flag
+    store_backend.set(key, "hello", allow_update=False)  # the only place we are testing this flag
     assert len(caplog.messages) == 1
     assert "already exists with the same value" in caplog.messages[0]
 
@@ -215,7 +211,4 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
         },
     )
 
-    assert (
-        expectations_store_with_database_backend.store_backend_id
-        == "00000000-0000-0000-0000-000000aaaaaa"
-    )
+    assert expectations_store_with_database_backend.store_backend_id == "00000000-0000-0000-0000-000000aaaaaa"

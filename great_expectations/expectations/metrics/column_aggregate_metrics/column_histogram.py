@@ -84,30 +84,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         case_conditions = []
         if len(bins) == 1 and not (
-            (
-                bins[0]
-                == get_sql_dialect_floating_point_infinity_value(
-                    schema="api_np", negative=True
-                )
-            )
-            or (
-                bins[0]
-                == get_sql_dialect_floating_point_infinity_value(
-                    schema="api_cast", negative=True
-                )
-            )
-            or (
-                bins[0]
-                == get_sql_dialect_floating_point_infinity_value(
-                    schema="api_np", negative=False
-                )
-            )
-            or (
-                bins[0]
-                == get_sql_dialect_floating_point_infinity_value(
-                    schema="api_cast", negative=False
-                )
-            )
+            (bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True))
+            or (bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True))
+            or (bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False))
+            or (bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False))
         ):
             # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
             case_conditions.append(
@@ -115,10 +95,8 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                     sa.case(
                         (
                             sa.and_(
-                                float(bins[0] - np.finfo(float).eps)
-                                < sa.column(column),
-                                sa.column(column)
-                                < float(bins[0] + np.finfo(float).eps),
+                                float(bins[0] - np.finfo(float).eps) < sa.column(column),
+                                sa.column(column) < float(bins[0] + np.finfo(float).eps),
                             ),
                             1,
                         ),
@@ -135,28 +113,16 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             )
 
             # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-            return convert_to_json_serializable(
-                list(execution_engine.execute_query(query).fetchone())
-            )
+            return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))
 
         idx = 0
 
         # If we have an infinite lower bound, don't express that in sql
-        if (
-            bins[0]
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=True
-            )
-        ) or (
-            bins[0]
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=True
-            )
+        if (bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True)) or (
+            bins[0] == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True)
         ):
             case_conditions.append(
-                sa.func.sum(
-                    sa.case((sa.column(column) < bins[idx + 1], 1), else_=0)
-                ).label(f"bin_{idx!s}")
+                sa.func.sum(sa.case((sa.column(column) < bins[idx + 1], 1), else_=0)).label(f"bin_{idx!s}")
             )
             idx += 1
 
@@ -182,22 +148,14 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 ).label(f"bin_{idx!s}")
             )
 
-        if (
-            bins[-1]
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=False
-            )
-        ) or (
-            bins[-1]
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=False
-            )
+        if (bins[-1] == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False)) or (
+            bins[-1] == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
         ):
             negative_boundary = float(bins[-2])
             case_conditions.append(
-                sa.func.sum(
-                    sa.case((negative_boundary <= sa.column(column), 1), else_=0)
-                ).label(f"bin_{len(bins) - 1!s}")
+                sa.func.sum(sa.case((negative_boundary <= sa.column(column), 1), else_=0)).label(
+                    f"bin_{len(bins) - 1!s}"
+                )
             )
         else:
             negative_boundary = float(bins[-2])
@@ -226,9 +184,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        return convert_to_json_serializable(
-            list(execution_engine.execute_query(query).fetchone())
-        )
+        return convert_to_json_serializable(list(execution_engine.execute_query(query).fetchone()))
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913
@@ -246,9 +202,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column = metric_domain_kwargs["column"]
 
         """return a list of counts corresponding to bins"""
-        bins = list(
-            copy.deepcopy(bins)
-        )  # take a copy since we are inserting and popping
+        bins = list(copy.deepcopy(bins))  # take a copy since we are inserting and popping
 
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
@@ -265,9 +219,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             bins.append(float("inf"))
 
         temp_column = df.select(column).where(F.col(column).isNotNull())
-        bucketizer = pyspark.Bucketizer(
-            splits=bins, inputCol=column, outputCol="buckets"
-        )
+        bucketizer = pyspark.Bucketizer(splits=bins, inputCol=column, outputCol="buckets")
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 
         # This is painful to do, but: bucketizer cannot handle values outside of a range
@@ -281,9 +233,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         # We'll try for an optimization by asking for it at the same time
         if added_max:
-            upper_bound_count = (
-                temp_column.select(column).filter(F.col(column) == bins[-2]).count()
-            )
+            upper_bound_count = temp_column.select(column).filter(F.col(column) == bins[-2]).count()
         else:
             upper_bound_count = 0
 

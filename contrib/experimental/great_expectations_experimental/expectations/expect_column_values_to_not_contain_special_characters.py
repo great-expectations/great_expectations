@@ -44,28 +44,20 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
-            special_characters = [
-                char for char in special_characters if char not in allowed_characters
-            ]
+            special_characters = [char for char in special_characters if char not in allowed_characters]
 
             for c in special_characters:
                 if c in str(val):
                     return False
             return True
 
-        return column.apply(
-            not_contain_special_character, args=(list(string.punctuation))
-        )
+        return column.apply(not_contain_special_character, args=(list(string.punctuation)))
 
     # This method defines the business logic for evaluating the metric when using a SparkExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
-            special_characters = [
-                char
-                for char in list(string.punctuation)
-                if char not in allowed_characters
-            ]
+            special_characters = [char for char in list(string.punctuation) if char not in allowed_characters]
 
             for c in special_characters:
                 if c in str(val):
@@ -73,14 +65,12 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
             return True
 
         # Register the UDF
-        not_contain_special_character_udf = F.udf(
-            not_contain_special_character, types.BooleanType()
-        )
+        not_contain_special_character_udf = F.udf(not_contain_special_character, types.BooleanType())
 
         # Apply the UDF to the column
-        result_column = F.when(
-            not_contain_special_character_udf(column, F.lit(string.punctuation)), True
-        ).otherwise(False)
+        result_column = F.when(not_contain_special_character_udf(column, F.lit(string.punctuation)), True).otherwise(
+            False
+        )
         return result_column
 
 
@@ -246,9 +236,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -263,9 +251,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
 
         template_str = "values must not contain special characters"
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
 
             template_str += ", at least $mostly_pct % of the time."
         else:

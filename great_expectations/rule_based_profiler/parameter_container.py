@@ -37,22 +37,16 @@ PARAMETER_NAME_ROOT_FOR_VARIABLES: Final[str] = "variables"
 VARIABLES_PREFIX: Final[str] = (
     f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_VARIABLES}"
 )
-VARIABLES_KEY: Final[str] = (
-    f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+VARIABLES_KEY: Final[str] = f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
 PARAMETER_NAME_ROOT_FOR_PARAMETERS: Final[str] = "parameter"
 PARAMETER_PREFIX: Final[str] = (
     f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_PARAMETERS}"
 )
-PARAMETER_KEY: Final[str] = (
-    f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+PARAMETER_KEY: Final[str] = f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
 RAW_SUFFIX: Final[str] = "raw"
-RAW_PARAMETER_KEY: Final[str] = (
-    f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+RAW_PARAMETER_KEY: Final[str] = f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: Final[str] = "attributed_value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: Final[str] = "details"
@@ -66,16 +60,8 @@ RESERVED_TERMINAL_LITERALS: Final[Set[str]] = {
 
 attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
     (
-        (
-            Suppress(Literal('["'))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal('"]'))
-        )
-        ^ (
-            Suppress(Literal("['"))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal("']"))
-        )
+        (Suppress(Literal('["')) + Word(alphas, alphanums + "_.") + Suppress(Literal('"]')))
+        ^ (Suppress(Literal("['")) + Word(alphas, alphanums + "_.") + Suppress(Literal("']")))
     )
     ^ (
         Suppress(Literal("["))
@@ -108,9 +94,7 @@ def _parse_attribute_naming_pattern(name: str) -> ParseResults:
     try:
         return attribute_naming_pattern.parseString(name)
     except ParseException:
-        raise ParameterAttributeNameParserError(
-            f'Unable to parse Parameter Attribute Name: "{name}".'
-        )
+        raise ParameterAttributeNameParserError(f'Unable to parse Parameter Attribute Name: "{name}".')
 
 
 def validate_fully_qualified_parameter_name_delimiter(
@@ -129,9 +113,7 @@ names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g.
 def is_fully_qualified_parameter_name_delimiter_in_literal(
     fully_qualified_parameter_name: str,
 ) -> bool:
-    return fully_qualified_parameter_name.startswith(
-        f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
-    )
+    return fully_qualified_parameter_name.startswith(f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}")
 
 
 def is_fully_qualified_parameter_name_prefix_in_literal(
@@ -140,9 +122,7 @@ def is_fully_qualified_parameter_name_prefix_in_literal(
     return (
         fully_qualified_parameter_name.startswith(f"{VARIABLES_PREFIX}")
         or fully_qualified_parameter_name.startswith(f"{PARAMETER_PREFIX}")
-        or fully_qualified_parameter_name.startswith(
-            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}"
-        )
+        or fully_qualified_parameter_name.startswith(f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}")
     )
 
 
@@ -232,9 +212,7 @@ class ParameterContainer(SerializableDictDot):
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = None
 
-    def set_parameter_node(
-        self, parameter_name_root: str, parameter_node: ParameterNode
-    ) -> None:
+    def set_parameter_node(self, parameter_name_root: str, parameter_node: ParameterNode) -> None:
         if self.parameter_nodes is None:
             self.parameter_nodes = {}
 
@@ -259,21 +237,14 @@ def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict],
 ) -> Union[T, ParameterNode]:
     if isinstance(source, dict):
-        return _deep_convert_properties_iterable_to_parameter_node(
-            source=ParameterNode(source)
-        )
+        return _deep_convert_properties_iterable_to_parameter_node(source=ParameterNode(source))
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
         element: Any
-        return data_type(
-            [
-                deep_convert_properties_iterable_to_parameter_node(source=element)
-                for element in source
-            ]
-        )
+        return data_type([deep_convert_properties_iterable_to_parameter_node(source=element) for element in source])
 
     return source
 
@@ -283,18 +254,13 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _deep_convert_properties_iterable_to_parameter_node(
-                source=value
-            )
+            source[key] = _deep_convert_properties_iterable_to_parameter_node(source=value)
         elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
             element: Any
             source[key] = data_type(
-                [
-                    deep_convert_properties_iterable_to_parameter_node(source=element)
-                    for element in value
-                ]
+                [deep_convert_properties_iterable_to_parameter_node(source=element) for element in value]
             )
 
     return ParameterNode(source)
@@ -340,9 +306,7 @@ def build_parameter_container_for_variables(
     # We only want to set the ParameterContainer key PARAMETER_NAME_ROOT_FOR_VARIABLES if
     # parameter_node is non-empty since there is downstream logic that depends on this.
     return (
-        ParameterContainer(
-            parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node}
-        )
+        ParameterContainer(parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node})
         if parameter_node
         else ParameterContainer()
     )
@@ -389,16 +353,12 @@ def build_parameter_container(
         fully_qualified_parameter_name,
         parameter_value,
     ) in parameter_values.items():
-        validate_fully_qualified_parameter_name_delimiter(
-            fully_qualified_parameter_name=fully_qualified_parameter_name
+        validate_fully_qualified_parameter_name_delimiter(fully_qualified_parameter_name=fully_qualified_parameter_name)
+        fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[1:].split(
+            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
         )
-        fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
-            1:
-        ].split(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER)
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
-        parameter_node = parameter_container.get_parameter_node(
-            parameter_name_root=parameter_name_root
-        )
+        parameter_node = parameter_container.get_parameter_node(parameter_name_root=parameter_name_root)
         if parameter_node is None:
             parameter_node = ParameterNode({})
             parameter_container.set_parameter_node(
@@ -443,9 +403,7 @@ def _build_parameter_node_tree_for_one_parameter(
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
 
-    node[parameter_name_as_list[-1]] = (
-        deep_convert_properties_iterable_to_parameter_node(parameter_value)
-    )
+    node[parameter_name_as_list[-1]] = deep_convert_properties_iterable_to_parameter_node(parameter_value)
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(
@@ -465,9 +423,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
     name supplied as argument -- a value (of type "Any") or a ParameterNode object (containing the sub-tree structure).
     """
-    validate_fully_qualified_parameter_name_delimiter(
-        fully_qualified_parameter_name=fully_qualified_parameter_name
-    )
+    validate_fully_qualified_parameter_name_delimiter(fully_qualified_parameter_name=fully_qualified_parameter_name)
 
     # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
     # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the
@@ -479,9 +435,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
         return None
 
-    if fully_qualified_parameter_name.startswith(
-        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-    ):
+    if fully_qualified_parameter_name.startswith(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME):
         if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
             # Supports the "$domain.domain_kwargs.column" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
@@ -505,10 +459,8 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
     fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-    fully_qualified_parameter_name_as_list: List[str] = (
-        fully_qualified_parameter_name.split(
-            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
-        )
+    fully_qualified_parameter_name_as_list: List[str] = fully_qualified_parameter_name.split(
+        FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
     )
 
     if len(fully_qualified_parameter_name_as_list) == 0:
@@ -541,9 +493,7 @@ def _get_parameter_value_from_parameter_container(
     parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
-            parsed_attribute_name: ParseResults = _parse_attribute_naming_pattern(
-                name=parameter_name_part
-            )
+            parsed_attribute_name: ParseResults = _parse_attribute_naming_pattern(name=parameter_name_part)
             if len(parsed_attribute_name) < 1:
                 raise KeyError(
                     f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \
@@ -609,18 +559,14 @@ def get_fully_qualified_parameter_names(
         fully_qualified_parameter_names.extend(
             _get_parameter_node_attribute_names(
                 parameter_name_root=PARAMETER_NAME_ROOT_FOR_VARIABLES,
-                parameter_node=variables.parameter_nodes[
-                    PARAMETER_NAME_ROOT_FOR_VARIABLES
-                ],
+                parameter_node=variables.parameter_nodes[PARAMETER_NAME_ROOT_FOR_VARIABLES],
             )
         )
 
     if parameters is not None:
         parameter_container: ParameterContainer = parameters[domain.id]  # type: ignore[union-attr] # could be None
 
-        if not (
-            parameter_container is None or parameter_container.parameter_nodes is None
-        ):
+        if not (parameter_container is None or parameter_container.parameter_nodes is None):
             parameter_name_root: str
             parameter_node: ParameterNode
             for (
@@ -658,9 +604,7 @@ def _get_parameter_node_attribute_names(
     attribute_name: str
     for attribute_name_as_list in attribute_names_as_lists:
         attribute_name_as_list = (  # noqa: PLW2901
-            _get_parameter_name_parts_up_to_including_reserved_literal(
-                attribute_name_as_list=attribute_name_as_list
-            )
+            _get_parameter_name_parts_up_to_including_reserved_literal(attribute_name_as_list=attribute_name_as_list)
         )
         attribute_name = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER.join(attribute_name_as_list[1:])}"
         attribute_names.add(attribute_name)

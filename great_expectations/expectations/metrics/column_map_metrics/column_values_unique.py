@@ -69,12 +69,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 .having(sa.func.count(column) > 1)
             )
         else:
-            dup_query = (
-                sa.select(column)
-                .select_from(_table)
-                .group_by(column)
-                .having(sa.func.count(column) > 1)
-            )
+            dup_query = sa.select(column).select_from(_table).group_by(column).having(sa.func.count(column) > 1)
         return column.notin_(dup_query)
 
     @column_condition_partial(

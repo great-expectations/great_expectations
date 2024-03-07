@@ -118,14 +118,10 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         else:
             at_least_str: str = "greater than or equal to"
             if params.strict_min:
-                at_least_str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_least_str = cls._get_strict_min_string(renderer_configuration=renderer_configuration)
             at_most_str: str = "less than or equal to"
             if params.strict_max:
-                at_most_str = cls._get_strict_max_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_most_str = cls._get_strict_max_string(renderer_configuration=renderer_configuration)
 
             if params.min_value and params.max_value:
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."

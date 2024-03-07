@@ -14,9 +14,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 
 logger = logging.getLogger(__name__)
 
-TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(
-    r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)"
-)
+TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)")
 
 
 class _ConfigurationSubstitutor:
@@ -31,17 +29,13 @@ class _ConfigurationSubstitutor:
     AWS_PATTERN = r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
     AWS_SSM_PATTERN = r"^secret\|arn:aws:ssm:([a-z\-0-9]+):([0-9]{12}):parameter\/([a-zA-Z0-9\/_\+=\.@\-]+)"
 
-    GCP_PATTERN = (
-        r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
-    )
+    GCP_PATTERN = r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
     AZURE_PATTERN = r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
 
     def __init__(self) -> None:
         # Using the @lru_cache decorator on method calls can create memory leaks - an attr is preferred here.
         # Ref: https://stackoverflow.com/a/68550238
-        self._secret_store_cache = lru_cache(maxsize=None)(
-            self._substitute_value_from_secret_store
-        )
+        self._secret_store_cache = lru_cache(maxsize=None)(self._substitute_value_from_secret_store)
 
     def substitute_all_config_variables(
         self,
@@ -64,18 +58,10 @@ class _ConfigurationSubstitutor:
             data = (data.__class__.get_schema_class())().dump(data)
 
         if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
-            return {
-                k: self.substitute_all_config_variables(v, replace_variables_dict)
-                for k, v in data.items()
-            }
+            return {k: self.substitute_all_config_variables(v, replace_variables_dict) for k, v in data.items()}
         elif isinstance(data, list):
-            return [
-                self.substitute_all_config_variables(v, replace_variables_dict)
-                for v in data
-            ]
-        return self.substitute_config_variable(
-            data, replace_variables_dict, dollar_sign_escape_string
-        )
+            return [self.substitute_all_config_variables(v, replace_variables_dict) for v in data]
+        return self.substitute_config_variable(data, replace_variables_dict, dollar_sign_escape_string)
 
     def substitute_config_variable(
         self,
@@ -227,9 +213,7 @@ class _ConfigurationSubstitutor:
         client = session.client(service_name="secretsmanager", region_name=region_name)
 
         if secret_version:
-            secret_response = client.get_secret_value(
-                SecretId=secret_name, VersionId=secret_version
-            )
+            secret_response = client.get_secret_value(SecretId=secret_name, VersionId=secret_version)
         else:
             secret_response = client.get_secret_value(SecretId=secret_name)
         # Decrypts secret using the associated KMS CMK.
@@ -293,13 +277,9 @@ class _ConfigurationSubstitutor:
         client = session.client(service_name="ssm", region_name=region_name)
 
         if secret_version:
-            secret_response = client.get_parameter(
-                Name=secret_name, WithDecryption=True, Version=secret_version
-            )
+            secret_response = client.get_parameter(Name=secret_name, WithDecryption=True, Version=secret_version)
         else:
-            secret_response = client.get_parameter(
-                Name=secret_name, WithDecryption=True
-            )
+            secret_response = client.get_parameter(Name=secret_name, WithDecryption=True)
         # Decrypts secret using the associated KMS CMK.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         secret = secret_response["Parameter"]["Value"]
@@ -330,9 +310,7 @@ class _ConfigurationSubstitutor:
         :return: a string with the value substituted by the secret from the GCP Secret Manager store
         :raises: ImportError, ValueError
         """
-        regex = re.compile(
-            rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
-        )
+        regex = re.compile(rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$")
         if not google.secretmanager:
             logger.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
@@ -354,9 +332,7 @@ class _ConfigurationSubstitutor:
             secret_version = "latest"
         name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
         try:
-            secret = client.access_secret_version(name=name)._pb.payload.data.decode(
-                "utf-8"
-            )
+            secret = client.access_secret_version(name=name)._pb.payload.data.decode("utf-8")
         except AttributeError:
             secret = client.access_secret_version(name=name).payload.data.decode(
                 "utf-8"
@@ -387,17 +363,13 @@ class _ConfigurationSubstitutor:
         :return: a string with the value substituted by the secret from the Azure Key Vault store
         :raises: ImportError, ValueError
         """
-        regex = re.compile(
-            rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
-        )
+        regex = re.compile(rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$")
         if not azure.SecretClient:  # type: ignore[truthy-function] # False if NotImported
             logger.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
             )
-            raise ImportError(
-                "Could not import SecretClient from azure.keyvault.secrets"
-            )
+            raise ImportError("Could not import SecretClient from azure.keyvault.secrets")
         matches = regex.match(value)
 
         if not matches:

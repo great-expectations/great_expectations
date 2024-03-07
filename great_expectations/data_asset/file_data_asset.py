@@ -93,16 +93,12 @@ class MetaFileDataAsset(DataAsset):
                     null_lines = re.compile(
                         null_lines_regex
                     )  # Ignore lines that are empty or have only white space ("null values" in the line-map context)
-                    boolean_mapped_null_lines = np.array(
-                        [bool(null_lines.match(line)) for line in lines]
-                    )
+                    boolean_mapped_null_lines = np.array([bool(null_lines.match(line)) for line in lines])
                 else:
                     boolean_mapped_null_lines = np.zeros(len(lines), dtype=bool)
                 element_count = int(len(lines))
                 if element_count > sum(boolean_mapped_null_lines):
-                    nonnull_lines = list(
-                        compress(lines, np.invert(boolean_mapped_null_lines))
-                    )
+                    nonnull_lines = list(compress(lines, np.invert(boolean_mapped_null_lines)))
                     nonnull_count = int(
                         (boolean_mapped_null_lines == False).sum()  # noqa: E712
                     )
@@ -110,18 +106,10 @@ class MetaFileDataAsset(DataAsset):
                         func(self, _lines=nonnull_lines, *args, **kwargs)  # noqa: B026
                     )
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
-                    unexpected_list = list(
-                        compress(nonnull_lines, np.invert(boolean_mapped_success_lines))
-                    )
+                    unexpected_list = list(compress(nonnull_lines, np.invert(boolean_mapped_success_lines)))
                     nonnull_lines_index = range(0, len(nonnull_lines) + 1)
-                    unexpected_index_list = list(
-                        compress(
-                            nonnull_lines_index, np.invert(boolean_mapped_success_lines)
-                        )
-                    )
-                    success, _percent_success = self._calc_map_expectation_success(
-                        success_count, nonnull_count, mostly
-                    )
+                    unexpected_index_list = list(compress(nonnull_lines_index, np.invert(boolean_mapped_success_lines)))
+                    success, _percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
                     return_obj = self._format_map_output(
                         result_format,
                         success,
@@ -277,20 +265,11 @@ class FileDataAsset(MetaFileDataAsset):
                 )
 
         if expected_max_count is not None and expected_min_count is not None:
-            truth_list = [
-                expected_min_count
-                <= len(comp_regex.findall(line))
-                <= expected_max_count
-                for line in _lines
-            ]
+            truth_list = [expected_min_count <= len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
         elif expected_max_count is not None:
-            truth_list = [
-                len(comp_regex.findall(line)) <= expected_max_count for line in _lines
-            ]
+            truth_list = [len(comp_regex.findall(line)) <= expected_max_count for line in _lines]
         elif expected_min_count is not None:
-            truth_list = [
-                len(comp_regex.findall(line)) >= expected_min_count for line in _lines
-            ]
+            truth_list = [len(comp_regex.findall(line)) >= expected_min_count for line in _lines]
         else:
             truth_list = [True for _ in _lines]
 

@@ -62,9 +62,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     """
 
-    PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[
-        PartitionerMethod, type[Sorter] | None
-    ] = {
+    PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[PartitionerMethod, type[Sorter] | None] = {
         PartitionerMethod.PARTITION_ON_YEAR: DictionarySorter,
         PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH: DictionarySorter,
         PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH_AND_DAY: DictionarySorter,
@@ -158,9 +156,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
         """
-        name = self._update_data_asset_name_from_config(
-            data_asset_name=name, data_asset_config=config
-        )
+        name = self._update_data_asset_name_from_config(data_asset_name=name, data_asset_config=config)
         self._assets[name] = config
 
     def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
@@ -188,9 +184,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 data_asset_name=batch_request.data_asset_name
             )
         except KeyError:
-            raise KeyError(
-                f"data_asset_name {batch_request.data_asset_name} is not recognized."
-            )
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
 
         for batch_identifiers in sub_cache:
             batch_definition = BatchDefinition(
@@ -203,15 +197,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        data_asset: Dict[str, Union[str, list, None]] = self.assets[
-            batch_request.data_asset_name
-        ]
-        data_asset_partitioner_method: Optional[str] = data_asset.get(
-            "partitioner_method"
-        )
-        data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = (
-            data_asset.get("partitioner_kwargs")
-        )
+        data_asset: Dict[str, Union[str, list, None]] = self.assets[batch_request.data_asset_name]
+        data_asset_partitioner_method: Optional[str] = data_asset.get("partitioner_method")
+        data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = data_asset.get("partitioner_kwargs")
         data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
         # if sorters have been explicitly passed to the data connector use them for sorting,
@@ -233,15 +221,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
-            if (
-                batch_request.limit is not None
-                and data_connector_query_dict.get("limit") is None
-            ):
+            if batch_request.limit is not None and data_connector_query_dict.get("limit") is None:
                 data_connector_query_dict["limit"] = batch_request.limit
 
-            batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=data_connector_query_dict
-            )
+            batch_filter_obj: BatchFilter = build_batch_filter(data_connector_query_dict=data_connector_query_dict)
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
             )
@@ -276,9 +259,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
 
-    def build_batch_spec(
-        self, batch_definition: BatchDefinition
-    ) -> SqlAlchemyDatasourceBatchSpec:
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> SqlAlchemyDatasourceBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -293,24 +274,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if (
             data_asset_name in self.assets
             and self.assets[data_asset_name].get("batch_spec_passthrough")
-            and isinstance(
-                self.assets[data_asset_name].get("batch_spec_passthrough"), dict
-            )
+            and isinstance(self.assets[data_asset_name].get("batch_spec_passthrough"), dict)
         ):
             # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
-            batch_definition_batch_spec_passthrough = (
-                deepcopy(batch_definition.batch_spec_passthrough) or {}
-            )
+            batch_spec_passthrough = deepcopy(self.assets[data_asset_name]["batch_spec_passthrough"])
+            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
             # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
@@ -335,9 +308,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             partitioner_method_name=partitioner_method_name,
         )
         try:
-            sorter_method: Optional[Sorter] = (
-                partitioner_method_to_sorter_method_mapping[partitioner_method_name]
-            )
+            sorter_method: Optional[Sorter] = partitioner_method_to_sorter_method_mapping[partitioner_method_name]
         except KeyError:
             raise gx_exceptions.SorterError(
                 f"No Sorter is defined in ConfiguredAssetSqlDataConnector.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING for partitioner_method: {partitioner_method_name}"
@@ -359,14 +330,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 )
             ]
         elif sorter_method == LexicographicSorter:
-            if (
-                partitioner_method_name
-                == PartitionerMethod.PARTITION_ON_MULTI_COLUMN_VALUES
-            ):
-                return [
-                    LexicographicSorter(name=column_name)
-                    for column_name in partitioner_kwargs["column_names"]
-                ]
+            if partitioner_method_name == PartitionerMethod.PARTITION_ON_MULTI_COLUMN_VALUES:
+                return [LexicographicSorter(name=column_name) for column_name in partitioner_kwargs["column_names"]]
             else:
                 return [LexicographicSorter(name=partitioner_kwargs["column_name"])]
         elif sorter_method == NumericSorter:
@@ -391,10 +356,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 else:
                     partitioner_group_names = [partitioner_kwargs["column_name"]]
 
-                if any(
-                    sorter_name not in partitioner_group_names
-                    for sorter_name in sorters.keys()
-                ):
+                if any(sorter_name not in partitioner_group_names for sorter_name in sorters.keys()):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 keys used for partitioning.
@@ -440,11 +402,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         Returns:
             a list of batch definitions sorted depending on partitioner method used to define them.
         """
-        if (
-            partitioner_method_name is not None
-            and partitioner_kwargs is not None
-            and sorters is None
-        ):
+        if partitioner_method_name is not None and partitioner_kwargs is not None and sorters is None:
             sorters = self._get_sorters_from_partitioner_method_name(
                 partitioner_method_name=partitioner_method_name,
                 partitioner_kwargs=partitioner_kwargs,
@@ -453,9 +411,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             sorters: Iterator[Sorter] = reversed(list(sorters.values()))
 
         for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(
-                batch_definitions=batch_definition_list
-            )
+            batch_definition_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_definition_list)
         return batch_definition_list
 
     def _refresh_data_assets_cache(
@@ -473,18 +429,10 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                     sorters = build_sorters_from_config(config_list=sorters)
 
                 aux_config: dict = {
-                    "partitioner_method": data_asset_config.get(
-                        "partitioner_method", self.partitioner_method
-                    ),
-                    "partitioner_kwargs": data_asset_config.get(
-                        "partitioner_kwargs", self.partitioner_kwargs
-                    ),
-                    "sampling_method": data_asset_config.get(
-                        "sampling_method", self.sampling_method
-                    ),
-                    "sampling_kwargs": data_asset_config.get(
-                        "sampling_kwargs", self.sampling_kwargs
-                    ),
+                    "partitioner_method": data_asset_config.get("partitioner_method", self.partitioner_method),
+                    "partitioner_kwargs": data_asset_config.get("partitioner_kwargs", self.partitioner_kwargs),
+                    "sampling_method": data_asset_config.get("sampling_method", self.sampling_method),
+                    "sampling_kwargs": data_asset_config.get("sampling_kwargs", self.sampling_kwargs),
                     "sorters": sorters or self.sorters,
                 }
 
@@ -496,21 +444,15 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                 data_asset_config.update(
                     {
                         "type": data_asset_config.get("type"),
-                        "table_name": data_asset_config.get(
-                            "table_name", data_asset_name
-                        ),
+                        "table_name": data_asset_config.get("table_name", data_asset_name),
                     }
                 )
 
                 self.add_data_asset(name=data_asset_name, config=data_asset_config)
 
-    def _update_data_asset_name_from_config(
-        self, data_asset_name: str, data_asset_config: dict
-    ) -> str:
+    def _update_data_asset_name_from_config(self, data_asset_name: str, data_asset_config: dict) -> str:
         schema_name: str = data_asset_config.get("schema_name")
-        include_schema_name: bool = data_asset_config.get(
-            "include_schema_name", self.include_schema_name
-        )
+        include_schema_name: bool = data_asset_config.get("include_schema_name", self.include_schema_name)
 
         if schema_name is not None and include_schema_name:
             schema_name = f"{schema_name}."
@@ -524,16 +466,10 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         "data_asset_name_suffix" as part of "tables" (reserved key for configuring "ConfiguredAssetSqlDataConnector" for
         a table), these configuration attributes can exist in "data_asset_config" and must be handled appropriately.
         """
-        data_asset_name_prefix: str = data_asset_config.get(
-            "data_asset_name_prefix", ""
-        )
-        data_asset_name_suffix: str = data_asset_config.get(
-            "data_asset_name_suffix", ""
-        )
+        data_asset_name_prefix: str = data_asset_config.get("data_asset_name_prefix", "")
+        data_asset_name_suffix: str = data_asset_config.get("data_asset_name_suffix", "")
 
-        data_asset_name: str = (
-            f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
-        )
+        data_asset_name: str = f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
 
         return data_asset_name
 
@@ -542,11 +478,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
         for data_asset_name in self.assets:
             data_asset_config = self.assets[data_asset_name]
-            batch_identifiers_list = (
-                self._get_batch_identifiers_list_from_data_asset_config(
-                    data_asset_name=data_asset_name,
-                    data_asset_config=data_asset_config,
-                )
+            batch_identifiers_list = self._get_batch_identifiers_list_from_data_asset_config(
+                data_asset_name=data_asset_name,
+                data_asset_config=data_asset_config,
             )
 
             batch_definition_list = [
@@ -559,11 +493,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                 for batch_identifiers in batch_identifiers_list
             ]
 
-            data_asset_partitioner_method: Optional[str] = data_asset_config.get(
-                "partitioner_method"
-            )
-            data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = (
-                data_asset_config.get("partitioner_kwargs")
+            data_asset_partitioner_method: Optional[str] = data_asset_config.get("partitioner_method")
+            data_asset_partitioner_kwargs: Optional[Dict[str, Union[str, list]]] = data_asset_config.get(
+                "partitioner_kwargs"
             )
             data_asset_sorters: Optional[dict] = data_asset_config.get("sorters")
 
@@ -584,8 +516,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                     sorters=None,
                 )
             self._data_references_cache[data_asset_name] = [
-                batch_definition.batch_identifiers
-                for batch_definition in batch_definition_list
+                batch_definition.batch_identifiers for batch_definition in batch_definition_list
             ]
 
     def _get_batch_identifiers_list_from_data_asset_config(
@@ -600,33 +531,23 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             table_name = f"{schema_name}.{table_name}"
 
         batch_identifiers_list: List[dict]
-        partitioner_method_name: Optional[str] = data_asset_config.get(
-            "partitioner_method"
-        )
+        partitioner_method_name: Optional[str] = data_asset_config.get("partitioner_method")
         if partitioner_method_name is not None:
-            partitioner_kwargs: Optional[dict] = data_asset_config.get(
-                "partitioner_kwargs"
-            )
-            batch_identifiers_list = (
-                self.execution_engine.get_data_for_batch_identifiers(
-                    selectable=sa.text(table_name),
-                    partitioner_method_name=partitioner_method_name,
-                    partitioner_kwargs=partitioner_kwargs,
-                )
+            partitioner_kwargs: Optional[dict] = data_asset_config.get("partitioner_kwargs")
+            batch_identifiers_list = self.execution_engine.get_data_for_batch_identifiers(
+                selectable=sa.text(table_name),
+                partitioner_method_name=partitioner_method_name,
+                partitioner_kwargs=partitioner_kwargs,
             )
         else:
             batch_identifiers_list = [{}]
 
         return batch_identifiers_list
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[dict]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[dict]:
         return self._data_references_cache[data_asset_name]
 
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _generate_batch_spec_parameters_from_batch_definition(self, batch_definition: BatchDefinition) -> dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
@@ -648,9 +569,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             **self.assets[data_asset_name],
         }
 
-    def _get_table_name_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> str:
+    def _get_table_name_from_batch_definition(self, batch_definition: BatchDefinition) -> str:
         """
         Helper method called by _generate_batch_spec_parameters_from_batch_definition() to parse table_name from
         data_asset_name in cases where schema is included.

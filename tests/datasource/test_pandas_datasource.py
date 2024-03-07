@@ -72,9 +72,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
 
 
 @pytest.mark.filesystem
-def test_create_pandas_datasource(
-    data_context_parameterized_expectation_suite, tmp_path_factory
-):
+def test_create_pandas_datasource(data_context_parameterized_expectation_suite, tmp_path_factory):
     basedir = tmp_path_factory.mktemp("test_create_pandas_datasource")
     name = "test_pandas_datasource"
     class_name = "PandasDatasource"
@@ -107,30 +105,19 @@ def test_create_pandas_datasource(
 
     # To match what we expect out of the yaml file, we need to deserialize our config using the same mechanism
     serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
-    datasource_config: DatasourceConfig = DataContextConfigSchema().dump(
-        data_context_config
-    )["datasources"][name]
-    expected_serialized_datasource_config: dict = serializer.serialize(
-        datasource_config
-    )
-    assert (
-        data_context_file_config["datasources"][name]
-        == expected_serialized_datasource_config
-    )
+    datasource_config: DatasourceConfig = DataContextConfigSchema().dump(data_context_config)["datasources"][name]
+    expected_serialized_datasource_config: dict = serializer.serialize(datasource_config)
+    assert data_context_file_config["datasources"][name] == expected_serialized_datasource_config
 
     # We should have added a default generator built from the default config
     assert (
-        data_context_file_config["datasources"][name]["batch_kwargs_generators"][
-            "subdir_reader"
-        ]["class_name"]
+        data_context_file_config["datasources"][name]["batch_kwargs_generators"]["subdir_reader"]["class_name"]
         == "SubdirReaderBatchKwargsGenerator"
     )
 
 
 @pytest.mark.filesystem
-def test_pandas_source_read_csv(
-    data_context_parameterized_expectation_suite, tmp_path_factory
-):
+def test_pandas_source_read_csv(data_context_parameterized_expectation_suite, tmp_path_factory):
     basedir = tmp_path_factory.mktemp("test_create_pandas_datasource")
     shutil.copy(file_relative_path(__file__, "../test_sets/unicode.csv"), basedir)
     data_context_parameterized_expectation_suite.add_datasource(
@@ -146,13 +133,9 @@ def test_pandas_source_read_csv(
         },
     )
 
-    data_context_parameterized_expectation_suite.add_expectation_suite(
-        expectation_suite_name="unicode"
-    )
+    data_context_parameterized_expectation_suite.add_expectation_suite(expectation_suite_name="unicode")
     batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource", "subdir_reader", "unicode"
-        ),
+        data_context_parameterized_expectation_suite.build_batch_kwargs("mysource", "subdir_reader", "unicode"),
         "unicode",
     )
     assert len(batch["Μ"] == 1)  # noqa: RUF001 # greek mu
@@ -171,9 +154,7 @@ def test_pandas_source_read_csv(
     )
 
     batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource2", "subdir_reader", "unicode"
-        ),
+        data_context_parameterized_expectation_suite.build_batch_kwargs("mysource2", "subdir_reader", "unicode"),
         "unicode",
     )
     assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
@@ -193,9 +174,7 @@ def test_pandas_source_read_csv(
 
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
         batch = data_context_parameterized_expectation_suite._get_batch_v2(
-            data_context_parameterized_expectation_suite.build_batch_kwargs(
-                "mysource3", "subdir_reader", "unicode"
-            ),
+            data_context_parameterized_expectation_suite.build_batch_kwargs("mysource3", "subdir_reader", "unicode"),
             "unicode",
         )
 
@@ -324,9 +303,7 @@ def test_process_batch_parameters():
     batch_kwargs = PandasDatasource("test").process_batch_parameters(limit=1)
     assert batch_kwargs == {"reader_options": {"nrows": 1}}
 
-    batch_kwargs = PandasDatasource("test").process_batch_parameters(
-        dataset_options={"caching": False}
-    )
+    batch_kwargs = PandasDatasource("test").process_batch_parameters(dataset_options={"caching": False})
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
@@ -341,9 +318,7 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
             }
         },
     )
-    batch_kwargs = datasource.build_batch_kwargs(
-        "subdir_reader", data_asset_name="test"
-    )
+    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", data_asset_name="test")
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
     validator = BridgeValidator(batch, ExpectationSuite(name="foo"))
@@ -359,6 +334,4 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
 def test_infer_default_options_partial_functions(reader_fn):
     datasource = PandasDatasource()
     reader_fn_partial = partial(reader_fn)
-    assert datasource._infer_default_options(
-        reader_fn_partial, {}
-    ) == datasource._infer_default_options(reader_fn, {})
+    assert datasource._infer_default_options(reader_fn_partial, {}) == datasource._infer_default_options(reader_fn, {})

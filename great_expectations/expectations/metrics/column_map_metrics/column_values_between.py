@@ -48,21 +48,15 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         # Use a vectorized approach for native numpy dtypes
         if column.dtype in [int, float]:
-            return cls._pandas_vectorized(
-                temp_column, min_value, max_value, strict_min, strict_max
-            )
-        elif isinstance(
-            column.dtype, pd.DatetimeTZDtype
-        ) or pd.api.types.is_datetime64_ns_dtype(column.dtype):
+            return cls._pandas_vectorized(temp_column, min_value, max_value, strict_min, strict_max)
+        elif isinstance(column.dtype, pd.DatetimeTZDtype) or pd.api.types.is_datetime64_ns_dtype(column.dtype):
             if min_value is not None and isinstance(min_value, str):
                 min_value = parse(min_value)
 
             if max_value is not None and isinstance(max_value, str):
                 max_value = parse(max_value)
 
-            return cls._pandas_vectorized(
-                temp_column, min_value, max_value, strict_min, strict_max
-            )
+            return cls._pandas_vectorized(temp_column, min_value, max_value, strict_min, strict_max)
 
         def is_between(val):  # noqa: C901, PLR0911, PLR0912
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -78,9 +72,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 if (isinstance(val, str) != isinstance(min_value, str)) or (
                     isinstance(val, str) != isinstance(max_value, str)
                 ):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
+                    raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 if strict_min and strict_max:
                     return (val > min_value) and (val < max_value)
@@ -97,9 +89,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 # Type of column values is either string or specific rich type (or "None").  In all cases, type of
                 # column must match type of constant being compared to column value (otherwise, error is raised).
                 if isinstance(val, str) != isinstance(max_value, str):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
+                    raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 if strict_max:
                     return val < max_value
@@ -110,9 +100,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 # Type of column values is either string or specific rich type (or "None").  In all cases, type of
                 # column must match type of constant being compared to column value (otherwise, error is raised).
                 if isinstance(val, str) != isinstance(min_value, str):
-                    raise TypeError(
-                        "Column values, min_value, and max_value must either be None or of the same type."
-                    )
+                    raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
                 if strict_min:
                     return val > min_value

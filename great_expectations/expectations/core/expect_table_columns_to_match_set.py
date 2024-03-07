@@ -112,11 +112,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            exact_match_str = (
-                "exactly"
-                if params.exact_match and params.exact_match.value is True
-                else "at least"
-            )
+            exact_match_str = "exactly" if params.exact_match and params.exact_match.value is True else "at least"
 
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_set_str}"
 
@@ -137,9 +133,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_set", "exact_match"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["column_set", "exact_match"])
 
         if params["column_set"] is None:
             template_str = "Must specify a set or list of columns."
@@ -148,9 +142,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             # standardize order of the set for output
             params["column_list"] = list(params["column_set"])
 
-            column_list_template_str = ", ".join(
-                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
-            )
+            column_list_template_str = ", ".join([f"$column_list_{idx}" for idx in range(len(params["column_list"]))])
 
             exact_match_str = "exactly" if params["exact_match"] is True else "at least"
 
@@ -180,16 +172,12 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_set = self._get_success_kwargs().get("column_set")
-        expected_column_set = (
-            set(expected_column_set) if expected_column_set is not None else set()
-        )
+        expected_column_set = set(expected_column_set) if expected_column_set is not None else set()
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
         exact_match = self._get_success_kwargs().get("exact_match")
 
-        if (
-            (expected_column_set is None) and (exact_match is not True)
-        ) or actual_column_set == expected_column_set:
+        if ((expected_column_set is None) and (exact_match is not True)) or actual_column_set == expected_column_set:
             return {"success": True, "result": {"observed_value": actual_column_list}}
         else:
             # Convert to lists and sort to lock order for testing and output rendering

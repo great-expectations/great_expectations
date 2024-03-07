@@ -85,9 +85,7 @@ T = TypeVar("T")
 class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
-    fluent_datasources: List[Datasource] = Field(
-        ..., description=_FLUENT_STYLE_DESCRIPTION
-    )
+    fluent_datasources: List[Datasource] = Field(..., description=_FLUENT_STYLE_DESCRIPTION)
 
     _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
         _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
@@ -205,9 +203,7 @@ class GxConfig(FluentBaseModel):
                 ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
                 logger.debug(f"Instantiating '{ds_name}' as {ds_type}")
             except KeyError as type_lookup_err:
-                raise ValueError(
-                    f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
-                ) from type_lookup_err
+                raise ValueError(f"'{ds_name}' has unsupported 'type' - {type_lookup_err}") from type_lookup_err
 
             if "assets" not in config:
                 config["assets"] = []
@@ -219,10 +215,7 @@ class GxConfig(FluentBaseModel):
                 datasource.delete_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
             # if the default pandas datasource has no assets, it should not be serialized
-            if (
-                datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME
-                or len(datasource.assets) > 0
-            ):
+            if datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME or len(datasource.assets) > 0:
                 loaded_datasources.append(datasource)
 
                 # TODO: move this to a different 'validator' method
@@ -239,9 +232,7 @@ class GxConfig(FluentBaseModel):
 
     @classmethod
     @override
-    def parse_yaml(
-        cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
-    ) -> GxConfig:
+    def parse_yaml(cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False) -> GxConfig:
         """
         Overriding base method to allow an empty/missing `fluent_datasources` field.
         In addition, converts datasource and assets configuration sections from dictionary style to list style.
@@ -326,9 +317,7 @@ class GxConfig(FluentBaseModel):
             encoder=encoder,
             models_as_dict=models_as_dict,
         )
-        intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
-            config=intermediate_json_dict
-        )
+        intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(config=intermediate_json_dict)
         yaml.dump(intermediate_json_dict, stream=stream_or_path, **yaml_kwargs)
 
         if isinstance(stream_or_path, pathlib.Path):
@@ -336,9 +325,7 @@ class GxConfig(FluentBaseModel):
 
         return stream_or_path.getvalue()
 
-    def _exclude_name_fields_from_fluent_datasources(
-        self, config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _exclude_name_fields_from_fluent_datasources(self, config: Dict[str, Any]) -> Dict[str, Any]:
         if _FLUENT_DATASOURCES_KEY in config:
             fluent_datasources_config_as_dict = {}
 
@@ -356,9 +343,7 @@ class GxConfig(FluentBaseModel):
                     data_assets: List[dict] = datasource_config["assets"]
                     data_asset_config: dict
                     data_assets_config_as_dict = {
-                        data_asset_config[
-                            _DATA_ASSET_NAME_KEY
-                        ]: _exclude_fields_from_serialization(
+                        data_asset_config[_DATA_ASSET_NAME_KEY]: _exclude_fields_from_serialization(
                             source_dict=data_asset_config,
                             exclusions=self._EXCLUDE_FROM_DATA_ASSET_SERIALIZATION,
                         )
@@ -367,9 +352,7 @@ class GxConfig(FluentBaseModel):
                     for data_asset in data_assets_config_as_dict.values():
                         if _BATCH_CONFIGS_KEY in data_asset:
                             data_asset[_BATCH_CONFIGS_KEY] = {
-                                batch_config[
-                                    _BATCH_CONFIG_NAME_KEY
-                                ]: _exclude_fields_from_serialization(
+                                batch_config[_BATCH_CONFIG_NAME_KEY]: _exclude_fields_from_serialization(
                                     source_dict=batch_config,
                                     exclusions=self._EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION,
                                 )
@@ -384,9 +367,7 @@ class GxConfig(FluentBaseModel):
         return config
 
 
-def _exclude_fields_from_serialization(
-    source_dict: Dict[str, Any], exclusions: Set[str]
-) -> Dict[str, Any]:
+def _exclude_fields_from_serialization(source_dict: Dict[str, Any], exclusions: Set[str]) -> Dict[str, Any]:
     element: Tuple[str, Any]
     # noinspection PyTypeChecker
     return dict(

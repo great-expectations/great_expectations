@@ -31,9 +31,7 @@ def env_config_provider() -> _ConfigurationProvider:
     return config_provider
 
 
-def test_config_provider_substitution(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
+def test_config_provider_substitution(monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
     monkeypatch.setenv("MY_CONFIG", "bar")
 
     my_dict = {"my_key": r"foo${MY_CONFIG}", "another_key": r"${MY_CONFIG}"}
@@ -56,9 +54,7 @@ def test_config_provider_substitution_raises_error(
 
 def test_config_str_validation():
     with pytest.raises(pydantic.ValidationError, match="ConfigStr"):
-        m = MyClass(
-            normal_field="normal", secret_field="secret", config_field="invalid config"
-        )
+        m = MyClass(normal_field="normal", secret_field="secret", config_field="invalid config")
         print(m)
 
 
@@ -83,9 +79,7 @@ def test_as_union_file_type(input_value, expected):
     assert str(m.my_field) == expected
 
 
-def test_config_substitution(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
+def test_config_substitution(monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -95,15 +89,10 @@ def test_config_substitution(
         config_field_w_default=r"hello-${MY_ENV_VAR}",  # type: ignore[arg-type]
     )
     assert m.config_field.get_config_value(env_config_provider) == "success"
-    assert (
-        m.config_field_w_default.get_config_value(env_config_provider)
-        == "hello-success"
-    )
+    assert m.config_field_w_default.get_config_value(env_config_provider) == "hello-success"
 
 
-def test_config_substitution_dict(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
+def test_config_substitution_dict(monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -116,9 +105,7 @@ def test_config_substitution_dict(
     assert d["config_field"] == "success"
 
 
-def test_config_nested_substitution_dict(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
+def test_config_nested_substitution_dict(monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     class MyCollection(FluentBaseModel):
@@ -236,9 +223,7 @@ class TestSecretMasking:
         )
         assert str(m.config_field) == r"${MY_ENV_VAR}"
 
-    def test_serialization(
-        self, monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-    ):
+    def test_serialization(self, monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
         monkeypatch.setenv("MY_SECRET", "dont_serialize_me")
         m = MyClass(
             normal_field="normal",

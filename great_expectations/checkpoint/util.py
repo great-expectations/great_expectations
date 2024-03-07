@@ -27,9 +27,7 @@ from great_expectations.types import DictDot
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(
-    query, slack_webhook=None, slack_channel=None, slack_token=None
-):
+def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack_token=None):
     session = requests.Session()
     url = slack_webhook
     headers = None
@@ -56,10 +54,7 @@ def send_slack_notification(
         logger.error(str(e))
     else:
         if response.status_code != 200 or not ok_status:  # noqa: PLR2004
-            logger.warning(
-                "Request to Slack webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
+            logger.warning("Request to Slack webhook " f"returned error {response.status_code}: {response.text}")
 
         else:
             return "Slack notification succeeded."
@@ -91,10 +86,7 @@ def send_opsgenie_alert(query, suite_name, settings):
         logger.error(str(e))
     else:
         if response.status_code != 202:  # noqa: PLR2004
-            logger.warning(
-                "Request to Opsgenie API "
-                f"returned error {response.status_code}: {response.text}"
-            )
+            logger.warning("Request to Opsgenie API " f"returned error {response.status_code}: {response.text}")
         else:
             return "success"
     return "error"
@@ -112,8 +104,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     else:
         if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
-                "Request to Microsoft Teams webhook "
-                f"returned error {response.status_code}: {response.text}"
+                "Request to Microsoft Teams webhook " f"returned error {response.status_code}: {response.text}"
             )
             return
         else:
@@ -125,16 +116,13 @@ def send_webhook_notifications(query, webhook, target_platform):
     try:
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            f"Failed to connect to {target_platform} webhook after 10 retries."
-        )
+        logger.warning(f"Failed to connect to {target_platform} webhook after 10 retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
-                f"Request to {target_platform} webhook "
-                f"returned error {response.status_code}: {response.text}"
+                f"Request to {target_platform} webhook " f"returned error {response.status_code}: {response.text}"
             )
         else:
             return f"{target_platform} notification succeeded."
@@ -174,17 +162,13 @@ def send_email(  # noqa: PLR0913
         if sender_login is not None and sender_password is not None:
             mailserver.login(sender_login, sender_password)
         elif not (sender_login is None and sender_password is None):
-            logger.error(
-                "Please specify both sender_login and sender_password or specify both as None"
-            )
+            logger.error("Please specify both sender_login and sender_password or specify both as None")
         mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:
         logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")
     except smtplib.SMTPAuthenticationError:
-        logger.error(
-            f"Failed to authenticate to the SMTP server at address: {smtp_address}"
-        )
+        logger.error(f"Failed to authenticate to the SMTP server at address: {smtp_address}")
     except Exception as e:
         logger.error(str(e))
     else:
@@ -245,23 +229,13 @@ def get_substituted_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    validation_batch_request = get_batch_request_as_dict(
-        batch_request=validation_batch_request
-    )
-    substituted_runtime_batch_request = get_batch_request_as_dict(
-        batch_request=substituted_runtime_batch_request
-    )
+    validation_batch_request = get_batch_request_as_dict(batch_request=validation_batch_request)
+    substituted_runtime_batch_request = get_batch_request_as_dict(batch_request=substituted_runtime_batch_request)
 
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
-        if (
-            value is not None
-            and substituted_value is not None
-            and value != substituted_value
-        ):
-            raise gx_exceptions.CheckpointError(
-                f'BatchRequest attribute "{key}" was provided with different values'
-            )
+        if value is not None and substituted_value is not None and value != substituted_value:
+            raise gx_exceptions.CheckpointError(f'BatchRequest attribute "{key}" was provided with different values')
 
     effective_batch_request: dict = {
         **validation_batch_request,
@@ -288,9 +262,7 @@ def substitute_runtime_config(  # noqa: C901 - 11
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
-        batch_request_from_runtime_kwargs = get_batch_request_as_dict(
-            batch_request=batch_request_from_runtime_kwargs
-        )
+        batch_request_from_runtime_kwargs = get_batch_request_as_dict(batch_request=batch_request_from_runtime_kwargs)
 
         # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
         updated_batch_request = copy.deepcopy(batch_request)
@@ -338,17 +310,13 @@ def substitute_runtime_config(  # noqa: C901 - 11
     if runtime_kwargs.get("profilers") is not None:
         profilers = dest_config.get("profilers") or []
         existing_profilers = source_config.get("profilers") or []
-        profilers.extend(
-            filter(lambda v: v not in existing_profilers, runtime_kwargs["profilers"])
-        )
+        profilers.extend(filter(lambda v: v not in existing_profilers, runtime_kwargs["profilers"]))
         dest_config["profilers"] = profilers
 
     return dest_config
 
 
-def get_updated_action_list(
-    base_action_list: list, other_action_list: list
-) -> List[dict]:
+def get_updated_action_list(base_action_list: list, other_action_list: list) -> List[dict]:
     if base_action_list is None:
         base_action_list = []
 
@@ -401,9 +369,7 @@ def get_validations_with_batch_request_as_dict(
 
     for value in validations:
         if "batch_request" in value:
-            value["batch_request"] = get_batch_request_as_dict(
-                batch_request=value["batch_request"]
-            )
+            value["batch_request"] = get_batch_request_as_dict(batch_request=value["batch_request"])
 
     return convert_validations_list_to_checkpoint_validation_configs(validations)
 
@@ -415,31 +381,23 @@ def convert_validations_list_to_checkpoint_validation_configs(
     if not validations:
         return []
     return [
-        CheckpointValidationConfig(**validation)
-        if isinstance(validation, dict)
-        else validation
+        CheckpointValidationConfig(**validation) if isinstance(validation, dict) else validation
         for validation in validations
     ]
 
 
-def validate_validation_dict(
-    validation_dict: dict, batch_request_required: bool = True
-) -> None:
+def validate_validation_dict(validation_dict: dict, batch_request_required: bool = True) -> None:
     if batch_request_required and validation_dict.get("batch_request") is None:
         raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
 
     if not validation_dict.get("expectation_suite_name"):
-        raise gx_exceptions.CheckpointError(
-            "validation expectation_suite_name must be specified"
-        )
+        raise gx_exceptions.CheckpointError("validation expectation_suite_name must be specified")
 
     if not validation_dict.get("action_list"):
         raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
-def send_sns_notification(
-    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
-) -> str:
+def send_sns_notification(sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs) -> str:
     """
     Send JSON results to an SNS topic with a schema of:
 

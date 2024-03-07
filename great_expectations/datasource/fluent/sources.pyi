@@ -69,9 +69,7 @@ class _FieldDetails(NamedTuple):
     default_value: Any
     type_annotation: Type
 
-def _get_field_details(
-    model: Type[pydantic.BaseModel], field_name: str
-) -> _FieldDetails: ...
+def _get_field_details(model: Type[pydantic.BaseModel], field_name: str) -> _FieldDetails: ...
 
 class _SourceFactories:
     type_lookup: ClassVar[TypeLookup]
@@ -586,9 +584,7 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[
-            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
-        ] = ...,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -624,9 +620,7 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[
-            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
-        ] = ...,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,
@@ -662,9 +656,7 @@ class _SourceFactories:
         name: Optional[str] = ...,
         datasource: Optional[Datasource] = ...,
         *,
-        connection_string: Union[
-            ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]
-        ] = ...,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str, SnowflakeConnectionDetails, dict[str, str]] = ...,
         create_temp_table: bool = ...,
         account: None = ...,
         user: None = ...,

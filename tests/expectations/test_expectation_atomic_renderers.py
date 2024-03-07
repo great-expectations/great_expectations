@@ -53,9 +53,7 @@ def get_prescriptive_rendered_content(
 def evr_kwargs(expectation_configuration_kwargs):
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "expectation_config": ExpectationConfiguration(
-            **expectation_configuration_kwargs
-        ),
+        "expectation_config": ExpectationConfiguration(**expectation_configuration_kwargs),
         "result": {},
     }
 
@@ -189,9 +187,7 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    res["value"]["graph"]["$schema"] = re.sub(
-        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
-    )
+    res["value"]["graph"]["$schema"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"])
 
     snapshot.assert_match(res)
 
@@ -237,9 +233,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    res["value"]["graph"]["$schema"] = re.sub(
-        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
-    )
+    res["value"]["graph"]["$schema"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"])
     snapshot.assert_match(res)
 
 
@@ -284,16 +278,12 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    res["value"]["graph"]["$schema"] = re.sub(
-        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
-    )
+    res["value"]["graph"]["$schema"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"])
     snapshot.assert_match(res)
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_max_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_max_to_be_between",
         "kwargs": {
@@ -311,9 +301,7 @@ def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_mean_to_be_between",
         "kwargs": {
@@ -331,9 +319,7 @@ def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_median_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_median_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_median_to_be_between",
         "kwargs": {
@@ -351,9 +337,7 @@ def test_atomic_prescriptive_summary_expect_column_median_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_min_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_min_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_min_to_be_between",
         "kwargs": {
@@ -572,9 +556,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_stdev_to_be_between",
         "kwargs": {
@@ -591,9 +573,7 @@ def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_sum_to_be_between",
         "kwargs": {
@@ -610,9 +590,7 @@ def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_to_exist(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_to_exist(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_to_exist",
         "kwargs": {
@@ -670,9 +648,7 @@ def test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_value_lengths_to_equal",
         "kwargs": {
@@ -698,9 +674,7 @@ def test_atomic_prescriptive_summary_expect_column_value_z_scores_to_be_less_tha
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_between",
         "kwargs": {
@@ -758,9 +732,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_be_in_set(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_be_in_set(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {
@@ -840,9 +812,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_be_null(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_null",
         "kwargs": {
@@ -876,9 +846,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_of_type",
         "kwargs": {
@@ -895,9 +863,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_be_unique(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_be_unique(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {
@@ -951,9 +917,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_like_pattern_
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_match_regex(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_match_regex(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_regex",
         "kwargs": {
@@ -1032,9 +996,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_values_to_not_be_null(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_column_values_to_not_be_null(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_null",
         "kwargs": {
@@ -1108,9 +1070,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_lis
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_compound_columns_to_be_unique",
         "kwargs": {
@@ -1126,9 +1086,7 @@ def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_multicolumn_sum_to_equal(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_multicolumn_sum_to_equal(snapshot, get_prescriptive_rendered_content):
     # Expectation is a stub; open to implement test once renderer method is available
     pass
 
@@ -1193,9 +1151,7 @@ def test_atomic_prescriptive_summary_expect_table_column_count_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_table_column_count_to_equal(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_table_column_count_to_equal(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_table_column_count_to_equal",
         "kwargs": {
@@ -1226,9 +1182,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_table_columns_to_match_set",
         "kwargs": {
@@ -1244,9 +1198,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_be_between",
         "kwargs": {"max_value": None, "min_value": 1},
@@ -1259,9 +1211,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_table_row_count_to_equal(
-    snapshot, get_prescriptive_rendered_content
-):
+def test_atomic_prescriptive_summary_expect_table_row_count_to_equal(snapshot, get_prescriptive_rendered_content):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {"value": 10},
@@ -1298,9 +1248,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_without_result(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_without_result(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
@@ -1318,9 +1266,7 @@ def test_atomic_diagnostic_observed_value_without_result(
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_with_numeric_observed_value(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
@@ -1339,9 +1285,7 @@ def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_with_str_observed_value(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_with_str_observed_value(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
@@ -1360,9 +1304,7 @@ def test_atomic_diagnostic_observed_value_with_str_observed_value(
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_with_unexpected_percent(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_with_unexpected_percent(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
@@ -1381,9 +1323,7 @@ def test_atomic_diagnostic_observed_value_with_unexpected_percent(
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_with_empty_result(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_with_empty_result(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {

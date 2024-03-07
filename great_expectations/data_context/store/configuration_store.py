@@ -55,23 +55,15 @@ class ConfigurationStore(Store):
             )
 
         if store_backend is not None:
-            store_backend_module_name = store_backend.get(
-                "module_name", "great_expectations.data_context.store"
-            )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_suffix"] = store_backend.get(
-                    "filepath_suffix", ".yml"
-                )
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".yml")
 
         super().__init__(
             store_backend=store_backend,
@@ -113,9 +105,7 @@ class ConfigurationStore(Store):
             # Just to be explicit about what we intended to catch
             raise
         except marshmallow.ValidationError as e:
-            raise gx_exceptions.InvalidBaseYamlConfigError(
-                f"Deserialized configuration failed validation: {e}"
-            )
+            raise gx_exceptions.InvalidBaseYamlConfigError(f"Deserialized configuration failed validation: {e}")
 
     @property
     def overwrite_existing(self) -> bool:

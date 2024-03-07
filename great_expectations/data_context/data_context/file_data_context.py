@@ -100,13 +100,9 @@ class FileDataContext(SerializableDataContext):
         )
 
     @override
-    def _init_project_config(
-        self, project_config: Optional[Union[DataContextConfig, Mapping]]
-    ) -> DataContextConfig:
+    def _init_project_config(self, project_config: Optional[Union[DataContextConfig, Mapping]]) -> DataContextConfig:
         if project_config:
-            project_config = FileDataContext.get_or_create_data_context_config(
-                project_config
-            )
+            project_config = FileDataContext.get_or_create_data_context_config(project_config)
         else:
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=self._context_root_directory,
@@ -136,9 +132,7 @@ class FileDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=YAMLReadyDictDatasourceConfigSerializer(
-                schema=datasourceConfigSchema
-            ),
+            serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 
@@ -160,27 +154,17 @@ class FileDataContext(SerializableDataContext):
         """
         config_filepath = pathlib.Path(self.root_directory, self.GX_YML)
 
-        logger.debug(
-            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
-        )
+        logger.debug(f"Starting DataContext._save_project_config; attempting to update {config_filepath}")
 
         try:
             with open(config_filepath, "w") as outfile:
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
-                    self.fluent_config.update_datasources(
-                        datasources=fluent_datasources
-                    )
-                    logger.info(
-                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
-                    )
-                    fluent_json_dict: dict[str, JSONValues] = (
-                        self.fluent_config._json_dict()
-                    )
-                    fluent_json_dict = (
-                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
-                            config=fluent_json_dict
-                        )
+                    self.fluent_config.update_datasources(datasources=fluent_datasources)
+                    logger.info(f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}")
+                    fluent_json_dict: dict[str, JSONValues] = self.fluent_config._json_dict()
+                    fluent_json_dict = self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                        config=fluent_json_dict
                     )
                     self.config._commented_map.update(fluent_json_dict)
 
@@ -199,9 +183,7 @@ class FileDataContext(SerializableDataContext):
                 config_commented_map_from_yaml = yaml.load(data)
 
         except DuplicateKeyError:
-            raise gx_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
-            )
+            raise gx_exceptions.InvalidConfigurationYamlError("Error: duplicate key found in project YAML file.")
         except YAMLError as err:
             raise gx_exceptions.InvalidConfigurationYamlError(
                 f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"
@@ -210,9 +192,7 @@ class FileDataContext(SerializableDataContext):
             raise gx_exceptions.ConfigNotFoundError()
 
         try:
-            return DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
+            return DataContextConfig.from_commented_map(commented_map=config_commented_map_from_yaml)
         except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise

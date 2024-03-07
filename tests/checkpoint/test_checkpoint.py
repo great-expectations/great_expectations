@@ -188,7 +188,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -204,15 +206,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             }
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
@@ -229,7 +227,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -248,9 +248,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
             }
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
@@ -262,12 +260,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = (
-        context.validations_store.list_keys()[0]
-    )
-    validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
-        validation_result_identifier
-    )
+    validation_result_identifier: DataContextKey = context.validations_store.list_keys()[0]
+    validation_result: ExpectationSuiteValidationResult = context.validations_store.get(validation_result_identifier)
 
     assert "checkpoint_name" in validation_result.meta
     assert validation_result.meta["checkpoint_name"] == checkpoint_name
@@ -375,7 +369,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     context.suites.add(ExpectationSuite("my_expectation_suite"))
 
@@ -536,7 +532,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = context.get_validator(
@@ -565,7 +563,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -579,9 +579,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         action_list=common_action_list,
         validations=[{"batch_request": batch_request}],
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
@@ -617,9 +615,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
     assert len(context.validations_store.list_keys()) == 0
@@ -657,9 +653,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
@@ -678,7 +672,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -707,9 +703,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
@@ -773,9 +767,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
@@ -818,9 +810,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -881,9 +871,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -979,11 +967,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1023,12 +1011,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1081,9 +1069,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -1118,9 +1104,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -1143,11 +1127,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1186,12 +1170,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1230,11 +1214,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1273,12 +1257,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1330,9 +1314,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -1397,9 +1379,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
-        pandas_df
-    )
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(pandas_df)
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1449,9 +1429,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
         }
     )
 
@@ -1520,9 +1498,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
-        pandas_df
-    )
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(pandas_df)
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1562,11 +1538,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1608,12 +1584,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1655,11 +1631,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1703,12 +1679,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1787,11 +1763,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
+        context.datasources["my_datasource"].data_connectors["my_basic_data_connector"].base_directory,
         "Titanic_19120414_1313.csv",
     )
 
@@ -1889,33 +1865,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     result = checkpoint.run()
     assert not result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     result = checkpoint.run(batch_request=runtime_batch_request)
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.35s
@@ -1961,46 +1917,16 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 1.91s
@@ -2045,35 +1971,15 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.46s
@@ -2119,18 +2025,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
@@ -2138,30 +2034,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.filesystem
@@ -2300,12 +2176,10 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
-    validation_result_identifier: ValidationResultIdentifier = (
-        result.list_validation_result_identifiers()[0]
-    )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    validation_result_identifier: ValidationResultIdentifier = result.list_validation_result_identifiers()[0]
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -2343,12 +2217,10 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
-    validation_result_identifier: ValidationResultIdentifier = (
-        result.list_validation_result_identifiers()[0]
-    )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    validation_result_identifier: ValidationResultIdentifier = result.list_validation_result_identifiers()[0]
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -2476,9 +2348,7 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(
-        result.run_results.values()
-    )[0]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0]["validation_result"]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
@@ -2491,19 +2361,12 @@ def _fake_cloud_context_setup(tmp_path, monkeypatch):
     # so we create a file.
     data_file = "yellow_tripdata_sample_2019-01.csv"
     data_file_path = (
-        pathlib.Path(__file__)
-        / ".."
-        / ".."
-        / "test_sets"
-        / "taxi_yellow_tripdata_samples"
-        / data_file
+        pathlib.Path(__file__) / ".." / ".." / "test_sets" / "taxi_yellow_tripdata_samples" / data_file
     ).resolve()
     shutil.copy(str(data_file_path), data_dir)
 
     monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
-    monkeypatch.setenv(
-        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
-    )
+    monkeypatch.setenv("GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012")
     monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
 
     monkeypatch.setattr(
@@ -2530,9 +2393,7 @@ def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
     monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_get",
-        cloud_config.make_store_get(
-            data_file_name=data_file, data_dir=data_dir, with_slack=False
-        ),
+        cloud_config.make_store_get(data_file_name=data_file, data_dir=data_dir, with_slack=False),
     )
     context = gx.data_context.CloudDataContext()
     yield context
@@ -2544,9 +2405,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
     monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_get",
-        cloud_config.make_store_get(
-            data_file_name=data_file, data_dir=data_dir, with_slack=True
-        ),
+        cloud_config.make_store_get(data_file_name=data_file, data_dir=data_dir, with_slack=True),
     )
     slack_counter = cloud_config.CallCounter()
     monkeypatch.setattr(
@@ -2670,9 +2529,7 @@ def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
             validations=validations,
         )
 
-    assert "cannot be called with a validator and contain a batch_request" in str(
-        e.value
-    )
+    assert "cannot be called with a validator and contain a batch_request" in str(e.value)
 
 
 # Marking this as "big" instead of "unit" since it fails intermittently due to the timeout. We've seen it take over 7s.
@@ -2712,9 +2569,7 @@ def test_get_substituted_batch_request_with_no_substituted_config():
         "batch_identifiers": {},
     }
 
-    batch_request = get_substituted_batch_request(
-        {"batch_request": runtime_batch_request}, None
-    )
+    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, None)
 
     assert batch_request == RuntimeBatchRequest(**runtime_batch_request)
 
@@ -2733,9 +2588,7 @@ def test_get_substituted_batch_request_with_substituted_config():
         "batch_identifiers": {"default_identifier_name": "my_identifier"},
     }
 
-    batch_request = get_substituted_batch_request(
-        {"batch_request": runtime_batch_request}, validation_batch_request
-    )
+    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
 
     assert batch_request == RuntimeBatchRequest(
         **{
@@ -2762,9 +2615,7 @@ def test_get_substituted_batch_request_with_clashing_values():
     }
 
     with pytest.raises(gx_exceptions.CheckpointError):
-        get_substituted_batch_request(
-            {"batch_request": runtime_batch_request}, validation_batch_request
-        )
+        get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
 
 
 @pytest.mark.big

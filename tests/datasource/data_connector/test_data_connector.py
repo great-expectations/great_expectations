@@ -19,9 +19,7 @@ yaml = YAMLHandler()
 
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
     basic_data_connector = instantiate_class_from_config(
         yaml.load(
@@ -65,37 +63,27 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name="", data_asset_name=""
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="", data_asset_name=""),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="B", data_connector_name="", data_asset_name=""
-        ),
+        batch_request=BatchRequestBase(datasource_name="B", data_connector_name="", data_asset_name=""),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name="a", data_asset_name=""
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a", data_asset_name=""),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name="a", data_asset_name="aaa"
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a", data_asset_name="aaa"),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name="a", data_asset_name="bbb"
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a", data_asset_name="bbb"),
     )
 
     assert not batch_definition_matches_batch_request(
@@ -146,10 +134,8 @@ def test__batch_definition_matches_batch_request():
 @pytest.mark.filesystem
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
-    data_references: list = (
-        basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name="my_asset_name"
-        )
+    data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+        data_asset_name="my_asset_name"
     )
     assert len(data_references) == 0
     assert data_references == []

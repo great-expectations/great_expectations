@@ -12,9 +12,7 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import SqliteDatasource
 
-DB_PATH: Final[str] = file_relative_path(
-    __file__, "../../test_sets/referential_integrity_dataset.db"
-)
+DB_PATH: Final[str] = file_relative_path(__file__, "../../test_sets/referential_integrity_dataset.db")
 
 
 @pytest.fixture
@@ -67,9 +65,7 @@ def referential_integrity_db(sa):
 def sqlite_datasource(in_memory_runtime_context) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
-    return context.sources.add_sqlite(
-        datasource_name, connection_string=f"sqlite:///{DB_PATH}"
-    )
+    return context.sources.add_sqlite(datasource_name, connection_string=f"sqlite:///{DB_PATH}")
 
 
 @pytest.mark.sqlite

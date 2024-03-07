@@ -100,9 +100,7 @@ def _datasource_asserts(
     # We assert the data assets and types are exactly what we expect. Then we
     # extract the names from `expected_data_assets_with_types` and verify the
     # names match what is returned from ds.get_available_data_asset_names()
-    assert (
-        ds.get_available_data_asset_names_and_types() == expected_data_assets_with_types
-    )
+    assert ds.get_available_data_asset_names_and_types() == expected_data_assets_with_types
     expected_data_assets: Dict[str, List[str]] = {}
     for key, asset_with_type in expected_data_assets_with_types.items():
         expected_data_assets[key] = []
@@ -153,9 +151,7 @@ def _datasource_asserts(
         },
     ],
 )
-def test_simple_sqlalchemy_datasource_init(
-    connection, url, credentials, introspection, tables
-):
+def test_simple_sqlalchemy_datasource_init(connection, url, credentials, introspection, tables):
     kwargs = {
         "module_name": "tests.datasource.test_simple_sqlalchemy_datasource",
         "class_name": "DummySqlAlchemyExecutionEngine",
@@ -170,12 +166,8 @@ def test_simple_sqlalchemy_datasource_init(
         tables=tables,
         **kwargs,
     )
-    expected_data_connector_types = _expected_data_connector_types(
-        introspection, tables
-    )
-    expected_data_assets_with_types = _expected_data_assets_with_types(
-        introspection, tables
-    )
+    expected_data_connector_types = _expected_data_connector_types(introspection, tables)
+    expected_data_assets_with_types = _expected_data_assets_with_types(introspection, tables)
     _datasource_asserts(
         datasource,
         connection,
@@ -186,9 +178,7 @@ def test_simple_sqlalchemy_datasource_init(
     )
 
 
-SqlDataConnectorType = Union[
-    Type[InferredAssetSqlDataConnector], Type[ConfiguredAssetSqlDataConnector]
-]
+SqlDataConnectorType = Union[Type[InferredAssetSqlDataConnector], Type[ConfiguredAssetSqlDataConnector]]
 
 
 def _expected_data_connector_types(

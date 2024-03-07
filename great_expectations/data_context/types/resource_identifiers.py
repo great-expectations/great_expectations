@@ -21,9 +21,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, name: str) -> None:
         super().__init__()
         if not isinstance(name, str):
-            raise gx_exceptions.InvalidDataContextKeyError(
-                f"name must be a string, not {type(name).__name__}"
-            )
+            raise gx_exceptions.InvalidDataContextKeyError(f"name must be a string, not {type(name).__name__}")
         self._name = name
 
     @property
@@ -172,13 +170,9 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise gx_exceptions.DataContextError(
-                "Unable to construct ValidationResultIdentifier from provided object."
-            )
+            raise gx_exceptions.DataContextError("Unable to construct ValidationResultIdentifier from provided object.")
         return cls(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                validation_result.meta["expectation_suite_name"]
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(validation_result.meta["expectation_suite_name"]),
             run_id=validation_result.meta.get("run_id"),
             batch_identifier=batch_identifier,
         )
@@ -207,9 +201,7 @@ class MetricIdentifier(DataContextKey):
             tuple_metric_kwargs_id = "__"
         else:
             tuple_metric_kwargs_id = self._metric_kwargs_id
-        return tuple(
-            (self.metric_name, tuple_metric_kwargs_id)
-        )  # We use the placeholder in to_tuple
+        return tuple((self.metric_name, tuple_metric_kwargs_id))  # We use the placeholder in to_tuple
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
@@ -233,9 +225,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     ) -> None:
         super().__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=expectation_suite_identifier
-            )
+            expectation_suite_identifier = ExpectationSuiteIdentifier(name=expectation_suite_identifier)
 
         if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
@@ -287,8 +277,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def to_evaluation_parameter_urn(self):
         if self._metric_kwargs_id is None:
             return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple())
-                + [self.metric_name]
+                list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]
             )
         else:
             return "urn:great_expectations:validations:" + ":".join(
@@ -310,9 +299,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
-                tuple_[3:-2]
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[3:-2]),
             metric_name=metric_id.metric_name,
             metric_kwargs_id=metric_id.metric_kwargs_id,
         )
@@ -321,8 +308,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
-                "ValidationMetricIdentifier fixed length tuple must have exactly six "
-                "components."
+                "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
         if tuple_[2] == "__":
             tuple_data_asset_name = None
@@ -332,9 +318,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return cls(
             run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(
-                tuple((tuple_[3],))
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(tuple((tuple_[3],))),
             metric_name=metric_id.metric_name,
             metric_kwargs_id=metric_id.metric_kwargs_id,
         )
@@ -401,16 +385,12 @@ class ValidationResultIdentifierSchema(Schema):
     expectation_suite_identifier = fields.Nested(
         ExpectationSuiteIdentifierSchema,
         required=True,
-        error_messages={
-            "required": "expectation_suite_identifier is required for a ValidationResultIdentifier"
-        },
+        error_messages={"required": "expectation_suite_identifier is required for a ValidationResultIdentifier"},
     )
     run_id = fields.Nested(
         RunIdentifierSchema,
         required=True,
-        error_messages={
-            "required": "run_id is required for a " "ValidationResultIdentifier"
-        },
+        error_messages={"required": "run_id is required for a " "ValidationResultIdentifier"},
     )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
@@ -427,13 +407,9 @@ class SiteSectionIdentifier(DataContextKey):
             if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ValidationResultIdentifier(
-                    *resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(*resource_identifier)
             else:
-                self._resource_identifier = ValidationResultIdentifier(
-                    **resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(**resource_identifier)
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
                 self._resource_identifier = resource_identifier  # type: ignore[assignment]
@@ -459,9 +435,7 @@ class SiteSectionIdentifier(DataContextKey):
         return self._resource_identifier
 
     def to_tuple(self):
-        site_section_identifier_tuple_list = [self.site_section_name] + list(
-            self.resource_identifier.to_tuple()
-        )
+        site_section_identifier_tuple_list = [self.site_section_name] + list(self.resource_identifier.to_tuple())
         return tuple(site_section_identifier_tuple_list)
 
     @classmethod

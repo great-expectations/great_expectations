@@ -29,9 +29,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
 
-        return RenderedSectionContent(
-            **{"section_name": section_name, "content_blocks": content_blocks}
-        )
+        return RenderedSectionContent(**{"section_name": section_name, "content_blocks": content_blocks})
 
     @classmethod
     def _render_header(cls, evrs, content_blocks) -> None:
@@ -78,9 +76,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "Number of observations",
-                            "tooltip": {
-                                "content": "expect_table_row_count_to_be_between"
-                            },
+                            "tooltip": {"content": "expect_table_row_count_to_be_between"},
                             "params": {"tooltip_text": "Number of observations"},
                         },
                     }
@@ -127,8 +123,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
         table_rows = [
-            [type, str(column_type_counter[type])]
-            for type in ["int", "float", "string", "datetime", "bool", "unknown"]
+            [type, str(column_type_counter[type])] for type in ["int", "float", "string", "datetime", "bool", "unknown"]
         ]
 
         content_blocks.append(
@@ -303,8 +298,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         return "{:.2f}%".format(
             sum(
                 evr.result["unexpected_percent"]
-                if "unexpected_percent" in evr.result
-                and evr.result["unexpected_percent"] is not None
+                if "unexpected_percent" in evr.result and evr.result["unexpected_percent"] is not None
                 else 100.0
                 for evr in expect_column_values_to_not_be_null_evrs
             )
@@ -317,9 +311,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         type_evrs = cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_be_in_type_list"
-        ) + cls._find_all_evrs_by_type(
-            evrs.results, "expect_column_values_to_be_of_type"
-        )
+        ) + cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:
@@ -327,10 +319,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         for evr in type_evrs:
             column = evr.expectation_config.kwargs["column"]
-            if (
-                evr.expectation_config.expectation_type
-                == "expect_column_values_to_be_in_type_list"
-            ):
+            if evr.expectation_config.expectation_type == "expect_column_values_to_be_in_type_list":
                 if evr.expectation_config.kwargs["type_list"] is None:
                     column_types[column] = "unknown"
                     continue
@@ -351,9 +340,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 column_types[column] = "bool"
             else:
                 warnings.warn(
-                    "The expected type list is not a subset of any of the profiler type sets: {:s}".format(
-                        str(expected_types)
-                    )
+                    f"The expected type list is not a subset of any of the profiler type sets: {expected_types!s:s}"
                 )
                 column_types[column] = "unknown"
 

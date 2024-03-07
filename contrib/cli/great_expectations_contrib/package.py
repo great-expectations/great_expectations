@@ -109,9 +109,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         diagnostics = GreatExpectationsContribPackageManifest.retrieve_package_expectations_diagnostics()
         self._update_attrs_with_diagnostics(diagnostics)
 
-    def _update_attrs_with_diagnostics(
-        self, diagnostics: List[ExpectationDiagnostics]
-    ) -> None:
+    def _update_attrs_with_diagnostics(self, diagnostics: List[ExpectationDiagnostics]) -> None:
         self._update_from_package_info("package_info.yml")
         self._update_expectations(diagnostics)
         self._update_dependencies("requirements.txt")
@@ -218,10 +216,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
             pypi_url = f"https://pypi.org/project/{name}"
             if requirement.specs:
                 # Stringify tuple of pins
-                version = ", ".join(
-                    "".join(symbol for symbol in pin)
-                    for pin in sorted(requirement.specs)
-                )
+                version = ", ".join("".join(symbol for symbol in pin) for pin in sorted(requirement.specs))
             else:
                 version = None
             return Dependency(text=name, link=pypi_url, version=version)
@@ -243,24 +238,16 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     def retrieve_package_expectations_diagnostics() -> List[ExpectationDiagnostics]:
         try:
             package = GreatExpectationsContribPackageManifest._identify_user_package()
-            expectations_module = (
-                GreatExpectationsContribPackageManifest._import_expectations_module(
-                    package
-                )
-            )
+            expectations_module = GreatExpectationsContribPackageManifest._import_expectations_module(package)
             expectations = GreatExpectationsContribPackageManifest._retrieve_expectations_from_module(
                 expectations_module
             )
-            diagnostics = GreatExpectationsContribPackageManifest._gather_diagnostics(
-                expectations
-            )
+            diagnostics = GreatExpectationsContribPackageManifest._gather_diagnostics(expectations)
             return diagnostics
         except Exception as e:
             # Exceptions should not break the CLI - this behavior should be working in the background
             # without the user being concerned about the underlying functionality
-            logger.warning(
-                f"Something went wrong when modifying the contributor package JSON object: {e}"
-            )
+            logger.warning(f"Something went wrong when modifying the contributor package JSON object: {e}")
             return []
 
     @staticmethod
@@ -300,11 +287,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         for name, obj in inspect.getmembers(expectations_module):
             # ProfileNumericColumnsDiffExpectation from capitalone_dataprofiler_expectations
             # is a base class that the contrib Expectations in that package all inherit from
-            if (
-                inspect.isclass(obj)
-                and issubclass(obj, Expectation)
-                and not obj.is_abstract()
-            ):
+            if inspect.isclass(obj) and issubclass(obj, Expectation) and not obj.is_abstract():
                 expectations.append(obj)
                 names.append(name)
 

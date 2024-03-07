@@ -86,10 +86,7 @@ def _pandas_column_pair_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
 
     unexpected_list = [
-        value_pair
-        for value_pair in zip(
-            domain_values[column_A_name].values, domain_values[column_B_name].values
-        )
+        value_pair for value_pair in zip(domain_values[column_A_name].values, domain_values[column_B_name].values)
     ]
     if result_format["result_format"] == "COMPLETE":
         return unexpected_list
@@ -175,8 +172,7 @@ def _sqlalchemy_column_pair_map_condition_values(
         query = query.limit(result_format["partial_unexpected_count"])
 
     unexpected_list = [
-        (val.unexpected_values_A, val.unexpected_values_B)
-        for val in execution_engine.execute_query(query).fetchall()
+        (val.unexpected_values_A, val.unexpected_values_B) for val in execution_engine.execute_query(query).fetchall()
     ]
     return unexpected_list
 
@@ -204,9 +200,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    return execution_engine.execute_query(
-        sa.select(sa.func.count()).select_from(selectable)
-    ).scalar()
+    return execution_engine.execute_query(sa.select(sa.func.count()).select_from(selectable)).scalar()
 
 
 def _spark_column_pair_map_condition_values(

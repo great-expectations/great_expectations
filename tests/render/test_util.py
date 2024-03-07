@@ -45,9 +45,7 @@ def test_num_to_str():
     f = 1.23456789012345e-10  # significant digits can come late
     assert num_to_str(f, precision=20) == "1.23456789012345e-10"
     assert num_to_str(f, precision=5) == "≈1.2346e-10"
-    assert (
-        num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
-    )
+    assert num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
     assert num_to_str(f, precision=5, no_scientific=True) == "≈0.00000000012346"
 
     f = 100.0  # floats should have trailing digits and numbers stripped
@@ -72,57 +70,19 @@ def test_resource_key_passes_run_name_filter():
         batch_identifier="f14c3d2f6e8028c2db0c25edabdb0d61",
     )
 
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "profiling"}) is False
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "foofooprofilingfoo"}) is True
+
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "profiling"}) is True
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"equals": "profiling"}
-        )
-        is False
-    )
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"equals": "foofooprofilingfoo"}
-        )
-        is True
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_equals": "foofooprofilingfoo"}) is False
     )
 
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"not_equals": "profiling"}
-        )
-        is True
-    )
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"not_equals": "foofooprofilingfoo"}
-        )
-        is False
-    )
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "profiling"}) is True
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "foobar"}) is False
 
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "profiling"}
-        )
-        is True
-    )
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "foobar"}
-        )
-        is False
-    )
-
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"not_includes": "foobar"}
-        )
-        is True
-    )
-    assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"not_includes": "profiling"}
-        )
-        is False
-    )
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "foobar"}) is True
+    assert resource_key_passes_run_name_filter(resource_key, run_name_filter={"not_includes": "profiling"}) is False
 
     assert (
         resource_key_passes_run_name_filter(
@@ -236,9 +196,7 @@ def test_convert_unexpected_indices_to_df_column_pair_expectation():
         partial_unexpected_counts=partial_unexpected_counts,
     )
     assert list(res) == ["pk_2", "Count"]
-    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
-        "('desk', 'eraser')"
-    ]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == ["('desk', 'eraser')"]
     assert res.iloc[0].tolist() == ["three, four, five", 3]
 
 
@@ -257,9 +215,7 @@ def test_convert_unexpected_indices_to_df_column_pair_expectation_no_id_pk():
         partial_unexpected_counts=partial_unexpected_counts,
     )
     assert list(res) == ["Index", "Count"]
-    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
-        "('desk', 'eraser')"
-    ]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == ["('desk', 'eraser')"]
     assert res.iloc[0].tolist() == ["3, 4, 5", 3]
 
 

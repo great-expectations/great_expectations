@@ -33,18 +33,13 @@ class ColumnValuesLessThanOrEqualToProfileMax(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls: Any, column: str, profile: Any, **kwargs) -> np.ndarray:
         columnPresent = (
-            column.name
-            in profile["global_stats"][
-                "profile_schema"
-            ]  # checks to ensure column exists
+            column.name in profile["global_stats"]["profile_schema"]  # checks to ensure column exists
         )
         transpose = np.array(column).T  # Turns column into a row format for return
         if not (columnPresent):  # Err column in user DF not present in input profile
             return transpose != transpose  # Returns 100% unexpected
 
-        index = profile["global_stats"]["profile_schema"][column.name][
-            0
-        ]  # Gets index of column from profile
+        index = profile["global_stats"]["profile_schema"][column.name][0]  # Gets index of column from profile
 
         dataType = profile["data_stats"][index]["data_type"]  # Checks datatype
         if dataType != "int" and dataType != "float":  # Err non-numerical column
@@ -105,9 +100,7 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
     profiler_opts.structured_options.multiprocess.is_enabled = False
     profileObj = dp.Profiler(df, options=profiler_opts)
     profileReport = profileObj.report(report_options={"output_format": "serializable"})
-    profileReport["global_stats"]["profile_schema"] = dict(
-        profileReport["global_stats"]["profile_schema"]
-    )
+    profileReport["global_stats"]["profile_schema"] = dict(profileReport["global_stats"]["profile_schema"])
 
     examples = [
         {
@@ -171,7 +164,5 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
 
 if __name__ == "__main__":
     # ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin().print_diagnostic_checklist()
-    diagnostics_report = (
-        ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
-    )
+    diagnostics_report = ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
     print(diagnostics_report.generate_checklist())

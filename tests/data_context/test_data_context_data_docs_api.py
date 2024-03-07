@@ -22,9 +22,7 @@ def test_open_docs_with_no_site(mock_webbrowser, context_with_no_sites):
 
 @pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_non_existent_site_raises_error(
-    mock_webbrowser, empty_data_context
-):
+def test_open_docs_with_non_existent_site_raises_error(mock_webbrowser, empty_data_context):
     context = empty_data_context
     with pytest.raises(DataContextError):
         context.open_data_docs(site_name="foo")
@@ -89,9 +87,7 @@ def context_with_multiple_built_sites(empty_data_context):
     assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
-    assert obs[1]["site_url"].endswith(
-        "gx/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert obs[1]["site_url"].endswith("gx/uncommitted/data_docs/another_local_site/index.html")
     assert obs[1]["site_name"] == "another_local_site"
     for site in ["local_site", "another_local_site"]:
         assert os.path.isfile(  # noqa: PTH113
@@ -109,9 +105,7 @@ def context_with_multiple_built_sites(empty_data_context):
 
 @pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_two_local_sites(
-    mock_webbrowser, context_with_multiple_built_sites
-):
+def test_open_docs_with_two_local_sites(mock_webbrowser, context_with_multiple_built_sites):
     context = context_with_multiple_built_sites
     context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 2
@@ -120,16 +114,12 @@ def test_open_docs_with_two_local_sites(
     assert first_call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
     second_call = mock_webbrowser.call_args_list[1][0][0]
     assert second_call.startswith("file:///")
-    assert second_call.endswith(
-        "/gx/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert second_call.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_two_local_sites_specify_open_one(
-    mock_webbrowser, context_with_multiple_built_sites
-):
+def test_open_docs_with_two_local_sites_specify_open_one(mock_webbrowser, context_with_multiple_built_sites):
     context = context_with_multiple_built_sites
     context.open_data_docs(site_name="another_local_site", only_if_exists=False)
 
@@ -170,9 +160,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
-    obs = context.get_docs_sites_urls(
-        site_name="another_local_site", only_if_exists=False
-    )
+    obs = context.get_docs_sites_urls(site_name="another_local_site", only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_name"] == "another_local_site"
 

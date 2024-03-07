@@ -65,9 +65,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         self._glob_directive = glob_directive
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 
@@ -79,9 +77,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         return sorted(path_list)
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return str(Path(self.base_directory).joinpath(path))

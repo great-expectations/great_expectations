@@ -16,9 +16,7 @@ class EmailRenderer(Renderer):
     def render(  # noqa: C901, PLR0912
         self, validation_result=None, data_docs_pages=None, notify_with=None
     ):
-        default_text = (
-            "No validation occurred. Please ensure you passed a validation_result."
-        )
+        default_text = "No validation occurred. Please ensure you passed a validation_result."
         status = "Failed ❌"
 
         title = default_text
@@ -46,10 +44,10 @@ class EmailRenderer(Renderer):
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
-            batch_id = BatchKwargs(
-                validation_result.meta.get("batch_kwargs", {})
-            ).to_id()
-            check_details_text = f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"
+            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
+            check_details_text = (
+                f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"
+            )
 
             if validation_result.success:
                 status = "Success 🎉"
@@ -92,9 +90,7 @@ class EmailRenderer(Renderer):
 
             if "result_reference" in validation_result.meta:
                 result_reference = validation_result.meta["result_reference"]
-                report_element = (
-                    f"- <strong>Validation Report</strong>: {result_reference}</br>"
-                )
+                report_element = f"- <strong>Validation Report</strong>: {result_reference}</br>"
                 html += report_element
 
             if "dataset_reference" in validation_result.meta:
@@ -103,7 +99,9 @@ class EmailRenderer(Renderer):
                 html += report_element
 
         documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
-        footer_section = f'<p>Learn <a href="{documentation_url}">here</a> how to review validation results in Data Docs</p>'
+        footer_section = (
+            f'<p>Learn <a href="{documentation_url}">here</a> how to review validation results in Data Docs</p>'
+        )
         html += footer_section
         return title, html
 
@@ -118,7 +116,9 @@ class EmailRenderer(Renderer):
                         "(Please copy and paste link into a browser to view)</p>",
                     )
                 else:
-                    report_element = f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</p>'
+                    report_element = (
+                        f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</p>'
+                    )
             except Exception as e:
                 logger.warning(
                     f"""EmailRenderer had a problem with generating the docs link.
@@ -127,7 +127,5 @@ class EmailRenderer(Renderer):
                 )
                 return
         else:
-            logger.warning(
-                "No docs link found. Skipping data docs link in the email message."
-            )
+            logger.warning("No docs link found. Skipping data docs link in the email message.")
         return report_element

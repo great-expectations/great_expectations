@@ -63,9 +63,7 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
 
 
 @pytest.mark.postgresql
-def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
-    z_score_validation_result, test_backends
-):
+def test_sa_expect_column_value_z_scores_to_be_less_than_impl(z_score_validation_result, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
 

@@ -112,9 +112,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
@@ -139,15 +137,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if not params.regex:
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -170,9 +164,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -180,15 +172,11 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         )
 
         if not params.get("regex"):
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:

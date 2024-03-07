@@ -83,9 +83,7 @@ class TableChecksum(TableMetricProvider):
             selectable,
             _compute_domain_kwargs,
             _accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.TABLE
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.TABLE)
 
         # get the all column names of table using existing metric.
         columns = metrics.get("table.columns")
@@ -95,13 +93,9 @@ class TableChecksum(TableMetricProvider):
         selectcolumns = select_column_list(columns, ignore_columns)
 
         if execution_engine.engine.dialect.name == "sqlite":
-            cksumquery = get_sqlite_checksum_query(
-                selectable.name, selectcolumns, ignore_columns
-            )
+            cksumquery = get_sqlite_checksum_query(selectable.name, selectcolumns, ignore_columns)
         elif dialect_name == "bigquery":
-            cksumquery = get_bigquery_checksum_query(
-                selectable.name, selectcolumns, ignore_columns
-            )
+            cksumquery = get_bigquery_checksum_query(selectable.name, selectcolumns, ignore_columns)
         else:
             logger.error("sql dialect is not supported: " + dialect_name)
             return 0
@@ -133,9 +127,7 @@ class TableChecksum(TableMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -143,9 +135,7 @@ class TableChecksum(TableMetricProvider):
 def get_bigquery_checksum_query(table_name, selectcolumns, ignore_columns):
     return (
         "select sum(cast(FARM_FINGERPRINT(concat('', "
-        + ",".join(
-            map(lambda x: " IFNULL(cast(" + x + " as string), '')", selectcolumns)
-        )
+        + ",".join(map(lambda x: " IFNULL(cast(" + x + " as string), '')", selectcolumns))
         + "))as NUMERIC)) as cksum from "
         + str(table_name)
     )
@@ -159,9 +149,7 @@ def get_sqlite_checksum_query(table_name, selectcolumns, ignore_columns):
     # checksum or similar hashing function is not there in sqlite so using length function for testing purposes.
     return (
         "select sum(length('' || "
-        + " || ".join(
-            map(lambda x: "coalesce(cast(" + x + " as varchar), '')", selectcolumns)
-        )
+        + " || ".join(map(lambda x: "coalesce(cast(" + x + " as varchar), '')", selectcolumns))
         + ")) as hash from "
         + str(table_name)
     )
@@ -169,9 +157,7 @@ def get_sqlite_checksum_query(table_name, selectcolumns, ignore_columns):
 
 
 def select_column_list(columns, ignore_columns):
-    return filter(
-        lambda x: x not in [x.strip() for x in ignore_columns.split(",")], columns
-    )
+    return filter(lambda x: x not in [x.strip() for x in ignore_columns.split(",")], columns)
 
 
 class TableChecksumValues(TableMetricProvider):
@@ -235,9 +221,7 @@ class TableChecksumValues(TableMetricProvider):
     ):
         # set ignore_columns to '' if it is not provided.
         if configuration and "ignore_columns" in configuration.kwargs:
-            runtime_configuration["ignore_columns"] = configuration.kwargs[
-                "ignore_columns"
-            ]
+            runtime_configuration["ignore_columns"] = configuration.kwargs["ignore_columns"]
         else:
             runtime_configuration["ignore_columns"] = ""
 
@@ -246,17 +230,11 @@ class TableChecksumValues(TableMetricProvider):
 
         # set table value to other_table_name in metric configuration.
         if configuration:
-            table_row_count_metric_config_other["table"] = configuration.kwargs[
-                "other_table_name"
-            ]
+            table_row_count_metric_config_other["table"] = configuration.kwargs["other_table_name"]
 
         return {
-            "table.checksum.self": MetricConfiguration(
-                "table.checksum", metric.metric_domain_kwargs
-            ),
-            "table.checksum.other": MetricConfiguration(
-                "table.checksum", table_row_count_metric_config_other
-            ),
+            "table.checksum.self": MetricConfiguration("table.checksum", metric.metric_domain_kwargs),
+            "table.checksum.other": MetricConfiguration("table.checksum", table_row_count_metric_config_other),
         }
 
 
@@ -438,9 +416,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         "meta": None,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ):
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -453,19 +429,13 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         """
 
         try:
-            assert (
-                "other_table_name" in configuration.kwargs
-            ), "other_table_name is required"
-            assert isinstance(
-                configuration.kwargs["other_table_name"], str
-            ), "other_table_name must be a string"
+            assert "other_table_name" in configuration.kwargs, "other_table_name is required"
+            assert isinstance(configuration.kwargs["other_table_name"], str), "other_table_name must be a string"
 
             if "ignore_columns" in configuration.kwargs:
                 pattern = re.compile(r"^(\w+)(,\s*\w+)*$")
                 assert (
-                    True
-                    if (pattern.match(configuration.kwargs["ignore_columns"]))
-                    else False
+                    True if (pattern.match(configuration.kwargs["ignore_columns"])) else False
                 ), "ignore_columns input is not valid. Please provide comma seperated columns list"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

@@ -83,9 +83,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="column_list", param_type=RendererValueType.ARRAY
-        )
+        renderer_configuration.add_param(name="column_list", param_type=RendererValueType.ARRAY)
         params = renderer_configuration.params
 
         if not params.column_list:
@@ -160,9 +158,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         expected_column_list = self._get_success_kwargs().get("column_list")
         actual_column_list = metrics.get("table.columns")
 
-        if expected_column_list is None or list(actual_column_list) == list(
-            expected_column_list
-        ):
+        if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
             return {
                 "success": True,
                 "result": {"observed_value": list(actual_column_list)},
@@ -174,15 +170,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
             column_index = range(number_of_columns)
 
             # Create a list of the mismatched details
-            compared_lists = list(
-                zip_longest(
-                    column_index, list(expected_column_list), list(actual_column_list)
-                )
-            )
+            compared_lists = list(zip_longest(column_index, list(expected_column_list), list(actual_column_list)))
             mismatched = [
-                {"Expected Column Position": i, "Expected": k, "Found": v}
-                for i, k, v in compared_lists
-                if k != v
+                {"Expected Column Position": i, "Expected": k, "Found": v} for i, k, v in compared_lists if k != v
             ]
             return {
                 "success": False,

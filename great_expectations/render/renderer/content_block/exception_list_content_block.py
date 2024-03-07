@@ -49,9 +49,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     }
 
     _default_element_styling = {
-        "classes": [
-            "list-group-item"
-        ],  # "d-flex", "justify-content-between", "align-items-center"],
+        "classes": ["list-group-item"],  # "d-flex", "justify-content-between", "align-items-center"],
         "params": {
             "column": {"classes": ["badge", "badge-primary"]},
             "expectation_type": {"classes": ["text-monospace"]},
@@ -61,9 +59,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, render_object, **kwargs):
-        return super().render(
-            render_object=render_object, exception_list_content_block=True
-        )
+        return super().render(render_object=render_object, exception_list_content_block=True)
 
     @classmethod
     def _missing_content_block_fn(
@@ -74,9 +70,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
@@ -97,9 +91,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                             "params": {
                                 "column": column,
                                 "expectation_type": result.expectation_config.expectation_type,
-                                "exception_message": result.exception_info[
-                                    "exception_message"
-                                ],
+                                "exception_message": result.exception_info["exception_message"],
                             },
                             "styling": styling,
                         },

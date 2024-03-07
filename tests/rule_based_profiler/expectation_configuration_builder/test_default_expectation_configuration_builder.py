@@ -39,13 +39,11 @@ def test_meta_not_dict_exception(
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -105,13 +103,11 @@ def test_condition_not_string_exception(
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -170,13 +166,11 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -252,14 +246,12 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     condition: Optional[str] = None
     max_user_id: int = 999999999999
 
-    min_user_id_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricMultiBatchParameterBuilder",
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-        )
+    min_user_id_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="MetricMultiBatchParameterBuilder",
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
     )
     validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         min_user_id_parameter_builder_config,
@@ -298,13 +290,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -365,13 +355,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -432,18 +420,14 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -503,18 +487,14 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -574,18 +554,14 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -645,18 +621,14 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -716,18 +688,14 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -787,18 +755,14 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -858,18 +822,14 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999, "answer": 42})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -929,18 +889,14 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999, "answer": 42})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -1000,18 +956,14 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999, "answer": 42})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -1071,18 +1023,14 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables({"max_user_id": 999999999999, "answer": 42})
     parameter_container = ParameterContainer(parameter_nodes=None)
     domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,

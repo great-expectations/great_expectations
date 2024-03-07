@@ -73,9 +73,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     batch_id: str = Field(description="Batch id")
     metric_name: str = Field(description="Metric name")
     value: _ValueType = Field(description="Metric value")
-    exception: Optional[MetricException] = Field(
-        description="Exception info if thrown", default=None
-    )
+    exception: Optional[MetricException] = Field(description="Exception info if thrown", default=None)
 
     @classmethod
     def update_forward_refs(cls):
@@ -102,9 +100,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     def _get_properties(cls):
         """in pydandic v2 we can use computed_field.
         https://docs.pydantic.dev/latest/usage/computed_fields/"""
-        properties = [
-            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
-        ]
+        properties = [prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)]
         return properties
 
     @override
@@ -216,7 +212,5 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
 class MetricRun(MetricRepositoryBaseModel):
     """Collection of Metric objects produced during the same execution run."""
 
-    data_asset_id: Union[uuid.UUID, None] = Field(
-        description="Data asset id", default=None
-    )
+    data_asset_id: Union[uuid.UUID, None] = Field(description="Data asset id", default=None)
     metrics: Sequence[Metric]

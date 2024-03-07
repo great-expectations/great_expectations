@@ -13,9 +13,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
     variables_multi_part_name_parameter_container,
     rule_state_with_domains_and_parameters,
 ):
-    with pytest.raises(
-        gx_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
-    ):
+    with pytest.raises(gx_exceptions.ProfilerExecutionError, match=r".+start with \$.*"):
         # noinspection PyUnusedLocal
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name="mean",
@@ -309,21 +307,15 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
     elif domain_name == "date":
         domain = column_Date_domain
     else:
-        raise ValueError(
-            'Supported "domain_name" parameter values are "age" and "date".'
-        )
+        raise ValueError('Supported "domain_name" parameter values are "age" and "date".')
 
     if value_accessor is None:
         value_accessor = ""
 
     if use_value_suffix:
-        fully_qualified_parameter_name_for_value = (
-            f"{fully_qualified_parameter_name}.value{value_accessor}"
-        )
+        fully_qualified_parameter_name_for_value = f"{fully_qualified_parameter_name}.value{value_accessor}"
     else:
-        fully_qualified_parameter_name_for_value = (
-            f"{fully_qualified_parameter_name}{value_accessor}"
-        )
+        fully_qualified_parameter_name_for_value = f"{fully_qualified_parameter_name}{value_accessor}"
 
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
@@ -336,9 +328,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
     )
 
     if test_details:
-        fully_qualified_parameter_name_for_details = (
-            f"{fully_qualified_parameter_name}.details"
-        )
+        fully_qualified_parameter_name_for_details = f"{fully_qualified_parameter_name}.details"
 
         assert (
             get_parameter_value_by_fully_qualified_parameter_name(

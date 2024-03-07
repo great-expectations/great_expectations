@@ -48,10 +48,7 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "isort": "Use `isort` to sort packages. Default behavior.",
-        "ruff": (
-            "Use `ruff` instead of `isort` to sort imports."
-            " This will eventually become the default."
-        ),
+        "ruff": ("Use `ruff` instead of `isort` to sort imports." " This will eventually become the default."),
         "pty": _PTY_HELP_DESC,
     }
 )
@@ -168,9 +165,7 @@ def upgrade(ctx: Context, path: str = "."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(
-    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
-):
+def hooks(ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -444,10 +439,7 @@ def docker(  # noqa: PLR0913
                 "-f",
                 "docker/Dockerfile.tests",
                 f"--tag {name}:{tag}",
-                *[
-                    f"--build-arg {arg}"
-                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
-                ],
+                *[f"--build-arg {arg}" for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]],
                 ".",
             ]
         )
@@ -505,9 +497,7 @@ def type_schema(
         _iter_all_registered_types,
     )
 
-    schema_dir_root: Final[pathlib.Path] = (
-        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
-    )
+    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
         print(f"🗑️ removing schema directory and contents - {file_count} .json files")
@@ -540,10 +530,7 @@ def type_schema(
             print(f"{name} - {model.__name__}.json")
             continue
 
-        if (
-            datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
-        ):
+        if datasource_dir.name.startswith("Pandas") and _PANDAS_SCHEMA_VERSION != pandas.__version__:
             print(
                 f"🙈  {name} - was generated with pandas"
                 f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
@@ -572,7 +559,9 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
         os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     )
     curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    exit_message = (
+        f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    )
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -586,14 +575,10 @@ def api_docs(ctx: Context):
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
     sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
 
-    doc_builder = SphinxInvokeDocsBuilder(
-        ctx=ctx, api_docs_source_path=sphinx_api_docs_source_dir, repo_root=repo_root
-    )
+    doc_builder = SphinxInvokeDocsBuilder(ctx=ctx, api_docs_source_path=sphinx_api_docs_source_dir, repo_root=repo_root)
 
     doc_builder.build_docs()
 
@@ -620,9 +605,7 @@ def docs(
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
 
     print("Running invoke docs from:", repo_root)
     old_cwd = pathlib.Path.cwd()
@@ -666,9 +649,7 @@ def public_api_task(
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="public-api", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="public-api", correct_dir=repo_root)
 
     # Docs folder is not reachable from install of Great Expectations
     api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
@@ -677,9 +658,7 @@ def public_api_task(
     public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
 
-def _exit_with_error_if_not_run_from_correct_dir(
-    task_name: str, correct_dir: Union[pathlib.Path, None] = None
-) -> None:
+def _exit_with_error_if_not_run_from_correct_dir(task_name: str, correct_dir: Union[pathlib.Path, None] = None) -> None:
     """Exit if the command was not run from the correct directory."""
     if not correct_dir:
         correct_dir = pathlib.Path(__file__).parent
@@ -754,9 +733,7 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
-    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
-        str, ...
-    ] = tuple()
+    extra_pytest_args: tuple[str, ...] = tuple()  # TODO: remove this once remove the custom flagging system
 
 
 MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
@@ -882,10 +859,7 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     tokens = marker_string.split()
     if len(tokens) == 1:
         yield tokens[0]
-    elif (
-        marker_string
-        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
-    ):
+    elif marker_string == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds":
         yield "aws_creds"
         yield "athena"
         yield "clickhouse"
@@ -1054,11 +1028,7 @@ def ci_tests(  # noqa: PLR0913
         for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_options.append(extra_pytest_arg)
 
-    marker_statement = (
-        f"'all_backends or {marker}'"
-        if _add_all_backends_marker(marker)
-        else f"'{marker}'"
-    )
+    marker_statement = f"'all_backends or {marker}'" if _add_all_backends_marker(marker) else f"'{marker}'"
 
     pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
     ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
@@ -1120,9 +1090,7 @@ def service(
                 )
 
             if restart_services:
-                print(
-                    f"  Removing existing containers and building latest for {service_name} ..."
-                )
+                print(f"  Removing existing containers and building latest for {service_name} ...")
                 cmds.extend(
                     [
                         "docker",

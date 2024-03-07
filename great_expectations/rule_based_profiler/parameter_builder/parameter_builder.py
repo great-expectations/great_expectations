@@ -100,9 +100,7 @@ class ParameterBuilder(ABC, Builder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -121,9 +119,7 @@ class ParameterBuilder(ABC, Builder):
 
         self._name = name
 
-        self._evaluation_parameter_builder_configs = (
-            evaluation_parameter_builder_configs
-        )
+        self._evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
         self._evaluation_parameter_builders = init_rule_parameter_builders(
             parameter_builder_configs=evaluation_parameter_builder_configs,
@@ -152,12 +148,10 @@ class ParameterBuilder(ABC, Builder):
         """
         runtime_configuration = runtime_configuration or {}
 
-        fully_qualified_parameter_names: List[str] = (
-            get_fully_qualified_parameter_names(
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
 
         # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
@@ -167,10 +161,8 @@ class ParameterBuilder(ABC, Builder):
 
         if (
             recompute_existing_parameter_values
-            or self.raw_fully_qualified_parameter_name
-            not in fully_qualified_parameter_names
-            or self.json_serialized_fully_qualified_parameter_name
-            not in fully_qualified_parameter_names
+            or self.raw_fully_qualified_parameter_name not in fully_qualified_parameter_names
+            or self.json_serialized_fully_qualified_parameter_name not in fully_qualified_parameter_names
         ):
             self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
@@ -220,9 +212,7 @@ class ParameterBuilder(ABC, Builder):
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """
         # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
-        evaluation_parameter_builders: List[ParameterBuilder] = (
-            self.evaluation_parameter_builders
-        )
+        evaluation_parameter_builders: List[ParameterBuilder] = self.evaluation_parameter_builders
 
         if not evaluation_parameter_builders:
             return
@@ -243,8 +233,7 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder: ParameterBuilder
         for evaluation_parameter_builder in evaluation_parameter_builders:
             if (
-                evaluation_parameter_builder.raw_fully_qualified_parameter_name
-                not in fully_qualified_parameter_names
+                evaluation_parameter_builder.raw_fully_qualified_parameter_name not in fully_qualified_parameter_names
                 or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
                 not in fully_qualified_parameter_names
             ):
@@ -342,12 +331,8 @@ class ParameterBuilder(ABC, Builder):
     def get_metrics(  # noqa: PLR0913
         self,
         metric_name: str,
-        metric_domain_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
-        metric_value_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
+        metric_domain_kwargs: Optional[Union[Union[str, dict], List[Union[str, dict]]]] = None,
+        metric_value_kwargs: Optional[Union[Union[str, dict], List[Union[str, dict]]]] = None,
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
@@ -476,11 +461,9 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
-        graph: ValidationGraph = (
-            validator.metrics_calculator.build_metric_dependency_graph(
-                metric_configurations=metrics_to_resolve,
-                runtime_configuration=runtime_configuration,
-            )
+        graph: ValidationGraph = validator.metrics_calculator.build_metric_dependency_graph(
+            metric_configurations=metrics_to_resolve,
+            runtime_configuration=runtime_configuration,
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
@@ -511,14 +494,12 @@ specified (empty "metric_name" value detected)."""
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
                     batch_ids=batch_ids,
-                    metric_attributes=Attributes(
-                        metric_configuration.metric_value_kwargs
-                    ),
+                    metric_attributes=Attributes(metric_configuration.metric_value_kwargs),
                     metric_values_by_batch_id=None,
                 )
-                attributed_resolved_metrics_map[
-                    metric_configuration.metric_value_kwargs_id
-                ] = attributed_resolved_metrics
+                attributed_resolved_metrics_map[metric_configuration.metric_value_kwargs_id] = (
+                    attributed_resolved_metrics
+                )
 
             if metric_configuration.id in resolved_metrics:
                 resolved_metric_value = resolved_metrics[metric_configuration.id]
@@ -550,9 +531,7 @@ specified (empty "metric_name" value detected)."""
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
                 }
-                attributed_resolved_metrics_map[metric_attributes_id] = (
-                    attributed_resolved_metrics
-                )
+                attributed_resolved_metrics_map[metric_attributes_id] = attributed_resolved_metrics
 
         # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 
@@ -577,9 +556,7 @@ specified (empty "metric_name" value detected)."""
             "metric_configuration": {
                 "metric_name": metric_name,
                 "domain_kwargs": domain_kwargs,
-                "metric_value_kwargs": metric_value_kwargs[0]
-                if len(metric_value_kwargs) == 1
-                else metric_value_kwargs,
+                "metric_value_kwargs": metric_value_kwargs[0] if len(metric_value_kwargs) == 1 else metric_value_kwargs,
             },
             "num_batches": len(batch_ids),
         }
@@ -650,8 +627,7 @@ specified (empty "metric_name" value detected)."""
             # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
             metric_value_shape_idx: int
             axes: List[np.ndarray] = [
-                np.indices(dimensions=(metric_value_shape_idx,))[0]
-                for metric_value_shape_idx in metric_value_shape
+                np.indices(dimensions=(metric_value_shape_idx,))[0] for metric_value_shape_idx in metric_value_shape
             ]
             metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
@@ -668,8 +644,7 @@ specified (empty "metric_name" value detected)."""
                         batch_metric_values.append(0.0)
                     elif not (
                         (  # noqa: PLR1701
-                            isinstance(metric_value, (str, np.str_))
-                            and is_parseable_date(value=metric_value)
+                            isinstance(metric_value, (str, np.str_)) and is_parseable_date(value=metric_value)
                         )
                         or isinstance(metric_value, datetime.datetime)
                         or isinstance(metric_value, numbers.Number)
@@ -688,9 +663,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(
 
             metric_values_by_batch_id[batch_id] = np.asarray(batch_metric_values)
 
-        attributed_resolved_metrics.metric_values_by_batch_id = (
-            metric_values_by_batch_id
-        )
+        attributed_resolved_metrics.metric_values_by_batch_id = metric_values_by_batch_id
 
     @staticmethod
     def _get_best_candidate_above_threshold(
@@ -758,8 +731,6 @@ def init_parameter_builder(
     parameter_builder: ParameterBuilder = instantiate_class_from_config(
         config=parameter_builder_config,
         runtime_environment={"data_context": data_context},
-        config_defaults={
-            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-        },
+        config_defaults={"module_name": "great_expectations.rule_based_profiler.parameter_builder"},
     )
     return parameter_builder

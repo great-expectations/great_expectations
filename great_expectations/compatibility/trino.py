@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from great_expectations.compatibility.not_imported import NotImported
 
-TRINO_NOT_IMPORTED = NotImported(
-    "trino connection components are not installed, please 'pip install trino'"
-)
+TRINO_NOT_IMPORTED = NotImported("trino connection components are not installed, please 'pip install trino'")
 
 try:
     import trino

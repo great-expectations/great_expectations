@@ -23,12 +23,8 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
-    DataProfilerProfileMetricProvider
-):
-    metric_name = (
-        "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold"
-    )
+class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(DataProfilerProfileMetricProvider):
+    metric_name = "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold"
 
     value_keys = (
         "profile_path",
@@ -68,9 +64,7 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
 
             # adds stats if generic stat key is provided
             numerical_diff_statistics_copy = copy.deepcopy(numerical_diff_statistics)
-            stats = replace_generic_operator_in_report_keys(
-                stats, numerical_diff_statistics_copy
-            )
+            stats = replace_generic_operator_in_report_keys(stats, numerical_diff_statistics_copy)
 
             if col not in columns:  # Makes sure column exists within profile schema
                 requested_columns[col] = "Column requested was not found."
@@ -90,9 +84,7 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
                 diff_val = col_data_stats[stat]
                 if diff_val == "unchanged":  # In the case there is no delta
                     diff_val = 0
-                is_greater = is_value_greater_than_or_equal_to_threshold(
-                    diff_val, threshold
-                )
+                is_greater = is_value_greater_than_or_equal_to_threshold(diff_val, threshold)
                 if not is_greater:
                     requested_columns[col][stat] = {
                         "threshold": threshold,
@@ -122,10 +114,7 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
             runtime_configuration=runtime_configuration,
         )
 
-        if (
-            metric.metric_name
-            == "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold"
-        ):
+        if metric.metric_name == "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold":
             dependencies["data_profiler.profile_diff"] = MetricConfiguration(
                 metric_name="data_profiler.profile_diff",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
@@ -140,9 +129,7 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
         return dependencies
 
 
-class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
-    ProfileNumericColumnsDiffExpectation
-):
+class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(ProfileNumericColumnsDiffExpectation):
     """Expect a statistic's value for a given column of a DataProfiler difference report to be greater than or equal to the specified threshold.
 
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
@@ -191,9 +178,7 @@ class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
 
     example_profile = dp.Profiler(df, options=profiler_opts)
 
-    profile_path = (
-        "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
-    )
+    profile_path = "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
 
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
@@ -294,9 +279,7 @@ class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
         },
     ]
 
-    profile_metric = (
-        "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold"
-    )
+    profile_metric = "data_profiler.profile_numeric_columns_diff_greater_than_or_equal_to_threshold"
 
     success_keys = (
         "profile_path",
@@ -346,7 +329,5 @@ class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold().run_diagnostics()
-    )
+    diagnostics_report = ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold().run_diagnostics()
     print(diagnostics_report.generate_checklist())

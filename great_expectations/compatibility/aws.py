@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from great_expectations.compatibility.not_imported import NotImported
 
-BOTO_NOT_IMPORTED = NotImported(
-    "AWS S3 connection components are not installed, please 'pip install boto3 botocore'"
-)
+BOTO_NOT_IMPORTED = NotImported("AWS S3 connection components are not installed, please 'pip install boto3 botocore'")
 REDSHIFT_NOT_IMPORTED = NotImported(
     "AWS Redshift connection component is not installed, please 'pip install sqlalchemy_redshift'"
 )

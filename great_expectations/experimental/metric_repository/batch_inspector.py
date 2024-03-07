@@ -22,15 +22,11 @@ class BatchInspector:
     It uses MetricRetriever objects to retrieve metrics.
     """
 
-    def __init__(
-        self, context: AbstractDataContext, metric_retrievers: list[MetricRetriever]
-    ):
+    def __init__(self, context: AbstractDataContext, metric_retrievers: list[MetricRetriever]):
         self._context = context
         self._metric_retrievers = metric_retrievers
 
-    def compute_metric_run(
-        self, data_asset_id: uuid.UUID, batch_request: BatchRequest
-    ) -> MetricRun:
+    def compute_metric_run(self, data_asset_id: uuid.UUID, batch_request: BatchRequest) -> MetricRun:
         metrics: list[Metric] = []
         for metric_retriever in self._metric_retrievers:
             metrics.extend(metric_retriever.get_metrics(batch_request=batch_request))

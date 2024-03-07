@@ -51,11 +51,7 @@ except ImportError:
     # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
     # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
     CompressionDict = Dict[str, Any]
-    CompressionOptions = Optional[  # type: ignore[misc]
-        Union[
-            Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict
-        ]
-    ]
+    CompressionOptions = Optional[Union[Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict]]  # type: ignore[misc]
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]  # type: ignore[misc]
     StorageOptions = Optional[Dict[str, Any]]  # type: ignore[misc]
 
@@ -77,9 +73,7 @@ DtypeBackend = Literal["pyarrow", "numpy_nullable"]
 
 logger = logging.getLogger(__name__)
 
-PANDAS_VERSION: float = float(
-    f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}"
-)
+PANDAS_VERSION: float = float(f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}")
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
@@ -264,11 +258,7 @@ def _extract_io_methods(
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
     # filter removed
     if blacklist:
-        return [
-            t
-            for t in member_functions
-            if t[0] not in blacklist and t[0].startswith("read_")
-        ]
+        return [t for t in member_functions if t[0] not in blacklist and t[0].startswith("read_")]
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
@@ -339,17 +329,13 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     return str_to_eval
 
 
-def _to_pydantic_fields(
-    sig_tuple: _SignatureTuple, skip_first_param: bool
-) -> Dict[str, _FieldSpec]:
+def _to_pydantic_fields(sig_tuple: _SignatureTuple, skip_first_param: bool) -> Dict[str, _FieldSpec]:
     """
     Extract the parameter details in a structure that can be easily unpacked to
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
-        sig_tuple.signature.parameters.items()
-    )
+    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(sig_tuple.signature.parameters.items())
     if skip_first_param:
         # skip the first parameter as this corresponds to the path/buffer/io field
         next(all_parameters)
@@ -367,15 +353,11 @@ def _to_pydantic_fields(
             else:
                 type_ = _get_annotation_type(param)
                 if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                    logger.debug(
-                        f"`{param_name}` has no supported types. Field skipped"
-                    )
+                    logger.debug(f"`{param_name}` has no supported types. Field skipped")
                     FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
                     continue
 
-            fields_dict[param_name] = _FieldSpec(
-                type=_replace_builtins(type_), default_value=_get_default_value(param)
-            )
+            fields_dict[param_name] = _FieldSpec(type=_replace_builtins(type_), default_value=_get_default_value(param))
 
     return fields_dict
 
@@ -431,9 +413,7 @@ def _generate_pandas_data_asset_models(
         fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
 
         type_name = signature_tuple.name.split("read_")[1]
-        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
-            type_name, f"{type_name.capitalize()}Asset"
-        )
+        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(type_name, f"{type_name.capitalize()}Asset")
 
         try:
             asset_model = _create_pandas_asset_model(

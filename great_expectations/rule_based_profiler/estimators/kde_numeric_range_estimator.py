@@ -102,19 +102,15 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
         if quantile_statistic_interpolation_method is None:
-            quantile_statistic_interpolation_method = (
-                DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD
-            )
+            quantile_statistic_interpolation_method = DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD
 
         # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        bw_method: Optional[Union[str, float, Callable]] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.configuration.bw_method,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        bw_method: Optional[Union[str, float, Callable]] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.configuration.bw_method,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         # If "bw_method" (bandwidth method) is omitted (default), then "scott" is used.
         if bw_method is None:

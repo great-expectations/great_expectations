@@ -47,16 +47,12 @@ def test_bootstrap_point_estimate_efficacy(
     """
     Efficacy means the custom bootstrap mean method approximates the sample +/- efficacy tolerance
     """
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
-    )
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
-    )
+    false_positive_rate: np.float64 = bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
+        "false_positive_rate"
+    ]
+    distribution_samples: pd.DataFrame = bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
+        "distribution_samples"
+    ]
 
     distribution_types: pd.Index = distribution_samples.columns
     distribution: str
@@ -78,9 +74,7 @@ def test_bootstrap_point_estimate_efficacy(
         actual_false_positive_rates[distribution] = (
             1.0
             - np.sum(
-                distribution_samples[distribution].between(
-                    lower_quantile_point_estimate, upper_quantile_point_estimate
-                )
+                distribution_samples[distribution].between(lower_quantile_point_estimate, upper_quantile_point_estimate)
             )
             / distribution_samples.shape[0]
         )
@@ -256,19 +250,17 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
     replace_nan_with_zero: bool = True
     reduce_scalar_metric: bool = True
 
-    metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_parameter_builder",
-            metric_name=metric_name,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            single_batch_mode=False,
-            enforce_numeric_metric=enforce_numeric_metric,
-            replace_nan_with_zero=replace_nan_with_zero,
-            reduce_scalar_metric=reduce_scalar_metric,
-            evaluation_parameter_builder_configs=None,
-            data_context=None,
-        )
+    metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_parameter_builder",
+        metric_name=metric_name,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        single_batch_mode=False,
+        enforce_numeric_metric=enforce_numeric_metric,
+        replace_nan_with_zero=replace_nan_with_zero,
+        reduce_scalar_metric=reduce_scalar_metric,
+        evaluation_parameter_builder_configs=None,
+        data_context=None,
     )
     if metric_name == "my_metric_6":
         with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:

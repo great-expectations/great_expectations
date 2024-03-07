@@ -204,9 +204,7 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {"mostly": 1}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

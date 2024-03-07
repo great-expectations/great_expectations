@@ -32,9 +32,7 @@ def sqlite_engine():
 
 @pytest.fixture
 def sqlite_batch_with_table_name(sqlite_engine) -> SqlAlchemyExecutionEngine:
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
@@ -47,13 +45,9 @@ def sqlite_batch_with_table_name(sqlite_engine) -> SqlAlchemyExecutionEngine:
 def sqlite_batch_with_selectable_with_temp_table(
     sqlite_engine,
 ) -> SqlAlchemyExecutionEngine:
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, selectable=selectable, create_temp_table=True
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, selectable=selectable, create_temp_table=True)
     execution_engine.load_batch_data("__", batch_data)
     return execution_engine
 
@@ -62,9 +56,7 @@ def sqlite_batch_with_selectable_with_temp_table(
 def sqlite_batch_with_selectable_without_temp_table(
     sqlite_engine,
 ) -> SqlAlchemyExecutionEngine:
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
@@ -158,10 +150,7 @@ def test_table_head_sqlite(
     assert res.shape == expected_shape
     assert res.columns.tolist() == expected_columns
     assert res.values.tolist() == expected_values
-    assert (
-        len(get_sqlite_temp_table_names_from_engine(engine.engine))
-        == expected_temp_tables
-    )
+    assert len(get_sqlite_temp_table_names_from_engine(engine.engine)) == expected_temp_tables
 
 
 @pytest.mark.sqlite
@@ -190,9 +179,7 @@ def test_limit_included_in_head_query(
     engine = request.getfixturevalue(execution_engine)
     table_head = TableHead()
 
-    with mock.patch(
-        "great_expectations.compatibility.sqlalchemy_and_pandas.pd.read_sql"
-    ) as mock_node:
+    with mock.patch("great_expectations.compatibility.sqlalchemy_and_pandas.pd.read_sql") as mock_node:
         table_head._sqlalchemy(
             execution_engine=engine,
             metric_domain_kwargs={},

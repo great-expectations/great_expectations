@@ -42,10 +42,7 @@ def instantiate_class_from_config(  # noqa: PLR0912
             module_name = config_defaults.pop("module_name")
         except KeyError:
             raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config,
-                    config_defaults,
-                )
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a module_name key."
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -64,10 +61,7 @@ def instantiate_class_from_config(  # noqa: PLR0912
             class_name = config_defaults.pop("class_name")
         except KeyError:
             raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                    config,
-                    config_defaults,
-                )
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a class_name key."
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -144,9 +138,7 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
     Returns:
         string of variable name e.g. SOME_VAR or None if not parsable. If there are multiple substitution variables this currently returns the first e.g. $SOME_$TRING -> $SOME_
     """
-    substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName(
-        "substitution_variable_name"
-    )
+    substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName("substitution_variable_name")
     curly_brace_parser = "${" + substitution_variable_name + "}"
     non_curly_brace_parser = "$" + substitution_variable_name
     both_parser = curly_brace_parser | non_curly_brace_parser
@@ -197,9 +189,7 @@ class PasswordMasker:
                 return engine.url.__repr__()
             # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
             except Exception as e:
-                logger.warning(
-                    f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}"
-                )
+                logger.warning(f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}")
         else:
             warnings.warn(
                 "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
@@ -246,9 +236,7 @@ class PasswordMasker:
         )
 
         if replace_prefix is not None:
-            masked_url = masked_url.replace(
-                replace_prefix["temporary"], replace_prefix["original"]
-            )
+            masked_url = masked_url.replace(replace_prefix["temporary"], replace_prefix["original"])
 
         return masked_url
 

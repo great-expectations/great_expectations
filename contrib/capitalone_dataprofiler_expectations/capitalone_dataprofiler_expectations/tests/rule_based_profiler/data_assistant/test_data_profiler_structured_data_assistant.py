@@ -36,9 +36,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -77,9 +75,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 def bobby_profile_data_profiler_structured_data_assistant_result(
     bobby_columnar_table_multi_batch_probabilistic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -123,19 +119,13 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         bobby_profile_data_profiler_structured_data_assistant_result.to_dict()
     )
     assert (
-        set(profile_data_profiler_structured_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
+        set(profile_data_profiler_structured_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
         bobby_profile_data_profiler_structured_data_assistant_result.to_json_dict()
         == profile_data_profiler_structured_data_assistant_result_as_dict
     )
-    assert (
-        len(
-            bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
-        )
-        == 2
-    )
+    assert len(bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules) == 2
 
 
 @pytest.mark.big
@@ -145,8 +135,10 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+    suite: ExpectationSuite = (
+        bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
     )
 
     assert suite is not None and len(suite.expectations) > 0
@@ -180,9 +172,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         parameter_values_for_fully_qualified_parameter_names,
     ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-    assert (
-        num_metrics == 50
-    )  # 2 * ((numeric_rule: 6 int + 9 float + 1 string) + (float_rule: 9 float))
+    assert num_metrics == 50  # 2 * ((numeric_rule: 6 int + 9 float + 1 string) + (float_rule: 9 float))
 
 
 @pytest.mark.big

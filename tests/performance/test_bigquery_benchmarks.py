@@ -56,11 +56,7 @@ def test_taxi_trips_benchmark(
     """
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
 
-    html_dir = (
-        os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath)
-        if write_data_docs
-        else None
-    )
+    html_dir = os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath) if write_data_docs else None
 
     checkpoint = taxi_benchmark_util.create_checkpoint(
         number_of_tables=number_of_tables,
@@ -115,23 +111,16 @@ def test_taxi_trips_benchmark(
     expected_results = taxi_benchmark_util.expected_validation_results()
 
     for run_result in result.run_results.values():
-        actual_results = [
-            result.to_json_dict()
-            for result in run_result["validation_result"]["results"]
-        ]
+        actual_results = [result.to_json_dict() for result in run_result["validation_result"]["results"]]
         assert len(expected_results) == len(actual_results)
         for expected_result, actual_result in zip(expected_results, actual_results):
-            description_for_error_reporting = (
-                f'{expected_result["expectation_config"]["expectation_type"]} result'
-            )
+            description_for_error_reporting = f'{expected_result["expectation_config"]["expectation_type"]} result'
             _recursively_assert_actual_result_matches_expected_result_keys(
                 expected_result, actual_result, description_for_error_reporting
             )
 
 
-def _recursively_assert_actual_result_matches_expected_result_keys(
-    expected, actual, description_for_error_reporting
-):
+def _recursively_assert_actual_result_matches_expected_result_keys(expected, actual, description_for_error_reporting):
     """Assert that actual equals expected while ignoring key order and extra keys not present in expected.
 
     Expected mappings may be a subset of actual mappings -- this can be useful to make tests less fragile so that they
@@ -167,12 +156,8 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
 def _skip_if_bigquery_performance_tests_not_enabled(
     pytestconfig: _pytest.config.Config,
 ):
-    if not pytestconfig.getoption("bigquery") or not pytestconfig.getoption(
-        "performance_tests"
-    ):
-        pytest.skip(
-            "This test requires --bigquery and --performance-tests flags to run."
-        )
+    if not pytestconfig.getoption("bigquery") or not pytestconfig.getoption("performance_tests"):
+        pytest.skip("This test requires --bigquery and --performance-tests flags to run.")
 
 
 if __name__ == "__main__":

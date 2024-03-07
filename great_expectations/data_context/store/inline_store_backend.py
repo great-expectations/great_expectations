@@ -112,9 +112,7 @@ class InlineStoreBackend(StoreBackend):
             # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail
             for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
                 config_commented_map_from_yaml.get("datasources", {}).pop(name, None)  # type: ignore[union-attr,arg-type,call-arg]
-            value = DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
+            value = DataContextConfig.from_commented_map(commented_map=config_commented_map_from_yaml)
             self._data_context.set_config(value)
         elif resource_name is not None:
             project_config[resource_type][resource_name] = value
@@ -124,9 +122,7 @@ class InlineStoreBackend(StoreBackend):
         self._save_changes()
 
     @override
-    def _move(
-        self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict
-    ) -> None:
+    def _move(self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict) -> None:
         raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
@@ -156,9 +152,7 @@ class InlineStoreBackend(StoreBackend):
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
-                raise StoreBackendError(
-                    "Cannot list keys in a non-iterable section of a project config"
-                )
+                raise StoreBackendError("Cannot list keys in a non-iterable section of a project config")
             keys = list((key,) for key in config_values.keys())
 
         return keys
@@ -180,9 +174,7 @@ class InlineStoreBackend(StoreBackend):
                 "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"
             )
         elif not self._has_key(key):
-            raise StoreBackendError(
-                f"Could not find a value associated with key `{key}`"
-            )
+            raise StoreBackendError(f"Could not find a value associated with key `{key}`")
 
         del self._data_context.config[resource_type][resource_name]
 

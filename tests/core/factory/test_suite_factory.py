@@ -49,9 +49,7 @@ def test_suite_factory_get_raises_error_on_missing_key():
     set_context(context)
 
     # Act
-    with pytest.raises(
-        DataContextError, match=f"ExpectationSuite with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ExpectationSuite with name {name} was not found."):
         factory.get(name=name)
 
     # Assert
@@ -166,9 +164,7 @@ def _test_suite_factory_add_success(context):
     # Arrange
     name = "test-suite"
     suite = ExpectationSuite(name=name)
-    with pytest.raises(
-        DataContextError, match=f"ExpectationSuite with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ExpectationSuite with name {name} was not found."):
         context.suites.get(name)
     # Act
     created_suite = context.suites.add(suite=suite)
@@ -216,15 +212,11 @@ class TestSuiteFactoryAnalytics:
         suite = ExpectationSuite(name=name)
 
         # Act
-        with mock.patch(
-            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
-        ) as mock_submit:
+        with mock.patch("great_expectations.core.factory.suite_factory.submit_event", autospec=True) as mock_submit:
             _ = context.suites.add(suite=suite)
 
         # Assert
-        mock_submit.assert_called_once_with(
-            event=ExpectationSuiteCreatedEvent(expectation_suite_id=suite.id)
-        )
+        mock_submit.assert_called_once_with(event=ExpectationSuiteCreatedEvent(expectation_suite_id=suite.id))
 
     @pytest.mark.filesystem
     def test_suite_factory_delete_emits_event_filesystem(self, empty_data_context):
@@ -241,12 +233,8 @@ class TestSuiteFactoryAnalytics:
         suite = context.suites.add(suite=suite)
 
         # Act
-        with mock.patch(
-            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
-        ) as mock_submit:
+        with mock.patch("great_expectations.core.factory.suite_factory.submit_event", autospec=True) as mock_submit:
             context.suites.delete(suite=suite)
 
         # Assert
-        mock_submit.assert_called_once_with(
-            event=ExpectationSuiteDeletedEvent(expectation_suite_id=suite.id)
-        )
+        mock_submit.assert_called_once_with(event=ExpectationSuiteDeletedEvent(expectation_suite_id=suite.id))

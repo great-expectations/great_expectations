@@ -29,9 +29,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     # Monkey-patch dialect for testing purposes.
     validator.execution_engine.dialect_module = aws.sqlalchemy_athena
 
-    result = validator.expect_column_values_to_be_in_type_list(
-        "col", type_list=["string", "boolean"]
-    )
+    result = validator.expect_column_values_to_be_in_type_list("col", type_list=["string", "boolean"])
 
     assert result == ExpectationValidationResult(
         success=True,
@@ -79,9 +77,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     # Monkey-patch dialect for testing purposes.
     validator.execution_engine.dialect_module = aws.sqlalchemy_athena
 
-    result = validator.expect_column_values_to_be_in_type_list(
-        "col", type_list=["string", "boolean"]
-    )
+    result = validator.expect_column_values_to_be_in_type_list("col", type_list=["string", "boolean"])
 
     assert result == ExpectationValidationResult(
         success=True,
@@ -131,9 +127,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
         context=context,
     )
 
-    result = validator.expect_column_values_to_be_in_type_list(
-        "col", type_list=["Int32Dtype"]
-    )
+    result = validator.expect_column_values_to_be_in_type_list("col", type_list=["Int32Dtype"])
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={

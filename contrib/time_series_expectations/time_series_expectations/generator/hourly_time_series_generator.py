@@ -72,10 +72,7 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
             outlier_alpha=1000000,  # outlier_alpha,
             noise_scale=noise_scale,
         )
-        return (
-            np.exp(hourly_seasonality_series) * np.repeat(daily_time_series, 24)[:size]
-            + hourly_outliers
-        )
+        return np.exp(hourly_seasonality_series) * np.repeat(daily_time_series, 24)[:size] + hourly_outliers
 
     def generate_df(
         self,

@@ -68,9 +68,9 @@ def test_get_sampler_method(underscore_prefix: str, sampler_method_name: str):
 
     sampler_method_name_with_prefix = f"{underscore_prefix}{sampler_method_name}"
 
-    assert data_partitioner.get_sampler_method(
-        sampler_method_name_with_prefix
-    ) == getattr(data_partitioner, sampler_method_name)
+    assert data_partitioner.get_sampler_method(sampler_method_name_with_prefix) == getattr(
+        data_partitioner, sampler_method_name
+    )
 
 
 def clean_query_for_comparison(query_string: str) -> str:
@@ -121,9 +121,7 @@ def pytest_parsed_arguments(request):
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(
-            dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
-        )
+        pytest.param(dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect)
         for dialect_name in GXSqlDialect.get_all_dialects()
     ],
 )
@@ -140,21 +138,15 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
     """
     if hasattr(pytest_parsed_arguments, str(dialect_name.value)):
         if not getattr(pytest_parsed_arguments, str(dialect_name.value)):
-            pytest.skip(
-                f"Skipping {dialect_name.value!s} since the --{dialect_name.value!s} pytest flag was not set"
-            )
+            pytest.skip(f"Skipping {dialect_name.value!s} since the --{dialect_name.value!s} pytest flag was not set")
     else:
-        pytest.skip(
-            f"Skipping {dialect_name.value!s} since the dialect is not runnable via pytest flag"
-        )
+        pytest.skip(f"Skipping {dialect_name.value!s} since the dialect is not runnable via pytest flag")
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
         def __init__(self, dialect_name: GXSqlDialect):
             self._dialect_name = dialect_name
-            self._connection_string = self.dialect_name_to_connection_string(
-                dialect_name
-            )
+            self._connection_string = self.dialect_name_to_connection_string(dialect_name)
 
         DIALECT_TO_CONNECTION_STRING_STUB: dict = {
             GXSqlDialect.POSTGRESQL: "postgresql://",
@@ -189,20 +181,14 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
             dialect_name: GXSqlDialect = self._dialect_name
             if dialect_name == GXSqlDialect.ORACLE:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name="sqlalchemy.dialects.oracle"
-                ).dialect()
+                return import_library_module(module_name="sqlalchemy.dialects.oracle").dialect()
             elif dialect_name == GXSqlDialect.SNOWFLAKE:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name="snowflake.sqlalchemy.snowdialect"
-                ).dialect()
+                return import_library_module(module_name="snowflake.sqlalchemy.snowdialect").dialect()
             elif dialect_name == GXSqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name="sqlalchemy_dremio.pyodbc"
-                ).dialect()
+                return import_library_module(module_name="sqlalchemy_dremio.pyodbc").dialect()
             # NOTE: AJB 20220512 Redshift dialect is not yet fully supported.
             # The below throws an `AttributeError: type object 'RedshiftDialect_psycopg2' has no attribute 'positional'`
             # elif dialect_name == "redshift":
@@ -211,21 +197,15 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
             #     ).RedshiftDialect
             elif dialect_name == GXSqlDialect.BIGQUERY:
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name=self._BIGQUERY_MODULE_NAME
-                ).dialect()
+                return import_library_module(module_name=self._BIGQUERY_MODULE_NAME).dialect()
             elif dialect_name == GXSqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
                 # noinspection PyUnresolvedReferences
-                return import_library_module(
-                    module_name="teradatasqlalchemy.dialect"
-                ).dialect()
+                return import_library_module(module_name="teradatasqlalchemy.dialect").dialect()
             else:
                 return sa.create_engine(self._connection_string).dialect
 
-    mock_execution_engine: MockSqlAlchemyExecutionEngine = (
-        MockSqlAlchemyExecutionEngine(dialect_name=dialect_name)
-    )
+    mock_execution_engine: MockSqlAlchemyExecutionEngine = MockSqlAlchemyExecutionEngine(dialect_name=dialect_name)
 
     data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
 
@@ -253,9 +233,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(  # noqa: C90
     else:
         query_str: str = clean_query_for_comparison(query)
 
-    expected: str = clean_query_for_comparison(
-        dialect_name_to_sql_statement(dialect_name)
-    )
+    expected: str = clean_query_for_comparison(dialect_name_to_sql_statement(dialect_name))
 
     assert query_str == expected
 
@@ -291,9 +269,7 @@ def test_sqlite_sample_using_limit(sa):
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.execute_query(
-            sa.select(sa.text("*")).select_from(batch_data.selectable)
-        )
+        batch_data.execution_engine.execute_query(sa.select(sa.text("*")).select_from(batch_data.selectable))
         .mappings()
         .fetchall()
     )
@@ -306,9 +282,7 @@ def test_sqlite_sample_using_limit(sa):
 
 @pytest.mark.sqlite
 def test_sample_using_random(sqlite_view_engine, test_df):
-    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
 
     p: float
     batch_spec: SqlAlchemyDatasourceBatchSpec
@@ -320,9 +294,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
-    add_dataframe_to_db(
-        df=test_df_0, name="test_table_0", con=my_execution_engine.engine
-    )
+    add_dataframe_to_db(df=test_df_0, name="test_table_0", con=my_execution_engine.engine)
 
     p = 1.0
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -359,9 +331,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # Second, verify that realistic case always returns different random sample of rows.
 
     test_df_1: pd.DataFrame = test_df
-    add_dataframe_to_db(
-        df=test_df_1, name="test_table_1", con=my_execution_engine.engine
-    )
+    add_dataframe_to_db(df=test_df_1, name="test_table_1", con=my_execution_engine.engine)
 
     p = 2.0e-1
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -401,9 +371,7 @@ def test_sample_using_random_batch_spec_test_table_name_required():
     fake_execution_engine = None
     batch_spec = BatchSpec()
     with pytest.raises(ValueError) as e:
-        SqlAlchemyDataSampler.sample_using_random(
-            execution_engine=fake_execution_engine, batch_spec=batch_spec
-        )
+        SqlAlchemyDataSampler.sample_using_random(execution_engine=fake_execution_engine, batch_spec=batch_spec)
     assert "table name must be specified" in str(e.value)
 
 
@@ -412,9 +380,7 @@ def test_sample_using_random_batch_spec_test_sampling_kwargs_required():
     fake_execution_engine = None
     batch_spec = BatchSpec(table_name="table")
     with pytest.raises(ValueError) as e:
-        SqlAlchemyDataSampler.sample_using_random(
-            execution_engine=fake_execution_engine, batch_spec=batch_spec
-        )
+        SqlAlchemyDataSampler.sample_using_random(execution_engine=fake_execution_engine, batch_spec=batch_spec)
         assert "sample_using_random" in str(e.value)
 
 
@@ -426,7 +392,5 @@ def test_sample_using_random_batch_spec_test_sampling_kwargs_p_required(
     fake_execution_engine = None
     batch_spec = BatchSpec(table_name="table", sampling_kwargs=sampling_kwargs)
     with pytest.raises(ValueError) as e:
-        SqlAlchemyDataSampler.sample_using_random(
-            execution_engine=fake_execution_engine, batch_spec=batch_spec
-        )
+        SqlAlchemyDataSampler.sample_using_random(execution_engine=fake_execution_engine, batch_spec=batch_spec)
         assert "sample_using_random" in str(e.value)

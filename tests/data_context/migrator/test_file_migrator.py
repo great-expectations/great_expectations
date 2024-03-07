@@ -45,9 +45,7 @@ def construct_file_migrator() -> Callable:
 
 
 @pytest.mark.big
-def test_migrate_scaffolds_filesystem(
-    tmp_path: pathlib.Path, file_migrator: FileMigrator
-):
+def test_migrate_scaffolds_filesystem(tmp_path: pathlib.Path, file_migrator: FileMigrator):
     # Construct and run migrator
     tmp_path.mkdir(exist_ok=True)
     with working_directory(str(tmp_path)):
@@ -92,9 +90,7 @@ def test_migrate_transfers_store_contents(
 
     # Check proper filesystem interaction
     root = pathlib.Path(migrated_context.root_directory)
-    expectations_dir = root.joinpath(
-        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value
-    )
+    expectations_dir = root.joinpath(DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value)
     contents = sorted(str(f.stem) for f in expectations_dir.glob("*.json"))
 
     assert contents == suite_names
@@ -197,17 +193,13 @@ def test_migrate_transfers_doc_sites(
 
     # Check proper config updates
     expected_site_names = [default_site_name] + site_names
-    actual_site_names = sorted(
-        site_url["site_name"] for site_url in migrated_context.get_docs_sites_urls()
-    )
+    actual_site_names = sorted(site_url["site_name"] for site_url in migrated_context.get_docs_sites_urls())
 
     assert actual_site_names == expected_site_names
 
     # Check proper filesystem interaction
     root = pathlib.Path(migrated_context.root_directory)
-    docs_sites_dir = root.joinpath(
-        DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value
-    )
+    docs_sites_dir = root.joinpath(DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value)
     contents = sorted(str(f.stem) for f in docs_sites_dir.glob("*"))
 
     assert contents == expected_site_names

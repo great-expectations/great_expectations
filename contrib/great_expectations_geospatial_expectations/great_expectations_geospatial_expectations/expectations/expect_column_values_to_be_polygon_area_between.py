@@ -212,9 +212,7 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -235,21 +233,15 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
                 template_str += "and have area less than or equal $min_area and greater than or equal $max_area in square kilometers"
 
             elif params["min_value"] is None:
-                template_str += (
-                    "and have area greater than or equal $max_area in square kilometers"
-                )
+                template_str += "and have area greater than or equal $max_area in square kilometers"
 
             elif params["max_value"] is None:
-                template_str += (
-                    "and have area less than or equal $min_area in square kilometers"
-                )
+                template_str += "and have area less than or equal $min_area in square kilometers"
 
         if params["mostly"] is None:
             template_str += "."
         else:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["min_value"] is not None and params["max_value"] is not None:
                 template_str += ", at least $mostly_pct % of the time."

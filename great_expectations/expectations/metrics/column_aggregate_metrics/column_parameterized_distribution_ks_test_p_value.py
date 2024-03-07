@@ -36,9 +36,7 @@ class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider)
 
         # Format arguments for scipy.kstest
         if isinstance(params, dict):
-            positional_parameters = _scipy_distribution_positional_args_from_dict(
-                distribution, params
-            )
+            positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
         else:
             positional_parameters = params
 

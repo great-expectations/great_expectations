@@ -53,9 +53,7 @@ def file_get_unfiltered_batch_definition_list_fn(
     # Use a combination of a list and set to preserve iteration order
     batch_definition_list: list[BatchDefinition] = list()
     batch_definition_set = set()
-    for (
-        batch_definition
-    ) in data_connector._get_batch_definition_list_from_data_references_cache():
+    for batch_definition in data_connector._get_batch_definition_list_from_data_references_cache():
         if (
             data_connector._batch_definition_matches_batch_request(
                 batch_definition=batch_definition, batch_request=batch_request
@@ -143,9 +141,7 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = (
-            self._ensure_regex_groups_include_data_reference_key(regex=batching_regex)
-        )
+        self._batching_regex: re.Pattern = self._ensure_regex_groups_include_data_reference_key(regex=batching_regex)
         self._regex_parser: RegExParser = RegExParser(
             regex_pattern=self._batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -153,9 +149,7 @@ class FilePathDataConnector(DataConnector):
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
-        self._get_unfiltered_batch_definition_list_fn = (
-            get_unfiltered_batch_definition_list_fn
-        )
+        self._get_unfiltered_batch_definition_list_fn = get_unfiltered_batch_definition_list_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
@@ -169,9 +163,7 @@ class FilePathDataConnector(DataConnector):
 
     # Interface Method
     @override
-    def get_batch_definition_list(
-        self, batch_request: BatchRequest
-    ) -> List[BatchDefinition]:
+    def get_batch_definition_list(self, batch_request: BatchRequest) -> List[BatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -189,8 +181,8 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        batch_definition_list: List[BatchDefinition] = (
-            self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+        batch_definition_list: List[BatchDefinition] = self._get_unfiltered_batch_definition_list_fn(
+            self, batch_request
         )
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
@@ -206,9 +198,7 @@ class FilePathDataConnector(DataConnector):
             data_connector_query_dict.update(
                 {
                     "batch_filter_parameters": {
-                        key: value
-                        for key, value in batch_request.options.items()
-                        if value is not None
+                        key: value for key, value in batch_request.options.items() if value is not None
                     }
                 }
             )
@@ -235,9 +225,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
     # Interface Method
@@ -310,11 +298,7 @@ class FilePathDataConnector(DataConnector):
         def _matching_criterion(
             batch_definition_list: Union[List[BatchDefinition], None],
         ) -> bool:
-            return (
-                (batch_definition_list is not None)
-                if matched
-                else (batch_definition_list is None)
-            )
+            return (batch_definition_list is not None) if matched else (batch_definition_list is None)
 
         data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
         # noinspection PyTypeChecker
@@ -332,9 +316,7 @@ class FilePathDataConnector(DataConnector):
 
     # Interface Method
     @override
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _generate_batch_spec_parameters_from_batch_definition(self, batch_definition: BatchDefinition) -> dict:
         """
         This interface method examines "BatchDefinition" object and converts it to exactly one "data_reference" handle,
         based on partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
@@ -364,9 +346,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
-    def _ensure_regex_groups_include_data_reference_key(
-        self, regex: re.Pattern
-    ) -> re.Pattern:
+    def _ensure_regex_groups_include_data_reference_key(self, regex: re.Pattern) -> re.Pattern:
         """
         Args:
             regex: regex pattern for filtering data references; if reserved group name "path" (FILE_PATH_BATCH_SPEC_KEY)
@@ -400,13 +380,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
                 mapped_batch_definition_list: List[BatchDefinition] | None = (
-                    self._map_data_reference_string_to_batch_definition_list_using_regex(
-                        data_reference=data_reference
-                    )
+                    self._map_data_reference_string_to_batch_definition_list_using_regex(data_reference=data_reference)
                 )
-                self._data_references_cache[data_reference] = (
-                    mapped_batch_definition_list
-                )
+                self._data_references_cache[data_reference] = mapped_batch_definition_list
 
         return self._data_references_cache
 
@@ -447,10 +423,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _map_data_reference_string_to_batch_definition_list_using_regex(
         self, data_reference: str
     ) -> List[BatchDefinition] | None:
-        batch_identifiers: Optional[IDDict] = (
-            self._convert_data_reference_string_to_batch_identifiers_using_regex(
-                data_reference=data_reference
-            )
+        batch_identifiers: Optional[IDDict] = self._convert_data_reference_string_to_batch_identifiers_using_regex(
+            data_reference=data_reference
         )
         if batch_identifiers is None:
             return None
@@ -467,36 +441,26 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             )
         ]
 
-    def _convert_data_reference_string_to_batch_identifiers_using_regex(
-        self, data_reference: str
-    ) -> Optional[IDDict]:
+    def _convert_data_reference_string_to_batch_identifiers_using_regex(self, data_reference: str) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._regex_parser.get_matches(
-            target=data_reference
-        )
+        matches: Optional[re.Match] = self._regex_parser.get_matches(target=data_reference)
         if matches is None:
             return None
 
-        num_all_matched_group_values: int = (
-            self._regex_parser.get_num_all_matched_group_values()
-        )
+        num_all_matched_group_values: int = self._regex_parser.get_num_all_matched_group_values()
 
         # Check for `(?P<name>)` named group syntax
         defined_group_name_to_group_index_mapping: Dict[str, int] = (
             self._regex_parser.get_named_group_name_to_group_index_mapping()
         )
-        defined_group_name_indexes: Set[int] = set(
-            defined_group_name_to_group_index_mapping.values()
-        )
+        defined_group_name_indexes: Set[int] = set(defined_group_name_to_group_index_mapping.values())
         defined_group_name_to_group_value_mapping: Dict[str, str] = matches.groupdict()
 
         all_matched_group_values: List[str] = list(matches.groups())
 
         assert len(all_matched_group_values) == num_all_matched_group_values
 
-        group_name_to_group_value_mapping: Dict[str, str] = copy.deepcopy(
-            defined_group_name_to_group_value_mapping
-        )
+        group_name_to_group_value_mapping: Dict[str, str] = copy.deepcopy(defined_group_name_to_group_value_mapping)
 
         idx: int
         group_idx: int

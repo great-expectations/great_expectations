@@ -120,8 +120,10 @@ def test_evaluation_parameter_store_methods(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
@@ -158,8 +160,10 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
@@ -171,11 +175,7 @@ def test_evaluation_parameter_store_methods(
 
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
-    run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
-    )
+    run_id = RunIdentifier(run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         data_asset_name=None,
@@ -208,11 +208,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
-    run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
-    )
+    run_id = RunIdentifier(run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         data_asset_name=None,

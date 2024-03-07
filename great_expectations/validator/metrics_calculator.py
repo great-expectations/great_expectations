@@ -67,9 +67,7 @@ class MetricsCalculator:
             domain_kwargs = {}
 
         if domain_kwargs.get("batch_id") is None:
-            domain_kwargs["batch_id"] = (
-                self._execution_engine.batch_manager.active_batch_id
-            )
+            domain_kwargs["batch_id"] = self._execution_engine.batch_manager.active_batch_id
 
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(
@@ -101,9 +99,7 @@ class MetricsCalculator:
             domain_kwargs = {}
 
         if domain_kwargs.get("batch_id") is None:
-            domain_kwargs["batch_id"] = (
-                self._execution_engine.batch_manager.active_batch_id
-            )
+            domain_kwargs["batch_id"] = self._execution_engine.batch_manager.active_batch_id
 
         df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
@@ -199,9 +195,7 @@ class MetricsCalculator:
         Returns:
             Resulting "ValidationGraph" object.
         """
-        graph: ValidationGraph = ValidationGraph(
-            execution_engine=self._execution_engine
-        )
+        graph: ValidationGraph = ValidationGraph(execution_engine=self._execution_engine)
 
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
@@ -241,9 +235,7 @@ class MetricsCalculator:
         )
 
         if aborted_metrics_info:
-            logger.warning(
-                f"Exceptions\n{aborted_metrics_info!s}\noccurred while resolving metrics."
-            )
+            logger.warning(f"Exceptions\n{aborted_metrics_info!s}\noccurred while resolving metrics.")
 
         return (
             resolved_metrics,

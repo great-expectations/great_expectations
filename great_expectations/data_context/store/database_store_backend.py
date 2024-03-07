@@ -48,14 +48,10 @@ class DatabaseStoreBackend(StoreBackend):
             store_name=store_name,
         )
         if not sa:
-            raise gx_exceptions.DataContextError(
-                "ModuleNotFoundError: No module named 'sqlalchemy'"
-            )
+            raise gx_exceptions.DataContextError("ModuleNotFoundError: No module named 'sqlalchemy'")
 
         if not self.fixed_length_key:
-            raise gx_exceptions.InvalidConfigError(
-                "DatabaseStoreBackend requires use of a fixed-length-key"
-            )
+            raise gx_exceptions.InvalidConfigError("DatabaseStoreBackend requires use of a fixed-length-key")
 
         self._schema_name = None
         self._credentials = credentials
@@ -88,17 +84,13 @@ class DatabaseStoreBackend(StoreBackend):
         cols = []
         for column_ in key_columns:
             if column_ == "value":
-                raise gx_exceptions.InvalidConfigError(
-                    "'value' cannot be used as a key_element name"
-                )
+                raise gx_exceptions.InvalidConfigError("'value' cannot be used as a key_element name")
             cols.append(sa.Column(column_, sa.String, primary_key=True))
         cols.append(sa.Column("value", sa.String))
         try:
             table = sa.Table(table_name, meta, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
-            if {str(col.name).lower() for col in table.columns} != (
-                set(key_columns) | {"value"}
-            ):
+            if {str(col.name).lower() for col in table.columns} != (set(key_columns) | {"value"}):
                 raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
@@ -107,9 +99,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 if self._schema_name:
                     with self.engine.begin() as connection:
-                        connection.execute(
-                            sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
-                        )
+                        connection.execute(sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"))
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
@@ -172,9 +162,7 @@ class DatabaseStoreBackend(StoreBackend):
             create_engine_kwargs["connect_args"] = connect_args
 
         if "private_key_path" in credentials:
-            options, create_engine_kwargs = self._get_sqlalchemy_key_pair_auth_url(
-                drivername, credentials
-            )
+            options, create_engine_kwargs = self._get_sqlalchemy_key_pair_auth_url(drivername, credentials)
         else:
             options = get_sqlalchemy_url(drivername, **credentials)
 
@@ -184,9 +172,7 @@ class DatabaseStoreBackend(StoreBackend):
         return engine
 
     @staticmethod
-    def _get_sqlalchemy_key_pair_auth_url(
-        drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
+    def _get_sqlalchemy_key_pair_auth_url(drivername: str, credentials: dict) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -208,9 +194,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
-                    password=private_key_passphrase.encode()
-                    if private_key_passphrase
-                    else None,
+                    password=private_key_passphrase.encode() if private_key_passphrase else None,
                     backend=default_backend(),
                 )
             except ValueError as e:
@@ -239,12 +223,7 @@ class DatabaseStoreBackend(StoreBackend):
             sa.select(sa.column("value"))
             .select_from(self._table)
             .where(
-                sa.and_(
-                    *(
-                        getattr(self._table.columns, key_col) == val
-                        for key_col, val in zip(self.key_columns, key)
-                    )
-                )
+                sa.and_(*(getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)))
             )
         )
         try:
@@ -283,9 +262,7 @@ class DatabaseStoreBackend(StoreBackend):
             if self._get(key) == value:
                 logger.info(f"Key {key!s} already exists with the same value.")
             else:
-                raise gx_exceptions.StoreBackendError(
-                    f"Integrity error {e!s} while trying to store key"
-                )
+                raise gx_exceptions.StoreBackendError(f"Integrity error {e!s} while trying to store key")
 
     @override
     def _move(self) -> None:  # type: ignore[override]
@@ -314,12 +291,7 @@ class DatabaseStoreBackend(StoreBackend):
             sa.select(sa.func.count(sa.column("value")))
             .select_from(self._table)
             .where(
-                sa.and_(
-                    *(
-                        getattr(self._table.columns, key_col) == val
-                        for key_col, val in zip(self.key_columns, key)
-                    )
-                )
+                sa.and_(*(getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)))
             )
         )
         try:
@@ -350,20 +322,13 @@ class DatabaseStoreBackend(StoreBackend):
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
-            sa.and_(
-                *(
-                    getattr(self._table.columns, key_col) == val
-                    for key_col, val in zip(self.key_columns, key)
-                )
-            )
+            sa.and_(*(getattr(self._table.columns, key_col) == val for key_col, val in zip(self.key_columns, key)))
         )
         try:
             with self.engine.begin() as connection:
                 return connection.execute(delete_statement)
         except SQLAlchemyError as e:
-            raise gx_exceptions.StoreBackendError(
-                f"Unable to delete key: got sqlalchemy error {e!s}"
-            )
+            raise gx_exceptions.StoreBackendError(f"Unable to delete key: got sqlalchemy error {e!s}")
 
     @property
     @override

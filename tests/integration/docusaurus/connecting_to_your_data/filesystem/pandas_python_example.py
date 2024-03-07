@@ -31,9 +31,7 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "base_directory"
-] = "../data/"
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["base_directory"] = "../data/"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
@@ -57,9 +55,7 @@ batch_request = RuntimeBatchRequest(
 batch_request.runtime_parameters["path"] = "./data/yellow_tripdata_sample_2019-01.csv"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -77,16 +73,12 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata_sample_2019-01.csv" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "default_inferred_data_connector_name"
-    ]
+    context.get_available_data_asset_names()["taxi_datasource"]["default_inferred_data_connector_name"]
 )

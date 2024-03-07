@@ -56,9 +56,7 @@ def test_basic_instantiation():
         "alpha-3.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -102,9 +100,7 @@ def test_instantiation_batching_regex_does_not_match_paths():
         "alpha-3.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -155,9 +151,7 @@ def test_return_all_batch_definitions_unsorted():
         "alex_20200819_1300.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -174,13 +168,11 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_s3_data_asset",
-                options={},
-            )
+    unsorted_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_s3_data_asset",
+            options={},
         )
     )
     expected: List[BatchDefinition] = [
@@ -547,9 +539,7 @@ def test_return_only_unique_batch_definitions():
         "B/file_2.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector
 
@@ -602,13 +592,11 @@ def test_return_only_unique_batch_definitions():
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_s3_data_asset",
-                options={},
-            )
+    unsorted_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_s3_data_asset",
+            options={},
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -632,9 +620,7 @@ def test_alpha():
         "test_dir_alpha/D.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -666,12 +652,8 @@ def test_alpha():
     my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(
-        datasource_name="BASE", data_asset_name="A", options={}
-    )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list(
-        batch_request=my_batch_request
-    )
+    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     assert len(my_batch_definition_list) == 0
 
     my_batch_request = BatchRequest(
@@ -679,9 +661,7 @@ def test_alpha():
         data_asset_name="my_s3_data_asset",
         options={"part_1": "B"},
     )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list(
-        batch_request=my_batch_request
-    )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     assert len(my_batch_definition_list) == 1
 
 
@@ -713,9 +693,7 @@ def test_foxtrot():
         "test_dir_foxtrot/D/D-eee.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: DataConnector
 
@@ -812,8 +790,8 @@ def test_foxtrot():
         data_asset_name="my_s3_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
 
@@ -973,35 +951,23 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
     assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
 
-    datasource = context.sources.add_or_update_pandas_s3(
-        name="s3_datasource", bucket=bucket
-    )
+    datasource = context.sources.add_or_update_pandas_s3(name="s3_datasource", bucket=bucket)
 
-    asset = datasource.add_csv_asset(
-        name="titanic_dataset", batching_regex="titanic.csv"
-    )
+    asset = datasource.add_csv_asset(name="titanic_dataset", batching_regex="titanic.csv")
 
     request = asset.build_batch_request()
 
     context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
-    validator = context.get_validator(
-        batch_request=request, expectation_suite_name="test_titanic"
-    )
+    validator = context.get_validator(batch_request=request, expectation_suite_name="test_titanic")
 
-    validator.expect_column_values_to_be_between(
-        column="col1", min_value=0, max_value=120
-    )
-    validator.expect_column_values_to_be_between(
-        column="col2", min_value=0, max_value=1
-    )
+    validator.expect_column_values_to_be_between(column="col1", min_value=0, max_value=120)
+    validator.expect_column_values_to_be_between(column="col2", min_value=0, max_value=1)
 
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     checkpoint = context.add_or_update_checkpoint(
         name="my_checkpoint",
-        validations=[
-            {"batch_request": request, "expectation_suite_name": "test_titanic"}
-        ],
+        validations=[{"batch_request": request, "expectation_suite_name": "test_titanic"}],
     )
 
     # Should not raise an error
@@ -1056,35 +1022,23 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
     assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
 
-    datasource = context.sources.add_or_update_pandas_s3(
-        name="s3_datasource", bucket=bucket
-    )
+    datasource = context.sources.add_or_update_pandas_s3(name="s3_datasource", bucket=bucket)
 
-    asset = datasource.add_csv_asset(
-        name="titanic_dataset", batching_regex="titanic.csv"
-    )
+    asset = datasource.add_csv_asset(name="titanic_dataset", batching_regex="titanic.csv")
 
     request = asset.build_batch_request()
 
     context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
-    validator = context.get_validator(
-        batch_request=request, expectation_suite_name="test_titanic"
-    )
+    validator = context.get_validator(batch_request=request, expectation_suite_name="test_titanic")
 
-    validator.expect_column_values_to_be_between(
-        column="col1", min_value=0, max_value=120
-    )
-    validator.expect_column_values_to_be_between(
-        column="col2", min_value=0, max_value=1
-    )
+    validator.expect_column_values_to_be_between(column="col1", min_value=0, max_value=120)
+    validator.expect_column_values_to_be_between(column="col2", min_value=0, max_value=1)
 
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     checkpoint = context.add_or_update_checkpoint(
         name="my_checkpoint",
-        validations=[
-            {"batch_request": request, "expectation_suite_name": "test_titanic"}
-        ],
+        validations=[{"batch_request": request, "expectation_suite_name": "test_titanic"}],
     )
 
     with pytest.raises(IndexError):

@@ -55,16 +55,12 @@ def datasource(
     datasource = context.sources.add_or_update_pandas(
         datasource=datasource,
     )
-    assert (
-        datasource.name == new_datasource_name
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.name == new_datasource_name, "The datasource was not updated in the previous method call."
     datasource.name = datasource_name
     datasource = context.add_or_update_datasource(  # type: ignore[assignment]
         datasource=datasource,
     )
-    assert (
-        datasource.name == datasource_name
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.name == datasource_name, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -145,18 +141,14 @@ def test_interactive_validator(
     Note: There is no need to test getting a Validator or using Validator.head(). That is already
     tested in the validator fixture.
     """
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_column_values_to_not_be_null(
-            column="datetime",
-            mostly=1,
-        )
+    expectation_validation_result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        column="datetime",
+        mostly=1,
     )
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+@pytest.mark.xfail(reason="1.0 API requires a backend change. Test should pass once #2623 is merged")
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

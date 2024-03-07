@@ -69,9 +69,7 @@ class SliceValidator:
         return cls(v)
 
 
-BatchSlice: TypeAlias = Union[
-    Sequence[Union[StrictInt, None]], SliceValidator, StrictInt, StrictStr
-]
+BatchSlice: TypeAlias = Union[Sequence[Union[StrictInt, None]], SliceValidator, StrictInt, StrictStr]
 
 
 def build_batch_filter(
@@ -115,10 +113,8 @@ def build_batch_filter(
 "{type(custom_filter_function)!s}", which is illegal.
             """
         )
-    batch_filter_parameters: Optional[Union[dict, IDDict]] = (
-        data_connector_query_dict.get(  # type: ignore[assignment]
-            "batch_filter_parameters"
-        )
+    batch_filter_parameters: Optional[Union[dict, IDDict]] = data_connector_query_dict.get(  # type: ignore[assignment]
+        "batch_filter_parameters"
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
@@ -128,9 +124,7 @@ def build_batch_filter(
                 """
             )
         if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
-            raise gx_exceptions.BatchFilterError(
-                'All batch_filter_parameters keys must strings (Python "str").'
-            )
+            raise gx_exceptions.BatchFilterError('All batch_filter_parameters keys must strings (Python "str").')
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[BatchSlice] = data_connector_query_dict.get(  # type: ignore[assignment]
         "index"
@@ -146,9 +140,7 @@ type and value given are "{type(limit)!s}" and "{limit}", respectively, which is
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    parsed_index: slice | None = (
-        parse_batch_slice(batch_slice=index) if index is not None else None
-    )
+    parsed_index: slice | None = parse_batch_slice(batch_slice=index) if index is not None else None
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
@@ -167,9 +159,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
         delimiter: str = ":"
         if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
             parsed_batch_slice = parsed_batch_slice[1:-1]
-        elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(
-            ")"
-        ):
+        elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
             parsed_batch_slice = parsed_batch_slice[6:-1]
             delimiter = ","
 
@@ -190,9 +180,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
 
 
 def _batch_slice_from_string(batch_slice: str) -> slice:
-    slice_params: list[int | None] = _batch_slice_string_to_slice_params(
-        batch_slice=batch_slice
-    )
+    slice_params: list[int | None] = _batch_slice_string_to_slice_params(batch_slice=batch_slice)
 
     if len(slice_params) == 0:
         return slice(0, None, None)
@@ -203,9 +191,7 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
     elif len(slice_params) == 3:  # noqa: PLR2004
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
-        raise ValueError(
-            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
-        )
+        raise ValueError(f"batch_slice string must take the form of a python slice, but {batch_slice} was provided.")
 
 
 def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) -> slice:
@@ -218,9 +204,7 @@ def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) ->
     elif len(batch_slice) == 3:  # noqa: PLR2004
         return slice(batch_slice[0], batch_slice[1], batch_slice[2])
     else:
-        raise ValueError(
-            f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
-        )
+        raise ValueError(f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.')
 
 
 def _batch_slice_from_int(batch_slice: int) -> slice:
@@ -245,9 +229,7 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
     elif isinstance(batch_slice, (list, tuple)):
         return_slice = _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
-        raise TypeError(
-            f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."
-        )
+        raise TypeError(f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed.")
     logger.info(f"batch_slice: {batch_slice} was parsed to: {return_slice}")
     return return_slice
 
@@ -327,9 +309,7 @@ class BatchFilter:
                 selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:
                 selected_batch_definitions = list(
-                    itertools.chain.from_iterable(
-                        [selected_batch_definitions[self.index]]
-                    )
+                    itertools.chain.from_iterable([selected_batch_definitions[self.index]])
                 )
         return selected_batch_definitions
 
@@ -343,8 +323,7 @@ class BatchFilter:
 
                 for batch_filter_parameter, val in self.batch_filter_parameters.items():
                     if not (
-                        batch_filter_parameter in batch_identifiers
-                        and batch_identifiers[batch_filter_parameter] == val
+                        batch_filter_parameter in batch_identifiers and batch_identifiers[batch_filter_parameter] == val
                     ):
                         return False
 

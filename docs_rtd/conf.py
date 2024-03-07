@@ -228,9 +228,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (index_doc, "great_expectations", "great_expectations Documentation", [author], 1)
-]
+man_pages = [(index_doc, "great_expectations", "great_expectations Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -300,22 +298,17 @@ def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
             or f"*TODO: {annotation.get('title')} Description*"
         )
         how_to_guide_url = (
-            annotation.get("how_to_guide_url")
-            or "https://docs.greatexpectations.io/en/latest/how_to_guides.html"
+            annotation.get("how_to_guide_url") or "https://docs.greatexpectations.io/en/latest/how_to_guides.html"
         )
         annotation["how_to_guide_url"] = how_to_guide_url
         annotation["description"] = description
 
         if annotation["maturity_details"].get("expectation_completeness"):
             feature_annotation_admonition += (
-                feature_annotation_template
-                + expectation_completeness_template
-                + icon_template
+                feature_annotation_template + expectation_completeness_template + icon_template
             ).format(**annotation)
         else:
-            feature_annotation_admonition += (
-                feature_annotation_template + icon_template
-            ).format(**annotation)
+            feature_annotation_admonition += (feature_annotation_template + icon_template).format(**annotation)
 
     lines += feature_annotation_admonition.splitlines()
 

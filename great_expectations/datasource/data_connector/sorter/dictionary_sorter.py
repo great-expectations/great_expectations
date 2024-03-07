@@ -43,9 +43,7 @@ class DictionarySorter(Sorter):
         elif order_keys_by == "desc":
             reverse_keys = True
         else:
-            raise gx_exceptions.SorterError(
-                f'Illegal key sort order "{order_keys_by}" for attribute "{name}".'
-            )
+            raise gx_exceptions.SorterError(f'Illegal key sort order "{order_keys_by}" for attribute "{name}".')
         self._reverse_keys = reverse_keys
         self._key_reference_list = key_reference_list
 
@@ -54,18 +52,10 @@ class DictionarySorter(Sorter):
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_keys: list[Any] | None
         if self._key_reference_list is None:
-            batch_keys = sorted(
-                batch_identifiers[self.name].keys(), reverse=self.reverse_keys
-            )
+            batch_keys = sorted(batch_identifiers[self.name].keys(), reverse=self.reverse_keys)
         else:
-            batch_keys = [
-                key
-                for key in self.key_reference_list
-                if key in batch_identifiers[self.name].keys()
-            ]
-        batch_values: list[Any] = [
-            batch_identifiers[self.name][key] for key in batch_keys
-        ]
+            batch_keys = [key for key in self.key_reference_list if key in batch_identifiers[self.name].keys()]
+        batch_values: list[Any] = [batch_identifiers[self.name][key] for key in batch_keys]
         return batch_values
 
     @override

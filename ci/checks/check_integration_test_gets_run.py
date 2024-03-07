@@ -89,9 +89,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
             text=True,
             capture_output=True,
         )
-        pwd = subprocess.run(
-            ["pwd"], text=True, capture_output=True, check=True
-        ).stdout.strip("\n")
+        pwd = subprocess.run(["pwd"], text=True, capture_output=True, check=True).stdout.strip("\n")
         res_test_files = subprocess.run(  # noqa: PLW1510
             ["sed", f"s/:.*//;s?{pwd}??"],
             text=True,
@@ -100,9 +98,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
         )
         return {s.strip("/") for s in res_test_files.stdout.splitlines()}
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        ) from e
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}") from e
 
 
 def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
@@ -154,14 +150,9 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
             input=res_test_fixture_definitions.stdout,
             capture_output=True,
         )
-        return {
-            s.strip()
-            for s in res_test_files_with_fixture_definitions.stdout.splitlines()
-        }
+        return {s.strip() for s in res_test_files_with_fixture_definitions.stdout.splitlines()}
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        ) from e
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}") from e
 
 
 def main() -> None:

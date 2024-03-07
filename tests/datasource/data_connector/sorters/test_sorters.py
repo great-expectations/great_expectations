@@ -58,9 +58,7 @@ def test_sorter_instantiation_numeric():
 
 def test_sorter_instantiation_dictionary():
     # DictionarySorter
-    my_dict = DictionarySorter(
-        name="dict", orderby="asc", order_keys_by="asc", key_reference_list=[1, 2, 3]
-    )
+    my_dict = DictionarySorter(name="dict", orderby="asc", order_keys_by="asc", key_reference_list=[1, 2, 3])
     assert isinstance(my_dict, DictionarySorter)
     assert my_dict.name == "dict"
     assert my_dict.reverse is False

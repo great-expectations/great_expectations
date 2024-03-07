@@ -28,11 +28,7 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, index, **kwargs):
         # print(column, str(type(column)))
-        return column.apply(
-            lambda element: element[index] == value
-            if str(element) == element
-            else False
-        )
+        return column.apply(lambda element: element[index] == value if str(element) == element else False)
 
         # return column == 3
 

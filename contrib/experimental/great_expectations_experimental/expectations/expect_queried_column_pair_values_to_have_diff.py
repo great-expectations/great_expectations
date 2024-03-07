@@ -45,9 +45,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         super().validate_configuration(configuration)
         diff = configuration["kwargs"].get("diff")
         mostly = configuration["kwargs"].get("mostly")
@@ -55,9 +53,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
         try:
             assert diff is not None, "'diff' must be specified"
             assert isinstance(diff, (int, float)), "`diff` must be a valid float or int"
-            assert (
-                isinstance(mostly, (int, float)) and 0 < mostly <= 1
-            ), "'mostly' must be 1, a float between 0 and 1"
+            assert isinstance(mostly, (int, float)) and 0 < mostly <= 1, "'mostly' must be 1, a float between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -73,9 +69,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
         query_result = metrics.get("query.column_pair")
         query_result = [tuple(element.values()) for element in query_result]
 
-        success = (
-            sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)
-        ) >= mostly
+        success = (sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)) >= mostly
 
         return {
             "success": success,

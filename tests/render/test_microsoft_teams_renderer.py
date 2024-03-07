@@ -27,18 +27,14 @@ pytestmark = pytest.mark.big
                 "expectation_suite_name": "asset.default",
                 "run_id": "test_100",
             },
-            BatchIdentifier(
-                batch_identifier="1234", data_asset_name="expected_asset_name"
-            ),
+            BatchIdentifier(batch_identifier="1234", data_asset_name="expected_asset_name"),
         ),
         (
             {
                 "great_expectations_version": "v0.8.0__develop",
                 "expectation_suite_name": "asset.default",
                 "run_id": "test_100",
-                "active_batch_definition": Mock(
-                    BatchDefinition, data_asset_name="expected_asset_name"
-                ),
+                "active_batch_definition": Mock(BatchDefinition, data_asset_name="expected_asset_name"),
             },
             "1234",
         ),
@@ -59,9 +55,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_bat
 
     validation_result_suite_identifier = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
-        run_id=RunIdentifier(
-            run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"
-        ),
+        run_id=RunIdentifier(run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"),
         batch_identifier=result_batch_id,
     )
 
@@ -101,10 +95,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_bat
                                                 {
                                                     "isSubtle": "true",
                                                     "spacing": "none",
-                                                    "text": "May "
-                                                    "08 "
-                                                    "2012 "
-                                                    "15:14:45+0800",
+                                                    "text": "May " "08 " "2012 " "15:14:45+0800",
                                                     "type": "TextBlock",
                                                     "wrap": "true",
                                                 },
@@ -125,22 +116,17 @@ def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_bat
                                 {
                                     "color": "good",
                                     "horizontalAlignment": "left",
-                                    "text": "**Batch validation "
-                                    "status:** Success "
-                                    "!!!",
+                                    "text": "**Batch validation " "status:** Success " "!!!",
                                     "type": "TextBlock",
                                 },
                                 {
                                     "horizontalAlignment": "left",
-                                    "text": "**Data asset "
-                                    "name:** expected_asset_name",
+                                    "text": "**Data asset " "name:** expected_asset_name",
                                     "type": "TextBlock",
                                 },
                                 {
                                     "horizontalAlignment": "left",
-                                    "text": "**Expectation "
-                                    "suite name:** "
-                                    "asset.default",
+                                    "text": "**Expectation " "suite name:** " "asset.default",
                                     "type": "TextBlock",
                                 },
                                 {
@@ -155,10 +141,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_bat
                                 },
                                 {
                                     "horizontalAlignment": "left",
-                                    "text": "**Summary:** *0* "
-                                    "of *0* "
-                                    "expectations were "
-                                    "met",
+                                    "text": "**Summary:** *0* " "of *0* " "expectations were " "met",
                                     "type": "TextBlock",
                                 },
                             ],

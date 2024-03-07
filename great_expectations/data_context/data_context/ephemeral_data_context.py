@@ -48,12 +48,8 @@ class EphemeralDataContext(AbstractDataContext):
         super().__init__(runtime_environment=runtime_environment)
 
     @override
-    def _init_project_config(
-        self, project_config: Union[DataContextConfig, Mapping]
-    ) -> DataContextConfig:
-        project_config = EphemeralDataContext.get_or_create_data_context_config(
-            project_config
-        )
+    def _init_project_config(self, project_config: Union[DataContextConfig, Mapping]) -> DataContextConfig:
+        project_config = EphemeralDataContext.get_or_create_data_context_config(project_config)
         return self._apply_global_config_overrides(project_config)
 
     @override

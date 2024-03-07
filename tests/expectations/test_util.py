@@ -64,9 +64,7 @@ def get_table_columns_metric(
             "include_nested": True,
         },
     )
-    results = execution_engine.resolve_metrics(
-        metrics_to_resolve=(table_column_types_metric,)
-    )
+    results = execution_engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
     resolved_metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -77,9 +75,7 @@ def get_table_columns_metric(
     table_columns_metric.metric_dependencies = {  # type: ignore[assignment]
         "table.column_types": table_column_types_metric,
     }
-    results = execution_engine.resolve_metrics(
-        metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
-    )
+    results = execution_engine.resolve_metrics(metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics)
     resolved_metrics.update(results)
 
     return table_columns_metric, resolved_metrics
@@ -126,7 +122,9 @@ def test_prescriptive_renderer_no_decorator(
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = configuration.kwargs
-        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        template_str = (
+            "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        )
         return [
             RenderedStringTemplateContent(
                 **{
@@ -152,12 +150,8 @@ def test_prescriptive_renderer_no_decorator(
     )
 
     # params should contain our evaluation parameters
-    assert res[0].string_template["params"]["min_value"] == {
-        "$PARAMETER": "MIN_VAL_PARAM"
-    }
-    assert res[0].string_template["params"]["max_value"] == {
-        "$PARAMETER": "MAX_VAL_PARAM"
-    }
+    assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
+    assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
 
     # full json dict comparison
     assert res[0].to_json_dict() == {
@@ -196,7 +190,9 @@ def test_prescriptive_renderer_with_decorator(
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = configuration.kwargs
-        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        template_str = (
+            "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        )
         return [
             RenderedStringTemplateContent(
                 **{
@@ -223,12 +219,8 @@ def test_prescriptive_renderer_with_decorator(
     )
 
     # params should contain our evaluation parameters
-    assert res[0].string_template["params"]["min_value"] == {
-        "$PARAMETER": "MIN_VAL_PARAM"
-    }
-    assert res[0].string_template["params"]["max_value"] == {
-        "$PARAMETER": "MAX_VAL_PARAM"
-    }
+    assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
+    assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
     assert res[0].to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
@@ -246,10 +238,7 @@ def test_prescriptive_renderer_with_decorator(
         },
     }
 
-    assert (
-        res[1].string_template["template"]
-        == "\n - $eval_param = $eval_param_value (at time of validation)."
-    )
+    assert res[1].string_template["template"] == "\n - $eval_param = $eval_param_value (at time of validation)."
     # params should contain our evaluation parameters
     assert res[1].string_template["params"]["eval_param"] == "MIN_VAL_PARAM"
     assert res[1].string_template["params"]["eval_param_value"] == 15
@@ -265,10 +254,7 @@ def test_prescriptive_renderer_with_decorator(
         },
     }
 
-    assert (
-        res[2].string_template["template"]
-        == "\n - $eval_param = $eval_param_value (at time of validation)."
-    )
+    assert res[2].string_template["template"] == "\n - $eval_param = $eval_param_value (at time of validation)."
     # params should contain our evaluation parameters
     assert res[2].string_template["params"]["eval_param"] == "MAX_VAL_PARAM"
     assert res[2].string_template["params"]["eval_param_value"] == 20
@@ -287,16 +273,12 @@ def test_prescriptive_renderer_with_decorator(
     # with no runtime_configuration, throw an error
     with pytest.raises(GreatExpectationsError):
         # noinspection PyUnusedLocal
-        res = bare_bones_prescriptive_renderer(
-            configuration=configuration, runtime_configuration={}
-        )
+        res = bare_bones_prescriptive_renderer(configuration=configuration, runtime_configuration={})
 
     # configuration should always be of ExpectationConfiguration-type
     with pytest.raises(AttributeError):
         # noinspection PyUnusedLocal,PyTypeChecker
-        res = bare_bones_prescriptive_renderer(
-            configuration={}, runtime_configuration={}
-        )
+        res = bare_bones_prescriptive_renderer(configuration={}, runtime_configuration={})
 
     # extra evaluation parameters will not have an effect
     runtime_configuration_with_extra = {
@@ -402,9 +384,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     sqlalchemy_engine: SqlAlchemyExecutionEngine
 
     for table_name, validator in validators_config.items():
-        table_columns_metric, results = get_table_columns_metric(
-            execution_engine=validator.execution_engine
-        )
+        table_columns_metric, results = get_table_columns_metric(execution_engine=validator.execution_engine)
         metrics.update(results)
         assert set(metrics[table_columns_metric.id]) == {"name", "age", "pet"}
         selectable: sqlalchemy.Select = sa.Table(
@@ -418,19 +398,14 @@ def test_table_column_reflection_fallback(test_backends, sa):
             dialect=sqlalchemy_engine.engine.dialect,
             sqlalchemy_engine=sqlalchemy_engine.engine,
         )
-        for column_name in [
-            reflected_column_config["name"]
-            for reflected_column_config in reflected_columns_list
-        ]:
+        for column_name in [reflected_column_config["name"] for reflected_column_config in reflected_columns_list]:
             validation_result = validator.expect_column_to_exist(column=column_name)
             assert validation_result.success
 
     if validators_config:
         validator = list(validators_config.values())[0]
 
-        validation_result = validator.expect_column_mean_to_be_between(
-            column="age", min_value=10
-        )
+        validation_result = validator.expect_column_mean_to_be_between(column="age", min_value=10)
         assert validation_result.success
 
         validation_result = validator.expect_table_row_count_to_equal(value=5)
@@ -440,9 +415,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         assert not validation_result.success
 
 
-@pytest.mark.skip(
-    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
-)
+@pytest.mark.skip(reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)")
 @pytest.mark.skipif(
     sa is None,
     reason="sqlalchemy is not installed",

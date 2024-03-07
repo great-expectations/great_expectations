@@ -65,9 +65,7 @@ def test_data_profiler_column_profile_report_metric_pd():
             "profile_path": profile_path,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics)
     metrics.update(results)
 
     data_profiler_table_column_infos_metric: MetricConfiguration = MetricConfiguration(
@@ -79,9 +77,7 @@ def test_data_profiler_column_profile_report_metric_pd():
         "table.columns": table_columns_metric,
         "data_profiler.profile_report": data_profiler_profile_report_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(data_profiler_table_column_infos_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(data_profiler_table_column_infos_metric,), metrics=metrics)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -93,32 +89,15 @@ def test_data_profiler_column_profile_report_metric_pd():
         "table.columns": table_columns_metric,
         "data_profiler.table_column_infos": data_profiler_table_column_infos_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics=metrics)
     metrics.update(results)
 
     profile: dp.profilers.profile_builder.BaseProfiler = dp.Profiler.load(profile_path)
-    assert (
-        metrics[desired_metric.id]["column_name"]
-        == profile.report()["data_stats"][0]["column_name"]
-    )
-    assert (
-        metrics[desired_metric.id]["data_type"]
-        == profile.report()["data_stats"][0]["data_type"]
-    )
-    assert (
-        metrics[desired_metric.id]["categorical"]
-        == profile.report()["data_stats"][0]["categorical"]
-    )
-    assert (
-        metrics[desired_metric.id]["order"]
-        == profile.report()["data_stats"][0]["order"]
-    )
-    assert (
-        metrics[desired_metric.id]["samples"]
-        == profile.report()["data_stats"][0]["samples"]
-    )
+    assert metrics[desired_metric.id]["column_name"] == profile.report()["data_stats"][0]["column_name"]
+    assert metrics[desired_metric.id]["data_type"] == profile.report()["data_stats"][0]["data_type"]
+    assert metrics[desired_metric.id]["categorical"] == profile.report()["data_stats"][0]["categorical"]
+    assert metrics[desired_metric.id]["order"] == profile.report()["data_stats"][0]["order"]
+    assert metrics[desired_metric.id]["samples"] == profile.report()["data_stats"][0]["samples"]
 
 
 def test_data_profiler_column_list_metric_same_as_in_batch_table_pd():
@@ -154,9 +133,7 @@ def test_data_profiler_column_list_metric_same_as_in_batch_table_pd():
             "profile_path": profile_path,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics)
     metrics.update(results)
 
     data_profiler_table_column_infos_metric: MetricConfiguration = MetricConfiguration(
@@ -167,9 +144,7 @@ def test_data_profiler_column_list_metric_same_as_in_batch_table_pd():
     data_profiler_table_column_infos_metric.metric_dependencies = {
         "data_profiler.profile_report": data_profiler_profile_report_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(data_profiler_table_column_infos_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(data_profiler_table_column_infos_metric,), metrics=metrics)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -181,9 +156,7 @@ def test_data_profiler_column_list_metric_same_as_in_batch_table_pd():
         "table.columns": table_columns_metric,
         "data_profiler.table_column_infos": data_profiler_table_column_infos_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics=metrics)
     metrics.update(results)
 
     assert metrics[desired_metric.id] == metrics[table_columns_metric.id]
@@ -229,17 +202,13 @@ def test_data_profiler_column_list_metric_same_as_profile_report_pd(
             },
         )
 
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics
-        )
+        results = engine.resolve_metrics(metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics)
         metrics.update(results)
 
-        data_profiler_table_column_infos_metric: MetricConfiguration = (
-            MetricConfiguration(
-                metric_name="data_profiler.table_column_infos",
-                metric_domain_kwargs={},
-                metric_value_kwargs=None,
-            )
+        data_profiler_table_column_infos_metric: MetricConfiguration = MetricConfiguration(
+            metric_name="data_profiler.table_column_infos",
+            metric_domain_kwargs={},
+            metric_value_kwargs=None,
         )
         data_profiler_table_column_infos_metric.metric_dependencies = {
             "data_profiler.profile_report": data_profiler_profile_report_metric,
@@ -259,13 +228,10 @@ def test_data_profiler_column_list_metric_same_as_profile_report_pd(
             "table.columns": table_columns_metric,
             "data_profiler.table_column_infos": data_profiler_table_column_infos_metric,
         }
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(desired_metric,), metrics=metrics
-        )
+        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics=metrics)
         metrics.update(results)
 
     element: dict
     assert metrics[desired_metric.id] == [
-        element["column_name"]
-        for element in mock_base_data_profiler.report()["data_stats"]
+        element["column_name"] for element in mock_base_data_profiler.report()["data_stats"]
     ]

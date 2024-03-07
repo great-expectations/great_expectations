@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @public_api
-class InferredAssetAWSGlueDataCatalogDataConnector(
-    ConfiguredAssetAWSGlueDataCatalogDataConnector
-):
+class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCatalogDataConnector):
     """An Inferred Asset Data Connector used to connect to data through an AWS Glue Data Catalog.
 
     This Data Connector operates on AWS Glue Data Catalog and determines the Data Asset name
@@ -109,23 +107,17 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         super()._refresh_data_references_cache()
 
     def _refresh_introspected_assets_cache(self) -> None:
-        introspected_table_metadata = self._introspect_catalog(
-            **self.glue_introspection_directives
-        )
+        introspected_table_metadata = self._introspect_catalog(**self.glue_introspection_directives)
 
         introspected_assets: dict = {}
         for metadata in introspected_table_metadata:
             # For the inferred glue connector, the data asset name is database.table
             data_asset_name = f"{metadata['database_name']}.{metadata['table_name']}"
 
-            if (self.excluded_tables is not None) and (
-                data_asset_name in self.excluded_tables
-            ):
+            if (self.excluded_tables is not None) and (data_asset_name in self.excluded_tables):
                 continue
 
-            if (self.included_tables is not None) and (
-                data_asset_name not in self.included_tables
-            ):
+            if (self.included_tables is not None) and (data_asset_name not in self.included_tables):
                 continue
 
             data_asset_config: dict = {
@@ -151,9 +143,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         paginator = self.glue_client.get_paginator("get_tables")
         paginator_kwargs = self._get_glue_paginator_kwargs()
 
-        databases: List[str] = (
-            [database_name] if database_name else list(self._get_databases())
-        )
+        databases: List[str] = [database_name] if database_name else list(self._get_databases())
         tables: List[dict] = []
         for db in databases:
             paginator_kwargs["DatabaseName"] = db

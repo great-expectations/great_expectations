@@ -81,9 +81,7 @@ class ConnectionDetails(FluentBaseModel):
     user: str
     password: Union[ConfigStr, str]
     database: Optional[str] = None
-    schema_: Optional[str] = pydantic.Field(
-        None, alias="schema"
-    )  # schema is a reserved attr in BaseModel
+    schema_: Optional[str] = pydantic.Field(None, alias="schema")  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
     numpy: bool = False
@@ -133,23 +131,17 @@ class SnowflakeDatasource(SQLDatasource):
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
         # keeping this validator isn't strictly necessary, but it provides a better error message
-        connection_string: str | ConnectionDetails | None = values.get(
-            "connection_string"
-        )
+        connection_string: str | ConnectionDetails | None = values.get("connection_string")
         if connection_string:
             # Method 1 - connection string
             if isinstance(connection_string, (str, ConfigStr)):
                 return values
             # Method 2 - individual args (account, user, and password are bare minimum)
             elif isinstance(connection_string, ConnectionDetails) and bool(
-                connection_string.account
-                and connection_string.user
-                and connection_string.password
+                connection_string.account and connection_string.user and connection_string.password
             ):
                 return values
-        raise ValueError(
-            "Must provide either a connection string or a combination of account, user, and password."
-        )
+        raise ValueError("Must provide either a connection string or a combination of account, user, and password.")
 
     class Config:
         @staticmethod
@@ -159,12 +151,8 @@ class SnowflakeDatasource(SQLDatasource):
             https://docs.pydantic.dev/1.10/usage/schema/#schema-customization
             Change connection_string to be a string or a dict, but not both.
             """
-            connection_string_prop = schema["properties"]["connection_string"].pop(
-                "anyOf"
-            )
-            schema["properties"]["connection_string"].update(
-                {"oneOf": connection_string_prop}
-            )
+            connection_string_prop = schema["properties"]["connection_string"].pop("anyOf")
+            schema["properties"]["connection_string"].update({"oneOf": connection_string_prop})
 
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
@@ -184,13 +172,9 @@ class SnowflakeDatasource(SQLDatasource):
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
         """
-        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = (
-            self.execution_engine_type
-        )
+        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = self.execution_engine_type
 
-        connection_string: str | None = (
-            self.connection_string if isinstance(self.connection_string, str) else None
-        )
+        connection_string: str | None = self.connection_string if isinstance(self.connection_string, str) else None
 
         gx_exec_engine = gx_execution_engine_type(
             self.name,
@@ -210,9 +194,7 @@ class SnowflakeDatasource(SQLDatasource):
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                 )
-                _check_config_substitutions_needed(
-                    self, model_dict, raise_warning_if_provider_not_present=True
-                )
+                _check_config_substitutions_needed(self, model_dict, raise_warning_if_provider_not_present=True)
 
                 kwargs = model_dict.pop("kwargs", {})
                 connection_string: str | dict = model_dict.pop("connection_string")
@@ -220,16 +202,13 @@ class SnowflakeDatasource(SQLDatasource):
                 if isinstance(connection_string, str):
                     self._engine = sa.create_engine(connection_string, **kwargs)
                 else:
-                    self._engine = self._build_engine_with_connect_args(
-                        **connection_string
-                    )
+                    self._engine = self._build_engine_with_connect_args(**connection_string)
 
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine due to the "
-                    f"following exception: {e!s}"
+                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
             # Since a connection string isn't strictly required for Snowflake, we conditionally cache
             if isinstance(self.connection_string, str):

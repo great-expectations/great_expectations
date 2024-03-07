@@ -91,9 +91,7 @@ class DataPartitioner(abc.ABC):
         Returns:
             partitioner method.
         """
-        partitioner_method_name = self._get_partitioner_method_name(
-            partitioner_method_name
-        )
+        partitioner_method_name = self._get_partitioner_method_name(partitioner_method_name)
 
         return getattr(self, partitioner_method_name)
 
@@ -122,10 +120,7 @@ class DataPartitioner(abc.ABC):
         Returns:
             List of DatePart objects
         """
-        return [
-            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
-            for date_part in date_parts
-        ]
+        return [DatePart(date_part.lower()) if isinstance(date_part, str) else date_part for date_part in date_parts]
 
     @staticmethod
     def _validate_date_parts(date_parts: List[DatePart] | List[str]) -> None:
@@ -138,16 +133,12 @@ class DataPartitioner(abc.ABC):
             None, this method raises exceptions if the config is invalid.
         """
         if len(date_parts) == 0:
-            raise gx_exceptions.InvalidConfigError(
-                "date_parts are required when using partition_on_date_parts."
-            )
+            raise gx_exceptions.InvalidConfigError("date_parts are required when using partition_on_date_parts.")
         if not all(
             (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
             for dp in date_parts
         ):
-            raise gx_exceptions.InvalidConfigError(
-                "date_parts should be of type DatePart or str."
-            )
+            raise gx_exceptions.InvalidConfigError("date_parts should be of type DatePart or str.")
 
     @staticmethod
     def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
@@ -185,12 +176,7 @@ class DataPartitioner(abc.ABC):
             column_batch_identifiers = parse(column_batch_identifiers)
 
         if isinstance(column_batch_identifiers, datetime.datetime):
-            return {
-                date_part.value: getattr(column_batch_identifiers, date_part.value)
-                for date_part in date_parts
-            }
+            return {date_part.value: getattr(column_batch_identifiers, date_part.value) for date_part in date_parts}
         else:
-            self._verify_all_strings_are_valid_date_parts(
-                list(column_batch_identifiers.keys())
-            )
+            self._verify_all_strings_are_valid_date_parts(list(column_batch_identifiers.keys()))
             return column_batch_identifiers

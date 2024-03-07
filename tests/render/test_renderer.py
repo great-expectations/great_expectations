@@ -42,9 +42,7 @@ def test_render():
 @pytest.mark.unit
 def test__find_evr_by_type(titanic_profiled_evrs_1):
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
-    found_evr = Renderer()._find_evr_by_type(
-        titanic_profiled_evrs_1.results, "expect_column_to_exist"
-    )
+    found_evr = Renderer()._find_evr_by_type(titanic_profiled_evrs_1.results, "expect_column_to_exist")
     print(found_evr)
     assert found_evr is None
 

@@ -58,13 +58,8 @@ class AugmentedLibraryMetadata(SerializableDictDot):
                 )
 
             # If necessary, substitute strings for precise Enum values.
-            if (
-                "maturity" in temp_dict
-                and temp_dict["maturity"] in cls.legacy_maturity_level_substitutions
-            ):
-                temp_dict["maturity"] = cls.legacy_maturity_level_substitutions[
-                    temp_dict["maturity"]
-                ]
+            if "maturity" in temp_dict and temp_dict["maturity"] in cls.legacy_maturity_level_substitutions:
+                temp_dict["maturity"] = cls.legacy_maturity_level_substitutions[temp_dict["maturity"]]
 
         return cls(**temp_dict)
 
@@ -159,9 +154,9 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: Sequence[
-        ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict
-    ] = field(default_factory=list)
+    sub_messages: Sequence[ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict] = field(
+        default_factory=list
+    )
 
 
 @dataclass

@@ -62,10 +62,7 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
 
     with pytest.raises(InvalidConfigError) as exc:
         context.save_config_variable("var_name_1", {"n1": "v1"})
-    assert (
-        "'config_variables_file_path' property is not found in config"
-        in exc.value.message
-    )
+    assert "'config_variables_file_path' property is not found in config" in exc.value.message
 
 
 @pytest.mark.filesystem
@@ -85,15 +82,11 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     )
 
     # load ge config fixture for expected
-    path_to_yml = (
-        "../test_fixtures/great_expectations_v013_basic_with_exhaustive_variables.yml"
-    )
+    path_to_yml = "../test_fixtures/great_expectations_v013_basic_with_exhaustive_variables.yml"
     path_to_yml = file_relative_path(__file__, path_to_yml)
     with open(path_to_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)
-    expected_config = DataContextConfig.from_commented_map(
-        config_commented_map_from_yaml
-    )
+    expected_config = DataContextConfig.from_commented_map(config_commented_map_from_yaml)
     expected_config_commented_map = dataContextConfigSchema.dump(expected_config)
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
@@ -128,22 +121,20 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = get_context(
-        context_root_dir=context_path, runtime_environment=runtime_environment
-    )
+    data_context = get_context(context_root_dir=context_path, runtime_environment=runtime_environment)
     config = data_context.get_config_with_variables_substituted()
 
     try:
         assert (
-            config.datasources["mydatasource"]["batch_kwargs_generators"][
-                "mygenerator"
-            ]["reader_options"]["test_variable_sub1"]
+            config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"]["reader_options"][
+                "test_variable_sub1"
+            ]
             == value_from_runtime_override
         )
         assert (
-            config.datasources["mydatasource"]["batch_kwargs_generators"][
-                "mygenerator"
-            ]["reader_options"]["test_variable_sub2"]
+            config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"]["reader_options"][
+                "test_variable_sub2"
+            ]
             == value_from_runtime_override
         )
     except Exception:
@@ -161,84 +152,46 @@ def test_substitute_config_variable():
         "aRg3": "val_of_aRg_3",
         "ARG4": "val_of_ARG_4",
     }
-    assert (
-        config_substitutor.substitute_config_variable(
-            "abc${arg0}", config_variables_dict
-        )
-        == "abcval_of_arg_0"
-    )
-    assert (
-        config_substitutor.substitute_config_variable("abc$arg0", config_variables_dict)
-        == "abcval_of_arg_0"
-    )
-    assert (
-        config_substitutor.substitute_config_variable("${arg0}", config_variables_dict)
-        == "val_of_arg_0"
-    )
-    assert (
-        config_substitutor.substitute_config_variable("hhhhhhh", config_variables_dict)
-        == "hhhhhhh"
-    )
+    assert config_substitutor.substitute_config_variable("abc${arg0}", config_variables_dict) == "abcval_of_arg_0"
+    assert config_substitutor.substitute_config_variable("abc$arg0", config_variables_dict) == "abcval_of_arg_0"
+    assert config_substitutor.substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
+    assert config_substitutor.substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
     with pytest.raises(MissingConfigVariableError) as exc:
         config_substitutor.substitute_config_variable(
             "abc${arg1} def${foo}", config_variables_dict
         )  # does NOT equal "abc${arg1}"
+    assert "Unable to find a match for config substitution variable: `arg1`." in exc.value.message
     assert (
-        "Unable to find a match for config substitution variable: `arg1`."
-        in exc.value.message
-    )
-    assert (
-        config_substitutor.substitute_config_variable("${arg2}", config_variables_dict)
-        == config_variables_dict["arg2"]
+        config_substitutor.substitute_config_variable("${arg2}", config_variables_dict) == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
 
     # Null cases
-    assert (
-        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
-    )
-    assert (
-        config_substitutor.substitute_config_variable(None, config_variables_dict)
-        is None
-    )
+    assert config_substitutor.substitute_config_variable("", config_variables_dict) == ""
+    assert config_substitutor.substitute_config_variable(None, config_variables_dict) is None
 
     # Test with mixed case
     assert (
-        config_substitutor.substitute_config_variable(
-            "prefix_${aRg3}_suffix", config_variables_dict
-        )
+        config_substitutor.substitute_config_variable("prefix_${aRg3}_suffix", config_variables_dict)
         == "prefix_val_of_aRg_3_suffix"
     )
-    assert (
-        config_substitutor.substitute_config_variable("${aRg3}", config_variables_dict)
-        == "val_of_aRg_3"
-    )
+    assert config_substitutor.substitute_config_variable("${aRg3}", config_variables_dict) == "val_of_aRg_3"
     # Test with upper case
     assert (
-        config_substitutor.substitute_config_variable(
-            "prefix_$ARG4/suffix", config_variables_dict
-        )
+        config_substitutor.substitute_config_variable("prefix_$ARG4/suffix", config_variables_dict)
         == "prefix_val_of_ARG_4/suffix"
     )
-    assert (
-        config_substitutor.substitute_config_variable("$ARG4", config_variables_dict)
-        == "val_of_ARG_4"
-    )
+    assert config_substitutor.substitute_config_variable("$ARG4", config_variables_dict) == "val_of_ARG_4"
 
     # Test with multiple substitutions
     assert (
-        config_substitutor.substitute_config_variable(
-            "prefix${arg0}$aRg3", config_variables_dict
-        )
+        config_substitutor.substitute_config_variable("prefix${arg0}$aRg3", config_variables_dict)
         == "prefixval_of_arg_0val_of_aRg_3"
     )
 
     # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
-        config_substitutor.substitute_config_variable(
-            r"abc\${arg0}\$aRg3", config_variables_dict
-        )
-        == "abc${arg0}$aRg3"
+        config_substitutor.substitute_config_variable(r"abc\${arg0}\$aRg3", config_variables_dict) == "abc${arg0}$aRg3"
     )
 
     # Multiple configurations together
@@ -252,33 +205,21 @@ def test_substitute_config_variable():
 
 
 @pytest.mark.filesystem
-def test_substitute_env_var_in_config_variable_file(
-    monkeypatch, empty_data_context_with_config_variables
-):
+def test_substitute_env_var_in_config_variable_file(monkeypatch, empty_data_context_with_config_variables):
     monkeypatch.setenv("FOO", "correct_val_of_replace_me")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
     context = empty_data_context_with_config_variables
     context_config = context.get_config_with_variables_substituted()
-    my_generator = context_config["datasources"]["mydatasource"][
-        "batch_kwargs_generators"
-    ]["mygenerator"]
+    my_generator = context_config["datasources"]["mydatasource"]["batch_kwargs_generators"]["mygenerator"]
     reader_options = my_generator["reader_options"]
 
     assert reader_options["test_variable_sub3"] == "correct_val_of_replace_me"
-    assert reader_options["test_variable_sub4"] == {
-        "inner_env_sub": "correct_val_of_replace_me"
-    }
+    assert reader_options["test_variable_sub4"] == {"inner_env_sub": "correct_val_of_replace_me"}
     assert reader_options["password"] == "dont$replaceme"
 
     # Escaped variables (variables containing `$` that have been escaped)
-    assert (
-        reader_options["test_escaped_env_var_from_config"]
-        == "prefixive_been_$replaced/suffix"
-    )
-    assert (
-        my_generator["test_variable_escaped"]
-        == "dont$replace$me$please$$$$thanksive_been_$replaced"
-    )
+    assert reader_options["test_escaped_env_var_from_config"] == "prefixive_been_$replaced/suffix"
+    assert my_generator["test_variable_escaped"] == "dont$replace$me$please$$$$thanksive_been_$replaced"
 
 
 @pytest.mark.unit
@@ -352,10 +293,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
             ),
         ]
     )
-    assert (
-        context.escape_all_config_variables(value=value_ordered_dict)
-        == escaped_value_ordered_dict
-    )
+    assert context.escape_all_config_variables(value=value_ordered_dict) == escaped_value_ordered_dict
 
     # list
     value_list = [
@@ -380,18 +318,14 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     value_str_custom_escape_string = "pas$word1"
     escaped_value_str_custom_escape_string = "pas@*&$word1"
     assert (
-        context.escape_all_config_variables(
-            value=value_str_custom_escape_string, dollar_sign_escape_string="@*&$"
-        )
+        context.escape_all_config_variables(value=value_str_custom_escape_string, dollar_sign_escape_string="@*&$")
         == escaped_value_str_custom_escape_string
     )
 
     value_str_custom_escape_string2 = "pas$wor$d1$"
     escaped_value_str_custom_escape_string2 = "pas@*&$wor@*&$d1@*&$"
     assert (
-        context.escape_all_config_variables(
-            value=value_str_custom_escape_string2, dollar_sign_escape_string="@*&$"
-        )
+        context.escape_all_config_variables(value=value_str_custom_escape_string2, dollar_sign_escape_string="@*&$")
         == escaped_value_str_custom_escape_string2
     )
 
@@ -409,76 +343,50 @@ def test_escape_all_config_variables_skip_substitution_vars(
     # str
     value_str = "$VALUE_STR"
     escaped_value_str = r"\$VALUE_STR"
+    assert context.escape_all_config_variables(value=value_str, skip_if_substitution_variable=True) == value_str
     assert (
-        context.escape_all_config_variables(
-            value=value_str, skip_if_substitution_variable=True
-        )
-        == value_str
-    )
-    assert (
-        context.escape_all_config_variables(
-            value=value_str, skip_if_substitution_variable=False
-        )
-        == escaped_value_str
+        context.escape_all_config_variables(value=value_str, skip_if_substitution_variable=False) == escaped_value_str
     )
 
     value_str2 = "VALUE_$TR"
     escaped_value_str2 = r"VALUE_\$TR"
     assert (
-        context.escape_all_config_variables(
-            value=value_str2, skip_if_substitution_variable=True
-        )
-        == escaped_value_str2
+        context.escape_all_config_variables(value=value_str2, skip_if_substitution_variable=True) == escaped_value_str2
     )
     assert (
-        context.escape_all_config_variables(
-            value=value_str2, skip_if_substitution_variable=False
-        )
-        == escaped_value_str2
+        context.escape_all_config_variables(value=value_str2, skip_if_substitution_variable=False) == escaped_value_str2
     )
 
     multi_value_str = "${USER}:pas$word@${HOST}:${PORT}/${DATABASE}"
     escaped_multi_value_str = r"\${USER}:pas\$word@\${HOST}:\${PORT}/\${DATABASE}"
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=multi_value_str, skip_if_substitution_variable=True)
         == multi_value_str
     )
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str, skip_if_substitution_variable=False
-        )
+        context.escape_all_config_variables(value=multi_value_str, skip_if_substitution_variable=False)
         == escaped_multi_value_str
     )
 
     multi_value_str2 = "$USER:pas$word@$HOST:${PORT}/${DATABASE}"
     escaped_multi_value_str2 = r"\$USER:pas\$word@\$HOST:\${PORT}/\${DATABASE}"
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str2, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=multi_value_str2, skip_if_substitution_variable=True)
         == multi_value_str2
     )
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str2, skip_if_substitution_variable=False
-        )
+        context.escape_all_config_variables(value=multi_value_str2, skip_if_substitution_variable=False)
         == escaped_multi_value_str2
     )
 
     multi_value_str3 = "USER:pas$word@$HOST:${PORT}/${DATABASE}"
     escaped_multi_value_str3 = r"USER:pas\$word@\$HOST:\${PORT}/\${DATABASE}"
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str3, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=multi_value_str3, skip_if_substitution_variable=True)
         == escaped_multi_value_str3
     )
     assert (
-        context.escape_all_config_variables(
-            value=multi_value_str3, skip_if_substitution_variable=False
-        )
+        context.escape_all_config_variables(value=multi_value_str3, skip_if_substitution_variable=False)
         == escaped_multi_value_str3
     )
 
@@ -526,15 +434,10 @@ def test_escape_all_config_variables_skip_substitution_vars(
         },
     }
     assert (
-        context.escape_all_config_variables(
-            value=value_dict, skip_if_substitution_variable=False
-        )
-        == escaped_value_dict
+        context.escape_all_config_variables(value=value_dict, skip_if_substitution_variable=False) == escaped_value_dict
     )
     assert (
-        context.escape_all_config_variables(
-            value=value_dict, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=value_dict, skip_if_substitution_variable=True)
         == escaped_value_dict_skip_substitution_variables
     )
 
@@ -591,15 +494,11 @@ def test_escape_all_config_variables_skip_substitution_vars(
         ]
     )
     assert (
-        context.escape_all_config_variables(
-            value=value_ordered_dict, skip_if_substitution_variable=False
-        )
+        context.escape_all_config_variables(value=value_ordered_dict, skip_if_substitution_variable=False)
         == escaped_value_ordered_dict
     )
     assert (
-        context.escape_all_config_variables(
-            value=value_ordered_dict, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=value_ordered_dict, skip_if_substitution_variable=True)
         == escaped_value_ordered_dict_skip_substitution_variables
     )
 
@@ -629,15 +528,10 @@ def test_escape_all_config_variables_skip_substitution_vars(
         "${POSTGRES}",
     ]
     assert (
-        context.escape_all_config_variables(
-            value=value_list, skip_if_substitution_variable=False
-        )
-        == escaped_value_list
+        context.escape_all_config_variables(value=value_list, skip_if_substitution_variable=False) == escaped_value_list
     )
     assert (
-        context.escape_all_config_variables(
-            value=value_list, skip_if_substitution_variable=True
-        )
+        context.escape_all_config_variables(value=value_list, skip_if_substitution_variable=True)
         == escaped_value_list_skip_substitution_variables
     )
 
@@ -672,13 +566,8 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     # Ensure all config vars saved are in the config_variables.yml file
     # and that escaping was added for "pas$word" -> "pas\$word"
-    assert all(
-        item in config_vars_file_contents.items()
-        for item in CONFIG_VARS_WITH_ESCAPING.items()
-    )
-    assert not all(
-        item in config_vars_file_contents.items() for item in CONFIG_VARS.items()
-    )
+    assert all(item in config_vars_file_contents.items() for item in CONFIG_VARS_WITH_ESCAPING.items())
+    assert not all(item in config_vars_file_contents.items() for item in CONFIG_VARS.items())
 
     # Add env var for substitution
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
@@ -724,9 +613,9 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         context.get_config_with_variables_substituted()
     )
 
-    test_datasource_credentials = context_with_variables_substituted_dict[
-        "datasources"
-    ]["test_datasource"]["execution_engine"]["credentials"]
+    test_datasource_credentials = context_with_variables_substituted_dict["datasources"]["test_datasource"][
+        "execution_engine"
+    ]["credentials"]
 
     assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
     assert test_datasource_credentials["username"] == "DB_USER"
@@ -734,12 +623,8 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     assert test_datasource_credentials["database"] == "DB_NAME"
 
     # Ensure skip_if_substitution_variable=False works as documented
-    context.save_config_variable(
-        "escaped", "$SOME_VAR", skip_if_substitution_variable=False
-    )
-    context.save_config_variable(
-        "escaped_curly", "${SOME_VAR}", skip_if_substitution_variable=False
-    )
+    context.save_config_variable("escaped", "$SOME_VAR", skip_if_substitution_variable=False)
+    context.save_config_variable("escaped_curly", "${SOME_VAR}", skip_if_substitution_variable=False)
 
     config_vars_file_contents = context.config_variables
 

@@ -79,11 +79,7 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
         conditions = []
         for idx_src in range(num_columns - 1):
             for idx_dest in range(idx_src + 1, num_columns):
-                conditions.append(
-                    F.col(column_names[idx_src]).eqNullSafe(
-                        F.col(column_names[idx_dest])
-                    )
-                )
+                conditions.append(F.col(column_names[idx_src]).eqNullSafe(F.col(column_names[idx_dest])))
 
         row_wise_cond = ~reduce(lambda a, b: a | b, conditions)
         return row_wise_cond

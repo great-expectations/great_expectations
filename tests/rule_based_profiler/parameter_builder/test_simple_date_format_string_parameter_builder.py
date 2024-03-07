@@ -30,11 +30,9 @@ def test_simple_date_format_parameter_builder_instantiation(
 ):
     data_context = alice_columnar_table_single_batch_context
 
-    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
-            data_context=data_context,
-        )
+    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_simple_date_format_string_parameter_builder",
+        data_context=data_context,
     )
 
     assert date_format_string_parameter.threshold == 1.0
@@ -47,11 +45,9 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 ):
     data_context = alice_columnar_table_single_batch_context
 
-    date_format_string_parameter: ParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
-            data_context=data_context,
-        )
+    date_format_string_parameter: ParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_simple_date_format_string_parameter_builder",
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -90,12 +86,10 @@ def test_simple_date_format_parameter_builder_alice(
 
     metric_domain_kwargs = {"column": "event_ts"}
 
-    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_date_format",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_date_format",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
@@ -220,14 +214,12 @@ def test_simple_date_format_parameter_builder_bobby(
         "data_asset_name": "my_reports",
     }
 
-    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_strings=candidate_strings,
-            threshold=threshold,
-            data_context=data_context,
-        )
+    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_simple_date_format_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_strings=candidate_strings,
+        threshold=threshold,
+        data_context=data_context,
     )
 
     assert date_format_string_parameter._candidate_strings == set(candidate_strings)
@@ -252,14 +244,9 @@ def test_simple_date_format_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
-    )
+    assert parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_simple_date_format_string_parameter_builder.value"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_simple_date_format_string_parameter_builder.value"
     expected_value: str = "%Y-%m-%d %H:%M:%S"
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -271,9 +258,7 @@ def test_simple_date_format_parameter_builder_bobby(
 
     assert parameter_node == expected_value
 
-    fully_qualified_parameter_name_for_meta: str = (
-        "$parameter.my_simple_date_format_string_parameter_builder.details"
-    )
+    fully_qualified_parameter_name_for_meta: str = "$parameter.my_simple_date_format_string_parameter_builder.details"
     expected_meta: dict = {
         "success_ratio": 1.0,
         "candidate_strings": {"%Y-%m-%d": 0.0, "%Y-%m-%d %H:%M:%S": 1.0},

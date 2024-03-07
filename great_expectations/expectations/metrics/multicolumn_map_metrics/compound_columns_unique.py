@@ -82,9 +82,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Need all columns of the table for the purposes of reporting entire rows satisfying unexpected condition logic.
         table_columns = kwargs.get("_table_columns")
 
-        table = kwargs.get(
-            "_table"
-        )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
+        table = kwargs.get("_table")  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
         # Filipe - 20231114
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
@@ -101,33 +99,19 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             except AttributeError:
                 dialect_name = ""
         if dialect and dialect_name == "mysql":
-            table_columns_selector = [
-                sa.column(column_name) for column_name in table_columns
-            ]
+            table_columns_selector = [sa.column(column_name) for column_name in table_columns]
             partition_by_columns = (
-                sa.func.count()
-                .over(partition_by=[sa.column(column) for column in column_names])
-                .label("_num_rows")
+                sa.func.count().over(partition_by=[sa.column(column) for column in column_names]).label("_num_rows")
             )
             count_selector = table_columns_selector + [partition_by_columns]
-            original_table_clause = (
-                sa.select(*count_selector)
-                .select_from(table)
-                .alias("original_table_clause")
-            )
+            original_table_clause = sa.select(*count_selector).select_from(table).alias("original_table_clause")
             return original_table_clause
 
         # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
-        table_columns_selector = [
-            sa.column(column_name) for column_name in table_columns
-        ]
-        original_table_clause = (
-            sa.select(*table_columns_selector)
-            .select_from(table)
-            .alias("original_table_clause")
-        )
+        table_columns_selector = [sa.column(column_name) for column_name in table_columns]
+        original_table_clause = sa.select(*table_columns_selector).select_from(table).alias("original_table_clause")
 
         # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
@@ -146,23 +130,14 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Hence, in order for the "_num_rows" column values to provide an entry for each row of the original table, the
         # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_clause"
         # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
-        conditions = sa.and_(
-            *(
-                group_count_query.c[name] == original_table_clause.c[name]
-                for name in column_names
-            )
-        )
+        conditions = sa.and_(*(group_count_query.c[name] == original_table_clause.c[name] for name in column_names))
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
                 original_table_clause,
                 group_count_query.c._num_rows.label("_num_rows"),
             )
-            .select_from(
-                original_table_clause.join(
-                    right=group_count_query, onclause=conditions, isouter=False
-                )
-            )
+            .select_from(original_table_clause.join(right=group_count_query, onclause=conditions, isouter=False))
             .alias("records_with_grouped_column_counts_subquery")
         )
 
@@ -196,10 +171,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
-        row_wise_cond = (
-            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
-            <= 1
-        )
+        row_wise_cond = F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names))) <= 1
         return row_wise_cond
 
     @classmethod
@@ -224,16 +196,13 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            if (
-                metric.metric_name
-                == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
-            ):
-                dependencies[
-                    f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-                ] = MetricConfiguration(
-                    metric_name=f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
+            if metric.metric_name == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}":
+                dependencies[f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"] = (
+                    MetricConfiguration(
+                        metric_name=f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+                        metric_domain_kwargs=metric.metric_domain_kwargs,
+                        metric_value_kwargs=None,
+                    )
                 )
 
         return dependencies

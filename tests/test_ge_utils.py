@@ -37,20 +37,14 @@ def file_data_asset(tmp_path):
 @pytest.fixture
 def datetime_array():
     week_idx: int
-    return [
-        datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
-        for week_idx in range(4)
-    ]
+    return [datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7)) for week_idx in range(4)]
 
 
 @pytest.fixture
 def datetime_string_array():
     week_idx: int
     return [
-        (
-            datetime.datetime(2021, 1, 1, 0, 0, 0)
-            + datetime.timedelta(days=(week_idx * 7))
-        ).isoformat()
+        (datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))).isoformat()
         for week_idx in range(4)
     ]
 
@@ -148,10 +142,7 @@ def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
 
     assert res == expected
     assert "Replaced 'id: null' with 'id: None' before writing to file" in caplog.text
-    assert (
-        "Replaced 'description: null' with 'description: None' before writing to file"
-        in caplog.text
-    )
+    assert "Replaced 'description: null' with 'description: None' before writing to file" in caplog.text
 
 
 @pytest.mark.unit
@@ -435,9 +426,7 @@ def test_deep_filter_properties_iterable_on_batch_request_dict():
         "limit": None,
     }
 
-    deep_filter_properties_iterable(
-        properties=batch_request, clean_nulls=True, clean_falsy=True, inplace=True
-    )
+    deep_filter_properties_iterable(properties=batch_request, clean_nulls=True, clean_falsy=True, inplace=True)
 
     assert batch_request == {
         "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
@@ -452,31 +441,17 @@ def test_is_ndarray_datetime_dtype(
     datetime_string_array,
     numeric_array,
 ):
-    assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=False, fuzzy=False
-    )
-    assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=True, fuzzy=False
-    )
+    assert is_ndarray_datetime_dtype(data=datetime_array, parse_strings_as_datetimes=False, fuzzy=False)
+    assert is_ndarray_datetime_dtype(data=datetime_array, parse_strings_as_datetimes=True, fuzzy=False)
 
-    assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=False, fuzzy=False
-    )
-    assert is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
-    )
+    assert not is_ndarray_datetime_dtype(data=datetime_string_array, parse_strings_as_datetimes=False, fuzzy=False)
+    assert is_ndarray_datetime_dtype(data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False)
 
-    assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=False, fuzzy=False
-    )
-    assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=True, fuzzy=False
-    )
+    assert not is_ndarray_datetime_dtype(data=numeric_array, parse_strings_as_datetimes=False, fuzzy=False)
+    assert not is_ndarray_datetime_dtype(data=numeric_array, parse_strings_as_datetimes=True, fuzzy=False)
 
     datetime_string_array[-1] = "malformed_datetime_string"
-    assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
-    )
+    assert not is_ndarray_datetime_dtype(data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False)
 
 
 @pytest.mark.unit
@@ -498,10 +473,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=datetime_array,
         parse_strings_as_datetimes=False,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert ndarray_is_datetime_type
     assert values_converted == datetime_array
@@ -514,10 +486,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=datetime_array,
         parse_strings_as_datetimes=True,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert ndarray_is_datetime_type
     assert values_converted == datetime_array
@@ -530,10 +499,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=datetime_string_array,
         parse_strings_as_datetimes=False,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert not ndarray_is_datetime_type
     assert values_converted == datetime_string_array
@@ -546,10 +512,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=datetime_string_array,
         parse_strings_as_datetimes=True,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert ndarray_is_datetime_type
     assert values_converted.tolist() == datetime_array
@@ -563,10 +526,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=datetime_string_array,
         parse_strings_as_datetimes=True,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert not ndarray_is_datetime_type
     assert values_converted == datetime_string_array
@@ -579,10 +539,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=numeric_array,
         parse_strings_as_datetimes=False,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert not ndarray_is_datetime_type
     assert values_converted == numeric_array
@@ -595,10 +552,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         data=numeric_array,
         parse_strings_as_datetimes=True,
     )
-    ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
 
     assert not ndarray_is_datetime_type
     assert values_converted == numeric_array
@@ -611,11 +565,8 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     numeric_array,
 ):
     element: Any
-    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
-        data=datetime_array
-    ).tolist() == [
-        element.replace(tzinfo=datetime.timezone.utc).timestamp()
-        for element in datetime_array
+    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(data=datetime_array).tolist() == [
+        element.replace(tzinfo=datetime.timezone.utc).timestamp() for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
@@ -624,9 +575,7 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     assert "'int' object has no attribute 'replace'" in str(e.value)
 
     with pytest.raises(TypeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(
-            data=datetime_string_array
-        )
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=datetime_string_array)
 
     assert "replace() takes no keyword arguments" in str(e.value)
 
@@ -637,10 +586,7 @@ def test_convert_ndarray_float_to_datetime_tuple(
 ):
     element: Any
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[
-            element.replace(tzinfo=datetime.timezone.utc).timestamp()
-            for element in datetime_array
-        ]
+        data=[element.replace(tzinfo=datetime.timezone.utc).timestamp() for element in datetime_array]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:

@@ -47,9 +47,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
         if x is None:
             x = ""
         if not isinstance(x, str):
-            raise TypeError(
-                "Column values must be strings in order to use 'expect_column_values_to_follow_rule'"
-            )
+            raise TypeError("Column values must be strings in order to use 'expect_column_values_to_follow_rule'")
         for name, rnge in rule["ranges"].items():
             if rnge[0] < rnge[1]:
                 strings[name] = str(x[rnge[0] : rnge[1]])

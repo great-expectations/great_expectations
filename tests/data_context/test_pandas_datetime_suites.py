@@ -41,16 +41,12 @@ def test_save_expectation_suite_with_datetime_objects(
 
         empty_suite = context.add_expectation_suite("test_suite")
 
-        batch = context._get_batch_v2(
-            batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite
-        )
+        batch = context._get_batch_v2(batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite)
         for param in evaluation_parameters:
             batch.set_evaluation_parameter(param, evaluation_parameters[param])
 
         # Add expectation that will succeed using the datetime in a $PARAMETER
-        batch.expect_column_max_to_be_between(
-            column="data_refresh", min_value={"$PARAMETER": "now_minus_48h"}
-        )
+        batch.expect_column_max_to_be_between(column="data_refresh", min_value={"$PARAMETER": "now_minus_48h"})
         result = batch.validate()
         assert result.success
         batch.save_expectation_suite()
@@ -75,10 +71,7 @@ def test_save_expectation_suite_with_datetime_objects(
 
         # Check that we can build Data Docs
         index_page_locator_infos = context.build_data_docs()
-        assert (
-            index_page_locator_infos["local_site"]
-            == f"file://{ge_path}/uncommitted/data_docs/local_site/index.html"
-        )
+        assert index_page_locator_infos["local_site"] == f"file://{ge_path}/uncommitted/data_docs/local_site/index.html"
 
         # Check that we can reload the expectation suite and validate
         reloaded_batch = context._get_batch_v2(

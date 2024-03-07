@@ -135,15 +135,11 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
     def generate_ascending_list_of_datetimes(
         n, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ) -> List[datetime.datetime]:
-        start_time = datetime.datetime(
-            start_date.year, start_date.month, start_date.day
-        )
+        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
         seconds_between_dates = (end_date - start_date).total_seconds()
         # noinspection PyUnusedLocal
         datetime_list = [
-            start_time
-            + datetime.timedelta(seconds=random.randrange(int(seconds_between_dates)))
-            for i in range(n)
+            start_time + datetime.timedelta(seconds=random.randrange(int(seconds_between_dates))) for i in range(n)
         ]
         datetime_list.sort()
         return datetime_list
@@ -153,9 +149,7 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
     timestamp_list: List[datetime.datetime] = generate_ascending_list_of_datetimes(
         n=k, end_date=datetime.date(2020, 1, 31)
     )
-    date_list: List[datetime.date] = [
-        datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list
-    ]
+    date_list: List[datetime.date] = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
 
     # noinspection PyUnusedLocal
     batch_ids: List[int] = [random.randint(0, 10) for i in range(k)]
@@ -177,24 +171,16 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
                 "d": [d.day for d in date_list],
                 "timestamp": timestamp_list,
                 "session_ids": session_ids,
-                "event_type": [
-                    random.choice(["start", "stop", "continue"]) for i in range(k)
-                ],
+                "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
                 "favorite_color": [
-                    "#"
-                    + "".join(
-                        [random.choice(list("0123456789ABCDEF")) for j in range(6)]
-                    )
-                    for i in range(k)
+                    "#" + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)
                 ],
             }
         )
     )
     spark_df = spark_df.withColumn(
         "timestamp",
-        F.col("timestamp")
-        .cast(pyspark.types.IntegerType())
-        .cast(pyspark.types.StringType()),
+        F.col("timestamp").cast(pyspark.types.IntegerType()).cast(pyspark.types.StringType()),
     )
     return spark_df
 

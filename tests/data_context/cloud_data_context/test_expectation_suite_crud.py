@@ -272,9 +272,7 @@ def test_list_expectation_suites(
     )
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
-            status_code=200, json=lambda: mock_get_all_suites_json
-        )
+        mock_get.return_value = mock.Mock(status_code=200, json=lambda: mock_get_all_suites_json)
         suites = context.list_expectation_suites()
 
     assert suites == [
@@ -302,9 +300,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
     suite_name = "my_suite"
     existing_suite_names = []
 
-    with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ), pytest.deprecated_call():
+    with mock.patch("requests.Session.post", autospec=True, side_effect=mocked_post_response), pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name)
 
@@ -335,9 +331,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
                 resource_name=suite_name,
             )
         ]
-        suite = context.create_expectation_suite(
-            expectation_suite_name=suite_name, overwrite_existing=True
-        )
+        suite = context.create_expectation_suite(expectation_suite_name=suite_name, overwrite_existing=True)
 
     assert suite.id == suite_id
 
@@ -407,9 +401,7 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
     suite_id = suite_1.id
 
     with pytest.raises(StoreBackendError):
-        with mock.patch(
-            "requests.Session.delete", autospec=True, side_effect=mocked_404_response
-        ):
+        with mock.patch("requests.Session.delete", autospec=True, side_effect=mocked_404_response):
             context.delete_expectation_suite(id=suite_id)
 
 
@@ -424,9 +416,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
-    with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
-    ) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response) as mock_get:
         suite = context.suites.get(name=suite_1.name)
         mock_get.assert_called_with(
             mock.ANY,
@@ -446,9 +436,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
     suite_name = "suite123"
 
     with pytest.raises(DataContextError) as e:
-        with mock.patch(
-            "requests.Session.get", autospec=True, side_effect=mocked_404_response
-        ):
+        with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_404_response):
             context.suites.get(suite_name)
 
     assert suite_name in str(e.value)
@@ -467,9 +455,7 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     assert suite.id is None
 
-    with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ), pytest.deprecated_call():
+    with mock.patch("requests.Session.post", autospec=True, side_effect=mocked_post_response), pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     assert suite.id is not None
@@ -488,9 +474,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
-    ) as mock_put, mock.patch(
-        "requests.Session.patch", autospec=True
-    ) as mock_patch, pytest.deprecated_call():
+    ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch, pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
@@ -505,9 +489,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
         actual_put_suite_json.pop(attr)
     assert actual_put_suite_json == expected_suite_json
 
-    actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]["attributes"][
-        "suite"
-    ]
+    actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]["attributes"]["suite"]
     assert actual_patch_suite_json == expected_suite_json
 
 
@@ -528,9 +510,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        context.save_expectation_suite(
-            expectation_suite=suite, overwrite_existing=False
-        )
+        context.save_expectation_suite(expectation_suite=suite, overwrite_existing=False)
 
     assert f"expectation_suite '{suite_name}' already exists" in str(e.value)
 
@@ -549,9 +529,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
 
     with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = True
-        context.save_expectation_suite(
-            expectation_suite=suite, overwrite_existing=False
-        )
+        context.save_expectation_suite(expectation_suite=suite, overwrite_existing=False)
 
     mock_expectations_store_has_key.assert_called_once_with(
         GXCloudIdentifier(
@@ -560,9 +538,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
             resource_name=suite_name,
         )
     )
-    assert f"expectation_suite with GX Cloud ID {suite_id} already exists" in str(
-        e.value
-    )
+    assert f"expectation_suite with GX Cloud ID {suite_id} already exists" in str(e.value)
 
 
 @pytest.mark.cloud
@@ -612,12 +588,7 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
     expectation_suite_exclude_rendered_content: ExpectationSuite = context.suites.get(
         name=expectation_suite_name,
     )
-    assert (
-        expectation_suite_exclude_rendered_content.expectation_configurations[
-            0
-        ].rendered_content
-        is None
-    )
+    assert expectation_suite_exclude_rendered_content.expectation_configurations[0].rendered_content is None
 
     expected_expectation_configuration_prescriptive_rendered_content = [
         RenderedAtomicContent(
@@ -644,15 +615,11 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     ]
 
-    expectation_suite_include_rendered_content: ExpectationSuite = (
-        context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            include_rendered_content=True,
-        )
+    expectation_suite_include_rendered_content: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+        include_rendered_content=True,
     )
     assert (
-        expectation_suite_include_rendered_content.expectation_configurations[
-            0
-        ].rendered_content
+        expectation_suite_include_rendered_content.expectation_configurations[0].rendered_content
         == expected_expectation_configuration_prescriptive_rendered_content
     )

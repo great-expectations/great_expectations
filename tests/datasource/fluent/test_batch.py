@@ -15,11 +15,7 @@ from great_expectations.datasource.fluent.interfaces import Batch
 def pandas_setup(csv_path: pathlib.Path) -> Tuple[AbstractDataContext, Batch]:
     context = gx.get_context()
     source = context.sources.add_pandas("my_pandas")
-    filepath = (
-        csv_path
-        / "ten_trips_from_each_month"
-        / "yellow_tripdata_sample_10_trips_from_each_month.csv"
-    )
+    filepath = csv_path / "ten_trips_from_each_month" / "yellow_tripdata_sample_10_trips_from_each_month.csv"
     asset = source.add_csv_asset("my_csv", filepath_or_buffer=filepath)
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     return context, batch

@@ -28,9 +28,7 @@ def unique_proportion(_metrics):
     """Computes the proportion of unique non-null values out of all non-null values"""
     total_values = _metrics.get("table.row_count")
     unique_values = _metrics.get("column.distinct_values.count")
-    null_count = _metrics.get(
-        f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-    )
+    null_count = _metrics.get(f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}")
 
     # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
     if total_values > 0 and total_values != null_count:
@@ -75,11 +73,11 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
             metric_domain_kwargs=metric.metric_domain_kwargs,
         )
 
-        dependencies[
-            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        ] = MetricConfiguration(
-            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            metric_domain_kwargs=metric.metric_domain_kwargs,
+        dependencies[f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"] = (
+            MetricConfiguration(
+                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
         )
 
         return dependencies

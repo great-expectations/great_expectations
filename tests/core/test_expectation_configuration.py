@@ -95,22 +95,14 @@ def test_expectation_configuration_equality(config1, config2, config3, config4):
 
 
 @pytest.mark.unit
-def test_expectation_configuration_equivalence(
-    config1, config2, config3, config4, config5
-):
+def test_expectation_configuration_equivalence(config1, config2, config3, config4, config5):
     """Equivalence should depend only on properties that affect the result of the expectation."""
     assert config1.isEquivalentTo(config2, match_type="runtime")  # no difference
     assert config2.isEquivalentTo(config1, match_type="runtime")
     assert config1.isEquivalentTo(config3, match_type="runtime")  # different meta
-    assert config1.isEquivalentTo(
-        config4, match_type="success"
-    )  # different result format
-    assert not config1.isEquivalentTo(
-        config5, match_type="success"
-    )  # different value_set
-    assert config1.isEquivalentTo(
-        config5, match_type="domain"
-    )  # different result format
+    assert config1.isEquivalentTo(config4, match_type="success")  # different result format
+    assert not config1.isEquivalentTo(config5, match_type="success")  # different value_set
+    assert config1.isEquivalentTo(config5, match_type="domain")  # different result format
 
 
 @pytest.mark.unit
@@ -164,9 +156,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "genre_id",
-            "value_set": {
-                "$PARAMETER": "urn:great_expectations:stores:query_store:get_pet_names"
-            },
+            "value_set": {"$PARAMETER": "urn:great_expectations:stores:query_store:get_pet_names"},
             "result_format": "COMPLETE",
         },
     )

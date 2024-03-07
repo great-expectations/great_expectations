@@ -36,9 +36,7 @@ def test_rule_output_get_get_expectation_configurations(
     ]
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    expectation_configurations: List[ExpectationConfiguration] = (
-        rule_output.get_expectation_configurations()
-    )
+    expectation_configurations: List[ExpectationConfiguration] = rule_output.get_expectation_configurations()
 
     assert expectation_configurations == expected_expectation_configurations
 
@@ -86,10 +84,7 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
         rule_output.get_fully_qualified_parameter_names_by_domain()
     )
 
-    assert (
-        fully_qualified_parameter_names_by_domain
-        == expected_fully_qualified_parameter_names_by_domain
-    )
+    assert fully_qualified_parameter_names_by_domain == expected_fully_qualified_parameter_names_by_domain
 
 
 # noinspection PyPep8Naming
@@ -103,10 +98,8 @@ def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     ]
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    fully_qualified_parameter_names: List[str] = (
-        rule_output.get_fully_qualified_parameter_names_for_domain_id(
-            domain_id=column_Age_domain.id
-        )
+    fully_qualified_parameter_names: List[str] = rule_output.get_fully_qualified_parameter_names_for_domain_id(
+        domain_id=column_Age_domain.id
     )
 
     assert fully_qualified_parameter_names == expected_fully_qualified_parameter_names
@@ -116,12 +109,8 @@ def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
 def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
-    expected_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, ParameterNode]
-    ] = {
-        Domain(
-            rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}
-        ): {"$mean": 5.0},
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
+        Domain(rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}): {"$mean": 5.0},
         Domain(
             domain_type="column",
             domain_kwargs={"column": "Date"},
@@ -484,9 +473,9 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
     }
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, ParameterNode]
-    ] = rule_output.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+    parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[Domain, Dict[str, ParameterNode]] = (
+        rule_output.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+    )
 
     assert (
         parameter_values_for_fully_qualified_parameter_names_by_domain
@@ -500,12 +489,10 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_fo
     rule_output_for_rule_state_with_domains_and_parameters,
     column_Age_domain,
 ):
-    expected_parameter_values_for_fully_qualified_parameter_names: ParameterNode = (
-        ParameterNode(
-            {
-                "$mean": 5.0,
-            }
-        )
+    expected_parameter_values_for_fully_qualified_parameter_names: ParameterNode = ParameterNode(
+        {
+            "$mean": 5.0,
+        }
     )
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters

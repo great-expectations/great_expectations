@@ -22,9 +22,7 @@ class MicrosoftTeamsRenderer(Renderer):
         validation_result_suite_identifier=None,
         data_docs_pages=None,
     ):
-        default_text = (
-            "No validation occurred. Please ensure you passed a validation_result."
-        )
+        default_text = "No validation occurred. Please ensure you passed a validation_result."
 
         status = "Failed :("
 
@@ -101,12 +99,8 @@ class MicrosoftTeamsRenderer(Renderer):
                     batch_identifier = batch_identifier.batch_identifier
                 elif "active_batch_definition" in validation_result.meta:
                     data_asset_name = (
-                        validation_result.meta[
-                            "active_batch_definition"
-                        ].data_asset_name
-                        if validation_result.meta[
-                            "active_batch_definition"
-                        ].data_asset_name
+                        validation_result.meta["active_batch_definition"].data_asset_name
+                        if validation_result.meta["active_batch_definition"].data_asset_name
                         else "__no_data_asset_name__"
                     )
                 else:
@@ -117,9 +111,7 @@ class MicrosoftTeamsRenderer(Renderer):
                 )
                 validation_result_elements.append(data_asset_name_element)
 
-                expectation_suite_name = (
-                    validation_result_suite_identifier.expectation_suite_identifier.name
-                )
+                expectation_suite_name = validation_result_suite_identifier.expectation_suite_identifier.name
                 expectation_suite_name_element = self._render_validation_result_element(
                     key="Expectation suite name", value=expectation_suite_name
                 )
@@ -133,19 +125,13 @@ class MicrosoftTeamsRenderer(Renderer):
                     run_time = "__no_run_time_"
                     run_name = run_id
 
-                run_name_element = self._render_validation_result_element(
-                    key="Run name", value=run_name
-                )
+                run_name_element = self._render_validation_result_element(key="Run name", value=run_name)
                 validation_result_elements.append(run_name_element)
 
-                batch_id_element = self._render_validation_result_element(
-                    key="Batch ID", value=batch_identifier
-                )
+                batch_id_element = self._render_validation_result_element(key="Batch ID", value=batch_identifier)
                 validation_result_elements.append(batch_id_element)
 
-                query["attachments"][0]["content"]["body"][0]["items"][0]["columns"][0][
-                    "items"
-                ].append(
+                query["attachments"][0]["content"]["body"][0]["items"][0]["columns"][0]["items"].append(
                     {
                         "type": "TextBlock",
                         "spacing": "none",
@@ -157,17 +143,11 @@ class MicrosoftTeamsRenderer(Renderer):
 
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
-            check_details_text = "*{}* of *{}* expectations were met".format(
-                n_checks_succeeded, n_checks
-            )
-            check_details_text_element = self._render_validation_result_element(
-                key="Summary", value=check_details_text
-            )
+            check_details_text = f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
+            check_details_text_element = self._render_validation_result_element(key="Summary", value=check_details_text)
             validation_result_elements.append(check_details_text_element)
 
-            query["attachments"][0]["content"]["body"][1]["items"] = (
-                validation_result_elements
-            )
+            query["attachments"][0]["content"]["body"][1]["items"] = validation_result_elements
 
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():
@@ -176,9 +156,7 @@ class MicrosoftTeamsRenderer(Renderer):
                     docs_link = data_docs_pages[docs_link_key]
                     report_element = self._get_report_element(docs_link)
                     if report_element:
-                        query["attachments"][0]["content"]["actions"].append(
-                            report_element
-                        )
+                        query["attachments"][0]["content"]["actions"].append(report_element)
 
         return query
 

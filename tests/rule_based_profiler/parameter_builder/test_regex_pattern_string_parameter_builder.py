@@ -38,9 +38,7 @@ def batch_fixture() -> Batch:
     Fixture for Batch object that contains data, BatchRequest, BatchDefinition
     as well as BatchSpec and BatchMarkers. To be used in unittesting.
     """
-    df: pd.DataFrame = pd.DataFrame(
-        {"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]}
-    )
+    df: pd.DataFrame = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     batch_request: BatchRequest = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_data_connector",
@@ -84,12 +82,10 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
-    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            data_context=data_context,
-            candidate_regexes=candidate_regexes,
-        )
+    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        data_context=data_context,
+        candidate_regexes=candidate_regexes,
     )
 
     assert regex_pattern_string_parameter.threshold == 1.0
@@ -107,13 +103,11 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     candidate_regexes: Set[str] = {
         r"\d{1}",
     }
-    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            candidate_regexes=candidate_regexes,
-            threshold=0.5,
-            data_context=data_context,
-        )
+    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        candidate_regexes=candidate_regexes,
+        threshold=0.5,
+        data_context=data_context,
     )
     assert regex_pattern_string_parameter.threshold == 0.5
     assert regex_pattern_string_parameter.candidate_regexes == candidate_regexes
@@ -140,13 +134,11 @@ def test_regex_pattern_string_parameter_builder_alice(
         r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
     ]
 
-    regex_pattern_string_parameter: ParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            data_context=data_context,
-        )
+    regex_pattern_string_parameter: ParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -167,9 +159,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         batch_request=batch_request,
         runtime_configuration=None,
     )
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex_pattern_string_parameter_builder"
     expected_parameter_node_as_dict: dict = {
         "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
         "details": {
@@ -214,14 +204,12 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     ]
     threshold: float = 0.9
 
-    regex_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            threshold=threshold,
-            data_context=data_context,
-        )
+    regex_parameter: RegexPatternStringParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        threshold=threshold,
+        data_context=data_context,
     )
 
     assert regex_parameter.CANDIDATE_REGEX != candidate_regexes
@@ -247,9 +235,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         runtime_configuration=None,
     )
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex_pattern_string_parameter_builder"
     expected_parameter_node_as_dict: dict = {
         "value": r"^\d{1}$",
         "details": {
@@ -318,9 +304,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         runtime_configuration=None,
     )
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex_pattern_string_parameter_builder"
     expected_parameter_node_as_dict: dict = {
         "value": "-?\\d+",
         "details": {
@@ -340,12 +324,10 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     assert parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] in [
@@ -356,15 +338,11 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     ]
     assert (
         parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].items()
-        == expected_parameter_node_as_dict[
-            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-        ].items()
+        == expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].items()
     )
     assert (
         parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].success_ratio
-        == expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY][
-            "success_ratio"
-        ]
+        == expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]["success_ratio"]
     )
 
 
@@ -373,9 +351,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
     mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator.return_value = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    )
+    mock_data_context.get_validator.return_value = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
 
     data_context = mock_data_context
 
@@ -383,13 +359,11 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
     metric_domain_kwargs: dict = {"column": "c"}
     candidate_regexes: List[str] = [r"^\d{1}$"]
 
-    regex_pattern_string_parameter_builder: ParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            data_context=data_context,
-        )
+    regex_pattern_string_parameter_builder: ParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -410,10 +384,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
             runtime_configuration=None,
         )
 
-    assert (
-        e.value.message
-        == "Result of metric computations for RegexPatternStringParameterBuilder is empty."
-    )
+    assert e.value.message == "Result of metric computations for RegexPatternStringParameterBuilder is empty."
 
 
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
@@ -429,13 +400,11 @@ def test_regex_single_candidate(
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$"]
 
-    regex_pattern_string_parameter_builder: ParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            data_context=data_context,
-        )
+    regex_pattern_string_parameter_builder: ParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -462,9 +431,7 @@ def test_regex_single_candidate(
         batch_list=[batch],
         runtime_configuration=None,
     )
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder.value"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex_pattern_string_parameter_builder.value"
     expected_value: str = "^\\d{1}$"
     assert (
         get_parameter_value_and_validate_return_type(
@@ -476,9 +443,7 @@ def test_regex_single_candidate(
         == expected_value
     )
 
-    fully_qualified_parameter_name_for_meta: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder.details"
-    )
+    fully_qualified_parameter_name_for_meta: str = "$parameter.my_regex_pattern_string_parameter_builder.details"
     expected_meta: dict = {"evaluated_regexes": {"^\\d{1}$": 1.0}, "success_ratio": 1.0}
 
     meta: dict = get_parameter_value_and_validate_return_type(
@@ -500,13 +465,11 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$", r"^\d{3}$"]
 
-    regex_pattern_string_parameter_builder: ParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            data_context=data_context,
-        )
+    regex_pattern_string_parameter_builder: ParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -533,9 +496,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         batch_list=[batch],
         runtime_configuration=None,
     )
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder.value"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex_pattern_string_parameter_builder.value"
 
     expected_value: str = "^\\d{1}$"
 
@@ -547,9 +508,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         )
         == expected_value
     )
-    fully_qualified_parameter_name_for_meta: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder.details"
-    )
+    fully_qualified_parameter_name_for_meta: str = "$parameter.my_regex_pattern_string_parameter_builder.details"
     expected_meta: dict = {
         "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{3}$": 0.0},
         "success_ratio": 1.0,

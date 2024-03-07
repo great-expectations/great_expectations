@@ -57,14 +57,10 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         if not s3_client:
             # Validate that "boto3" library was successfully imported and attempt to create "s3_client" handle.
             if aws.boto3:
-                _check_config_substitutions_needed(
-                    self, self.boto3_options, raise_warning_if_provider_not_present=True
-                )
+                _check_config_substitutions_needed(self, self.boto3_options, raise_warning_if_provider_not_present=True)
                 # pull in needed config substitutions using the `_config_provider`
                 # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
-                boto3_options: dict = self.dict(
-                    config_provider=self._config_provider
-                ).get("boto3_options", {})
+                boto3_options: dict = self.dict(config_provider=self._config_provider).get("boto3_options", {})
                 try:
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
@@ -73,9 +69,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                         f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'
                     ) from e
             else:
-                raise PandasS3DatasourceError(
-                    'Unable to create "PandasS3Datasource" due to missing boto3 dependency.'
-                )
+                raise PandasS3DatasourceError('Unable to create "PandasS3Datasource" due to missing boto3 dependency.')
 
             self._s3_client = s3_client
 
@@ -95,8 +89,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             _ = self._get_s3_client()
         except Exception as e:
             raise TestConnectionError(
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
+                "Attempt to connect to datasource failed with the following error message: " f"{e!s}"
             ) from e
 
         if self.assets and test_assets:
@@ -116,9 +109,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         """Builds and attaches the `S3DataConnector` to the asset."""
         # TODO: use the `asset_options_type` for validation and defaults
         if kwargs:
-            raise TypeError(
-                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
-            )
+            raise TypeError(f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}")
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
@@ -134,17 +125,13 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         )
 
         # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
-            self.data_connector_type.build_test_connection_error_message(
-                data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
-                bucket=self.bucket,
-                prefix=s3_prefix,
-                delimiter=s3_delimiter,
-                recursive_file_discovery=s3_recursive_file_discovery,
-            )
+        data_asset._test_connection_error_message = self.data_connector_type.build_test_connection_error_message(
+            data_asset_name=data_asset.name,
+            batching_regex=data_asset.batching_regex,
+            bucket=self.bucket,
+            prefix=s3_prefix,
+            delimiter=s3_delimiter,
+            recursive_file_discovery=s3_recursive_file_discovery,
         )
 
-        logger.info(
-            f"{self.data_connector_type.__name__} created for '{data_asset.name}'"
-        )
+        logger.info(f"{self.data_connector_type.__name__} created for '{data_asset.name}'")

@@ -4,9 +4,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots[
-    "test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than 1"
-] = {
+snapshots["test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": {
@@ -50,9 +48,7 @@ snapshots[
     "value_type": "GraphType",
 }
 
-snapshots[
-    "test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"
-] = {
+snapshots["test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "header_row": [
@@ -86,9 +82,7 @@ snapshots[
     "value_type": "TableType",
 }
 
-snapshots[
-    "test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than 1"
-] = {
+snapshots["test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than 1"] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": {
@@ -226,9 +220,7 @@ snapshots["test_atomic_diagnostic_observed_value_without_result 1"] = {
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -244,9 +236,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_distinct_values_to_contain_set 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_distinct_values_to_contain_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -262,9 +252,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -280,9 +268,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "graph": {
@@ -383,9 +369,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_min_to_be_between 1"] 
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_set 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -402,9 +386,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_less_than 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_less_than 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -417,9 +399,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_pair_values_a_to_be_greater_than_b 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_pair_values_a_to_be_greater_than_b 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -436,9 +416,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_pair_values_to_be_equal 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_pair_values_to_be_equal 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -454,9 +432,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_proportion_of_unique_values_to_be_between 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_proportion_of_unique_values_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -470,17 +446,13 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "header": {
             "schema": {"type": "StringValueType"},
             "value": {
-                "params": {
-                    "column": {"schema": {"type": "string"}, "value": "Unnamed: 0"}
-                },
+                "params": {"column": {"schema": {"type": "string"}, "value": "Unnamed: 0"}},
                 "template": "$column quantiles must be within the following value ranges.",
             },
         },
@@ -563,9 +535,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_to_exist 1"] = {
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_unique_value_count_to_be_between 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_unique_value_count_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -581,9 +551,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -630,9 +598,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_between 1
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseable 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseable 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -646,9 +612,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -682,9 +646,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_set 1"
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_in_type_list 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_type_list 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -705,9 +667,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_increasing 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_increasing 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -722,9 +682,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -752,9 +710,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] 
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -796,9 +752,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_unique 1"
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_match_json_schema 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_json_schema 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -834,9 +788,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_regex 
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_match_regex_list 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_regex_list 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -857,9 +809,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_match_strftime_format 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_strftime_format 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -874,9 +824,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -908,9 +856,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_be_null 
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -925,9 +871,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_list 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_list 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -965,9 +909,7 @@ snapshots["test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_multicolumn_values_to_be_unique 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_multicolumn_values_to_be_unique 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -985,9 +927,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_select_column_values_to_be_unique_within_record 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_select_column_values_to_be_unique_within_record 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -1010,9 +950,7 @@ snapshots[
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_table_column_count_to_be_between 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_table_column_count_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {"min_value": {"schema": {"type": "number"}, "value": 5}},
@@ -1032,9 +970,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_column_count_to_equal 1
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
@@ -1085,9 +1021,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal 1"] 
     "value_type": "StringValueType",
 }
 
-snapshots[
-    "test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table 1"
-] = {
+snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {

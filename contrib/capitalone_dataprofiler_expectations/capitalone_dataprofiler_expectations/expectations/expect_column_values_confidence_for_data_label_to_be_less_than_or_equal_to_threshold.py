@@ -22,9 +22,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
-    ColumnMapMetricProvider
-):
+class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(ColumnMapMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
 
@@ -38,9 +36,7 @@ class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(
-        cls: Any, column: str, threshold: float, data_label: str, **kwargs: Any
-    ) -> np.ndarray:
+    def _pandas(cls: Any, column: str, threshold: float, data_label: str, **kwargs: Any) -> np.ndarray:
         """
         Implement the yes/no question for the expectation
         """
@@ -68,9 +64,7 @@ class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
         return data_label_conf <= threshold
 
 
-class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
-    ColumnMapExpectation
-):
+class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(ColumnMapExpectation):
     """Expect the column values to have a DataProfiler confidence threshold less than or equal to the specified threshold for the data label.
 
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, is the confidence threshold provided by the DataProfiler model upper bounded by the user-specified threshold.

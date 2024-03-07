@@ -73,9 +73,7 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(checkpoint_dict: dic
     set_context(context)
 
     # Act
-    with pytest.raises(
-        DataContextError, match=f"Checkpoint with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         factory.get(name=name)
 
     # Assert
@@ -192,18 +190,14 @@ def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
     checkpoint = Checkpoint(name=name)
-    with pytest.raises(
-        DataContextError, match=f"Checkpoint with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
 
     # Act
     created_checkpoint = context.checkpoints.add(checkpoint=checkpoint)
 
     # Assert
-    _assert_checkpoint_equality(
-        actual=created_checkpoint, expected=context.checkpoints.get(name=name)
-    )
+    _assert_checkpoint_equality(actual=created_checkpoint, expected=context.checkpoints.get(name=name))
 
 
 @pytest.mark.filesystem

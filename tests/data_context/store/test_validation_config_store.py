@@ -83,9 +83,7 @@ def test_add(request, store_fixture: str, validation_config: ValidationConfig):
 
 
 @pytest.mark.cloud
-def test_add_cloud(
-    cloud_backed_store: ValidationConfigStore, validation_config: ValidationConfig
-):
+def test_add_cloud(cloud_backed_store: ValidationConfigStore, validation_config: ValidationConfig):
     store = cloud_backed_store
 
     id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
@@ -240,8 +238,6 @@ def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
         ),
     ],
 )
-def test_gx_cloud_response_json_to_object_dict_failure(
-    response_json: dict, error_substring: str
-):
+def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
     with pytest.raises(ValueError, match=f"{error_substring}*."):
         ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)

@@ -34,13 +34,8 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
-        return [
-            {"name": name, "type": dtype}
-            for (name, dtype) in zip(df.columns, df.dtypes)
-        ]
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
+        return [{"name": name, "type": dtype} for (name, dtype) in zip(df.columns, df.dtypes)]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
@@ -81,18 +76,14 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         spark_column_metadata = _get_spark_column_metadata(
             df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
         return spark_column_metadata
 
 
-def _get_sqlalchemy_column_metadata(
-    execution_engine: SqlAlchemyExecutionEngine, batch_data: SqlAlchemyBatchData
-):
+def _get_sqlalchemy_column_metadata(execution_engine: SqlAlchemyExecutionEngine, batch_data: SqlAlchemyBatchData):
     table_selectable: str | sqlalchemy.TextClause
 
     if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
@@ -100,9 +91,7 @@ def _get_sqlalchemy_column_metadata(
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
-    elif sqlalchemy.TextClause and isinstance(
-        batch_data.selectable, sqlalchemy.TextClause
-    ):
+    elif sqlalchemy.TextClause and isinstance(batch_data.selectable, sqlalchemy.TextClause):
         table_selectable = batch_data.selectable
         schema_name = None
     else:
@@ -123,9 +112,7 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
 
     if pyspark.types and isinstance(field, pyspark.types.StructType):
         for child in field.fields:
-            cols += _get_spark_column_metadata(
-                child, parent_name=parent_name, include_nested=include_nested
-            )
+            cols += _get_spark_column_metadata(child, parent_name=parent_name, include_nested=include_nested)
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
         if include_nested and "." in field.name:
             # Only add backticks to escape dotted fields if they don't already exist
@@ -139,11 +126,7 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
         field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
 
-        if (
-            include_nested
-            and pyspark.types
-            and isinstance(field.dataType, pyspark.types.StructType)
-        ):
+        if include_nested and pyspark.types and isinstance(field.dataType, pyspark.types.StructType):
             for child in field.dataType.fields:
                 cols += _get_spark_column_metadata(
                     child,

@@ -36,9 +36,7 @@ def sqlite_database_path() -> pathlib.Path:
 
 
 @pytest.fixture
-def sqlite_datasource(
-    empty_data_context, sqlite_database_path, sqlite_datasource_name
-) -> SqliteDatasource:
+def sqlite_datasource(empty_data_context, sqlite_database_path, sqlite_datasource_name) -> SqliteDatasource:
     connection_string = f"sqlite:///{sqlite_database_path}"
     return SqliteDatasource(
         name=sqlite_datasource_name,
@@ -47,9 +45,7 @@ def sqlite_datasource(
 
 
 @pytest.mark.unit
-def test_connection_string_starts_with_sqlite(
-    sqlite_datasource, sqlite_database_path, sqlite_datasource_name
-):
+def test_connection_string_starts_with_sqlite(sqlite_datasource, sqlite_database_path, sqlite_datasource_name):
     # The actual file doesn't matter only it's existence since SqlAlchemy does a check
     # when it creates the database engine.
     assert sqlite_datasource.name == sqlite_datasource_name
@@ -115,9 +111,7 @@ def _create_sqlite_source(
 
 @pytest.fixture
 def create_sqlite_source() -> (
-    Callable[
-        [Optional[AbstractDataContext], list[tuple[str]]], _GeneratorContextManager[Any]
-    ]
+    Callable[[Optional[AbstractDataContext], list[tuple[str]]], _GeneratorContextManager[Any]]
 ):
     return _create_sqlite_source
 
@@ -162,18 +156,14 @@ def test_sqlite_specific_partitioner(
 ):
     with create_sqlite_source(
         data_context=empty_data_context,
-        partitioner_query_response=[
-            response for response in partitioner_query_responses
-        ],
+        partitioner_query_response=[response for response in partitioner_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         asset.add_sorters(sorter_args)
         # Test getting all batches
         partitioner = partitioner_class(**partitioner_kwargs)
         batch_request = asset.build_batch_request(partitioner=partitioner)
-        all_batches = asset.get_batch_list_from_batch_request(
-            batch_request=batch_request
-        )
+        all_batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
         assert len(all_batches) == all_batches_cnt
         # Test getting specified batches
         specified_batches = asset.get_batch_list_from_batch_request(
@@ -185,9 +175,7 @@ def test_sqlite_specific_partitioner(
 
 @pytest.mark.unit
 def test_create_temp_table(empty_data_context, create_sqlite_source):
-    with create_sqlite_source(
-        data_context=empty_data_context, create_temp_table=False
-    ) as source:
+    with create_sqlite_source(data_context=empty_data_context, create_temp_table=False) as source:
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())

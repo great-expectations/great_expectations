@@ -115,15 +115,11 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def test_connection(self) -> None: ...
 
     @override
-    def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner] = None
-    ) -> Tuple[str, ...]:
+    def get_batch_request_options_keys(self, partitioner: Optional[Partitioner] = None) -> Tuple[str, ...]:
         return tuple()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
@@ -137,9 +133,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             ),
         )
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -156,9 +150,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_spec_passthrough=None,
         )
 
-        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
-        )
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(batch_request=batch_request)
 
         batch_list.append(
             Batch(
@@ -194,19 +186,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             get_batch_list_from_batch_request method.
         """
         if options:
-            raise ValueError(
-                "options is not currently supported for this DataAssets and must be None or {}."
-            )
+            raise ValueError("options is not currently supported for this DataAssets and must be None or {}.")
 
         if batch_slice is not None:
-            raise ValueError(
-                "batch_slice is not currently supported and must be None for this DataAsset."
-            )
+            raise ValueError("batch_slice is not currently supported and must be None for this DataAsset.")
 
         if partitioner is not None:
-            raise ValueError(
-                "partitioner is not currently supported and must be None for this DataAsset."
-            )
+            raise ValueError("partitioner is not currently supported and must be None for this DataAsset.")
 
         return BatchRequest(
             datasource_name=self.datasource.name,
@@ -265,13 +251,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
-            include_exclude=exclude
-        )
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(include_exclude=exclude)
         # don't check fields that should always be set
-        check_fields: set[str] = self.__fields_set__.copy().difference(
-            _FIELDS_ALWAYS_SET
-        )
+        check_fields: set[str] = self.__fields_set__.copy().difference(_FIELDS_ALWAYS_SET)
         for field in check_fields:
             if isinstance(getattr(self, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
                 exclude_fields[field] = True
@@ -322,33 +304,21 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
-ClipboardAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "clipboard", _PandasDataAsset
-)
+ClipboardAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("clipboard", _PandasDataAsset)
 CSVAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("csv", _PandasDataAsset)
 ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDataAsset)
-FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "feather", _PandasDataAsset
-)
+FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("feather", _PandasDataAsset)
 FWFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("fwf", _PandasDataAsset)
 GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
 HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
 HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
 JSONAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("json", _PandasDataAsset)
 ORCAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("orc", _PandasDataAsset)
-ParquetAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "parquet", _PandasDataAsset
-)
-PickleAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "pickle", _PandasDataAsset
-)
+ParquetAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("parquet", _PandasDataAsset)
+PickleAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("pickle", _PandasDataAsset)
 SQLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql", _PandasDataAsset)
-SQLQueryAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "sql_query", _PandasDataAsset
-)
-SQLTableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "sql_table", _PandasDataAsset
-)
+SQLQueryAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql_query", _PandasDataAsset)
+SQLTableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql_table", _PandasDataAsset)
 SASAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sas", _PandasDataAsset)
 SPSSAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("spss", _PandasDataAsset)
 StataAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("stata", _PandasDataAsset)
@@ -371,9 +341,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
-    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
-        default=None, exclude=True, repr=False
-    )
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -423,19 +391,13 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             get_batch_list_from_batch_request method.
         """
         if options:
-            raise ValueError(
-                "options is not currently supported for this DataAssets and must be None or {}."
-            )
+            raise ValueError("options is not currently supported for this DataAssets and must be None or {}.")
 
         if batch_slice is not None:
-            raise ValueError(
-                "batch_slice is not currently supported and must be None for this DataAsset."
-            )
+            raise ValueError("batch_slice is not currently supported and must be None for this DataAsset.")
 
         if partitioner is not None:
-            raise ValueError(
-                "partitioner is not currently supported and must be None for this DataAsset."
-            )
+            raise ValueError("partitioner is not currently supported and must be None for this DataAsset.")
 
         if dataframe is None:
             df = self.dataframe
@@ -443,25 +405,19 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             df = dataframe  # type: ignore[assignment]
 
         if df is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
 
         self.dataframe = df
 
         return super().build_batch_request()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -478,9 +434,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
-        )
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(batch_request=batch_request)
 
         return [
             Batch(
@@ -525,9 +479,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _PandasDatasource subclass."""
-        )
+        raise NotImplementedError("""One needs to implement "test_connection" on a _PandasDatasource subclass.""")
 
     # End Abstract Methods
 
@@ -558,20 +510,14 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
-            include_exclude=exclude
-        )
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(include_exclude=exclude)
         if "assets" in self.__fields_set__:
             exclude_assets = {}
             for asset in self.assets:
                 # don't check fields that should always be set
-                check_fields: set[str] = asset.__fields_set__.copy().difference(
-                    _FIELDS_ALWAYS_SET
-                )
+                check_fields: set[str] = asset.__fields_set__.copy().difference(_FIELDS_ALWAYS_SET)
                 for field in check_fields:
-                    if isinstance(
-                        getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
-                    ):
+                    if isinstance(getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
                         exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
@@ -590,9 +536,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
 
     @override
-    def _add_asset(
-        self, asset: _DataAssetT, connect_options: dict | None = None
-    ) -> _DataAssetT:
+    def _add_asset(self, asset: _DataAssetT, connect_options: dict | None = None) -> _DataAssetT:
         """Adds an asset to this "_PandasDatasource" object.
 
         The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
@@ -612,9 +556,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             if in_cloud_context:
                 # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
                 asset_name = f"{asset.type}-{_short_id()}"
-                logger.info(
-                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
-                )
+                logger.info(f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'")
                 asset.name = asset_name
             elif asset_name in asset_names:
                 self.delete_asset(asset_name=asset_name)
@@ -636,9 +578,7 @@ class PandasDatasource(_PandasDatasource):
     """
 
     # class attributes
-    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
-        DataFrameAsset
-    ]
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [DataFrameAsset]
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
@@ -653,9 +593,7 @@ class PandasDatasource(_PandasDatasource):
         if _exclude_default_asset_names:
             assets = ds_dict.pop("assets", None)
             if assets:
-                assets = [
-                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
-                ]
+                assets = [a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME]
                 if assets:
                     ds_dict["assets"] = assets
         return ds_dict
@@ -673,9 +611,7 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _get_batch(
-        self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None
-    ) -> Batch:
+    def _get_batch(self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None) -> Batch:
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
             if not isinstance(dataframe, pd.DataFrame):

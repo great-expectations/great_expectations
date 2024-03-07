@@ -34,9 +34,7 @@ def passing_expectation() -> Expectation:
 
 
 @pytest.fixture
-def expectation_suite(
-    failing_expectation: Expectation, passing_expectation: Expectation
-) -> ExpectationSuite:
+def expectation_suite(failing_expectation: Expectation, passing_expectation: Expectation) -> ExpectationSuite:
     suite = ExpectationSuite("test_suite")
     suite.add_expectation_configuration(failing_expectation.configuration)
     suite.add_expectation_configuration(passing_expectation.configuration)
@@ -83,9 +81,7 @@ def batch_config_with_event_type_partitioner(
 
 
 @pytest.fixture
-def validator(
-    fds_data_context: AbstractDataContext, batch_config: BatchConfig
-) -> Validator:
+def validator(fds_data_context: AbstractDataContext, batch_config: BatchConfig) -> Validator:
     return Validator(
         batch_config=batch_config,
         batch_request_options=None,
@@ -94,9 +90,7 @@ def validator(
 
 
 @pytest.mark.unit
-def test_result_format_boolean_only(
-    validator: Validator, failing_expectation: Expectation
-):
+def test_result_format_boolean_only(validator: Validator, failing_expectation: Expectation):
     validator.result_format = ResultFormat.BOOLEAN_ONLY
     result = validator.validate_expectation(failing_expectation)
 
@@ -141,18 +135,14 @@ def test_result_format_complete(validator: Validator, failing_expectation: Expec
 
 
 @pytest.mark.unit
-def test_validate_expectation_success(
-    validator: Validator, passing_expectation: Expectation
-):
+def test_validate_expectation_success(validator: Validator, passing_expectation: Expectation):
     result = validator.validate_expectation(passing_expectation)
 
     assert result.success
 
 
 @pytest.mark.unit
-def test_validate_expectation_failure(
-    validator: Validator, failing_expectation: Expectation
-):
+def test_validate_expectation_failure(validator: Validator, failing_expectation: Expectation):
     result = validator.validate_expectation(failing_expectation)
 
     assert not result.success
@@ -180,9 +170,7 @@ def test_validate_expectation_with_batch_asset_options(
 
 
 @pytest.mark.unit
-def test_validate_expectation_suite(
-    validator: Validator, expectation_suite: ExpectationSuite
-):
+def test_validate_expectation_suite(validator: Validator, expectation_suite: ExpectationSuite):
     result = validator.validate_expectation_suite(expectation_suite)
 
     assert not result.success

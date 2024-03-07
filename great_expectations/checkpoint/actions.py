@@ -73,9 +73,7 @@ class ValidationAction:
     def run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
@@ -110,9 +108,7 @@ class ValidationAction:
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -149,9 +145,7 @@ class NoOpAction(ValidationAction):
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -243,9 +237,7 @@ class SlackNotificationAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -254,9 +246,7 @@ class SlackNotificationAction(ValidationAction):
         logger.debug("SlackNotificationAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -282,24 +272,14 @@ class SlackNotificationAction(ValidationAction):
         )
 
         validation_result_urls: list[str] = [
-            data_docs_url["site_url"]
-            for data_docs_url in data_docs_urls
-            if data_docs_url["site_url"]
+            data_docs_url["site_url"] for data_docs_url in data_docs_urls if data_docs_url["site_url"]
         ]
-        if (
-            isinstance(validation_result_suite_identifier, GXCloudIdentifier)
-            and validation_result_suite_identifier.id
-        ):
+        if isinstance(validation_result_suite_identifier, GXCloudIdentifier) and validation_result_suite_identifier.id:
             # To send a notification with a link to the validation result, we need to have created the validation
             # result in cloud. If the user has configured the store action after the notification action, they will
             # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.
-            if (
-                "store_validation_result" in payload
-                and "validation_result_url" in payload["store_validation_result"]
-            ):
-                validation_result_urls.append(
-                    payload["store_validation_result"]["validation_result_url"]
-                )
+            if "store_validation_result" in payload and "validation_result_url" in payload["store_validation_result"]:
+                validation_result_urls.append(payload["store_validation_result"]["validation_result_url"])
         result = {"slack_notification_result": "none required"}
         if (
             self.notify_on == "all"
@@ -320,9 +300,7 @@ class SlackNotificationAction(ValidationAction):
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(
-                            blocks, query, result
-                        )
+                        result = self._send_notifications_in_batches(blocks, query, result)
                     else:
                         result = self._get_slack_result(query)
 
@@ -331,10 +309,7 @@ class SlackNotificationAction(ValidationAction):
     def _send_notifications_in_batches(self, blocks, query, result):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
-        split_text = [
-            text[position : position + chunk_size]
-            for position in range(0, chunks, chunk_size)
-        ]
+        split_text = [text[position : position + chunk_size] for position in range(0, chunks, chunk_size)]
         for batch in split_text:
             query["text"] = batch
             result = self._get_slack_result(query)
@@ -396,9 +371,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -407,9 +380,7 @@ class PagerdutyAlertAction(ValidationAction):
         logger.debug("PagerdutyAlertAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -506,18 +477,14 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                 class_name=renderer["class_name"],
             )
         self.teams_webhook = microsoft_teams_webhook
-        assert (
-            microsoft_teams_webhook
-        ), "No Microsoft teams webhook found in action config."
+        assert microsoft_teams_webhook, "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -526,9 +493,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         logger.debug("MicrosoftTeamsNotificationAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -561,9 +526,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                 data_docs_pages,
             )
             # this will actually sent the POST request to the Microsoft Teams webapp server
-            teams_notif_result = send_microsoft_teams_notifications(
-                query, microsoft_teams_webhook=self.teams_webhook
-            )
+            teams_notif_result = send_microsoft_teams_notifications(query, microsoft_teams_webhook=self.teams_webhook)
             return {"microsoft_teams_notification_result": teams_notif_result}
         else:
             return {"microsoft_teams_notification_result": None}
@@ -630,9 +593,7 @@ class OpsgenieAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -641,9 +602,7 @@ class OpsgenieAlertAction(ValidationAction):
         logger.debug("OpsgenieAlertAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -677,9 +636,7 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(
-                description, expectation_suite_name, settings
-            )
+            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
@@ -772,16 +729,12 @@ class EmailAction(ValidationAction):
             self.sender_alias = sender_login
         else:
             self.sender_alias = sender_alias
-        self.receiver_emails_list = list(
-            map(lambda x: x.strip(), receiver_emails.split(","))
-        )
+        self.receiver_emails_list = list(map(lambda x: x.strip(), receiver_emails.split(",")))
         self.use_tls = use_tls
         self.use_ssl = use_ssl
         assert smtp_address, "No SMTP server address found in action config."
         assert smtp_port, "No SMTP server port found in action config."
-        assert (
-            receiver_emails
-        ), "No email addresses to send the email to in action config."
+        assert receiver_emails, "No email addresses to send the email to in action config."
         if not sender_login:
             logger.warning(
                 "No login found for sending the email in action config. "
@@ -799,9 +752,7 @@ class EmailAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -810,9 +761,7 @@ class EmailAction(ValidationAction):
         logger.debug("EmailAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -838,9 +787,7 @@ class EmailAction(ValidationAction):
             or (self.notify_on == "success" and validation_success)
             or (self.notify_on == "failure" and not validation_success)
         ):
-            title, html = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.notify_with
-            )
+            title, html = self.renderer.render(validation_result_suite, data_docs_pages, self.notify_with)
             # this will actually send the email
             email_result = send_email(
                 title,
@@ -901,9 +848,7 @@ class StoreValidationResultAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -916,26 +861,18 @@ class StoreValidationResultAction(ValidationAction):
             expectation_suite_identifier,
             checkpoint_identifier,
         )
-        if self._using_cloud_context and isinstance(
-            run_return_value, GXCloudResourceRef
-        ):
-            return self._run_cloud_post_process_resource_ref(
-                run_return_value, validation_result_suite_identifier
-            )
+        if self._using_cloud_context and isinstance(run_return_value, GXCloudResourceRef):
+            return self._run_cloud_post_process_resource_ref(run_return_value, validation_result_suite_identifier)
 
     def _basic_run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         expectation_suite_identifier,
         checkpoint_identifier: Optional[GXCloudIdentifier],
     ) -> Union[bool, GXCloudResourceRef]:
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -966,9 +903,7 @@ class StoreValidationResultAction(ValidationAction):
     def _run_cloud_post_process_resource_ref(
         self,
         gx_cloud_resource_ref: GXCloudResourceRef,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
     ):
         store_set_return_value: GXCloudResourceRef
         new_id = gx_cloud_resource_ref.id
@@ -1000,9 +935,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
-    def __init__(
-        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
-    ) -> None:
+    def __init__(self, data_context: AbstractDataContext, target_store_name: Optional[str] = None) -> None:
         super().__init__(data_context)
 
         if target_store_name is None:
@@ -1014,9 +947,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1025,9 +956,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         logger.debug("StoreEvaluationParametersAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -1088,23 +1017,15 @@ class StoreMetricsAction(ValidationAction):
         try:
             store = data_context.stores[target_store_name]
         except KeyError:
-            raise DataContextError(
-                "Unable to find store {} in your DataContext configuration.".format(
-                    target_store_name
-                )
-            )
+            raise DataContextError(f"Unable to find store {target_store_name} in your DataContext configuration.")
         if not isinstance(store, MetricStore):
-            raise DataContextError(
-                "StoreMetricsAction must have a valid MetricsStore for its target store."
-            )
+            raise DataContextError("StoreMetricsAction must have a valid MetricsStore for its target store.")
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1113,9 +1034,7 @@ class StoreMetricsAction(ValidationAction):
         logger.debug("StoreMetricsAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -1179,9 +1098,7 @@ class UpdateDataDocsAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1190,9 +1107,7 @@ class UpdateDataDocsAction(ValidationAction):
         logger.debug("UpdateDataDocsAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action.")
             return
 
         if not isinstance(
@@ -1276,14 +1191,10 @@ class SNSNotificationAction(ValidationAction):
         logger.debug("SNSNotificationAction.run")
 
         if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
-            )
+            logger.warning(f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. ")
 
         if self.sns_message_subject is None:
-            logger.warning(
-                "No message subject was passed checking for expectation_suite_name"
-            )
+            logger.warning("No message subject was passed checking for expectation_suite_name")
             if expectation_suite_identifier is None:
                 subject = validation_result_suite_identifier.run_id
                 logger.warning(
@@ -1295,9 +1206,7 @@ class SNSNotificationAction(ValidationAction):
         else:
             subject = self.sns_message_subject
 
-        return send_sns_notification(
-            self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
-        )
+        return send_sns_notification(self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs)
 
 
 class APINotificationAction(ValidationAction):
@@ -1323,27 +1232,19 @@ class APINotificationAction(ValidationAction):
         elif "active_batch_definition" in validation_result_suite.meta:
             data_asset_name = (
                 validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta[
-                    "active_batch_definition"
-                ].data_asset_name
+                if validation_result_suite.meta["active_batch_definition"].data_asset_name
                 else "__no_data_asset_name__"
             )
         else:
             data_asset_name = "__no_data_asset_name__"
 
         validation_results: list = validation_result_suite.get("results")
-        validation_results_serializable: list = convert_to_json_serializable(
-            validation_results
-        )
+        validation_results_serializable: list = convert_to_json_serializable(validation_results)
 
-        payload = self.create_payload(
-            data_asset_name, suite_name, validation_results_serializable
-        )
+        payload = self.create_payload(data_asset_name, suite_name, validation_results_serializable)
 
         response = self.send_results(payload)
-        return (
-            f"Successfully Posted results to API, status code - {response.status_code}"
-        )
+        return f"Successfully Posted results to API, status code - {response.status_code}"
 
     def send_results(self, payload) -> requests.Response:
         try:
@@ -1354,9 +1255,7 @@ class APINotificationAction(ValidationAction):
             raise e
 
     @staticmethod
-    def create_payload(
-        data_asset_name, suite_name, validation_results_serializable
-    ) -> str:
+    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:
         payload = json.dumps(
             {
                 "test_suite_name": suite_name,

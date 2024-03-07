@@ -55,9 +55,7 @@ def metrics_dict():
     }
 
 
-def fake_metrics_config_list(
-    metric_name: str, metric_domain_kwargs: Dict[str, Any]
-) -> List[MetricConfiguration]:
+def fake_metrics_config_list(metric_name: str, metric_domain_kwargs: Dict[str, Any]) -> List[MetricConfiguration]:
     """
     Helper method to generate list of MetricConfiguration objects for tests.
     """
@@ -70,9 +68,7 @@ def fake_metrics_config_list(
     ]
 
 
-def fake_expectation_config(
-    expectation_type: str, config_kwargs: Dict[str, Any]
-) -> ExpectationConfiguration:
+def fake_expectation_config(expectation_type: str, config_kwargs: Dict[str, Any]) -> ExpectationConfiguration:
     """
     Helper method to generate of ExpectationConfiguration objects for tests.
     """
@@ -88,9 +84,7 @@ def fake_expectation_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config(
-                "fake_multicolumn_expectation", {"column_list": []}
-            ),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": []}),
         ),
         (
             FakeColumnMapExpectation,
@@ -109,12 +103,8 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
     try:
         fake_expectation = fake_expectation_cls(**config.kwargs)
     except Exception:
-        assert (
-            False
-        ), "Validate configuration threw an error when testing default mostly value"
-    assert (
-        fake_expectation._get_success_kwargs().get("mostly") == 1
-    ), "Default mostly success ratio is not 1"
+        assert False, "Validate configuration threw an error when testing default mostly value"
+    assert fake_expectation._get_success_kwargs().get("mostly") == 1, "Default mostly success ratio is not 1"
 
 
 @pytest.mark.unit
@@ -125,18 +115,14 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             [
                 (
                     FakeMulticolumnExpectation,
-                    fake_expectation_config(
-                        "fake_multicolumn_expectation", {"column_list": [], "mostly": x}
-                    ),
+                    fake_expectation_config("fake_multicolumn_expectation", {"column_list": [], "mostly": x}),
                 )
                 for x in [0, 0.5, 1]
             ],
             [
                 (
                     FakeColumnMapExpectation,
-                    fake_expectation_config(
-                        "fake_column_map_expectation", {"column": "col", "mostly": x}
-                    ),
+                    fake_expectation_config("fake_column_map_expectation", {"column": "col", "mostly": x}),
                 )
                 for x in [0, 0.5, 1]
             ],
@@ -166,15 +152,11 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config(
-                "fake_multicolumn_expectation", {"column_list": [], "mostly": -0.5}
-            ),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": [], "mostly": -0.5}),
         ),
         (
             FakeColumnMapExpectation,
-            fake_expectation_config(
-                "fake_column_map_expectation", {"column": "col", "mostly": 1.5}
-            ),
+            fake_expectation_config("fake_column_map_expectation", {"column": "col", "mostly": 1.5}),
         ),
         (
             FakeColumnPairMapExpectation,
@@ -185,9 +167,7 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
         ),
     ],
 )
-def test_multicolumn_expectation_validation_errors_with_bad_mostly(
-    fake_expectation_cls, config
-):
+def test_multicolumn_expectation_validation_errors_with_bad_mostly(fake_expectation_cls, config):
     with pytest.raises(pydantic.ValidationError):
         fake_expectation_cls(**config)
 
@@ -225,9 +205,7 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
 
 @pytest.mark.unit
 def test_expectation_configuration_property():
-    expectation = gxe.ExpectColumnMaxToBeBetween(
-        column="foo", min_value=0, max_value=10
-    )
+    expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
@@ -241,9 +219,7 @@ def test_expectation_configuration_property():
 
 @pytest.mark.unit
 def test_expectation_configuration_property_recognizes_state_changes():
-    expectation = gxe.ExpectColumnMaxToBeBetween(
-        column="foo", min_value=0, max_value=10
-    )
+    expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     expectation.column = "bar"
     expectation.min_value = 5
@@ -292,14 +268,10 @@ def taxi_db_path() -> str:
 
 
 @pytest.fixture
-def sqlite_datasource(
-    in_memory_runtime_context: AbstractDataContext, taxi_db_path: str
-) -> SqliteDatasource:
+def sqlite_datasource(in_memory_runtime_context: AbstractDataContext, taxi_db_path: str) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_sqlite_datasource"
-    return context.sources.add_sqlite(
-        datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
-    )
+    return context.sources.add_sqlite(datasource_name, connection_string=f"sqlite:///{taxi_db_path}")
 
 
 @pytest.fixture
@@ -388,9 +360,7 @@ class TestEvaluationParameterOptions:
 
     @pytest.mark.unit
     def test_expectation_without_evaluation_parameter(self):
-        expectation = gxe.ExpectColumnValuesToBeBetween(
-            column="foo", min_value=0, max_value=10
-        )
+        expectation = gxe.ExpectColumnValuesToBeBetween(column="foo", min_value=0, max_value=10)
         assert expectation.evaluation_parameter_options == tuple()
 
     @pytest.mark.unit
@@ -400,9 +370,7 @@ class TestEvaluationParameterOptions:
             min_value=0,
             max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
         )
-        assert expectation.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_MAX,
-        )
+        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_MAX,)
 
     @pytest.mark.unit
     def test_expectation_with_multiple_evaluation_parameters(self):
@@ -423,6 +391,4 @@ class TestEvaluationParameterOptions:
             min_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
             max_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
         )
-        assert expectation.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_VALUE,
-        )
+        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_VALUE,)

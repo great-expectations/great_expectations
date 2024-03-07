@@ -23,12 +23,8 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
-    DataProfilerProfileMetricProvider
-):
-    metric_name = (
-        "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
-    )
+class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(DataProfilerProfileMetricProvider):
+    metric_name = "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
 
     value_keys = (
         "profile_path",
@@ -68,9 +64,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
 
             # adds stats if generic stat key is provided
             numerical_diff_statistics_copy = copy.deepcopy(numerical_diff_statistics)
-            stats = replace_generic_operator_in_report_keys(
-                stats, numerical_diff_statistics_copy
-            )
+            stats = replace_generic_operator_in_report_keys(stats, numerical_diff_statistics_copy)
 
             if col not in columns:  # Makes sure column exists within profile schema
                 requested_columns[col] = "Column requested was not found."
@@ -90,9 +84,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
                 diff_val = col_data_stats[stat]
                 if diff_val == "unchanged":  # In the case there is no delta
                     diff_val = 0
-                between_bounds = is_value_between_bounds(
-                    diff_val, bounds["lower"], bounds["upper"], inclusive=True
-                )
+                between_bounds = is_value_between_bounds(diff_val, bounds["lower"], bounds["upper"], inclusive=True)
                 if not between_bounds:
                     requested_columns[col][stat] = {
                         "lower_bound": bounds["lower"],
@@ -123,10 +115,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
             runtime_configuration=runtime_configuration,
         )
 
-        if (
-            metric.metric_name
-            == "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
-        ):
+        if metric.metric_name == "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range":
             dependencies["data_profiler.profile_diff"] = MetricConfiguration(
                 metric_name="data_profiler.profile_diff",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
@@ -141,9 +130,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
         return dependencies
 
 
-class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
-    ProfileNumericColumnsDiffExpectation
-):
+class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(ProfileNumericColumnsDiffExpectation):
     """Expect a statistic's value for a given column of a DataProfiler difference report to be within the specified threshold, inclusive.
 
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
@@ -192,9 +179,7 @@ class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
 
     example_profile = dp.Profiler(df, options=profiler_opts)
 
-    profile_path = (
-        "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
-    )
+    profile_path = "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
 
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
@@ -271,9 +256,7 @@ class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
         },
     ]
 
-    profile_metric = (
-        "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
-    )
+    profile_metric = "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
 
     success_keys = (
         "profile_path",

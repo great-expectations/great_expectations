@@ -42,9 +42,7 @@ if __name__ == "__main__":
         anonymous_usage_statistics=config_file["anonymous_usage_statistics"],
         checkpoint_store_name=config_file["checkpoint_store_name"],
         store_backend_defaults=S3StoreBackendDefaults(
-            default_bucket_name=config_file["data_docs_sites"]["s3_site"][
-                "store_backend"
-            ]["bucket"]
+            default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"]["bucket"]
         ),
     )
 
@@ -64,9 +62,7 @@ if __name__ == "__main__":
         expectation_suite_name=expectation_suite_name,
     )
     print(validator.head())
-    validator.expect_column_values_to_not_be_null(
-        column="passenger_count"
-    )  ## add some test
+    validator.expect_column_values_to_not_be_null(column="passenger_count")  ## add some test
     validator.save_expectation_suite(discard_failed_expectations=False)
     my_checkpoint_name = "in_memory_checkpoint"
     python_config = {
@@ -98,9 +94,7 @@ if __name__ == "__main__":
         run_name="run_name",
         batch_request={
             "runtime_parameters": {"batch_data": df_spark},
-            "batch_identifiers": {
-                "runtime_batch_identifier_name": "default_identifier"
-            },
+            "batch_identifiers": {"runtime_batch_identifier_name": "default_identifier"},
         },
     )
 

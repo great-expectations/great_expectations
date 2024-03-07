@@ -56,9 +56,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     """
 
     sum_total: float
-    ignore_row_if: Literal[
-        "all_values_are_missing", "any_value_is_missing", "never"
-    ] = "all_values_are_missing"
+    ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = "all_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -96,14 +94,8 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
             ["column_list", "sum_total", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+        mostly_str = "" if params.get("mostly") is None else ", at least $mostly_pct % of the time"
         sum_total = params.get("sum_total")  # noqa: F841
 
         column_list_str = ""
@@ -113,9 +105,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         last_idx = len(params["column_list"]) - 1
         column_list_str += f"$column_list_{last_idx!s}"
         params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
-        template_str = (
-            f"Sum across columns {column_list_str} must be $sum_total{mostly_str}."
-        )
+        template_str = f"Sum across columns {column_list_str} must be $sum_total{mostly_str}."
         return [
             RenderedStringTemplateContent(
                 **{

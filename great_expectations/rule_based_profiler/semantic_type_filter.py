@@ -11,9 +11,7 @@ class SemanticTypeFilter(ABC):
     @abstractmethod
     def parse_semantic_domain_type_argument(
         self,
-        semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
     ) -> List[SemanticDomainTypes]:
         pass
 

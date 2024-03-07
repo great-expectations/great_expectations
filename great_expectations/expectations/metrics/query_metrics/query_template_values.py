@@ -31,9 +31,7 @@ class QueryTemplateValues(QueryMetricProvider):
     @classmethod
     def get_query(cls, query, template_dict, selectable) -> str:
         template_dict_reformatted = {
-            k: str(v).format(batch=selectable)
-            if isinstance(v, numbers.Number)
-            else v.format(batch=selectable)
+            k: str(v).format(batch=selectable) if isinstance(v, numbers.Number) else v.format(batch=selectable)
             for k, v in template_dict.items()
         }
         query_reformatted = query.format(**template_dict_reformatted, batch=selectable)
@@ -86,9 +84,7 @@ class QueryTemplateValues(QueryMetricProvider):
             query = cls.get_query(query, template_dict, f"({selectable})")
 
         try:
-            result: List[sqlalchemy.Row] = execution_engine.execute_query(
-                sa.text(query)
-            ).fetchall()
+            result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
@@ -109,9 +105,7 @@ class QueryTemplateValues(QueryMetricProvider):
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
 
         df.createOrReplaceTempView("tmp_view")
         template_dict = metric_value_kwargs.get("template_dict")

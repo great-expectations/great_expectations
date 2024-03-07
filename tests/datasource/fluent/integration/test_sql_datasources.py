@@ -59,9 +59,7 @@ if TYPE_CHECKING:
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
-PYTHON_VERSION: Final[Literal["py38", "py39", "py310", "py311"]] = (
-    f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
-)
+PYTHON_VERSION: Final[Literal["py38", "py39", "py310", "py311"]] = f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
@@ -75,9 +73,7 @@ DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 # sqlite db files should be using fresh tmp_path on every test
 DO_NOT_DROP_TABLES: set[str] = {"sqlite"}
 
-DatabaseType: TypeAlias = Literal[
-    "databricks_sql", "postgres", "snowflake", "sqlite", "trino"
-]
+DatabaseType: TypeAlias = Literal["databricks_sql", "postgres", "snowflake", "sqlite", "trino"]
 TableNameCase: TypeAlias = Literal[
     "quoted_lower",
     "quoted_mixed",
@@ -161,9 +157,7 @@ def _get_exception_details(
     """Extract a list of exception_info dicts from a CheckpointResult."""
     validation_results: list[
         dict[
-            Literal[
-                "exception_info", "expectation_config", "meta", "result", "success"
-            ],
+            Literal["exception_info", "expectation_config", "meta", "result", "success"],
             dict,
         ]
     ] = next(  # type: ignore[index, assignment]
@@ -176,17 +170,11 @@ def _get_exception_details(
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
 
-    exc_details = [
-        r["exception_info"]
-        for r in validation_results
-        if r["exception_info"]["raised_exception"]
-    ]
+    exc_details = [r["exception_info"] for r in validation_results if r["exception_info"]["raised_exception"]]
     if exc_details and prettyprint:
         print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
         for i, exc_info in enumerate(exc_details, start=1):
-            print(
-                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
-            )
+            print(f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}")
     return exc_details
 
 
@@ -225,9 +213,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
     Given a SQLALchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """
-    all_created_tables: dict[
-        str, list[dict[Literal["table_name", "schema"], str | None]]
-    ] = {}
+    all_created_tables: dict[str, list[dict[Literal["table_name", "schema"], str | None]]] = {}
     engines: dict[str, engine.Engine] = {}
 
     def _table_factory(
@@ -238,9 +224,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
     ) -> None:
         sa_engine = gx_engine.engine
         if sa_engine.dialect.name in DO_NOT_CREATE_TABLES:
-            LOGGER.info(
-                f"Skipping table creation for {table_names} for {sa_engine.dialect.name}"
-            )
+            LOGGER.info(f"Skipping table creation for {table_names} for {sa_engine.dialect.name}")
             return
         LOGGER.info(
             f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
@@ -248,12 +232,8 @@ def table_factory() -> Generator[TableFactory, None, None]:
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
-            quoted_upper_col: str = quote_str(
-                QUOTED_UPPER_COL, dialect=sa_engine.dialect.name
-            )
-            quoted_lower_col: str = quote_str(
-                QUOTED_LOWER_COL, dialect=sa_engine.dialect.name
-            )
+            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)
+            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -319,29 +299,20 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 @pytest.fixture
 def databricks_creds_populated() -> bool:
-    if (
-        os.getenv("DATABRICKS_TOKEN")
-        or os.getenv("DATABRICKS_HOST")
-        or os.getenv("DATABRICKS_HTTP_PATH")
-    ):
+    if os.getenv("DATABRICKS_TOKEN") or os.getenv("DATABRICKS_HOST") or os.getenv("DATABRICKS_HTTP_PATH"):
         return True
     return False
 
 
 @pytest.fixture
-def databricks_sql_ds(
-    context: EphemeralDataContext, databricks_creds_populated: bool
-) -> DatabricksSQLDatasource:
+def databricks_sql_ds(context: EphemeralDataContext, databricks_creds_populated: bool) -> DatabricksSQLDatasource:
     if not databricks_creds_populated:
         pytest.skip("no databricks credentials")
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
-        "/"
-        + RAND_SCHEMA
-        + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
-        + RAND_SCHEMA,
+        "/" + RAND_SCHEMA + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema=" + RAND_SCHEMA,
     )
     return ds
 
@@ -370,12 +341,8 @@ def snowflake_ds(
 
 
 @pytest.fixture
-def sqlite_ds(
-    context: EphemeralDataContext, tmp_path: pathlib.Path
-) -> SqliteDatasource:
-    ds = context.sources.add_sqlite(
-        "sqlite", connection_string=f"sqlite:///{tmp_path}/test.db"
-    )
+def sqlite_ds(context: EphemeralDataContext, tmp_path: pathlib.Path) -> SqliteDatasource:
+    ds = context.sources.add_sqlite("sqlite", connection_string=f"sqlite:///{tmp_path}/test.db")
     return ds
 
 
@@ -436,9 +403,7 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for postgres")
         # create table
-        table_factory(
-            gx_engine=postgres_ds.get_execution_engine(), table_names={table_name}
-        )
+        table_factory(gx_engine=postgres_ds.get_execution_engine(), table_names={table_name})
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
@@ -462,14 +427,10 @@ class TestTableIdentifiers:
             schema=RAND_SCHEMA,
         )
 
-        table_names: list[str] = inspect(
-            databricks_sql_ds.get_engine()
-        ).get_table_names(schema=RAND_SCHEMA)
+        table_names: list[str] = inspect(databricks_sql_ds.get_engine()).get_table_names(schema=RAND_SCHEMA)
         print(f"databricks tables:\n{pf(table_names)}))")
 
-        databricks_sql_ds.add_table_asset(
-            asset_name, table_name=table_name, schema_name=RAND_SCHEMA
-        )
+        databricks_sql_ds.add_table_asset(asset_name, table_name=table_name, schema_name=RAND_SCHEMA)
 
     @pytest.mark.snowflake
     def test_snowflake(
@@ -491,14 +452,10 @@ class TestTableIdentifiers:
             schema=schema,
         )
 
-        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names(
-            schema=schema
-        )
+        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names(schema=schema)
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
 
     @pytest.mark.sqlite
     def test_sqlite(
@@ -555,13 +512,9 @@ class TestTableIdentifiers:
             schema=schema,
         )
 
-        asset = datasource.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
+        suite = context.add_expectation_suite(expectation_suite_name=f"{datasource.name}-{asset.name}")
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type="expect_column_values_to_not_be_null",
@@ -819,10 +772,7 @@ class TestColumnIdentifiers:
             request.applymarker(pytest.mark.xfail)
 
         schema: str | None = (
-            RAND_SCHEMA
-            if GXSqlDialect(dialect)
-            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
-            else None
+            RAND_SCHEMA if GXSqlDialect(dialect) in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS) else None
         )
 
         print(f"\ncolumn_name:\n  {column_name!r}")
@@ -844,9 +794,7 @@ class TestColumnIdentifiers:
             ],
         )
 
-        qualified_table_name: str = (
-            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        )
+        qualified_table_name: str = f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
         # check that the column exists so that we know what if the expectation should succeed or fail
         column_exists = _raw_query_check_column_exists(
             column_name,
@@ -854,14 +802,10 @@ class TestColumnIdentifiers:
             datasource.get_execution_engine(),
         )
 
-        asset = datasource.add_table_asset(
-            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
-        )
+        asset = datasource.add_table_asset("my_asset", table_name=TEST_TABLE_NAME, schema_name=schema)
         print(f"asset:\n{asset!r}\n")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
+        suite = context.add_expectation_suite(expectation_suite_name=f"{datasource.name}-{asset.name}")
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
@@ -896,9 +840,7 @@ class TestColumnIdentifiers:
         if column_exists:
             assert result.success is True, "column exists but validation failed"
         else:
-            assert (
-                result.success is False
-            ), "column does not exist but validation succeeded"
+            assert result.success is False, "column does not exist but validation succeeded"
 
 
 if __name__ == "__main__":

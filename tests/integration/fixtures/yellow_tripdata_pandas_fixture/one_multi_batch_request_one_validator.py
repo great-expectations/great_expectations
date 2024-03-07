@@ -20,32 +20,23 @@ multi_batch_request = BatchRequest(
 )
 
 # Instantiate the Validator
-validator_multi_batch = context.get_validator(
-    batch_request=multi_batch_request, expectation_suite=suite
-)
+validator_multi_batch = context.get_validator(batch_request=multi_batch_request, expectation_suite=suite)
 
 # The active batch should be December, as this should be the last one loaded. Confirming here.
 assert validator_multi_batch.active_batch_definition.batch_identifiers["month"] == "12"
 
 # Get the list of all batches contained by the Validator for use in the BatchFilter
-total_batch_definition_list: list = [
-    v.batch_definition for k, v in validator_multi_batch.batches.items()
-]
+total_batch_definition_list: list = [v.batch_definition for k, v in validator_multi_batch.batches.items()]
 
 # Filter to all batch_definitions prior to December
 pre_dec_batch_filter: BatchFilter = build_batch_filter(
     data_connector_query_dict={
-        "custom_filter_function": lambda batch_identifiers: int(
-            batch_identifiers["month"]
-        )
-        < 12
+        "custom_filter_function": lambda batch_identifiers: int(batch_identifiers["month"]) < 12
         and batch_identifiers["year"] == "2019"
     }
 )
-pre_dec_batch_definition_list: list = (
-    pre_dec_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
-    )
+pre_dec_batch_definition_list: list = pre_dec_batch_filter.select_from_data_connector_query(
+    batch_definition_list=total_batch_definition_list
 )
 
 # Get the highest max and lowest min before December

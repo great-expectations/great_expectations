@@ -109,12 +109,8 @@ class CardinalityChecker:
         AbsoluteCardinalityLimit,
         RelativeCardinalityLimit,
     )
-    SUPPORTED_LIMIT_MODE_CLASS_NAMES = (
-        mode.__name__ for mode in SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
-    )
-    SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS = (
-        mode.name for mode in CardinalityLimitMode
-    )
+    SUPPORTED_LIMIT_MODE_CLASS_NAMES = (mode.__name__ for mode in SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES)
+    SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS = (mode.name for mode in CardinalityLimitMode)
 
     def __init__(
         self,
@@ -155,14 +151,9 @@ class CardinalityChecker:
             return metric_value <= self._cardinality_limit_mode.max_unique_values
 
         if isinstance(self._cardinality_limit_mode, RelativeCardinalityLimit):
-            return (
-                float(metric_value)
-                <= self._cardinality_limit_mode.max_proportion_unique
-            )
+            return float(metric_value) <= self._cardinality_limit_mode.max_proportion_unique
 
-        raise ValueError(
-            f'Unknown "cardinality_limit_mode" mode "{self._cardinality_limit_mode}" encountered.'
-        )
+        raise ValueError(f'Unknown "cardinality_limit_mode" mode "{self._cardinality_limit_mode}" encountered.')
 
     @staticmethod
     def _validate_metric_value(metric_value: Union[int, float]) -> None:  # noqa: PYI041
@@ -191,29 +182,21 @@ class CardinalityChecker:
             validate_input_parameters(
                 cardinality_limit_mode=cardinality_limit_mode.get("name"),
                 max_unique_values=cardinality_limit_mode.get("max_unique_values"),
-                max_proportion_unique=cardinality_limit_mode.get(
-                    "max_proportion_unique"
-                ),
+                max_proportion_unique=cardinality_limit_mode.get("max_proportion_unique"),
                 required_num_supplied_params=2,
             )
             try:
                 return AbsoluteCardinalityLimit(
                     name=cardinality_limit_mode["name"],
                     max_unique_values=cardinality_limit_mode["max_unique_values"],
-                    metric_name_defining_limit=cardinality_limit_mode[
-                        "metric_name_defining_limit"
-                    ],
+                    metric_name_defining_limit=cardinality_limit_mode["metric_name_defining_limit"],
                 )
             except (KeyError, ValueError):
                 try:
                     return RelativeCardinalityLimit(
                         name=cardinality_limit_mode["name"],
-                        max_proportion_unique=cardinality_limit_mode[
-                            "max_proportion_unique"
-                        ],
-                        metric_name_defining_limit=cardinality_limit_mode[
-                            "metric_name_defining_limit"
-                        ],
+                        max_proportion_unique=cardinality_limit_mode["max_proportion_unique"],
+                        metric_name_defining_limit=cardinality_limit_mode["metric_name_defining_limit"],
                     )
                 except (KeyError, ValueError):
                     raise ProfilerConfigurationError(
@@ -287,9 +270,7 @@ def validate_input_parameters(
 
     if max_unique_values is not None:
         if not isinstance(max_unique_values, int):
-            raise ProfilerConfigurationError(
-                f"Please specify an int, you specified a {type(max_unique_values)}"
-            )
+            raise ProfilerConfigurationError(f"Please specify an int, you specified a {type(max_unique_values)}")
 
     if max_proportion_unique is not None:
         if not isinstance(max_proportion_unique, (float, int)):

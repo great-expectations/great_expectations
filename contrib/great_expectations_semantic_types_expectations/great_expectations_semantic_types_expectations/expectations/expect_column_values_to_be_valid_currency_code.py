@@ -50,9 +50,7 @@ class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
         is_valid_currency_code_udf = F.udf(is_valid_currency_code, types.BooleanType())
 
         # Apply the UDF to the column
-        result_column = F.when(
-            is_valid_currency_code_udf(column, F.lit(currency_codes)), True
-        ).otherwise(False)
+        result_column = F.when(is_valid_currency_code_udf(column, F.lit(currency_codes)), True).otherwise(False)
         return result_column
 
 

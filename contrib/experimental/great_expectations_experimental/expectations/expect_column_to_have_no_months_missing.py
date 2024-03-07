@@ -33,20 +33,14 @@ class ColumnDistinctMonths(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
 
         # get all unique months from timestamp
-        query = sa.select(
-            sa.func.date_format(sa.func.Date(column), MONTH_FORMAT).distinct()
-        ).select_from(selectable)
-        all_unique_months = [
-            i[0] for i in execution_engine.execute_query(query).fetchall()
-        ]
+        query = sa.select(sa.func.date_format(sa.func.Date(column), MONTH_FORMAT).distinct()).select_from(selectable)
+        all_unique_months = [i[0] for i in execution_engine.execute_query(query).fetchall()]
 
         return all_unique_months
 
@@ -153,16 +147,11 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
 
         dist_months_as_str = metrics["column.distinct_months"]
         distinct_months_sorted = sorted(
-            [
-                datetime.strptime(month_str, MONTH_FORMAT)
-                for month_str in dist_months_as_str
-            ]
+            [datetime.strptime(month_str, MONTH_FORMAT) for month_str in dist_months_as_str]
         )
         min_month, max_month = distinct_months_sorted[0], distinct_months_sorted[-1]
         months_diff = relativedelta(max_month, min_month).months
-        month_set = {
-            min_month + relativedelta(months=n_month) for n_month in range(months_diff)
-        }
+        month_set = {min_month + relativedelta(months=n_month) for n_month in range(months_diff)}
         n_missing_months = len(month_set - set(distinct_months_sorted))
 
         threshold = self._get_success_kwargs().get("threshold")

@@ -76,19 +76,14 @@ class MetaPandasDataset(Dataset):
             result_format = parse_result_format(result_format)
 
             if row_condition and self._supports_row_condition:
-                data = self._apply_row_condition(
-                    row_condition=row_condition, condition_parser=condition_parser
-                )
+                data = self._apply_row_condition(row_condition=row_condition, condition_parser=condition_parser)
             else:
                 data = self
 
             series = data[column]
 
             func_args = inspect.getfullargspec(func)[0][1:]
-            if (
-                "parse_strings_as_datetimes" in func_args
-                and pd.api.types.is_datetime64_any_dtype(series)
-            ):
+            if "parse_strings_as_datetimes" in func_args and pd.api.types.is_datetime64_any_dtype(series):
                 kwargs["parse_strings_as_datetimes"] = True
 
             if func.__name__ in [
@@ -115,12 +110,8 @@ class MetaPandasDataset(Dataset):
             boolean_mapped_success_values = func(self, nonnull_values, *args, **kwargs)
             success_count = np.count_nonzero(boolean_mapped_success_values)
 
-            unexpected_list = list(
-                nonnull_values[boolean_mapped_success_values == False]
-            )
-            unexpected_index_list = list(
-                nonnull_values[boolean_mapped_success_values == False].index
-            )
+            unexpected_list = list(nonnull_values[boolean_mapped_success_values == False])
+            unexpected_index_list = list(nonnull_values[boolean_mapped_success_values == False].index)
 
             if kwargs.get("output_strftime_format") is not None:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -131,14 +122,10 @@ class MetaPandasDataset(Dataset):
                     else:
                         if isinstance(val, str):
                             val = parse(val)  # noqa: PLW2901
-                        parsed_unexpected_list.append(
-                            datetime.strftime(val, output_strftime_format)
-                        )
+                        parsed_unexpected_list.append(datetime.strftime(val, output_strftime_format))
                 unexpected_list = parsed_unexpected_list
 
-            success, percent_success = self._calc_map_expectation_success(
-                success_count, nonnull_count, mostly
-            )
+            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_map_output(
                 result_format,
@@ -218,9 +205,7 @@ class MetaPandasDataset(Dataset):
             else:
                 raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
-            assert len(series_A) == len(
-                series_B
-            ), "Series A and B must be the same length"
+            assert len(series_A) == len(series_B), "Series A and B must be the same length"
 
             # This next bit only works if series_A and _B are the same length
             element_count = int(len(series_A))
@@ -228,43 +213,23 @@ class MetaPandasDataset(Dataset):
 
             nonnull_values_A = series_A[boolean_mapped_null_values == False]
             nonnull_values_B = series_B[boolean_mapped_null_values == False]
-            nonnull_values = [
-                value_pair
-                for value_pair in zip(list(nonnull_values_A), list(nonnull_values_B))
-            ]
+            nonnull_values = [value_pair for value_pair in zip(list(nonnull_values_A), list(nonnull_values_B))]
 
-            boolean_mapped_success_values = func(
-                self, nonnull_values_A, nonnull_values_B, *args, **kwargs
-            )
+            boolean_mapped_success_values = func(self, nonnull_values_A, nonnull_values_B, *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
 
             unexpected_list = [
                 value_pair
                 for value_pair in zip(
-                    list(
-                        series_A[
-                            (boolean_mapped_success_values == False)
-                            & (boolean_mapped_null_values == False)
-                        ]
-                    ),
-                    list(
-                        series_B[
-                            (boolean_mapped_success_values == False)
-                            & (boolean_mapped_null_values == False)
-                        ]
-                    ),
+                    list(series_A[(boolean_mapped_success_values == False) & (boolean_mapped_null_values == False)]),
+                    list(series_B[(boolean_mapped_success_values == False) & (boolean_mapped_null_values == False)]),
                 )
             ]
             unexpected_index_list = list(
-                series_A[
-                    (boolean_mapped_success_values == False)
-                    & (boolean_mapped_null_values == False)
-                ].index
+                series_A[(boolean_mapped_success_values == False) & (boolean_mapped_null_values == False)].index
             )
 
-            success, percent_success = self._calc_map_expectation_success(
-                success_count, nonnull_count, mostly
-            )
+            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_map_output(
                 result_format,
@@ -322,22 +287,15 @@ class MetaPandasDataset(Dataset):
 
             validate_mostly(mostly)
 
-            boolean_mapped_success_values = func(
-                self, test_df[boolean_mapped_skip_values == False], *args, **kwargs
-            )
+            boolean_mapped_success_values = func(self, test_df[boolean_mapped_skip_values == False], *args, **kwargs)
             success_count = boolean_mapped_success_values.sum()
             nonnull_count = (~boolean_mapped_skip_values).sum()
             element_count = len(test_df)
 
-            unexpected_list = test_df[
-                (boolean_mapped_skip_values == False)
-                & (boolean_mapped_success_values == False)
-            ]
+            unexpected_list = test_df[(boolean_mapped_skip_values == False) & (boolean_mapped_success_values == False)]
             unexpected_index_list = list(unexpected_list.index)
 
-            success, percent_success = self._calc_map_expectation_success(
-                success_count, nonnull_count, mostly
-            )
+            success, percent_success = self._calc_map_expectation_success(success_count, nonnull_count, mostly)
 
             return_obj = self._format_map_output(
                 result_format,
@@ -415,9 +373,7 @@ Notes:
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get(
-            "discard_subset_failing_expectations", False
-        )
+        self.discard_subset_failing_expectations = kwargs.get("discard_subset_failing_expectations", False)
 
     @property
     def _constructor(self):
@@ -441,8 +397,7 @@ Notes:
     def _apply_row_condition(self, row_condition, condition_parser):
         if condition_parser not in ["python", "pandas"]:
             raise ValueError(
-                "condition_parser is required when setting a row_condition,"
-                " and must be 'python' or 'pandas'"
+                "condition_parser is required when setting a row_condition," " and must be 'python' or 'pandas'"
             )
         else:
             return self.query(row_condition, parser=condition_parser)
@@ -524,11 +479,7 @@ Notes:
                 f"parameter of .quantile() (one of {interpolation_options})"
             )
 
-        return (
-            self[column]
-            .quantile(quantiles, interpolation=allow_relative_error)
-            .tolist()
-        )
+        return self[column].quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     def get_column_stdev(self, column):
         return self[column].std()
@@ -605,8 +556,7 @@ Notes:
             # Used in e.g. crosstab that is printed as observed value in data docs.
             precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
             labels = [
-                f"[{round(lower, precision)}, {round(upper, precision)})"
-                for lower, upper in zip(bins[:-1], bins[1:])
+                f"[{round(lower, precision)}, {round(upper, precision)})" for lower, upper in zip(bins[:-1], bins[1:])
             ]
             if any(np.isnan(series)):
                 # Missing get digitized into bin = n_bins+1
@@ -630,11 +580,7 @@ Notes:
                 replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return (
-                series.replace(to_replace=replace)
-                .fillna("(missing)")
-                .astype("category")
-            )
+            return series.replace(to_replace=replace).fillna("(missing)").astype("category")
 
     ### Expectation methods ###
 
@@ -717,14 +663,8 @@ Notes:
         numpy 'string_' (bytes)); consequently, it is not possible to test for string columns using aggregate semantics.
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
-        if (
-            self[column].dtype != "object"
-            or type_ is None
-            or type_ in ["object", "object_", "O"]
-        ):
-            res = self._expect_column_values_to_be_of_type__aggregate(
-                column, type_, **kwargs
-            )
+        if self[column].dtype != "object" or type_ is None or type_ in ["object", "object_", "O"]:
+            res = self._expect_column_values_to_be_of_type__aggregate(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
 
@@ -741,9 +681,7 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectation_configurations.pop(
-                    existing_expectations[0]
-                )
+                self._expectation_suite.expectation_configurations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -753,18 +691,14 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ]
+            old_config = self._expectation_suite.expectation_configurations[new_expectations[0]]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
-                new_config
-            )
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = new_config
         else:
             res = self._expect_column_values_to_be_of_type__map(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
@@ -783,9 +717,7 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectation_configurations.pop(
-                    existing_expectations[0]
-                )
+                self._expectation_suite.expectation_configurations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -795,18 +727,14 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ]
+            old_config = self._expectation_suite.expectation_configurations[new_expectations[0]]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
-                new_config
-            )
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = new_config
 
         return res
 
@@ -824,9 +752,7 @@ Notes:
         meta=None,
     ):
         if mostly is not None:
-            raise ValueError(
-                "PandasDataset cannot support mostly for a column with a non-object dtype."
-            )
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
 
         if type_ is None:
             success = True
@@ -957,9 +883,7 @@ Notes:
         """
         # Short-circuit if the dtype tells us; in that case use column-aggregate (vs map) semantics
         if self[column].dtype != "object" or type_list is None:
-            res = self._expect_column_values_to_be_in_type_list__aggregate(
-                column, type_list, **kwargs
-            )
+            res = self._expect_column_values_to_be_in_type_list__aggregate(column, type_list, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
 
@@ -976,9 +900,7 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectation_configurations.pop(
-                    existing_expectations[0]
-                )
+                self._expectation_suite.expectation_configurations.pop(existing_expectations[0])
 
             new_expectations = self._expectation_suite.find_expectation_indexes(
                 ExpectationConfiguration(
@@ -987,22 +909,16 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ]
+            old_config = self._expectation_suite.expectation_configurations[new_expectations[0]]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
-                new_config
-            )
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = new_config
         else:
-            res = self._expect_column_values_to_be_in_type_list__map(
-                column, type_list, **kwargs
-            )
+            res = self._expect_column_values_to_be_in_type_list__map(column, type_list, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
             # existing expectation, but it should be definitely kept in sync
 
@@ -1019,9 +935,7 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectation_configurations.pop(
-                    existing_expectations[0]
-                )
+                self._expectation_suite.expectation_configurations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -1031,18 +945,14 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ]
+            old_config = self._expectation_suite.expectation_configurations[new_expectations[0]]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
-                new_config
-            )
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = new_config
 
         return res
 
@@ -1060,9 +970,7 @@ Notes:
         meta=None,
     ):
         if mostly is not None:
-            raise ValueError(
-                "PandasDataset cannot support mostly for a column with a non-object dtype."
-            )
+            raise ValueError("PandasDataset cannot support mostly for a column with a non-object dtype.")
 
         if type_list is None:
             success = True
@@ -1257,9 +1165,7 @@ Notes:
         except TypeError:
             if allow_cross_type_comparisons:
                 return pd.Series(cross_type_comparator(val) for val in temp_column)
-            raise TypeError(
-                "Column values, min_value, and max_value must either be None or of the same type."
-            )
+            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
@@ -1623,9 +1529,7 @@ Notes:
 
         # Format arguments for scipy.kstest
         if isinstance(params, dict):
-            positional_parameters = _scipy_distribution_positional_args_from_dict(
-                distribution, params
-            )
+            positional_parameters = _scipy_distribution_positional_args_from_dict(distribution, params)
         else:
             positional_parameters = params
 
@@ -1665,18 +1569,11 @@ Notes:
             raise ValueError("Invalid continuous partition object.")
 
         # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
-        if (partition_object["bins"][0] == -np.inf) or (
-            partition_object["bins"][-1] == np.inf
-        ):
+        if (partition_object["bins"][0] == -np.inf) or (partition_object["bins"][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
-        if (
-            "tail_weights" in partition_object
-            and np.sum(partition_object["tail_weights"]) > 0
-        ):
-            raise ValueError(
-                "Partition cannot have tail weights -- endpoints must be finite."
-            )
+        if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(partition_object["weights"]))
 
@@ -1710,12 +1607,8 @@ Notes:
 
         # Expand observed partition to report, if necessary
         if below_partition > 0 and above_partition > 0:
-            observed_bins = (
-                [np.min(column)] + partition_object["bins"] + [np.max(column)]
-            )
-            observed_weights = np.concatenate(
-                ([below_partition], hist, [above_partition])
-            ) / len(column)
+            observed_bins = [np.min(column)] + partition_object["bins"] + [np.max(column)]
+            observed_weights = np.concatenate(([below_partition], hist, [above_partition])) / len(column)
         elif below_partition > 0:
             observed_bins = [np.min(column)] + partition_object["bins"]
             observed_weights = np.concatenate(([below_partition], hist)) / len(column)

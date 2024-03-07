@@ -23,21 +23,15 @@ class CustomSparkDFDataset(SparkDFDataset):
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
-            raise ValueError(
-                "quantile_values and quantiles must have the same number of elements"
-            )
+            raise ValueError("quantile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_approx_quantiles(
-            column, tuple(quantiles), tolerance
-        )
+        quantile_vals = self.get_column_approx_quantiles(column, tuple(quantiles), tolerance)
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
-            [lower_bound or -np.inf, upper_bound or np.inf]
-            for (lower_bound, upper_bound) in quantile_value_ranges
+            [lower_bound or -np.inf, upper_bound or np.inf] for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [
-            range_[0] <= quantile_vals[idx] <= range_[1]
-            for idx, range_ in enumerate(comparison_quantile_ranges)
+            range_[0] <= quantile_vals[idx] <= range_[1] for idx, range_ in enumerate(comparison_quantile_ranges)
         ]
 
         return {

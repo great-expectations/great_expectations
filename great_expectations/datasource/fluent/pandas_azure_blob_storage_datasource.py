@@ -38,9 +38,7 @@ class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
 @public_api
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[AzureBlobStorageDataConnector]] = (
-        AzureBlobStorageDataConnector
-    )
+    data_connector_type: ClassVar[Type[AzureBlobStorageDataConnector]] = AzureBlobStorageDataConnector
 
     # instance attributes
     type: Literal["pandas_abs"] = "pandas_abs"
@@ -55,14 +53,10 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
-            _check_config_substitutions_needed(
-                self, self.azure_options, raise_warning_if_provider_not_present=True
-            )
+            _check_config_substitutions_needed(self, self.azure_options, raise_warning_if_provider_not_present=True)
             # pull in needed config substitutions using the `_config_provider`
             # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
-            azure_options: dict = self.dict(config_provider=self._config_provider).get(
-                "azure_options", {}
-            )
+            azure_options: dict = self.dict(config_provider=self._config_provider).get("azure_options", {})
 
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
@@ -81,9 +75,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                         self._account_name = re.search(  # type: ignore[union-attr]
                             r".*?AccountName=(.+?);.*?", conn_str
                         ).group(1)
-                        azure_client = azure.BlobServiceClient.from_connection_string(
-                            **azure_options
-                        )
+                        azure_client = azure.BlobServiceClient.from_connection_string(**azure_options)
                     elif account_url is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
                             r"(?:https?://)?(.+?).blob.core.windows.net", account_url
@@ -102,9 +94,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             self._azure_client = azure_client
 
         if not azure_client:
-            raise PandasAzureBlobStorageDatasourceError(
-                "Failed to return `azure_client`"
-            )
+            raise PandasAzureBlobStorageDatasourceError("Failed to return `azure_client`")
 
         return azure_client
 
@@ -122,8 +112,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             _ = self._get_azure_client()
         except Exception as e:
             raise TestConnectionError(
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
+                "Attempt to connect to datasource failed with the following error message: " f"{e!s}"
             ) from e
 
         if self.assets and test_assets:
@@ -142,13 +131,9 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
-                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
-            )
+            raise TypeError(f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}")
         if abs_container is _MISSING:
-            raise TypeError(
-                f"'{data_asset.name}' is missing required argument 'abs_container'"
-            )
+            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
@@ -164,14 +149,12 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         )
 
         # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
-            self.data_connector_type.build_test_connection_error_message(
-                data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
-                account_name=self._account_name,
-                container=abs_container,
-                name_starts_with=abs_name_starts_with,
-                delimiter=abs_delimiter,
-                recursive_file_discovery=abs_recursive_file_discovery,
-            )
+        data_asset._test_connection_error_message = self.data_connector_type.build_test_connection_error_message(
+            data_asset_name=data_asset.name,
+            batching_regex=data_asset.batching_regex,
+            account_name=self._account_name,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
+            recursive_file_discovery=abs_recursive_file_discovery,
         )

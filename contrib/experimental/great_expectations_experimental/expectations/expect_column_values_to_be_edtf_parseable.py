@@ -390,9 +390,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -402,9 +400,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         template_str = "values must be parseable by edtf"
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

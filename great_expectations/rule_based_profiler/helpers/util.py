@@ -111,13 +111,9 @@ def get_validator(  # noqa: PLR0913
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
-        expectation_suite_name = (
-            f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
-        )
+        expectation_suite_name = f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
     else:
-        expectation_suite_name = (
-            f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
-        )
+        expectation_suite_name = f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
 
     batch: Batch
     if batch_list is None or all(batch is None for batch in batch_list):
@@ -210,17 +206,15 @@ def build_batch_request(
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=batch_request,
-            expected_return_type=(BatchRequestBase, dict),
-            variables=variables,
-            parameters=parameters,
-        )
+    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=batch_request,
+        expected_return_type=(BatchRequestBase, dict),
+        variables=variables,
+        parameters=parameters,
     )
-    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
-        materialize_batch_request(batch_request=effective_batch_request)
+    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = materialize_batch_request(
+        batch_request=effective_batch_request
     )
 
     return materialized_batch_request
@@ -317,9 +311,7 @@ def get_parameter_value(
                 for element in parameter_reference
             ]
         )
-    elif isinstance(
-        parameter_reference, str
-    ) and is_fully_qualified_parameter_name_prefix_in_literal(
+    elif isinstance(parameter_reference, str) and is_fully_qualified_parameter_name_prefix_in_literal(
         fully_qualified_parameter_name=parameter_reference
     ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
@@ -378,10 +370,7 @@ def get_resolved_metrics_by_key(
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
     metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
-        key: [
-            metric_configuration.id
-            for metric_configuration in metric_configurations_for_key
-        ]
+        key: [metric_configuration.id for metric_configuration in metric_configurations_for_key]
         for key, metric_configurations_for_key in metric_configurations_by_key.items()
     }
 
@@ -389,10 +378,7 @@ def get_resolved_metrics_by_key(
     # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
     metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
         itertools.chain(
-            *[
-                metric_configuration_ids
-                for metric_configuration_ids in metric_configuration_ids_by_key.values()
-            ]
+            *[metric_configuration_ids for metric_configuration_ids in metric_configuration_ids_by_key.values()]
         )
     )
 
@@ -407,9 +393,7 @@ def get_resolved_metrics_by_key(
     }
 
     # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
-    metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
-        resolved_metrics.keys()
-    )
+    metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(resolved_metrics.keys())
 
     # Step 6: Produce "key" list, corresponding to effective "MetricConfiguration" ID values.
     candidate_keys: List[str] = [
@@ -436,9 +420,7 @@ def build_domains_from_column_names(
     rule_name: str,
     column_names: List[str],
     domain_type: MetricDomainTypes,
-    table_column_name_to_inferred_semantic_domain_type_map: Optional[
-        Dict[str, SemanticDomainTypes]
-    ] = None,
+    table_column_name_to_inferred_semantic_domain_type_map: Optional[Dict[str, SemanticDomainTypes]] = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
@@ -458,9 +440,7 @@ def build_domains_from_column_names(
             },
             details={
                 INFERRED_SEMANTIC_TYPE_KEY: {
-                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
-                        column_name
-                    ],
+                    column_name: table_column_name_to_inferred_semantic_domain_type_map[column_name],
                 }
                 if table_column_name_to_inferred_semantic_domain_type_map
                 else None,
@@ -476,14 +456,12 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=VARIABLES_PREFIX,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
+    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = get_parameter_value_and_validate_return_type(
+        domain=None,
+        parameter_reference=VARIABLES_PREFIX,
+        expected_return_type=None,
+        variables=variables,
+        parameters=None,
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()
@@ -512,9 +490,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
 
     """
 
-    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
-        INFERRED_SEMANTIC_TYPE_KEY
-    )
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(INFERRED_SEMANTIC_TYPE_KEY)
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
@@ -541,9 +517,7 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
         Boolean value indicating whether or not specified "Domain" is inferred as "SemanticDomainTypes.DATETIME"
     """
 
-    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
-        INFERRED_SEMANTIC_TYPE_KEY
-    )
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(INFERRED_SEMANTIC_TYPE_KEY)
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
@@ -608,19 +582,14 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
     validates the result.
     """
     # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    quantile_statistic_interpolation_method = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=quantile_statistic_interpolation_method,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
+    quantile_statistic_interpolation_method = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=quantile_statistic_interpolation_method,
+        expected_return_type=str,
+        variables=variables,
+        parameters=parameters,
     )
-    if (
-        quantile_statistic_interpolation_method
-        not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
-    ):
+    if quantile_statistic_interpolation_method not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS:
         raise gx_exceptions.ProfilerExecutionError(
             message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
 {RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
@@ -695,9 +664,7 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
-    metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
-        metric_values, bw_method=bw_method
-    )
+    metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(metric_values, bw_method=bw_method)
 
     metric_values_gaussian_sample: np.ndarray
     if random_seed:
@@ -710,19 +677,15 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
-        numpy.numpy_quantile(
-            metric_values_gaussian_sample,
-            q=lower_quantile_pct,
-            method=quantile_statistic_interpolation_method,
-        )
+    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
-        numpy.numpy_quantile(
-            metric_values_gaussian_sample,
-            q=upper_quantile_pct,
-            method=quantile_statistic_interpolation_method,
-        )
+    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        method=quantile_statistic_interpolation_method,
     )
 
     return build_numeric_range_estimation_result(
@@ -811,36 +774,30 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
 
     bootstraps: np.ndarray
     if random_seed:
-        random_state: np.random.Generator = np.random.Generator(
-            np.random.PCG64(random_seed)
-        )
-        bootstraps = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
+        random_state: np.random.Generator = np.random.Generator(np.random.PCG64(random_seed))
+        bootstraps = random_state.choice(metric_values, size=(n_resamples, metric_values.size))
     else:
-        bootstraps = NP_RANDOM_GENERATOR.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
+        bootstraps = NP_RANDOM_GENERATOR.choice(metric_values, size=(n_resamples, metric_values.size))
 
-    lower_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=lower_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_lower_quantile,
+    lower_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=lower_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_lower_quantile,
+        )
     )
-    upper_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=upper_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_upper_quantile,
+    upper_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=upper_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_upper_quantile,
+        )
     )
 
     return build_numeric_range_estimation_result(
@@ -926,14 +883,11 @@ def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
     if (
         not quantile_bias_correction
         and bootstrap_quantile_standard_error > 0.0
-        and bootstrap_quantile_bias / bootstrap_quantile_standard_error
-        <= quantile_bias_std_error_ratio_threshold
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error <= quantile_bias_std_error_ratio_threshold
     ):
         quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
     else:
-        quantile_bias_corrected_point_estimate = (
-            bootstrap_quantile_point_estimate - bootstrap_quantile_bias
-        )
+        quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate - bootstrap_quantile_bias
 
     return quantile_bias_corrected_point_estimate
 
@@ -962,14 +916,9 @@ def convert_metric_values_to_float_dtype_best_effort(
         parse_strings_as_datetimes=True,
         fuzzy=False,
     )
-    ndarray_is_datetime_type: bool = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
-    )
+    ndarray_is_datetime_type: bool = original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     if ndarray_is_datetime_type:
-        metric_values_converted = convert_ndarray_datetime_to_float_dtype_utc_timezone(
-            data=metric_values_converted
-        )
+        metric_values_converted = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=metric_values_converted)
     else:
         metric_values_converted = metric_values
 
@@ -1026,9 +975,7 @@ def get_or_create_expectation_suite(
 
     if expectation_suite is not None and expectation_suite_name is not None:
         if expectation_suite.name != expectation_suite_name:
-            raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-            )
+            raise ValueError('Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.')
 
         return expectation_suite
     elif expectation_suite is None and expectation_suite_name is not None:
@@ -1053,9 +1000,7 @@ def get_or_create_expectation_suite(
                 # noinspection PyUnusedLocal
                 expectation_suite = data_context.suites.get(name=expectation_suite_name)
             except gx_exceptions.DataContextError:
-                expectation_suite = data_context.add_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
+                expectation_suite = data_context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
                 logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(

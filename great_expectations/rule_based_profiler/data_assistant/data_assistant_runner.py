@@ -158,15 +158,13 @@ class DataAssistantRunner:
             )
             variables_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    not in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] not in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
             domain_type_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
@@ -174,16 +172,14 @@ class DataAssistantRunner:
             Convert "dict"-typed "variables"-level and "Domain"-level arguments/directives into lists of corresponding
             "Enum" typed objects ("RuntimeEnvironmentVariablesDirectives" and "RuntimeEnvironmentDomainTypeDirectives").
             """
-            variables_directives_list: List[RuntimeEnvironmentVariablesDirectives] = (
-                build_variables_directives(
-                    exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
-                    rules=self._profiler.rules,
-                    **variables_directives_kwargs,
-                )
+            variables_directives_list: List[RuntimeEnvironmentVariablesDirectives] = build_variables_directives(
+                exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
+                rules=self._profiler.rules,
+                **variables_directives_kwargs,
             )
-            domain_type_directives_list: List[
-                RuntimeEnvironmentDomainTypeDirectives
-            ] = build_domain_type_directives(**domain_type_directives_kwargs)
+            domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = build_domain_type_directives(
+                **domain_type_directives_kwargs
+            )
             """
             Run "data_assistant" with thus constructed "variables"-level and "Domain"-level custom user-specified
             overwrite arguments/directives and return computed "data_assistant_result" to caller.
@@ -219,19 +215,13 @@ class DataAssistantRunner:
         ]
 
         # 2. Extend the signature to include "DataAssistant"-specific "Domain"-level arguments/directives.
-        parameters.extend(
-            self._get_method_signature_parameters_for_domain_type_directives()
-        )
+        parameters.extend(self._get_method_signature_parameters_for_domain_type_directives())
         # 3. Extend the signature to include "DataAssistant"-specific "variables"-level arguments/directives.
         # Use separate call for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.
-        parameters.extend(
-            self._get_method_signature_parameters_for_variables_directives()
-        )
+        parameters.extend(self._get_method_signature_parameters_for_variables_directives())
 
         # 4. Encapsulate all arguments/directives into "DataAssistant"-specific "DataAssistantRunner.run()" signature.
-        func_sig = Signature(
-            parameters=parameters, return_annotation=DataAssistantResult
-        )
+        func_sig = Signature(parameters=parameters, return_annotation=DataAssistantResult)
         # 5. Override the runner docstring with the docstring defined in the implemented DataAssistant child-class.
         run.__doc__ = self._data_assistant_cls.__doc__
         # 6. Create "DataAssistant"-specific "DataAssistantRunner.run()" method and parametrized implementation closure.
@@ -319,12 +309,14 @@ class DataAssistantRunner:
 
         rule: Rule  # one "Rule" object of underlying "RuleBasedProfiler"
         domain_builder: DomainBuilder | None  # "DomainBuilder" of "Rule"
-        domain_builder_attributes: List[
-            str
-        ]  # list of specific "DomainBuilder" arguments/directives of "Rule"
+        domain_builder_attributes: List[str]  # list of specific "DomainBuilder" arguments/directives of "Rule"
         key: str  # one argument/directive of "DomainBuilder" of "Rule"
-        property_accessor_method: Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"
-        property_accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        property_accessor_method: (
+            Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        )
+        property_accessor_method_return_type: (
+            Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        )
         property_value: Any  # default return value of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
         parameter: (
             Parameter | None
@@ -337,17 +329,14 @@ class DataAssistantRunner:
                 """
                 "getattr_static()" returns "getter" "property" definition object, and "fget" on it gives its "Callable"
                 """
-                property_accessor_method = getattr_static(
-                    domain_builder, key, None
-                ).fget
+                property_accessor_method = getattr_static(domain_builder, key, None).fget
                 property_accessor_method_return_type = signature(
                     obj=property_accessor_method, follow_wrapped=False
                 ).return_annotation
                 property_value = getattr(domain_builder, key, None)
                 parameter = domain_type_attribute_name_to_parameter_map.get(key)
                 if (key not in conflicting_domain_type_attribute_names) and (
-                    (parameter is None)
-                    or ((parameter.default is None) and (property_value is not None))
+                    (parameter is None) or ((parameter.default is None) and (property_value is not None))
                 ):
                     """
                     Condition for incorporating new default value of given "Domain" type argument/directive of
@@ -367,11 +356,7 @@ class DataAssistantRunner:
                             annotation=property_accessor_method_return_type,
                         )
                         domain_type_attribute_name_to_parameter_map[key] = parameter
-                elif (
-                    parameter is not None
-                    and property_value is not None
-                    and parameter.default != property_value
-                ):
+                elif parameter is not None and property_value is not None and parameter.default != property_value:
                     """
                     Handling conflict involves detection of already successful incorporation of "Parameter" for
                     argument/directive name of "DomainBuilder" of "Rule", but with previous (processed) default value
@@ -385,15 +370,11 @@ class DataAssistantRunner:
 
         return list(domain_type_attribute_name_to_parameter_map.values())
 
-    def _get_rule_based_profiler_domain_type_attributes(
-        self, rule: Optional[Rule] = None
-    ) -> List[str]:
+    def _get_rule_based_profiler_domain_type_attributes(self, rule: Optional[Rule] = None) -> List[str]:
         if rule is None:
             domain_type_attributes: List[str] = []
             for rule in self._profiler.rules:
-                domain_type_attributes.extend(
-                    self._get_rule_domain_type_attributes(rule=rule)
-                )
+                domain_type_attributes.extend(self._get_rule_domain_type_attributes(rule=rule))
 
             return list(set(domain_type_attributes))
 
@@ -406,9 +387,7 @@ class DataAssistantRunner:
         parameters: Dict[str, Parameter] = dict(sig.parameters)
 
         domain_builder = rule.domain_builder
-        assert (
-            domain_builder
-        ), f"The underlying domain_builder on rule {rule.name} must be non-null"
+        assert domain_builder, f"The underlying domain_builder on rule {rule.name} must be non-null"
         exclude_field_names = domain_builder.exclude_field_names
 
         attribute_names: List[str] = list(

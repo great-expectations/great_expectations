@@ -96,9 +96,7 @@ def construct_json_payload(
     return data
 
 
-def get_user_friendly_error_message(
-    http_exc: requests.exceptions.HTTPError, log_level: int = logging.WARNING
-) -> str:
+def get_user_friendly_error_message(http_exc: requests.exceptions.HTTPError, log_level: int = logging.WARNING) -> str:
     # TODO: define a GeCloud service/client for this & other related behavior
     support_message = []
     response: requests.Response = http_exc.response
@@ -116,9 +114,7 @@ def get_user_friendly_error_message(
             support_message.append(json.dumps(errors))
 
     except json.JSONDecodeError:
-        support_message.append(
-            f"Please contact the Great Expectations team at {SUPPORT_EMAIL}"
-        )
+        support_message.append(f"Please contact the Great Expectations team at {SUPPORT_EMAIL}")
     return " ".join(support_message)
 
 
@@ -185,8 +181,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self._ge_cloud_base_url = ge_cloud_base_url
 
         self._ge_cloud_resource_name = (
-            ge_cloud_resource_name
-            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
+            ge_cloud_resource_name or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
         )
 
         # While resource_types should be coming in as enums, configs represent the arg
@@ -196,8 +191,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_resource_type = GXCloudRESTResource[ge_cloud_resource_type]
 
         self._ge_cloud_resource_type = (
-            ge_cloud_resource_type
-            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
+            ge_cloud_resource_type or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
         )
 
         self._ge_cloud_credentials = ge_cloud_credentials
@@ -206,9 +200,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        self._session = create_session(
-            access_token=self._ge_cloud_credentials["access_token"]
-        )
+        self._session = create_session(access_token=self._ge_cloud_credentials["access_token"])
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -244,9 +236,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Requests using query params may return {"data": []} if the object doesn't exist
         # We need to validate that even if we have a 200, there are contents to support existence
         if not bool(payload.get("data")):
-            raise StoreBackendError(
-                "Unable to get object in GX Cloud Store Backend: Object does not exist."
-            )
+            raise StoreBackendError("Unable to get object in GX Cloud Store Backend: Object does not exist.")
 
         return cast(ResponsePayload, payload)
 
@@ -276,9 +266,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(response.text),
                 str(jsonError),
             )
-            raise StoreBackendError(
-                f"Unable to get object in GX Cloud Store Backend: {jsonError}"
-            )
+            raise StoreBackendError(f"Unable to get object in GX Cloud Store Backend: {jsonError}")
         except requests.HTTPError as http_err:
             raise StoreBackendError(
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
@@ -361,15 +349,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except Exception as e:
             logger.debug(repr(e))
-            raise StoreBackendError(
-                f"Unable to update object in GX Cloud Store Backend: {e}"
-            ) from e
+            raise StoreBackendError(f"Unable to update object in GX Cloud Store Backend: {e}") from e
 
     @property
     def allowed_set_kwargs(self) -> Set[str]:
-        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
-            self.ge_cloud_resource_type, set()
-        )
+        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(self.ge_cloud_resource_type, set())
 
     def validate_set_kwargs(self, kwargs: dict) -> Union[bool, None]:
         kwarg_names = set(kwargs.keys())
@@ -431,9 +415,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
-            object_url = self.get_url_for_key(
-                (self.ge_cloud_resource_type, object_id, None)
-            )
+            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id, None))
             # This method is where posts get made for all cloud store endpoints. We pass
             # the response_json back up to the caller because the specific resource may
             # want to parse resource specific data out of the response.
@@ -454,9 +436,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(
-                f"Unable to set object in GX Cloud Store Backend: {e}"
-            ) from e
+            raise StoreBackendError(f"Unable to set object in GX Cloud Store Backend: {e}") from e
 
     @property
     def ge_cloud_base_url(self) -> str:
@@ -475,9 +455,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     @override
-    def list_keys(
-        self, prefix: Tuple = ()
-    ) -> List[Tuple[GXCloudRESTResource, str, str]]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -494,9 +472,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             for resource in response_json["data"]:
                 id: str = resource["id"]
 
-                resource_dict: dict = resource.get("attributes", {}).get(
-                    attributes_key, {}
-                )
+                resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
                 resource_name: str = resource_dict.get("name", "")
 
                 key = (resource_type, id, resource_name)
@@ -505,9 +481,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(
-                f"Unable to list keys in GX Cloud Store Backend: {e}"
-            )
+            raise StoreBackendError(f"Unable to list keys in GX Cloud Store Backend: {e}")
 
     @override
     def get_url_for_key(  # type: ignore[override]
@@ -563,9 +537,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                     organization_id=self.ge_cloud_credentials["organization_id"],
                     resource_name=self.ge_cloud_resource_name,
                 )
-                response = self._session.delete(
-                    url, params={"name": resource_object_name}
-                )
+                response = self._session.delete(url, params={"name": resource_object_name})
                 response.raise_for_status()
                 return True
         except requests.HTTPError as http_exc:
@@ -580,9 +552,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(
-                f"Unable to delete object in GX Cloud Store Backend: {e!r}"
-            )
+            raise StoreBackendError(f"Unable to delete object in GX Cloud Store Backend: {e!r}")
 
     def _get_one_or_none_from_response_data(
         self,
@@ -616,9 +586,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         response_data = self._get(key)["data"]
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
-        existing = self._get_one_or_none_from_response_data(
-            response_data=response_data, key=key
-        )
+        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
 
         if existing is None:
             raise StoreBackendError(
@@ -639,9 +607,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
-        existing = self._get_one_or_none_from_response_data(
-            response_data=response_data, key=key
-        )
+        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
 
         if existing is not None:
             id = key[1] if key[1] is not None else existing["id"]
@@ -689,6 +655,4 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             GXCloudRESTResource(resource_type)
         except ValueError:
-            raise TypeError(
-                f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
-            )
+            raise TypeError(f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource")

@@ -85,9 +85,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         try:
             self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
-            )
+            raise ImportError("Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector).")
 
     @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
@@ -100,9 +98,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     @override
@@ -135,9 +131,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

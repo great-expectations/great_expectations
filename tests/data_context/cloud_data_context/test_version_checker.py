@@ -33,9 +33,7 @@ def enable_pypi_version_check():
 )
 @pytest.mark.unit
 @responses.activate
-def test_check_if_using_latest_gx(
-    enable_pypi_version_check, version: str, expected: bool, status: int, caplog
-):
+def test_check_if_using_latest_gx(enable_pypi_version_check, version: str, expected: bool, status: int, caplog):
     pypi_payload = {"info": {"version": _MOCK_PYPI_VERSION}}
     responses.add(
         responses.GET,

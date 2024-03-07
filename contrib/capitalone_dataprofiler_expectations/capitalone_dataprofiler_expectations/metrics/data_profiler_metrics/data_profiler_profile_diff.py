@@ -22,24 +22,18 @@ class DataProfilerProfileDiff(DataProfilerProfileMetricProvider):
         metrics,
         runtime_configuration,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         first_profile = None
         try:
             first_profile_path = metric_value_kwargs["profile_path"]
             first_profile = dp.Profiler.load(first_profile_path)
         except FileNotFoundError:
-            raise ValueError(
-                "'profile_path' does not point to a valid DataProfiler stored profile."
-            )
+            raise ValueError("'profile_path' does not point to a valid DataProfiler stored profile.")
 
         profiler_opts = dp.ProfilerOptions()
         profiler_opts.structured_options.multiprocess.is_enabled = False
         new_profile = dp.Profiler(df, options=profiler_opts)
 
-        report_diff = new_profile.diff(
-            first_profile
-        )  # Results in diff of new_prof - first_prof
+        report_diff = new_profile.diff(first_profile)  # Results in diff of new_prof - first_prof
         # Values in this report indicate +/- change from old profile
         return report_diff

@@ -35,17 +35,11 @@ logger = logging.getLogger(__file__)
 
 
 # apply markers to entire test module
-pytestmark = [
-    pytest.mark.skipif(
-        PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
-    )
-]
+pytestmark = [pytest.mark.skipif(PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}")]
 
 
 @pytest.fixture
-def pandas_dbfs_datasource(
-    empty_data_context: FileDataContext, fs: FakeFilesystem
-) -> PandasDBFSDatasource:
+def pandas_dbfs_datasource(empty_data_context: FileDataContext, fs: FakeFilesystem) -> PandasDBFSDatasource:
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
@@ -97,12 +91,8 @@ def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsse
 
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(
-        r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    )
-    data_connector: DBFSDataConnector = cast(
-        DBFSDataConnector, csv_asset._data_connector
-    )
+    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    data_connector: DBFSDataConnector = cast(DBFSDataConnector, csv_asset._data_connector)
     test_connection_error_message = f"""No file at base_directory path "{data_connector._base_directory.resolve()}" matched regular expressions pattern "{data_connector._batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
     return regex, test_connection_error_message
 
@@ -148,9 +138,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
 
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -168,10 +156,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "timestamp": "20200819",
         "price": "1300",
     }
-    assert (
-        batch.id
-        == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-    )
+    assert batch.id == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)

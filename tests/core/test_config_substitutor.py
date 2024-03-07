@@ -83,9 +83,7 @@ class MockedBoto3Session:
     ],
 )
 @pytest.mark.unit
-def test_substitute_value_from_aws_secrets_manager(
-    config_substitutor, input_value, secret_response, raises, expected
-):
+def test_substitute_value_from_aws_secrets_manager(config_substitutor, input_value, secret_response, raises, expected):
     with raises:
         with mock.patch(
             "great_expectations.core.config_substitutor.aws.boto3.session.Session",
@@ -94,9 +92,7 @@ def test_substitute_value_from_aws_secrets_manager(
             # As we're testing the secret store and not the actual substitution logic,
             # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_config_variable(
-                    template_str=input_value, config_variables_dict={}
-                )
+                config_substitutor.substitute_config_variable(template_str=input_value, config_variables_dict={})
                 == expected
             )
 
@@ -157,18 +153,14 @@ def test_substitute_value_from_aws_secrets_manager(
     ],
 )
 @pytest.mark.unit
-def test_substitute_value_from_aws_ssm(
-    config_substitutor, input_value, secret_response, raises, expected
-):
+def test_substitute_value_from_aws_ssm(config_substitutor, input_value, secret_response, raises, expected):
     with raises:
         with mock.patch(
             "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             assert (
-                config_substitutor.substitute_config_variable(
-                    template_str=input_value, config_variables_dict={}
-                )
+                config_substitutor.substitute_config_variable(template_str=input_value, config_variables_dict={})
                 == expected
             )
 
@@ -227,9 +219,7 @@ class MockedSecretManagerServiceClient:
     ],
 )
 @pytest.mark.unit
-def test_substitute_value_from_gcp_secret_manager(
-    config_substitutor, input_value, secret_response, raises, expected
-):
+def test_substitute_value_from_gcp_secret_manager(config_substitutor, input_value, secret_response, raises, expected):
     with raises:
         with mock.patch(
             "great_expectations.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
@@ -238,9 +228,7 @@ def test_substitute_value_from_gcp_secret_manager(
             # As we're testing the secret store and not the actual substitution logic,
             # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_config_variable(
-                    template_str=input_value, config_variables_dict={}
-                )
+                config_substitutor.substitute_config_variable(template_str=input_value, config_variables_dict={})
                 == expected
             )
 
@@ -301,9 +289,7 @@ class MockedSecretClient:
     not (azure.storage and azure.SecretClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
-def test_substitute_value_from_azure_keyvault(
-    config_substitutor, input_value, secret_response, raises, expected
-):
+def test_substitute_value_from_azure_keyvault(config_substitutor, input_value, secret_response, raises, expected):
     with raises:
         with mock.patch(
             "great_expectations.core.config_substitutor.azure.SecretClient",
@@ -312,8 +298,6 @@ def test_substitute_value_from_azure_keyvault(
             # As we're testing the secret store and not the actual substitution logic,
             # we deem the use of an empty config_variables_dict appropriate.
             assert (
-                config_substitutor.substitute_config_variable(
-                    template_str=input_value, config_variables_dict={}
-                )
+                config_substitutor.substitute_config_variable(template_str=input_value, config_variables_dict={})
                 == expected
             )

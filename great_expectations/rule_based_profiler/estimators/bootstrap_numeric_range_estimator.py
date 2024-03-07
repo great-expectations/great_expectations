@@ -103,37 +103,29 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
         if quantile_statistic_interpolation_method is None:
-            quantile_statistic_interpolation_method = (
-                DEFAULT_BOOTSTRAP_QUANTILE_STATISTIC_INTERPOLATION_METHOD
-            )
+            quantile_statistic_interpolation_method = DEFAULT_BOOTSTRAP_QUANTILE_STATISTIC_INTERPOLATION_METHOD
 
         # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_correction: Optional[bool] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.configuration.quantile_bias_correction,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        quantile_bias_correction: Optional[bool] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.configuration.quantile_bias_correction,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         if quantile_bias_correction is None:
             quantile_bias_correction = False
 
         # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_std_error_ratio_threshold: Optional[float] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        quantile_bias_std_error_ratio_threshold: Optional[float] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         if quantile_bias_std_error_ratio_threshold is None:
-            quantile_bias_std_error_ratio_threshold = (
-                DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD
-            )
+            quantile_bias_std_error_ratio_threshold = DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD
 
         return compute_bootstrap_quantiles_point_estimate(
             metric_values=metric_values,

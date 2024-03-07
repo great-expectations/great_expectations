@@ -85,9 +85,7 @@ class Validator:
 
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
-        batch_request = self._batch_config.build_batch_request(
-            batch_request_options=self._batch_request_options
-        )
+        batch_request = self._batch_config.build_batch_request(batch_request_options=self._batch_request_options)
         return self._get_validator(batch_request=batch_request)
 
     def _validate_expectation_configs(
@@ -96,10 +94,8 @@ class Validator:
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
-        processed_expectation_configs = (
-            self._wrapped_validator.process_expectations_for_validation(
-                expectation_configs, evaluation_parameters
-            )
+        processed_expectation_configs = self._wrapped_validator.process_expectations_for_validation(
+            expectation_configs, evaluation_parameters
         )
 
         results = self._wrapped_validator.graph_validate(

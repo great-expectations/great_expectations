@@ -114,9 +114,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
         forecast_lower_bound = forecast.yhat_lower[0]
         forecast_upper_bound = forecast.yhat_upper[0]
 
-        in_bounds = (forecast_lower_bound < batch_row_count) & (
-            batch_row_count < forecast_upper_bound
-        )
+        in_bounds = (forecast_lower_bound < batch_row_count) & (batch_row_count < forecast_upper_bound)
 
         return {
             "success": in_bounds,

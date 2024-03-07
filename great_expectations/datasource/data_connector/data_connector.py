@@ -58,9 +58,7 @@ class DataConnector:
         id: Optional[str] = None,
     ) -> None:
         if execution_engine is None:
-            raise gx_exceptions.DataConnectorError(
-                "A non-existent/unknown ExecutionEngine instance was referenced."
-            )
+            raise gx_exceptions.DataConnectorError("A non-existent/unknown ExecutionEngine instance was referenced.")
 
         self._name = name
         self._id = id
@@ -114,9 +112,7 @@ class DataConnector:
 
         """
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
-        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
@@ -134,10 +130,8 @@ class DataConnector:
             BatchSpec object built from BatchDefinition
 
         """
-        batch_spec_params: dict = (
-            self._generate_batch_spec_parameters_from_batch_definition(
-                batch_definition=batch_definition
-            )
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
@@ -155,9 +149,7 @@ class DataConnector:
     ) -> None:
         raise NotImplementedError
 
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class
@@ -168,9 +160,7 @@ class DataConnector:
         """
         raise NotImplementedError
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[Any]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[Any]:
         """
         Fetch data_references corresponding to data_asset_name from the cache.
         """
@@ -212,14 +202,10 @@ class DataConnector:
     ) -> Optional[List[BatchDefinition]]:
         raise NotImplementedError
 
-    def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
-    ) -> Any:
+    def _map_batch_definition_to_data_reference(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
 
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _generate_batch_spec_parameters_from_batch_definition(self, batch_definition: BatchDefinition) -> dict:
         raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:

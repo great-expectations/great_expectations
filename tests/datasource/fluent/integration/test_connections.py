@@ -41,18 +41,14 @@ class TestSnowflake:
             ),
         ],
     )
-    def test_un_queryable_asset_should_raise_error(
-        self, context: DataContext, connection_string: str
-    ):
+    def test_un_queryable_asset_should_raise_error(self, context: DataContext, connection_string: str):
         """
         A SnowflakeDatasource can successfully connect even if things like database, schema, warehouse, and role are omitted.
         However, if we try to add an asset that is not queryable with the current datasource connection details,
         then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
         """
-        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
-            "my_ds", connection_string=connection_string
-        )
+        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake("my_ds", connection_string=connection_string)
 
         inspector: Inspector = sa.inspection.inspect(snowflake_ds.get_engine())
         inspector_tables: list[str] = inspector.get_table_names()
@@ -65,9 +61,7 @@ class TestSnowflake:
                 # query the asset, if it fails then we should expect a TestConnectionError
                 # expect the sql ProgrammingError to be raised
                 # we are only testing the failure case here
-                snowflake_ds.get_engine().execute(
-                    f"SELECT * FROM {table_name} LIMIT 1;"
-                )
+                snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
                 print(f"{table_name} is queryable")
             except sa.exc.ProgrammingError:
                 print(f"{table_name} is not queryable")
@@ -76,9 +70,7 @@ class TestSnowflake:
         assert unqueryable_table, "no unqueryable tables found, cannot run test"
 
         with pytest.raises(TestConnectionError) as exc_info:
-            asset = snowflake_ds.add_table_asset(
-                name="un-reachable asset", table_name=unqueryable_table
-            )
+            asset = snowflake_ds.add_table_asset(name="un-reachable asset", table_name=unqueryable_table)
             print(f"\n  Uh oh, asset should not have been created...\n{asset!r}")
         print(f"\n  TestConnectionError was raised as expected.\n{exc_info.exconly()}")
 
@@ -95,12 +87,8 @@ class TestSnowflake:
             ),
         ],
     )
-    def test_queryable_asset_should_pass_test_connection(
-        self, context: DataContext, connection_string: str
-    ):
-        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
-            "my_ds", connection_string=connection_string
-        )
+    def test_queryable_asset_should_pass_test_connection(self, context: DataContext, connection_string: str):
+        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake("my_ds", connection_string=connection_string)
 
         inspector: Inspector = sa.inspection.inspect(snowflake_ds.get_engine())
         inspector_tables = inspector.get_table_names()
@@ -112,9 +100,7 @@ class TestSnowflake:
         snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
 
         # the table is queryable so the `add_table_asset()` should pass the test_connection step
-        asset = snowflake_ds.add_table_asset(
-            name="reachable asset", table_name=table_name
-        )
+        asset = snowflake_ds.add_table_asset(name="reachable asset", table_name=table_name)
         print(f"\n  Yay, asset was created!\n{asset!r}")
 
 

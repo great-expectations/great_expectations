@@ -60,8 +60,6 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
             except:
                 raise
 
-        matches_json_schema_udf = F.udf(
-            lambda val: matches_json_schema(val=val), pyspark.types.BooleanType()
-        )
+        matches_json_schema_udf = F.udf(lambda val: matches_json_schema(val=val), pyspark.types.BooleanType())
 
         return matches_json_schema_udf(column)

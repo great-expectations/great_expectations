@@ -125,10 +125,7 @@ def test_parse_evaluation_parameter():
     # Valid variables but invalid expression is no good
     with pytest.raises(EvaluationParameterError) as err:
         parse_evaluation_parameter("1 / a", {"a": 0})
-    assert (
-        "Error while evaluating evaluation parameter expression: division by zero"
-        in str(err.value)
-    )
+    assert "Error while evaluating evaluation parameter expression: division by zero" in str(err.value)
 
     # It is okay to *substitute* strings in the expression...
     assert parse_evaluation_parameter("foo", {"foo": "bar"}) == "bar"
@@ -145,10 +142,7 @@ def test_parse_evaluation_parameter():
     # ...but we cannot leave *partially* evaluated expressions (phew!)
     with pytest.raises(EvaluationParameterError) as e:
         parse_evaluation_parameter("foo + bar", {"foo": 2})
-    assert (
-        "Error while evaluating evaluation parameter expression: Unknown string format: bar"
-        in str(e.value)
-    )
+    assert "Error while evaluating evaluation parameter expression: Unknown string format: bar" in str(e.value)
 
 
 @pytest.mark.filesystem
@@ -232,9 +226,7 @@ def test_temporal_evaluation_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
-        )
+        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)"))
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -246,9 +238,7 @@ def test_temporal_evaluation_parameters_complex():
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
-        )
+        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)"))
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
 
@@ -291,20 +281,8 @@ def test_find_evaluation_parameter_dependencies():
 def test_deduplicate_evaluation_parameter_dependencies():
     dependencies = {
         "profile": [
-            {
-                "metric_kwargs_id": {
-                    "column=norm": [
-                        "expect_column_mean_to_be_between.result.observed_value"
-                    ]
-                }
-            },
-            {
-                "metric_kwargs_id": {
-                    "column=norm": [
-                        "expect_column_stdev_to_be_between.result.observed_value"
-                    ]
-                }
-            },
+            {"metric_kwargs_id": {"column=norm": ["expect_column_mean_to_be_between.result.observed_value"]}},
+            {"metric_kwargs_id": {"column=norm": ["expect_column_stdev_to_be_between.result.observed_value"]}},
         ]
     }
 
@@ -459,13 +437,9 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     for evaluation_parameter in evaluation_parameters:
         validator.set_evaluation_parameter(*evaluation_parameter)
 
-    actual_expectation_validation_result = getattr(validator, expectation_type)(
-        **expectation_kwargs
-    )
+    actual_expectation_validation_result = getattr(validator, expectation_type)(**expectation_kwargs)
 
-    assert (
-        actual_expectation_validation_result == expected_expectation_validation_result
-    )
+    assert actual_expectation_validation_result == expected_expectation_validation_result
 
 
 @pytest.mark.unit
@@ -476,15 +450,11 @@ def test_now_evaluation_parameter():
     """
     # By itself
     res = parse_evaluation_parameter("now()")
-    assert dateutil.parser.parse(
-        res
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
 
     # In conjunction with timedelta
     res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert dateutil.parser.parse(
-        res
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
 
     # Require parens to actually invoke
     with pytest.raises(EvaluationParameterError):

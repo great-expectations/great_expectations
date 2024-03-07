@@ -17,9 +17,9 @@ def test_render_template():
         }
     ).replace(" ", "").replace("\t", "").replace(
         "\n", ""
-    ) == "<span>It was the best of times; it was the worst of times.</span>".replace(
-        " ", ""
-    ).replace("\t", "").replace("\n", "")
+    ) == "<span>It was the best of times; it was the worst of times.</span>".replace(" ", "").replace("\t", "").replace(
+        "\n", ""
+    )
 
     assert (
         DefaultJinjaPageView()
@@ -148,14 +148,11 @@ def test_render_template_with_extra_dollar_signs_in_template():
             },
         }
     )
-    assert (
-        result.replace(" ", "").replace("\t", "").replace("\n", "")
-        == "<span>It was the best of times; it was the worst of times. Blahhh$hhhh. $Bloooop. Bleep$.</span>".replace(
-            " ", ""
-        )
-        .replace("\t", "")
-        .replace("\n", "")
-    )
+    assert result.replace(" ", "").replace("\t", "").replace(
+        "\n", ""
+    ) == "<span>It was the best of times; it was the worst of times. Blahhh$hhhh. $Bloooop. Bleep$.</span>".replace(
+        " ", ""
+    ).replace("\t", "").replace("\n", "")
 
     result = DefaultJinjaPageView().render_string_template(
         {

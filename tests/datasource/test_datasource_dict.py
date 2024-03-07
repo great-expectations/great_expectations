@@ -158,9 +158,7 @@ def test_datasource_dict___contains___requests_store_just_in_time(
 
 
 @pytest.mark.unit
-def test_datasource_dict___setitem___with_fds(
-    empty_datasource_dict: DatasourceDict, pandas_fds: PandasDatasource
-):
+def test_datasource_dict___setitem___with_fds(empty_datasource_dict: DatasourceDict, pandas_fds: PandasDatasource):
     store = empty_datasource_dict._datasource_store
     assert store.set_count == 0
 
@@ -207,9 +205,7 @@ def test_datasource_dict___getitem__raises_key_error_on_store_miss(
 def test_datasource_dict___getitem___with_fds(
     build_datasource_dict_with_store_spy: Callable, pandas_fds: PandasDatasource
 ):
-    datasource_dict = build_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_fds]
-    )
+    datasource_dict = build_datasource_dict_with_store_spy(datasource_configs=[pandas_fds])
     store = datasource_dict._datasource_store
     assert store.get_count == 0
 
@@ -222,9 +218,7 @@ def test_datasource_dict___getitem___with_fds(
 def test_datasource_dict___getitem___with_block_datasource(
     build_datasource_dict_with_store_spy: Callable, pandas_block_datasource_config: dict
 ):
-    datasource_dict = build_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_block_datasource_config]
-    )
+    datasource_dict = build_datasource_dict_with_store_spy(datasource_configs=[pandas_block_datasource_config])
     store = datasource_dict._datasource_store
     assert store.get_count == 0
 
@@ -232,10 +226,7 @@ def test_datasource_dict___getitem___with_block_datasource(
     assert store.get_count == 1
 
     # Compare arbitrary nested value
-    assert (
-        retrieved_ds.config["data_connectors"].keys()
-        == pandas_block_datasource_config["data_connectors"].keys()
-    )
+    assert retrieved_ds.config["data_connectors"].keys() == pandas_block_datasource_config["data_connectors"].keys()
 
 
 @pytest.fixture
@@ -273,9 +264,7 @@ def cacheable_datasource_dict_with_fds(
     build_cacheable_datasource_dict_with_store_spy: Callable,
     pandas_fds: PandasDatasource,
 ) -> CacheableDatasourceDict:
-    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_fds]
-    )
+    datasource_dict = build_cacheable_datasource_dict_with_store_spy(datasource_configs=[pandas_fds])
     return datasource_dict
 
 
@@ -327,9 +316,7 @@ def test_cacheable_datasource_dict___setitem___with_block_datasource(
     assert store.set_count == 0
 
     # non-FDS use both store and cache
-    empty_cacheable_datasource_dict[pandas_block_datasource.name] = (
-        pandas_block_datasource
-    )
+    empty_cacheable_datasource_dict[pandas_block_datasource.name] = pandas_block_datasource
     assert store.set_count == 1
 
 
@@ -409,7 +396,4 @@ def test_cacheable_datasource_dict___getitem___with_block_datasource(
     assert store.get_count == 1
 
     # Compare arbitrary nested value
-    assert (
-        retrieved_ds.config["data_connectors"].keys()
-        == pandas_block_datasource_config["data_connectors"].keys()
-    )
+    assert retrieved_ds.config["data_connectors"].keys() == pandas_block_datasource_config["data_connectors"].keys()

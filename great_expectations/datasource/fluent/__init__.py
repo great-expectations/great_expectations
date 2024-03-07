@@ -89,7 +89,5 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
 )
 
 
-_PANDAS_SCHEMA_VERSION: str = (
-    "1.5.3"  # this is the version schemas we generated for. Update as needed
-)
+_PANDAS_SCHEMA_VERSION: str = "1.5.3"  # this is the version schemas we generated for. Update as needed
 _SCHEMAS_DIR = pathlib.Path(__file__).parent / "schemas"

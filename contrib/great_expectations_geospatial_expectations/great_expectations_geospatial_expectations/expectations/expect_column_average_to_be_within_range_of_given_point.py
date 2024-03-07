@@ -60,11 +60,7 @@ class ColumnCoordinatesDistance(ColumnAggregateMetricProvider):
         delta_lon = lon2 - lon1
 
         k1 = 111.13209 - (0.56605 * cos(2 * mean_lat)) + (0.0012 * cos(4 * mean_lat))
-        k2 = (
-            (111.41513 * cos(mean_lat))
-            - (0.09455 * cos(3 * mean_lat))
-            + (0.00012 * cos(5 * mean_lat))
-        )
+        k2 = (111.41513 * cos(mean_lat)) - (0.09455 * cos(3 * mean_lat)) + (0.00012 * cos(5 * mean_lat))
 
         distance = sqrt((k1 * delta_lat) ** 2 + (k2 * delta_lon) ** 2)
 
@@ -171,9 +167,7 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation)
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -184,9 +178,7 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation)
             ],
         )
 
-        template_str = (
-            "column average must be in fcc projection within $range of $center_point."
-        )
+        template_str = "column average must be in fcc projection within $range of $center_point."
 
         if include_column_name:
             template_str = f"$column {template_str}"

@@ -103,9 +103,7 @@ class MetaDataset(DataAsset):
             result_format = parse_result_format(result_format)
 
             if row_condition and self._supports_row_condition:
-                self = self.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                self = self.query(row_condition, parser=condition_parser).reset_index(drop=True)
 
             element_count = self.get_row_count()
 
@@ -115,23 +113,16 @@ class MetaDataset(DataAsset):
             if column is not None:
                 # We test whether the dataset is a sqlalchemy_dataset by seeing if it has an engine. We don't test
                 # whether it is actually an instance to avoid circular dependency issues.
-                if (
-                    hasattr(self, "engine")
-                    and self.batch_kwargs.get("use_quoted_name")
-                    and sqlalchemy.quoted_name
-                ):
+                if hasattr(self, "engine") and self.batch_kwargs.get("use_quoted_name") and sqlalchemy.quoted_name:
                     column = sqlalchemy.quoted_name(column, quote=True)
 
-                nonnull_count = self.get_column_nonnull_count(
-                    kwargs.get("column", column)
-                )
+                nonnull_count = self.get_column_nonnull_count(kwargs.get("column", column))
                 # column is treated specially as a positional argument in most expectations
                 args = tuple((column, *args))
             elif kwargs.get("column_A") and kwargs.get("column_B"):
                 try:
                     nonnull_count = (
-                        self[kwargs.get("column_A")].notnull()
-                        & self[kwargs.get("column_B")].notnull()
+                        self[kwargs.get("column_A")].notnull() & self[kwargs.get("column_B")].notnull()
                     ).sum()
                 except TypeError:
                     nonnull_count = None
@@ -149,16 +140,10 @@ class MetaDataset(DataAsset):
             evaluation_result = func(self, *args, **kwargs)
 
             if "success" not in evaluation_result:
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: success"
-                )
+                raise ValueError("Column aggregate expectation failed to return required information: success")
 
-            if ("result" not in evaluation_result) or (
-                "observed_value" not in evaluation_result["result"]
-            ):
-                raise ValueError(
-                    "Column aggregate expectation failed to return required information: observed_value"
-                )
+            if ("result" not in evaluation_result) or ("observed_value" not in evaluation_result["result"]):
+                raise ValueError("Column aggregate expectation failed to return required information: observed_value")
 
             return_obj = {"success": bool(evaluation_result["success"])}
 
@@ -173,9 +158,7 @@ class MetaDataset(DataAsset):
             if null_count:
                 return_obj["result"]["missing_count"] = null_count
                 if element_count > 0:
-                    return_obj["result"]["missing_percent"] = (
-                        null_count * 100.0 / element_count
-                    )
+                    return_obj["result"]["missing_percent"] = null_count * 100.0 / element_count
                 else:
                     return_obj["result"]["missing_percent"] = None
             else:
@@ -302,9 +285,7 @@ class Dataset(MetaDataset):
         """Returns: Any"""
         raise NotImplementedError
 
-    def get_column_quantiles(
-        self, column, quantiles, allow_relative_error=False
-    ) -> List[Any]:
+    def get_column_quantiles(self, column, quantiles, allow_relative_error=False) -> List[Any]:
         """Get the values in column closest to the requested quantiles
         Args:
             column (string): name of column
@@ -320,9 +301,7 @@ class Dataset(MetaDataset):
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_partition(
-        self, column, bins="uniform", n_bins=10, allow_relative_error=False
-    ):
+    def get_column_partition(self, column, bins="uniform", n_bins=10, allow_relative_error=False):
         """Get a partition of the range of values in the specified column.
 
         Args:
@@ -343,9 +322,7 @@ class Dataset(MetaDataset):
             #  quantiles for clarity
             # min_ = self.get_column_min(column)
             # max_ = self.get_column_max(column)
-            min_, max_ = self.get_column_quantiles(
-                column, (0.0, 1.0), allow_relative_error=allow_relative_error
-            )
+            min_, max_ = self.get_column_quantiles(column, (0.0, 1.0), allow_relative_error=allow_relative_error)
             # PRECISION NOTE: some implementations of quantiles could produce
             # varying levels of precision (e.g. a NUMERIC column producing
             # Decimal from a SQLAlchemy source, so we cast to float for numpy)
@@ -372,9 +349,7 @@ class Dataset(MetaDataset):
                 n_bins = sturges
             else:
                 fd = (2 * float(iqr)) / (nonnull_count ** (1 / 3))
-                n_bins = max(
-                    int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd))
-                )
+                n_bins = max(int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd)))
             bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1)
         else:
             raise ValueError("Invalid parameter for bins argument")
@@ -506,8 +481,7 @@ class Dataset(MetaDataset):
         if column in columns:
             return {
                 # FIXME: list.index does not check for duplicate values.
-                "success": (column_index is None)
-                or (columns.index(column) == column_index)
+                "success": (column_index is None) or (columns.index(column) == column_index)
             }
         else:
             return {"success": False}
@@ -563,13 +537,9 @@ class Dataset(MetaDataset):
             column_index = range(number_of_columns)
 
             # Create a list of the mismatched details
-            compared_lists = list(
-                zip_longest(column_index, list(column_list), list(columns))
-            )
+            compared_lists = list(zip_longest(column_index, list(column_list), list(columns)))
             mismatched = [
-                {"Expected Column Position": i, "Expected": k, "Found": v}
-                for i, k, v in compared_lists
-                if k != v
+                {"Expected Column Position": i, "Expected": k, "Found": v} for i, k, v in compared_lists if k != v
             ]
             return {
                 "success": False,
@@ -629,9 +599,7 @@ class Dataset(MetaDataset):
         dataset_columns_list = self.get_table_columns()
         dataset_columns_set = set(dataset_columns_list)
 
-        if (
-            (column_set is None) and (exact_match is not True)
-        ) or dataset_columns_set == column_set:
+        if ((column_set is None) and (exact_match is not True)) or dataset_columns_set == column_set:
             return {"success": True, "result": {"observed_value": dataset_columns_list}}
         else:
             # Convert to lists and sort to lock order for testing and output rendering
@@ -2374,9 +2342,7 @@ class Dataset(MetaDataset):
         else:
             if parse_strings_as_datetimes:
                 parsed_value_set = self._parse_value_set(value_set)
-                parsed_observed_value_set = set(
-                    self._parse_value_set(observed_value_counts.index)
-                )
+                parsed_observed_value_set = set(self._parse_value_set(observed_value_counts.index))
             else:
                 parsed_value_set = value_set
                 parsed_observed_value_set = set(observed_value_counts.index)
@@ -2640,14 +2606,10 @@ class Dataset(MetaDataset):
 
         """
         if min_value is not None and not isinstance(min_value, Number):
-            raise ValueError(
-                "min_value must be a datetime (for datetime columns) or number"
-            )
+            raise ValueError("min_value must be a datetime (for datetime columns) or number")
 
         if max_value is not None and not isinstance(max_value, Number):
-            raise ValueError(
-                "max_value must be a datetime (for datetime columns) or number"
-            )
+            raise ValueError("max_value must be a datetime (for datetime columns) or number")
 
         column_mean = self.get_column_mean(column)
 
@@ -2897,13 +2859,9 @@ class Dataset(MetaDataset):
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
-            raise ValueError(
-                "quantile_values and quantiles must have the same number of elements"
-            )
+            raise ValueError("quantile_values and quantiles must have the same number of elements")
 
-        quantile_vals = self.get_column_quantiles(
-            column, tuple(quantiles), allow_relative_error=allow_relative_error
-        )
+        quantile_vals = self.get_column_quantiles(column, tuple(quantiles), allow_relative_error=allow_relative_error)
         # We explicitly allow "None" to be interpreted as +/- infinity
         comparison_quantile_ranges = [
             [
@@ -2913,8 +2871,7 @@ class Dataset(MetaDataset):
             for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [
-            range_[0] <= quantile_vals[idx] <= range_[1]
-            for idx, range_ in enumerate(comparison_quantile_ranges)
+            range_[0] <= quantile_vals[idx] <= range_[1] for idx, range_ in enumerate(comparison_quantile_ranges)
         ]
 
         return {
@@ -3487,9 +3444,7 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
-                            f"Something went wrong when parsing 'min_value': {e}"
-                        )
+                        logger.debug(f"Something went wrong when parsing 'min_value': {e}")
 
                 if strict_min:
                     above_min = column_min > min_value
@@ -3503,9 +3458,7 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
-                            f"Something went wrong when parsing 'max_value': {e}"
-                        )
+                        logger.debug(f"Something went wrong when parsing 'max_value': {e}")
 
                 if strict_max:
                     below_max = column_min < max_value
@@ -3617,9 +3570,7 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
-                            f"Something went wrong when parsing 'min_value': {e}"
-                        )
+                        logger.debug(f"Something went wrong when parsing 'min_value': {e}")
 
                 if strict_min:
                     above_min = column_max > min_value
@@ -3633,9 +3584,7 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
-                            f"Something went wrong when parsing 'max_value': {e}"
-                        )
+                        logger.debug(f"Something went wrong when parsing 'max_value': {e}")
 
                 if strict_max:
                     below_max = column_max < max_value
@@ -4007,23 +3956,15 @@ class Dataset(MetaDataset):
         """
         if partition_object is None:
             if bucketize_data:
-                partition_object = build_continuous_partition_object(
-                    dataset=self, column=column
-                )
+                partition_object = build_continuous_partition_object(dataset=self, column=column)
             else:
-                partition_object = build_categorical_partition_object(
-                    dataset=self, column=column
-                )
+                partition_object = build_categorical_partition_object(dataset=self, column=column)
 
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if threshold is not None and (
-            (not isinstance(threshold, (int, float))) or (threshold < 0)
-        ):
-            raise ValueError(
-                "Threshold must be specified, greater than or equal to zero."
-            )
+        if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
         if (
             (not isinstance(tail_weight_holdout, (int, float)))
@@ -4040,21 +3981,15 @@ class Dataset(MetaDataset):
             raise ValueError("internal_weight_holdout must be between zero and one.")
 
         if tail_weight_holdout != 0 and "tail_weights" in partition_object:
-            raise ValueError(
-                "tail_weight_holdout must be 0 when using tail_weights in partition object"
-            )
+            raise ValueError("tail_weight_holdout must be 0 when using tail_weights in partition object")
 
         # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
-                raise ValueError(
-                    "Internal weight holdout cannot be used for discrete data."
-                )
+                raise ValueError("Internal weight holdout cannot be used for discrete data.")
 
             # Data are expected to be discrete, use value_counts
-            observed_weights = self.get_column_value_counts(
-                column
-            ) / self.get_column_nonnull_count(column)
+            observed_weights = self.get_column_value_counts(column) / self.get_column_nonnull_count(column)
             expected_weights = pd.Series(
                 partition_object["weights"],
                 index=partition_object["values"],
@@ -4074,9 +4009,7 @@ class Dataset(MetaDataset):
                 # Scale existing expected values
                 test_df["expected"] *= 1 - tail_weight_holdout
                 # Fill NAs with holdout.
-                qk = test_df["expected"].fillna(
-                    tail_weight_holdout / na_counts["expected"]
-                )
+                qk = test_df["expected"].fillna(tail_weight_holdout / na_counts["expected"])
             else:
                 qk = test_df["expected"]
 
@@ -4117,17 +4050,13 @@ class Dataset(MetaDataset):
                     "parameter set to false."
                 )
             # Build the histogram first using expected bins so that the largest bin is >=
-            hist = np.array(
-                self.get_column_hist(column, tuple(partition_object["bins"]))
-            )
+            hist = np.array(self.get_column_hist(column, tuple(partition_object["bins"])))
             # np.histogram(column, partition_object['bins'], density=False)
             bin_edges = partition_object["bins"]
             # Add in the frequencies observed above or below the provided partition
             # below_partition = len(np.where(column < partition_object['bins'][0])[0])
             # above_partition = len(np.where(column > partition_object['bins'][-1])[0])
-            below_partition = self.get_column_count_in_range(
-                column, max_val=partition_object["bins"][0]
-            )
+            below_partition = self.get_column_count_in_range(column, max_val=partition_object["bins"][0])
             above_partition = self.get_column_count_in_range(
                 column, min_val=partition_object["bins"][-1], strict_min=True
             )
@@ -4151,19 +4080,13 @@ class Dataset(MetaDataset):
                 if zero_count > 0:
                     for index, value in enumerate(expected_weights):
                         if value == 0:
-                            expected_weights[index] = (
-                                internal_weight_holdout / zero_count
-                            )
+                            expected_weights[index] = internal_weight_holdout / zero_count
 
             # Assign tail weight holdout if applicable
             # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
-            if (partition_object["bins"][0] == -np.inf) and (
-                partition_object["bins"][-1]
-            ) == np.inf:
+            if (partition_object["bins"][0] == -np.inf) and (partition_object["bins"][-1]) == np.inf:
                 if tail_weight_holdout > 0:
-                    raise ValueError(
-                        "tail_weight_holdout cannot be used for partitions with infinite endpoints."
-                    )
+                    raise ValueError("tail_weight_holdout cannot be used for partitions with infinite endpoints.")
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -4174,17 +4097,13 @@ class Dataset(MetaDataset):
 
                 comb_expected_weights = expected_weights
                 # Set aside tail weights
-                expected_tail_weights = np.concatenate(
-                    ([expected_weights[0]], [expected_weights[-1]])
-                )
+                expected_tail_weights = np.concatenate(([expected_weights[0]], [expected_weights[-1]]))
                 # Remove tail weights
                 expected_weights = expected_weights[1:-1]
 
                 comb_observed_weights = observed_weights
                 # Set aside tail weights
-                observed_tail_weights = np.concatenate(
-                    ([observed_weights[0]], [observed_weights[-1]])
-                )
+                observed_tail_weights = np.concatenate(([observed_weights[0]], [observed_weights[-1]]))
                 # Remove tail weights
                 observed_weights = observed_weights[1:-1]
 
@@ -4197,13 +4116,9 @@ class Dataset(MetaDataset):
                 # Remove -inf
                 expected_bins = partition_object["bins"][1:]
 
-                comb_expected_weights = np.concatenate(
-                    (expected_weights, [tail_weight_holdout])
-                )
+                comb_expected_weights = np.concatenate((expected_weights, [tail_weight_holdout]))
                 # Set aside left tail weight and holdout
-                expected_tail_weights = np.concatenate(
-                    ([expected_weights[0]], [tail_weight_holdout])
-                )
+                expected_tail_weights = np.concatenate(([expected_weights[0]], [tail_weight_holdout]))
                 # Remove left tail weight from main expected_weights
                 expected_weights = expected_weights[1:]
 
@@ -4232,13 +4147,9 @@ class Dataset(MetaDataset):
                 # Remove inf
                 expected_bins = partition_object["bins"][:-1]
 
-                comb_expected_weights = np.concatenate(
-                    ([tail_weight_holdout], expected_weights)
-                )
+                comb_expected_weights = np.concatenate(([tail_weight_holdout], expected_weights))
                 # Set aside right tail weight and holdout
-                expected_tail_weights = np.concatenate(
-                    ([tail_weight_holdout], [expected_weights[-1]])
-                )
+                expected_tail_weights = np.concatenate(([tail_weight_holdout], [expected_weights[-1]]))
                 # Remove right tail weight from main expected_weights
                 expected_weights = expected_weights[:-1]
 
@@ -4264,9 +4175,7 @@ class Dataset(MetaDataset):
                 if "tail_weights" in partition_object:
                     tail_weights = partition_object["tail_weights"]
                     # Tack on tail weights
-                    comb_expected_weights = np.concatenate(
-                        ([tail_weights[0]], expected_weights, [tail_weights[1]])
-                    )
+                    comb_expected_weights = np.concatenate(([tail_weights[0]], expected_weights, [tail_weights[1]]))
                     # Tail weights are just tail_weights
                     expected_tail_weights = np.array(tail_weights)
                 else:
@@ -4278,9 +4187,7 @@ class Dataset(MetaDataset):
                         )
                     )
                     # Tail weights are just tail_weight holdout divided equally to both tails
-                    expected_tail_weights = np.concatenate(
-                        ([tail_weight_holdout / 2], [tail_weight_holdout / 2])
-                    )
+                    expected_tail_weights = np.concatenate(([tail_weight_holdout / 2], [tail_weight_holdout / 2]))
 
                 comb_observed_weights = np.concatenate(
                     (
@@ -4384,16 +4291,12 @@ class Dataset(MetaDataset):
             :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
         """
-        crosstab = self.get_crosstab(
-            column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B
-        )
+        crosstab = self.get_crosstab(column_A, column_B, bins_A, bins_B, n_bins_A, n_bins_B)
         chi2_result = stats.chi2_contingency(crosstab)
         # See e.g. https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V
         cramers_V = max(
             min(
-                np.sqrt(
-                    chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)
-                ),
+                np.sqrt(chi2_result[0] / self.get_row_count() / (min(crosstab.shape) - 1)),
                 1,
             ),
             0,
@@ -4758,9 +4661,7 @@ class Dataset(MetaDataset):
 
     @staticmethod
     def _parse_value_set(value_set):
-        parsed_value_set = [
-            parse(value) if isinstance(value, str) else value for value in value_set
-        ]
+        parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
         return parsed_value_set
 
     def attempt_allowing_relative_error(self) -> Union[bool, float]:

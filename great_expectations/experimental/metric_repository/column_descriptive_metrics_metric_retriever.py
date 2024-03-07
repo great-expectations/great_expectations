@@ -48,9 +48,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         # We need to skip columns that do not report a type, because the metric computation
         # to determine semantic type will fail.
-        table_column_types = list(
-            filter(lambda m: m.metric_name == "table.column_types", table_metrics)
-        )[0]
+        table_column_types = list(filter(lambda m: m.metric_name == "table.column_types", table_metrics))[0]
         exclude_column_names = self._get_columns_to_exclude(table_column_types)
 
         numeric_column_names = self._get_numeric_column_names(
@@ -83,12 +81,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
-        table_metric_configs = self._generate_table_metric_configurations(
-            table_metric_names
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, table_metric_configs
-        )
+        table_metric_configs = self._generate_table_metric_configurations(table_metric_names)
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(batch_request, table_metric_configs)
 
         metrics = [
             self._get_table_row_count(batch_id, computed_metrics, aborted_metrics),
@@ -185,12 +179,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         column_metric_names: List[str],
         column_metric_type: type[ColumnMetric[Any]],
     ) -> Sequence[Metric]:
-        column_metric_configs = self._generate_column_metric_configurations(
-            column_list, column_metric_names
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, column_metric_configs
-        )
+        column_metric_configs = self._generate_column_metric_configurations(column_list, column_metric_names)
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(batch_request, column_metric_configs)
 
         # Convert computed_metrics
         metrics: list[Metric] = []
@@ -217,9 +207,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return metrics
 
-    def _get_numeric_column_metrics(
-        self, batch_request: BatchRequest, column_list: List[str]
-    ) -> Sequence[Metric]:
+    def _get_numeric_column_metrics(self, batch_request: BatchRequest, column_list: List[str]) -> Sequence[Metric]:
         column_metric_names = [
             "column.min",
             "column.max",
@@ -233,9 +221,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             column_metric_type=ColumnMetric[float],
         )
 
-    def _get_timestamp_column_metrics(
-        self, batch_request: BatchRequest, column_list: List[str]
-    ) -> Sequence[Metric]:
+    def _get_timestamp_column_metrics(self, batch_request: BatchRequest, column_list: List[str]) -> Sequence[Metric]:
         column_metric_names = [
             "column.min",
             "column.max",
@@ -251,19 +237,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             column_metric_type=ColumnMetric[str],
         )
 
-    def _get_non_numeric_column_metrics(
-        self, batch_request: BatchRequest, column_list: List[str]
-    ) -> Sequence[Metric]:
+    def _get_non_numeric_column_metrics(self, batch_request: BatchRequest, column_list: List[str]) -> Sequence[Metric]:
         column_metric_names = [
             "column_values.null.count",
         ]
 
-        column_metric_configs = self._generate_column_metric_configurations(
-            column_list, column_metric_names
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, column_metric_configs
-        )
+        column_metric_configs = self._generate_column_metric_configurations(column_list, column_metric_names)
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(batch_request, column_metric_configs)
 
         # Convert computed_metrics
         metrics: list[Metric] = []
@@ -344,13 +324,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
         return column_names
 
-    def _generate_table_metric_configurations(
-        self, table_metric_names: list[str]
-    ) -> list[MetricConfiguration]:
+    def _generate_table_metric_configurations(self, table_metric_names: list[str]) -> list[MetricConfiguration]:
         table_metric_configs = [
-            MetricConfiguration(
-                metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
-            )
+            MetricConfiguration(metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={})
             for metric_name in table_metric_names
         ]
         return table_metric_configs
@@ -414,9 +390,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
             if isinstance(exception_info, ExceptionInfo):
                 exception_message = exception_info.exception_message
-                metric_exception = MetricException(
-                    type=exception_type, message=exception_message
-                )
+                metric_exception = MetricException(type=exception_type, message=exception_message)
         else:
             metric_exception = MetricException(
                 type="Not found",

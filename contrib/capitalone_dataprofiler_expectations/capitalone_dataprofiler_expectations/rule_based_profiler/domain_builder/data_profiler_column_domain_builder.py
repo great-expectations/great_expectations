@@ -39,12 +39,8 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
         semantic_type_filter_module_name: Optional[str] = None,
         semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        include_semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
+        exclude_semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -109,14 +105,12 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        profile_report_filtering_key: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=f"{VARIABLES_KEY}profile_report_filtering_key",
-                expected_return_type=str,
-                variables=variables,
-                parameters=None,
-            )
+        profile_report_filtering_key: str = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=f"{VARIABLES_KEY}profile_report_filtering_key",
+            expected_return_type=str,
+            variables=variables,
+            parameters=None,
         )
 
         profile_report_accepted_filtering_values: str = get_parameter_value_and_validate_return_type(
@@ -145,9 +139,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"Error: List of available table columns in {self.__class__.__name__} must not be empty."
             )
 
-        if not is_candidate_subset_of_target(
-            candidate=profile_report_column_names, target=table_column_names
-        ):
+        if not is_candidate_subset_of_target(candidate=profile_report_column_names, target=table_column_names):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )

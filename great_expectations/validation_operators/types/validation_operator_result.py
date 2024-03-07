@@ -55,10 +55,7 @@ class ValidationOperatorResult(DictDot):
         self._evaluation_parameters = evaluation_parameters
         self._validation_operator_config = validation_operator_config
         if success is None:
-            self._success = all(
-                run_result["validation_result"].success
-                for run_result in run_results.values()
-            )
+            self._success = all(run_result["validation_result"].success for run_result in run_results.values())
         else:
             self._success = success
 
@@ -135,15 +132,10 @@ class ValidationOperatorResult(DictDot):
             self._validation_result_identifiers = list(self._run_results.keys())
         return self._validation_result_identifiers
 
-    def list_validation_results(
-        self, group_by=None
-    ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+    def list_validation_results(self, group_by=None) -> Union[List[ExpectationSuiteValidationResult], dict]:
         if group_by is None:
             if self._validation_results is None:
-                self._validation_results = [
-                    run_result["validation_result"]
-                    for run_result in self.run_results.values()
-                ]
+                self._validation_results = [run_result["validation_result"] for run_result in self.run_results.values()]
             return self._validation_results
         elif group_by == "validation_result_identifier":
             return self._list_validation_results_by_validation_result_identifier()
@@ -166,8 +158,7 @@ class ValidationOperatorResult(DictDot):
                 expectation_suite_name: [
                     run_result["validation_result"]
                     for run_result in self.run_results.values()
-                    if run_result["validation_result"].meta["expectation_suite_name"]
-                    == expectation_suite_name
+                    if run_result["validation_result"].meta["expectation_suite_name"] == expectation_suite_name
                 ]
                 for expectation_suite_name in self.list_expectation_suite_names()
             }
@@ -187,22 +178,15 @@ class ValidationOperatorResult(DictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_kwargs"].get("data_asset_name")
-                        == data_asset_name
+                        if data_asset["batch_kwargs"].get("data_asset_name") == data_asset_name
                     ]
-            self._validation_results_by_data_asset_name = (
-                validation_results_by_data_asset_name
-            )
+            self._validation_results_by_data_asset_name = validation_results_by_data_asset_name
         return self._validation_results_by_data_asset_name
 
-    def list_data_assets_validated(
-        self, group_by: Optional[str] = None
-    ) -> Union[List[dict], dict]:
+    def list_data_assets_validated(self, group_by: Optional[str] = None) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:
-                self._data_assets_validated = list(
-                    self._list_data_assets_validated_by_batch_id().values()
-                )
+                self._data_assets_validated = list(self._list_data_assets_validated_by_batch_id().values())
             return self._data_assets_validated
         if group_by == "batch_id":
             return self._list_data_assets_validated_by_batch_id()
@@ -214,9 +198,7 @@ class ValidationOperatorResult(DictDot):
             for validation_result in self.list_validation_results():
                 batch_kwargs = validation_result.meta["batch_kwargs"]
                 batch_id = BatchKwargs(batch_kwargs).to_id()
-                expectation_suite_name = validation_result.meta[
-                    "expectation_suite_name"
-                ]
+                expectation_suite_name = validation_result.meta["expectation_suite_name"]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
                         "batch_kwargs": batch_kwargs,
@@ -224,12 +206,8 @@ class ValidationOperatorResult(DictDot):
                         "expectation_suite_names": [expectation_suite_name],
                     }
                 else:
-                    assets_validated_by_batch_id[batch_id]["validation_results"].append(
-                        validation_result
-                    )
-                    assets_validated_by_batch_id[batch_id][
-                        "expectation_suite_names"
-                    ].append(expectation_suite_name)
+                    assets_validated_by_batch_id[batch_id]["validation_results"].append(validation_result)
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(expectation_suite_name)
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
         return self._data_assets_validated_by_batch_id
 
@@ -238,18 +216,11 @@ class ValidationOperatorResult(DictDot):
             data_asset_count = len(self.list_data_assets_validated())
             validation_result_count = len(self.list_validation_results())
             successful_validation_count = len(
-                [
-                    validation_result
-                    for validation_result in self.list_validation_results()
-                    if validation_result.success
-                ]
+                [validation_result for validation_result in self.list_validation_results() if validation_result.success]
             )
-            unsuccessful_validation_count = (
-                validation_result_count - successful_validation_count
-            )
+            unsuccessful_validation_count = validation_result_count - successful_validation_count
             successful_validation_percent = (
-                validation_result_count
-                and (successful_validation_count / validation_result_count) * 100
+                validation_result_count and (successful_validation_count / validation_result_count) * 100
             )
 
             self._statistics = {

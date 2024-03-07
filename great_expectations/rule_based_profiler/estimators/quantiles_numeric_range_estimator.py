@@ -72,9 +72,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
         if quantile_statistic_interpolation_method is None:
-            quantile_statistic_interpolation_method = (
-                DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
-            )
+            quantile_statistic_interpolation_method = DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
 
         datetime_detected: bool = datetime_semantic_domain_type(domain=domain)
         metric_values_converted: npt.NDArray

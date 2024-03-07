@@ -64,10 +64,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[BatchDefinition] = (
-                self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-                    data_reference=data_reference, data_asset_name=None
-                )
+            mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                data_reference=data_reference, data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -105,20 +103,15 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list: List[BatchDefinition] = (
-            self._get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequestBase(
-                    datasource_name=self.datasource_name,
-                    data_connector_name=self.name,
-                    data_asset_name="",
-                )
+        batch_definition_list: List[BatchDefinition] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name="",
             )
         )
 
-        data_asset_names: List[str] = [
-            batch_definition.data_asset_name
-            for batch_definition in batch_definition_list
-        ]
+        data_asset_names: List[str] = [batch_definition.data_asset_name for batch_definition in batch_definition_list]
 
         return list(set(data_asset_names))
 
@@ -133,9 +126,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return PathBatchSpec(batch_spec)
 

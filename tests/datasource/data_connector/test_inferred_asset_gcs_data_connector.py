@@ -56,12 +56,8 @@ def expected_config_dict():
         "directory/B-2.csv",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_without_args(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
-):
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
+def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -92,12 +88,8 @@ def test_instantiation_without_args(
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_file"
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_with_filename_arg(
-    mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
-):
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
+def test_instantiation_with_filename_arg(mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -131,12 +123,8 @@ def test_instantiation_with_filename_arg(
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_info"
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_with_info_arg(
-    mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
-):
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
+def test_instantiation_with_info_arg(mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -204,9 +192,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         "2020/04/beta-1007.csv",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 def test_get_batch_definition_list_from_batch_request_with_unknown_data_connector_raises_error(
     mock_gcs_conn,
     mock_list_keys,
@@ -248,9 +234,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
         "2020/04/beta-1007.csv",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 def test_complex_regex_example_with_implicit_data_asset_names(
     mock_gcs_conn,
     mock_list_keys,
@@ -332,9 +316,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 def test_redundant_information_in_naming_convention_bucket_sorted(
     mock_gcs_conn,
     mock_list_keys,
@@ -371,13 +353,11 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="my_inferred_asset_filesystem_data_connector",
-                data_asset_name="some_bucket",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
         )
     )
 
@@ -386,57 +366,43 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}),
         ),
     ]
     assert expected == sorted_batch_definition_list
@@ -454,9 +420,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match_group(
     mock_gcs_conn,
     mock_list_keys,
@@ -492,9 +456,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -510,9 +472,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     mock_gcs_conn,
     mock_list_keys,
@@ -551,22 +511,16 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client")
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
 )
-def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path(mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -606,20 +560,14 @@ default_regex:
     )
 
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha")
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/beta_here/beta-202002.txt", "beta")
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/gamma-202005.csv", "gamma")
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"
     )

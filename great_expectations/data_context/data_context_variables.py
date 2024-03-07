@@ -36,9 +36,7 @@ logger = logging.getLogger(__file__)
 
 
 class DataContextVariableSchema(str, enum.Enum):
-    ALL_VARIABLES = (
-        "data_context_variables"  # If retrieving/setting the entire config at once
-    )
+    ALL_VARIABLES = "data_context_variables"  # If retrieving/setting the entire config at once
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
@@ -105,9 +103,7 @@ class DataContextVariables(ABC):
         """
         Generates the appropriate Store key to retrieve/store configs.
         """
-        key = ConfigurationIdentifier(
-            configuration_key=DataContextVariableSchema.ALL_VARIABLES
-        )
+        key = ConfigurationIdentifier(configuration_key=DataContextVariableSchema.ALL_VARIABLES)
         return key
 
     def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
@@ -168,9 +164,7 @@ class DataContextVariables(ABC):
 
     @expectations_store_name.setter
     def expectations_store_name(self, expectations_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name
-        )
+        self._set(DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name)
 
     @property
     def validations_store_name(self) -> Optional[str]:
@@ -178,18 +172,14 @@ class DataContextVariables(ABC):
 
     @validations_store_name.setter
     def validations_store_name(self, validations_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name
-        )
+        self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name)
 
     @property
     def evaluation_parameter_store_name(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
 
     @evaluation_parameter_store_name.setter
-    def evaluation_parameter_store_name(
-        self, evaluation_parameter_store_name: str
-    ) -> None:
+    def evaluation_parameter_store_name(self, evaluation_parameter_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
             evaluation_parameter_store_name,
@@ -240,9 +230,7 @@ class DataContextVariables(ABC):
         return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
 
     @anonymous_usage_statistics.setter
-    def anonymous_usage_statistics(
-        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
-    ) -> None:
+    def anonymous_usage_statistics(self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig) -> None:
         self._set(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             anonymous_usage_statistics,
@@ -264,9 +252,7 @@ class DataContextVariables(ABC):
         return self._get(DataContextVariableSchema.INCLUDE_RENDERED_CONTENT)
 
     @include_rendered_content.setter
-    def include_rendered_content(
-        self, include_rendered_content: IncludeRenderedContentConfig
-    ) -> None:
+    def include_rendered_content(self, include_rendered_content: IncludeRenderedContentConfig) -> None:
         self._set(
             DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
             include_rendered_content,
@@ -302,9 +288,7 @@ class FileDataContextVariables(DataContextVariables):
         # This should be modified once our lowest supported version is 3.10.
 
         if self.data_context is None:
-            raise ValueError(
-                f"A reference to a data context is required for {self.__class__.__name__}"
-            )
+            raise ValueError(f"A reference to a data context is required for {self.__class__.__name__}")
 
     @override
     def _init_store(self) -> DataContextStore:
@@ -369,13 +353,9 @@ class FileDataContextVariables(DataContextVariables):
             raise
         finally:
             if config_fluent_datasources_stash:
-                logger.info(
-                    f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
-                )
+                logger.info(f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s")
                 self.data_context.datasources.update(config_fluent_datasources_stash)
-                self.data_context.fluent_config.fluent_datasources = list(
-                    config_fluent_datasources_stash.values()
-                )
+                self.data_context.fluent_config.fluent_datasources = list(config_fluent_datasources_stash.values())
 
 
 @dataclass(repr=False)
@@ -438,7 +418,5 @@ class CloudDataContextVariables(DataContextVariables):
         """
         from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES
-        )
+        key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES)
         return key

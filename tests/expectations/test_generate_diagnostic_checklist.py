@@ -11,9 +11,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.skip(
-    "This is broken because Expectation._get_execution_engine_diagnostics is broken"
-)
+@pytest.mark.skip("This is broken because Expectation._get_execution_engine_diagnostics is broken")
 def test_print_diagnostic_checklist__first_iteration():
     output_message = ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 
@@ -30,9 +28,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 
 def test_print_diagnostic_checklist__second_iteration():
-    output_message = ExpectColumnValuesToEqualThree__SecondIteration(
-        column="values"
-    ).print_diagnostic_checklist()
+    output_message = ExpectColumnValuesToEqualThree__SecondIteration(column="values").print_diagnostic_checklist()
     print(output_message)
 
     assert (
@@ -57,9 +53,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Mat
 
 
 def test_print_diagnostic_checklist__third_iteration():
-    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(
-        column="values"
-    ).print_diagnostic_checklist()
+    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(column="values").print_diagnostic_checklist()
     print(output_message)
 
     assert (

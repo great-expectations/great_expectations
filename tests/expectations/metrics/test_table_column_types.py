@@ -19,18 +19,14 @@ def test_table_column_introspection(sa, capsys):
     )
     eng = sa.create_engine(f"sqlite:///{db_file}", echo=True)
     engine = SqlAlchemyExecutionEngine(engine=eng)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=engine, table_name="table_partitioned_by_date_column__A"
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="table_partitioned_by_date_column__A")
     engine.load_batch_data("__", batch_data)
     assert isinstance(batch_data.selectable, sa.Table)
     assert batch_data.selectable.name == "table_partitioned_by_date_column__A"
     assert batch_data.selectable.schema is None
 
     insp = engine.get_inspector()
-    columns = insp.get_columns(
-        batch_data.selectable.name, schema=batch_data.selectable.schema
-    )
+    columns = insp.get_columns(batch_data.selectable.name, schema=batch_data.selectable.schema)
     assert [x["name"] for x in columns] == [
         "index",
         "id",
@@ -41,9 +37,7 @@ def test_table_column_introspection(sa, capsys):
     assert capsys.readouterr().out
 
     # Assert that using the same inspector again does not cause a query
-    columns = insp.get_columns(
-        batch_data.selectable.name, schema=batch_data.selectable.schema
-    )
+    columns = insp.get_columns(batch_data.selectable.name, schema=batch_data.selectable.schema)
     assert [x["name"] for x in columns] == [
         "index",
         "id",
@@ -60,15 +54,10 @@ def test_table_column_introspection(sa, capsys):
     )
     engine.load_batch_data("__1", batch_data)
     assert isinstance(batch_data.selectable, sa.Table)
-    assert (
-        batch_data.selectable.name
-        == "table_that_should_be_partitioned_by_random_hash__H"
-    )
+    assert batch_data.selectable.name == "table_that_should_be_partitioned_by_random_hash__H"
     assert batch_data.selectable.schema is None
 
-    columns = insp.get_columns(
-        batch_data.selectable.name, schema=batch_data.selectable.schema
-    )
+    columns = insp.get_columns(batch_data.selectable.name, schema=batch_data.selectable.schema)
     assert [x["name"] for x in columns] == [
         "index",
         "id",
@@ -92,17 +81,13 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
         "great_expectations.execution_engine.sqlalchemy_execution_engine.sa.inspect",
         wraps=sa.inspect,
     ) as mock_inspect:
-        batch_data = SqlAlchemyBatchData(
-            execution_engine=engine, table_name="table_partitioned_by_date_column__A"
-        )
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="table_partitioned_by_date_column__A")
         engine.load_batch_data("__", batch_data)
         assert isinstance(batch_data.selectable, sa.Table)
         assert batch_data.selectable.name == "table_partitioned_by_date_column__A"
         assert batch_data.selectable.schema is None
 
-        _table_columns_metric, results = get_table_columns_metric(
-            execution_engine=engine
-        )
+        _table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
         assert results[("table.columns", (), ())] == [
             "index",
@@ -114,9 +99,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
 
         assert mock_inspect.call_count == 1
 
-        _table_columns_metric, results = get_table_columns_metric(
-            execution_engine=engine
-        )
+        _table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
         assert results[("table.columns", (), ())] == [
             "index",
@@ -136,15 +119,10 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
         )
         engine.load_batch_data("__1", batch_data)
         assert isinstance(batch_data.selectable, sa.Table)
-        assert (
-            batch_data.selectable.name
-            == "table_that_should_be_partitioned_by_random_hash__H"
-        )
+        assert batch_data.selectable.name == "table_that_should_be_partitioned_by_random_hash__H"
         assert batch_data.selectable.schema is None
 
-        _table_columns_metric, results = get_table_columns_metric(
-            execution_engine=engine
-        )
+        _table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
         assert results[("table.columns", (), ())] == [
             "index",
@@ -168,19 +146,12 @@ def test_table_column_types__sqlalchemy_table_not_found(sa):
     engine = SqlAlchemyExecutionEngine(engine=eng)
 
     # Table `table_partitioned_by_date_column__B` does not exist in database
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=engine, table_name="table_partitioned_by_date_column__B"
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="table_partitioned_by_date_column__B")
     engine.load_batch_data("__1", batch_data)
     assert isinstance(batch_data.selectable, sa.Table)
     assert batch_data.selectable.name == "table_partitioned_by_date_column__B"
     assert batch_data.selectable.schema is None
 
     with pytest.raises(MetricResolutionError) as exc:
-        _table_columns_metric, _results = get_table_columns_metric(
-            execution_engine=engine
-        )
-    assert (
-        "(sqlite3.OperationalError) no such table: table_partitioned_by_date_column__B"
-        in str(exc.value)
-    )
+        _table_columns_metric, _results = get_table_columns_metric(execution_engine=engine)
+    assert "(sqlite3.OperationalError) no such table: table_partitioned_by_date_column__B" in str(exc.value)

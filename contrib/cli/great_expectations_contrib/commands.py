@@ -90,9 +90,7 @@ def perform_check(suppress_output: bool) -> bool:
 
     is_successful = successes == len(commands)
     color = "green" if is_successful else "red"
-    echo(
-        f"Summary: [{successes}/{len(commands)}] checks have passed!", color, bold=True
-    )
+    echo(f"Summary: [{successes}/{len(commands)}] checks have passed!", color, bold=True)
 
     return is_successful
 
@@ -131,9 +129,7 @@ def run_command(command: Command, suppress_output: bool = False) -> bool:
     name, full_command, err = command
 
     echo(f"{name}:", "blue", bold=True)
-    result = subprocess.run(
-        full_command.split(" "), shell=False, stdout=sys.stdout, stderr=sys.stdout
-    )
+    result = subprocess.run(full_command.split(" "), shell=False, stdout=sys.stdout, stderr=sys.stdout)
 
     success = result.returncode == 0
     if success:
@@ -173,9 +169,7 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
     return GreatExpectationsContribPackageManifest(**data)
 
 
-def write_package_to_disk(
-    package: GreatExpectationsContribPackageManifest, path: str
-) -> None:
+def write_package_to_disk(package: GreatExpectationsContribPackageManifest, path: str) -> None:
     """Serialize a GreatExpectationsContribPackageManifest instance into a JSON file.
 
     Args:

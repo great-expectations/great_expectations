@@ -55,9 +55,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         mode: str,
         max_error_rate: Optional[Union[str, float]] = None,
         expectation_type: Optional[str] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -83,9 +81,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         self._total_count_parameter_builder_name = total_count_parameter_builder_name
-        self._unexpected_count_parameter_builder_name = (
-            unexpected_count_parameter_builder_name
-        )
+        self._unexpected_count_parameter_builder_name = unexpected_count_parameter_builder_name
         self._mode = mode
 
         self._expectation_type = expectation_type
@@ -129,23 +125,18 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
 
-        if (
-            domain.domain_type == MetricDomainTypes.COLUMN
-            and "." in domain.domain_kwargs["column"]
-        ):
+        if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
             raise gx_exceptions.ProfilerExecutionError(
                 "Column names cannot contain '.' when computing parameters for unexpected count statistics."
             )
 
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        unexpected_count_parameter_builder_name: Optional[str] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.unexpected_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        unexpected_count_parameter_builder_name: Optional[str] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.unexpected_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         fully_qualified_unexpected_count_parameter_builder_name: str = (
@@ -164,36 +155,28 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         ]
 
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_builder_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.total_count_parameter_builder_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=parameters,
-            )
+        total_count_parameter_builder_name: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.total_count_parameter_builder_name,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
             f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_total_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        total_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_total_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
-        total_count_values: MetricValues = total_count_parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        total_count_values: MetricValues = total_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
-        unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
-            total_count_values + NP_EPSILON
-        )
+        unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (total_count_values + NP_EPSILON)
 
         # Obtain mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         mode: str = get_parameter_value_and_validate_return_type(
@@ -220,9 +203,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         else:
             result = {
                 "single_batch_mode": mode == "single_batch",
-                "unexpected_count_fraction_active_batch_value": unexpected_count_fraction_values[
-                    -1
-                ],
+                "unexpected_count_fraction_active_batch_value": unexpected_count_fraction_values[-1],
             }
 
             mostly: np.float64
@@ -230,9 +211,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             if mode == "single_batch":
                 unexpected_fraction: np.float64 = unexpected_count_fraction_values[-1]
                 expected_fraction: np.float64 = np.float64(1.0 - unexpected_fraction)
-                result["mostly"] = _standardize_mostly_for_single_batch(
-                    self._expectation_type, expected_fraction
-                )
+                result["mostly"] = _standardize_mostly_for_single_batch(self._expectation_type, expected_fraction)
                 result["error_rate"] = np.float64(0.0)
             elif mode == "multi_batch":
                 # Obtain max_error_rate directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -244,11 +223,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
                     parameters=parameters,
                 )
 
-                min_unexpected_count_fraction: np.float64 = (
-                    _compute_multi_batch_min_unexpected_count_fraction(
-                        a=unexpected_count_fraction_values,
-                        max_error_rate=np.float64(max_error_rate),
-                    )
+                min_unexpected_count_fraction: np.float64 = _compute_multi_batch_min_unexpected_count_fraction(
+                    a=unexpected_count_fraction_values,
+                    max_error_rate=np.float64(max_error_rate),
                 )
                 mostly = np.float64(1.0 - min_unexpected_count_fraction)
                 result["mostly"] = mostly
@@ -257,9 +234,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
                 )  # per-Batch Hamming expectation validation success/failure distance
                 result["error_rate"] = error_rate
 
-        details: dict = unexpected_count_parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-        ]
+        details: dict = unexpected_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
         details["mode"] = mode
 
         return Attributes(
@@ -309,9 +284,7 @@ def _multi_batch_cost_function(x: np.float64, a: np.ndarray) -> np.float64:
     return np.mean(x < a)
 
 
-def _compute_multi_batch_min_unexpected_count_fraction(
-    a: np.ndarray, max_error_rate: np.float64
-) -> np.float64:
+def _compute_multi_batch_min_unexpected_count_fraction(a: np.ndarray, max_error_rate: np.float64) -> np.float64:
     """
     Use constrained optimization algorithm to compute minimum value of x ("unexpected_count_fraction") under constraint
     that _cost_function() of variable x given array a must be less than or equal to "max_error_rate" constant.
@@ -326,9 +299,7 @@ def _compute_multi_batch_min_unexpected_count_fraction(
 
     # Define constraint function reflecting penalty incurred by lowering "unexpected_count_fraction" (raising "mostly").
     def _constraint_function(x: np.float64) -> np.float64:
-        return np.float64(
-            _multi_batch_cost_function(x=x[0], a=sorted_a) - max_error_rate
-        )
+        return np.float64(_multi_batch_cost_function(x=x[0], a=sorted_a) - max_error_rate)
 
     # Perform optimization.
     result: scipy.optimize.OptimizeResult = scipy.optimize.minimize(

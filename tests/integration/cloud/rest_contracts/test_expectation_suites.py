@@ -123,8 +123,7 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
 
 
 @pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name",
+    reason="Expectation suites in 1.0.0 now have a name attribute " "instead of expectation_suite_name",
     strict=True,
 )
 @pytest.mark.cloud
@@ -159,8 +158,7 @@ def test_get_expectation_suite(
 
 
 @pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name",
+    reason="Expectation suites in 1.0.0 now have a name attribute " "instead of expectation_suite_name",
     # strict=True, # TODO: GG (kilo59) temporarily disabled strict mode
 )
 @pytest.mark.cloud
@@ -190,9 +188,7 @@ def test_get_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.get_expectation_suite(
-                id=NON_EXISTENT_EXPECTATION_SUITE_ID
-            )
+            cloud_data_context.get_expectation_suite(id=NON_EXISTENT_EXPECTATION_SUITE_ID)
 
 
 # This test only passes now because GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
@@ -395,9 +391,7 @@ def test_delete_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.delete_expectation_suite(
-            expectation_suite_name=query["name"]
-        )
+        cloud_data_context.delete_expectation_suite(expectation_suite_name=query["name"])
 
 
 @pytest.mark.cloud
@@ -430,6 +424,4 @@ def test_delete_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.delete_expectation_suite(
-                expectation_suite_name=query["name"]
-            )
+            cloud_data_context.delete_expectation_suite(expectation_suite_name=query["name"])

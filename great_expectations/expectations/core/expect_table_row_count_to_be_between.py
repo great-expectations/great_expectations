@@ -99,9 +99,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     @classmethod
     @override
-    def _prescriptive_template(
-        cls, renderer_configuration: RendererConfiguration
-    ) -> RendererConfiguration:
+    def _prescriptive_template(cls, renderer_configuration: RendererConfiguration) -> RendererConfiguration:
         add_param_args: AddParamArgs = (
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
@@ -118,14 +116,10 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_least_str = cls._get_strict_min_string(renderer_configuration=renderer_configuration)
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str = cls._get_strict_max_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_most_str = cls._get_strict_max_string(renderer_configuration=renderer_configuration)
 
             if params.min_value and params.max_value:
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."

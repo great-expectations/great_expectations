@@ -85,8 +85,7 @@ class PandasDatasource(LegacyDatasource):
                 configuration.update(boto3_options)
             else:
                 raise ValueError(
-                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
-                    "initialization."
+                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon " "initialization."
                 )
             configuration["boto3_options"] = boto3_options
 
@@ -95,8 +94,7 @@ class PandasDatasource(LegacyDatasource):
                 configuration.update(reader_options)
             else:
                 raise ValueError(
-                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
-                    "initialization."
+                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon " "initialization."
                 )
 
         if reader_method is not None:
@@ -130,9 +128,7 @@ class PandasDatasource(LegacyDatasource):
         )
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop(
-            "batch_kwargs_generators", None
-        )
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super().__init__(
             name,
             data_context=data_context,
@@ -196,11 +192,7 @@ class PandasDatasource(LegacyDatasource):
 
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
+            {"ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")}
         )
 
         if "path" in batch_kwargs:
@@ -221,29 +213,19 @@ class PandasDatasource(LegacyDatasource):
 
                 s3 = aws.boto3.client("s3", **self._boto3_options)
             except ImportError:
-                raise BatchKwargsError(
-                    "Unable to load boto3 client to read s3 asset.", batch_kwargs
-                )
+                raise BatchKwargsError("Unable to load boto3 client to read s3 asset.", batch_kwargs)
             raw_url = batch_kwargs["s3"]
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
-            default_reader_options = self._infer_default_options(
-                reader_fn, reader_options
-            )
-            if not reader_options.get("encoding") and default_reader_options.get(
-                "encoding"
-            ):
-                reader_options["encoding"] = s3_object.get(
-                    "ContentEncoding", default_reader_options.get("encoding")
-                )
+            default_reader_options = self._infer_default_options(reader_fn, reader_options)
+            if not reader_options.get("encoding") and default_reader_options.get("encoding"):
+                reader_options["encoding"] = s3_object.get("ContentEncoding", default_reader_options.get("encoding"))
             df = reader_fn(BytesIO(s3_object["Body"].read()), **reader_options)
 
-        elif "dataset" in batch_kwargs and isinstance(
-            batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
-        ):
+        elif "dataset" in batch_kwargs and isinstance(batch_kwargs["dataset"], (pd.DataFrame, pd.Series)):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
             batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"}
@@ -273,9 +255,7 @@ class PandasDatasource(LegacyDatasource):
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return {"reader_method": "read_parquet"}
         elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}
@@ -342,9 +322,7 @@ class PandasDatasource(LegacyDatasource):
         if reader_method is None:
             path_guess = self.guess_reader_method_from_path(path)
             reader_method = path_guess["reader_method"]
-            reader_options = path_guess.get(
-                "reader_options"
-            )  # This may not be there; use None in that case
+            reader_options = path_guess.get("reader_options")  # This may not be there; use None in that case
 
         try:
             reader_fn = getattr(pd, reader_method)

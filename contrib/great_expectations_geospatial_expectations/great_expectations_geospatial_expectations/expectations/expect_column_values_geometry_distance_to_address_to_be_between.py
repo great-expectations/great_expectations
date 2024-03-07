@@ -52,9 +52,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
             raise ValueError("min_value cannot be greater than max_value")
 
         if geocoder not in ["nominatim", "pickpoint", "openmapquest"]:
-            raise NotImplementedError(
-                "The geocoder is not implemented for this method."
-            )
+            raise NotImplementedError("The geocoder is not implemented for this method.")
 
         # find the reference shape with the geocoder.
         if geocoder is not None:
@@ -63,13 +61,9 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
             except Exception:
-                raise Exception(
-                    "Geocoding configuration and query failed to produce a valid result."
-                )
+                raise Exception("Geocoding configuration and query failed to produce a valid result.")
         else:
-            raise Exception(
-                "A valid geocoder must be provided for this method. See GeoPy for reference."
-            )
+            raise Exception("A valid geocoder must be provided for this method. See GeoPy for reference.")
 
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).
         if column_shape_format == "wkt":
@@ -108,9 +102,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
         elif units in ["ft", "feet", "foot"]:
             column_dist = points_test.apply(lambda p: distance(p, point_ref).ft)
         else:
-            raise NotImplementedError(
-                "Unit conversion has not yet been implemented. Please use one of km, m, mi, ft"
-            )
+            raise NotImplementedError("Unit conversion has not yet been implemented. Please use one of km, m, mi, ft")
 
         # Evaluate the between statement (from column_values_between.py)
         if min_value is None:
@@ -282,9 +274,7 @@ class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectatio
             min_val = configuration.kwargs["min_value"]
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-        assert (
-            min_val is not None or max_val is not None
-        ), "min_value and max_value cannot both be None"
+        assert min_val is not None or max_val is not None, "min_value and max_value cannot both be None"
 
         return True
 

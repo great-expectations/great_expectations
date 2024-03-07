@@ -33,9 +33,7 @@ from great_expectations.expectations.expectation import Expectation
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
 chandler.setLevel(logging.DEBUG)
-chandler.setFormatter(
-    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S")
-)
+chandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"))
 logger.addHandler(chandler)
 logger.setLevel(logging.DEBUG)
 
@@ -105,9 +103,7 @@ def execute_shell_command(command: str) -> int:
         sys.stderr.flush()
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
-        )
+        exception_message += f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         logger.error(exception_message)
 
     return status_code
@@ -181,10 +177,7 @@ def get_expectations_info_dict(  # noqa: C901
         )
         if only_these_expectations and expectation_name not in only_these_expectations:
             continue
-        if (
-            expectation_name in IGNORE_NON_V3_EXPECTATIONS
-            or expectation_name in IGNORE_FAULTY_EXPECTATIONS
-        ):
+        if expectation_name in IGNORE_NON_V3_EXPECTATIONS or expectation_name in IGNORE_FAULTY_EXPECTATIONS:
             continue
 
         package_name = os.path.basename(  # noqa: PTH119
@@ -218,12 +211,8 @@ def get_expectations_info_dict(  # noqa: C901
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {file_path!r}'
         created_at_cmd = f'git log --diff-filter=A --format="%ai %ar" -- {file_path!r}'
         result[expectation_name] = {
-            "updated_at": check_output(updated_at_cmd, shell=True)
-            .decode("utf-8")
-            .strip(),
-            "created_at": check_output(created_at_cmd, shell=True)
-            .decode("utf-8")
-            .strip(),
+            "updated_at": check_output(updated_at_cmd, shell=True).decode("utf-8").strip(),
+            "created_at": check_output(created_at_cmd, shell=True).decode("utf-8").strip(),
             "path": file_path,
             "package": package_name,
             "requirements": requirements,
@@ -247,9 +236,7 @@ def get_expectations_info_dict(  # noqa: C901
         else:
             _prefix = "Contrib "
         result[expectation_name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
-        logger.debug(
-            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation_name} in {file_path}"
-        )
+        logger.debug(f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation_name} in {file_path}")
 
     os.chdir(oldpwd)
     return result
@@ -277,9 +264,7 @@ def install_necessary_requirements(requirements) -> list:
 def uninstall_requirements(requirements):
     """Uninstall any requirements that were added to the venv"""
     print("\n\n\n=== (Uninstalling) ===")
-    logger.info(
-        "Uninstalling packages that were installed while running this script..."
-    )
+    logger.info("Uninstalling packages that were installed while running this script...")
     for req in requirements:
         logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
         execute_shell_command(f'pip uninstall -y "{req}"')
@@ -311,31 +296,21 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
-            expectation_class = (
-                great_expectations.expectations.registry.get_expectation_impl(
-                    expectation_name
-                )
-            )
+            expectation_class = great_expectations.expectations.registry.get_expectation_impl(expectation_name)
             expectation = create_expectation_instance(expectation_class)
             expectation_instances[expectation_name] = expectation
         except ExpectationNotFoundError:
-            logger.error(
-                f"Failed to get Expectation implementation from registry: {expectation_name}"
-            )
+            logger.error(f"Failed to get Expectation implementation from registry: {expectation_name}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
                 f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
             )
             expectation_tracebacks.write(traceback.format_exc())
         except pydantic.ValidationError:
-            expectation_tracebacks.write(
-                f"Test case for {expectation_name} has invalid input type."
-            )
+            expectation_tracebacks.write(f"Test case for {expectation_name} has invalid input type.")
             expectation_tracebacks.write(traceback.format_exc())
         except (IndexError, ValueError):
-            expectation_tracebacks.write(
-                f"Expectation {expectation_name} has invalid test case."
-            )
+            expectation_tracebacks.write(f"Expectation {expectation_name} has invalid test case.")
             expectation_tracebacks.write(traceback.format_exc())
         except Exception:  # continue even if this expectation fails catastrophically
             expectation_tracebacks.write("Unexpected error occurred.")
@@ -350,26 +325,18 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
     expectation_params: dict
     if expectation_class.examples:
         # take the first test case available:
-        expectation_params = get_success_test_case(
-            expectation_class.examples[0]["tests"]
-        )
+        expectation_params = get_success_test_case(expectation_class.examples[0]["tests"])
 
     else:
-        _TEST_DEFS_DIR: Final = pathlib.Path(
-            __file__, "..", "..", "..", "tests", "test_definitions"
-        ).resolve()
-        found = next(
-            _TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None
-        )
+        _TEST_DEFS_DIR: Final = pathlib.Path(__file__, "..", "..", "..", "tests", "test_definitions").resolve()
+        found = next(_TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None)
         if not found:
             raise Exception(
                 f"No JSON test case found for Expectation {expectation_class.expectation_type}, cannot build gallery example."
             )
         with open(found) as fp:
             test_cases = json.load(fp)
-            expectation_params = get_success_test_case(
-                test_cases["datasets"][0]["tests"]
-            )
+            expectation_params = get_success_test_case(test_cases["datasets"][0]["tests"])
     return expectation_class(**expectation_params)
 
 
@@ -383,18 +350,12 @@ def get_success_test_case(tests: list[dict]) -> dict:
         raise ValueError("Error: Expectation test case is malformed.")
 
 
-def combine_backend_results(
-    expectations_info, expectation_instances, diagnostic_objects, outfile_name
-):
-    expected_full_backend_files = [
-        f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
-    ]
+def combine_backend_results(expectations_info, expectation_instances, diagnostic_objects, outfile_name):
+    expected_full_backend_files = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
     found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
-        logger.info(
-            f"All expected *_full.json files were found. Going to combine and write to {outfile_name}"
-        )
+        logger.info(f"All expected *_full.json files were found. Going to combine and write to {outfile_name}")
 
         bad_key_names = []
         for fname in found_full_backend_files:
@@ -404,13 +365,13 @@ def combine_backend_results(
 
             for expectation_name in data:
                 try:
-                    expectations_info[expectation_name][
-                        "backend_test_result_counts"
-                    ].extend(data[expectation_name]["backend_test_result_counts"])
+                    expectations_info[expectation_name]["backend_test_result_counts"].extend(
+                        data[expectation_name]["backend_test_result_counts"]
+                    )
                 except KeyError:
-                    expectations_info[expectation_name][
+                    expectations_info[expectation_name]["backend_test_result_counts"] = data[expectation_name][
                         "backend_test_result_counts"
-                    ] = data[expectation_name]["backend_test_result_counts"]
+                    ]
 
         # Re-calculate maturity_checklist, library_metadata, and coverage_score
         for expectation_name in expectations_info:
@@ -424,9 +385,7 @@ def combine_backend_results(
             try:
                 backend_test_result_counts_object = [
                     ExpectationBackendTestResultCounts(**backend_results)
-                    for backend_results in expectations_info[expectation_name][
-                        "backend_test_result_counts"
-                    ]
+                    for backend_results in expectations_info[expectation_name]["backend_test_result_counts"]
                 ]
             except KeyError:
                 logger.error(f"No backend_test_result_counts for {expectation_name}")
@@ -439,19 +398,13 @@ def combine_backend_results(
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
             )
-            expectations_info[expectation_name]["maturity_checklist"] = (
-                maturity_checklist_object.to_dict()
+            expectations_info[expectation_name]["maturity_checklist"] = maturity_checklist_object.to_dict()
+            expectations_info[expectation_name]["coverage_score"] = Expectation._get_coverage_score(
+                backend_test_result_counts=backend_test_result_counts_object,
+                execution_engines=diagnostic_object.execution_engines,
             )
-            expectations_info[expectation_name]["coverage_score"] = (
-                Expectation._get_coverage_score(
-                    backend_test_result_counts=backend_test_result_counts_object,
-                    execution_engines=diagnostic_object.execution_engines,
-                )
-            )
-            expectations_info[expectation_name]["library_metadata"]["maturity"] = (
-                Expectation._get_final_maturity_level(
-                    maturity_checklist=maturity_checklist_object
-                )
+            expectations_info[expectation_name]["library_metadata"]["maturity"] = Expectation._get_final_maturity_level(
+                maturity_checklist=maturity_checklist_object
             )
 
         for bad_key_name in bad_key_names:
@@ -547,9 +500,7 @@ def build_gallery(  # noqa: C901 - 17
         backend_outfile_suffix += "_nonstandard"
     if only_consider_these_backends:
         only_consider_these_backends = [
-            backend
-            for backend in only_consider_these_backends
-            if backend in ALL_GALLERY_BACKENDS
+            backend for backend in only_consider_these_backends if backend in ALL_GALLERY_BACKENDS
         ]
     else:
         only_consider_these_backends = list(ALL_GALLERY_BACKENDS)
@@ -591,20 +542,14 @@ def build_gallery(  # noqa: C901 - 17
             expectation_checklists.write(f"{checklist_string}\n")
             if diagnostics["description"]["docstring"]:
                 expectation_docstrings.write(
-                    "\n\n"
-                    + "=" * 80
-                    + f"\n\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
+                    "\n\n" + "=" * 80 + f"\n\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
                 )
-                expectation_docstrings.write(
-                    f"{diagnostics['description']['docstring']}\n"
-                )
+                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
                 )
                 expectation_docstrings.write("\n" + "." * 80 + "\n\n")
-                expectation_docstrings.write(
-                    f"{diagnostics['description']['docstring']}\n"
-                )
+                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation_name}")
             print(traceback.format_exc())
@@ -617,9 +562,7 @@ def build_gallery(  # noqa: C901 - 17
                 diagnostics_json_dict = diagnostics.to_json_dict()
 
                 # Some items need to be recalculated when {backend}_full.json files get combined
-                backend_test_result_counts = diagnostics_json_dict.pop(
-                    "backend_test_result_counts"
-                )
+                backend_test_result_counts = diagnostics_json_dict.pop("backend_test_result_counts")
                 diagnostics_json_dict.pop("maturity_checklist")
                 diagnostics_json_dict.pop("coverage_score")
 
@@ -655,9 +598,7 @@ def build_gallery(  # noqa: C901 - 17
 
     # Only attempt to combine and write to file when no Expectations are skipped
     if backend_outfile_suffix == "full":
-        combine_backend_results(
-            expectations_info, expectation_instances, diagnostic_objects, outfile_name
-        )
+        combine_backend_results(expectations_info, expectation_instances, diagnostic_objects, outfile_name)
 
 
 def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
@@ -711,9 +652,7 @@ def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
                 # Determine the number of spaces indenting the first line of code so they can be removed from all lines
                 # in the code block without wrecking the hierarchical indentation levels of future lines.
                 if first_code_indentation is None and line.strip() != "":
-                    first_code_indentation = len(
-                        re.match(r"\s*", original_line, re.UNICODE).group(0)
-                    )
+                    first_code_indentation = len(re.match(r"\s*", original_line, re.UNICODE).group(0))
                 if line.strip() == "" and prev_line == "::":
                     # If the first line of the code block is a blank one, just skip it.
                     pass

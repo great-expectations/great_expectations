@@ -75,9 +75,7 @@ def test__get_examples_from_a_class_with_some_examples():
 
     first_example = examples[0]
     assert isinstance(first_example, ExpectationTestDataCases)
-    assert first_example.data == {
-        "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]
-    }
+    assert first_example.data == {"mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]}
     assert len(first_example.tests) == 1
 
 
@@ -90,9 +88,7 @@ def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_fal
 
     first_example = examples[0]
     assert isinstance(first_example, ExpectationTestDataCases)
-    assert first_example.data == {
-        "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]
-    }
+    assert first_example.data == {"mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]}
     assert len(first_example.tests) == 3
 
 
@@ -127,9 +123,7 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     _config = None
     expectation = ExpectColumnValuesToEqualThree(column="values")
     doctor = ExpectationDoctor(expectation=expectation)
-    metric_diagnostics_list = doctor._get_metric_diagnostics_list(
-        expectation_config=_config
-    )
+    metric_diagnostics_list = doctor._get_metric_diagnostics_list(expectation_config=_config)
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -142,9 +136,7 @@ def test__get_metric_diagnostics_list_on_a_class_with_metrics():
     _config = None
     expectation = ExpectColumnValuesToEqualThree__ThirdIteration(column="values")
     doctor = ExpectationDoctor(expectation=expectation)
-    metric_diagnostics_list = doctor._get_metric_diagnostics_list(
-        expectation_config=_config
-    )
+    metric_diagnostics_list = doctor._get_metric_diagnostics_list(expectation_config=_config)
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -162,16 +154,13 @@ Metrics could be used to make inferences, but they'd never provide comparably co
 )
 @pytest.mark.unit
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
-    assert (
-        ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
-            metric_diagnostics_list=[],
-            registered_metrics={},
-        )
-        == ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SqlAlchemyExecutionEngine=False,
-            SparkDFExecutionEngine=False,
-        )
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+        metric_diagnostics_list=[],
+        registered_metrics={},
+    ) == ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=False,
+        SqlAlchemyExecutionEngine=False,
+        SparkDFExecutionEngine=False,
     )
 
 
@@ -190,35 +179,26 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
             has_question_renderer=True,
         )
     ]
-    registered_metrics = {
-        "colum_values.something": {"providers": ["PandasExecutionEngine"]}
-    }
-    assert (
-        ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
-            metric_diagnostics_list=metrics_diagnostics_list,
-            registered_metrics=registered_metrics,
-        )
-        == ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SqlAlchemyExecutionEngine=False,
-            SparkDFExecutionEngine=False,
-        )
+    registered_metrics = {"colum_values.something": {"providers": ["PandasExecutionEngine"]}}
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+        metric_diagnostics_list=metrics_diagnostics_list,
+        registered_metrics=registered_metrics,
+    ) == ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=False,
+        SqlAlchemyExecutionEngine=False,
+        SparkDFExecutionEngine=False,
     )
 
 
 ### Tests for _get_test_results
-@pytest.mark.skip(
-    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
-)
+@pytest.mark.skip(reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)")
 @pytest.mark.all_backends
 def test__get_test_results():
-    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(
-        column="values"
-    )._get_test_results(
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(column="values")._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(
-            column="values"
-        )._get_examples(return_only_gallery_examples=False),
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(column="values")._get_examples(
+            return_only_gallery_examples=False
+        ),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
             PandasExecutionEngine=True,
             SqlAlchemyExecutionEngine=False,
@@ -229,13 +209,11 @@ def test__get_test_results():
     for result in test_results:
         assert result.test_passed
 
-    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(
-        column="values"
-    )._get_test_results(
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration(column="values")._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(
-            column="values"
-        )._get_examples(return_only_gallery_examples=False),
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration(column="values")._get_examples(
+            return_only_gallery_examples=False
+        ),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
             PandasExecutionEngine=True,
             SqlAlchemyExecutionEngine=True,

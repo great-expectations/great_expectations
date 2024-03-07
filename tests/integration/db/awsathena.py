@@ -10,16 +10,14 @@ yaml = YAMLHandler()
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
-    raise ValueError(
-        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
-    )
+    raise ValueError("Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena")
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
 if not ATHENA_STAGING_S3:
-    raise ValueError(
-        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
-    )
+    raise ValueError("Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena")
 
-connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+connection_string = (
+    f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+)
 
 # create datasource and add to DataContext
 context = gx.get_context()
@@ -81,9 +79,7 @@ batch_request = {
 expectation_suite_name = "my_awsathena_expectation_suite"
 try:
     suite = context.suites.get(name=expectation_suite_name)
-    print(
-        f'Loaded ExpectationSuite "{suite.name}" containing {len(suite.expectations)} expectations.'
-    )
+    print(f'Loaded ExpectationSuite "{suite.name}" containing {len(suite.expectations)} expectations.')
 except DataContextError:
     suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(f'Created ExpectationSuite "{suite.name}".')

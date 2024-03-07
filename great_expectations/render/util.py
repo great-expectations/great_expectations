@@ -61,9 +61,7 @@ def num_to_str(
     try:
         d = local_context.create_decimal(s)
     except decimal.InvalidOperation:
-        raise TypeError(
-            f"num_to_str received an invalid value: {f} of type {type(f).__name__}."
-        )
+        raise TypeError(f"num_to_str received an invalid value: {f} of type {type(f).__name__}.")
     if no_scientific:
         result = format(d, "f")
     elif use_locale:
@@ -76,9 +74,7 @@ def num_to_str(
         result = f"≈{result}"
     decimal_char = locale.localeconv().get("decimal_point")
     if not isinstance(decimal_char, str):
-        raise TypeError(
-            f"Expected str but got {decimal_char} which is type {type(decimal_char).__name__}."
-        )
+        raise TypeError(f"Expected str but got {decimal_char} which is type {type(decimal_char).__name__}.")
     if "e" not in result and "E" not in result and decimal_char in result:
         result = result.rstrip("0").rstrip(decimal_char)
     return result
@@ -103,9 +99,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
     if type(resource_key) == ValidationResultIdentifier:
         run_name = resource_key.run_id.run_name
     else:
-        raise TypeError(
-            "run_name_filter filtering is only implemented for ValidationResultResources."
-        )
+        raise TypeError("run_name_filter filtering is only implemented for ValidationResultResources.")
 
     if run_name_filter.get("equals"):
         return run_name_filter.get("equals") == run_name
@@ -124,9 +118,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
 
 
 @public_api
-def substitute_none_for_missing(
-    kwargs: dict[str, Any], kwarg_list: Sequence[str]
-) -> dict[str, Any]:
+def substitute_none_for_missing(kwargs: dict[str, Any], kwarg_list: Sequence[str]) -> dict[str, Any]:
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
     Args:
@@ -158,9 +150,7 @@ def substitute_none_for_missing(
 
 # NOTE: the method is pretty dirty
 @public_api
-def parse_row_condition_string_pandas_engine(
-    condition_string: str, with_schema: bool = False
-) -> tuple[str, dict]:
+def parse_row_condition_string_pandas_engine(condition_string: str, with_schema: bool = False) -> tuple[str, dict]:
     """Parses the row condition string into a pandas engine compatible format.
 
     Args:
@@ -218,9 +208,7 @@ def parse_row_condition_string_pandas_engine(
             }
         else:
             params[f"row_condition__{i}"] = param_value
-            condition_string = condition_string.replace(
-                condition, f"$row_condition__{i}"
-            )
+            condition_string = condition_string.replace(condition, f"$row_condition__{i}")
 
     template_str += condition_string.lower()
 
@@ -237,14 +225,8 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
     Returns:
         Tuple of strings to use for the at least condition and the at most condition.
     """
-    at_least_str = (
-        "greater than"
-        if params.get("strict_min") is True
-        else "greater than or equal to"
-    )
-    at_most_str = (
-        "less than" if params.get("strict_max") is True else "less than or equal to"
-    )
+    at_least_str = "greater than" if params.get("strict_min") is True else "greater than or equal to"
+    at_most_str = "less than" if params.get("strict_max") is True else "less than or equal to"
 
     return at_least_str, at_most_str
 
@@ -396,16 +378,12 @@ def _convert_unexpected_indices_to_df(
     domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
-        unexpected_index_df: pd.DataFrame = pd.DataFrame(
-            unexpected_index_list, dtype="string"
-        )
+        unexpected_index_df: pd.DataFrame = pd.DataFrame(unexpected_index_list, dtype="string")
         unexpected_index_df = unexpected_index_df.fillna(value="null")
         first_unexpected_index = unexpected_index_list[0]
         if isinstance(first_unexpected_index, dict):
             domain_column_name_list = list(
-                set(first_unexpected_index.keys()).difference(
-                    set(unexpected_index_column_names)
-                )
+                set(first_unexpected_index.keys()).difference(set(unexpected_index_column_names))
             )
         else:
             raise TypeError(
@@ -425,29 +403,21 @@ def _convert_unexpected_indices_to_df(
         return pd.DataFrame()
 
     # 1. groupby on domain columns, and turn id/pk into list
-    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(
-        domain_column_name_list
-    ).agg(lambda y: list(y))
+    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(domain_column_name_list).agg(lambda y: list(y))
 
     # 2. add count
     col_to_count: str = unexpected_index_column_names[0]
-    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(
-        lambda x: len(x)
-    )
+    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(lambda x: len(x))
 
     # 3. ensure index is a string
     all_unexpected_indices.index = all_unexpected_indices.index.map(str)
 
     # 4. truncate indices and replace with `...` if necessary
     for column in unexpected_index_column_names:
-        all_unexpected_indices[column] = all_unexpected_indices[column].apply(
-            lambda row: truncate_list_of_indices(row)
-        )
+        all_unexpected_indices[column] = all_unexpected_indices[column].apply(lambda row: truncate_list_of_indices(row))
 
     # 5. only keep the rows we are rendering
-    filtered_unexpected_indices = all_unexpected_indices.head(
-        len(partial_unexpected_counts)
-    )
+    filtered_unexpected_indices = all_unexpected_indices.head(len(partial_unexpected_counts))
     return filtered_unexpected_indices
 
 

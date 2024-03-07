@@ -25,9 +25,7 @@ pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 @pytest.mark.sqlite
 def test_instantiation_with_table_name(sqlite_view_engine):
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
@@ -35,9 +33,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     # This is a very hacky type check.
     # A better way would be to figure out the proper parent class for dialects within SQLAlchemy
-    assert (
-        str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
-    )
+    assert str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
@@ -84,13 +80,9 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {
-        "test_temp_view"
-    }
+    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {"test_temp_view"}
 
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
     # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
     SqlAlchemyBatchData(
         execution_engine=execution_engine,
@@ -149,9 +141,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
 @pytest.mark.sqlite
 def test_instantiation_with_unknown_dialect(sqlite_view_engine):
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
     execution_engine.engine.dialect.name = "not_a_supported_dialect"
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
@@ -212,9 +202,7 @@ def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine
     # only have the view that is created by the `sqlite_view_engine` fixture
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
     SqlAlchemyBatchData(
         execution_engine=execution_engine,
         selectable=selectable,
@@ -223,8 +211,6 @@ def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine
     # No new views were created
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
-    SqlAlchemyBatchData(
-        execution_engine=execution_engine, selectable=selectable, create_temp_table=True
-    )
+    SqlAlchemyBatchData(execution_engine=execution_engine, selectable=selectable, create_temp_table=True)
     # One new temp_table was created
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2

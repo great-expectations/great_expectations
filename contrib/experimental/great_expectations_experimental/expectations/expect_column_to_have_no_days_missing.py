@@ -31,24 +31,18 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
 
         # get all unique dates from timestamp
         query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
-        all_unique_dates = [
-            i[0] for i in execution_engine.execute_query(query).fetchall()
-        ]
+        all_unique_dates = [i[0] for i in execution_engine.execute_query(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings
         if all_unique_dates and isinstance(all_unique_dates[0], date):
-            all_unique_dates = [
-                unique_date.strftime("%Y-%m-%d") for unique_date in all_unique_dates
-            ]
+            all_unique_dates = [unique_date.strftime("%Y-%m-%d") for unique_date in all_unique_dates]
         return all_unique_dates
 
 
@@ -122,9 +116,7 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
 
         # returns the distinct dates of the column
         dist_dates_as_str = metrics["column.distinct_dates"]
-        distinct_dates_sorted = sorted(
-            [datetime.strptime(date_str, "%Y-%m-%d") for date_str in dist_dates_as_str]
-        )
+        distinct_dates_sorted = sorted([datetime.strptime(date_str, "%Y-%m-%d") for date_str in dist_dates_as_str])
         min_date, max_date = distinct_dates_sorted[0], distinct_dates_sorted[-1]
         days_diff = (max_date - min_date).days
         date_set = {distinct_dates_sorted[0] + timedelta(x) for x in range(days_diff)}

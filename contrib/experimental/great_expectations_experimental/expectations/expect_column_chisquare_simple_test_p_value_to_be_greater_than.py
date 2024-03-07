@@ -35,9 +35,7 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         metrics,
         runtime_configuration,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
 
         # metric value kwargs: kwargs passed in through the expectation
         observed_column = metric_value_kwargs.get("observed_column")
@@ -59,9 +57,7 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 

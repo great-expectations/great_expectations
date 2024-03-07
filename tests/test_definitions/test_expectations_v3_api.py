@@ -59,9 +59,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                     pk_column: bool = False
                     test_configuration = json.load(file)
                     expectation_type = filename.split(".json")[0].split("/")[-1]
-                    for index, test_config in enumerate(
-                        test_configuration["datasets"], 1
-                    ):
+                    for index, test_config in enumerate(test_configuration["datasets"], 1):
                         datasets = []
                         # optional only_for and suppress_test flag at the datasets-level that can prevent data being
                         # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
@@ -70,9 +68,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             # coerce into list if passed in as string
                             only_for = [only_for]
                         suppress_test_for = test_config.get("suppress_test_for")
-                        if suppress_test_for and not isinstance(
-                            suppress_test_for, list
-                        ):
+                        if suppress_test_for and not isinstance(suppress_test_for, list):
                             # coerce into list if passed in as string
                             suppress_test_for = [suppress_test_for]
                         if candidate_test_is_on_temporary_notimplemented_list_v3_api(
@@ -87,17 +83,13 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             skip_expectation = False
                             if isinstance(test_config["data"], list):
                                 sqlite_db_path = generate_sqlite_db_path()
-                                sub_index: int = (
-                                    1  # additional index needed when dataset is a list
-                                )
+                                sub_index: int = 1  # additional index needed when dataset is a list
                                 for dataset in test_config["data"]:
-                                    dataset_name = (
-                                        generate_dataset_name_from_expectation_name(
-                                            dataset=dataset,
-                                            expectation_type=expectation_type,
-                                            index=index,
-                                            sub_index=sub_index,
-                                        )
+                                    dataset_name = generate_dataset_name_from_expectation_name(
+                                        dataset=dataset,
+                                        expectation_type=expectation_type,
+                                        index=index,
+                                        sub_index=sub_index,
                                     )
 
                                     datasets.append(
@@ -119,18 +111,12 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 ]:
                                     pk_column: bool = True
 
-                                schemas = (
-                                    test_config["schemas"]
-                                    if "schemas" in test_config
-                                    else None
-                                )
+                                schemas = test_config["schemas"] if "schemas" in test_config else None
                                 dataset = test_config["data"]
-                                dataset_name = (
-                                    generate_dataset_name_from_expectation_name(
-                                        dataset=dataset,
-                                        expectation_type=expectation_type,
-                                        index=index,
-                                    )
+                                dataset_name = generate_dataset_name_from_expectation_name(
+                                    dataset=dataset,
+                                    expectation_type=expectation_type,
+                                    index=index,
                                 )
                                 validator_with_data = get_test_validator_with_data(
                                     execution_engine=backend,
@@ -210,8 +196,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "bigquery"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "bigquery"
                                     ):
                                         generate_test = True
                                     elif (
@@ -221,8 +206,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "bigquery"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "bigquery"
                                     ):
                                         # <WILL> : Marker to get the test to only run for CFE
                                         # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones
@@ -237,8 +221,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "trino"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "trino"
                                     ):
                                         generate_test = True
 
@@ -253,17 +236,13 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     if "pandas" in only_for:
                                         generate_test = True
                                     if (
-                                        (
-                                            "pandas_022" in only_for
-                                            or "pandas_023" in only_for
-                                        )
+                                        ("pandas_022" in only_for or "pandas_023" in only_for)
                                         and major == "0"
                                         and minor in ["22", "23"]
                                     ):
                                         generate_test = True
                                     if ("pandas>=024" in only_for) and (
-                                        (major == "0" and int(minor) >= 24)
-                                        or int(major) >= 1
+                                        (major == "0" and int(minor) >= 24) or int(major) >= 1
                                     ):
                                         generate_test = True
                                 elif validator_with_data and isinstance(
@@ -367,8 +346,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "bigquery"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "bigquery"
                                     )
                                     or (
                                         "bigquery_v3_api" in suppress_test_for
@@ -382,8 +360,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "bigquery"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "bigquery"
                                     )
                                     or (
                                         "trino" in suppress_test_for
@@ -398,8 +375,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
-                                        == "trino"
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name == "trino"
                                     )
                                     or (
                                         "pandas" in suppress_test_for
@@ -430,9 +406,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 
                             parametrized_tests.append(
                                 {
-                                    "expectation_type": test_configuration[
-                                        "expectation_type"
-                                    ],
+                                    "expectation_type": test_configuration["expectation_type"],
                                     "pk_column": pk_column,
                                     "validator_with_data": validator_with_data,
                                     "test": test,

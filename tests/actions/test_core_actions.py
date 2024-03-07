@@ -82,21 +82,15 @@ def test_StoreAction():
 
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
-        validation_result_suite=ExpectationSuiteValidationResult(
-            success=False, results=[]
-        ),
+        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
         data_asset=None,
     )
 
-    expected_run_id = RunIdentifier(
-        run_name="prod_20190801", run_time="20190926T134241.000000Z"
-    )
+    expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
 
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
@@ -106,9 +100,7 @@ def test_StoreAction():
 
     assert fake_in_memory_store.get(
         ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=expected_run_id,
             batch_identifier="1234",
         )
@@ -163,9 +155,7 @@ def test_SlackNotificationAction(
     # test for long text message - should be split into multiple messages
     long_text = "a" * 10000
     validation_result_suite.meta = {
-        "active_batch_definition": BatchIdentifier(
-            batch_identifier="1234", data_asset_name=long_text
-        ),
+        "active_batch_definition": BatchIdentifier(batch_identifier="1234", data_asset_name=long_text),
     }
 
     assert slack_action.run(
@@ -368,9 +358,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = True
@@ -400,9 +388,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = False
@@ -418,9 +404,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     validation_result_suite.success = True
     notify_on = "failure"
@@ -632,13 +616,11 @@ def test_EmailAction(
 def test_api_action_create_payload():
     mock_data_context = ""
     mock_validation_results = []
-    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
-    api_notification_action = APINotificationAction(
-        mock_data_context, "http://www.example.com"
+    expected_payload = (
+        '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
     )
-    payload = api_notification_action.create_payload(
-        "my_schema.my_table", "my_suite", mock_validation_results
-    )
+    api_notification_action = APINotificationAction(mock_data_context, "http://www.example.com")
+    payload = api_notification_action.create_payload("my_schema.my_table", "my_suite", mock_validation_results)
     assert payload == expected_payload
 
 
@@ -653,12 +635,8 @@ def test_api_action_run(
     mock_response = mock.MagicMock()
     mock_response.status_code = 200
     mock_requests.post.return_value = mock_response
-    api_notification_action = APINotificationAction(
-        data_context_simple_expectation_suite, "http://www.example.com"
-    )
-    response = api_notification_action.run(
-        validation_result_suite, validation_result_suite_id, file_data_asset
-    )
+    api_notification_action = APINotificationAction(data_context_simple_expectation_suite, "http://www.example.com")
+    response = api_notification_action.run(validation_result_suite, validation_result_suite_id, file_data_asset)
     assert response == "Successfully Posted results to API, status code - 200"
 
 

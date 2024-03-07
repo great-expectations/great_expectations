@@ -39,8 +39,7 @@ class SqlAlchemyQueryStore(Store):
     ) -> None:
         if not sa:
             raise gx_exceptions.DataContextError(
-                "sqlalchemy module not found, but is required for "
-                "SqlAlchemyQueryStore"
+                "sqlalchemy module not found, but is required for " "SqlAlchemyQueryStore"
             )
         super().__init__(
             store_backend=store_backend,
@@ -50,13 +49,8 @@ class SqlAlchemyQueryStore(Store):
         if queries:
             # If queries are defined in configuration, then we load them into an InMemoryStoreBackend
             try:
-                assert isinstance(
-                    queries, dict
-                ), "SqlAlchemyQueryStore queries must be defined as a dictionary"
-                assert (
-                    store_backend is None
-                    or store_backend["class_name"] == "InMemoryStoreBackend"
-                ), (
+                assert isinstance(queries, dict), "SqlAlchemyQueryStore queries must be defined as a dictionary"
+                assert store_backend is None or store_backend["class_name"] == "InMemoryStoreBackend", (
                     "If queries are provided in configuration, then store_backend must be empty or an "
                     "InMemoryStoreBackend"
                 )
@@ -110,8 +104,7 @@ class SqlAlchemyQueryStore(Store):
             return_type = result.get("return_type", "list")
             if return_type not in ["list", "scalar"]:
                 raise ValueError(
-                    "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' "
-                    "or 'scalar'"
+                    "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' " "or 'scalar'"
                 )
         else:
             query = result

@@ -51,9 +51,7 @@ class MulticolumnValuesProductEqualToSingleColumn(MulticolumnMapMetricProvider):
         columns_to_multiply = column_list[:-1]
         column_to_equal = column_list[-1]
 
-        columns_mulitplied = functools.reduce(
-            operator.mul, [F.col(column) for column in columns_to_multiply]
-        )
+        columns_mulitplied = functools.reduce(operator.mul, [F.col(column) for column in columns_to_multiply])
 
         columns_mulitplied *= additional_value
 

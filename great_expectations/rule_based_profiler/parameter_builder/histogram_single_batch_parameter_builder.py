@@ -39,18 +39,15 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        MetricSingleBatchParameterBuilder.exclude_field_names
-        | {
-            "column_partition_metric_single_batch_parameter_builder_config",
-            "metric_name",
-            "metric_domain_kwargs",
-            "metric_value_kwargs",
-            "enforce_numeric_metric",
-            "replace_nan_with_zero",
-            "reduce_scalar_metric",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = MetricSingleBatchParameterBuilder.exclude_field_names | {
+        "column_partition_metric_single_batch_parameter_builder_config",
+        "metric_name",
+        "metric_domain_kwargs",
+        "metric_value_kwargs",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -58,9 +55,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         bins: str = "uniform",
         n_bins: int = 10,
         allow_relative_error: bool = False,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -78,23 +73,21 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context: AbstractDataContext associated with this ParameterBuilder
         """
 
-        self._column_partition_metric_single_batch_parameter_builder_config = (
-            ParameterBuilderConfig(
-                module_name="great_expectations.rule_based_profiler.parameter_builder",
-                class_name="MetricSingleBatchParameterBuilder",
-                name="column_partition_metric_single_batch_parameter_builder",
-                metric_name="column.partition",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs={
-                    "bins": bins,
-                    "n_bins": n_bins,
-                    "allow_relative_error": allow_relative_error,
-                },
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
-            )
+        self._column_partition_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricSingleBatchParameterBuilder",
+            name="column_partition_metric_single_batch_parameter_builder",
+            metric_name="column.partition",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "bins": bins,
+                "n_bins": n_bins,
+                "allow_relative_error": allow_relative_error,
+            },
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            reduce_scalar_metric=False,
+            evaluation_parameter_builder_configs=None,
         )
 
         if evaluation_parameter_builder_configs is None:
@@ -128,7 +121,9 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        )
         # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -137,14 +132,9 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        bins: MetricValue | None = column_partition_parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        bins: MetricValue | None = column_partition_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
-        if (
-            domain.domain_type == MetricDomainTypes.COLUMN
-            and "." in domain.domain_kwargs["column"]
-        ):
+        if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
             raise gx_exceptions.ProfilerExecutionError(
                 "Column names cannot contain '.' when computing the histogram metric."
             )
@@ -218,13 +208,8 @@ elements.
             parameters=parameters,
         )
 
-        weights: np.ndarray = np.asarray(
-            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
-        ) / (
-            column_values_nonnull_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
-            + NP_EPSILON
+        weights: np.ndarray = np.asarray(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]) / (
+            column_values_nonnull_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] + NP_EPSILON
         )
         tail_weights: float = (1.0 - sum(weights)) / 2.0
 

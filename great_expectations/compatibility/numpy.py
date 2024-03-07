@@ -13,9 +13,7 @@ if TYPE_CHECKING:
     from numpy import typing as npt
 
 
-def numpy_quantile(
-    a: npt.NDArray, q: float, method: str, axis: int | None = None
-) -> np.float64 | npt.NDArray:
+def numpy_quantile(a: npt.NDArray, q: float, method: str, axis: int | None = None) -> np.float64 | npt.NDArray:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html

@@ -656,9 +656,7 @@ def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
 
         script_path = tmp_path / "test_script.py"
         shutil.copyfile(script_source, script_path)
-        logger.debug(
-            f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}"
-        )
+        logger.debug(f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}")
         if script_source.suffix != ".py":
             logger.error(f"{script_source} is not a python script!")
             text = script_source.read_text()
@@ -673,9 +671,7 @@ def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
             shutil.copyfile(script_source, util_script_path)
 
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
-        loader = importlib.machinery.SourceFileLoader(
-            "test_script_module", str(script_path)
-        )
+        loader = importlib.machinery.SourceFileLoader("test_script_module", str(script_path))
         spec = importlib.util.spec_from_loader("test_script_module", loader)
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
@@ -700,21 +696,13 @@ def _check_for_skipped_tests(  # noqa: C901, PLR0912
     dependencies = integration_test_fixture.backend_dependencies
     if not dependencies:
         return
-    elif BackendDependencies.POSTGRESQL in dependencies and (
-        not pytest_args.postgresql or pytest_args.no_sqlalchemy
-    ):
+    elif BackendDependencies.POSTGRESQL in dependencies and (not pytest_args.postgresql or pytest_args.no_sqlalchemy):
         pytest.skip("Skipping postgres tests")
-    elif BackendDependencies.MYSQL in dependencies and (
-        not pytest_args.mysql or pytest_args.no_sqlalchemy
-    ):
+    elif BackendDependencies.MYSQL in dependencies and (not pytest_args.mysql or pytest_args.no_sqlalchemy):
         pytest.skip("Skipping mysql tests")
-    elif BackendDependencies.MSSQL in dependencies and (
-        not pytest_args.mssql or pytest_args.no_sqlalchemy
-    ):
+    elif BackendDependencies.MSSQL in dependencies and (not pytest_args.mssql or pytest_args.no_sqlalchemy):
         pytest.skip("Skipping mssql tests")
-    elif BackendDependencies.BIGQUERY in dependencies and (
-        pytest_args.no_sqlalchemy or not pytest_args.bigquery
-    ):
+    elif BackendDependencies.BIGQUERY in dependencies and (pytest_args.no_sqlalchemy or not pytest_args.bigquery):
         # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping bigquery tests")
     elif BackendDependencies.GCS in dependencies and not pytest_args.bigquery:
@@ -722,15 +710,11 @@ def _check_for_skipped_tests(  # noqa: C901, PLR0912
         pytest.skip("Skipping GCS tests")
     elif BackendDependencies.AWS in dependencies and not pytest_args.aws:
         pytest.skip("Skipping AWS tests")
-    elif BackendDependencies.REDSHIFT in dependencies and (
-        pytest_args.no_sqlalchemy or not pytest_args.redshift
-    ):
+    elif BackendDependencies.REDSHIFT in dependencies and (pytest_args.no_sqlalchemy or not pytest_args.redshift):
         pytest.skip("Skipping redshift tests")
     elif BackendDependencies.SPARK in dependencies and not pytest_args.spark:
         pytest.skip("Skipping spark tests")
-    elif BackendDependencies.SNOWFLAKE in dependencies and (
-        pytest_args.no_sqlalchemy or not pytest_args.snowflake
-    ):
+    elif BackendDependencies.SNOWFLAKE in dependencies and (pytest_args.no_sqlalchemy or not pytest_args.snowflake):
         pytest.skip("Skipping snowflake tests")
     elif BackendDependencies.AZURE in dependencies and not pytest_args.azure:
         pytest.skip("Skipping Azure tests")

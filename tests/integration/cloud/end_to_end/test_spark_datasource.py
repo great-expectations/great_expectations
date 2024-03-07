@@ -39,26 +39,18 @@ def datasource(
     )
     datasource.persist = False
     datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
-    assert (
-        datasource.persist is False
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is False, "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     datasource.persist = False
     datasource_dict = datasource.dict()
     datasource = context.sources.add_or_update_spark(**datasource_dict)
-    assert (
-        datasource.persist is False
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is False, "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource_dict = datasource.dict()
     datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -92,9 +84,7 @@ def data_asset(
 def batch_request(
     data_asset: DataAsset,
     spark_session: pyspark.SparkSession,
-    spark_df_from_pandas_df: Callable[
-        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
-    ],
+    spark_df_from_pandas_df: Callable[[pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame],
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
     """Build a BatchRequest depending on the types of Data Assets tested in the module."""
@@ -148,18 +138,14 @@ def test_interactive_validator(
     Note: There is no need to test getting a Validator or using Validator.head(). That is already
     tested in the validator fixture.
     """
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_column_values_to_not_be_null(
-            column="id",
-            mostly=1,
-        )
+    expectation_validation_result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        column="id",
+        mostly=1,
     )
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+@pytest.mark.xfail(reason="1.0 API requires a backend change. Test should pass once #2623 is merged")
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

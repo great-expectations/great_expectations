@@ -100,9 +100,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
                     - airflow_run_id
     """
 
-    context.add_datasource(
-        name="my_runtime_sql_datasource", **yaml.load(datasource_config)
-    )
+    context.add_datasource(name="my_runtime_sql_datasource", **yaml.load(datasource_config))
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -110,12 +108,8 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
 
 
 @pytest.mark.filesystem
-def test_ConfigOnlyDataContext_v013__initialization(
-    tmp_path_factory, basic_data_context_v013_config
-):
-    config_path = str(
-        tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
-    )
+def test_ConfigOnlyDataContext_v013__initialization(tmp_path_factory, basic_data_context_v013_config):
+    config_path = str(tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir"))
     context = get_context(
         basic_data_context_v013_config,
         config_path,
@@ -130,10 +124,7 @@ def test_ConfigOnlyDataContext_v013__initialization(
             list(
                 filter(
                     lambda element: element,
-                    sorted(
-                        pattern.match(element) is not None
-                        for element in context.plugins_directory.split("/")[-3:]
-                    ),
+                    sorted(pattern.match(element) is not None for element in context.plugins_directory.split("/")[-3:]),
                 )
             )
         )
@@ -142,12 +133,8 @@ def test_ConfigOnlyDataContext_v013__initialization(
 
 
 @pytest.mark.unit
-def test__normalize_absolute_or_relative_path(
-    tmp_path_factory, basic_data_context_v013_config
-):
-    full_test_path = tmp_path_factory.mktemp(
-        "test__normalize_absolute_or_relative_path__dir"
-    )
+def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_v013_config):
+    full_test_path = tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
     test_dir = full_test_path.parts[-1]
     config_path = str(full_test_path)
     context = get_context(
@@ -155,20 +142,15 @@ def test__normalize_absolute_or_relative_path(
         config_path,
     )
 
-    assert context._normalize_absolute_or_relative_path("yikes").endswith(
-        f"{test_dir}/yikes"
-    )
-    assert (
-        "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(f"{test_dir}/yikes")
+    assert "test__normalize_absolute_or_relative_path__dir" not in context._normalize_absolute_or_relative_path(
+        "/yikes"
     )
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
 @pytest.mark.filesystem
-def test_load_config_variables_file(
-    basic_data_context_v013_config, tmp_path_factory, monkeypatch
-):
+def test_load_config_variables_file(basic_data_context_v013_config, tmp_path_factory, monkeypatch):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
@@ -185,22 +167,16 @@ def test_load_config_variables_file(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_v013_config["config_variables_file_path"] = (
-        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
-    )
+    basic_data_context_v013_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
 
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
-        context = get_context(
-            basic_data_context_v013_config, context_root_dir=base_path
-        )
+        context = get_context(basic_data_context_v013_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
-        context = get_context(
-            basic_data_context_v013_config, context_root_dir=base_path
-        )
+        context = get_context(basic_data_context_v013_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
@@ -318,14 +294,9 @@ data_connectors:
 
     df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
-    )
+    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
     assert (
-        test_df[
-            (test_df["date"] == datetime.date(2020, 1, 15))
-            | (test_df["date"] == datetime.date(2020, 1, 29))
-        ]
+        test_df[(test_df["date"] == datetime.date(2020, 1, 15)) | (test_df["date"] == datetime.date(2020, 1, 29))]
         .drop("timestamp", axis=1)
         .equals(df_data.drop("timestamp", axis=1))
     )
@@ -346,12 +317,8 @@ data_connectors:
 
     df_data = my_batch.data.dataframe
     assert df_data.shape == (4, 10)
-    df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
-    )
-    df_data["belongs_in_partition"] = df_data.apply(
-        lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1
-    )
+    df_data["date"] = df_data.apply(lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1)
+    df_data["belongs_in_partition"] = df_data.apply(lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1)
     df_data = df_data[df_data["belongs_in_partition"]]
     assert df_data.drop("belongs_in_partition", axis=1).shape == (4, 10)
 
@@ -410,13 +377,9 @@ data_connectors:
         == f"{context.root_directory}/test_dir_0/A"
     )
     assert (
-        my_datasource.data_connectors[
-            "my_filesystem_data_connector"
-        ]._get_full_file_path_for_asset(
+        my_datasource.data_connectors["my_filesystem_data_connector"]._get_full_file_path_for_asset(
             path="bigfile_1.csv",
-            asset=my_datasource.data_connectors["my_filesystem_data_connector"].assets[
-                "A"
-            ],
+            asset=my_datasource.data_connectors["my_filesystem_data_connector"].assets["A"],
         )
         == f"{context.root_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
@@ -437,8 +400,10 @@ data_connectors:
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
-        mode=ConfigOutputModes.DICT
+    project_config_dict: dict = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
+            mode=ConfigOutputModes.DICT
+        )
     )
     project_config_dict["plugins_directory"] = None
     project_config_dict["validation_operators"] = {
@@ -498,9 +463,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            runtime_parameters={
-                "query": "SELECT * FROM table_partitioned_by_date_column__A"
-            },
+            runtime_parameters={"query": "SELECT * FROM table_partitioned_by_date_column__A"},
             batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
@@ -517,10 +480,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
     execution_engine = batch.data.execution_engine
 
-    assert (
-        execution_engine.execute_query(sa.text(selectable_count_sql_str)).scalar()
-        == 123
-    )
+    assert execution_engine.execute_query(sa.text(selectable_count_sql_str)).scalar() == 123
     assert batch.batch_markers.get("ge_load_time") is not None
     # since create_temp_table defaults to True, there should be 1 temp table
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
@@ -531,9 +491,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            runtime_parameters={
-                "query": "SELECT * FROM table_partitioned_by_date_column__A"
-            },
+            runtime_parameters={"query": "SELECT * FROM table_partitioned_by_date_column__A"},
             batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
@@ -551,9 +509,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
     context = data_context_with_runtime_sql_datasource_for_testing_get_batch
-    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        "my_expectations"
-    )
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite("my_expectations")
 
     validator: Validator
 
@@ -562,9 +518,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            runtime_parameters={
-                "query": "SELECT * FROM table_partitioned_by_date_column__A"
-            },
+            runtime_parameters={"query": "SELECT * FROM table_partitioned_by_date_column__A"},
             batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
@@ -663,9 +617,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
-    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        "my_expectations"
-    )
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite("my_expectations")
 
     validator: Validator
 

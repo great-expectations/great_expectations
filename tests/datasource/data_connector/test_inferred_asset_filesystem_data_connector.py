@@ -31,18 +31,16 @@ def test_basic_instantiation(tmp_path_factory):
         ],
     )
 
-    my_data_connector: InferredAssetFilesystemDataConnector = (
-        InferredAssetFilesystemDataConnector(
-            name="my_data_connector",
-            datasource_name="FAKE_DATASOURCE_NAME",
-            execution_engine=PandasExecutionEngine(),
-            default_regex={
-                "pattern": r"(.+)/(.+)-(\d+)\.csv",
-                "group_names": ["data_asset_name", "letter", "number"],
-            },
-            glob_directive="*/*.csv",
-            base_directory=base_directory,
-        )
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
+        default_regex={
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+        },
+        glob_directive="*/*.csv",
+        base_directory=base_directory,
     )
 
     # noinspection PyProtectedMember
@@ -65,11 +63,7 @@ def test_basic_instantiation(tmp_path_factory):
 
 
 def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_complex_regex_example_with_implicit_data_asset_names"
-        )
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_complex_regex_example_with_implicit_data_asset_names"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -83,18 +77,16 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         ],
     )
 
-    my_data_connector: InferredAssetFilesystemDataConnector = (
-        InferredAssetFilesystemDataConnector(
-            name="my_data_connector",
-            datasource_name="FAKE_DATASOURCE_NAME",
-            execution_engine=PandasExecutionEngine(),
-            default_regex={
-                "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
-                "group_names": ["year_dir", "month_dir", "data_asset_name"],
-            },
-            glob_directive="*/*/*.csv",
-            base_directory=base_directory,
-        )
+    my_data_connector: InferredAssetFilesystemDataConnector = InferredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
+        default_regex={
+            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
+            "group_names": ["year_dir", "month_dir", "data_asset_name"],
+        },
+        glob_directive="*/*/*.csv",
+        base_directory=base_directory,
     )
 
     # noinspection PyProtectedMember
@@ -103,22 +95,18 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[BatchDefinition] = (
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="non_existent_datasource",
-                    data_connector_name="my_data_connector",
-                    data_asset_name="my_data_asset",
-                )
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="non_existent_datasource",
+                data_connector_name="my_data_connector",
+                data_asset_name="my_data_asset",
             )
         )
 
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[  # noqa: F841
-            BatchDefinition
-        ] = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list_from_batch_request(  # noqa: F841
             batch_request=BatchRequest(
                 datasource_name="FAKE_DATASOURCE_NAME",
                 data_connector_name="non_existent_data_connector",
@@ -216,27 +204,21 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
           """,
     )
 
-    my_data_connector: InferredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_inferred_asset_filesystem_data_connector",
-                "datasource_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: InferredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "my_inferred_asset_filesystem_data_connector",
+            "datasource_name": "test_environment",
+            "execution_engine": "BASE_ENGINE",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="my_inferred_asset_filesystem_data_connector",
-                data_asset_name="some_bucket",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
         )
     )
 
@@ -245,57 +227,43 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            batch_identifiers=IDDict(
-                {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
-            ),
+            batch_identifiers=IDDict({"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}),
         ),
     ]
     assert expected == sorted_batch_definition_list
@@ -352,9 +320,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                     "datasource_name": "test_environment",
                     "execution_engine": "BASE_ENGINE",
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
@@ -413,9 +379,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                     "datasource_name": "test_environment",
                     "execution_engine": "BASE_ENGINE",
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 

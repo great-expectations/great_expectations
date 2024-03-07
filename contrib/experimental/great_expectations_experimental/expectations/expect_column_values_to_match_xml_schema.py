@@ -152,9 +152,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -165,20 +163,16 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
             template_str = "values must match a XML Schema but none was specified."
         else:
             params["formatted_xml"] = (
-                "<pre>"
-                + etree.tostring(params.get("xml_schema"), pretty_print=True)
-                + "</pre>"  # TODO:
+                "<pre>" + etree.tostring(params.get("xml_schema"), pretty_print=True) + "</pre>"  # TODO:
             )
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                template_str = "values must match the following XML Schema, at least $mostly_pct % of the time: $formatted_xml"
-            else:
                 template_str = (
-                    "values must match the following XML Schema: $formatted_xml"
+                    "values must match the following XML Schema, at least $mostly_pct % of the time: $formatted_xml"
                 )
+            else:
+                template_str = "values must match the following XML Schema: $formatted_xml"
 
         if include_column_name:
             template_str = "$column " + template_str

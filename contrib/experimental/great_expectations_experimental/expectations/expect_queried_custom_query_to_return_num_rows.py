@@ -111,17 +111,13 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         "contributors": ["@mantasmy", "@itaise"],
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
 
         try:
             assert value is not None, "'value' must be specified"
-            assert (
-                isinstance(value, int) and value >= 0
-            ), "`value` must be an integer greater than or equal to zero"
+            assert isinstance(value, int) and value >= 0, "`value` must be an integer greater than or equal to zero"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 

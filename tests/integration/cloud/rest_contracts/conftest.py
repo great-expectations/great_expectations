@@ -26,17 +26,13 @@ PROVIDER_NAME: Final[str] = "mercury"
 
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[pathlib.Path] = pathlib.Path(
-    pathlib.Path(__file__, ".."), "pacts"
-).resolve()
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__, ".."), "pacts").resolve()
 PACT_MOCK_SERVICE_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
 
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
 
-PactBody: TypeAlias = Union[
-    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher, None
-]
+PactBody: TypeAlias = Union[Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher, None]
 
 
 EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID", "")
@@ -122,9 +118,7 @@ def pact_test(request) -> pact.Pact:
         broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
     else:
-        pytest.skip(
-            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
-        )
+        pytest.skip("no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io")
 
     # Adding random id to the commit hash allows us to run the build
     # and publish the contract more than once for a given commit.

@@ -66,18 +66,14 @@ batch_request = RuntimeBatchRequest(
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_spark_dataframe"]
-assert set(
-    context.get_available_data_asset_names()["my_spark_dataframe"][
-        "default_runtime_data_connector_name"
-    ]
-) == {"<YOUR_MEANGINGFUL_NAME>"}
+assert set(context.get_available_data_asset_names()["my_spark_dataframe"]["default_runtime_data_connector_name"]) == {
+    "<YOUR_MEANGINGFUL_NAME>"
+}
 assert validator.validate().success

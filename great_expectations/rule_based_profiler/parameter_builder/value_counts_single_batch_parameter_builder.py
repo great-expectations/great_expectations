@@ -35,26 +35,21 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute value counts using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        MetricSingleBatchParameterBuilder.exclude_field_names
-        | {
-            "column_value_counts_metric_single_batch_parameter_builder_config",
-            "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
-            "metric_name",
-            "metric_domain_kwargs",
-            "metric_value_kwargs",
-            "enforce_numeric_metric",
-            "replace_nan_with_zero",
-            "reduce_scalar_metric",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = MetricSingleBatchParameterBuilder.exclude_field_names | {
+        "column_value_counts_metric_single_batch_parameter_builder_config",
+        "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
+        "metric_name",
+        "metric_domain_kwargs",
+        "metric_value_kwargs",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -67,21 +62,19 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
         """
-        self._column_value_counts_metric_single_batch_parameter_builder_config = (
-            ParameterBuilderConfig(
-                module_name="great_expectations.rule_based_profiler.parameter_builder",
-                class_name="MetricSingleBatchParameterBuilder",
-                name="column_value_counts_metric_single_batch_parameter_builder",
-                metric_name="column.value_counts",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs={
-                    "sort": "value",
-                },
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
-            )
+        self._column_value_counts_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricSingleBatchParameterBuilder",
+            name="column_value_counts_metric_single_batch_parameter_builder",
+            metric_name="column.value_counts",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "sort": "value",
+            },
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            reduce_scalar_metric=False,
+            evaluation_parameter_builder_configs=None,
         )
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -128,7 +121,9 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
+        )
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -138,7 +133,9 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
-        fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
+        )
         # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -148,27 +145,16 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
-        values: list = list(
-            column_value_counts_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ].index
-        )
+        values: list = list(column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY].index)
         weights: np.ndarray = np.asarray(
             column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
-        ) / (
-            column_values_nonnull_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
-            + NP_EPSILON
-        )
+        ) / (column_values_nonnull_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] + NP_EPSILON)
 
         partition_object: dict = {
             "values": values,
             "weights": weights.tolist(),
         }
-        details: dict = column_value_counts_parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-        ]
+        details: dict = column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
         return Attributes(
             {

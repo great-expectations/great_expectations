@@ -7,7 +7,9 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-IMDB_ID_REGEX = r"^ev\d{7}\/(19|20)\d{2}(\/[12])?|tt\d{7,8}\/characters\/nm\d{7,8}|(tt|ni|nm)\d{8}|(ch|co|ev|tt|nm)\d{7}$"
+IMDB_ID_REGEX = (
+    r"^ev\d{7}\/(19|20)\d{2}(\/[12])?|tt\d{7,8}\/characters\/nm\d{7,8}|(tt|ni|nm)\d{8}|(ch|co|ev|tt|nm)\d{7}$"
+)
 
 
 # This class defines a Metric to support your Expectation.

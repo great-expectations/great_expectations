@@ -68,9 +68,7 @@ class DataAsset:
         expectation_suite = kwargs.pop("expectation_suite", None)
         expectation_suite_name = kwargs.pop("expectation_suite_name", None)
         data_context = kwargs.pop("data_context", None)
-        batch_kwargs = kwargs.pop(
-            "batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1()))
-        )
+        batch_kwargs = kwargs.pop("batch_kwargs", BatchKwargs(ge_batch_id=str(uuid.uuid1())))
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
@@ -93,9 +91,7 @@ class DataAsset:
 
     def list_available_expectation_types(self):
         keys = dir(self)
-        return [
-            expectation for expectation in keys if expectation.startswith("expect_")
-        ]
+        return [expectation for expectation in keys if expectation.startswith("expect_")]
 
     def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
@@ -108,9 +104,7 @@ class DataAsset:
             tuple(expectation_suite, validation_results)
 
         """
-        expectation_suite, validation_results = profiler.profile(
-            self, profiler_configuration
-        )
+        expectation_suite, validation_results = profiler.profile(self, profiler_configuration)
         return expectation_suite, validation_results
 
     @classmethod  # - complexity 24
@@ -233,10 +227,7 @@ class DataAsset:
                 exception_message = None
 
                 # Finally, execute the expectation method itself
-                if (
-                    self._config.get("interactive_evaluation", True)
-                    or self._active_validation
-                ):
+                if self._config.get("interactive_evaluation", True) or self._active_validation:
                     try:
                         return_obj = func(self, **evaluation_args)
                         if isinstance(return_obj, dict):
@@ -254,9 +245,7 @@ class DataAsset:
                             raise err
 
                 else:
-                    return_obj = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(expectation_config)
-                    )
+                    return_obj = ExpectationValidationResult(expectation_config=copy.deepcopy(expectation_config))
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
                 # saving updating expectation configs to the same suite during validation runs
@@ -327,9 +316,7 @@ class DataAsset:
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite_dict: dict = expectationSuiteSchema.load(
-                    expectation_suite
-                )
+                expectation_suite_dict: dict = expectationSuiteSchema.load(expectation_suite)
                 expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
@@ -521,9 +508,7 @@ class DataAsset:
         if discards["catch_exceptions"] > 0 and not suppress_warnings:
             settings_message += " catch_exceptions"
 
-        if (
-            len(settings_message) > 1
-        ):  # Only add this if we added one of the settings above.
+        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
         expectation_suite.add_expectation_configurations(expectations)
@@ -575,9 +560,7 @@ class DataAsset:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.add_or_update_expectation_suite(
-                expectation_suite=expectation_suite
-            )
+            self._data_context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
                 json.dump(
@@ -587,9 +570,7 @@ class DataAsset:
                     sort_keys=True,
                 )
         else:
-            raise ValueError(
-                "Unable to save config: filepath or data_context must be available."
-            )
+            raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
@@ -669,9 +650,7 @@ class DataAsset:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
-            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            )
+            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
 
             assert not (run_id and run_name) and not (
                 run_id and run_time
@@ -703,9 +682,7 @@ class DataAsset:
             elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite) as infile:
-                        expectation_suite_dict: dict = expectationSuiteSchema.loads(
-                            infile.read()
-                        )
+                        expectation_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
                         expectation_suite = ExpectationSuite(**expectation_suite_dict)
                 except ValidationError:
                     raise
@@ -729,24 +706,18 @@ class DataAsset:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = (
-                    data_context.evaluation_parameter_store.get_bind_params(run_id)
-                )
+                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
             else:
                 runtime_evaluation_parameters = {}
 
             if expectation_suite.evaluation_parameters:
-                runtime_evaluation_parameters.update(
-                    expectation_suite.evaluation_parameters
-                )
+                runtime_evaluation_parameters.update(expectation_suite.evaluation_parameters)
 
             if evaluation_parameters is not None:
                 runtime_evaluation_parameters.update(evaluation_parameters)
 
             # Convert evaluation parameters to be json-serializable
-            runtime_evaluation_parameters = recursively_convert_to_json_serializable(
-                runtime_evaluation_parameters
-            )
+            runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
@@ -761,9 +732,7 @@ class DataAsset:
             columns = {}
 
             for expectation in expectation_suite.expectation_configurations:
-                if "column" in expectation.kwargs and isinstance(
-                    expectation.kwargs["column"], Hashable
-                ):
+                if "column" in expectation.kwargs and isinstance(expectation.kwargs["column"], Hashable):
                     column = expectation.kwargs["column"]
                 else:
                     column = "_nocolumn"
@@ -899,9 +868,7 @@ class DataAsset:
             parameter_name (string): The name of the kwarg to be replaced at evaluation time
             parameter_value (any): The value to be used
         """
-        self._expectation_suite.evaluation_parameters.update(
-            {parameter_name: parameter_value}
-        )
+        self._expectation_suite.evaluation_parameters.update({parameter_name: parameter_value})
 
     def add_citation(  # noqa: PLR0913
         self,
@@ -995,9 +962,7 @@ class DataAsset:
             "unexpected_percent": unexpected_percent_nonmissing,
             "unexpected_percent_total": unexpected_percent_total,
             "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
-            "partial_unexpected_list": unexpected_list[
-                : result_format["partial_unexpected_count"]
-            ],
+            "partial_unexpected_list": unexpected_list[: result_format["partial_unexpected_count"]],
         }
 
         if result_format["result_format"] == "BASIC":
@@ -1008,16 +973,12 @@ class DataAsset:
                 # in the case of multicolumn map expectations `unexpected_list` contains dicts,
                 # which will throw an exception when we hash it to count unique members.
                 # As a workaround, we flatten the values out to tuples.
-                immutable_unexpected_list = [
-                    tuple([val for val in item.values()]) for item in unexpected_list
-                ]
+                immutable_unexpected_list = [tuple([val for val in item.values()]) for item in unexpected_list]
             else:
                 immutable_unexpected_list = unexpected_list
 
         # Try to return the most common values, if possible.
-        partial_unexpected_count: Optional[int] = result_format.get(
-            "partial_unexpected_count"
-        )
+        partial_unexpected_count: Optional[int] = result_format.get("partial_unexpected_count")
         partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
 
         if partial_unexpected_count is not None and 0 < partial_unexpected_count:
@@ -1025,9 +986,7 @@ class DataAsset:
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(immutable_unexpected_list).most_common(
-                            result_format["partial_unexpected_count"]
-                        ),
+                        Counter(immutable_unexpected_list).most_common(result_format["partial_unexpected_count"]),
                         key=lambda x: (-x[1], x[0]),
                     )
                 ]
@@ -1082,14 +1041,10 @@ class DataAsset:
             success (boolean), percent_success (float)
         """
         if isinstance(success_count, decimal.Decimal):
-            raise ValueError(
-                "success_count must not be a decimal; check your db configuration"
-            )
+            raise ValueError("success_count must not be a decimal; check your db configuration")
 
         if isinstance(nonnull_count, decimal.Decimal):
-            raise ValueError(
-                "nonnull_count must not be a decimal; check your db configuration"
-            )
+            raise ValueError("nonnull_count must not be a decimal; check your db configuration")
 
         if nonnull_count > 0:
             percent_success = success_count / nonnull_count

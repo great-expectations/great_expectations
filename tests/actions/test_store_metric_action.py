@@ -62,9 +62,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
     assert (
-        basic_in_memory_data_context_for_validation_operator.stores[
-            "metrics_store"
-        ].get(
+        basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(
             ValidationMetricIdentifier(
                 run_id=run_id,
                 data_asset_name=None,
@@ -77,9 +75,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
     assert (
-        basic_in_memory_data_context_for_validation_operator.stores[
-            "metrics_store"
-        ].get(
+        basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(
             ValidationMetricIdentifier(
                 run_id=run_id,
                 data_asset_name=None,
@@ -92,9 +88,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
     assert (
-        basic_in_memory_data_context_for_validation_operator.stores[
-            "metrics_store"
-        ].get(
+        basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(
             ValidationMetricIdentifier(
                 run_id=run_id,
                 data_asset_name=None,
@@ -107,9 +101,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
     assert (
-        basic_in_memory_data_context_for_validation_operator.stores[
-            "metrics_store"
-        ].get(
+        basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(
             ValidationMetricIdentifier(
                 run_id=run_id,
                 data_asset_name=None,
@@ -180,9 +172,7 @@ def test_StoreMetricsAction_column_metric(
     )
 
     assert (
-        basic_in_memory_data_context_for_validation_operator.stores[
-            "metrics_store"
-        ].get(
+        basic_in_memory_data_context_for_validation_operator.stores["metrics_store"].get(
             ValidationMetricIdentifier(
                 run_id=run_id,
                 data_asset_name=None,

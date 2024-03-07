@@ -59,25 +59,15 @@ def datasource(
     Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
-    datasource = context.sources.add_spark_filesystem(
-        name=datasource_name, base_directory=original_base_dir
-    )
+    datasource = context.sources.add_spark_filesystem(name=datasource_name, base_directory=original_base_dir)
 
-    datasource.base_directory = normalize_directory_path(
-        updated_base_dir, context.root_directory
-    )
+    datasource.base_directory = normalize_directory_path(updated_base_dir, context.root_directory)
     datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
-    assert (
-        datasource.base_directory == updated_base_dir
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.base_directory == updated_base_dir, "The datasource was not updated in the previous method call."
 
-    datasource.base_directory = normalize_directory_path(
-        original_base_dir, context.root_directory
-    )
+    datasource.base_directory = normalize_directory_path(original_base_dir, context.root_directory)
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.base_directory == original_base_dir
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.base_directory == original_base_dir, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -145,19 +135,15 @@ def test_interactive_validator(
     Note: There is no need to test getting a Validator or using Validator.head(). That is already
     tested in the validator fixture.
     """
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_column_mean_to_be_between(
-            column="name",
-            min_value=0,
-            max_value=4,
-        )
+    expectation_validation_result: ExpectationValidationResult = validator.expect_column_mean_to_be_between(
+        column="name",
+        min_value=0,
+        max_value=4,
     )
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+@pytest.mark.xfail(reason="1.0 API requires a backend change. Test should pass once #2623 is merged")
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

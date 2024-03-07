@@ -141,29 +141,21 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_least_str = cls._get_strict_min_string(renderer_configuration=renderer_configuration)
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str = cls._get_strict_max_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_most_str = cls._get_strict_max_string(renderer_configuration=renderer_configuration)
             if not params.min_value:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif not params.max_value:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params.min_value.value != params.max_value.value:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
-                else:
                     template_str = (
-                        "fraction of unique values must be exactly $min_value."
+                        f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                     )
+                else:
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -183,9 +175,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -205,20 +195,16 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params["min_value"] != params["max_value"]:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
-                else:
                     template_str = (
-                        "fraction of unique values must be exactly $min_value."
+                        f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                     )
+                else:
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -245,9 +231,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         ]
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_DISTINCT_PERCENT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_DISTINCT_PERCENT_ROW)
     def _descriptive_column_properties_table_distinct_percent_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -262,9 +246,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "Distinct (%)",
-                    "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
-                    },
+                    "tooltip": {"content": "expect_column_proportion_of_unique_values_to_be_between"},
                 },
             }
         )

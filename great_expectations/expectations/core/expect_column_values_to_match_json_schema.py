@@ -112,9 +112,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.json_schema:
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            formatted_json = (
-                f"<pre>{json.dumps(params.json_schema.value, indent=4)}</pre>"
-            )
+            formatted_json = f"<pre>{json.dumps(params.json_schema.value, indent=4)}</pre>"
             renderer_configuration.add_param(
                 name="formatted_json",
                 param_type=RendererValueType.STRING,
@@ -122,14 +120,12 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             )
 
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
-                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
-            else:
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str = (
-                    "values must match the following JSON Schema: $formatted_json"
+                    "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
                 )
+            else:
+                template_str = "values must match the following JSON Schema: $formatted_json"
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -149,9 +145,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -161,19 +155,15 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            params["formatted_json"] = (
-                f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
-            )
+            params["formatted_json"] = f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
-            else:
                 template_str = (
-                    "values must match the following JSON Schema: $formatted_json"
+                    "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
                 )
+            else:
+                template_str = "values must match the following JSON Schema: $formatted_json"
 
         if include_column_name:
             template_str = f"$column {template_str}"

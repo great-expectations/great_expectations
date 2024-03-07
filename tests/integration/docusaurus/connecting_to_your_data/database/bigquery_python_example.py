@@ -11,9 +11,7 @@ yaml = YAMLHandler()
 # GCP project information
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
-    raise ValueError(
-        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-    )
+    raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests")
 bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
@@ -63,9 +61,7 @@ batch_request = RuntimeBatchRequest(
 )
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -79,9 +75,7 @@ batch_request = BatchRequest(
     data_asset_name="demo.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
@@ -89,7 +83,5 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_bigquery_datasource"]
 assert "demo.taxi_data" in set(
-    context.get_available_data_asset_names()["my_bigquery_datasource"][
-        "default_inferred_data_connector_name"
-    ]
+    context.get_available_data_asset_names()["my_bigquery_datasource"]["default_inferred_data_connector_name"]
 )

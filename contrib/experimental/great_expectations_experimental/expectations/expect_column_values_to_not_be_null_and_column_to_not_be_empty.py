@@ -161,12 +161,8 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if params.mostly and params.mostly.value < 1.0:
-            renderer_configuration = cls._add_mostly_pct_param(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = (
-                "values must not be null, at least $mostly_pct % of the time."
-            )
+            renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
+            template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must never be null."
 
@@ -188,9 +184,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -198,16 +192,12 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
                 template_str = "$column values must not be null, at least $mostly_pct % of the time."
             else:
-                template_str = (
-                    "values must not be null, at least $mostly_pct % of the time."
-                )
+                template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
             if include_column_name:
                 template_str = "$column values must never be null."
@@ -248,19 +238,14 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
 
         try:
             null_percent = result_dict["unexpected_percent"]
-            return (
-                num_to_str(100 - null_percent, precision=5, use_locale=True)
-                + "% not null"
-            )
+            return num_to_str(100 - null_percent, precision=5, use_locale=True) + "% not null"
         except KeyError:
             return "unknown % not null"
         except TypeError:
             return "NaN% not null"
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW)
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -275,22 +260,17 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (n)",
-                        "tooltip": {
-                            "content": "expect_column_values_to_not_be_null_and_column_to_not_be_empty"
-                        },
+                        "tooltip": {"content": "expect_column_values_to_not_be_null_and_column_to_not_be_empty"},
                     },
                 }
             ),
             result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
+            if "unexpected_count" in result.result and result.result["unexpected_count"] is not None
             else "--",
         ]
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW)
     def _descriptive_column_properties_table_missing_percent_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -305,15 +285,12 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (%)",
-                        "tooltip": {
-                            "content": "expect_column_values_to_not_be_null_and_column_to_not_be_empty"
-                        },
+                        "tooltip": {"content": "expect_column_values_to_not_be_null_and_column_to_not_be_empty"},
                     },
                 }
             ),
             f"{result.result['unexpected_percent']:.1f}%"
-            if "unexpected_percent" in result.result
-            and result.result["unexpected_percent"] is not None
+            if "unexpected_percent" in result.result and result.result["unexpected_percent"] is not None
             else "--",
         ]
 
@@ -323,16 +300,10 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self._get_result_format(
-            runtime_configuration=runtime_configuration
-        )
-        mostly = self._get_success_kwargs().get(
-            "mostly", self._get_default_value("mostly")
-        )
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
+        mostly = self._get_success_kwargs().get("mostly", self._get_default_value("mostly"))
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(
-            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        )
+        unexpected_count = metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}")
 
         if total_count is None or total_count == 0:
             success = False
@@ -347,12 +318,8 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(
-                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-            ),
-            unexpected_list=metrics.get(
-                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
-            ),
+            unexpected_count=metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"),
+            unexpected_list=metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"),
             unexpected_index_list=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
             ),
@@ -363,6 +330,4 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty().print_diagnostic_checklist(
-        show_failed_tests=True
-    )
+    ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty().print_diagnostic_checklist(show_failed_tests=True)

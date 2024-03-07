@@ -58,9 +58,7 @@ class BaseDatasource:
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
-            raise gx_exceptions.ExecutionEngineError(
-                message="No ExecutionEngine configuration provided."
-            )
+            raise gx_exceptions.ExecutionEngineError(message="No ExecutionEngine configuration provided.")
 
         try:
             self._execution_engine = instantiate_class_from_config(
@@ -98,16 +96,12 @@ class BaseDatasource:
             # Seems like we should verify that batch_data is compatible with the execution_engine...?
             batch_spec, batch_markers = None, None
         else:
-            data_connector: DataConnector = self.data_connectors[
-                batch_definition.data_connector_name
-            ]
+            data_connector: DataConnector = self.data_connectors[batch_definition.data_connector_name]
             (
                 batch_data,
                 batch_spec,
                 batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition
-            )
+            ) = data_connector.get_batch_data_and_metadata(batch_definition=batch_definition)
         new_batch = Batch(
             data=batch_data,
             batch_request=None,
@@ -117,14 +111,10 @@ class BaseDatasource:
         )
         return new_batch
 
-    def get_single_batch_from_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> Batch:
+    def get_single_batch_from_batch_request(self, batch_request: Union[BatchRequest, RuntimeBatchRequest]) -> Batch:
         batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
-            raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch."
-            )
+            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")
         return batch_list[0]
 
     def get_batch_definition_list_from_batch_request(
@@ -139,16 +129,10 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
-        return data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
+        return data_connector.get_batch_definition_list_from_batch_request(batch_request=batch_request)
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: Union[BatchRequest, RuntimeBatchRequest]) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
 
@@ -158,23 +142,17 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
 
-        batch_definition_list: List[BatchDefinition] = (
-            data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=batch_request
-            )
+        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
         )
 
         if isinstance(batch_request, RuntimeBatchRequest):
             # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
-                raise ValueError(
-                    "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
-                )
+                raise ValueError("RuntimeBatchRequests must specify exactly one corresponding BatchDefinition")
 
             batch_definition = batch_definition_list[0]
             runtime_parameters = batch_request.runtime_parameters
@@ -201,9 +179,7 @@ class BaseDatasource:
         else:
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
-                batch_definition.batch_spec_passthrough = (
-                    batch_request.batch_spec_passthrough
-                )
+                batch_definition.batch_spec_passthrough = batch_request.batch_spec_passthrough
                 batch_data: Any  # type: ignore[no-redef]
                 batch_spec: PathBatchSpec  # type: ignore[no-redef]
                 batch_markers: BatchMarkers  # type: ignore[no-redef]
@@ -211,9 +187,7 @@ class BaseDatasource:
                     batch_data,
                     batch_spec,
                     batch_markers,
-                ) = data_connector.get_batch_data_and_metadata(
-                    batch_definition=batch_definition
-                )
+                ) = data_connector.get_batch_data_and_metadata(batch_definition=batch_definition)
                 new_batch = Batch(
                     data=batch_data,
                     batch_request=batch_request,
@@ -237,9 +211,7 @@ class BaseDatasource:
                 "datasource_name": self.name,
                 "execution_engine": self.execution_engine,
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
         new_data_connector.data_context_root_directory = (
             self._data_context_root_directory  # type: ignore[assignment]
@@ -283,9 +255,7 @@ class BaseDatasource:
 
         for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
-            available_data_asset_names[data_connector_name] = (
-                data_connector.get_available_data_asset_names()
-            )
+            available_data_asset_names[data_connector_name] = data_connector.get_available_data_asset_names()
 
         return available_data_asset_names
 
@@ -333,24 +303,13 @@ class BaseDatasource:
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
-        batch_definition_list = (
-            data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=batch_request
-            )
-        )
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
+        batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(batch_request=batch_request)
 
         return batch_definition_list
 
-    def _validate_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> None:
-        if not (
-            batch_request.datasource_name is None
-            or batch_request.datasource_name == self.name
-        ):
+    def _validate_batch_request(self, batch_request: Union[BatchRequest, RuntimeBatchRequest]) -> None:
+        if not (batch_request.datasource_name is None or batch_request.datasource_name == self.name):
             raise ValueError(
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
                 match Datasource name: "{self.name}".
@@ -440,9 +399,7 @@ class Datasource(BaseDatasource):
         if data_connectors is None:
             data_connectors = {}
         self._data_connectors = data_connectors
-        self._datasource_config.update(
-            {"data_connectors": copy.deepcopy(data_connectors)}
-        )
+        self._datasource_config.update({"data_connectors": copy.deepcopy(data_connectors)})
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
@@ -460,21 +417,14 @@ class Datasource(BaseDatasource):
         from great_expectations.datasource.fluent import PandasDatasource
 
         # PandasDatasource has all the `read_*` methods + the normal Datasource methods
-        fluent_datasource_attrs.update(
-            {a for a in dir(PandasDatasource) if not a.startswith("_")}
-        )
+        fluent_datasource_attrs.update({a for a in dir(PandasDatasource) if not a.startswith("_")})
         if attr.startswith("add_"):
             from great_expectations.datasource.fluent.sources import (  # isort: skip
                 _iter_all_registered_types,
             )
 
             fluent_datasource_attrs.update(
-                {
-                    f"add_{type_name}_asset"
-                    for type_name, _ in _iter_all_registered_types(
-                        include_datasource=False
-                    )
-                }
+                {f"add_{type_name}_asset" for type_name, _ in _iter_all_registered_types(include_datasource=False)}
             )
         if attr in fluent_datasource_attrs:
             raise NotImplementedError(f"`{attr}` - {NOT_FLUENT_ERROR_MSG}")

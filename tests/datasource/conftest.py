@@ -22,9 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import get_sqlite_connection_url
 
 
-def create_partitions_for_table(
-    glue_client, database_name: str, table_name: str, partitions: dict
-):
+def create_partitions_for_table(glue_client, database_name: str, table_name: str, partitions: dict):
     """
     This function is used to create partitions for a table in the Glue Data Catalog. It
     will create one partition per combination of partition values. Example: if we define
@@ -69,13 +67,9 @@ def glue_titanic_catalog():
     try:
         import boto3
     except ImportError:
-        raise ValueError(
-            "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
-        )
+        raise ValueError("AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed")
 
-    os.environ["AWS_DEFAULT_REGION"] = (
-        "testing"  # required when connecting to the glue client, even when mocked
-    )
+    os.environ["AWS_DEFAULT_REGION"] = "testing"  # required when connecting to the glue client, even when mocked
 
     with mock_glue():
         client = boto3.client("glue")
@@ -164,9 +158,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
     )
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
-    raw_connection.create_function(
-        "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
-    )
+    raw_connection.create_function("md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :])
 
     conn: sa.engine.Connection = engine.connect()  # noqa: F841
 

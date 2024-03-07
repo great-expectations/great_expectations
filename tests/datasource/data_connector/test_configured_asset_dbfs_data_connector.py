@@ -94,9 +94,7 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     my_data_connector.data_context_root_directory = base_directory
 
     assert (
-        my_data_connector._get_full_file_path_for_asset(
-            path="bigfile_1.csv", asset=my_data_connector.assets["A"]
-        )
+        my_data_connector._get_full_file_path_for_asset(path="bigfile_1.csv", asset=my_data_connector.assets["A"])
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
@@ -108,17 +106,13 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
     my_batch_definition = my_batch_definition_list[0]
-    batch_spec: BatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=my_batch_definition
-    )
+    batch_spec: BatchSpec = my_data_connector.build_batch_spec(batch_definition=my_batch_definition)
 
     assert isinstance(batch_spec, PathBatchSpec)
     assert batch_spec.path == f"{base_directory}/test_dir_0/A/B/C/logfile_0.csv"
@@ -183,9 +177,7 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
     my_data_connector.data_context_root_directory = base_directory
 
     assert (
-        my_data_connector._get_full_file_path_for_asset(
-            path="bigfile_1.csv", asset=my_data_connector.assets["A"]
-        )
+        my_data_connector._get_full_file_path_for_asset(path="bigfile_1.csv", asset=my_data_connector.assets["A"])
         == f"{base_directory_colon}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
@@ -197,17 +189,13 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
     my_batch_definition = my_batch_definition_list[0]
-    batch_spec: BatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=my_batch_definition
-    )
+    batch_spec: BatchSpec = my_data_connector.build_batch_spec(batch_definition=my_batch_definition)
 
     assert isinstance(batch_spec, PathBatchSpec)
     assert batch_spec.path == "dbfs:/great_expectations/test_dir_0/A/B/C/logfile_0.csv"

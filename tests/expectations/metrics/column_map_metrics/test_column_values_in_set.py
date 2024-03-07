@@ -22,9 +22,7 @@ except ImportError:
     sqlalchemy is None or sqlalchemy_bigquery is None,
     reason="sqlalchemy or sqlalchemy_bigquery is not installed",
 )
-@pytest.mark.parametrize(
-    "value_set", [[False, True], [False, True, None], [True], [False], [None]]
-)
+@pytest.mark.parametrize("value_set", [[False, True], [False, True, None], [True], [False], [None]])
 def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
     column_name = "my_bool_col"
     column = sqlalchemy.column(column_name)
@@ -33,8 +31,7 @@ def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
     # If a value in value_set is None we expect "column_name is null" otherwise we expect
     # "column_name = value"
     expected_predicates = [
-        f"{column_name} {'is' if value is None else '='} {'null' if value is None else value}"
-        for value in value_set
+        f"{column_name} {'is' if value is None else '='} {'null' if value is None else value}" for value in value_set
     ]
     assert str(predicate).lower() == " or ".join(expected_predicates).lower()
 
@@ -42,19 +39,13 @@ def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
 @pytest.mark.unit
 @pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
 @pytest.mark.parametrize("dialect", [mysql, postgresql, sqlite])
-@pytest.mark.parametrize(
-    "value_set", [[False, True], [False, True, None], [True], [False], [None]]
-)
-def test_sqlalchemy_impl_not_bigquery_bool(
-    dialect: ModuleType, value_set: List[Optional[bool]]
-):
+@pytest.mark.parametrize("value_set", [[False, True], [False, True, None], [True], [False], [None]])
+def test_sqlalchemy_impl_not_bigquery_bool(dialect: ModuleType, value_set: List[Optional[bool]]):
     column_name = "my_bool_col"
     column = sqlalchemy.column(column_name)
     kwargs = _make_sqlalchemy_kwargs(column_name, dialect)
     predicate = ColumnValuesInSet._sqlalchemy_impl(column, value_set, **kwargs)
-    expected_predicates = ", ".join(
-        ["null" if value is None else str(value) for value in value_set]
-    ).lower()
+    expected_predicates = ", ".join(["null" if value is None else str(value) for value in value_set]).lower()
     # We expect the predicate to look similar to "column_name in (true, false, null)"
     assert (
         str(predicate.compile(compile_kwargs={"literal_binds": True})).lower()

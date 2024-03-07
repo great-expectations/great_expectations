@@ -34,9 +34,7 @@ def test_load_an_existing_config(
     fluent_yaml_config_file: pathlib.Path,
     fluent_only_config: GxConfig,
 ):
-    context = get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
+    context = get_context(context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False)
 
     assert context.fluent_config == fluent_only_config
 
@@ -71,9 +69,7 @@ def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
     )
 
     validator = seeded_file_context.get_validator(batch_request=batch_request)
-    result = validator.expect_column_max_to_be_between(
-        column="passenger_count", min_value=1, max_value=12
-    )
+    result = validator.expect_column_max_to_be_between(column="passenger_count", min_value=1, max_value=12)
     print(f"  results ->\n{pf(result)}")
     assert result["success"] is True
 
@@ -92,18 +88,14 @@ def test_variables_save_config_does_not_break(seeded_file_context: FileDataConte
 
 
 @pytest.mark.filesystem
-def test_save_datacontext_persists_fluent_config(
-    file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
-):
+def test_save_datacontext_persists_fluent_config(file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig):
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
     for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name not in initial_yaml
 
-    context: FileDataContext = get_context(
-        context_root_dir=config_file.parent, cloud_mode=False
-    )
+    context: FileDataContext = get_context(context_root_dir=config_file.parent, cloud_mode=False)
 
     context.fluent_config = fluent_only_config
     context._save_project_config()
@@ -129,13 +121,9 @@ def test_file_context_add_and_save_fluent_datasource(
     initial_yaml = config_file.read_text()
     assert datasource_name not in initial_yaml
 
-    context: FileDataContext = get_context(
-        context_root_dir=config_file.parent, cloud_mode=False
-    )
+    context: FileDataContext = get_context(context_root_dir=config_file.parent, cloud_mode=False)
 
-    ds = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
-    )
+    ds = context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}")
 
     final_yaml = config_file.read_text()
     diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
@@ -157,9 +145,7 @@ def test_context_add_and_save_fluent_datasource(
 
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
-    )
+    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}")
 
     assert datasource_name in context.datasources
 
@@ -201,9 +187,7 @@ def test_sources_delete_removes_datasource_from_yaml(
 
     seeded_file_context.sources.delete(random_datasource.name)
 
-    yaml_path = pathlib.Path(
-        seeded_file_context.root_directory, seeded_file_context.GX_YML
-    ).resolve(strict=True)
+    yaml_path = pathlib.Path(seeded_file_context.root_directory, seeded_file_context.GX_YML).resolve(strict=True)
     yaml_contents = YAML.load(yaml_path.read_text())
     print(f"{pf(yaml_contents, depth=2)}")
 
@@ -211,16 +195,12 @@ def test_sources_delete_removes_datasource_from_yaml(
 
 
 @pytest.mark.filesystem
-def test_ctx_delete_removes_datasource_from_yaml(
-    random_datasource: Datasource, seeded_file_context: FileDataContext
-):
+def test_ctx_delete_removes_datasource_from_yaml(random_datasource: Datasource, seeded_file_context: FileDataContext):
     print(f"Delete -> '{random_datasource.name}'\n")
 
     seeded_file_context.delete_datasource(random_datasource.name)
 
-    yaml_path = pathlib.Path(
-        seeded_file_context.root_directory, seeded_file_context.GX_YML
-    ).resolve(strict=True)
+    yaml_path = pathlib.Path(seeded_file_context.root_directory, seeded_file_context.GX_YML).resolve(strict=True)
     yaml_contents = YAML.load(yaml_path.read_text())
     print(f"{pf(yaml_contents, depth=2)}")
 
@@ -314,11 +294,7 @@ def test_quickstart_workflow(
     # Create Expectations
     suite = context.add_expectation_suite("my_suite")
     suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-    suite.add_expectation(
-        gxe.ExpectColumnValuesToBeBetween(
-            column="passenger_count", min_value=1, max_value=6
-        )
-    )
+    suite.add_expectation(gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6))
 
     # Validate data
     result = batch.validate(suite)

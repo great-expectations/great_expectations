@@ -70,9 +70,7 @@ def build_variables_directives(
     directives as part of dedicated "RuntimeEnvironmentVariablesDirectives" typed object for every "rule_name" (string).
     """
     # Implementation relies on assumption that "kwargs" contains "variables"-level arguments/directives only.
-    directives: Dict[
-        str, Dict[str, Any]
-    ]  # key is "rule_name"; value is "variables" in corresponding "Rule" object
+    directives: Dict[str, Dict[str, Any]]  # key is "rule_name"; value is "variables" in corresponding "Rule" object
     if exact_estimation:
         directives = {}
         rule_variables_configs: Optional[Dict[str, Any]]
@@ -121,11 +119,9 @@ def build_domain_type_directives(
     """
     domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = []
 
-    column_domain_type_directives: RuntimeEnvironmentDomainTypeDirectives = (
-        RuntimeEnvironmentDomainTypeDirectives(
-            domain_type=MetricDomainTypes.COLUMN,
-            directives=kwargs,
-        )
+    column_domain_type_directives: RuntimeEnvironmentDomainTypeDirectives = RuntimeEnvironmentDomainTypeDirectives(
+        domain_type=MetricDomainTypes.COLUMN,
+        directives=kwargs,
     )
     domain_type_directives_list.append(column_domain_type_directives)
 

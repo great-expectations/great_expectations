@@ -63,9 +63,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
     @override
     def parse_semantic_domain_type_argument(
         self,
-        semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
     ) -> List[SemanticDomainTypes]:
         if semantic_types is None:
             return []
@@ -83,14 +81,9 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 return [semantic_type for semantic_type in semantic_types]
 
             if _is_sequence_of(semantic_types, str):
-                return [
-                    SemanticDomainTypes(semantic_type.lower())
-                    for semantic_type in semantic_types
-                ]
+                return [SemanticDomainTypes(semantic_type.lower()) for semantic_type in semantic_types]
 
-            raise ValueError(
-                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
-            )
+            raise ValueError("All elements in semantic_types list must be either of str or SemanticDomainTypes type.")
 
         raise ValueError("Unrecognized semantic_types directive.")
 
@@ -144,9 +137,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]
                 or column_name
-                == column_type_dict["name"].strip(
-                    "`"
-                ),  # Spark specific fix to compare column names without backticks
+                == column_type_dict["name"].strip("`"),  # Spark specific fix to compare column names without backticks
                 column_types_dict_list,
             )
         )
@@ -163,18 +154,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if any(
             map(
                 lambda type_name: column_type.startswith(type_name.upper()),
-                ProfilerTypeMapping.INT_TYPE_NAMES
-                + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
+                ProfilerTypeMapping.INT_TYPE_NAMES + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
             )
         ):
             semantic_column_type = SemanticDomainTypes.NUMERIC
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.STRING_TYPE_NAMES
-        }:
+        elif column_type in {type_name.upper() for type_name in ProfilerTypeMapping.STRING_TYPE_NAMES}:
             semantic_column_type = SemanticDomainTypes.TEXT
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES
-        }:
+        elif column_type in {type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES}:
             semantic_column_type = SemanticDomainTypes.LOGIC
         elif any(
             map(
@@ -183,23 +169,14 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             )
         ):
             semantic_column_type = SemanticDomainTypes.DATETIME
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES
-        }:
+        elif column_type in {type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES}:
             semantic_column_type = SemanticDomainTypes.BINARY
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.CURRENCY_TYPE_NAMES
-        }:
+        elif column_type in {type_name.upper() for type_name in ProfilerTypeMapping.CURRENCY_TYPE_NAMES}:
             semantic_column_type = SemanticDomainTypes.CURRENCY
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.IDENTIFIER_TYPE_NAMES
-        }:
+        elif column_type in {type_name.upper() for type_name in ProfilerTypeMapping.IDENTIFIER_TYPE_NAMES}:
             semantic_column_type = SemanticDomainTypes.IDENTIFIER
         elif column_type in (
-            {
-                type_name.upper()
-                for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES
-            }
+            {type_name.upper() for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES}
             | {type_name.upper() for type_name in ProfilerTypeMapping.RECORD_TYPE_NAMES}
         ):
             semantic_column_type = SemanticDomainTypes.MISCELLANEOUS

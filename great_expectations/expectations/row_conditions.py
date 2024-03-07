@@ -35,9 +35,7 @@ def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
 
 WHITESPACE_CHARS = " \t"
 column_name = Combine(
-    Suppress(Literal('col("'))
-    + Word(alphas, f"{alphanums}_-.").setResultsName("column")
-    + Suppress(Literal('")'))
+    Suppress(Literal('col("')) + Word(alphas, f"{alphanums}_-.").setResultsName("column") + Suppress(Literal('")'))
 )
 gt = Literal(">")
 lt = Literal("<")
@@ -49,17 +47,10 @@ ops = (gt ^ lt ^ ge ^ le ^ eq ^ ne).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
 punctuation_without_apostrophe = punctuation.replace('"', "").replace("'", "")
 condition_value_chars = alphanums + punctuation_without_apostrophe + WHITESPACE_CHARS
-condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
-    "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
-    "condition_value"
-) + Suppress("'")
-date = (
-    Literal("date").setResultsName("date")
-    + Suppress(Literal("("))
-    + condition_value
-    + Suppress(Literal(")"))
-)
+condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName("condition_value") + Suppress(
+    '"'
+) ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName("condition_value") + Suppress("'")
+date = Literal("date").setResultsName("date") + Suppress(Literal("(")) + condition_value + Suppress(Literal(")"))
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
 condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
     column_name + ops + (fnumber ^ condition_value ^ date)
@@ -134,9 +125,7 @@ def parse_condition_to_spark(  # type: ignore[return] # return or raise exists f
         if parsed["op"] == "==":
             return F.col(column) == parsed["condition_value"]
         else:
-            raise ConditionParserError(
-                f"Invalid operator: {parsed['op']} for string literal spark condition."
-            )
+            raise ConditionParserError(f"Invalid operator: {parsed['op']} for string literal spark condition.")
     elif "fnumber" in parsed:
         try:
             num: int | float = int(parsed["fnumber"])
@@ -179,14 +168,10 @@ def parse_condition_to_sqlalchemy(
     if "date" in parsed:
         date_value: str = parsed["condition_value"]
         cast_as_date = f"date({date_value})"
-        return generate_condition_by_operator(
-            sa.column(column), parsed["op"], cast_as_date
-        )
+        return generate_condition_by_operator(sa.column(column), parsed["op"], cast_as_date)
 
     elif "condition_value" in parsed:
-        return generate_condition_by_operator(
-            sa.column(column), parsed["op"], parsed["condition_value"]
-        )
+        return generate_condition_by_operator(sa.column(column), parsed["op"], parsed["condition_value"])
     elif "fnumber" in parsed:
         number_value = parsed["fnumber"]
         num = int(number_value) if number_value.isdigit() else float(number_value)

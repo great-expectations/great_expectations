@@ -49,9 +49,7 @@ MAX_METRIC_COMPUTATION_RETRIES: int = 3
 
 
 class MetricEdge:
-    def __init__(
-        self, left: MetricConfiguration, right: Optional[MetricConfiguration] = None
-    ) -> None:
+    def __init__(self, left: MetricConfiguration, right: Optional[MetricConfiguration] = None) -> None:
         self._left = left
         self._right = right
 
@@ -129,9 +127,7 @@ class ValidationGraph:
         (
             metric_impl_klass,
             _metric_provider,
-        ) = self.set_metric_configuration_default_kwargs_if_absent(
-            metric_configuration=metric_configuration
-        )
+        ) = self.set_metric_configuration_default_kwargs_if_absent(metric_configuration=metric_configuration)
 
         metric_dependencies = metric_impl_klass.get_evaluation_dependencies(
             metric=metric_configuration,
@@ -150,9 +146,7 @@ class ValidationGraph:
             for metric_dependency in metric_dependencies.values():
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:
-                    logger.warning(
-                        f"Metric {metric_configuration.id!s} has created a circular dependency"
-                    )
+                    logger.warning(f"Metric {metric_configuration.id!s} has created a circular dependency")
                     continue
                 self.add(
                     MetricEdge(
@@ -292,18 +286,12 @@ class ValidationGraph:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
                             failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
-                            failed_metric_info[failed_metric.id]["exception_info"] = (
-                                exception_info
-                            )
+                            failed_metric_info[failed_metric.id]["exception_info"] = exception_info
                         else:
                             failed_metric_info[failed_metric.id] = {}
-                            failed_metric_info[failed_metric.id][
-                                "metric_configuration"
-                            ] = failed_metric
+                            failed_metric_info[failed_metric.id]["metric_configuration"] = failed_metric
                             failed_metric_info[failed_metric.id]["num_failures"] = 1
-                            failed_metric_info[failed_metric.id]["exception_info"] = (
-                                exception_info
-                            )
+                            failed_metric_info[failed_metric.id]["exception_info"] = exception_info
 
                 else:
                     raise err
@@ -316,9 +304,7 @@ class ValidationGraph:
                 else:
                     raise e
 
-            if (len(ready_metrics) + len(needed_metrics) == 0) or (
-                len(ready_metrics) == len(aborted_metrics_info)
-            ):
+            if (len(ready_metrics) + len(needed_metrics) == 0) or (len(ready_metrics) == len(aborted_metrics_info)):
                 done = True
 
         progress_bar.close()  # type: ignore[union-attr]  # Incorrect flagging of 'Item "None" of "Optional[Any]" has no attribute "close"' in external package.
@@ -357,11 +343,7 @@ class ValidationGraph:
     ) -> None:
         key: str
         for key in keys:
-            if (
-                key not in metric_kwargs
-                and key in default_kwarg_values
-                and default_kwarg_values[key] is not None
-            ):
+            if key not in metric_kwargs and key in default_kwarg_values and default_kwarg_values[key] is not None:
                 metric_kwargs[key] = default_kwarg_values[key]
 
     def __repr__(self):
@@ -406,9 +388,7 @@ class ExpectationValidationGraph:
         metric_info: _AbortedMetricsInfoDict,
     ) -> Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
-        metric_exception_info: Dict[
-            str, Union[MetricConfiguration, ExceptionInfo, int]
-        ] = {}
+        metric_exception_info: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]] = {}
         metric_id: _MetricKey
         metric_info_item: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]
         for metric_id, metric_info_item in metric_info.items():

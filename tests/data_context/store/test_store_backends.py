@@ -105,9 +105,7 @@ def basic_data_context_config_for_validation_operator():
 
 
 @pytest.fixture
-def validation_operators_data_context(
-    basic_data_context_config_for_validation_operator, filesystem_csv_4
-):
+def validation_operators_data_context(basic_data_context_config_for_validation_operator, filesystem_csv_4):
     data_context = get_context(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
@@ -123,9 +121,7 @@ def validation_operators_data_context(
     data_context.add_expectation_suite("f1.foo")
 
     df = data_context._get_batch_v2(
-        batch_kwargs=data_context.build_batch_kwargs(
-            "my_datasource", "subdir_reader", "f1"
-        ),
+        batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
         expectation_suite_name="f1.foo",
     )
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
@@ -200,9 +196,7 @@ def check_store_backend_store_backend_id_functionality(
     # Check file stores for the file in the correct format
     store_backend_id_from_file = store_backend.get(key=(".ge_store_backend_id",))
     store_backend_id_file_parser = "store_backend_id = " + pp.Word(pp.hexnums + "-")
-    parsed_store_backend_id = store_backend_id_file_parser.parseString(
-        store_backend_id_from_file
-    )
+    parsed_store_backend_id = store_backend_id_file_parser.parseString(store_backend_id_from_file)
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
@@ -226,9 +220,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     # InMemoryStoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
     in_memory_store_backend = InMemoryStoreBackend()
-    check_store_backend_store_backend_id_functionality(
-        store_backend=in_memory_store_backend
-    )
+    check_store_backend_store_backend_id_functionality(store_backend=in_memory_store_backend)
 
     # Create a new store with the same config and make sure it reports the same store_backend_id
     # in_memory_store_backend_duplicate = InMemoryStoreBackend()
@@ -254,15 +246,11 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         .ge_store_backend_id
 """
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
-    check_store_backend_store_backend_id_functionality(
-        store_backend=tuple_filesystem_store_backend
-    )
+    check_store_backend_store_backend_id_functionality(store_backend=tuple_filesystem_store_backend)
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
 
     # Repeat the above with a filepath template
-    full_test_dir_with_file_template = tmp_path_factory.mktemp(
-        "test_StoreBackend_id_initialization__dir"
-    )
+    full_test_dir_with_file_template = tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
     test_dir_with_file_template = full_test_dir_with_file_template.parts[-1]
     project_path_with_filepath_template = str(full_test_dir_with_file_template)
 
@@ -288,13 +276,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         base_directory=os.path.join(project_path, path),  # noqa: PTH118
         # filepath_template="my_file_{0}",
     )
-    check_store_backend_store_backend_id_functionality(
-        store_backend=tuple_filesystem_store_backend_duplicate
-    )
-    assert (
-        tuple_filesystem_store_backend.store_backend_id
-        == tuple_filesystem_store_backend_duplicate.store_backend_id
-    )
+    check_store_backend_store_backend_id_functionality(store_backend=tuple_filesystem_store_backend_duplicate)
+    assert tuple_filesystem_store_backend.store_backend_id == tuple_filesystem_store_backend_duplicate.store_backend_id
 
     # TupleS3StoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
@@ -319,12 +302,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         bucket=bucket,
         prefix=prefix,
     )
-    check_store_backend_store_backend_id_functionality(
-        store_backend=s3_store_backend_duplicate
-    )
-    assert (
-        s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
-    )
+    check_store_backend_store_backend_id_functionality(store_backend=s3_store_backend_duplicate)
+    assert s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
 
     # TupleGCSStoreBackend
     # TODO: Improve GCS Testing e.g. using a docker service to mock
@@ -380,9 +359,7 @@ def test_TupleS3StoreBackend_store_backend_id(aws_credentials):
     assert s3_store_backend.store_backend_id != store_error_uuid
     assert s3_store_backend_duplicate.store_backend_id != store_error_uuid
 
-    assert (
-        s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
-    )
+    assert s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
 
 
 @pytest.mark.unit
@@ -410,9 +387,7 @@ def test_InMemoryStoreBackend():
 
 @pytest.mark.filesystem
 def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
-    path = str(
-        tmp_path_factory.mktemp("test_tuple_filesystem_store_filepath_prefix_error")
-    )
+    path = str(tmp_path_factory.mktemp("test_tuple_filesystem_store_filepath_prefix_error"))
     project_path = str(tmp_path_factory.mktemp("my_dir"))
 
     with pytest.raises(StoreBackendError) as e:
@@ -434,11 +409,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
 
 @pytest.mark.filesystem
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
-    path = str(
-        tmp_path_factory.mktemp(
-            "test_FilesystemStoreBackend_two_way_string_conversion__dir"
-        )
-    )
+    path = str(tmp_path_factory.mktemp("test_FilesystemStoreBackend_two_way_string_conversion__dir"))
     project_path = str(tmp_path_factory.mktemp("my_dir"))
 
     my_store = TupleFilesystemStoreBackend(
@@ -451,9 +422,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     converted_string = my_store._convert_key_to_filepath(tuple_)
     assert converted_string == "A__a/B-b/C/foo-C-expectations.txt"
 
-    recovered_key = my_store._convert_filepath_to_key(
-        "A__a/B-b/C/foo-C-expectations.txt"
-    )
+    recovered_key = my_store._convert_filepath_to_key("A__a/B-b/C/foo-C-expectations.txt")
     assert recovered_key == tuple_
 
     with pytest.raises(ValueError):
@@ -592,23 +561,15 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",), (".ge_store_backend_id",)}
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "this_is_a_test_prefix/.ge_store_backend_id",
         "this_is_a_test_prefix/my_file_AAA",
         "this_is_a_test_prefix/my_file_BBB",
     }
 
-    assert (
-        my_store.get_url_for_key(("AAA",))
-        == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_AAA"
-    )
-    assert (
-        my_store.get_url_for_key(("BBB",))
-        == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
-    )
+    assert my_store.get_url_for_key(("AAA",)) == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_AAA"
+    assert my_store.get_url_for_key(("BBB",)) == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
 
     assert my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
@@ -616,9 +577,7 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     # Check that the rest of the keys still exist in the bucket
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "this_is_a_test_prefix/.ge_store_backend_id",
         "this_is_a_test_prefix/my_file_AAA",
@@ -629,9 +588,7 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     # Check that the rest of the keys still exist in the bucket
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "this_is_a_test_prefix/.ge_store_backend_id",
         "this_is_a_test_prefix/my_file_AAA",
@@ -642,9 +599,7 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     # Check that the rest of the keys still exist in the bucket
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "this_is_a_test_prefix/.ge_store_backend_id",
         "this_is_a_test_prefix/my_file_AAA",
@@ -660,10 +615,7 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
 
     my_new_store.set(("BBB",), "bbb", content_type="text/html; charset=utf-8")
 
-    assert (
-        my_new_store.get_public_url_for_key(("BBB",))
-        == "http://www.test.com/my_file_BBB"
-    )
+    assert my_new_store.get_public_url_for_key(("BBB",)) == "http://www.test.com/my_file_BBB"
 
 
 @mock_s3
@@ -685,17 +637,10 @@ def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo__/.ge_store_backend_id", "foo__/my_suite__bar.json"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo__/my_suite__bar.json"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo__/my_suite__bar.json"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     my_store = TupleS3StoreBackend(
         bucket=bucket,
@@ -704,17 +649,10 @@ def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = [".ge_store_backend_id", "my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     my_store = TupleS3StoreBackend(
         bucket=bucket,
@@ -723,136 +661,68 @@ def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0
     )
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = [".ge_store_backend_id", "my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     prefix = "/foo/"
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=True
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=True)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     prefix = "foo"
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=True
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=True)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=False
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=False)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     prefix = "foo/"
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=True
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=True)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=False
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=False)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
     prefix = "/foo"
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=True
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=True)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
-    client.delete_objects(
-        Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]}
-    )
+    client.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": key} for key in expected_s3_keys]})
     assert len(client.list_objects_v2(Bucket=bucket).get("Contents", [])) == 0
-    my_store = TupleS3StoreBackend(
-        bucket=bucket, prefix=prefix, platform_specific_separator=False
-    )
+    my_store = TupleS3StoreBackend(bucket=bucket, prefix=prefix, platform_specific_separator=False)
     my_store.set(("my_suite",), '{"foo": "bar"}')
     expected_s3_keys = ["foo/.ge_store_backend_id", "foo/my_suite"]
-    assert [
-        obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]
-    ] == expected_s3_keys
-    assert (
-        my_store.get_url_for_key(("my_suite",))
-        == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
-    )
+    assert [obj["Key"] for obj in client.list_objects_v2(Bucket=bucket)["Contents"]] == expected_s3_keys
+    assert my_store.get_url_for_key(("my_suite",)) == "https://s3.amazonaws.com/my_bucket/foo/my_suite"
 
 
 @mock_s3
@@ -898,19 +768,11 @@ def test_TupleS3StoreBackend_with_empty_prefixes(aws_credentials):
     assert set(my_store.list_keys()) == {("AAA",), ("BBB",), (".ge_store_backend_id",)}
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {"my_file_AAA", "my_file_BBB", ".ge_store_backend_id"}
 
-    assert (
-        my_store.get_url_for_key(("AAA",))
-        == "https://s3.amazonaws.com/leakybucket/my_file_AAA"
-    )
-    assert (
-        my_store.get_url_for_key(("BBB",))
-        == "https://s3.amazonaws.com/leakybucket/my_file_BBB"
-    )
+    assert my_store.get_url_for_key(("AAA",)) == "https://s3.amazonaws.com/leakybucket/my_file_AAA"
+    assert my_store.get_url_for_key(("BBB",)) == "https://s3.amazonaws.com/leakybucket/my_file_BBB"
 
 
 @mock_s3
@@ -978,9 +840,7 @@ def test_TupleGCSStoreBackend_base_public_path():
             base_public_path=base_public_path,
         )
 
-        my_store_with_base_public_path.set(
-            ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
-        )
+        my_store_with_base_public_path.set(("BBB",), b"bbb", content_encoding=None, content_type="image/png")
 
     run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
     key = ValidationResultIdentifier(
@@ -1041,9 +901,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         mock_client.bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/my_file_AAA")
         # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
-        mock_blob.upload_from_string.assert_called_with(
-            b"aaa", content_type="text/html"
-        )
+        mock_blob.upload_from_string.assert_called_with(b"aaa", content_type="text/html")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
@@ -1054,17 +912,13 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
             filepath_template=None, bucket=bucket, prefix=prefix, project=project
         )
 
-        my_store_with_no_filepath_template.set(
-            ("AAA",), b"aaa", content_encoding=None, content_type="image/png"
-        )
+        my_store_with_no_filepath_template.set(("AAA",), b"aaa", content_encoding=None, content_type="image/png")
 
         mock_gcs_client.assert_called_with("dummy-project")
         mock_client.bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/AAA")
         # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
-        mock_blob.upload_from_string.assert_called_with(
-            b"aaa", content_type="image/png"
-        )
+        mock_blob.upload_from_string.assert_called_with(b"aaa", content_type="image/png")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
@@ -1076,9 +930,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
         mock_gcs_client.assert_called_once_with("dummy-project")
         mock_client.bucket.assert_called_once_with("leakybucket")
-        mock_bucket.get_blob.assert_called_once_with(
-            "this_is_a_test_prefix/my_file_BBB"
-        )
+        mock_bucket.get_blob.assert_called_once_with("this_is_a_test_prefix/my_file_BBB")
         mock_blob.download_as_bytes.assert_called_once()
         mock_str.decode.assert_called_once_with("utf-8")
 
@@ -1087,9 +939,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
         my_store.list_keys()
 
-        mock_client.list_blobs.assert_called_once_with(
-            "leakybucket", prefix="this_is_a_test_prefix"
-        )
+        mock_client.list_blobs.assert_called_once_with("leakybucket", prefix="this_is_a_test_prefix")
 
         my_store.remove_key("leakybucket")
 
@@ -1141,9 +991,7 @@ def test_TupleAzureBlobStoreBackend_credential():
         prefix=prefix,
         container=container,
     )
-    with mock.patch(
-        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
-    ):
+    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
         mock_container_client = my_store._container_client
         my_store.set(("AAA",), "aaa")
         mock_container_client.upload_blob.assert_called_once_with(
@@ -1154,14 +1002,10 @@ def test_TupleAzureBlobStoreBackend_credential():
         )
 
         my_store.get(("BBB",))
-        mock_container_client.download_blob.assert_called_once_with(
-            "this_is_a_test_prefix/BBB"
-        )
+        mock_container_client.download_blob.assert_called_once_with("this_is_a_test_prefix/BBB")
 
         my_store.list_keys()
-        mock_container_client.list_blobs.assert_called_once_with(
-            name_starts_with="this_is_a_test_prefix"
-        )
+        mock_container_client.list_blobs.assert_called_once_with(name_starts_with="this_is_a_test_prefix")
 
 
 @pytest.mark.unit
@@ -1173,13 +1017,13 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
     and assert that the store backend makes the right calls for set, get, and list.
     """
-    connection_string = "DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=secret;EndpointSuffix=core.windows.net"
+    connection_string = (
+        "DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=secret;EndpointSuffix=core.windows.net"
+    )
     prefix = "this_is_a_test_prefix"
     container = "dummy-container"
 
-    my_store = TupleAzureBlobStoreBackend(
-        connection_string=connection_string, prefix=prefix, container=container
-    )
+    my_store = TupleAzureBlobStoreBackend(connection_string=connection_string, prefix=prefix, container=container)
 
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
@@ -1196,14 +1040,10 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
         my_store.get(("BBB",))
-        mock_container_client.download_blob.assert_called_once_with(
-            "this_is_a_test_prefix/BBB"
-        )
+        mock_container_client.download_blob.assert_called_once_with("this_is_a_test_prefix/BBB")
 
         my_store.list_keys()
-        mock_container_client.list_blobs.assert_called_once_with(
-            name_starts_with="this_is_a_test_prefix"
-        )
+        mock_container_client.list_blobs.assert_called_once_with(name_starts_with="this_is_a_test_prefix")
 
 
 @pytest.mark.unit
@@ -1219,9 +1059,7 @@ def test_TupleAzureBlobStoreBackend_account_url():
     prefix = "this_is_a_test_prefix"
     container = "dummy-container"
 
-    my_store = TupleAzureBlobStoreBackend(
-        account_url=account_url, prefix=prefix, container=container
-    )
+    my_store = TupleAzureBlobStoreBackend(account_url=account_url, prefix=prefix, container=container)
 
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
@@ -1234,9 +1072,7 @@ def test_TupleAzureBlobStoreBackend_account_url():
             mock_azure_blob_client.assert_called_once()
 
             my_store.get(("BBB",))
-            mock_container_client.download_blob.assert_called_once_with(
-                "this_is_a_test_prefix/BBB"
-            )
+            mock_container_client.download_blob.assert_called_once_with("this_is_a_test_prefix/BBB")
             mock_azure_credential.assert_called_once()
 
 
@@ -1262,10 +1098,7 @@ def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     conn.create_bucket(Bucket=bucket)
 
     # Assert that the bucket is empty before creating store
-    assert (
-        boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix).get("Contents")
-        is None
-    )
+    assert boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix).get("Contents") is None
 
     my_store = TupleS3StoreBackend(
         filepath_template="my_file_{0}",
@@ -1295,10 +1128,7 @@ def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     # This is belt and suspenders to make sure mocking s3 list_objects_v2 implements
     # the same limit as the actual s3 api
     assert (
-        len(
-            boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
-        )
-        == max_keys_in_a_single_call
+        len(boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]) == max_keys_in_a_single_call
     )
 
     # With pagination list all keys
@@ -1326,9 +1156,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     # test valid .set
     key = DataContextVariableKey()
     tuple_ = key.to_tuple()
-    with mock.patch(
-        "great_expectations.data_context.store.InlineStoreBackend._save_changes"
-    ) as mock_save:
+    with mock.patch("great_expectations.data_context.store.InlineStoreBackend._save_changes") as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
     assert empty_data_context.variables.config.config_version == new_config_version
@@ -1393,9 +1221,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
 
-    assert "InlineStoreBackend does not support the deletion of top level keys" in str(
-        e.value
-    )
+    assert "InlineStoreBackend does not support the deletion of top level keys" in str(e.value)
 
     # test valid .remove_key
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
@@ -1530,9 +1356,7 @@ def test_InMemoryStoreBackend_config_and_defaults() -> None:
 def test_InMemoryStoreBackend_build_Key() -> None:
     store_backend = InMemoryStoreBackend()
     name = "my_backend_key"
-    assert store_backend.build_key(name=name) == DataContextVariableKey(
-        resource_name=name
-    )
+    assert store_backend.build_key(name=name) == DataContextVariableKey(resource_name=name)
 
 
 @pytest.mark.unit

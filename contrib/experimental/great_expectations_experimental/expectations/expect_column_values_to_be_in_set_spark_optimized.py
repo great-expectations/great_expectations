@@ -37,23 +37,15 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
             df,
             _compute_domain_kwargs,
             _accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        ) = execution_engine.get_compute_domain(domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
 
         try:
-            value_set = execution_engine.spark.createDataFrame(
-                data=value_set, schema=df.schema[column_name].dataType
-            )
+            value_set = execution_engine.spark.createDataFrame(data=value_set, schema=df.schema[column_name].dataType)
         except TypeError as e:
-            raise InvalidExpectationConfigurationError(
-                f"`value_set` must be of same type as `column` : {e}"
-            )
+            raise InvalidExpectationConfigurationError(f"`value_set` must be of same type as `column` : {e}")
 
         joined = df.join(value_set, df[column_name] == value_set["value"], "left")
-        success = joined.withColumn(
-            "__success", F.when(joined["value"].isNull(), False).otherwise(True)
-        )
+        success = joined.withColumn("__success", F.when(joined["value"].isNull(), False).otherwise(True))
 
         return success.select(column_name, "__success").collect()
 
@@ -84,9 +76,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
     # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {"mostly": 1, "strict": True, "value_set": []}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -100,19 +90,13 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
-            "value_set"
-        )
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value("value_set")
         column = configuration.kwargs.get("column")
 
         try:
             assert column is not None, "`column` must be specified"
-            assert (
-                "value_set" in configuration.kwargs or value_set
-            ), "value_set is required"
-            assert isinstance(
-                value_set, (list, set, dict)
-            ), "value_set must be a list, set, or dict"
+            assert "value_set" in configuration.kwargs or value_set, "value_set is required"
+            assert isinstance(value_set, (list, set, dict)), "value_set must be a list, set, or dict"
             if isinstance(value_set, dict):
                 assert (
                     "$PARAMETER" in value_set

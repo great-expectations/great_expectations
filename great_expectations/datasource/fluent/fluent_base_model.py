@@ -271,9 +271,7 @@ class FluentBaseModel(pydantic.BaseModel):
                 f" {class_name} may be missing a context."
             )
         else:
-            logger.info(
-                f"{class_name}.dict() - missing `config_provider`, skipping config substitution"
-            )
+            logger.info(f"{class_name}.dict() - missing `config_provider`, skipping config substitution")
 
         return result
 
@@ -341,6 +339,4 @@ def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) 
         logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} added")
     else:
         model.__fields_set__.discard(field_name)
-        logger.debug(
-            f"{model.__class__.__name__}.__fields_set__ {field_name} discarded"
-        )
+        logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} discarded")

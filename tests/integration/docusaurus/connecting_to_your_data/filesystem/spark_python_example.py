@@ -58,9 +58,7 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "base_directory"
-] = folder_path
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["base_directory"] = folder_path
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
@@ -87,9 +85,7 @@ batch_request.runtime_parameters["path"] = data_filepath
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
@@ -111,9 +107,7 @@ batch_request.data_asset_name = "yellow_tripdata_sample_2019-01"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
@@ -122,9 +116,7 @@ assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_filesystem_datasource"]
 assert (
     "yellow_tripdata_sample_2019-01"
-    in context.get_available_data_asset_names()["my_filesystem_datasource"][
-        "default_inferred_data_connector_name"
-    ]
+    in context.get_available_data_asset_names()["my_filesystem_datasource"]["default_inferred_data_connector_name"]
 )
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory">
@@ -145,9 +137,7 @@ batch_request.runtime_parameters["path"] = folder_path
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 
 print(validator.head())
 print(validator.active_batch.data.dataframe.count())  # should be 30,000

@@ -49,9 +49,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
         batch_identifier="batch_id",
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
-    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
-        success=True, statistics={}, results=[]
-    )
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -62,16 +60,12 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
     )
 
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
-    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
-        success=False, statistics={}, results=[]
-    )
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
     # Verify that internals are working as expected, including the default filepath
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "test/prefix/.ge_store_backend_id",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/batch_id.json",
@@ -119,9 +113,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
         )
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
-    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
-        success=True, statistics={}, results=[]
-    )
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier.from_tuple(
         (
@@ -134,9 +126,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
         )
     )
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
-    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
-        success=False, statistics={}, results=[]
-    )
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
     assert set(my_store.list_keys()) == {
         ns_1,
         ns_2,
@@ -158,9 +148,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
-    full_test_dir = tmp_path_factory.mktemp(
-        "test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir"
-    )
+    full_test_dir = tmp_path_factory.mktemp("test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir")
     test_dir = full_test_dir.parts[-1]
     path = str(full_test_dir)
 
@@ -182,9 +170,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
         batch_identifier="batch_id",
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
-    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
-        success=True, statistics={}, results=[]
-    )
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier.from_tuple(
         (
@@ -196,9 +182,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
         )
     )
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
-    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
-        success=False, statistics={}, results=[]
-    )
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
     assert set(my_store.list_keys()) == {
         ns_1,
@@ -271,9 +255,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
         batch_identifier="batch_id",
     )
     my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
-    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
-        success=True, statistics={}, results=[]
-    )
+    assert my_store.get(ns_1) == ExpectationSuiteValidationResult(success=True, statistics={}, results=[])
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -284,9 +266,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     )
 
     my_store.set(ns_2, ExpectationSuiteValidationResult(success=False))
-    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(
-        success=False, statistics={}, results=[]
-    )
+    assert my_store.get(ns_2) == ExpectationSuiteValidationResult(success=False, statistics={}, results=[])
 
     assert set(my_store.list_keys()) == {
         ns_1,

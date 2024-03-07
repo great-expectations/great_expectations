@@ -71,9 +71,7 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     df: pd.DataFrame = pd.DataFrame(
         {
@@ -142,9 +140,7 @@ def test_column_domain_builder(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -261,9 +257,7 @@ def test_column_domain_builder_with_simple_semantic_type_included(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -326,9 +320,7 @@ def test_column_pair_domain_builder_wrong_column_names(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -347,9 +339,7 @@ def test_column_pair_domain_builder_wrong_column_names(
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_builder.get_domains(
-            rule_name="my_rule", variables=variables, batch_request=batch_request
-        )
+        domain_builder.get_domains(rule_name="my_rule", variables=variables, batch_request=batch_request)
 
     assert (
         'Error: Columns specified for ColumnPairDomainBuilder in sorted order must correspond to "column_A" and "column_B" (in this exact order).'
@@ -372,9 +362,7 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -435,9 +423,7 @@ def test_multi_column_domain_builder_wrong_column_list(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -452,23 +438,15 @@ def test_multi_column_domain_builder_wrong_column_list(
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_builder.get_domains(
-            rule_name="my_rule", variables=variables, batch_request=batch_request
-        )
+        domain_builder.get_domains(rule_name="my_rule", variables=variables, batch_request=batch_request)
 
-    assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
-        excinfo.value
-    )
+    assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(excinfo.value)
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_builder.get_domains(
-            rule_name="my_rule", variables=variables, batch_request=batch_request
-        )
+        domain_builder.get_domains(rule_name="my_rule", variables=variables, batch_request=batch_request)
 
-    assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
-        excinfo.value
-    )
+    assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(excinfo.value)
 
 
 @pytest.mark.slow  # 1.18s
@@ -486,9 +464,7 @@ def test_multi_column_domain_builder_correct_column_list(
     if variables_configs is None:
         variables_configs = {}
 
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        variables_configs=variables_configs
-    )
+    variables: ParameterContainer = build_parameter_container_for_variables(variables_configs=variables_configs)
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",

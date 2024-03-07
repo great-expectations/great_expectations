@@ -31,9 +31,7 @@ def test_execution_engine():
     """
 
     class TestExecutionEngine(ExecutionEngine):
-        def get_batch_data_and_markers(
-            self, batch_spec
-        ) -> Tuple[BatchData, BatchMarkers]:
+        def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
             raise NotImplementedError
 
     return TestExecutionEngine()
@@ -50,11 +48,7 @@ def test_add_column_row_condition_filter_null_row_condition_not_present(
     domain_kwargs: dict = {}
     new_domain_kwargs = e.add_column_row_condition(domain_kwargs, "a")
     assert new_domain_kwargs == {
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ]
+        "filter_conditions": [RowCondition(condition='col("a").notnull()', condition_type=RowConditionParserType.GE)]
     }
 
     # Ensuring that this also works when formatted differently
@@ -62,11 +56,7 @@ def test_add_column_row_condition_filter_null_row_condition_not_present(
     new_domain_kwargs = e.add_column_row_condition({"column": "a"})
     assert new_domain_kwargs == {
         "column": "a",
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ],
+        "filter_conditions": [RowCondition(condition='col("a").notnull()', condition_type=RowConditionParserType.GE)],
     }
 
 
@@ -79,9 +69,7 @@ def test_add_column_row_condition_filter_null_false_row_condition_not_present(
     # Identity case
     # default of add_column_row_condition is to apply filter_null=True
     domain_kwargs: dict = {}
-    new_domain_kwargs = e.add_column_row_condition(
-        domain_kwargs, "a", filter_null=False
-    )
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs, "a", filter_null=False)
     assert new_domain_kwargs == domain_kwargs
 
 
@@ -94,9 +82,7 @@ def test_add_column_row_condition_filter_null_false_row_condition_present(
     # Identity case
     # default of add_column_row_condition is to apply filter_null=True
     domain_kwargs: dict = {"row_condition": "some_condition"}
-    new_domain_kwargs = e.add_column_row_condition(
-        domain_kwargs, "a", filter_null=False
-    )
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs, "a", filter_null=False)
     assert new_domain_kwargs == domain_kwargs
 
 
@@ -113,11 +99,7 @@ def test_add_column_row_condition_filter_null_row_condition_present(
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": "some_row_condition",
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ],
+        "filter_conditions": [RowCondition(condition='col("a").notnull()', condition_type=RowConditionParserType.GE)],
     }
 
     # Ensuring that we don't override if a row condition is present,
@@ -127,11 +109,7 @@ def test_add_column_row_condition_filter_null_row_condition_present(
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": "some_row_condition",
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ],
+        "filter_conditions": [RowCondition(condition='col("a").notnull()', condition_type=RowConditionParserType.GE)],
     }
 
 
@@ -146,11 +124,7 @@ def test_add_column_row_condition_filter_null_row_condition_none(test_execution_
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": None,
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ],
+        "filter_conditions": [RowCondition(condition='col("a").notnull()', condition_type=RowConditionParserType.GE)],
     }
 
 
@@ -164,10 +138,7 @@ def test_add_column_row_condition_with_unsupported_filter_nan_true(
     # Ensuring that an attempt to filter nans within base class yields an error
     with pytest.raises(gx_exceptions.GreatExpectationsError) as error:
         _ = e.add_column_row_condition({}, "a", filter_nan=True)
-    assert (
-        "Base ExecutionEngine does not support adding nan condition filters"
-        in error.value.message
-    )
+    assert "Base ExecutionEngine does not support adding nan condition filters" in error.value.message
 
 
 @pytest.mark.unit
@@ -213,9 +184,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
-    results = engine.resolve_metrics(
-        metrics_to_resolve=desired_metrics, metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=desired_metrics, metrics=metrics)
     metrics.update(results)
 
     desired_map_metric = MetricConfiguration(
@@ -228,9 +197,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         "column.mean": mean,
         "table.columns": table_columns_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_map_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_map_metric,), metrics=metrics)
     metrics.update(results)
 
     desired_threshold_condition_metric = MetricConfiguration(
@@ -242,9 +209,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": desired_map_metric,
         "table.columns": table_columns_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_threshold_condition_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_threshold_condition_metric,), metrics=metrics)
     metrics.update(results)
     assert list(results[desired_threshold_condition_metric.id][0]) == [
         False,
@@ -260,9 +225,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     desired_metric.metric_dependencies = {
         "unexpected_condition": desired_threshold_condition_metric,
     }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics=metrics)
     metrics.update(results)
     assert results[desired_metric.id] == 0
 
@@ -300,16 +263,11 @@ def test_resolve_metrics_with_extraneous_value_key():
     }
 
     desired_metrics = (mean, stdev)
-    results = engine.resolve_metrics(
-        metrics_to_resolve=desired_metrics, metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=desired_metrics, metrics=metrics)
     metrics.update(results)
 
     # Ensuring extraneous value key did not change computation
-    assert (
-        metrics[("column.standard_deviation", "column=a", "value_set=[1, 2, 3, 4, 5]")]
-        == 1.0
-    )
+    assert metrics[("column.standard_deviation", "column=a", "value_set=[1, 2, 3, 4, 5]")] == 1.0
 
 
 # Testing that metric resolution also works with metric partial function

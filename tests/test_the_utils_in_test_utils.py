@@ -39,9 +39,4 @@ def test_get_clickhouse_sqlalchemy_potential_type():
         ("Map(String, String)", types.Map),
     )
     for pair in input_output:
-        assert (
-            get_clickhouse_sqlalchemy_potential_type(
-                clickhouse_sqlalchemy.drivers.base, pair[0]
-            )
-            == pair[1]
-        )
+        assert get_clickhouse_sqlalchemy_potential_type(clickhouse_sqlalchemy.drivers.base, pair[0]) == pair[1]

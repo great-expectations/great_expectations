@@ -127,9 +127,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
     def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params: list = []
-        app_template_str = (
-            "\n - $eval_param = $eval_param_value (at time of validation)."
-        )
+        app_template_str = "\n - $eval_param = $eval_param_value (at time of validation)."
         configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
@@ -140,9 +138,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
-        if current_expectation_params and not isinstance(
-            rendered_string_template, RenderedAtomicContent
-        ):
+        if current_expectation_params and not isinstance(rendered_string_template, RenderedAtomicContent):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
@@ -186,9 +182,7 @@ def param_method(param_name: str) -> Callable:
     """
     if not param_name:
         # If param_name was passed as an empty string
-        raise RendererConfigurationError(
-            "Method decorated with @param_method must be passed an existing param_name."
-        )
+        raise RendererConfigurationError("Method decorated with @param_method must be passed an existing param_name.")
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
@@ -206,9 +200,7 @@ def param_method(param_name: str) -> Callable:
 
             if hasattr(renderer_configuration.params, param_name):
                 if getattr(renderer_configuration.params, param_name, None):
-                    return_obj = param_func(
-                        renderer_configuration=renderer_configuration
-                    )
+                    return_obj = param_func(renderer_configuration=renderer_configuration)
                 else:  # noqa: PLR5501
                     if return_type is RendererConfiguration:
                         return_obj = renderer_configuration
@@ -307,36 +299,26 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    _save_callback: Union[Callable[[Expectation], Expectation], None] = (
-        pydantic.PrivateAttr(default=None)
-    )
+    _save_callback: Union[Callable[[Expectation], Expectation], None] = pydantic.PrivateAttr(default=None)
 
     @pydantic.validator("result_format")
-    def _validate_result_format(
-        cls, result_format: ResultFormat | dict
-    ) -> ResultFormat | dict:
+    def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
         if isinstance(result_format, dict) and "result_format" not in result_format:
-            raise ValueError(
-                "If configuring result format with a dictionary, the key 'result_format' must be present."
-            )
+            raise ValueError("If configuring result format with a dictionary, the key 'result_format' must be present.")
         return result_format
 
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
 
-    def register_save_callback(
-        self, save_callback: Callable[[Expectation], Expectation]
-    ) -> None:
+    def register_save_callback(self, save_callback: Callable[[Expectation], Expectation]) -> None:
         self._save_callback = save_callback
 
     @public_api
     def save(self):
         """Save the current state of this Expectation."""
         if not self._save_callback:
-            raise RuntimeError(
-                "Expectation must be added to ExpectationSuite before it can be saved."
-            )
+            raise RuntimeError("Expectation must be added to ExpectationSuite before it can be saved.")
         updated_self = self._save_callback(self)
         self.id = updated_self.id
 
@@ -348,9 +330,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
-            register_renderer(
-                object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
-            )
+            register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
 
     @abstractmethod
     def _validate(
@@ -423,9 +403,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         elif renderer_configuration.expectation_type:
             template_str = "$expectation_type"
         else:
-            raise ValueError(
-                "RendererConfiguration does not contain an expectation_type."
-            )
+            raise ValueError("RendererConfiguration does not contain an expectation_type.")
 
         add_param_args = (
             (
@@ -436,9 +414,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
         )
         for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+            renderer_configuration.add_param(name=name, param_type=param_type, value=value)
 
         renderer_configuration.template_str = template_str
         return renderer_configuration
@@ -468,9 +444,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration = cls._prescriptive_template(
             renderer_configuration=renderer_configuration,
         )
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
         return (
             renderer_configuration.template_str,
             renderer_configuration.params.dict(),
@@ -578,18 +552,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         custom_property_values = []
         meta_properties_to_render: Optional[dict] = None
         if result and result.expectation_config:
-            meta_properties_to_render = result.expectation_config.kwargs.get(
-                "meta_properties_to_render"
-            )
+            meta_properties_to_render = result.expectation_config.kwargs.get("meta_properties_to_render")
         if meta_properties_to_render:
             for key in sorted(meta_properties_to_render.keys()):
                 meta_property = meta_properties_to_render[key]
                 if meta_property:
                     try:
                         # Allow complex structure with . usage
-                        assert isinstance(
-                            result.expectation_config, ExpectationConfiguration
-                        )
+                        assert isinstance(result.expectation_config, ExpectationConfiguration)
                         obj = result.expectation_config.meta["attributes"]
                         keys = meta_property.split(".")
                         for i in range(0, len(keys)):
@@ -666,11 +636,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             )
         else:
@@ -711,9 +677,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if "raised_exception" in result.exception_info:
             exception["raised_exception"] = result.exception_info["raised_exception"]
             exception["exception_message"] = result.exception_info["exception_message"]
-            exception["exception_traceback"] = result.exception_info[
-                "exception_traceback"
-            ]
+            exception["exception_traceback"] = result.exception_info["exception_traceback"]
         else:
             for k, v in result.exception_info.items():
                 # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
@@ -725,9 +689,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 break
 
         if exception["raised_exception"]:
-            exception_message_template_str = (
-                "\n\n$expectation_type raised an exception:\n$exception_message"
-            )
+            exception_message_template_str = "\n\n$expectation_type raised an exception:\n$exception_message"
 
             if result.expectation_config is not None:
                 expectation_type = result.expectation_config.expectation_type
@@ -748,9 +710,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                             "classes": ["text-danger"],
                             "params": {
                                 "exception_message": {"tag": "code"},
-                                "expectation_type": {
-                                    "classes": ["badge", "badge-danger", "mb-2"]
-                                },
+                                "expectation_type": {"classes": ["badge", "badge-danger", "mb-2"]},
                             },
                         },
                     },
@@ -779,19 +739,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if success or not result_dict.get("unexpected_count"):
             return []
         else:
-            unexpected_count = num_to_str(
-                result_dict["unexpected_count"], use_locale=True, precision=20
-            )
-            unexpected_percent = (
-                f"{num_to_str(result_dict['unexpected_percent'], precision=4)}%"
-            )
-            element_count = num_to_str(
-                result_dict["element_count"], use_locale=True, precision=20
-            )
+            unexpected_count = num_to_str(result_dict["unexpected_count"], use_locale=True, precision=20)
+            unexpected_percent = f"{num_to_str(result_dict['unexpected_percent'], precision=4)}%"
+            element_count = num_to_str(result_dict["element_count"], use_locale=True, precision=20)
 
             template_str = (
-                "\n\n$unexpected_count unexpected values found. "
-                "$unexpected_percent of $element_count total rows."
+                "\n\n$unexpected_count unexpected values found. " "$unexpected_percent of $element_count total rows."
             )
 
             return [
@@ -828,19 +781,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if result_dict is None:
             return None
 
-        if not result_dict.get("partial_unexpected_list") and not result_dict.get(
-            "partial_unexpected_counts"
-        ):
+        if not result_dict.get("partial_unexpected_list") and not result_dict.get("partial_unexpected_counts"):
             return None
         table_rows: List[Any] = []
 
-        partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
-            "partial_unexpected_counts"
-        )
+        partial_unexpected_counts: Optional[List[dict]] = result_dict.get("partial_unexpected_counts")
         # this means the result_format is COMPLETE and we have the full set of unexpected indices
-        unexpected_index_list: Optional[List[dict]] = result_dict.get(
-            "unexpected_index_list"
-        )
+        unexpected_index_list: Optional[List[dict]] = result_dict.get("unexpected_index_list")
         unexpected_count: int = result_dict["unexpected_count"]
         if partial_unexpected_counts:
             # We will check to see whether we have *all* of the unexpected values
@@ -848,9 +795,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
             unexpected_list: Optional[List[dict]] = result_dict.get("unexpected_list")
-            unexpected_index_column_names: Optional[List[str]] = result_dict.get(
-                "unexpected_index_column_names"
-            )
+            unexpected_index_column_names: Optional[List[str]] = result_dict.get("unexpected_index_column_names")
             if unexpected_index_list:
                 header_row, table_rows = build_count_and_index_table(
                     partial_unexpected_counts=partial_unexpected_counts,
@@ -868,9 +813,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         else:
             header_row = ["Sampled Unexpected Values"]
             sampled_values_set = set()
-            partial_unexpected_list: Optional[List[Any]] = result_dict.get(
-                "partial_unexpected_list"
-            )
+            partial_unexpected_list: Optional[List[Any]] = result_dict.get("partial_unexpected_list")
             if partial_unexpected_list:
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
@@ -888,9 +831,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 "content_block_type": "table",
                 "table": table_rows,
                 "header_row": header_row,
-                "styling": {
-                    "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
-                },
+                "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
             }
         )
         if result_dict.get("unexpected_index_query"):
@@ -918,9 +859,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return [unexpected_table_content_block]
 
     @classmethod
-    def _get_observed_value_from_evr(
-        self, result: Optional[ExpectationValidationResult]
-    ) -> str:
+    def _get_observed_value_from_evr(self, result: Optional[ExpectationValidationResult]) -> str:
         result_dict: Optional[dict] = None
         if result:
             result_dict = result.result
@@ -930,9 +869,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         observed_value: Any = result_dict.get("observed_value")
         unexpected_percent: Optional[float] = result_dict.get("unexpected_percent")
         if observed_value is not None:
-            if isinstance(observed_value, (int, float)) and not isinstance(
-                observed_value, bool
-            ):
+            if isinstance(observed_value, (int, float)) and not isinstance(observed_value, bool):
                 return num_to_str(observed_value, precision=10, use_locale=True)
             return str(observed_value)
         elif unexpected_percent is not None:
@@ -1043,11 +980,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if runtime_configuration is None:
             runtime_configuration = {}
 
-        validation_dependencies: ValidationDependencies = (
-            self.get_validation_dependencies(
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        validation_dependencies: ValidationDependencies = self.get_validation_dependencies(
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
@@ -1067,17 +1002,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
 
-        expectation_validation_result: Union[ExpectationValidationResult, dict] = (
-            self._validate(
-                metrics=provided_metrics,
-                runtime_configuration=runtime_configuration,
-                execution_engine=execution_engine,
-            )
+        expectation_validation_result: Union[ExpectationValidationResult, dict] = self._validate(
+            metrics=provided_metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
 
-        result_format = parse_result_format(
-            runtime_configuration.get("result_format", {})
-        )
+        result_format = parse_result_format(runtime_configuration.get("result_format", {}))
         if result_format.get("result_format") == ResultFormat.BOOLEAN_ONLY:
             if isinstance(expectation_validation_result, ExpectationValidationResult):
                 expectation_validation_result.result = {}
@@ -1124,9 +1055,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         result_format: dict = runtime_configuration["result_format"]
         result_format = parse_result_format(result_format=result_format)
-        return ValidationDependencies(
-            metric_configurations={}, result_format=result_format
-        )
+        return ValidationDependencies(metric_configurations={}, result_format=result_format)
 
     def _get_default_value(self, key: str) -> Any:
         field = self.__fields__.get(key)
@@ -1134,30 +1063,22 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         if field is not None:
             return field.default if not field.required else None
         else:
-            logger.info(
-                f'_get_default_value called with key "{key}", but it is not a known field'
-            )
+            logger.info(f'_get_default_value called with key "{key}", but it is not a known field')
             return None
 
     def _get_domain_kwargs(self) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
-            key: self.configuration.kwargs.get(key, self._get_default_value(key))
-            for key in self.domain_keys
+            key: self.configuration.kwargs.get(key, self._get_default_value(key)) for key in self.domain_keys
         }
-        missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
-            domain_kwargs.keys()
-        )
+        missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
-            raise InvalidExpectationKwargsError(
-                f"Missing domain kwargs: {list(missing_kwargs)}"
-            )
+            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")
         return domain_kwargs
 
     def _get_success_kwargs(self) -> Dict[str, Any]:
         domain_kwargs: Dict[str, Optional[str]] = self._get_domain_kwargs()
         success_kwargs: Dict[str, Any] = {
-            key: self.configuration.kwargs.get(key, self._get_default_value(key))
-            for key in self.success_keys
+            key: self.configuration.kwargs.get(key, self._get_default_value(key)) for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
         return success_kwargs
@@ -1172,15 +1093,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             configuration.kwargs.update(runtime_configuration)
 
         success_kwargs = self._get_success_kwargs()
-        runtime_kwargs = {
-            key: configuration.kwargs.get(key, self._get_default_value(key))
-            for key in self.runtime_keys
-        }
+        runtime_kwargs = {key: configuration.kwargs.get(key, self._get_default_value(key)) for key in self.runtime_keys}
         runtime_kwargs.update(success_kwargs)
 
-        runtime_kwargs["result_format"] = parse_result_format(
-            runtime_kwargs["result_format"]
-        )
+        runtime_kwargs["result_format"] = parse_result_format(runtime_kwargs["result_format"])
 
         return runtime_kwargs
 
@@ -1189,9 +1105,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool, List[str], None]], str]:
         default_result_format: Optional[Any] = self._get_default_value("result_format")
-        configuration_result_format: Union[
-            Dict[str, Union[str, int, bool, List[str], None]], str
-        ] = self.configuration.kwargs.get("result_format", default_result_format)
+        configuration_result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str] = (
+            self.configuration.kwargs.get("result_format", default_result_format)
+        )
         result_format: Union[Dict[str, Union[str, int, bool, List[str], None]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
@@ -1203,9 +1119,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return result_format
 
     @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
@@ -1238,18 +1152,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self._warn_if_result_format_config_in_runtime_configuration(
             runtime_configuration=runtime_configuration,
         )
-        self._warn_if_result_format_config_in_expectation_configuration(
-            configuration=configuration
-        )
+        self._warn_if_result_format_config_in_expectation_configuration(configuration=configuration)
 
-        configuration.process_evaluation_parameters(
-            evaluation_parameters, interactive_evaluation, data_context
-        )
-        expectation_validation_result_list: list[ExpectationValidationResult] = (
-            validator.graph_validate(
-                configurations=[configuration],
-                runtime_configuration=runtime_configuration,
-            )
+        configuration.process_evaluation_parameters(evaluation_parameters, interactive_evaluation, data_context)
+        expectation_validation_result_list: list[ExpectationValidationResult] = validator.graph_validate(
+            configurations=[configuration],
+            runtime_configuration=runtime_configuration,
         )
         return expectation_validation_result_list[0]
 
@@ -1405,17 +1313,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         if not param_prefix:
-            raise RendererConfigurationError(
-                "Array param_prefix must be a non-empty string."
-            )
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
 
         @param_method(param_name=array_param_name)
         def _add_params(
             renderer_configuration: RendererConfiguration,
         ) -> RendererConfiguration:
-            array: Sequence[Optional[Any]] = getattr(
-                renderer_configuration.params, array_param_name
-            ).value
+            array: Sequence[Optional[Any]] = getattr(renderer_configuration.params, array_param_name).value
             if array:
                 for idx, value in enumerate(array):
                     if isinstance(value, Number):
@@ -1438,19 +1342,13 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> str:
         if not param_prefix:
-            raise RendererConfigurationError(
-                "Array param_prefix must be a non-empty string."
-            )
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
 
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
-            array: Sequence[Optional[Any]] = getattr(
-                renderer_configuration.params, array_param_name
-            ).value
+            array: Sequence[Optional[Any]] = getattr(renderer_configuration.params, array_param_name).value
             if array:
-                array_string = " ".join(
-                    [f"${param_prefix}{idx!s}" for idx in range(len(array))]
-                )
+                array_string = " ".join([f"${param_prefix}{idx!s}" for idx in range(len(array))])
             else:
                 array_string = "[ ]"
             return array_string
@@ -1476,20 +1374,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @staticmethod
     @param_method(param_name="strict_min")
     def _get_strict_min_string(renderer_configuration: RendererConfiguration) -> str:
-        return (
-            "greater than"
-            if renderer_configuration.params.strict_min.value is True
-            else "greater than or equal to"
-        )
+        return "greater than" if renderer_configuration.params.strict_min.value is True else "greater than or equal to"
 
     @staticmethod
     @param_method(param_name="strict_max")
     def _get_strict_max_string(renderer_configuration: RendererConfiguration) -> str:
-        return (
-            "less than"
-            if renderer_configuration.params.strict_max.value is True
-            else "less than or equal to"
-        )
+        return "less than" if renderer_configuration.params.strict_max.value is True else "less than or equal to"
 
 
 @public_api
@@ -1536,11 +1426,9 @@ class BatchExpectation(Expectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
 
         metric_name: str
@@ -1602,9 +1490,7 @@ representation."""
 representation."""
                     )
 
-        if isinstance(min_value, datetime.datetime) or isinstance(
-            max_value, datetime.datetime
-        ):
+        if isinstance(min_value, datetime.datetime) or isinstance(max_value, datetime.datetime):
             if not isinstance(metric_value, datetime.datetime):
                 try:
                     metric_value = parse(metric_value)
@@ -1722,9 +1608,7 @@ class QueryExpectation(BatchExpectation, ABC):
     )
 
     @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         """Raises an exception if the configuration is not viable for an expectation.
 
         Args:
@@ -1738,24 +1622,18 @@ class QueryExpectation(BatchExpectation, ABC):
         if not configuration:
             configuration = self.configuration
 
-        query: Optional[Any] = configuration.kwargs.get(
-            "query"
-        ) or self._get_default_value("query")
-        row_condition: Optional[Any] = configuration.kwargs.get(
+        query: Optional[Any] = configuration.kwargs.get("query") or self._get_default_value("query")
+        row_condition: Optional[Any] = configuration.kwargs.get("row_condition") or self._get_default_value(
             "row_condition"
-        ) or self._get_default_value("row_condition")
+        )
 
         try:
-            assert (
-                "query" in configuration.kwargs or query
-            ), "'query' parameter is required for Query Expectations."
+            assert "query" in configuration.kwargs or query, "'query' parameter is required for Query Expectations."
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         try:
             if not isinstance(query, str):
-                raise TypeError(
-                    f"'query' must be a string, but your query is type: {type(query)}"
-                )
+                raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
@@ -1861,11 +1739,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         assert isinstance(
             self.map_metric, str
@@ -1918,12 +1794,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
-        include_unexpected_rows: Optional[bool] = (
-            validation_dependencies.result_format.get("include_unexpected_rows")
-        )
+        result_format_str: Optional[str] = validation_dependencies.result_format.get("result_format")
+        include_unexpected_rows: Optional[bool] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -1996,19 +1868,13 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: str | dict[str, Any] = self._get_result_format(
-            runtime_configuration=runtime_configuration
-        )
+        result_format: str | dict[str, Any] = self._get_result_format(runtime_configuration=runtime_configuration)
 
         include_unexpected_rows: bool
         unexpected_index_column_names: int | str | list[str] | None
         if isinstance(result_format, dict):
-            include_unexpected_rows = result_format.get(
-                "include_unexpected_rows", False
-            )
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+            include_unexpected_rows = result_format.get("include_unexpected_rows", False)
+            unexpected_index_column_names = result_format.get("unexpected_index_column_names", None)
         else:
             include_unexpected_rows = False
             unexpected_index_column_names = None
@@ -2032,9 +1898,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         unexpected_rows: pd.DataFrame | None = None
         if include_unexpected_rows:
-            unexpected_rows = metrics.get(
-                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
-            )
+            unexpected_rows = metrics.get(f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}")
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -2118,11 +1982,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         assert isinstance(
             self.map_metric, str
@@ -2176,12 +2038,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
-        include_unexpected_rows: Optional[bool] = (
-            validation_dependencies.result_format.get("include_unexpected_rows")
-        )
+        result_format_str: Optional[str] = validation_dependencies.result_format.get("result_format")
+        include_unexpected_rows: Optional[bool] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2253,15 +2111,13 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[Dict[str, Union[int, str, bool, List[str], None]], str] = (
-            self._get_result_format(runtime_configuration=runtime_configuration)
+        result_format: Union[Dict[str, Union[int, str, bool, List[str], None]], str] = self._get_result_format(
+            runtime_configuration=runtime_configuration
         )
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+            unexpected_index_column_names = result_format.get("unexpected_index_column_names", None)
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -2336,9 +2192,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
     column_list: List[str]
 
-    ignore_row_if: Literal[
-        "all_values_are_missing", "any_value_is_missing", "never"
-    ] = "all_values_are_missing"
+    ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = "all_values_are_missing"
     catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
@@ -2364,11 +2218,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         assert isinstance(
             self.map_metric, str
@@ -2422,12 +2274,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        result_format_str: Optional[str] = validation_dependencies.result_format.get(
-            "result_format"
-        )
-        include_unexpected_rows: Optional[bool] = (
-            validation_dependencies.result_format.get("include_unexpected_rows")
-        )
+        result_format_str: Optional[str] = validation_dependencies.result_format.get("result_format")
+        include_unexpected_rows: Optional[bool] = validation_dependencies.result_format.get("include_unexpected_rows")
 
         if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
@@ -2469,9 +2317,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         )
 
         # ID/PK currently doesn't work for ExpectCompoundColumnsToBeUnique in SQL
-        if self.map_metric == "compound_columns.unique" and isinstance(
-            execution_engine, SqlAlchemyExecutionEngine
-        ):
+        if self.map_metric == "compound_columns.unique" and isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -2510,14 +2356,10 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self._get_result_format(
-            runtime_configuration=runtime_configuration
-        )
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
-            unexpected_index_column_names = result_format.get(
-                "unexpected_index_column_names", None
-            )
+            unexpected_index_column_names = result_format.get("unexpected_index_column_names", None)
 
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
@@ -2627,22 +2469,16 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
     if unexpected_list is not None and not exclude_unexpected_values:
-        return_obj["result"]["partial_unexpected_list"] = unexpected_list[
-            : result_format["partial_unexpected_count"]
-        ]
+        return_obj["result"]["partial_unexpected_list"] = unexpected_list[: result_format["partial_unexpected_count"]]
 
     if unexpected_index_column_names is not None:
-        return_obj["result"].update(
-            {"unexpected_index_column_names": unexpected_index_column_names}
-        )
+        return_obj["result"].update({"unexpected_index_column_names": unexpected_index_column_names})
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
         return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
-        return_obj["result"]["unexpected_percent_nonmissing"] = (
-            unexpected_percent_nonmissing
-        )
+        return_obj["result"]["unexpected_percent_nonmissing"] = unexpected_percent_nonmissing
 
     if result_format["include_unexpected_rows"]:
         return_obj["result"].update(
@@ -2659,16 +2495,12 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             # in the case of multicolumn map expectations `unexpected_list` contains dicts,
             # which will throw an exception when we hash it to count unique members.
             # As a workaround, we flatten the values out to tuples.
-            immutable_unexpected_list = [
-                tuple([val for val in item.values()]) for item in unexpected_list
-            ]
+            immutable_unexpected_list = [tuple([val for val in item.values()]) for item in unexpected_list]
         else:
             immutable_unexpected_list = unexpected_list
 
     # Try to return the most common values, if possible.
-    partial_unexpected_count: Optional[int] = result_format.get(
-        "partial_unexpected_count"
-    )
+    partial_unexpected_count: Optional[int] = result_format.get("partial_unexpected_count")
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
@@ -2676,19 +2508,13 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(immutable_unexpected_list).most_common(
-                            result_format["partial_unexpected_count"]
-                        ),
+                        Counter(immutable_unexpected_list).most_common(result_format["partial_unexpected_count"]),
                         key=lambda x: (-x[1], x[0]),
                     )
                 ]
-                return_obj["result"].update(
-                    {"partial_unexpected_counts": partial_unexpected_counts}
-                )
+                return_obj["result"].update({"partial_unexpected_counts": partial_unexpected_counts})
         except TypeError:
-            partial_unexpected_counts = [
-                {"error": "partial_exception_counts requires a hashable type"}
-            ]
+            partial_unexpected_counts = [{"error": "partial_exception_counts requires a hashable type"}]
         finally:
             if unexpected_index_list is not None:
                 return_obj["result"].update(
@@ -2741,9 +2567,7 @@ def _mostly_success(
 ) -> bool:
     rows_considered_cnt_as_float: float = float(rows_considered_cnt)
     unexpected_cnt_as_float: float = float(unexpected_cnt)
-    success_ratio: float = (
-        rows_considered_cnt_as_float - unexpected_cnt_as_float
-    ) / rows_considered_cnt_as_float
+    success_ratio: float = (rows_considered_cnt_as_float - unexpected_cnt_as_float) / rows_considered_cnt_as_float
     return success_ratio >= mostly
 
 

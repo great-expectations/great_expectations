@@ -54,9 +54,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         value = configuration["kwargs"].get("value")
@@ -64,14 +62,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
         try:
             assert value is not None, "'value' must be specified"
-            assert (
-                (isinstance(threshold, (int, float)) and 0 < threshold <= 1)
-                or (
-                    isinstance(threshold, list)
-                    and all(isinstance(x, (int, float)) for x in threshold)
-                    and all(0 < x <= 1 for x in threshold)
-                    and 0 < sum(threshold) <= 1
-                )
+            assert (isinstance(threshold, (int, float)) and 0 < threshold <= 1) or (
+                isinstance(threshold, list)
+                and all(isinstance(x, (int, float)) for x in threshold)
+                and all(0 < x <= 1 for x in threshold)
+                and 0 < sum(threshold) <= 1
             ), "'threshold' must be 1, a float between 0 and 1, or a list of floats whose sum is between 0 and 1"
             if isinstance(threshold, list):
                 assert isinstance(value, list) and len(value) == len(
@@ -93,17 +88,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
-            success = all(
-                query_result[value[i]] >= threshold[i] for i in range(len(value))
-            )
+            success = all(query_result[value[i]] >= threshold[i] for i in range(len(value)))
 
             return {
                 "success": success,
-                "result": {
-                    "observed_value": [
-                        query_result[value[i]] for i in range(len(value))
-                    ]
-                },
+                "result": {"observed_value": [query_result[value[i]] for i in range(len(value))]},
             }
 
         success = query_result[value] >= threshold

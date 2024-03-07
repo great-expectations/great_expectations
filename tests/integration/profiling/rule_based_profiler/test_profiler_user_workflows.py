@@ -114,9 +114,7 @@ def bobster_validator(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
     """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
-    context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
@@ -189,14 +187,10 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
-    file_list: List[str] = [
-        alice_columnar_table_single_batch["sample_data_relative_path"]
-    ]
+    file_list: List[str] = [alice_columnar_table_single_batch["sample_data_relative_path"]]
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name=data_asset_name
-        )
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(data_asset_name=data_asset_name)
         == file_list
     )
 
@@ -256,22 +250,16 @@ def test_alice_profiler_user_workflow_single_batch(
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
-    result: RuleBasedProfilerResult = profiler.run(
-        batch_request=alice_single_batch_data_batch_request
-    )
+    result: RuleBasedProfilerResult = profiler.run(batch_request=alice_single_batch_data_batch_request)
 
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         result.expectation_configurations
-        == alice_columnar_table_single_batch[
-            "expected_expectation_suite"
-        ].expectation_configurations
+        == alice_columnar_table_single_batch["expected_expectation_suite"].expectation_configurations
     )
 
 
@@ -306,9 +294,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     ]
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name=data_asset_name
-        )
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(data_asset_name=data_asset_name)
         == file_list
     )
 
@@ -332,9 +318,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
         },
         "metric_value_kwargs": None,
     }
-    metric_value: int = validator_latest.get_metric(
-        metric=MetricConfiguration(**metric_configuration_arguments)
-    )
+    metric_value: int = validator_latest.get_metric(metric=MetricConfiguration(**metric_configuration_arguments))
     assert metric_value == 9000
 
     # noinspection PyUnresolvedReferences
@@ -397,29 +381,19 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
-    assert (
-        result.expectation_configurations
-        == fixture_expectation_suite.expectation_configurations
-    )
+    assert result.expectation_configurations == fixture_expectation_suite.expectation_configurations
 
     profiled_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
         profiler.get_fully_qualified_parameter_names_by_domain()
     )
 
-    fixture_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
-        bobby_columnar_table_multi_batch[
-            "test_configuration_quantiles_estimator"
-        ]["expected_fixture_fully_qualified_parameter_names_by_domain"]
-    )
+    fixture_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = bobby_columnar_table_multi_batch[
+        "test_configuration_quantiles_estimator"
+    ]["expected_fixture_fully_qualified_parameter_names_by_domain"]
 
-    assert (
-        profiled_fully_qualified_parameter_names_by_domain
-        == fixture_fully_qualified_parameter_names_by_domain
-    )
+    assert profiled_fully_qualified_parameter_names_by_domain == fixture_fully_qualified_parameter_names_by_domain
 
     domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
@@ -430,20 +404,17 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
     )
 
-    fixture_fully_qualified_parameter_names_for_domain_id: List[str] = (
-        bobby_columnar_table_multi_batch[
-            "test_configuration_quantiles_estimator"
-        ]["expected_fixture_fully_qualified_parameter_names_by_domain"][domain]
-    )
+    fixture_fully_qualified_parameter_names_for_domain_id: List[str] = bobby_columnar_table_multi_batch[
+        "test_configuration_quantiles_estimator"
+    ]["expected_fixture_fully_qualified_parameter_names_by_domain"][domain]
 
     assert (
-        profiled_fully_qualified_parameter_names_for_domain_id
-        == fixture_fully_qualified_parameter_names_for_domain_id
+        profiled_fully_qualified_parameter_names_for_domain_id == fixture_fully_qualified_parameter_names_for_domain_id
     )
 
-    profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, ParameterNode]
-    ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+    profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[Domain, Dict[str, ParameterNode]] = (
+        profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+    )
 
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, ParameterNode]
@@ -468,17 +439,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         rule_name="column_ranges_rule",
     )
 
-    profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
-        str, ParameterNode
-    ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
-        domain_id=domain.id
+    profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[str, ParameterNode] = (
+        profiler.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(domain_id=domain.id)
     )
 
-    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
-        str, ParameterNode
-    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
-        "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
-    ][domain]
+    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[str, ParameterNode] = (
+        bobby_columnar_table_multi_batch[
+            "test_configuration_quantiles_estimator"
+        ]["expected_parameter_values_for_fully_qualified_parameter_names_by_domain"][domain]
+    )
 
     assert convert_to_json_serializable(
         data=profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
@@ -506,16 +475,12 @@ class HasStaticDefaultProfiler(Protocol):
 def restore_profiler_config(
     expectation: Type[HasStaticDefaultProfiler],
 ) -> Iterator[None]:
-    original_default_profiler_config = copy.deepcopy(
-        expectation.default_profiler_config
-    )
+    original_default_profiler_config = copy.deepcopy(expectation.default_profiler_config)
     try:
         yield
     finally:
         expectation.default_profiler_config = original_default_profiler_config
-        expectation.default_kwarg_values["profiler_config"] = (
-            original_default_profiler_config
-        )
+        expectation.default_kwarg_values["profiler_config"] = original_default_profiler_config
 
 
 @pytest.mark.skipif(
@@ -531,14 +496,10 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     # Load data context
-    data_context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    data_context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Load profiler configs & loop (run tests for each one)
-    yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-        "profiler_config"
-    ]
+    yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000["profiler_config"]
 
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
@@ -565,37 +526,29 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     result: RuleBasedProfilerResult = profiler.run(batch_request=batch_request)
 
-    expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
-        result.expectation_configurations[0].to_json_dict()["kwargs"]
-    )
-    min_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "min_value"
-        ]
-    )
-    max_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "max_value"
-        ]
-    )
+    expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = result.expectation_configurations[
+        0
+    ].to_json_dict()["kwargs"]
+    min_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs["min_value"]
+    max_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs["max_value"]
 
     assert (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_estimator"
-        ]["expect_table_row_count_to_be_between_min_value_mean_value"]
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000["test_configuration_bootstrap_estimator"][
+            "expect_table_row_count_to_be_between_min_value_mean_value"
+        ]
         < min_value
-        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_estimator"
-        ]["expect_table_row_count_to_be_between_mean_value"]
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000["test_configuration_bootstrap_estimator"][
+            "expect_table_row_count_to_be_between_mean_value"
+        ]
     )
     assert (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_estimator"
-        ]["expect_table_row_count_to_be_between_mean_value"]
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000["test_configuration_bootstrap_estimator"][
+            "expect_table_row_count_to_be_between_mean_value"
+        ]
         < max_value
-        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_estimator"
-        ]["expect_table_row_count_to_be_between_max_value_mean_value"]
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000["test_configuration_bootstrap_estimator"][
+            "expect_table_row_count_to_be_between_max_value_mean_value"
+        ]
     )
 
 
@@ -646,15 +599,10 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     expectation_configuration_dict: dict
     column_name: str
     expectation_kwargs: dict
-    expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict: Dict[
-        str, dict
-    ] = {
-        expectation_configuration_dict["kwargs"][
-            "column"
-        ]: expectation_configuration_dict["kwargs"]
+    expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict: Dict[str, dict] = {
+        expectation_configuration_dict["kwargs"]["column"]: expectation_configuration_dict["kwargs"]
         for expectation_configuration_dict in [
-            expectation_configuration.to_json_dict()
-            for expectation_configuration in result.expectation_configurations
+            expectation_configuration.to_json_dict() for expectation_configuration in result.expectation_configurations
         ]
     }
     expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
@@ -665,9 +613,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     }
 
     assert (
-        expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column[
-            "tolls_amount"
-        ]
+        expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column["tolls_amount"]
         == quentin_columnar_table_multi_batch["test_configuration"][
             "expect_column_quantile_values_to_be_between_quantile_ranges_by_column"
         ]["tolls_amount"]

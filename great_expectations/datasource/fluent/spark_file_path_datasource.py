@@ -41,9 +41,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
     # ^^^ Docs <> Source Code mismatch
 
     path_glob_filter: Optional[Union[bool, str]] = Field(None, alias="pathGlobFilter")
-    recursive_file_lookup: Optional[Union[bool, str]] = Field(
-        None, alias="recursiveFileLookup"
-    )
+    recursive_file_lookup: Optional[Union[bool, str]] = Field(None, alias="recursiveFileLookup")
     modified_before: Optional[Union[bool, str]] = Field(None, alias="modifiedBefore")
     modified_after: Optional[Union[bool, str]] = Field(None, alias="modifiedAfter")
 
@@ -71,9 +69,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
-        None, alias="schema"
-    )
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(None, alias="schema")
     # sep: Optional[str] = None,
     sep: Union[str, None] = None
     # encoding: Optional[str] = None,
@@ -89,13 +85,9 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # inferSchema: Optional[Union[bool, str]] = None,
     infer_schema: Optional[Union[bool, str]] = Field(None, alias="inferSchema")
     # ignoreLeadingWhiteSpace: Optional[Union[bool, str]] = None,
-    ignore_leading_white_space: Optional[Union[bool, str]] = Field(
-        None, alias="ignoreLeadingWhiteSpace"
-    )
+    ignore_leading_white_space: Optional[Union[bool, str]] = Field(None, alias="ignoreLeadingWhiteSpace")
     # ignoreTrailingWhiteSpace: Optional[Union[bool, str]] = None,
-    ignore_trailing_white_space: Optional[Union[bool, str]] = Field(
-        None, alias="ignoreTrailingWhiteSpace"
-    )
+    ignore_trailing_white_space: Optional[Union[bool, str]] = Field(None, alias="ignoreTrailingWhiteSpace")
     # nullValue: Optional[str] = None,
     null_value: Optional[str] = Field(None, alias="nullValue")
     # nanValue: Optional[str] = None,
@@ -111,25 +103,17 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # maxColumns: Optional[Union[int, str]] = None,
     max_columns: Optional[Union[int, str]] = Field(None, alias="maxColumns")
     # maxCharsPerColumn: Optional[Union[int, str]] = None,
-    max_chars_per_column: Optional[Union[int, str]] = Field(
-        None, alias="maxCharsPerColumn"
-    )
+    max_chars_per_column: Optional[Union[int, str]] = Field(None, alias="maxCharsPerColumn")
     # maxMalformedLogPerPartition: Optional[Union[int, str]] = None,
-    max_malformed_log_per_partition: Optional[Union[int, str]] = Field(
-        None, alias="maxMalformedLogPerPartition"
-    )
+    max_malformed_log_per_partition: Optional[Union[int, str]] = Field(None, alias="maxMalformedLogPerPartition")
     # mode: Optional[str] = None,
     mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
     # columnNameOfCorruptRecord: Optional[str] = None,
-    column_name_of_corrupt_record: Optional[str] = Field(
-        None, alias="columnNameOfCorruptRecord"
-    )
+    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
     # multiLine: Optional[Union[bool, str]] = None,
     multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
     # charToEscapeQuoteEscaping: Optional[str] = None,
-    char_to_escape_quote_escaping: Optional[str] = Field(
-        None, alias="charToEscapeQuoteEscaping"
-    )
+    char_to_escape_quote_escaping: Optional[str] = Field(None, alias="charToEscapeQuoteEscaping")
     # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
     # enforceSchema: Optional[Union[bool, str]] = None,
@@ -249,8 +233,7 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -262,9 +245,7 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
     datetime_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = Field(
         None, alias="datetimeRebaseMode"
     )
-    int_96_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = Field(
-        None, alias="int96RebaseMode"
-    )
+    int_96_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = Field(None, alias="int96RebaseMode")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -309,8 +290,7 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -353,8 +333,7 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -367,29 +346,19 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
-        None, alias="schema"
-    )
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(None, alias="schema")
     # primitivesAsString: Optional[Union[bool, str]] = None,
-    primitives_as_string: Optional[Union[bool, str]] = Field(
-        None, alias="primitivesAsString"
-    )
+    primitives_as_string: Optional[Union[bool, str]] = Field(None, alias="primitivesAsString")
     # prefersDecimal: Optional[Union[bool, str]] = None,
     prefers_decimal: Optional[Union[bool, str]] = Field(None, alias="prefersDecimal")
     # allowComments: Optional[Union[bool, str]] = None,
     allow_comments: Optional[Union[bool, str]] = Field(None, alias="allowComments")
     # allowUnquotedFieldNames: Optional[Union[bool, str]] = None,
-    allow_unquoted_field_names: Optional[Union[bool, str]] = Field(
-        None, alias="allowUnquotedFieldNames"
-    )
+    allow_unquoted_field_names: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedFieldNames")
     # allowSingleQuotes: Optional[Union[bool, str]] = None,
-    allow_single_quotes: Optional[Union[bool, str]] = Field(
-        None, alias="allowSingleQuotes"
-    )
+    allow_single_quotes: Optional[Union[bool, str]] = Field(None, alias="allowSingleQuotes")
     # allowNumericLeadingZero: Optional[Union[bool, str]] = None,
-    allow_numeric_leading_zero: Optional[Union[bool, str]] = Field(
-        None, alias="allowNumericLeadingZero"
-    )
+    allow_numeric_leading_zero: Optional[Union[bool, str]] = Field(None, alias="allowNumericLeadingZero")
     # allowBackslashEscapingAnyCharacter: Optional[Union[bool, str]] = None,
     allow_backslash_escaping_any_character: Optional[Union[bool, str]] = Field(
         None, alias="allowBackslashEscapingAnyCharacter"
@@ -397,9 +366,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # mode: Optional[str] = None,
     mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
     # columnNameOfCorruptRecord: Optional[str] = None,
-    column_name_of_corrupt_record: Optional[str] = Field(
-        None, alias="columnNameOfCorruptRecord"
-    )
+    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
     # dateFormat: Optional[str] = None,
     date_format: Optional[str] = Field(None, alias="dateFormat")
     # timestampFormat: Optional[str] = None,
@@ -407,17 +374,13 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # multiLine: Optional[Union[bool, str]] = None,
     multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
     # allowUnquotedControlChars: Optional[Union[bool, str]] = None,
-    allow_unquoted_control_chars: Optional[Union[bool, str]] = Field(
-        None, alias="allowUnquotedControlChars"
-    )
+    allow_unquoted_control_chars: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedControlChars")
     # lineSep: Optional[str] = None,
     line_sep: Optional[str] = Field(None, alias="lineSep")
     # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
     # dropFieldIfAllNull: Optional[Union[bool, str]] = None,
-    drop_field_if_all_null: Optional[Union[bool, str]] = Field(
-        None, alias="dropFieldIfAllNull"
-    )
+    drop_field_if_all_null: Optional[Union[bool, str]] = Field(None, alias="dropFieldIfAllNull")
     # encoding: Optional[str] = None,
     encoding: Optional[str] = None
     # locale: Optional[str] = None,
@@ -431,9 +394,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # modifiedAfter: Optional[Union[bool, str]] = None,
     # Inherited from _SparkGenericFilePathAssetMixin
     # allowNonNumericNumbers: Optional[Union[bool, str]] = None,
-    allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(
-        None, alias="allowNonNumericNumbers"
-    )
+    allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(None, alias="allowNonNumericNumbers")
     # ^^^ spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
 
     # vvv Docs <> Source Code mismatch
@@ -516,8 +477,7 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-json.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -561,8 +521,7 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -607,8 +566,7 @@ class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
         See https://docs.databricks.com/delta/tutorial.html for more info.
         """
         return (
-            super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super()._get_reader_options_include() | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 

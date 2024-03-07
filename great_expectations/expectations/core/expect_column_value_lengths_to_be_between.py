@@ -156,28 +156,28 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_least_str = cls._get_strict_min_string(renderer_configuration=renderer_configuration)
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str = cls._get_strict_max_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_most_str = cls._get_strict_max_string(renderer_configuration=renderer_configuration)
 
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 if params.min_value and params.max_value:
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
                 elif not params.min_value:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = (
+                        f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    )
                 else:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = (
+                        f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    )
             else:  # noqa: PLR5501
                 if params.min_value and params.max_value:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    )
                 elif not params.min_value:
                     template_str = f"values must always be {at_most_str} $max_value characters long."
                 else:
@@ -211,9 +211,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -235,21 +233,25 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
 
                 elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = (
+                        f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    )
 
                 elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = (
+                        f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    )
             else:  # noqa: PLR5501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    )
 
                 elif params["min_value"] is None:
                     template_str = f"values must always be {at_most_str} $max_value characters long."

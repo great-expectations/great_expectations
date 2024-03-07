@@ -92,17 +92,11 @@ def column_function_partial(  # noqa: C901, PLR0915
                     df,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=metric_domain_kwargs, domain_type=domain_type)
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
 
@@ -145,9 +139,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
 
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
@@ -155,9 +147,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_row_condition(
-                        metric_domain_kwargs
-                    )
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(metric_domain_kwargs)
                 else:
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
@@ -166,13 +156,9 @@ def column_function_partial(  # noqa: C901, PLR0915
                     selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=compute_domain_kwargs, domain_type=domain_type)
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
@@ -219,9 +205,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
 
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
@@ -229,9 +213,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_row_condition(
-                        metric_domain_kwargs
-                    )
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(metric_domain_kwargs)
                 else:
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
@@ -240,13 +222,9 @@ def column_function_partial(  # noqa: C901, PLR0915
                     data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=compute_domain_kwargs, domain_type=domain_type)
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 column_function = metric_fn(
@@ -263,6 +241,4 @@ def column_function_partial(  # noqa: C901, PLR0915
         return wrapper
 
     else:
-        raise ValueError(
-            'Unsupported engine for "column_function_partial" metric function decorator.'
-        )
+        raise ValueError('Unsupported engine for "column_function_partial" metric function decorator.')

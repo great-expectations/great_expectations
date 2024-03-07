@@ -125,9 +125,7 @@ class TestFabricPowerBI:
         # intitial datasource should have no assets
         assert not power_bi_datasource.assets
 
-        add_asset_fn: Callable[[str], _PowerBIAsset] = getattr(
-            power_bi_datasource, f"add_{asset_type}_asset"
-        )
+        add_asset_fn: Callable[[str], _PowerBIAsset] = getattr(power_bi_datasource, f"add_{asset_type}_asset")
         my_asset = add_asset_fn(f"my_{asset_type}_asset", **asset_kwargs)
         batch_request = my_asset.build_batch_request()
         my_asset.get_batch_list_from_batch_request(batch_request)

@@ -177,9 +177,7 @@ class ProjectManager:
         try:
             kwargs = param_lookup[mode]
         except KeyError:
-            raise ValueError(
-                f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
-            )
+            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")
 
         from great_expectations.data_context.data_context import (
             AbstractDataContext,
@@ -190,10 +188,7 @@ class ProjectManager:
 
         expected_ctx_types: dict[
             ContextModes | None,
-            Type[CloudDataContext]
-            | Type[EphemeralDataContext]
-            | Type[FileDataContext]
-            | Type[AbstractDataContext],
+            Type[CloudDataContext] | Type[EphemeralDataContext] | Type[FileDataContext] | Type[AbstractDataContext],
         ] = {
             "ephemeral": EphemeralDataContext,
             "file": FileDataContext,
@@ -273,9 +268,7 @@ class ProjectManager:
 
         # If available and applicable, convert project_config mapping into a rich config type
         if project_config:
-            project_config = AbstractDataContext.get_or_create_data_context_config(
-                project_config
-            )
+            project_config = AbstractDataContext.get_or_create_data_context_config(project_config)
         assert project_config is None or isinstance(
             project_config, DataContextConfig
         ), "project_config must be of type Optional[DataContextConfig]"
@@ -353,9 +346,7 @@ class ProjectManager:
 
         if not project_config:
             project_config = DataContextConfig(
-                store_backend_defaults=InMemoryStoreBackendDefaults(
-                    init_temp_docs_sites=True
-                )
+                store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
             )
 
         return EphemeralDataContext(

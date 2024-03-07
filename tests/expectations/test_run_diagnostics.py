@@ -242,9 +242,7 @@ def test_self_check_on_an_existing_expectation():
     report_object = expectation().run_diagnostics()
     # print(json.dumps(report_object, indent=2))
 
-    report_object["description"].pop(
-        "docstring"
-    )  # Don't try to exact match the docstring
+    report_object["description"].pop("docstring")  # Don't try to exact match the docstring
 
     # one of the test cases in the examples for this expectation is failing on our CI
     # and the number of items depends on the flags
@@ -337,9 +335,7 @@ def test_self_check_on_an_existing_expectation():
     }
 
 
-@pytest.mark.skip(
-    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
-)
+@pytest.mark.skip(reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)")
 @pytest.mark.all_backends
 def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
@@ -355,12 +351,8 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -416,12 +408,8 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -467,12 +455,8 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
-        expectation_config=my_expectation_config
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -519,9 +503,7 @@ def test_expectation_is_abstract():
 
 @pytest.mark.unit
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration(
-        column="values"
-    ).run_diagnostics()
+    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration(column="values").run_diagnostics()
     # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
     tests = expectation_diagnostics["tests"]

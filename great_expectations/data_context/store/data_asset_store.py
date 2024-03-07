@@ -111,9 +111,7 @@ class DataAssetStore(Store):
         if isinstance(data, list):
             if len(data) > 1:
                 # TODO: handle larger arrays of DataAssets
-                raise TypeError(
-                    f"GX Cloud returned {len(data)} DataAssets but expected 1"
-                )
+                raise TypeError(f"GX Cloud returned {len(data)} DataAssets but expected 1")
             data = data[0]
         data_asset_id: str = data["id"]
         data_asset_config_dict: dict = data["attributes"]["data_asset_config"]

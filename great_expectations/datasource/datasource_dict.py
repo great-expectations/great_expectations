@@ -60,9 +60,7 @@ class DatasourceDict(UserDict):
         self._in_memory_data_assets: dict[str, DataAsset] = {}
 
     @staticmethod
-    def _get_in_memory_data_asset_name(
-        datasource_name: str, data_asset_name: str
-    ) -> str:
+    def _get_in_memory_data_asset_name(datasource_name: str, data_asset_name: str) -> str:
         return f"{datasource_name}-{data_asset_name}"
 
     @override
@@ -81,14 +79,10 @@ class DatasourceDict(UserDict):
             try:
                 if isinstance(config, FluentDatasource):
                     name = config.name
-                    datasources[name] = self._init_fluent_datasource(
-                        name=name, ds=config
-                    )
+                    datasources[name] = self._init_fluent_datasource(name=name, ds=config)
                 else:
                     name = config["name"]
-                    datasources[name] = self._init_block_style_datasource(
-                        name=name, config=config
-                    )
+                    datasources[name] = self._init_block_style_datasource(name=name, config=config)
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -100,9 +94,7 @@ class DatasourceDict(UserDict):
     @overload
     def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
 
-    def set_datasource(
-        self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | None:
+    def set_datasource(self, name: str, ds: FluentDatasource | BaseDatasource) -> FluentDatasource | None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
             config = self._prep_fds_config_for_set(name=name, ds=ds)
@@ -118,24 +110,18 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.set_datasource(name=name, ds=ds)
 
-    def _prep_fds_config_for_set(
-        self, name: str, ds: FluentDatasource
-    ) -> FluentDatasource:
+    def _prep_fds_config_for_set(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                    in_memory_asset_name: str = (
-                        DatasourceDict._get_in_memory_data_asset_name(
-                            datasource_name=name,
-                            data_asset_name=asset.name,
-                        )
+                    in_memory_asset_name: str = DatasourceDict._get_in_memory_data_asset_name(
+                        datasource_name=name,
+                        data_asset_name=asset.name,
                     )
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
-    def _prep_legacy_datasource_config_for_set(
-        self, name: str, ds: BaseDatasource
-    ) -> DatasourceConfig:
+    def _prep_legacy_datasource_config_for_set(self, name: str, ds: BaseDatasource) -> DatasourceConfig:
         config = ds.config
         # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config
         # There's probably a better way to do this with Marshmallow but this works
@@ -162,23 +148,17 @@ class DatasourceDict(UserDict):
             return self._init_fluent_datasource(name=name, ds=ds)
         return self._init_block_style_datasource(name=name, config=ds)
 
-    def _init_fluent_datasource(
-        self, name: str, ds: FluentDatasource
-    ) -> FluentDatasource:
+    def _init_fluent_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         ds._data_context = self._context
         ds._rebuild_asset_data_connectors()
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                    in_memory_asset_name: str = (
-                        DatasourceDict._get_in_memory_data_asset_name(
-                            datasource_name=name,
-                            data_asset_name=asset.name,
-                        )
+                    in_memory_asset_name: str = DatasourceDict._get_in_memory_data_asset_name(
+                        datasource_name=name,
+                        data_asset_name=asset.name,
                     )
-                    cached_data_asset = self._in_memory_data_assets.get(
-                        in_memory_asset_name
-                    )
+                    cached_data_asset = self._in_memory_data_assets.get(in_memory_asset_name)
                     if cached_data_asset:
                         asset.dataframe = cached_data_asset.dataframe
                     else:
@@ -188,12 +168,8 @@ class DatasourceDict(UserDict):
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
-    def _init_block_style_datasource(
-        self, name: str, config: DatasourceConfig
-    ) -> BaseDatasource:
-        return self._context._init_block_style_datasource(
-            datasource_name=name, datasource_config=config
-        )
+    def _init_block_style_datasource(self, name: str, config: DatasourceConfig) -> BaseDatasource:
+        return self._context._init_block_style_datasource(datasource_name=name, datasource_config=config)
 
 
 class CacheableDatasourceDict(DatasourceDict):
@@ -238,9 +214,7 @@ class CacheableDatasourceDict(DatasourceDict):
     def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
 
     @override
-    def set_datasource(
-        self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | None:
+    def set_datasource(self, name: str, ds: FluentDatasource | BaseDatasource) -> FluentDatasource | None:
         self.data[name] = ds
 
         # FDS do not use stores

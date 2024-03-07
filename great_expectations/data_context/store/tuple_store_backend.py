@@ -54,9 +54,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.platform_specific_separator = platform_specific_separator
 
         if filepath_template is not None and filepath_suffix is not None:
-            raise ValueError(
-                "filepath_suffix may only be used when filepath_template is None"
-            )
+            raise ValueError("filepath_suffix may only be used when filepath_template is None")
 
         self.filepath_template = filepath_template
         if filepath_prefix and len(filepath_prefix) > 0:
@@ -64,8 +62,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             if filepath_prefix[-1] in self.forbidden_substrings:
                 raise StoreBackendError(
                     "Unable to initialize TupleStoreBackend: filepath_prefix may not end with a "
-                    "forbidden substring. Current forbidden substrings are "
-                    + str(forbidden_substrings)
+                    "forbidden substring. Current forbidden substrings are " + str(forbidden_substrings)
                 )
         self.filepath_prefix = filepath_prefix
         self.filepath_suffix = filepath_suffix
@@ -97,12 +94,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"
             )
 
     def _convert_key_to_filepath(self, key):
@@ -112,11 +104,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Handle store_backend_id separately
         if key == self.STORE_BACKEND_ID_KEY:
             filepath = f"{self.filepath_prefix or ''}{'/' if self.filepath_prefix else ''}{key[0]}"
-            return (
-                filepath
-                if not self.platform_specific_separator
-                else os.path.normpath(filepath)
-            )
+            return filepath if not self.platform_specific_separator else os.path.normpath(filepath)
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
         else:
@@ -138,14 +126,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             filepath = os.path.normpath(filepath)
 
         if self.filepath_prefix:
-            if (
-                not filepath.startswith(self.filepath_prefix)
-                and len(filepath) >= len(self.filepath_prefix) + 1
-            ):
+            if not filepath.startswith(self.filepath_prefix) and len(filepath) >= len(self.filepath_prefix) + 1:
                 # If filepath_prefix is set, we expect that it is the first component of a valid filepath.
-                raise ValueError(
-                    "filepath must start with the filepath_prefix when one is set by the store_backend"
-                )
+                raise ValueError("filepath must start with the filepath_prefix when one is set by the store_backend")
             else:
                 # Remove the prefix before processing
                 # Also remove the separator that was added, which may have been platform-dependent
@@ -154,9 +137,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         if self.filepath_suffix:
             if not filepath.endswith(self.filepath_suffix):
                 # If filepath_suffix is set, we expect that it is the last component of a valid filepath.
-                raise ValueError(
-                    "filepath must end with the filepath_suffix when one is set by the store_backend"
-                )
+                raise ValueError("filepath must end with the filepath_suffix when one is set by the store_backend")
             else:
                 # Remove the suffix before processing
                 filepath = filepath[: -len(self.filepath_suffix)]
@@ -174,10 +155,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             # Convert the template to a regex
             indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
-            tuple_index_list = [
-                f"(?P<tuple_index_{i}>.*)"
-                for i in range(len(indexed_string_substitutions))
-            ]
+            tuple_index_list = [f"(?P<tuple_index_{i}>.*)" for i in range(len(indexed_string_substitutions))]
             intermediate_filepath_regex = re.sub(
                 r"{\d+}",
                 lambda m,
@@ -196,9 +174,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Map key elements into the appropriate parts of the tuple
             new_key = [None] * self.key_length
             for i in range(len(tuple_index_list)):
-                tuple_index = int(
-                    re.search(r"\d+", indexed_string_substitutions[i]).group(0)
-                )
+                tuple_index = int(re.search(r"\d+", indexed_string_substitutions[i]).group(0))
                 key_element = matches.group(f"tuple_index_{i!s}")
                 new_key[tuple_index] = key_element
 
@@ -209,9 +185,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
         def get_random_hex(size=4):
-            return "".join(
-                [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
-            )
+            return "".join([random.choice(list("ABCDEF0123456789")) for _ in range(size)])
 
         key = tuple(get_random_hex() for _ in range(self.key_length))
         filepath = self._convert_key_to_filepath(key)
@@ -271,15 +245,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory = base_directory
         else:  # noqa: PLR5501
             if root_directory is None:
-                raise ValueError(
-                    "base_directory must be an absolute path if root_directory is not provided"
-                )
+                raise ValueError("base_directory must be an absolute path if root_directory is not provided")
             elif not os.path.isabs(root_directory):  # noqa: PTH117
-                raise ValueError(
-                    "root_directory must be an absolute path. Got {} instead.".format(
-                        root_directory
-                    )
-                )
+                raise ValueError(f"root_directory must be an absolute path. Got {root_directory} instead.")
             else:
                 self.full_base_directory = os.path.join(  # noqa: PTH118
                     root_directory, base_directory
@@ -383,13 +351,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                if self.filepath_prefix and not filepath.startswith(
-                    self.filepath_prefix
-                ):
+                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
                     continue
-                elif self.filepath_suffix and not filepath.endswith(
-                    self.filepath_suffix
-                ):
+                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
                 key = self._convert_filepath_to_key(filepath)
                 if key and not self.is_ignored_key(key):
@@ -554,9 +518,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 s3_object_key = self._convert_key_to_filepath(key)
         else:  # noqa: PLR5501
             if self.prefix:
-                s3_object_key = "/".join(
-                    (self.prefix, self._convert_key_to_filepath(key))
-                )
+                s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
             else:
                 s3_object_key = self._convert_key_to_filepath(key)
         return s3_object_key
@@ -573,11 +535,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
 
-        return (
-            s3_response_object["Body"]
-            .read()
-            .decode(s3_response_object.get("ContentEncoding", "utf-8"))
-        )
+        return s3_response_object["Body"].read().decode(s3_response_object.get("ContentEncoding", "utf-8"))
 
     @override
     def _get_all(self) -> list[Any]:
@@ -605,9 +563,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     **self.s3_put_options,
                 )
             else:
-                result_s3.put(
-                    Body=value, ContentType=content_type, **self.s3_put_options
-                )
+                result_s3.put(Body=value, ContentType=content_type, **self.s3_put_options)
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
@@ -625,9 +581,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if not dest_filepath.startswith(self.prefix):
             dest_filepath = os.path.join(self.prefix, dest_filepath)  # noqa: PTH118
 
-        s3.Bucket(self.bucket).copy(
-            {"Bucket": self.bucket, "Key": source_filepath}, dest_filepath
-        )
+        s3.Bucket(self.bucket).copy({"Bucket": self.bucket, "Key": source_filepath}, dest_filepath)
 
         s3.Object(self.bucket, source_filepath).delete()
 
@@ -652,13 +606,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 else:  # noqa: PLR5501
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not s3_object_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not s3_object_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -673,9 +623,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             # build s3 endpoint when no endpoint_url is configured
 
-            location = self._create_client().get_bucket_location(Bucket=self.bucket)[
-                "LocationConstraint"
-            ]
+            location = self._create_client().get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
 
             if location is None:
                 location = "https://s3.amazonaws.com"
@@ -732,15 +680,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             RoleSessionName=role_session_name,
             DurationSeconds=assume_role_duration,
         )
-        self._boto3_options["aws_access_key_id"] = response["Credentials"][
-            "AccessKeyId"
-        ]
-        self._boto3_options["aws_secret_access_key"] = response["Credentials"][
-            "SecretAccessKey"
-        ]
-        self._boto3_options["aws_session_token"] = response["Credentials"][
-            "SessionToken"
-        ]
+        self._boto3_options["aws_access_key_id"] = response["Credentials"]["AccessKeyId"]
+        self._boto3_options["aws_secret_access_key"] = response["Credentials"]["SecretAccessKey"]
+        self._boto3_options["aws_session_token"] = response["Credentials"]["SessionToken"]
 
     @property
     def boto3_options(self):
@@ -845,9 +787,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         else:  # noqa: PLR5501
             if self.prefix:
-                gcs_object_key = "/".join(
-                    (self.prefix, self._convert_key_to_filepath(key))
-                )
+                gcs_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
             else:
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
@@ -889,9 +829,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
         if isinstance(value, str):
             blob.content_encoding = content_encoding
-            blob.upload_from_string(
-                value.encode(content_encoding), content_type=content_type
-            )
+            blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
@@ -928,13 +866,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if self.filepath_prefix and not gcs_object_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not gcs_object_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
@@ -1056,10 +990,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
-                    blob_service_client: azure.BlobServiceClient = (
-                        azure.BlobServiceClient.from_connection_string(
-                            self.connection_string
-                        )
+                    blob_service_client: azure.BlobServiceClient = azure.BlobServiceClient.from_connection_string(
+                        self.connection_string
                     )
                 elif self.account_url:
                     blob_service_client = azure.BlobServiceClient(
@@ -1076,9 +1008,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     )
             except Exception as e:
                 # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
-                raise StoreBackendError(
-                    f'Due to exception: "{e!s}", "azure_client" could not be created.'
-                ) from e
+                raise StoreBackendError(f'Due to exception: "{e!s}", "azure_client" could not be created.') from e
         else:
             raise StoreBackendError(
                 'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'
@@ -1090,9 +1020,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         az_blob_key = os.path.join(  # noqa: PTH118
             self.prefix, self._convert_key_to_filepath(key)
         )
-        return (
-            self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
-        )
+        return self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
 
     @override
     def _get_all(self) -> list[Any]:
@@ -1123,9 +1051,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     overwrite=True,
                 )
         else:
-            self._container_client.upload_blob(
-                name=az_blob_key, data=value, overwrite=True
-            )
+            self._container_client.upload_blob(name=az_blob_key, data=value, overwrite=True)
         return az_blob_key
 
     @override
@@ -1137,13 +1063,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not az_blob_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not az_blob_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not az_blob_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 
@@ -1156,10 +1078,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             self.container, self.prefix, az_blob_key
         )
 
-        return "https://{}.blob.core.windows.net/{}".format(
-            self._container_client.account_name,
-            az_blob_path,
-        )
+        return f"https://{self._container_client.account_name}.blob.core.windows.net/{az_blob_path}"
 
     def _has_key(self, key):
         all_keys = self.list_keys()
@@ -1185,9 +1104,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
-            raise StoreBackendError(
-                f"Unable to copy blob {source_blob_path} with status {copy_properties.status}"
-            )
+            raise StoreBackendError(f"Unable to copy blob {source_blob_path} with status {copy_properties.status}")
         source_blob.delete_blob()
 
     def remove_key(self, key):

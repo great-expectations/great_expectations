@@ -167,9 +167,7 @@ def determine_progress_bar_method_by_environment() -> Callable:
 ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
 ToInt: TypeAlias = Union[int, np.integer]
-ToStr: TypeAlias = Union[
-    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
-]
+ToStr: TypeAlias = Union[str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64]
 
 ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
 ToDict: TypeAlias = Union[
@@ -367,9 +365,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return convert_to_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     # SQLAlchemy serialization
     if LegacyRow and isinstance(data, LegacyRow):
@@ -397,9 +393,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return data.to_json_dict()
 
     # Unable to serialize (unrecognized data type).
-    raise TypeError(
-        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
-    )
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")
 
 
 def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
@@ -490,9 +484,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return ensure_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     if isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
@@ -526,24 +518,16 @@ def substitute_all_strftime_format_strings(
 
     datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
     if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
-        return {
-            k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
-            for k, v in data.items()
-        }
+        return {k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj) for k, v in data.items()}
     elif isinstance(data, list):
-        return [
-            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
-            for el in data
-        ]
+        return [substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj) for el in data]
     elif isinstance(data, str):
         return datetime_obj.strftime(data)
     else:
         return data
 
 
-def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: Optional[str] = None
-) -> datetime.datetime:
+def parse_string_to_datetime(datetime_string: str, datetime_format_string: Optional[str] = None) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
@@ -580,28 +564,16 @@ class AzureUrl:
         Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
     """
 
-    AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN: str = (
-        r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$"
-    )
+    AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN: str = r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$"
 
-    AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN: str = (
-        r"^(https?:\/\/)?(.+?)\.blob\.core\.windows\.net/([^/]+)/(.+)$"
-    )
-    AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE: str = (
-        "{account_name}.blob.core.windows.net/{container}/{path}"
-    )
+    AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN: str = r"^(https?:\/\/)?(.+?)\.blob\.core\.windows\.net/([^/]+)/(.+)$"
+    AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE: str = "{account_name}.blob.core.windows.net/{container}/{path}"
 
-    AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN: str = (
-        r"^(wasbs?:\/\/)?([^/]+)@(.+?)\.blob\.core\.windows\.net/(.+)$"
-    )
-    AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE: str = (
-        "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
-    )
+    AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN: str = r"^(wasbs?:\/\/)?([^/]+)@(.+?)\.blob\.core\.windows\.net/(.+)$"
+    AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE: str = "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
 
     def __init__(self, url: str) -> None:
-        search = re.search(
-            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
-        )
+        search = re.search(AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url)
         if search is None:
             search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
@@ -819,9 +791,7 @@ def get_or_create_spark_session(
     )
 
 
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
+def get_sql_dialect_floating_point_infinity_value(schema: str, negative: bool = False) -> float:
     res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:

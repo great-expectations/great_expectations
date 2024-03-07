@@ -119,17 +119,13 @@ class ValidationDependencies:
     metric_configurations: Dict[str, MetricConfiguration] = field(default_factory=dict)
     result_format: Dict[str, Any] = field(default_factory=dict)
 
-    def set_metric_configuration(
-        self, metric_name: str, metric_configuration: MetricConfiguration
-    ) -> None:
+    def set_metric_configuration(self, metric_name: str, metric_configuration: MetricConfiguration) -> None:
         """
         Sets specified "MetricConfiguration" for "metric_name" to "metric_configurations" dependencies dictionary.
         """
         self.metric_configurations[metric_name] = metric_configuration
 
-    def get_metric_configuration(
-        self, metric_name: str
-    ) -> Optional[MetricConfiguration]:
+    def get_metric_configuration(self, metric_name: str) -> Optional[MetricConfiguration]:
         """
         Obtains "MetricConfiguration" for specified "metric_name" from "metric_configurations" dependencies dictionary.
         """
@@ -396,9 +392,7 @@ class Validator:
         Returns:
             A Pandas DataFrame containing the records' data.
         """
-        return self._metrics_calculator.head(
-            n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
-        )
+        return self._metrics_calculator.head(n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all)
 
     @override
     def __dir__(self) -> List[str]:
@@ -454,9 +448,7 @@ class Validator:
         ):
             return getattr(self.active_batch.data.dataframe, name)
         else:
-            raise AttributeError(
-                f"'{type(self).__name__}'  object has no attribute '{name}'"
-            )
+            raise AttributeError(f"'{type(self).__name__}'  object has no attribute '{name}'")
 
     def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
         """
@@ -482,20 +474,12 @@ class Validator:
             meta: Optional[dict] = expectation_kwargs.pop("meta", None)
 
             basic_default_expectation_args: dict = {
-                k: v
-                for k, v in self.default_expectation_args.items()
-                if k in Validator.RUNTIME_KEYS
+                k: v for k, v in self.default_expectation_args.items() if k in Validator.RUNTIME_KEYS
             }
-            basic_runtime_configuration: dict = copy.deepcopy(
-                basic_default_expectation_args
-            )
-            basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
-            )
+            basic_runtime_configuration: dict = copy.deepcopy(basic_default_expectation_args)
+            basic_runtime_configuration.update({k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS})
 
-            allowed_config_keys: Tuple[str, ...] = (
-                expectation_impl.get_allowed_config_keys()
-            )
+            allowed_config_keys: Tuple[str, ...] = expectation_impl.get_allowed_config_keys()
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -509,14 +493,10 @@ class Validator:
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     if arg_name == "meta":
-                        logger.warning(
-                            "Setting meta via args could be ambiguous; please use a kwarg instead."
-                        )
+                        logger.warning("Setting meta via args could be ambiguous; please use a kwarg instead.")
                         meta = arg
                 except IndexError:
-                    raise InvalidExpectationConfigurationError(
-                        f"Invalid positional argument: {arg}"
-                    )
+                    raise InvalidExpectationConfigurationError(f"Invalid positional argument: {arg}")
 
             configuration: ExpectationConfiguration | None = None
 
@@ -534,9 +514,7 @@ class Validator:
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
-                    validation_result = ExpectationValidationResult(
-                        expectation_config=copy.deepcopy(configuration)
-                    )
+                    validation_result = ExpectationValidationResult(expectation_config=copy.deepcopy(configuration))
                 else:
                     validation_result = expectation.validate_(
                         validator=self,
@@ -611,9 +589,7 @@ class Validator:
 
         rules: List[Rule] = profiler.rules
 
-        assert (
-            len(rules) == 1
-        ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
+        assert len(rules) == 1, "A Rule-Based Profiler for an Expectation can have exactly one rule."
 
         domain_type: MetricDomainTypes
 
@@ -629,24 +605,16 @@ class Validator:
         override_profiler_config_dict.pop("name", None)
         override_profiler_config_dict.pop("config_version", None)
 
-        override_variables: Dict[str, Any] = override_profiler_config_dict.get(
-            "variables", {}
-        )
-        effective_variables: Optional[ParameterContainer] = (
-            profiler.reconcile_profiler_variables(
-                variables=override_variables,
-                reconciliation_strategy=ReconciliationStrategy.UPDATE,
-            )
+        override_variables: Dict[str, Any] = override_profiler_config_dict.get("variables", {})
+        effective_variables: Optional[ParameterContainer] = profiler.reconcile_profiler_variables(
+            variables=override_variables,
+            reconciliation_strategy=ReconciliationStrategy.UPDATE,
         )
         profiler.variables = effective_variables
 
-        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config_dict.get(
-            "rules", {}
-        )
+        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config_dict.get("rules", {})
 
-        assert (
-            len(override_rules) <= 1
-        ), "An override Rule-Based Profiler for an Expectation can have exactly one rule."
+        assert len(override_rules) <= 1, "An override Rule-Based Profiler for an Expectation can have exactly one rule."
 
         if override_rules:
             profiler.rules[0].name = list(override_rules.keys())[0]
@@ -679,8 +647,7 @@ class Validator:
         rule: Rule = profiler.rules[0]
         assert (
             rule.expectation_configuration_builders
-            and rule.expectation_configuration_builders[0].expectation_type
-            == expectation_type
+            and rule.expectation_configuration_builders[0].expectation_type == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
 
         # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
@@ -689,26 +656,21 @@ class Validator:
         metric_value_kwargs_override: dict = {
             key: value
             for key, value in expectation_kwargs.items()
-            if key in success_keys
-            and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
+            if key in success_keys and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
         }
 
         if not rule.domain_builder:
             raise TypeError("Rule must include domain_builder.")
         domain_type: MetricDomainTypes = rule.domain_builder.domain_type
         if domain_type not in MetricDomainTypes:
-            raise ValueError(
-                f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
-            )
+            raise ValueError(f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.')
 
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
             assert isinstance(rule.domain_builder, ColumnDomainBuilder)
 
             column_name = expectation_kwargs.get("column")
-            rule.domain_builder.include_column_names = (
-                [column_name] if column_name else None
-            )
+            rule.domain_builder.include_column_names = [column_name] if column_name else None
 
         parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
 
@@ -743,24 +705,16 @@ class Validator:
         if metric_value_kwargs is None:
             metric_value_kwargs = {}
 
-        if hasattr(parameter_builder, "metric_name") and hasattr(
-            parameter_builder, "metric_value_kwargs"
-        ):
-            parameter_builder_metric_value_kwargs: dict = (
-                parameter_builder.metric_value_kwargs or {}
-            )
+        if hasattr(parameter_builder, "metric_name") and hasattr(parameter_builder, "metric_value_kwargs"):
+            parameter_builder_metric_value_kwargs: dict = parameter_builder.metric_value_kwargs or {}
 
             parameter_builder_metric_value_kwargs = {
                 key: metric_value_kwargs.get(key) or value
                 for key, value in parameter_builder_metric_value_kwargs.items()
             }
-            parameter_builder.metric_value_kwargs = (
-                parameter_builder_metric_value_kwargs
-            )
+            parameter_builder.metric_value_kwargs = parameter_builder_metric_value_kwargs
 
-        evaluation_parameter_builders: List[ParameterBuilder] = (
-            parameter_builder.evaluation_parameter_builders or []
-        )
+        evaluation_parameter_builders: List[ParameterBuilder] = parameter_builder.evaluation_parameter_builders or []
 
         evaluation_parameter_builder: ParameterBuilder
         for evaluation_parameter_builder in evaluation_parameter_builders:
@@ -772,9 +726,7 @@ class Validator:
     def list_available_expectation_types(self) -> List[str]:
         """Returns a list of all expectations available to the validator"""
         keys = dir(self)
-        return [
-            expectation for expectation in keys if expectation.startswith("expect_")
-        ]
+        return [expectation for expectation in keys if expectation.startswith("expect_")]
 
     def graph_validate(
         self,
@@ -819,10 +771,8 @@ class Validator:
             runtime_configuration=runtime_configuration,
         )
 
-        graph: ValidationGraph = (
-            self._generate_suite_level_graph_from_expectation_level_sub_graphs(
-                expectation_validation_graphs=expectation_validation_graphs
-            )
+        graph: ValidationGraph = self._generate_suite_level_graph_from_expectation_level_sub_graphs(
+            expectation_validation_graphs=expectation_validation_graphs
         )
 
         resolved_metrics: _MetricsDict
@@ -904,9 +854,7 @@ class Validator:
         for configuration in expectation_configurations:
             # Validating
             try:
-                assert (
-                    configuration.expectation_type is not None
-                ), "Given configuration should include expectation type"
+                assert configuration.expectation_type is not None, "Given configuration should include expectation type"
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
 
@@ -916,11 +864,9 @@ class Validator:
                 evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation = evaluated_config.to_domain_obj()
-            validation_dependencies: ValidationDependencies = (
-                expectation.get_validation_dependencies(
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
+            validation_dependencies: ValidationDependencies = expectation.get_validation_dependencies(
+                execution_engine=self._execution_engine,
+                runtime_configuration=runtime_configuration,
             )
 
             try:
@@ -966,9 +912,7 @@ class Validator:
                 ]
             )
         )
-        validation_graph = ValidationGraph(
-            execution_engine=self._execution_engine, edges=edges
-        )
+        validation_graph = ValidationGraph(execution_engine=self._execution_engine, edges=edges)
         return validation_graph
 
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(  # noqa: PLR0913
@@ -999,10 +943,8 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Dict[
-                str, Union[MetricConfiguration, ExceptionInfo, int]
-            ] = expectation_validation_graph.get_exception_info(
-                metric_info=aborted_metrics_info
+            metric_exception_info: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]] = (
+                expectation_validation_graph.get_exception_info(metric_info=aborted_metrics_info)
             )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:
@@ -1243,15 +1185,11 @@ class Validator:
         if discards["catch_exceptions"] > 0 and not suppress_warnings:
             settings_message += " catch_exceptions"
 
-        if (
-            len(settings_message) > 1
-        ):  # Only add this if we added one of the settings above.
+        if len(settings_message) > 1:  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
         expectation_suite.expectations = []
-        expectation_suite.add_expectation_configurations(
-            expectation_configurations=expectations
-        )
+        expectation_suite.add_expectation_configurations(expectation_configurations=expectations)
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -1289,13 +1227,9 @@ class Validator:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.add_or_update_expectation_suite(
-                expectation_suite=expectation_suite
-            )
+            self._data_context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
             if self.cloud_mode:
-                updated_suite = self._data_context.get_expectation_suite(
-                    id=expectation_suite.id
-                )
+                updated_suite = self._data_context.get_expectation_suite(id=expectation_suite.id)
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
@@ -1306,9 +1240,7 @@ class Validator:
                     sort_keys=True,
                 )
         else:
-            raise ValueError(
-                "Unable to save config: filepath or data_context must be available."
-            )
+            raise ValueError("Unable to save config: filepath or data_context must be available.")
 
     @public_api
     @deprecated_argument(
@@ -1320,9 +1252,7 @@ class Validator:
         self,
         expectation_suite: str | ExpectationSuite | None = None,
         run_id: str | RunIdentifier | Dict[str, str] | None = None,
-        data_context: Optional[
-            Any
-        ] = None,  # Cannot type DataContext due to circular import
+        data_context: Optional[Any] = None,  # Cannot type DataContext due to circular import
         evaluation_parameters: Optional[dict] = None,
         catch_exceptions: bool = True,
         result_format: Optional[str] = None,
@@ -1357,9 +1287,7 @@ class Validator:
         """
         # noinspection PyUnusedLocal
         try:
-            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            )
+            validation_time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
@@ -1410,24 +1338,18 @@ class Validator:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = (
-                    data_context.evaluation_parameter_store.get_bind_params(run_id)
-                )
+                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(run_id)
             else:
                 runtime_evaluation_parameters = {}
 
             if expectation_suite.evaluation_parameters:
-                runtime_evaluation_parameters.update(
-                    expectation_suite.evaluation_parameters
-                )
+                runtime_evaluation_parameters.update(expectation_suite.evaluation_parameters)
 
             if evaluation_parameters is not None:
                 runtime_evaluation_parameters.update(evaluation_parameters)
 
             # Convert evaluation parameters to be json-serializable
-            runtime_evaluation_parameters = recursively_convert_to_json_serializable(
-                runtime_evaluation_parameters
-            )
+            runtime_evaluation_parameters = recursively_convert_to_json_serializable(runtime_evaluation_parameters)
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
@@ -1496,9 +1418,7 @@ class Validator:
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationConfiguration]:
         """Substitute evaluation parameters into the provided expectations and sort by column."""
-        NO_COLUMN = (
-            "_nocolumn"  # just used to group expectations that don't specify a column
-        )
+        NO_COLUMN = "_nocolumn"  # just used to group expectations that don't specify a column
         columns: dict[str, list[ExpectationConfiguration]] = {}
 
         for expectation in expectation_configurations:
@@ -1507,9 +1427,7 @@ class Validator:
                 interactive_evaluation=self.interactive_evaluation,
                 data_context=self._data_context,
             )
-            if "column" in expectation.kwargs and isinstance(
-                expectation.kwargs["column"], str
-            ):
+            if "column" in expectation.kwargs and isinstance(expectation.kwargs["column"], str):
                 column = expectation.kwargs["column"]
             else:
                 column = NO_COLUMN
@@ -1575,9 +1493,7 @@ class Validator:
             citation_date=citation_date,
         )
 
-    def test_expectation_function(
-        self, function: Callable, *args, **kwargs
-    ) -> Callable:
+    def test_expectation_function(self, function: Callable, *args, **kwargs) -> Callable:
         """Test a generic expectation function
 
         Args:
@@ -1658,16 +1574,10 @@ class Validator:
         # Checking type of expectation_suite.
         # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
         if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
-            raise TypeError(
-                "expectation_suite must be of type ExpectationSuite, not {}".format(
-                    type(expectation_suite)
-                )
-            )
+            raise TypeError(f"expectation_suite must be of type ExpectationSuite, not {type(expectation_suite)}")
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite_dict: dict = expectationSuiteSchema.load(
-                    expectation_suite
-                )
+                expectation_suite_dict: dict = expectationSuiteSchema.load(expectation_suite)
                 expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
@@ -1700,10 +1610,7 @@ class Validator:
         if catch_exceptions is not None:
             runtime_configuration.update({"catch_exceptions": catch_exceptions})
 
-        if (
-            self.default_expectation_args["result_format"]
-            == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]
-        ):
+        if self.default_expectation_args["result_format"] == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]:
             if result_format is None:
                 runtime_configuration.pop("result_format")
             else:
@@ -1738,9 +1645,7 @@ class Validator:
 class BridgeValidator:
     """This is currently helping bridge APIs"""
 
-    def __init__(
-        self, batch, expectation_suite, expectation_engine=None, **kwargs
-    ) -> None:
+    def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs) -> None:
         """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
         determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
 
@@ -1760,9 +1665,7 @@ class BridgeValidator:
         if isinstance(expectation_engine, ClassConfig):
             module_name = expectation_engine.module_name or "great_expectations.dataset"
             verify_dynamic_loading_support(module_name=module_name)
-            expectation_engine = load_class(
-                class_name=expectation_engine.class_name, module_name=module_name
-            )
+            expectation_engine = load_class(class_name=expectation_engine.class_name, module_name=module_name)
 
         self.expectation_engine = expectation_engine
 
@@ -1779,9 +1682,7 @@ class BridgeValidator:
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
-            raise ValueError(
-                "Unable to identify expectation_engine. It must be a subclass of DataAsset."
-            )
+            raise ValueError("Unable to identify expectation_engine. It must be a subclass of DataAsset.")
 
         self.init_kwargs = kwargs
 
@@ -1790,13 +1691,9 @@ class BridgeValidator:
         Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
         contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
         """
-        if self.expectation_engine and issubclass(
-            self.expectation_engine, PandasDataset
-        ):
+        if self.expectation_engine and issubclass(self.expectation_engine, PandasDataset):
             if not isinstance(self.batch["data"], pd.DataFrame):
-                raise ValueError(
-                    "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
-                )
+                raise ValueError("PandasDataset expectation_engine requires a Pandas Dataframe for its batch")
 
             return self.expectation_engine(
                 self.batch.data,
@@ -1815,9 +1712,7 @@ class BridgeValidator:
             if not (
                 pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)  # type: ignore [truthy-function]
             ):
-                raise ValueError(
-                    "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
-                )
+                raise ValueError("SparkDFDataset expectation_engine requires a spark DataFrame for its batch")
 
             return self.expectation_engine(
                 spark_df=self.batch.data,

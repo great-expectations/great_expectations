@@ -135,9 +135,7 @@ class SparkDFDatasource(LegacyDatasource):
             **kwargs,
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop(
-            "batch_kwargs_generators", None
-        )
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super().__init__(
             name,
             data_context=data_context,
@@ -153,9 +151,7 @@ class SparkDFDatasource(LegacyDatasource):
 
         self._build_generators()
 
-    def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None
-    ):
+    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None, dataset_options=None):
         batch_kwargs = super().process_batch_parameters(
             limit=limit,
             dataset_options=dataset_options,
@@ -183,11 +179,7 @@ class SparkDFDatasource(LegacyDatasource):
 
         # We need to build batch_markers to be used with the DataFrame
         batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
+            {"ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")}
         )
 
         if "path" in batch_kwargs:
@@ -221,9 +213,7 @@ class SparkDFDatasource(LegacyDatasource):
             batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
         else:
-            raise BatchKwargsError(
-                "Unrecognized batch_kwargs for spark_source", batch_kwargs
-            )
+            raise BatchKwargsError("Unrecognized batch_kwargs for spark_source", batch_kwargs)
 
         if "limit" in batch_kwargs:
             df = df.limit(batch_kwargs["limit"])
@@ -242,9 +232,7 @@ class SparkDFDatasource(LegacyDatasource):
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return {"reader_method": "parquet"}
 
         raise BatchKwargsError(
@@ -271,9 +259,7 @@ class SparkDFDatasource(LegacyDatasource):
             )
 
         if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path=path)[
-                "reader_method"
-            ]
+            reader_method = self.guess_reader_method_from_path(path=path)["reader_method"]
 
         try:
             if reader_method.lower() in ["delta", "avro"]:

@@ -73,9 +73,7 @@ class NotNullSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_dump(pass_original=True)
-    def remove_nulls_and_keep_unknowns(
-        self, output: dict, original: DictDot, **kwargs
-    ) -> dict:
+    def remove_nulls_and_keep_unknowns(self, output: dict, original: DictDot, **kwargs) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
         Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
         attributes set through `setattr` are captured in the resulting object.
@@ -374,9 +372,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     )
     expectation_type = fields.Str(
         required=True,
-        error_messages={
-            "required": "expectation_type missing in expectation configuration builder"
-        },
+        error_messages={"required": "expectation_type missing in expectation configuration builder"},
     )
     meta = fields.Dict(
         keys=fields.String(
@@ -403,9 +399,7 @@ class RuleConfig(SerializableDictDot):
         variables: Optional[Dict[str, Any]] = None,
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
-        expectation_configuration_builders: Optional[
-            List[dict]
-        ] = None,  # see ExpectationConfigurationBuilderConfig
+        expectation_configuration_builders: Optional[List[dict]] = None,  # see ExpectationConfigurationBuilderConfig
     ) -> None:
         self.variables = variables
         self.domain_builder = domain_builder
@@ -536,9 +530,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
 
             return config
         except ValidationError:
-            logger.error(
-                "Encountered errors during loading config.  See ValidationError for more details."
-            )
+            logger.error("Encountered errors during loading config.  See ValidationError for more details.")
             raise
 
     @classmethod
@@ -618,23 +610,17 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         Returns:
             An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
         """
-        effective_variables: Optional[ParameterContainer] = (
-            profiler.reconcile_profiler_variables(
-                variables=variables,
-            )
+        effective_variables: Optional[ParameterContainer] = profiler.reconcile_profiler_variables(
+            variables=variables,
         )
-        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
-            variables=effective_variables
-        )
+        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(variables=effective_variables)
 
         effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
             rules=rules,
         )
 
         rule: Rule
-        effective_rules_dict: Dict[str, Rule] = {
-            rule.name: rule for rule in effective_rules
-        }
+        effective_rules_dict: Dict[str, Rule] = {rule.name: rule for rule in effective_rules}
         runtime_rules: Dict[str, dict] = {
             name: RuleBasedProfilerConfig._substitute_variables_in_config(
                 rule=rule,
@@ -754,9 +740,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     )
 
 
-expectationConfigurationBuilderConfigSchema = (
-    ExpectationConfigurationBuilderConfigSchema()
-)
+expectationConfigurationBuilderConfigSchema = ExpectationConfigurationBuilderConfigSchema()
 parameterBuilderConfigSchema = ParameterBuilderConfigSchema()
 domainBuilderConfigSchema = DomainBuilderConfigSchema()
 ruleConfigSchema = RuleConfigSchema()

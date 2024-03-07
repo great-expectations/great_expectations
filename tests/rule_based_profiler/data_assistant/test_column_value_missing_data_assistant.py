@@ -73,9 +73,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
             "expect_column_values_to_be_null",
         ]
         column = expectation.kwargs["column"]
-        assert (
-            expectation.kwargs.get("mostly", 1.0) == expected_results[column]["mostly"]
-        )
+        assert expectation.kwargs.get("mostly", 1.0) == expected_results[column]["mostly"]
         assert expectation.expectation_type == expected_results[column]["expectation"]
 
 
@@ -99,13 +97,9 @@ def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_bat
     call_args = mock_run_profiler_on_data.call_args[1]
     profiler = call_args["profiler"]
     rules = profiler.config.rules
-    expectation_configuration_builders = rules["column_value_missing_rule"][
-        "expectation_configuration_builders"
-    ]
+    expectation_configuration_builders = rules["column_value_missing_rule"]["expectation_configuration_builders"]
     for builder in expectation_configuration_builders:
-        validation_parameter_builder_configs = builder[
-            "validation_parameter_builder_configs"
-        ]
+        validation_parameter_builder_configs = builder["validation_parameter_builder_configs"]
         assert len(validation_parameter_builder_configs) == 1
         assert validation_parameter_builder_configs[0]["mode"] == "multi_batch"
 
@@ -135,13 +129,9 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
     call_args = mock_run_profiler_on_data.call_args[1]
     profiler = call_args["profiler"]
     rules = profiler.config.rules
-    expectation_configuration_builders = rules["column_value_missing_rule"][
-        "expectation_configuration_builders"
-    ]
+    expectation_configuration_builders = rules["column_value_missing_rule"]["expectation_configuration_builders"]
     for builder in expectation_configuration_builders:
-        validation_parameter_builder_configs = builder[
-            "validation_parameter_builder_configs"
-        ]
+        validation_parameter_builder_configs = builder["validation_parameter_builder_configs"]
         assert len(validation_parameter_builder_configs) == 1
         assert validation_parameter_builder_configs[0]["mode"] == "single_batch"
 
@@ -173,12 +163,8 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
 
     # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
     # Other metrics should pass.
-    assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
-        "column_value_missing_rule"
-    ]
+    assert list(data_assistant_result.rule_exception_tracebacks.keys()) == ["column_value_missing_rule"]
     assert (
-        data_assistant_result.rule_exception_tracebacks["column_value_missing_rule"][
-            "exception_message"
-        ]
+        data_assistant_result.rule_exception_tracebacks["column_value_missing_rule"]["exception_message"]
         == "Column names cannot contain '.' when computing parameters for unexpected count statistics."
     )

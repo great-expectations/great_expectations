@@ -33,9 +33,7 @@ if TYPE_CHECKING:
     )
 
 
-class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
-    MetricMultiBatchParameterBuilder
-):
+class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     Compute mean match ratio (as a fraction) of "table.columns" metric across every Batch of data given.
 
@@ -45,25 +43,20 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        MetricMultiBatchParameterBuilder.exclude_field_names
-        | {
-            "metric_name",
-            "single_batch_mode",
-            "enforce_numeric_metric",
-            "replace_nan_with_zero",
-            "reduce_scalar_metric",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "metric_name",
+        "single_batch_mode",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -121,9 +114,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
         )
-        table_columns_names_multi_batch_value: MetricValues = parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        table_columns_names_multi_batch_value: MetricValues = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
@@ -131,18 +122,13 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
-        multi_batch_table_columns_names_as_set: Set[str] = set().union(
-            *multi_batch_table_columns_names_sets_as_list
-        )
+        multi_batch_table_columns_names_as_set: Set[str] = set().union(*multi_batch_table_columns_names_sets_as_list)
 
         one_batch_table_columns_names_set: Set[str]
         mean_table_columns_set_match: np.float64 = np.mean(
             np.asarray(
                 [
-                    1
-                    if one_batch_table_columns_names_set
-                    == multi_batch_table_columns_names_as_set
-                    else 0
+                    1 if one_batch_table_columns_names_set == multi_batch_table_columns_names_as_set else 0
                     for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
                 ]
             )

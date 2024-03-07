@@ -55,9 +55,7 @@ class OrderedProfilerCardinality(OrderedEnum):
     UNIQUE = 7
 
     @classmethod
-    def get_basic_column_cardinality(
-        cls, num_unique=0, pct_unique=0
-    ) -> OrderedProfilerCardinality:
+    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0) -> OrderedProfilerCardinality:
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
@@ -117,10 +115,7 @@ class ProfilerCardinality(Enum):
 profiler_data_types_with_mapping = {
     "INT": list(ProfilerTypeMapping.INT_TYPE_NAMES),
     "FLOAT": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
-    "NUMERIC": (
-        list(ProfilerTypeMapping.INT_TYPE_NAMES)
-        + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
-    ),
+    "NUMERIC": (list(ProfilerTypeMapping.INT_TYPE_NAMES) + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
     "STRING": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
     "BOOLEAN": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
     "DATETIME": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
@@ -163,17 +158,13 @@ class Profiler(metaclass=abc.ABCMeta):
         """
         pass
 
-    def profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
-    ) -> ExpectationSuite:
+    def profile(self, item_to_profile: Any, suite_name: Optional[str] = None) -> ExpectationSuite:
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
         return expectation_suite
 
     @abc.abstractmethod
-    def _profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
-    ) -> ExpectationSuite:
+    def _profile(self, item_to_profile: Any, suite_name: Optional[str] = None) -> ExpectationSuite:
         pass
 
 
@@ -205,10 +196,7 @@ class DatasetProfiler(DataAssetProfiler):
         if batch_kwargs is not None:
             expectation_suite.meta[class_name]["batch_kwargs"] = batch_kwargs
 
-        new_expectations = [
-            cls.add_expectation_meta(exp)
-            for exp in expectation_suite.expectation_configurations
-        ]
+        new_expectations = [cls.add_expectation_meta(exp) for exp in expectation_suite.expectation_configurations]
         expectation_suite.expectations = []
         expectation_suite.add_expectation_configurations(new_expectations)
 
@@ -245,15 +233,11 @@ class DatasetProfiler(DataAssetProfiler):
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
-        expectation_suite = cls._profile(
-            data_asset, configuration=profiler_configuration
-        )
+        expectation_suite = cls._profile(data_asset, configuration=profiler_configuration)
 
         batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
-        validation_results = data_asset.validate(
-            expectation_suite, run_id=run_id, result_format="SUMMARY"
-        )
+        validation_results = data_asset.validate(expectation_suite, run_id=run_id, result_format="SUMMARY")
         expectation_suite.add_citation(
             comment=f"{cls.__name__!s} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,

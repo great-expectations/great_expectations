@@ -59,8 +59,8 @@ def empty_rule_state(
 @pytest.fixture
 def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
     false_positive_rate: np.float64 = np.float64(0.01)
-    distribution_parameters: Dict[str, Dict[str, Number]] = (
-        generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_parameters: Dict[str, Dict[str, Number]] = generate_distribution_parameters(
+        false_positive_rate=false_positive_rate
     )
     distribution_samples: pd.DataFrame = generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=1000
@@ -77,12 +77,8 @@ def generate_distribution_parameters(
 ) -> Dict[str, Dict[str, Number]]:
     normal_mean: int = 5000
     normal_stdev: int = 1000
-    normal_lower_quantile: Number = stats.norm.ppf(
-        q=false_positive_rate / 2, loc=normal_mean, scale=normal_stdev
-    )
-    normal_upper_quantile: Number = stats.norm.ppf(
-        q=1 - false_positive_rate / 2, loc=normal_mean, scale=normal_stdev
-    )
+    normal_lower_quantile: Number = stats.norm.ppf(q=false_positive_rate / 2, loc=normal_mean, scale=normal_stdev)
+    normal_upper_quantile: Number = stats.norm.ppf(q=1 - false_positive_rate / 2, loc=normal_mean, scale=normal_stdev)
 
     uniform_lower_bound: int = 4000
     uniform_scale: int = 6000
@@ -119,12 +115,8 @@ def generate_distribution_parameters(
             ),
         ]
     )
-    bimodal_lower_quantile = np.quantile(
-        a=bimodal_approximation, q=false_positive_rate / 2
-    )
-    bimodal_upper_quantile = np.quantile(
-        a=bimodal_approximation, q=1 - false_positive_rate / 2
-    )
+    bimodal_lower_quantile = np.quantile(a=bimodal_approximation, q=false_positive_rate / 2)
+    bimodal_upper_quantile = np.quantile(a=bimodal_approximation, q=1 - false_positive_rate / 2)
 
     exponential_shape: float = 1.5
     exponential_lower_bound: int = 5000

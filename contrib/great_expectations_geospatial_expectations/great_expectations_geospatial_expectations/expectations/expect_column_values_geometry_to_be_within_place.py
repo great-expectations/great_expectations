@@ -31,9 +31,7 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
         geocoder_config = kwargs.get("geocoder_config")
 
         if geocoder not in ["nominatim", "pickpoint", "openmapquest"]:
-            raise NotImplementedError(
-                "The geocoder is not implemented for this method."
-            )
+            raise NotImplementedError("The geocoder is not implemented for this method.")
 
         # find the reference shape with the geocoder.
         if geocoder is not None:
@@ -42,13 +40,9 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
             except Exception:
-                raise Exception(
-                    "Geocoding configuration and query failed to produce a valid result."
-                )
+                raise Exception("Geocoding configuration and query failed to produce a valid result.")
         else:
-            raise Exception(
-                "A valid geocoder must be provided for this method. See GeoPy for reference."
-            )
+            raise Exception("A valid geocoder must be provided for this method. See GeoPy for reference.")
 
         # This method only works with the default Nominatim params and wkt.
         # TODO: Other geocoders and methods need to be implemented.

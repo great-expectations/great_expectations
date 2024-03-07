@@ -49,9 +49,7 @@ LOGGER = logging.getLogger(__name__)
 
 @pytest.fixture
 def taxi_data_samples_dir() -> pathlib.Path:
-    return pathlib.Path(
-        __file__, "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    ).resolve(strict=True)
+    return pathlib.Path(__file__, "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples").resolve(strict=True)
 
 
 @pytest.mark.cloud
@@ -66,9 +64,7 @@ def test_add_fluent_datasource_are_persisted(
 
     datasource_name = "save_ds_test"
 
-    datasource = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
+    datasource = context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
 
     assert datasource.id
     assert set_spy.call_count == 1
@@ -86,9 +82,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     context = empty_file_context
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
+    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
 
     yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
     assert yaml_path.exists()
@@ -108,17 +102,13 @@ def test_partitioners_are_persisted_on_creation(
     context = empty_cloud_context_fluent
 
     datasource_name = "save_ds_partitioners_test"
-    datasource = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
+    datasource = context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
     partitioner = PartitionerYear(column_name="date")
     my_asset.add_batch_config(name="cloud partitioner test", partitioner=partitioner)
 
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-        "attributes"
-    ]["datasource_config"]
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"]["datasource_config"]
 
     # partitioners should be present
     assert datasource_config["assets"][0]["batch_configs"][0]["partitioner"]
@@ -139,9 +129,7 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     datasource_name = "my_datasource"
     asset_name = "my_asset"
 
-    context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    ).add_query_asset(
+    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}").add_query_asset(
         asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"'
     )
 
@@ -180,9 +168,9 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-            "attributes"
-        ]["datasource_config"]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"]["datasource_config"][
+            "assets"
+        ]
     ]
     assert asset_name not in asset_names
 
@@ -197,9 +185,7 @@ def test_context_add_or_update_datasource(
 ):
     context = empty_contexts
 
-    datasource = context.sources.add_pandas_filesystem(
-        name="save_ds_test", base_directory=taxi_data_samples_dir
-    )
+    datasource = context.sources.add_pandas_filesystem(name="save_ds_test", base_directory=taxi_data_samples_dir)
     datasource.add_csv_asset(
         name="my_asset",
     )
@@ -216,9 +202,7 @@ def test_context_add_or_update_datasource(
             2,
         )
 
-        response = requests.get(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}"
-        )
+        response = requests.get(f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}")
         response.raise_for_status()
         print(pf(response.json(), depth=4))
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
@@ -263,14 +247,10 @@ def test_context_add_and_then_update_datasource(
 ):
     context = empty_contexts
 
-    datasource1 = context.sources.add_pandas_filesystem(
-        name="update_ds_test", base_directory=taxi_data_samples_dir
-    )
+    datasource1 = context.sources.add_pandas_filesystem(name="update_ds_test", base_directory=taxi_data_samples_dir)
 
     # add_or_update should be idempotent
-    datasource2 = context.sources.update_pandas_filesystem(
-        name="update_ds_test", base_directory=taxi_data_samples_dir
-    )
+    datasource2 = context.sources.update_pandas_filesystem(name="update_ds_test", base_directory=taxi_data_samples_dir)
 
     assert datasource1 == datasource2
 
@@ -292,9 +272,7 @@ def test_update_non_existant_datasource(
     context = empty_contexts
 
     with pytest.raises(ValueError, match="I_DONT_EXIST"):
-        context.sources.update_pandas_filesystem(
-            name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
-        )
+        context.sources.update_pandas_filesystem(name="I_DONT_EXIST", base_directory=taxi_data_samples_dir)
 
 
 @pytest.mark.cloud
@@ -305,9 +283,7 @@ def test_cloud_context_delete_datasource(
 ):
     context = empty_cloud_context_fluent
 
-    datasource = context.sources.add_pandas_filesystem(
-        name="delete_ds_test", base_directory=taxi_data_samples_dir
-    )
+    datasource = context.sources.add_pandas_filesystem(name="delete_ds_test", base_directory=taxi_data_samples_dir)
 
     # check cloud_api_fake items
     response1 = requests.get(
@@ -411,15 +387,11 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
     print(f"{bad_datasource!r}\n{bad_datasource!s}")
     assert isinstance(bad_datasource, InvalidDatasource)
     assert bad_datasource.name == datasource_name
-    assert len(bad_datasource.assets) == len(
-        invalid_datasource_config.get("assets", [])
-    )
+    assert len(bad_datasource.assets) == len(invalid_datasource_config.get("assets", []))
 
 
 @pytest.fixture
-def verify_asset_names_mock(
-    cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
-):
+def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db):
     def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
             parsed_url_path = str(urllib.parse.urlparse(request.url).path)
@@ -431,17 +403,10 @@ def verify_asset_names_mock(
             assert assets, "No assets found"
             for asset in assets:
                 if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
-                    raise ValueError(
-                        f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
-                    )
-            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
-                datasource_id
-            )
+                    raise ValueError(f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'")
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(datasource_id)
             if old_datasource:
-                if (
-                    payload.data.name
-                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
-                ):
+                if payload.data.name != old_datasource["data"]["attributes"]["datasource_config"]["name"]:
                     raise NotImplementedError("Unsure how to handle name change")
                 cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
@@ -451,9 +416,7 @@ def verify_asset_names_mock(
             )
         return CallbackResult(500, DEFAULT_HEADERS, "No body found")
 
-    cloud_url = re.compile(
-        f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{UUID_REGEX}"
-    )
+    cloud_url = re.compile(f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{UUID_REGEX}")
 
     cloud_api_fake.remove("PUT", url=cloud_url)
     cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
@@ -470,9 +433,7 @@ class TestPandasDefaultWithCloud:
         verify_asset_names_mock: RequestsMock,
     ):
         context = empty_cloud_context_fluent
-        df = pd.DataFrame.from_dict(
-            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
-        )
+        df = pd.DataFrame.from_dict({"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]})
 
         context.sources.pandas_default.read_dataframe(df)
 

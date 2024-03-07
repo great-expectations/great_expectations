@@ -46,9 +46,7 @@ class ColumnValuesToBeValidUUID(ColumnMapMetricProvider):
         For future purposes, the stricter pattern can be found here as well, commented out.
         """
         # regex_pattern = '^(urn:uuid:)?\{?[A-Fa-f0-9]{8}-?[A-Fa-f0-9]{4}-?[1-5][A-Fa-f0-9]{3}-?[89ABab][A-Fa-f0-9]{3}-?[A-Fa-f0-9]{12}\}?$'
-        regex_pattern = (
-            "^(urn:uuid:)?\\{?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}\\}?$"
-        )
+        regex_pattern = "^(urn:uuid:)?\\{?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}\\}?$"
         return column.regexp_match(regex_pattern)
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine

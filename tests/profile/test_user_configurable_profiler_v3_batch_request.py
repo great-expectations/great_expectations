@@ -65,9 +65,7 @@ def get_pandas_runtime_validator(context, df):
 
     expectation_suite = context.add_expectation_suite("my_suite")
 
-    validator = context.get_validator(
-        batch_request=batch_request, expectation_suite=expectation_suite
-    )
+    validator = context.get_validator(batch_request=batch_request, expectation_suite=expectation_suite)
 
     return validator
 
@@ -88,9 +86,7 @@ def get_spark_runtime_validator(context, df):
 
     expectation_suite = context.add_expectation_suite("my_suite")
 
-    validator = context.get_validator(
-        batch_request=batch_request, expectation_suite=expectation_suite
-    )
+    validator = context.get_validator(batch_request=batch_request, expectation_suite=expectation_suite)
 
     return validator
 
@@ -111,11 +107,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
 
     sql_dtypes = {}
 
-    if (
-        schemas
-        and sa_engine_name in schemas
-        and isinstance(engine.dialect, postgresqltypes.dialect)
-    ):
+    if schemas and sa_engine_name in schemas and isinstance(engine.dialect, postgresqltypes.dialect):
         schema = schemas[sa_engine_name]
         sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
 
@@ -125,16 +117,10 @@ def get_sqlalchemy_runtime_validator_postgresql(
                 df[col] = pd.to_numeric(df[col], downcast="signed")
             elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                 df[col] = pd.to_numeric(df[col])
-                min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=True
-                )
-                max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=False
-                )
+                min_value_dbms = get_sql_dialect_floating_point_infinity_value(schema=sa_engine_name, negative=True)
+                max_value_dbms = get_sql_dialect_floating_point_infinity_value(schema=sa_engine_name, negative=False)
                 for api_schema_type in ["api_np", "api_cast"]:
-                    min_value_api = get_sql_dialect_floating_point_infinity_value(
-                        schema=api_schema_type, negative=True
-                    )
+                    min_value_api = get_sql_dialect_floating_point_infinity_value(schema=api_schema_type, negative=True)
                     max_value_api = get_sql_dialect_floating_point_infinity_value(
                         schema=api_schema_type, negative=False
                     )
@@ -147,9 +133,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:
-        table_name = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-        )
+        table_name = "test_data_" + "".join([random.choice(string.ascii_letters + string.digits) for _ in range(8)])
     add_dataframe_to_db(
         df=df,
         name=table_name,
@@ -159,9 +143,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         if_exists="replace",
     )
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name=table_name
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, table_name=table_name)
     batch = Batch(data=batch_data)
 
     return Validator(execution_engine=execution_engine, batches=[batch])
@@ -360,9 +342,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
     bad_semantic_types_dict_type = {"value_set": "col_few"}
     with pytest.raises(AssertionError) as e:
         # noinspection PyTypeChecker
-        UserConfigurableProfiler(
-            cardinality_validator, semantic_types_dict=bad_semantic_types_dict_type
-        )
+        UserConfigurableProfiler(cardinality_validator, semantic_types_dict=bad_semantic_types_dict_type)
     assert e.value.args[0] == (
         "Entries in semantic type dict must be lists of column names e.g. "
         "{'semantic_types': {'numeric': ['number_of_transactions']}}"
@@ -370,9 +350,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
 
     bad_semantic_types_incorrect_type = {"incorrect_type": ["col_few"]}
     with pytest.raises(ValueError) as e:
-        UserConfigurableProfiler(
-            cardinality_validator, semantic_types_dict=bad_semantic_types_incorrect_type
-        )
+        UserConfigurableProfiler(cardinality_validator, semantic_types_dict=bad_semantic_types_incorrect_type)
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
         f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
@@ -449,9 +427,7 @@ def test_build_suite_with_semantic_types_dict(
     assert len(suite.expectations) == 32
 
     value_set_expectations = [
-        i
-        for i in suite.expectation_configurations
-        if i.expectation_type == "expect_column_values_to_be_in_set"
+        i for i in suite.expectation_configurations if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
 
@@ -493,9 +469,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     Confirms that an error is raised if a primary_or_compound key is specified with a column not found in the validator
     """
     # regular case, should pass
-    working_profiler = UserConfigurableProfiler(
-        cardinality_validator, primary_or_compound_key=["col_unique"]
-    )
+    working_profiler = UserConfigurableProfiler(cardinality_validator, primary_or_compound_key=["col_unique"])
     assert working_profiler.primary_or_compound_key == ["col_unique"]
 
     # key includes a non-existent column, should fail
@@ -532,25 +506,17 @@ def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
 
     validator = nulls_validator
 
-    profiler_without_not_null_only = UserConfigurableProfiler(
-        validator, excluded_expectations, not_null_only=False
-    )
+    profiler_without_not_null_only = UserConfigurableProfiler(validator, excluded_expectations, not_null_only=False)
     suite_without_not_null_only = profiler_without_not_null_only.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(
-        suite_without_not_null_only
-    )
+    _, expectations = get_set_of_columns_and_expectations_from_suite(suite_without_not_null_only)
     assert expectations == {
         "expect_column_values_to_be_null",
         "expect_column_values_to_not_be_null",
     }
 
-    profiler_with_not_null_only = UserConfigurableProfiler(
-        validator, excluded_expectations, not_null_only=True
-    )
+    profiler_with_not_null_only = UserConfigurableProfiler(validator, excluded_expectations, not_null_only=True)
     not_null_only_suite = profiler_with_not_null_only.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(
-        not_null_only_suite
-    )
+    _, expectations = get_set_of_columns_and_expectations_from_suite(not_null_only_suite)
     assert expectations == {"expect_column_values_to_not_be_null"}
 
     no_config_profiler = UserConfigurableProfiler(validator)
@@ -560,16 +526,12 @@ def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
 
 
 @pytest.mark.filesystem
-def test_nullity_expectations_mostly_tolerance(
-    nulls_validator, possible_expectations_set
-):
+def test_nullity_expectations_mostly_tolerance(nulls_validator, possible_expectations_set):
     excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
 
     validator = nulls_validator
 
-    profiler = UserConfigurableProfiler(
-        validator, excluded_expectations, not_null_only=False
-    )
+    profiler = UserConfigurableProfiler(validator, excluded_expectations, not_null_only=False)
     suite = profiler.build_suite()
 
     for i in suite.expectation_configurations:
@@ -578,23 +540,17 @@ def test_nullity_expectations_mostly_tolerance(
 
 @pytest.mark.slow  # 2.44s
 @pytest.mark.filesystem
-def test_profiled_dataset_passes_own_validation(
-    cardinality_validator, titanic_data_context
-):
+def test_profiled_dataset_passes_own_validation(cardinality_validator, titanic_data_context):
     """
     What does this test do and why?
     Confirms that a suite created on a validator with no config will pass when validated against itself
     """
     context = titanic_data_context
-    profiler = UserConfigurableProfiler(
-        cardinality_validator, ignored_columns=["col_none"]
-    )
+    profiler = UserConfigurableProfiler(cardinality_validator, ignored_columns=["col_none"])
     suite = profiler.build_suite()
 
     context.add_expectation_suite(expectation_suite=suite)
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[cardinality_validator]
-    )
+    results = context.run_validation_operator("action_list_operator", assets_to_validate=[cardinality_validator])
 
     assert results["success"]
 
@@ -610,33 +566,23 @@ def test_column_cardinality_functions(cardinality_validator):
     assert profiler.column_info.get("col_many").get("cardinality") == "MANY"
     assert profiler.column_info.get("col_very_many").get("cardinality") == "VERY_MANY"
 
-    cardinality_with_ten_num_and_no_pct = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(num_unique=10)
-    )
+    cardinality_with_ten_num_and_no_pct = OrderedProfilerCardinality.get_basic_column_cardinality(num_unique=10)
     assert cardinality_with_ten_num_and_no_pct.name == "VERY_FEW"
 
-    cardinality_with_unique_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=1.0)
-    )
+    cardinality_with_unique_pct_and_no_num = OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=1.0)
     assert cardinality_with_unique_pct_and_no_num.name == "UNIQUE"
 
-    cardinality_with_no_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality()
-    )
+    cardinality_with_no_pct_and_no_num = OrderedProfilerCardinality.get_basic_column_cardinality()
     assert cardinality_with_no_pct_and_no_num.name == "NONE"
 
-    cardinality_with_large_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=0.5)
-    )
+    cardinality_with_large_pct_and_no_num = OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=0.5)
     assert cardinality_with_large_pct_and_no_num.name == "NONE"
 
 
 @mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
 @pytest.mark.slow  # 1.28s
 @pytest.mark.filesystem
-def test_user_configurable_profiler_progress_bar_config_enabled(
-    mock_tqdm, cardinality_validator
-):
+def test_user_configurable_profiler_progress_bar_config_enabled(mock_tqdm, cardinality_validator):
     semantic_types = {
         "numeric": ["col_few", "col_many", "col_very_many"],
         "value_set": ["col_two", "col_very_few"],
@@ -656,13 +602,9 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.slow  # 1.34s
 @pytest.mark.filesystem
-def test_user_configurable_profiler_progress_bar_config_disabled(
-    mock_tqdm, cardinality_validator
-):
+def test_user_configurable_profiler_progress_bar_config_disabled(mock_tqdm, cardinality_validator):
     data_context = cardinality_validator.data_context
-    data_context.project_config_with_variables_substituted.progress_bars = (
-        ProgressBarsConfig(profilers=False)
-    )
+    data_context.project_config_with_variables_substituted.progress_bars = ProgressBarsConfig(profilers=False)
 
     semantic_types = {
         "numeric": ["col_few", "col_many", "col_very_many"],

@@ -20,9 +20,12 @@ from great_expectations.render.util import (
 
 @pytest.mark.unit
 def test_substitute_none_for_missing():
-    assert substitute_none_for_missing(
-        kwargs={"a": 1, "b": 2}, kwarg_list=["c", "d"]
-    ) == {"a": 1, "b": 2, "c": None, "d": None}
+    assert substitute_none_for_missing(kwargs={"a": 1, "b": 2}, kwarg_list=["c", "d"]) == {
+        "a": 1,
+        "b": 2,
+        "c": None,
+        "d": None,
+    }
 
     my_kwargs = {"a": 1, "b": 2}
     assert substitute_none_for_missing(kwargs=my_kwargs, kwarg_list=["c", "d"]) == {
@@ -72,9 +75,7 @@ def test_all_expectations_using_test_definitions():
     test_files = glob.glob(pattern)  # noqa: PTH207
 
     # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
-    assert (
-        len(test_files) == 61
-    ), "Something went wrong when collecting JSON Expectation test fixtures"
+    assert len(test_files) == 61, "Something went wrong when collecting JSON Expectation test fixtures"
 
     # Not ported over to V1 so ignore for purposes of this test
     UNSUPPORTED_EXPECTATIONS = {
@@ -105,18 +106,14 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
-                render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
-                    [fake_expectation]
-                )
+                render_result = ExpectationSuiteBulletListContentBlockRenderer.render([fake_expectation])
                 assert render_result is not None
                 render_result = render_result.to_json_dict()
 
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
                 assert render_result["content_block_type"] in render_result
-                assert isinstance(
-                    render_result[render_result["content_block_type"]], list
-                )
+                assert isinstance(render_result[render_result["content_block_type"]], list)
 
                 # TODO: Assert that the template is renderable, with all the right arguments, etc.
                 # rendered_template = pTemplate(el["template"]).substitute(el["params"])

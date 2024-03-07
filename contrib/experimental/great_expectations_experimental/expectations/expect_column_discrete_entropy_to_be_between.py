@@ -81,9 +81,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             _df,
             _compute_domain_kwargs,
             _accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         base = metric_value_kwargs["base"]
 
         column_value_counts = metrics.get("column.value_counts")
@@ -104,17 +102,9 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
 
-        dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
-        )
+        dependencies.update({"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)})
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
             execution_engine, SparkDFExecutionEngine
@@ -178,9 +168,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                 "b": ["Jarndyce", "Jarndyce", None, None],
                 "c": ["past", "present", "future", None],
             },
-            "schemas": {
-                "spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}
-            },
+            "schemas": {"spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}},
             "tests": [
                 {
                     "title": "positive_test_min_equal_max",
@@ -268,9 +256,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         "base": 2,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         neccessary configuration arguments have been provided for the validation of the expectation.
@@ -295,9 +281,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

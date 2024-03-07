@@ -41,9 +41,7 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
             batch_columns_list=metrics["table.columns"],
         )
 
-        profile_report_column_data_stats: dict = metrics[
-            "data_profiler.table_column_infos"
-        ]
+        profile_report_column_data_stats: dict = metrics["data_profiler.table_column_infos"]
         return profile_report_column_data_stats[column_name]
 
     @classmethod
@@ -60,9 +58,7 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs: dict = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
         dependencies["data_profiler.table_column_infos"] = MetricConfiguration(
             metric_name="data_profiler.table_column_infos",
             metric_domain_kwargs={},

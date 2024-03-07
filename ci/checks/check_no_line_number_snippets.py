@@ -39,9 +39,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        ) from e
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}") from e
     return res.stdout.splitlines()
 
 
@@ -57,10 +55,7 @@ def main() -> None:
             grep_output,
         )
     )
-    excluded_documents = {
-        project_root / file_path
-        for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
-    }
+    excluded_documents = {project_root / file_path for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER}
     new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(

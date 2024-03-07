@@ -93,13 +93,9 @@ class Store:
             },
         )
         if not self._store_backend:
-            raise ClassInstantiationError(
-                module_name=module_name, package_name=None, class_name=store_backend
-            )
+            raise ClassInstantiationError(module_name=module_name, package_name=None, class_name=store_backend)
         if not isinstance(self._store_backend, StoreBackend):
-            raise DataContextError(
-                "Invalid StoreBackend configuration: expected a StoreBackend instance."
-            )
+            raise DataContextError("Invalid StoreBackend configuration: expected a StoreBackend instance.")
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
     @staticmethod
@@ -125,9 +121,7 @@ class Store:
         elif isinstance(key, self.key_class):
             return
         else:
-            raise TypeError(
-                f"key must be an instance of {self.key_class.__name__}, not {type(key)}"
-            )
+            raise TypeError(f"key must be an instance of {self.key_class.__name__}, not {type(key)}")
 
     @property
     def cloud_mode(self) -> bool:
@@ -190,9 +184,7 @@ class Store:
     def deserialize(self, value: Any) -> Any:
         return value
 
-    def get(
-        self, key: DataContextKey | GXCloudIdentifier | ConfigurationIdentifier
-    ) -> Optional[Any]:
+    def get(self, key: DataContextKey | GXCloudIdentifier | ConfigurationIdentifier) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
@@ -223,9 +215,7 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.set(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -235,9 +225,7 @@ class Store:
 
     def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.add(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -247,31 +235,21 @@ class Store:
 
     def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.update(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.update(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
-    def add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
         return self._add_or_update(key=key, value=value, **kwargs)
 
-    def _add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         self._validate_key(key)
-        return self._store_backend.add_or_update(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.add_or_update(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
-            key
-            for key in self._store_backend.list_keys()
-            if not key == StoreBackend.STORE_BACKEND_ID_KEY
+            key for key in self._store_backend.list_keys() if not key == StoreBackend.STORE_BACKEND_ID_KEY
         ]
         return [self.tuple_to_key(key) for key in keys_without_store_backend_id]
 
@@ -318,9 +296,7 @@ class Store:
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
-            logger.critical(
-                f"Error {e} occurred while attempting to instantiate a store."
-            )
+            logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
             class_name: str = store_config["class_name"]
             module_name = store_config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(

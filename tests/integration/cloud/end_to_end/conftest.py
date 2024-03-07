@@ -69,9 +69,7 @@ def expectation_suite(
     )
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(
-        expectation_suite=expectation_suite
-    )
+    expectation_suite = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
     assert len(expectation_suite.expectations) > 0
     _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -128,9 +126,7 @@ def checkpoint(
         ],
     )
     checkpoint = context.checkpoints.get(name=checkpoint_name)
-    assert (
-        len(checkpoint.validations) == 1
-    ), "Checkpoint was not updated in the previous method call."
+    assert len(checkpoint.validations) == 1, "Checkpoint was not updated in the previous method call."
     yield checkpoint
     context.checkpoints.delete(checkpoint)
 
@@ -168,9 +164,7 @@ def table_factory() -> Iterator[TableFactory]:
     Given a SQLAlchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """
-    all_created_tables: dict[
-        str, list[dict[Literal["table_name", "schema_name"], str | None]]
-    ] = {}
+    all_created_tables: dict[str, list[dict[Literal["table_name", "schema_name"], str | None]]] = {}
     engines: dict[str, sqlalchemy.engine.Engine] = {}
 
     def _table_factory(
@@ -179,12 +173,8 @@ def table_factory() -> Iterator[TableFactory]:
         schema_name: str | None = None,
     ) -> None:
         sa_engine = gx_engine.engine
-        LOGGER.info(
-            f"Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
-        )
-        created_tables: list[
-            dict[Literal["table_name", "schema_name"], str | None]
-        ] = []
+        LOGGER.info(f"Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist")
+        created_tables: list[dict[Literal["table_name", "schema_name"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
             transaction = conn.begin()
@@ -236,10 +226,7 @@ def spark_df_from_pandas_df():
     ):
         spark_df = spark_session.createDataFrame(
             [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
+                tuple(None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist())
                 for record in pandas_df.to_records(index=False)
             ],
             pandas_df.columns.tolist(),

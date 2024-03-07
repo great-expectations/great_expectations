@@ -99,14 +99,10 @@ def data_context_with_bad_datasource(tmp_path_factory):
 @pytest.mark.filesystem
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_create_expectation_suite"
-    )
+    assert titanic_data_context.add_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.add_expectation_suite(
-            expectation_suite_name="titanic.test_create_expectation_suite"
-        )
+        titanic_data_context.add_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
     assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
@@ -122,10 +118,8 @@ def test_list_expectation_suite_keys(data_context_parameterized_expectation_suit
 
 @pytest.mark.filesystem
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            parameterized_expectation_suite_name
-        )
+    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        parameterized_expectation_suite_name
     )
     assert expectation_suite.name == parameterized_expectation_suite_name
     assert len(expectation_suite.expectations) == 2
@@ -133,10 +127,8 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
 
 @pytest.mark.filesystem
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_does_not_exist.default"
-        )
+    expectation_suite = data_context_parameterized_expectation_suite.add_expectation_suite(
+        "this_data_asset_does_not_exist.default"
     )
     assert expectation_suite.name == "this_data_asset_does_not_exist.default"
     assert len(expectation_suite.expectations) == 0
@@ -144,43 +136,28 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 @pytest.mark.filesystem
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    expectation_suite = data_context_parameterized_expectation_suite.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
-    data_context_parameterized_expectation_suite.save_expectation_suite(
-        expectation_suite
+    data_context_parameterized_expectation_suite.save_expectation_suite(expectation_suite)
+    expectation_suite_saved = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
-    expectation_suite_saved = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
-    )
-    assert (
-        expectation_suite.expectation_configurations
-        == expectation_suite_saved.expectation_configurations
-    )
+    assert expectation_suite.expectation_configurations == expectation_suite_saved.expectation_configurations
 
 
 @pytest.mark.filesystem
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
-    expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    expectation_suite: ExpectationSuite = data_context_parameterized_expectation_suite.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
@@ -188,10 +165,8 @@ def test_save_expectation_suite_include_rendered_content(
         expectation_suite,
         include_rendered_content=True,
     )
-    expectation_suite_saved: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    expectation_suite_saved: ExpectationSuite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     for expectation in expectation_suite_saved.expectation_configurations:
         for rendered_content_block in expectation.rendered_content:
@@ -205,15 +180,11 @@ def test_save_expectation_suite_include_rendered_content(
 def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
-    expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    expectation_suite: ExpectationSuite = data_context_parameterized_expectation_suite.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
@@ -228,11 +199,9 @@ def test_get_expectation_suite_include_rendered_content(
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
 
-    expectation_suite_retrieved: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default",
-            include_rendered_content=True,
-        )
+    expectation_suite_retrieved: ExpectationSuite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default",
+        include_rendered_content=True,
     )
 
     for expectation in expectation_suite_retrieved.expectation_configurations:
@@ -247,28 +216,18 @@ def test_get_expectation_suite_include_rendered_content(
 def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite,
 ):
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {}
-    )
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
     data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {
-            "source_diabetes_data.default": [
-                {
-                    "metric_kwargs_id": {
-                        "column=patient_nbr": [
-                            "expect_column_unique_value_count_to_be_between.result.observed_value"
-                        ]
-                    }
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+        "source_diabetes_data.default": [
+            {
+                "metric_kwargs_id": {
+                    "column=patient_nbr": ["expect_column_unique_value_count_to_be_between.result.observed_value"]
                 }
-            ],
-            "source_patient_data.default": [
-                "expect_table_row_count_to_equal.result.observed_value"
-            ],
-        }
-    )
+            }
+        ],
+        "source_patient_data.default": ["expect_table_row_count_to_equal.result.observed_value"],
+    }
 
 
 @pytest.mark.filesystem
@@ -300,29 +259,19 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
     with broken_suite_path.open("w", encoding="UTF-8") as fp:
         json.dump(obj=broken_suite_dict, fp=fp)
 
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {}
-    )
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
     with pytest.warns(UserWarning):
         data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
-        == {
-            "source_diabetes_data.default": [
-                {
-                    "metric_kwargs_id": {
-                        "column=patient_nbr": [
-                            "expect_column_unique_value_count_to_be_between.result.observed_value"
-                        ]
-                    }
+    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+        "source_diabetes_data.default": [
+            {
+                "metric_kwargs_id": {
+                    "column=patient_nbr": ["expect_column_unique_value_count_to_be_between.result.observed_value"]
                 }
-            ],
-            "source_patient_data.default": [
-                "expect_table_row_count_to_equal.result.observed_value"
-            ],
-        }
-    )
+            }
+        ],
+        "source_patient_data.default": ["expect_table_row_count_to_equal.result.observed_value"],
+    }
 
 
 @pytest.mark.filesystem
@@ -347,32 +296,22 @@ def test_data_context_get_datasource(titanic_data_context):
 
 @pytest.mark.filesystem
 def test_data_context_expectation_suite_delete(empty_data_context):
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_create_expectation_suite"
-    )
+    assert empty_data_context.add_expectation_suite(expectation_suite_name="titanic.test_create_expectation_suite")
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 1
-    empty_data_context.delete_expectation_suite(
-        expectation_suite_name=expectation_suites[0]
-    )
+    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 0
 
 
 @pytest.mark.filesystem
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.create_expectation_suite"
-    )
+    assert empty_data_context.add_expectation_suite(expectation_suite_name="titanic.test.create_expectation_suite")
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.a.create_expectation_suite"
-    )
+    assert empty_data_context.add_expectation_suite(expectation_suite_name="titanic.test.a.create_expectation_suite")
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 2
-    empty_data_context.delete_expectation_suite(
-        expectation_suite_name=expectation_suites[0]
-    )
+    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 1
 
@@ -403,36 +342,24 @@ def test_add_store(empty_data_context):
 
 
 @pytest.mark.unit
-def test_ConfigOnlyDataContext__initialization(
-    tmp_path_factory, basic_data_context_config
-):
-    config_path = str(
-        tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
-    )
+def test_ConfigOnlyDataContext__initialization(tmp_path_factory, basic_data_context_config):
+    config_path = str(tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir"))
     context = get_context(
         basic_data_context_config,
         config_path,
     )
 
-    assert context.root_directory.split("/")[-1].startswith(
-        "test_ConfigOnlyDataContext__initialization__dir"
-    )
+    assert context.root_directory.split("/")[-1].startswith("test_ConfigOnlyDataContext__initialization__dir")
 
     plugins_dir_parts = context.plugins_directory.split("/")[-3:]
     assert len(plugins_dir_parts) == 3
-    assert plugins_dir_parts[0].startswith(
-        "test_ConfigOnlyDataContext__initialization__dir"
-    )
+    assert plugins_dir_parts[0].startswith("test_ConfigOnlyDataContext__initialization__dir")
     assert plugins_dir_parts[1:] == ["plugins", ""]
 
 
 @pytest.mark.unit
-def test__normalize_absolute_or_relative_path(
-    tmp_path_factory, basic_data_context_config
-):
-    full_test_dir = tmp_path_factory.mktemp(
-        "test__normalize_absolute_or_relative_path__dir"
-    )
+def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_context_config):
+    full_test_dir = tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
     test_dir = full_test_dir.parts[-1]
     config_path = str(full_test_dir)
     context = get_context(
@@ -483,9 +410,7 @@ def test_data_context_updates_expectation_suite_names(
     # A data context should update the data_asset_name and expectation_suite_name of expectation suites
     # that it creates when it saves them.
 
-    expectation_suites = (
-        data_context_parameterized_expectation_suite.list_expectation_suites()
-    )
+    expectation_suites = data_context_parameterized_expectation_suite.list_expectation_suites()
 
     # We should have a single expectation suite defined
     assert len(expectation_suites) == 1
@@ -494,11 +419,7 @@ def test_data_context_updates_expectation_suite_names(
 
     # We'll get that expectation suite and then update its name and re-save, then verify that everything
     # has been properly updated
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            expectation_suite_name
-        )
-    )
+    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(expectation_suite_name)
 
     # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
     # will enable changing that
@@ -517,11 +438,7 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
     )
 
-    fetched_expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "a_new_suite_name"
-        )
-    )
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite("a_new_suite_name")
 
     assert fetched_expectation_suite.name == "a_new_suite_name"
 
@@ -531,10 +448,8 @@ def test_data_context_updates_expectation_suite_names(
         expectation_suite_name="a_new_new_suite_name",
     )
 
-    fetched_expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "a_new_new_suite_name"
-        )
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
+        "a_new_new_suite_name"
     )
 
     assert fetched_expectation_suite.name == "a_new_new_suite_name"
@@ -555,15 +470,9 @@ def test_data_context_updates_expectation_suite_names(
 
     #   3. Using the new name but having the context draw that from the suite
     expectation_suite.name = "a_third_suite_name"
-    data_context_parameterized_expectation_suite.save_expectation_suite(
-        expectation_suite=expectation_suite
-    )
+    data_context_parameterized_expectation_suite.save_expectation_suite(expectation_suite=expectation_suite)
 
-    fetched_expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "a_third_suite_name"
-        )
-    )
+    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite("a_third_suite_name")
     assert fetched_expectation_suite.name == "a_third_suite_name"
 
 
@@ -617,9 +526,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
 ):
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
-    assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
-    )
+    assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
 
 
 @pytest.mark.filesystem
@@ -627,9 +534,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
-    )
+    assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
 
 
 @pytest.mark.filesystem
@@ -638,9 +543,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
-    assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
-    )
+    assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
 
 
 @pytest.mark.filesystem
@@ -649,9 +552,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))  # noqa: PTH118
-    assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
-    )
+    assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
 
 
 @pytest.mark.filesystem
@@ -661,9 +562,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:  # noqa: PTH118
         yml.write("this file: is not a valid ge config")
-    assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
-    )
+    assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
 
 
 @pytest.mark.filesystem
@@ -798,9 +697,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
-    with pytest.warns(
-        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
-    ):
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
         # re-run create to simulate onboarding
         FileDataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
@@ -867,9 +764,7 @@ gx/
 
     assert fixture == expected
 
-    with pytest.warns(
-        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
-    ):
+    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
         # re-run create to simulate onboarding
         FileDataContext.create(project_path)
 
@@ -970,9 +865,7 @@ def test_scaffold_directories(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_load_config_variables_property(
-    basic_data_context_config, tmp_path_factory, monkeypatch
-):
+def test_load_config_variables_property(basic_data_context_config, tmp_path_factory, monkeypatch):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
@@ -989,9 +882,7 @@ def test_load_config_variables_property(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_config["config_variables_file_path"] = (
-        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
-    )
+    basic_data_context_config["config_variables_file_path"] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
 
     try:
         # We should be able to load different files based on an environment variable
@@ -1047,9 +938,7 @@ def test_list_validation_operators_data_context_with_none_returns_empty_list(
 
 @pytest.mark.unit
 def test_list_validation_operators_data_context_with_one(titanic_data_context):
-    assert titanic_data_context.list_validation_operator_names() == [
-        "action_list_operator"
-    ]
+    assert titanic_data_context.list_validation_operator_names() == ["action_list_operator"]
 
 
 @pytest.mark.unit
@@ -1186,15 +1075,11 @@ def test_run_checkpoint_new_style(
             }
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
     checkpoint = context.checkpoints.get(checkpoint_config.name)
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
@@ -1212,16 +1097,10 @@ def test_run_checkpoint_new_style(
 
 
 @pytest.mark.filesystem
-def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context_stats_enabled, tmp_path_factory
-):
+def test_get_validator_with_instantiated_expectation_suite(empty_data_context_stats_enabled, tmp_path_factory):
     context = empty_data_context_stats_enabled
 
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_get_validator_with_instantiated_expectation_suite"
-        )
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_get_validator_with_instantiated_expectation_suite"))
 
     create_files_in_directory(
         directory=base_directory,
@@ -1267,14 +1146,10 @@ data_connectors:
 
 
 @pytest.mark.filesystem
-def test_get_validator_with_attach_expectation_suite(
-    empty_data_context, tmp_path_factory
-):
+def test_get_validator_with_attach_expectation_suite(empty_data_context, tmp_path_factory):
     context = empty_data_context
 
-    base_directory = str(
-        tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite"))
 
     create_files_in_directory(
         directory=base_directory,
@@ -1412,9 +1287,7 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
         expectation_suite_name="my_new_expectation_suite"
     )
     expectation_suite.add_expectation_configuration(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
 
 
@@ -1443,9 +1316,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
 
     checkpoint_config = {
-        "validations": [
-            {"batch_request": batch_request, "expectation_suite_name": suite_name}
-        ],
+        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -1461,17 +1332,13 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
             },
         ],
     }
-    checkpoint = Checkpoint(
-        f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
-    )
+    checkpoint = Checkpoint(f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config)
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.get("success") is True
 
 
 @pytest.mark.filesystem
-def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
-    empty_data_context, monkeypatch
-) -> None:
+def test_modifications_to_env_vars_is_recognized_within_same_program_execution(empty_data_context, monkeypatch) -> None:
     """
     What does this test do and why?
 
@@ -1487,9 +1354,7 @@ def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
     context.variables.config.plugins_directory = f"${env_var_name}"
     monkeypatch.setenv(env_var_name, env_var_value)
 
-    assert context.plugins_directory and context.plugins_directory.endswith(
-        env_var_value
-    )
+    assert context.plugins_directory and context.plugins_directory.endswith(env_var_value)
 
 
 @pytest.mark.filesystem
@@ -1509,13 +1374,9 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     config_var_value: str = "my_patched_value"
 
     context.variables.config.plugins_directory = f"${config_var_name}"
-    context.save_config_variable(
-        config_variable_name=config_var_name, value=config_var_value
-    )
+    context.save_config_variable(config_variable_name=config_var_name, value=config_var_value)
 
-    assert context.plugins_directory and context.plugins_directory.endswith(
-        config_var_value
-    )
+    assert context.plugins_directory and context.plugins_directory.endswith(config_var_value)
 
 
 @pytest.mark.big
@@ -1574,11 +1435,7 @@ class ExpectSkyToBeColor(BatchExpectation):
     args_keys = ("color",)
 
     @classmethod
-    @renderer(
-        renderer_type=".".join(
-            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
-        )
-    )
+    @renderer(renderer_type=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]))
     def _prescriptive_renderer_custom(
         cls,
         **kwargs: dict,
@@ -1595,9 +1452,7 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
-@pytest.mark.xfail(
-    reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"
-)
+@pytest.mark.xfail(reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117")
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context,
@@ -1610,9 +1465,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
-            ),
+            ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}),
         ],
     )
     context.add_expectation_suite(expectation_suite=expectation_suite)
@@ -1639,9 +1492,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
-            ),
+            ExpectationConfiguration(expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}),
         ],
     )
     context.update_expectation_suite(expectation_suite=expectation_suite)
@@ -1743,9 +1594,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         ),
     ]
 
-    expectation_suite.expectation_configurations[
-        0
-    ].rendered_content = legacy_rendered_content
+    expectation_suite.expectation_configurations[0].rendered_content = legacy_rendered_content
 
     actual_rendered_content: List[RenderedAtomicContent] = []
     for expectation_configuration in expectation_suite.expectation_configurations:
@@ -1816,9 +1665,7 @@ def test_set_oss_id_with_existing_config(
     # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
     config = configparser.ConfigParser()
     config["anonymous_usage_statistics"] = {}
-    usage_statistics_url = (
-        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-    )
+    usage_statistics_url = "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
     config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
 
     oss_id = context._set_oss_id(config)
@@ -1828,8 +1675,5 @@ def test_set_oss_id_with_existing_config(
         "usage_statistics_url",
         "oss_id",
     ]
-    assert (
-        usage_statistics_url
-        == config["anonymous_usage_statistics"]["usage_statistics_url"]
-    )
+    assert usage_statistics_url == config["anonymous_usage_statistics"]["usage_statistics_url"]
     assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])

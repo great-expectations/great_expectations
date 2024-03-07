@@ -32,7 +32,9 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     ge_cloud_runtime_organization_id,
     ge_cloud_access_token,
 ):
-    called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
+    called_with_url = (
+        f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
+    )
 
     # Ensure that the request goes through
     responses.get(
@@ -47,7 +49,9 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
             cloud_organization_id=ge_cloud_runtime_organization_id,
             cloud_access_token=ge_cloud_access_token,
         )
-    except Exception:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
+    except (
+        Exception
+    ):  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
     # Only ever called once with the endpoint URL and auth token as args
@@ -96,26 +100,15 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     # Assertions that the context fixture is set up properly
     assert not context.ge_cloud_config.base_url == CLOUD_DEFAULT_BASE_URL
     assert not context.ge_cloud_config.base_url == ge_cloud_base_url
-    assert (
-        not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
-    )
+    assert not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
 
     # The DatasourceStore should not have the default base_url or commonly used test base urls
-    assert (
-        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
-        == CLOUD_DEFAULT_BASE_URL
-    )
-    assert (
-        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
-        == ge_cloud_base_url
-    )
+    assert not context._datasource_store.store_backend.config["ge_cloud_base_url"] == CLOUD_DEFAULT_BASE_URL
+    assert not context._datasource_store.store_backend.config["ge_cloud_base_url"] == ge_cloud_base_url
     assert (
         not context._datasource_store.store_backend.config["ge_cloud_base_url"]
         == "https://app.test.greatexpectations.io"
     )
 
     # The DatasourceStore should have the custom base url set
-    assert (
-        context._datasource_store.store_backend.config["ge_cloud_base_url"]
-        == custom_base_url
-    )
+    assert context._datasource_store.store_backend.config["ge_cloud_base_url"] == custom_base_url

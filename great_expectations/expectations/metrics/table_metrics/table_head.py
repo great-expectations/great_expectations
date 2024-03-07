@@ -39,9 +39,7 @@ class TableHead(TableMetricProvider):
         metrics: dict[str, Any],
         runtime_configuration: dict,
     ) -> pd.DataFrame:
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
             return df
         n_rows: int = (
@@ -86,9 +84,7 @@ class TableHead(TableMetricProvider):
         except StopIteration:
             # empty table. At least try to get the column names
             validator = Validator(execution_engine=execution_engine)
-            columns = validator.get_metric(
-                MetricConfiguration("table.columns", metric_domain_kwargs)
-            )
+            columns = validator.get_metric(MetricConfiguration("table.columns", metric_domain_kwargs))
             df = pd.DataFrame(columns=columns)
         return df  # type: ignore[return-value]
 
@@ -101,9 +97,7 @@ class TableHead(TableMetricProvider):
         metrics: dict[str, Any],
         runtime_configuration: dict,
     ) -> pd.DataFrame:
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         rows: list[pyspark.Row] | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()

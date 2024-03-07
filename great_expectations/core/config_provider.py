@@ -25,9 +25,7 @@ class _AbstractConfigurationProvider(ABC):
         """
         pass
 
-    def substitute_config(
-        self, config: Any, config_values: Optional[Dict[str, str]] = None
-    ) -> Any:
+    def substitute_config(self, config: Any, config_values: Optional[Dict[str, str]] = None) -> Any:
         """
         Utilizes the underlying ConfigurationSubstitutor instance to substitute any
         $VARIABLES with their corresponding config variable value.
@@ -57,9 +55,9 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
     """
 
     def __init__(self) -> None:
-        self._providers: OrderedDict[
-            Type[_AbstractConfigurationProvider], _AbstractConfigurationProvider
-        ] = OrderedDict()
+        self._providers: OrderedDict[Type[_AbstractConfigurationProvider], _AbstractConfigurationProvider] = (
+            OrderedDict()
+        )
         super().__init__()
 
     def register_provider(self, provider: _AbstractConfigurationProvider) -> None:
@@ -75,9 +73,7 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
             raise ValueError(f"Provider of type {type_} has already been registered!")
         self._providers[type_] = provider
 
-    def get_provider(
-        self, type_: Type[_AbstractConfigurationProvider]
-    ) -> Optional[_AbstractConfigurationProvider]:
+    def get_provider(self, type_: Type[_AbstractConfigurationProvider]) -> Optional[_AbstractConfigurationProvider]:
         """
         Retrieves a registered configuration provider (if available).
 
@@ -138,9 +134,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
     These can be found in the user's /uncommitted/config_variables.yml file.
     """
 
-    def __init__(
-        self, config_variables_file_path: str, root_directory: Optional[str] = None
-    ) -> None:
+    def __init__(self, config_variables_file_path: str, root_directory: Optional[str] = None) -> None:
         self._config_variables_file_path = config_variables_file_path
         self._root_directory = root_directory
         super().__init__()

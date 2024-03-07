@@ -43,13 +43,9 @@ class ContentBlockRenderer(Renderer):
         pass
 
     @classmethod
-    def render(
-        cls, render_object: Any, **kwargs
-    ) -> Union[_rendered_component_type, Any, None]:
+    def render(cls, render_object: Any, **kwargs) -> Union[_rendered_component_type, Any, None]:
         cls.validate_input(render_object)
-        exception_list_content_block: bool = kwargs.get(
-            "exception_list_content_block", False
-        )
+        exception_list_content_block: bool = kwargs.get("exception_list_content_block", False)
 
         data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -79,19 +75,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _get_content_block_fn_from_render_object(
-        cls, obj_: ExpectationConfiguration | ExpectationValidationResult
-    ):
+    def _get_content_block_fn_from_render_object(cls, obj_: ExpectationConfiguration | ExpectationValidationResult):
         expectation_type = cls._get_expectation_type(obj_)
-        expectation_config = (
-            obj_.expectation_config
-            if isinstance(obj_, ExpectationValidationResult)
-            else obj_
-        )
+        expectation_config = obj_.expectation_config if isinstance(obj_, ExpectationValidationResult) else obj_
 
-        return cls._get_content_block_fn(
-            expectation_type=expectation_type, expectation_config=expectation_config
-        )
+        return cls._get_content_block_fn(expectation_type=expectation_type, expectation_config=expectation_config)
 
     @classmethod
     def _render_list(  # noqa: C901, PLR0912, PLR0913
@@ -104,9 +92,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ) -> Optional[_rendered_component_type]:
         """Helper method to render list render_objects - refer to `render` for more context"""
         blocks = []
-        has_failed_evr = (
-            False if isinstance(render_object[0], ExpectationValidationResult) else None
-        )
+        has_failed_evr = False if isinstance(render_object[0], ExpectationValidationResult) else None
         for obj_ in render_object:
             content_block_fn = cls._get_content_block_fn_from_render_object(obj_)
 
@@ -138,9 +124,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     logger.error(exception_message)
 
                     if isinstance(obj_, ExpectationValidationResult):
-                        content_block_fn = cls._get_content_block_fn(
-                            "_missing_content_block_fn"
-                        )
+                        content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         expectation_config = obj_.expectation_config
                         result = content_block_fn(
                             configuration=expectation_config,
@@ -194,9 +178,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                     "classes": ["mt-1", "mb-1"],
                                 },
                             },
-                            "styling": {
-                                "parent": {"styles": {"list-style-type": "none"}}
-                            },
+                            "styling": {"parent": {"styles": {"list-style-type": "none"}}},
                         }
                     )
                     result.append(horizontal_rule)
@@ -208,15 +190,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 cls._content_block_type: blocks,
                 "styling": cls._get_content_block_styling(),
             }
-            rendered_component_type_default_init_kwargs = getattr(
-                cls, "_rendered_component_default_init_kwargs", {}
-            )
-            rendered_component_type_init_kwargs.update(
-                rendered_component_type_default_init_kwargs
-            )
-            content_block = cls._rendered_component_type(
-                **rendered_component_type_init_kwargs
-            )
+            rendered_component_type_default_init_kwargs = getattr(cls, "_rendered_component_default_init_kwargs", {})
+            rendered_component_type_init_kwargs.update(rendered_component_type_default_init_kwargs)
+            content_block = cls._rendered_component_type(**rendered_component_type_init_kwargs)
             cls._process_content_block(
                 content_block,
                 has_failed_evr=has_failed_evr,
@@ -255,15 +231,12 @@ diagnose and repair the underlying issue.  Detailed information follows:
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
-                    data_docs_exception_message
-                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
+                    data_docs_exception_message + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 
                 if isinstance(render_object, ExpectationValidationResult):
-                    content_block_fn = cls._get_content_block_fn(
-                        "_missing_content_block_fn"
-                    )
+                    content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     result = content_block_fn(
                         result=render_object,
                         runtime_configuration=runtime_configuration,
@@ -314,16 +287,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
         if not description:
             raise ValueError("Cannot render an expectation with no description.")
         # If we wish to support $VAR substitution, we should use RenderedStringTemplateContent with params
-        return [
-            RenderedMarkdownContent(
-                markdown=description, styling=runtime_configuration.get("styling", {})
-            )
-        ]
+        return [RenderedMarkdownContent(markdown=description, styling=runtime_configuration.get("styling", {}))]
 
     @classmethod
-    def _render_expectation_notes(
-        cls, expectation_config: ExpectationConfiguration
-    ) -> CollapseContent:
+    def _render_expectation_notes(cls, expectation_config: ExpectationConfiguration) -> CollapseContent:
         notes = expectation_config.notes
         if not notes:
             return None
@@ -395,9 +362,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(
-        cls, content_block, has_failed_evr, render_object=None
-    ) -> None:
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None) -> None:
         header = cls._get_header()
         if header != "":
             content_block.header = header
@@ -433,11 +398,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def list_available_expectations(cls):
-        expectations = [
-            object_name
-            for object_name in _registered_renderers
-            if object_name.startswith("expect_")
-        ]
+        expectations = [object_name for object_name in _registered_renderers if object_name.startswith("expect_")]
         return expectations
 
     @classmethod

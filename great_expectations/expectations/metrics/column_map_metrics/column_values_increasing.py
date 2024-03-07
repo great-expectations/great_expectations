@@ -57,9 +57,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = [col for col in table_columns if col["name"] == column_name][
-            0
-        ]
+        column_metadata = [col for col in table_columns if col["name"] == column_name][0]
         if isinstance(
             column_metadata["type"],
             (
@@ -81,9 +79,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             _df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN)
 
         # instead detect types naturally
         column = F.col(column_name)
@@ -99,9 +95,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
                 F.lag(column).over(pyspark.Window.orderBy(F.lit("constant"))),
             )
         else:
-            diff = column - F.lag(column).over(
-                pyspark.Window.orderBy(F.lit("constant"))
-            )
+            diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
             diff = F.when(diff.isNull(), 1).otherwise(diff)
 
         # NOTE: because in spark we are implementing the window function directly,

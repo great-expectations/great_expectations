@@ -44,10 +44,8 @@ def test_datasource_store_set(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-        saved_datasource_config: DatasourceConfig = (
-            datasource_store_ge_cloud_backend.set(
-                key=key, value=block_config_datasource_config
-            )
+        saved_datasource_config: DatasourceConfig = datasource_store_ge_cloud_backend.set(
+            key=key, value=block_config_datasource_config
         )
 
     serializer = DictConfigSerializer(schema=datasourceConfigSchema)
@@ -67,9 +65,7 @@ def test_datasource_store_set(
         },
     )
 
-    assert serializer.serialize(saved_datasource_config) == serializer.serialize(
-        datasource_config_with_names_and_ids
-    )
+    assert serializer.serialize(saved_datasource_config) == serializer.serialize(datasource_config_with_names_and_ids)
 
 
 @pytest.mark.cloud
@@ -99,9 +95,7 @@ def test_datasource_store_get_by_id(
             200,
         )
 
-    with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_response
-    ) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_response) as mock_get:
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
@@ -137,17 +131,13 @@ def test_datasource_store_get_by_name(
             200,
         )
 
-    with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_response
-    ) as mock_get, mock.patch(
+    with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_response) as mock_get, mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
     ) as mock_has_key:
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
         mock_has_key.return_value = True
 
-        datasource_store_ge_cloud_backend.retrieve_by_name(
-            datasource_name=datasource_name
-        )
+        datasource_store_ge_cloud_backend.retrieve_by_name(datasource_name=datasource_name)
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -198,9 +188,7 @@ def test_datasource_store_delete_by_id(
             "delete",
             "delete",
             [],
-            marks=pytest.mark.xfail(
-                reason="We do not raise errors on delete fail", strict=True
-            ),
+            marks=pytest.mark.xfail(reason="We do not raise errors on delete fail", strict=True),
         ),
     ],
 )
@@ -214,9 +202,7 @@ def test_datasource_http_error_handling(
     id: str = "example_id_normally_uuid"
 
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
-    with pytest.raises(
-        StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*"
-    ) as exc_info:
+    with pytest.raises(StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*") as exc_info:
         backend_method = getattr(datasource_store_ge_cloud_backend, method)
         backend_method(key, *args)
 

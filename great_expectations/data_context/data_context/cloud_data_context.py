@@ -158,25 +158,19 @@ class CloudDataContext(SerializableDataContext):
         if not ENV_CONFIG.gx_analytics_enabled:
             return None
 
-        response = self._request_cloud_backend(
-            cloud_config=self.ge_cloud_config, uri="accounts/me"
-        )
+        response = self._request_cloud_backend(cloud_config=self.ge_cloud_config, uri="accounts/me")
         data = response.json()
         user_id = data["user_id"]
         return uuid.UUID(user_id)
 
     @override
-    def _init_project_config(
-        self, project_config: Optional[Union[DataContextConfig, Mapping]]
-    ) -> DataContextConfig:
+    def _init_project_config(self, project_config: Optional[Union[DataContextConfig, Mapping]]) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
                 cloud_config=self.ge_cloud_config,
             )
 
-        project_data_context_config = (
-            CloudDataContext.get_or_create_data_context_config(project_config)
-        )
+        project_data_context_config = CloudDataContext.get_or_create_data_context_config(project_config)
 
         return self._apply_global_config_overrides(config=project_data_context_config)
 
@@ -189,9 +183,7 @@ class CloudDataContext(SerializableDataContext):
         Note that it is registered last as it takes the highest precedence.
         """
         super()._register_providers(config_provider)
-        config_provider.register_provider(
-            _CloudConfigurationProvider(self.ge_cloud_config)
-        )
+        config_provider.register_provider(_CloudConfigurationProvider(self.ge_cloud_config))
 
     @classmethod
     def is_cloud_config_available(
@@ -239,17 +231,14 @@ class CloudDataContext(SerializableDataContext):
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
             logger.debug(
-                f'context_root_dir was not provided - defaulting to current working directory "'
-                f'{context_root_dir}".'
+                f'context_root_dir was not provided - defaulting to current working directory "' f'{context_root_dir}".'
             )
         return os.path.abspath(  # noqa: PTH100
             os.path.expanduser(context_root_dir)  # noqa: PTH111
         )
 
     @classmethod
-    def retrieve_data_context_config_from_cloud(
-        cls, cloud_config: GXCloudConfig
-    ) -> DataContextConfig:
+    def retrieve_data_context_config_from_cloud(cls, cloud_config: GXCloudConfig) -> DataContextConfig:
         """
         Utilizes the GXCloudConfig instantiated in the constructor to create a request to the Cloud API.
         Given proper authorization, the request retrieves a data context config that is pre-populated with
@@ -260,9 +249,7 @@ class CloudDataContext(SerializableDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
-        response = cls._request_cloud_backend(
-            cloud_config=cloud_config, uri="data-context-configuration"
-        )
+        response = cls._request_cloud_backend(cloud_config=cloud_config, uri="data-context-configuration")
         config = cls._prepare_v1_config(config=response.json())
         return DataContextConfig(**config)
 
@@ -290,9 +277,7 @@ class CloudDataContext(SerializableDataContext):
         try:
             response.raise_for_status()
         except HTTPError:
-            raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}", response=response
-            )
+            raise gx_exceptions.GXCloudError(f"Bad request made to GX Cloud; {response.text}", response=response)
 
         return response
 
@@ -336,9 +321,7 @@ class CloudDataContext(SerializableDataContext):
                 missing_keys.append(key)
         if len(missing_keys) > 0:
             missing_keys_str = [f'"{key}"' for key in missing_keys]
-            global_config_path_str = [
-                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
-            ]
+            global_config_path_str = [f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS]
             raise DataContextError(
                 f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
@@ -518,9 +501,7 @@ class CloudDataContext(SerializableDataContext):
         return self.ge_cloud_config.organization_id  # type: ignore[return-value]
 
     @override
-    def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
-    ) -> DataContextConfig:
+    def get_config_with_variables_substituted(self, config: Optional[DataContextConfig] = None) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
         in order of precedence: cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
@@ -544,9 +525,7 @@ class CloudDataContext(SerializableDataContext):
                 missing_config_vars_and_subs.append((config_variable, value))
 
         if missing_config_vars_and_subs:
-            missing_config_var_repr = ", ".join(
-                [f"{var}={sub}" for var, sub in missing_config_vars_and_subs]
-            )
+            missing_config_var_repr = ", ".join([f"{var}={sub}" for var, sub in missing_config_vars_and_subs])
             logger.info(
                 "Config variables were not found in environment or global config ("
                 f"{self.GLOBAL_CONFIG_PATHS}). Using default values instead. {missing_config_var_repr} ;"
@@ -593,9 +572,7 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = (
-                self.list_expectation_suites()
-            )
+            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = self.list_expectation_suites()
             if identifiers:
                 for cloud_identifier in identifiers:
                     if isinstance(cloud_identifier, GXCloudIdentifier):
@@ -611,9 +588,7 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
-            key, expectation_suite, **kwargs
-        )  # type: ignore[func-returns-value]
+        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.id = response.id
 
@@ -695,14 +670,10 @@ class CloudDataContext(SerializableDataContext):
         try:
             expectations_schema_dict: dict = self.expectations_store.get(key)
         except StoreBackendError:
-            raise DataContextError(
-                f"Unable to load Expectation Suite {key.resource_name or key.id}"
-            )
+            raise DataContextError(f"Unable to load Expectation Suite {key.resource_name or key.id}")
 
         if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
+            include_rendered_content = self._determine_if_expectation_suite_include_rendered_content()
 
         # create the ExpectationSuite from constructor
         expectation_suite = ExpectationSuite(**expectations_schema_dict)
@@ -730,10 +701,8 @@ class CloudDataContext(SerializableDataContext):
             self._validate_suite_unique_constaints_before_save(key)
 
         self._evaluation_parameter_dependencies_compiled = False
-        include_rendered_content = (
-            self._determine_if_expectation_suite_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
+        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
+            include_rendered_content=include_rendered_content
         )
         if include_rendered_content:
             expectation_suite.render()
@@ -742,9 +711,7 @@ class CloudDataContext(SerializableDataContext):
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.id = response.id
 
-    def _validate_suite_unique_constaints_before_save(
-        self, key: GXCloudIdentifier
-    ) -> None:
+    def _validate_suite_unique_constaints_before_save(self, key: GXCloudIdentifier) -> None:
         id = key.id
         if id:
             if self.expectations_store.has_key(key):
@@ -820,20 +787,14 @@ class CloudDataContext(SerializableDataContext):
         default_actions = super()._determine_default_action_list()
 
         # Data docs are not relevant to Cloud and should be excluded
-        return [
-            action
-            for action in default_actions
-            if action["action"]["class_name"] != "UpdateDataDocsAction"
-        ]
+        return [action for action in default_actions if action["action"]["class_name"] != "UpdateDataDocsAction"]
 
     @override
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 
     @override
-    def _init_site_builder_for_data_docs_site_creation(
-        self, site_name: str, site_config: dict
-    ) -> SiteBuilder:
+    def _init_site_builder_for_data_docs_site_creation(self, site_name: str, site_config: dict) -> SiteBuilder:
         """
         Note that this explicitly overriding the `AbstractDataContext` helper method called
         in `self.build_data_docs()`.
@@ -928,7 +889,9 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
         url = result.validation_result_url
-        assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        assert (
+            url
+        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
 
     @override

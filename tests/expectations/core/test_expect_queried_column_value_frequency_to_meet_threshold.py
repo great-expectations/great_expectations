@@ -61,28 +61,22 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
 
     if warns:
         with pytest.warns(UserWarning):
-            result: ExpectationValidationResult = (
-                validator.expect_queried_column_value_frequency_to_meet_threshold(
-                    column="Sex",
-                    value="male",
-                    threshold=0.5,
-                    row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
-                )
-            )
-    else:
-        result: ExpectationValidationResult = (
-            validator.expect_queried_column_value_frequency_to_meet_threshold(
+            result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
                 column="Sex",
                 value="male",
                 threshold=0.5,
                 row_condition=row_condition,
                 condition_parser="great_expectations__experimental__",
             )
+    else:
+        result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
+            column="Sex",
+            value="male",
+            threshold=0.5,
+            row_condition=row_condition,
+            condition_parser="great_expectations__experimental__",
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.parametrize(
@@ -147,19 +141,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 
     if warns:
         with pytest.warns(UserWarning):
-            result: ExpectationValidationResult = (
-                validator.expect_queried_column_value_frequency_to_meet_threshold(
-                    column="Sex",
-                    value="male",
-                    threshold=0.5,
-                    query=query,
-                    row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
-                )
-            )
-    else:
-        result: ExpectationValidationResult = (
-            validator.expect_queried_column_value_frequency_to_meet_threshold(
+            result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
                 column="Sex",
                 value="male",
                 threshold=0.5,
@@ -167,10 +149,16 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 row_condition=row_condition,
                 condition_parser="great_expectations__experimental__",
             )
+    else:
+        result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
+            column="Sex",
+            value="male",
+            threshold=0.5,
+            query=query,
+            row_condition=row_condition,
+            condition_parser="great_expectations__experimental__",
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -204,28 +192,22 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 
     if warns:
         with pytest.warns(UserWarning):
-            result: ExpectationValidationResult = (
-                validator.expect_queried_column_value_frequency_to_meet_threshold(
-                    column="Sex",
-                    value="male",
-                    threshold=0.5,
-                    row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
-                )
-            )
-    else:
-        result: ExpectationValidationResult = (
-            validator.expect_queried_column_value_frequency_to_meet_threshold(
+            result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
                 column="Sex",
                 value="male",
                 threshold=0.5,
                 row_condition=row_condition,
                 condition_parser="great_expectations__experimental__",
             )
+    else:
+        result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
+            column="Sex",
+            value="male",
+            threshold=0.5,
+            row_condition=row_condition,
+            condition_parser="great_expectations__experimental__",
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -271,19 +253,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 
     if warns:
         with pytest.warns(UserWarning):
-            result: ExpectationValidationResult = (
-                validator.expect_queried_column_value_frequency_to_meet_threshold(
-                    column="Sex",
-                    value="male",
-                    threshold=0.5,
-                    query=query,
-                    row_condition=row_condition,
-                    condition_parser="great_expectations__experimental__",
-                )
-            )
-    else:
-        result: ExpectationValidationResult = (
-            validator.expect_queried_column_value_frequency_to_meet_threshold(
+            result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
                 column="Sex",
                 value="male",
                 threshold=0.5,
@@ -291,10 +261,16 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 row_condition=row_condition,
                 condition_parser="great_expectations__experimental__",
             )
+    else:
+        result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
+            column="Sex",
+            value="male",
+            threshold=0.5,
+            query=query,
+            row_condition=row_condition,
+            condition_parser="great_expectations__experimental__",
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.big
@@ -306,14 +282,12 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_va
     validator: Validator = context.get_validator(batch_request=sqlite_batch_request)
 
     with pytest.warns(UserWarning):
-        result: ExpectationValidationResult = (
-            validator.expect_queried_column_value_frequency_to_meet_threshold(
-                column="Sex",
-                value=["male", "female"],
-                threshold=[0.6, 0.3],
-                row_condition='col("Age")>17',
-                condition_parser="great_expectations__experimental__",
-            )
+        result: ExpectationValidationResult = validator.expect_queried_column_value_frequency_to_meet_threshold(
+            column="Sex",
+            value=["male", "female"],
+            threshold=[0.6, 0.3],
+            row_condition='col("Age")>17',
+            condition_parser="great_expectations__experimental__",
         )
 
     assert result["success"] is True and result["result"]["observed_value"] == [

@@ -22,13 +22,9 @@ class ColumnValuesNotMatchLikePattern(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, like_pattern, _dialect, **kwargs):
-        like_pattern_expression = get_dialect_like_pattern_expression(
-            column, _dialect, like_pattern, positive=False
-        )
+        like_pattern_expression = get_dialect_like_pattern_expression(column, _dialect, like_pattern, positive=False)
         if like_pattern_expression is None:
-            logger.warning(
-                f"Like patterns are not supported for dialect {_dialect.name!s}"
-            )
+            logger.warning(f"Like patterns are not supported for dialect {_dialect.name!s}")
             raise NotImplementedError
 
         return like_pattern_expression

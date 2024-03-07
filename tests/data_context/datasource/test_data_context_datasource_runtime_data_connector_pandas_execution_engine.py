@@ -109,9 +109,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
     context = data_context_with_datasource_pandas_engine
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -168,10 +166,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine_named_a
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers
 
 
 @pytest.mark.unit
@@ -203,9 +198,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
 
 
 @pytest.mark.unit
-def test_get_validator_wrong_type_pandas_engine(
-    data_context_with_datasource_pandas_engine, test_df_pandas
-):
+def test_get_validator_wrong_type_pandas_engine(data_context_with_datasource_pandas_engine, test_df_pandas):
     context = data_context_with_datasource_pandas_engine
 
     context.add_expectation_suite("my_expectations")
@@ -218,9 +211,7 @@ def test_get_validator_wrong_type_pandas_engine(
                 datasource_name="my_datasource",
                 data_connector_name=1,
                 data_asset_name="default_data_asset_name",
-                runtime_parameters={
-                    "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-                },
+                runtime_parameters={"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
                 batch_identifiers={"default_identifier_name": "identifier_name"},
             ),
             expectation_suite_name="my_expectations",
@@ -235,9 +226,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_pandas_engine(
 
     context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_validator(
             batch_request=RuntimeBatchRequest(
@@ -306,9 +295,7 @@ def test_file_path_get_batch_successful_specification_pandas_file_path_no_header
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1, Batch)
     assert isinstance(my_batch_1.data, PandasBatchData)
-    assert (
-        len(my_batch_1.data.dataframe) == 10001
-    )  # one more line because of header being set to None
+    assert len(my_batch_1.data.dataframe) == 10001  # one more line because of header being set to None
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
@@ -349,9 +336,7 @@ def test_get_batch_pandas_wrong_path(data_context_with_datasource_pandas_engine)
 
 
 @pytest.mark.filesystem
-def test_file_path_get_batch_pandas_wrong_reader_method(
-    data_context_with_datasource_pandas_engine, taxi_test_file
-):
+def test_file_path_get_batch_pandas_wrong_reader_method(data_context_with_datasource_pandas_engine, taxi_test_file):
     context = data_context_with_datasource_pandas_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         context.get_batch_list(
@@ -446,7 +431,4 @@ def test_file_path_get_validator_successful_specification_pandas_engine_named_as
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers

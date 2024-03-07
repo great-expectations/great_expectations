@@ -14,9 +14,7 @@ def exception_info() -> ExceptionInfo:
 
 @pytest.mark.unit
 def test_exception_info__eq__and__ne__(exception_info: ExceptionInfo) -> None:
-    other_exception_info = ExceptionInfo(
-        exception_traceback="", exception_message="", raised_exception=True
-    )
+    other_exception_info = ExceptionInfo(exception_traceback="", exception_message="", raised_exception=True)
     assert exception_info != other_exception_info
 
 

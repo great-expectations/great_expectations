@@ -69,9 +69,7 @@ def test_basic_instantiation(tmp_path_factory):
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_instantiation_from_a_config_batching_regex_does_not_match_paths"
-        )
+        tmp_path_factory.mktemp("test_instantiation_from_a_config_batching_regex_does_not_match_paths")
     )
     create_files_in_directory(
         directory=base_directory,
@@ -108,9 +106,7 @@ def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -140,13 +136,11 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_filesystem_data_asset",
-                options={},
-            )
+    unsorted_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_filesystem_data_asset",
+            options={},
         )
     )
     expected: List[BatchDefinition] = [
@@ -486,9 +480,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_only_unique_batch_definitions(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -532,41 +524,31 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "A/file_1.csv", "directory": "A", "filename": "file_1.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "A/file_1.csv", "directory": "A", "filename": "file_1.csv"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "A/file_2.csv", "directory": "A", "filename": "file_2.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "A/file_2.csv", "directory": "A", "filename": "file_2.csv"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "A/file_3.csv", "directory": "A", "filename": "file_3.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "A/file_3.csv", "directory": "A", "filename": "file_3.csv"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}),
         ),
     ]
 
@@ -578,13 +560,11 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
 
-    unsorted_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_filesystem_data_asset",
-                options={},
-            )
+    unsorted_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_filesystem_data_asset",
+            options={},
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -632,12 +612,8 @@ def test_alpha(tmp_path_factory):
     my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(
-        datasource_name="BASE", data_asset_name="A", options={}
-    )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list(
-        batch_request=my_batch_request
-    )
+    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     assert len(my_batch_definition_list) == 0
 
     my_batch_request = BatchRequest(
@@ -645,9 +621,7 @@ def test_alpha(tmp_path_factory):
         data_asset_name="my_filesystem_data_asset",
         options={"part_1": "B"},
     )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list(
-        batch_request=my_batch_request
-    )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     assert len(my_batch_definition_list) == 1
 
 
@@ -763,8 +737,8 @@ def test_foxtrot(tmp_path_factory):
         data_asset_name="my_filesystem_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
 
@@ -772,9 +746,7 @@ def test_foxtrot(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_relative_base_directory_path(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_relative_asset_base_directory_path"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -834,8 +806,8 @@ def test_relative_base_directory_path(tmp_path_factory):
         data_asset_name="my_filesystem_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
-        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[BatchDefinition] = my_data_connector.get_batch_definition_list(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 

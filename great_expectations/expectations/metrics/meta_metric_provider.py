@@ -80,9 +80,7 @@ as of v0.13.12 and will be removed in v0.16.
         return super().__new__(cls, name, fixed_bases, classdict, *args, **kwargs)
 
     def __instancecheck__(cls, instance):
-        return any(
-            cls.__subclasscheck__(c) for c in (type(instance), instance.__class__)
-        )
+        return any(cls.__subclasscheck__(c) for c in (type(instance), instance.__class__))
 
     def __subclasscheck__(cls, subclass):
         if subclass is cls:

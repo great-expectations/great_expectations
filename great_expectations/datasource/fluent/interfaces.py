@@ -143,9 +143,7 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
     # another TypeGuard. We could cast instead which may be slightly faster.
     sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
-        return [
-            _sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters
-        ]
+        return [_sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters]
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
@@ -204,13 +202,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a DataAsset subclass."""
-        )
+        raise NotImplementedError("""One needs to implement "test_connection" on a DataAsset subclass.""")
 
-    def get_batch_request_options_keys(
-        self, partitioner: Optional[Partitioner] = None
-    ) -> tuple[str, ...]:
+    def get_batch_request_options_keys(self, partitioner: Optional[Partitioner] = None) -> tuple[str, ...]:
         raise NotImplementedError(
             """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
         )
@@ -235,13 +229,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        raise NotImplementedError(
-            """One must implement "build_batch_request" on a DataAsset subclass."""
-        )
+        raise NotImplementedError("""One must implement "build_batch_request" on a DataAsset subclass.""")
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -250,16 +240,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Args:
             batch_request: A batch request object to be validated.
         """
-        raise NotImplementedError(
-            """One must implement "_validate_batch_request" on a DataAsset subclass."""
-        )
+        raise NotImplementedError("""One must implement "_validate_batch_request" on a DataAsset subclass.""")
 
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(
-        self, name: str, partitioner: Optional[Partitioner] = None
-    ) -> BatchConfig:
+    def add_batch_config(self, name: str, partitioner: Optional[Partitioner] = None) -> BatchConfig:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
 
@@ -331,11 +317,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             self.__fields_set__.add("batch_configs")
 
     def get_batch_config(self, batch_config_name: str) -> BatchConfig:
-        batch_configs = [
-            batch_config
-            for batch_config in self.batch_configs
-            if batch_config.name == batch_config_name
-        ]
+        batch_configs = [batch_config for batch_config in self.batch_configs if batch_config.name == batch_config_name]
         if len(batch_configs) == 0:
             raise KeyError(f"BatchConfig {batch_config_name} not found")
         elif len(batch_configs) > 1:
@@ -348,9 +330,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
-    def _get_batch_metadata_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> BatchMetadata:
+    def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
         """Performs config variable substitution and populates batch request options for
         Batch.metadata at runtime.
         """
@@ -364,9 +344,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
-    def _parse_order_by_sorters(
-        cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None
-    ) -> List[Sorter]:
+    def _parse_order_by_sorters(cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
     def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
@@ -412,9 +390,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=functools.cmp_to_key(
-                        _sort_batches_with_none_metadata_values(sorter.key)
-                    ),
+                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(sorter.key)),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -483,9 +459,7 @@ class Datasource(
     data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource sublcasses should update this set if the field should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = set()
-    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
-        TypeLookup
-    ]
+    _type_lookup: ClassVar[TypeLookup]  # This attribute is set in `MetaDatasource.__new__`
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
     execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
@@ -567,9 +541,7 @@ class Datasource(
         updated_datasource = self.data_context.update_datasource(loaded_datasource)
         assert isinstance(updated_datasource, Datasource)
 
-        output = updated_datasource.get_asset(asset_name).get_batch_config(
-            batch_config.name
-        )
+        output = updated_datasource.get_asset(asset_name).get_batch_config(batch_config.name)
         output.set_data_asset(batch_config.data_asset)
         return output
 
@@ -593,19 +565,12 @@ class Datasource(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
         )
-        if (
-            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
-            or not self._execution_engine
-        ):
-            self._execution_engine = self._execution_engine_type()(
-                **current_execution_engine_kwargs
-            )
+        if current_execution_engine_kwargs != self._cached_execution_engine_kwargs or not self._execution_engine:
+            self._execution_engine = self._execution_engine_type()(**current_execution_engine_kwargs)
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that correspond to the BatchRequest.
 
         Args:
@@ -625,9 +590,7 @@ class Datasource(
             Dictionary of "_DataAssetT" objects with "name" attribute serving as key.
         """
         asset: _DataAssetT
-        assets_as_dict: MutableMapping[str, _DataAssetT] = {
-            asset.name: asset for asset in self.assets
-        }
+        assets_as_dict: MutableMapping[str, _DataAssetT] = {asset.name: asset for asset in self.assets}
 
         return assets_as_dict
 
@@ -652,9 +615,7 @@ class Datasource(
         # This default implementation will be used if protocol is inherited
         try:
             asset: _DataAssetT
-            found_asset: _DataAssetT = list(
-                filter(lambda asset: asset.name == asset_name, self.assets)
-            )[0]
+            found_asset: _DataAssetT = list(filter(lambda asset: asset.name == asset_name, self.assets))[0]
             found_asset._datasource = self
             return found_asset
         except IndexError as exc:
@@ -679,9 +640,7 @@ class Datasource(
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
         self._save_context_project_config()
 
-    def _add_asset(
-        self, asset: _DataAssetT, connect_options: dict | None = None
-    ) -> _DataAssetT:
+    def _add_asset(self, asset: _DataAssetT, connect_options: dict | None = None) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -699,18 +658,14 @@ class Datasource(
 
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:
-            raise ValueError(
-                f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
-            )
+            raise ValueError(f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})')
 
         self.assets.append(asset)
 
         # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
         # which will contain the new asset populated with an id
         if self._data_context:
-            updated_datasource = self._data_context._update_fluent_datasource(
-                datasource=self
-            )
+            updated_datasource = self._data_context._update_fluent_datasource(datasource=self)
             assert isinstance(updated_datasource, Datasource)
             if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
                 asset.id = asset_id
@@ -747,14 +702,11 @@ class Datasource(
                         exc_info=True,
                     )
                     # reveal direct cause instead of generic, unhelpful MyDatasourceError
-                    asset_build_failure_direct_cause[data_asset.name] = (
-                        dc_build_err.__cause__ or dc_build_err
-                    )
+                    asset_build_failure_direct_cause[data_asset.name] = dc_build_err.__cause__ or dc_build_err
         if asset_build_failure_direct_cause:
             # TODO: allow users to opt out of these warnings
             names_and_error: List[str] = [
-                f"{name}:{type(exc).__name__}"
-                for (name, exc) in asset_build_failure_direct_cause.items()
+                f"{name}:{type(exc).__name__}" for (name, exc) in asset_build_failure_direct_cause.items()
             ]
             warnings.warn(
                 f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
@@ -770,9 +722,7 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError(
-                            '"order_by" list cannot contain an empty string'
-                        )
+                        raise ValueError('"order_by" list cannot contain an empty string')
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -782,9 +732,7 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError(
-                            '"order_by" list dict must have a key named "key"'
-                        )
+                        raise ValueError('"order_by" list dict must have a key named "key"')
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
@@ -810,9 +758,7 @@ class Datasource(
     @property
     def execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Return the ExecutionEngine type use for this Datasource"""
-        raise NotImplementedError(
-            """One needs to implement "execution_engine_type" on a Datasource subclass."""
-        )
+        raise NotImplementedError("""One needs to implement "execution_engine_type" on a Datasource subclass.""")
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the Datasource.
@@ -823,9 +769,7 @@ class Datasource(
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a Datasource subclass."""
-        )
+        raise NotImplementedError("""One needs to implement "test_connection" on a Datasource subclass.""")
 
     def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
@@ -854,9 +798,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
-    name for name in Datasource.__fields__.keys()
-}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1018,9 +960,7 @@ class Batch:
     def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(
-        self, expect: ExpectationSuite
-    ) -> ExpectationSuiteValidationResult: ...
+    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(
@@ -1036,16 +976,12 @@ class Batch:
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory
             # workflows are not being type checked.
-            raise ValueError(
-                f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"
-            )
+            raise ValueError(f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}")
 
     def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
         return self._validator.validate_expectation(expect)
 
-    def _validate_expectation_suite(
-        self, expect: ExpectationSuite
-    ) -> ExpectationSuiteValidationResult:
+    def _validate_expectation_suite(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
         return self._validator.validate_expectation_suite(expect)
 
     @functools.cached_property
@@ -1054,13 +990,9 @@ class Batch:
 
         context = self.datasource.data_context
         if context is None:
-            raise ValueError(
-                "We can't validate batches that are attached to datasources without a data context"
-            )
+            raise ValueError("We can't validate batches that are attached to datasources without a data context")
         batch_config = self.data_asset.add_batch_config(
-            name="-".join(
-                [self.datasource.name, self.data_asset.name, str(uuid.uuid4())]
-            )
+            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
         )
         return V1Validator(
             batch_config=batch_config,

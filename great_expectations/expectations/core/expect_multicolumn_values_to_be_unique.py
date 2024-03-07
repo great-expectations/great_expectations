@@ -111,9 +111,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if params.mostly and params.mostly.value < 1.0:
-            renderer_configuration = cls._add_mostly_pct_param(
-                renderer_configuration=renderer_configuration
-            )
+            renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
             template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
             template_str = "Values must always be unique across columns: "
@@ -165,14 +163,8 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         )
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+        mostly_str = "" if params.get("mostly") is None else ", at least $mostly_pct % of the time"
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
@@ -188,12 +180,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+            template_str = conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             params.update(conditional_params)
 
         return [

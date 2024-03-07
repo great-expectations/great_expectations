@@ -57,19 +57,9 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
             raise NotImplementedError
 
         if match_on == "any":
-            condition = sa.or_(
-                *(
-                    get_dialect_regex_expression(column, regex, _dialect)
-                    for regex in regex_list
-                )
-            )
+            condition = sa.or_(*(get_dialect_regex_expression(column, regex, _dialect) for regex in regex_list))
         else:
-            condition = sa.and_(
-                *(
-                    get_dialect_regex_expression(column, regex, _dialect)
-                    for regex in regex_list
-                )
-            )
+            condition = sa.and_(*(get_dialect_regex_expression(column, regex, _dialect) for regex in regex_list))
         return condition
 
     @column_condition_partial(engine=SparkDFExecutionEngine)

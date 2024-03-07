@@ -42,18 +42,13 @@ def pandas_execution_engine_fake(
             "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
             """
             metric_configuration: MetricConfiguration
-            if failed_metric_config.id in [
-                metric_configuration.id for metric_configuration in metrics_to_resolve
-            ]:
+            if failed_metric_config.id in [metric_configuration.id for metric_configuration in metrics_to_resolve]:
                 raise gx_exceptions.MetricResolutionError(
                     message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()}',  # Randomizing the message to assert that only one exception is kept
                     failed_metrics=[failed_metric_config],
                 )
 
-            return {
-                metric_configuration.id: "my_value"
-                for metric_configuration in metrics_to_resolve
-            }
+            return {metric_configuration.id: "my_value" for metric_configuration in metrics_to_resolve}
 
     PandasExecutionEngineFake.__name__ = "PandasExecutionEngine"
     return cast(ExecutionEngine, PandasExecutionEngineFake())
@@ -64,9 +59,7 @@ def metric_edge(
     table_head_metric_config: MetricConfiguration,
     column_histogram_metric_config: MetricConfiguration,
 ) -> MetricEdge:
-    return MetricEdge(
-        left=table_head_metric_config, right=column_histogram_metric_config
-    )
+    return MetricEdge(left=table_head_metric_config, right=column_histogram_metric_config)
 
 
 @pytest.fixture
@@ -99,9 +92,7 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 
 
 @pytest.fixture
-def expect_column_value_z_scores_to_be_less_than_expectation_config() -> (
-    ExpectationConfiguration
-):
+def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -143,11 +134,9 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     )
 
     graph = ValidationGraph(execution_engine=execution_engine)
-    validation_dependencies: ValidationDependencies = (
-        gxe.ExpectColumnValueZScoresToBeLessThan(
-            **expectation_configuration.kwargs
-        ).get_validation_dependencies(execution_engine)
-    )
+    validation_dependencies: ValidationDependencies = gxe.ExpectColumnValueZScoresToBeLessThan(
+        **expectation_configuration.kwargs
+    ).get_validation_dependencies(execution_engine)
 
     metric_configuration: MetricConfiguration
     for metric_configuration in validation_dependencies.get_metric_configurations():
@@ -230,9 +219,7 @@ def test_ExpectationValidationGraph_constructor(
             graph=None,
         )
 
-    assert ve.value.args == (
-        'Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object.',
-    )
+    assert ve.value.args == ('Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object.',)
 
     expectation_validation_graph = ExpectationValidationGraph(
         configuration=expect_column_values_to_be_unique_expectation_config,
@@ -246,19 +233,11 @@ def test_ExpectationValidationGraph_update(
     validation_graph_with_single_edge: ValidationGraph,
     expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
 ) -> None:
-    assert (
-        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
-        == 0
-    )
+    assert len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges) == 0
 
-    expect_column_values_to_be_unique_expectation_validation_graph.update(
-        validation_graph_with_single_edge
-    )
+    expect_column_values_to_be_unique_expectation_validation_graph.update(validation_graph_with_single_edge)
 
-    assert (
-        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
-        == 1
-    )
+    assert len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges) == 1
 
 
 @pytest.mark.unit
@@ -285,9 +264,7 @@ def test_ExpectationValidationGraph_get_exception_info(
         right.id: {"exception_info": right_exception},
     }
 
-    expect_column_values_to_be_unique_expectation_validation_graph.update(
-        validation_graph_with_single_edge
-    )
+    expect_column_values_to_be_unique_expectation_validation_graph.update(validation_graph_with_single_edge)
     exception_info = expect_column_values_to_be_unique_expectation_validation_graph.get_exception_info(
         metric_info=metric_info
     )
@@ -312,9 +289,7 @@ def test_parse_validation_graph(
     (
         ready_metrics,
         needed_metrics,
-    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
-        metrics=available_metrics
-    )
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(metrics=available_metrics)
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
     # Show that including "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.
@@ -322,9 +297,7 @@ def test_parse_validation_graph(
     (
         ready_metrics,
         needed_metrics,
-    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
-        metrics=available_metrics
-    )
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(metrics=available_metrics)
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
@@ -332,12 +305,7 @@ def test_parse_validation_graph(
 def test_populate_dependencies(
     expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
-    assert (
-        len(
-            expect_column_value_z_scores_to_be_less_than_expectation_validation_graph.edges
-        )
-        == 33
-    )
+    assert len(expect_column_value_z_scores_to_be_less_than_expectation_validation_graph.edges) == 33
 
 
 @pytest.mark.unit
@@ -358,10 +326,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
             ),
         )
 
-    assert (
-        e.value.message
-        == "No provider found for column_values.not_a_metric using PandasExecutionEngine"
-    )
+    assert e.value.message == "No provider found for column_values.not_a_metric using PandasExecutionEngine"
 
 
 @pytest.mark.unit
@@ -414,10 +379,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 
     exception_info = aborted_metric_info_item["exception_info"]
 
-    assert (
-        'Error: The column "not_in_table" in BatchData does not exist.'
-        in exception_info["exception_message"]
-    )
+    assert 'Error: The column "not_in_table" in BatchData does not exist.' in exception_info["exception_message"]
 
 
 @pytest.mark.unit
@@ -496,9 +458,7 @@ if __name__ == "__main__":
     argv: list = sys.argv[1:]
 
     if argv and ((len(argv) > 1) or (argv[0] not in ["unit", "integration"])):
-        raise ValueError(
-            f'Value of test type can be only "unit" or "integration" ({argv} was entered.)'
-        )
+        raise ValueError(f'Value of test type can be only "unit" or "integration" ({argv} was entered.)')
 
     test_type: str = "integration" if argv and argv[0] == "integration" else "unit"
     pytest.main(

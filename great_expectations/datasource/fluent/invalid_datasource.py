@@ -94,9 +94,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> NoReturn:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> NoReturn:
         self._raise_type_error()
 
     @override
@@ -104,9 +102,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_request_options_keys(
-        self, partitioner: Partitioner | None = None
-    ) -> NoReturn:
+    def get_batch_request_options_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 
@@ -125,9 +121,7 @@ class InvalidAssetTypeLookup(TypeLookup):
             return InvalidAsset
         # if a type is passed, normally we would return the type name but that doesn't make sense here
         # for an InvalidAsset
-        raise NotImplementedError(
-            f"Looking up the `type` name for {InvalidAsset.__name__} is not supported"
-        )
+        raise NotImplementedError(f"Looking up the `type` name for {InvalidAsset.__name__} is not supported")
 
 
 class InvalidDatasource(Datasource):

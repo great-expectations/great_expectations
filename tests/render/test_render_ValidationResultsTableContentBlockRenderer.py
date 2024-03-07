@@ -136,9 +136,7 @@ def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
     evr_failed_with_exception,
 ):
-    result = ValidationResultsTableContentBlockRenderer.render(
-        [evr_failed_with_exception]
-    ).to_json_dict()
+    result = ValidationResultsTableContentBlockRenderer.render([evr_failed_with_exception]).to_json_dict()
     expected_result = {
         "content_block_type": "table",
         "styling": {
@@ -194,9 +192,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                                 "classes": ["text-danger"],
                                 "params": {
                                     "exception_message": {"tag": "code"},
-                                    "expectation_type": {
-                                        "classes": ["badge", "badge-danger", "mb-2"]
-                                    },
+                                    "expectation_type": {"classes": ["badge", "badge-danger", "mb-2"]},
                                 },
                             },
                         },
@@ -229,9 +225,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
 def test_ValidationResultsTableContentBlockRenderer_render(
     titanic_profiled_name_column_evrs,
 ):
-    validation_results_table = ValidationResultsTableContentBlockRenderer.render(
-        titanic_profiled_name_column_evrs
-    )
+    validation_results_table = ValidationResultsTableContentBlockRenderer.render(titanic_profiled_name_column_evrs)
 
     assert isinstance(validation_results_table, RenderedComponentContent)
     assert validation_results_table.content_block_type == "table"
@@ -249,24 +243,19 @@ def test_ValidationResultsTableContentBlockRenderer_render(
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_success):
-    assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
-        == []
-    )
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == []
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
-    assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
-        == []
-    )
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == []
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
         "doesntmatterone": "doesntmatter",
         "doesntmattertwo": "doesntmatter",
     }
-    assert ValidationResultsTableContentBlockRenderer._get_custom_columns(
-        [evr_success]
-    ) == ["doesntmatterone", "doesntmattertwo"]
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == [
+        "doesntmatterone",
+        "doesntmattertwo",
+    ]
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
@@ -296,11 +285,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -345,11 +330,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -375,20 +356,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
     content_block_fn_output = content_block_fn(result=evr_success)
-    assert (
-        content_block_fn_output[0][0].to_json_dict()
-        == content_block_fn_expected_output[0][0].to_json_dict()
-    )
-    assert (
-        content_block_fn_output[0][1].to_json_dict()
-        == content_block_fn_expected_output[0][1].to_json_dict()
-    )
+    assert content_block_fn_output[0][0].to_json_dict() == content_block_fn_expected_output[0][0].to_json_dict()
+    assert content_block_fn_output[0][1].to_json_dict() == content_block_fn_expected_output[0][1].to_json_dict()
 
     assert content_block_fn_output == content_block_fn_expected_output
 
-    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
-        "property_that_doesnt_exist": "property"
-    }
+    evr_success.expectation_config.kwargs["meta_properties_to_render"] = {"property_that_doesnt_exist": "property"}
     content_block_fn_expected_output = [
         [
             RenderedStringTemplateContent(
@@ -410,11 +383,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -423,9 +392,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                     "string_template": {
                         "template": "Must have greater than or equal to $min_value rows.",
                         "params": {
-                            "meta_properties_to_render": {
-                                "property_that_doesnt_exist": "property"
-                            },
+                            "meta_properties_to_render": {"property_that_doesnt_exist": "property"},
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
@@ -443,9 +410,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     content_block_fn_output = content_block_fn(result=evr_success)
     assert content_block_fn_output == content_block_fn_expected_output
 
-    evr_success.expectation_config.meta = {
-        "attributes": {"property": 5, "nested": {"property": "this is nested"}}
-    }
+    evr_success.expectation_config.meta = {"attributes": {"property": 5, "nested": {"property": "this is nested"}}}
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
         "property_that_exists": "property",
         "other existing prop": "nested.property",
@@ -472,11 +437,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -577,11 +538,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -701,9 +658,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     assert output_5 == "0"
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
-    evr_success, evr_failed
-):
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(evr_success, evr_failed):
     evr_no_result = ExpectationValidationResult(
         success=True,
         exception_info={
@@ -834,9 +789,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
                     "classes": ["text-danger"],
                     "params": {
                         "exception_message": {"tag": "code"},
-                        "expectation_type": {
-                            "classes": ["badge", "badge-danger", "mb-2"]
-                        },
+                        "expectation_type": {"classes": ["badge", "badge-danger", "mb-2"]},
                     },
                 },
             },
@@ -1128,9 +1081,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
-    evr_failed_with_exception, evr_success, evr_failed
-):
+def test_ValidationResultsTableContentBlockRenderer_get_status_cell(evr_failed_with_exception, evr_success, evr_failed):
     # test for failed evr with exception
     output_1 = get_renderer_impl(
         object_name=evr_failed_with_exception.expectation_config.expectation_type,
@@ -1184,11 +1135,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
         "string_template": {
             "template": "$icon",
             "params": {"icon": "", "markdown_status_icon": "❌"},
-            "styling": {
-                "params": {
-                    "icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}
-                }
-            },
+            "styling": {"params": {"icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}}},
         },
     }
 

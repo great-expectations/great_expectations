@@ -10,9 +10,9 @@ def generate_trend(time, trend_params) -> np.ndarray:
     X = time * 0
     prev_cutpoint = 0
     for param_set in trend_params:
-        X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set[
-            "beta"
-        ] * (time[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint)
+        X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set["beta"] * (
+            time[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint
+        )
         prev_cutpoint = param_set["cutpoint"]
     return X
 
@@ -34,8 +34,7 @@ def generate_annual_seasonality(
 
     return sum(
         [
-            alpha * np.cos(2 * np.pi * (i + 1) * time / 365)
-            + beta * np.sin(2 * np.pi * (i + 1) * time / 365)
+            alpha * np.cos(2 * np.pi * (i + 1) * time / 365) + beta * np.sin(2 * np.pi * (i + 1) * time / 365)
             for i, (alpha, beta) in enumerate(annual_seasonality_params)
         ]
     )
@@ -45,9 +44,7 @@ def generate_posneg_pareto(alpha, size):
     """Generate a positive or negative pareto distribution."""
 
     if alpha is not None:
-        return np.random.pareto(a=alpha, size=size) * np.random.randint(
-            -1, 2, size=size
-        )
+        return np.random.pareto(a=alpha, size=size) * np.random.randint(-1, 2, size=size)
     else:
         return 0
 
@@ -151,9 +148,7 @@ def generate_daily_time_series(
     return Y
 
 
-def generate_daily_time_series_df(
-    size: int = 365 * 3, start_date: str = "2018-01-01", **kwargs
-) -> pd.DataFrame:
+def generate_daily_time_series_df(size: int = 365 * 3, start_date: str = "2018-01-01", **kwargs) -> pd.DataFrame:
     """Generate a time series as a pandas dataframe."""
 
     return pd.DataFrame(

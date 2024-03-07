@@ -20,9 +20,7 @@ from great_expectations.experimental.metric_repository.metrics import (
 
 @pytest.mark.cloud
 class TestCloudDataStore:
-    def test_add_expectation_suite_success(
-        self, empty_cloud_context_fluent: CloudDataContext
-    ):  # used as a fixture
+    def test_add_expectation_suite_success(self, empty_cloud_context_fluent: CloudDataContext):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
         retrieved_expectation_suite = context.suites.get("test_suite")
@@ -162,9 +160,7 @@ class TestCloudDataStoreMetricRun:
                     batch_id="batch_id",
                     metric_name="metric_name",
                     value=1,
-                    exception=MetricException(
-                        type="exception type", message="exception message"
-                    ),
+                    exception=MetricException(type="exception type", message="exception message"),
                     column="column",
                 )
             ],

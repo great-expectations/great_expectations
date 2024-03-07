@@ -78,9 +78,7 @@ class ColumnValuesAreUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapMetricProv
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
-    ColumnMapExpectation
-):
+class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapExpectation):
     """Expect column values to be US zip codes within a specified number of miles of a given zipcode."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -285,22 +283,16 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "central_zip", "radius_in_miles", "mostly"],
         )
 
-        template_str = (
-            "values must be US zip code within $radius_in_miles miles of $central_zip"
-        )
+        template_str = "values must be US zip code within $radius_in_miles miles of $central_zip"
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

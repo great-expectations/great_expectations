@@ -130,9 +130,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         cardinality_limit_mode="very_few",
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "event_type",
@@ -177,9 +175,7 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
         cardinality_limit_mode="ONE",
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "user_agent",
@@ -272,9 +268,9 @@ def test_unspecified_cardinality_limit(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        _: List[Domain] = CategoricalColumnDomainBuilder(
-            data_context=data_context
-        ).get_domains(rule_name="my_rule", batch_request=batch_request)
+        _: List[Domain] = CategoricalColumnDomainBuilder(data_context=data_context).get_domains(
+            rule_name="my_rule", batch_request=batch_request
+        )
 
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
@@ -301,9 +297,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
         ],
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "device_ts",
@@ -346,9 +340,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         exclude_column_names=[],
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "id",
@@ -383,9 +375,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
 def test_multi_batch_very_few_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -397,9 +387,7 @@ def test_multi_batch_very_few_cardinality(
         cardinality_limit_mode="very_few",
         data_context=data_context,
     )
-    observed_domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    observed_domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     expected_domains: List[Domain] = [
         Domain(
@@ -507,9 +495,7 @@ def test_multi_batch_very_few_cardinality(
 def test_multi_batch_one_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -521,9 +507,7 @@ def test_multi_batch_one_cardinality(
         cardinality_limit_mode="ONE",
         data_context=data_context,
     )
-    observed_domains: List[Domain] = domain_builder.get_domains(
-        rule_name="my_rule", batch_request=batch_request
-    )
+    observed_domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
     expected_domains: List[Domain] = []
 

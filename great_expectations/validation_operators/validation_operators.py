@@ -221,22 +221,12 @@ class ActionListValidationOperator(ValidationOperator):
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError(
-                    'Action config keys must be ("name", "action"). Instead got {}'.format(
-                        action_config.keys()
-                    )
-                )
+                raise KeyError(f'Action config keys must be ("name", "action"). Instead got {action_config.keys()}')
 
             if "class_name" in action_config["action"]:
-                if (
-                    action_config["action"]["class_name"]
-                    == "StoreValidationResultAction"
-                ):
+                if action_config["action"]["class_name"] == "StoreValidationResultAction":
                     store_action_detected = True
-                elif (
-                    action_config["action"]["class_name"].endswith("NotificationAction")
-                    and not store_action_detected
-                ):
+                elif action_config["action"]["class_name"].endswith("NotificationAction") and not store_action_detected:
                     # We currently only support SlackNotifications but setting this for any notification.
                     notify_before_store = action_config["action"]["class_name"]
 
@@ -306,9 +296,7 @@ class ActionListValidationOperator(ValidationOperator):
                 and isinstance(item[1], str)
             ):
                 raise ValueError("Unable to build batch from item.")
-            batch = self.data_context._get_batch_v2(
-                batch_kwargs=item[0], expectation_suite_name=item[1]
-            )
+            batch = self.data_context._get_batch_v2(batch_kwargs=item[0], expectation_suite_name=item[1])
         else:
             batch = item
 
@@ -359,9 +347,7 @@ class ActionListValidationOperator(ValidationOperator):
             if checkpoint_name is not None:
                 batch_validate_arguments["checkpoint_name"] = checkpoint_name
 
-            batch_and_validation_result_tuples.append(
-                (batch, batch.validate(**batch_validate_arguments))
-            )
+            batch_and_validation_result_tuples.append((batch, batch.validate(**batch_validate_arguments)))
 
         run_results = {}
         for batch, validation_result in batch_and_validation_result_tuples:
@@ -370,13 +356,9 @@ class ActionListValidationOperator(ValidationOperator):
                     resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
                     id=batch._expectation_suite.id,
                 )
-                validation_result_id = GXCloudIdentifier(
-                    resource_type=GXCloudRESTResource.VALIDATION_RESULT
-                )
+                validation_result_id = GXCloudIdentifier(resource_type=GXCloudRESTResource.VALIDATION_RESULT)
             else:
-                expectation_suite_identifier = ExpectationSuiteIdentifier(
-                    name=batch._expectation_suite.name
-                )
+                expectation_suite_identifier = ExpectationSuiteIdentifier(name=batch._expectation_suite.name)
                 validation_result_id = ValidationResultIdentifier(
                     batch_identifier=batch_identifier,
                     expectation_suite_identifier=expectation_suite_identifier,
@@ -384,9 +366,7 @@ class ActionListValidationOperator(ValidationOperator):
                 )
 
             validation_result.meta["validation_id"] = validation_id
-            validation_result.meta["checkpoint_id"] = (
-                checkpoint_identifier.id if checkpoint_identifier else None
-            )
+            validation_result.meta["checkpoint_id"] = checkpoint_identifier.id if checkpoint_identifier else None
 
             batch_actions_results = self._run_actions(
                 batch=batch,
@@ -464,9 +444,9 @@ class ActionListValidationOperator(ValidationOperator):
                 if isinstance(action_result, GXCloudResourceRef):
                     transformed_result = {
                         "id": action_result.id,
-                        "validation_result_url": action_result.response["data"][
-                            "attributes"
-                        ]["validation_result"]["display_url"],
+                        "validation_result_url": action_result.response["data"]["attributes"]["validation_result"][
+                            "display_url"
+                        ],
                     }
                 elif action_result is None:
                     transformed_result = {}
@@ -475,9 +455,7 @@ class ActionListValidationOperator(ValidationOperator):
 
                 # add action_result
                 batch_actions_results[action["name"]] = transformed_result
-                batch_actions_results[action["name"]]["class"] = action["action"][
-                    "class_name"
-                ]
+                batch_actions_results[action["name"]]["class"] = action["action"]["class_name"]
 
             except Exception as e:
                 logger.exception(f"Error running action with name {action['name']}")
@@ -486,9 +464,7 @@ class ActionListValidationOperator(ValidationOperator):
         return batch_actions_results
 
 
-class WarningAndFailureExpectationSuitesValidationOperator(
-    ActionListValidationOperator
-):
+class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
     """
     WarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
@@ -763,9 +739,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn about FailureVsWarning Validation Operators at {}".format(
-                        documentation_url
-                    ),
+                    "text": f"Learn about FailureVsWarning Validation Operators at {documentation_url}",
                 }
             ],
         }
@@ -809,8 +783,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=base_expectation_suite_name
-                + self.expectation_suite_name_suffixes[0]
+                name=base_expectation_suite_name + self.expectation_suite_name_suffixes[0]
             )
 
             failure_validation_result_id = ValidationResultIdentifier(
@@ -821,29 +794,23 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             failure_expectation_suite = None
             try:
-                failure_expectation_suite = self.data_context.stores[
-                    self.data_context.expectations_store_name
-                ].get(failure_expectation_suite_identifier)
+                failure_expectation_suite = self.data_context.stores[self.data_context.expectations_store_name].get(
+                    failure_expectation_suite_identifier
+                )
 
             # NOTE : Abe 2019/09/17 : I'm concerned that this may be too permissive, since
             # it will catch any error in the Store, not just KeyErrors. In the longer term, a better
             # solution will be to have the Stores catch other known errors and raise KeyErrors,
             # so that methods like this can catch and handle a single error type.
             except Exception:
-                logger.debug(
-                    "Failure expectation suite not found: {}".format(
-                        failure_expectation_suite_identifier
-                    )
-                )
+                logger.debug(f"Failure expectation suite not found: {failure_expectation_suite_identifier}")
 
             if failure_expectation_suite:
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=result_format if result_format else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -861,8 +828,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     break
 
             warning_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=base_expectation_suite_name
-                + self.expectation_suite_name_suffixes[1]
+                name=base_expectation_suite_name + self.expectation_suite_name_suffixes[1]
             )
 
             warning_validation_result_id = ValidationResultIdentifier(
@@ -873,24 +839,18 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             warning_expectation_suite = None
             try:
-                warning_expectation_suite = self.data_context.stores[
-                    self.data_context.expectations_store_name
-                ].get(warning_expectation_suite_identifier)
-            except Exception:
-                logger.debug(
-                    "Warning expectation suite not found: {}".format(
-                        warning_expectation_suite_identifier
-                    )
+                warning_expectation_suite = self.data_context.stores[self.data_context.expectations_store_name].get(
+                    warning_expectation_suite_identifier
                 )
+            except Exception:
+                logger.debug(f"Warning expectation suite not found: {warning_expectation_suite_identifier}")
 
             if warning_expectation_suite:
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=result_format if result_format else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result
@@ -924,11 +884,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 or self.notify_on == "failure"
                 and not validation_operator_result.success
             ):
-                slack_query = self._build_slack_query(
-                    validation_operator_result=validation_operator_result
-                )
-                send_slack_notification(
-                    query=slack_query, slack_webhook=self.slack_webhook
-                )
+                slack_query = self._build_slack_query(validation_operator_result=validation_operator_result)
+                send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
 
         return validation_operator_result

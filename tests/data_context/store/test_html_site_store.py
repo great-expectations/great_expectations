@@ -20,9 +20,7 @@ from great_expectations.util import gen_directory_tree_str
 @pytest.mark.filesystem
 @freeze_time("09/26/2019 13:42:41")
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
-    full_test_dir = tmp_path_factory.mktemp(
-        "test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir"
-    )
+    full_test_dir = tmp_path_factory.mktemp("test_HtmlSiteStore_with_TupleFileSystemStoreBackend__dir")
     test_dir = full_test_dir.parts[-1]
     path = str(full_test_dir)
 
@@ -147,9 +145,7 @@ def test_HtmlSiteStore_S3_backend(aws_credentials):
     # paths below should include the batch_parameters
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)["Contents"]
     } == {
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/index.html",
@@ -157,9 +153,6 @@ def test_HtmlSiteStore_S3_backend(aws_credentials):
     }
 
     index_content = (
-        boto3.client("s3")
-        .get_object(Bucket=bucket, Key="test/prefix/index.html")["Body"]
-        .read()
-        .decode("utf-8")
+        boto3.client("s3").get_object(Bucket=bucket, Key="test/prefix/index.html")["Body"].read().decode("utf-8")
     )
     assert index_content == "index_html_string_content"

@@ -17,9 +17,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def renderer(
-    renderer_type: str, **kwargs
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def renderer(renderer_type: str, **kwargs) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def wrapper(renderer_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(renderer_fn)
         def inner_func(*args: P.args, **kwargs: P.kwargs):
@@ -90,18 +88,12 @@ class Renderer:
         # Group EVRs by column
         sorted_columns = sorted(
             list(
-                {
-                    evr.expectation_config.kwargs["column"]
-                    for evr in evrs_
-                    if "column" in evr.expectation_config.kwargs
-                }
+                {evr.expectation_config.kwargs["column"] for evr in evrs_ if "column" in evr.expectation_config.kwargs}
             )
         )
 
         if expect_table_columns_to_match_ordered_list_evr:
-            ordered_columns = expect_table_columns_to_match_ordered_list_evr.result[
-                "observed_value"
-            ]
+            ordered_columns = expect_table_columns_to_match_ordered_list_evr.result["observed_value"]
         else:
             ordered_columns = []
 

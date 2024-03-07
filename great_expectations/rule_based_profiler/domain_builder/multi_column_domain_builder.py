@@ -27,18 +27,15 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses "include_column_names" property of its parent class to specify "column_list" (order-non-preserving).
     """
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        ColumnDomainBuilder.exclude_field_names
-        | {
-            "exclude_column_names",
-            "include_column_name_suffixes",
-            "exclude_column_name_suffixes",
-            "semantic_type_filter_module_name",
-            "semantic_type_filter_class_name",
-            "include_semantic_types",
-            "exclude_semantic_types",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = ColumnDomainBuilder.exclude_field_names | {
+        "exclude_column_names",
+        "include_column_name_suffixes",
+        "exclude_column_name_suffixes",
+        "semantic_type_filter_module_name",
+        "semantic_type_filter_class_name",
+        "include_semantic_types",
+        "exclude_semantic_types",
+    }
 
     def __init__(
         self,
@@ -101,9 +98,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
         column_name: str
         semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
-            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
-                column_name
-            ]
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[column_name]  # type: ignore[union-attr] # could be None
             for column_name in effective_column_names
         }
 

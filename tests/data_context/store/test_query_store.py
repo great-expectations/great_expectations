@@ -11,9 +11,7 @@ from tests import test_utils
 def basic_sqlalchemy_query_store(titanic_sqlite_db):
     # For the purpose of this test, just steal the engine from a dataset
     credentials = {"engine": titanic_sqlite_db.engine}
-    return SqlAlchemyQueryStore(
-        credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"}
-    )
+    return SqlAlchemyQueryStore(credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"})
 
 
 @pytest.fixture()
@@ -21,9 +19,7 @@ def basic_sqlalchemy_query_store_connection_string(
     titanic_sqlite_db_connection_string,
 ):
     credentials = {"connection_string": titanic_sqlite_db_connection_string}
-    return SqlAlchemyQueryStore(
-        credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"}
-    )
+    return SqlAlchemyQueryStore(credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"})
 
 
 @pytest.fixture()
@@ -49,24 +45,16 @@ def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
 
 @pytest.mark.filesystem
 def test_basic_query(basic_sqlalchemy_query_store):
-    assert (
-        basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
-    )
+    assert basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
     basic_sqlalchemy_query_store.set("q2", "SELECT DISTINCT PClass FROM ${table_name};")
-    assert (
-        basic_sqlalchemy_query_store.get("q2")
-        == "SELECT DISTINCT PClass FROM ${table_name};"
-    )
+    assert basic_sqlalchemy_query_store.get("q2") == "SELECT DISTINCT PClass FROM ${table_name};"
     res = basic_sqlalchemy_query_store.get_query_result("q1", {"table_name": "titanic"})
     assert res == ["1st", "2nd", "*", "3rd"]
 
 
 @pytest.mark.filesystem
 def test_query_connection_string(basic_sqlalchemy_query_store_connection_string):
-    assert (
-        basic_sqlalchemy_query_store_connection_string.get("q1")
-        == "SELECT DISTINCT PClass FROM titanic;"
-    )
+    assert basic_sqlalchemy_query_store_connection_string.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
 
 
 @pytest.mark.filesystem

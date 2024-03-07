@@ -43,9 +43,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
@@ -55,9 +53,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     # not configured
     notify_with = ["fake_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
@@ -102,9 +98,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
@@ -114,9 +108,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     # not configured
     notify_with = ["fake_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",

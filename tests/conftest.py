@@ -211,8 +211,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--verify-marker-coverage-and-exit",
         action="store_true",
-        help="If set, checks that all tests have one of the markers necessary "
-        "for it to be run.",
+        help="If set, checks that all tests have one of the markers necessary " "for it to be run.",
     )
 
     # note: --no-spark will be deprecated in favor of --spark
@@ -292,9 +291,7 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run integration tests for docs",
     )
-    parser.addoption(
-        "--azure", action="store_true", help="If set, execute tests against Azure"
-    )
+    parser.addoption("--azure", action="store_true", help="If set, execute tests against Azure")
     parser.addoption(
         "--cloud",
         action="store_true",
@@ -318,10 +315,7 @@ def build_test_backends_list_v2_api(metafunc):
     In order to get the support for the "trino" SQLAlchemy dialect as well as receive the benefits of other latest
     capabilities, users are encouraged to upgrade their Great Expectations installation to the latest version.
     """
-    return [
-        (backend_name_class_name_map.get(backend_name) or backend_name)
-        for backend_name in test_backend_names
-    ]
+    return [(backend_name_class_name_map.get(backend_name) or backend_name) for backend_name in test_backend_names]
 
 
 def build_test_backends_list_v3_api(metafunc):
@@ -401,14 +395,10 @@ def _verify_marker_coverage(
         #  1 => the marker coverage for this test is correct
         # >1 => too many markers are covering this test
         if required_intersection_size == 0:
-            uncovered.append(
-                TestMarkerCoverage(path=str(test.path), name=test.name, markers=markers)
-            )
+            uncovered.append(TestMarkerCoverage(path=str(test.path), name=test.name, markers=markers))
         elif required_intersection_size > 1:
             multiple_markers.append(
-                TestMarkerCoverage(
-                    path=str(test.path), name=test.name, markers=required_intersection
-                )
+                TestMarkerCoverage(path=str(test.path), name=test.name, markers=required_intersection)
             )
     return uncovered, multiple_markers
 
@@ -417,26 +407,20 @@ def pytest_collection_finish(session):
     if session.config.option.verify_marker_coverage_and_exit:
         uncovered, multiply_covered = _verify_marker_coverage(session)
         if uncovered or multiply_covered:
-            print(
-                "*** Every test should be covered by exactly 1 of our required markers ***"
-            )
+            print("*** Every test should be covered by exactly 1 of our required markers ***")
             if uncovered:
                 print(f"*** {len(uncovered)} tests have no marker coverage ***")
                 for test_info in uncovered:
                     print(test_info)
                 print()
             else:
-                print(
-                    f"*** {len(multiply_covered)} tests have multiple marker coverage ***"
-                )
+                print(f"*** {len(multiply_covered)} tests have multiple marker coverage ***")
                 for test_info in multiply_covered:
                     print(test_info)
                 print()
 
             print("*** The required markers follow. ***")
-            print(
-                "*** Tests marked with 'performance' are not run in the PR or release pipeline. ***"
-            )
+            print("*** Tests marked with 'performance' are not run in the PR or release pipeline. ***")
             print("*** All other tests are. ***")
             for m in REQUIRED_MARKERS:
                 print(m)
@@ -496,9 +480,7 @@ def preload_latest_gx_cache():
     import great_expectations as gx
 
     current_version = packaging.version.Version(gx.__version__)
-    logger.info(
-        f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}"
-    )
+    logger.info(f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}")
     _VersionChecker._LATEST_GX_VERSION_CACHE = current_version
     yield current_version
     # teardown
@@ -570,58 +552,24 @@ def spark_df_taxi_data_schema(spark_session):
 
     schema = pyspark.types.StructType(
         [
-            pyspark.types.StructField(
-                "vendor_id", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "pickup_datetime", pyspark.types.TimestampType(), True, None
-            ),
-            pyspark.types.StructField(
-                "dropoff_datetime", pyspark.types.TimestampType(), True, None
-            ),
-            pyspark.types.StructField(
-                "passenger_count", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "trip_distance", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "rate_code_id", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "store_and_fwd_flag", pyspark.types.StringType(), True, None
-            ),
-            pyspark.types.StructField(
-                "pickup_location_id", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "dropoff_location_id", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "payment_type", pyspark.types.IntegerType(), True, None
-            ),
-            pyspark.types.StructField(
-                "fare_amount", pyspark.types.DoubleType(), True, None
-            ),
+            pyspark.types.StructField("vendor_id", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("pickup_datetime", pyspark.types.TimestampType(), True, None),
+            pyspark.types.StructField("dropoff_datetime", pyspark.types.TimestampType(), True, None),
+            pyspark.types.StructField("passenger_count", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("trip_distance", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("rate_code_id", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("store_and_fwd_flag", pyspark.types.StringType(), True, None),
+            pyspark.types.StructField("pickup_location_id", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("dropoff_location_id", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("payment_type", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("fare_amount", pyspark.types.DoubleType(), True, None),
             pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
-            pyspark.types.StructField(
-                "mta_tax", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "tip_amount", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "tolls_amount", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "improvement_surcharge", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "total_amount", pyspark.types.DoubleType(), True, None
-            ),
-            pyspark.types.StructField(
-                "congestion_surcharge", pyspark.types.DoubleType(), True, None
-            ),
+            pyspark.types.StructField("mta_tax", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("tip_amount", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("tolls_amount", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("improvement_surcharge", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("total_amount", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField("congestion_surcharge", pyspark.types.DoubleType(), True, None),
         ]
     )
     return schema
@@ -652,12 +600,8 @@ def basic_expectation_suite():
                 expectation_type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
+            ExpectationConfiguration(expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_unique",
                 kwargs={"column": "naturals"},
@@ -1194,9 +1138,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
                         - data_asset_name
     """
 
-    _: BaseDatasource = context.add_datasource(
-        "my_additional_datasource", **yaml.load(datasource_config)
-    )
+    _: BaseDatasource = context.add_datasource("my_additional_datasource", **yaml.load(datasource_config))
     project_manager.set_project(context)
     return context
 
@@ -1215,9 +1157,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     if (
-        any(
-            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-        )
+        any(dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"])
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
     ):
@@ -1249,9 +1189,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             name: whole_table
         """
 
-        _: BaseDatasource = context.add_datasource(
-            "my_sqlite_db_datasource", **yaml.load(datasource_config)
-        )
+        _: BaseDatasource = context.add_datasource("my_sqlite_db_datasource", **yaml.load(datasource_config))
 
     return context
 
@@ -1312,10 +1250,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             }
         },
     )
-    simple_checkpoint_template_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_template_config.name
-        )
+    simple_checkpoint_template_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_template_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_template_config_key,
@@ -1369,10 +1305,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             }
         ],
     )
-    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_1.name
-        )
+    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_1.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_1_key,
@@ -1416,10 +1350,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             "partial_unexpected_count": 20,
         },
     )
-    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_2.name
-        )
+    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_2.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_2_key,
@@ -1465,10 +1397,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             "template_3_key": "bloopy!",
         },
     )
-    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_3.name
-        )
+    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_3.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_3_key,
@@ -1484,9 +1414,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
-    simple_checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_config.name
-    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(configuration_key=simple_checkpoint_config.name)
     context.checkpoint_store.set(
         key=simple_checkpoint_config_key,
         value=simple_checkpoint_config,
@@ -1505,10 +1433,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             ),
         ],
     )
-    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_with_slack_webhook_config.name
-        )
+    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_slack_webhook_config_key,
@@ -1550,10 +1476,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
             ),
         ],
     )
-    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_with_site_names_config.name
-        )
+    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_site_names_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_site_names_config_key,
@@ -1753,15 +1677,11 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="exploration", batching_regex=batching_regex, glob_directive=glob_directive)
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="users", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="users", batching_regex=batching_regex, glob_directive=glob_directive)
 
     datasource_name = "my_pandas_dataframes_datasource"
     datasource = context.sources.add_pandas(name=datasource_name)
@@ -1807,15 +1727,11 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="exploration", batching_regex=batching_regex, glob_directive=glob_directive)
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="users", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="users", batching_regex=batching_regex, glob_directive=glob_directive)
 
     datasource_name = "my_spark_dataframes_datasource"
     datasource = context.sources.add_spark(name=datasource_name)
@@ -1856,14 +1772,10 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
     )
 
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
-    )
+    datasource.add_query_asset(name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query)
 
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
-    )
+    datasource.add_query_asset(name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1913,10 +1825,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             }
         },
     )
-    simple_checkpoint_template_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_template_config.name
-        )
+    simple_checkpoint_template_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_template_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_template_config_key,
@@ -1970,10 +1880,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             }
         ],
     )
-    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_1.name
-        )
+    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_1.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_1_key,
@@ -2017,10 +1925,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             "partial_unexpected_count": 20,
         },
     )
-    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_2.name
-        )
+    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_2.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_2_key,
@@ -2066,10 +1972,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             "template_3_key": "bloopy!",
         },
     )
-    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=nested_checkpoint_template_config_3.name
-        )
+    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_3.name
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_3_key,
@@ -2084,9 +1988,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
-    simple_checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_config.name
-    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(configuration_key=simple_checkpoint_config.name)
     context.checkpoint_store.set(
         key=simple_checkpoint_config_key,
         value=simple_checkpoint_config,
@@ -2105,10 +2007,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             ),
         ],
     )
-    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_with_slack_webhook_config.name
-        )
+    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_slack_webhook_config_key,
@@ -2150,10 +2050,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
             ),
         ],
     )
-    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(
-            configuration_key=simple_checkpoint_with_site_names_config.name
-        )
+    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_site_names_config.name
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_site_names_config_key,
@@ -2188,15 +2086,11 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="exploration", batching_regex=batching_regex, glob_directive=glob_directive)
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="users", batching_regex=batching_regex, glob_directive=glob_directive
-    )
+    datasource.add_csv_asset(name="users", batching_regex=batching_regex, glob_directive=glob_directive)
 
     datasource_name = "my_spark_dataframes_datasource"
     datasource = context.sources.add_spark(name=datasource_name)
@@ -2237,14 +2131,10 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
     )
 
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
-    )
+    datasource.add_query_asset(name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query)
 
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
-    )
+    datasource.add_query_asset(name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2257,9 +2147,7 @@ def empty_context_with_checkpoint(empty_data_context):
     context = empty_data_context
     root_dir = empty_data_context.root_directory
     fixture_name = "my_checkpoint.yml"
-    fixture_path = file_relative_path(
-        __file__, f"./data_context/fixtures/contexts/{fixture_name}"
-    )
+    fixture_path = file_relative_path(__file__, f"./data_context/fixtures/contexts/{fixture_name}")
     checkpoints_file = os.path.join(  # noqa: PTH118
         root_dir, "checkpoints", fixture_name
     )
@@ -2296,9 +2184,7 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_v013_titanic.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -2358,9 +2244,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_titanic_no_data_docs.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic_no_data_docs.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -2391,9 +2275,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_v013_titanic.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -2424,9 +2306,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_titanic.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_titanic.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -2457,9 +2337,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_v013_upgraded_titanic.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./test_fixtures/great_expectations_v013_upgraded_titanic.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -2489,13 +2367,9 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     )
 
     shutil.copy(titanic_csv_path, project_dataset_path)
-    titanic_df: DataFrame = spark_warehouse_session.read.csv(
-        project_dataset_path, header=True
-    )
+    titanic_df: DataFrame = spark_warehouse_session.read.csv(project_dataset_path, header=True)
 
-    spark_warehouse_session.sql(
-        f"CREATE DATABASE IF NOT EXISTS {titanic_database_name}"
-    )
+    spark_warehouse_session.sql(f"CREATE DATABASE IF NOT EXISTS {titanic_database_name}")
     spark_warehouse_session.catalog.setCurrentDatabase(titanic_database_name)
     titanic_df.write.saveAsTable(
         "tb_titanic_with_partitions",
@@ -2509,9 +2383,7 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     ).collect()
     assert row_count and row_count[0][0] == 1313
     yield spark_warehouse_session
-    spark_warehouse_session.sql(
-        f"DROP DATABASE IF EXISTS {titanic_database_name} CASCADE"
-    )
+    spark_warehouse_session.sql(f"DROP DATABASE IF EXISTS {titanic_database_name} CASCADE")
     spark_warehouse_session.catalog.setCurrentDatabase("default")
 
 
@@ -2524,9 +2396,7 @@ def titanic_sqlite_db(sa):
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
         with engine.begin() as connection:
-            assert connection.execute(
-                sa.text("select count(*) from titanic")
-            ).fetchall()[0] == (1313,)
+            assert connection.execute(sa.text("select count(*) from titanic")).fetchall()[0] == (1313,)
             return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -2541,9 +2411,7 @@ def titanic_sqlite_db_connection_string(sa):
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
         with engine.begin() as connection:
-            assert connection.execute(
-                sa.text("select count(*) from titanic")
-            ).fetchall()[0] == (1313,)
+            assert connection.execute(sa.text("select count(*) from titanic")).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -2557,9 +2425,7 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
         meta={},
         data_asset_type="Dataset",
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}
-            ),
+            ExpectationConfiguration(expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_not_be_null",
                 kwargs={"column": "Name"},
@@ -2598,15 +2464,11 @@ def v20_project_directory(tmp_path_factory):
         project_path, FileDataContext.GX_DIR
     )
     shutil.copytree(
-        file_relative_path(
-            __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
-        ),
+        file_relative_path(__file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"),
         context_root_dir,
     )
     shutil.copy(
-        file_relative_path(
-            __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
-        ),
+        file_relative_path(__file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"),
         os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
@@ -2757,9 +2619,7 @@ def data_context_simple_expectation_suite(tmp_path_factory):
 
 
 @pytest.fixture()
-def filesystem_csv_data_context_with_validation_operators(
-    titanic_data_context_stats_enabled, filesystem_csv_2
-):
+def filesystem_csv_data_context_with_validation_operators(titanic_data_context_stats_enabled, filesystem_csv_2):
     titanic_data_context_stats_enabled.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
@@ -2817,9 +2677,7 @@ def data_context_with_fluent_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
-        name="my_pandas_datasource", base_directory=filesystem_csv_2
-    )
+    empty_data_context.sources.add_pandas_filesystem(name="my_pandas_datasource", base_directory=filesystem_csv_2)
     # noinspection PyProtectedMember
     empty_data_context._save_project_config()
     return empty_data_context
@@ -2830,9 +2688,7 @@ def data_context_with_fluent_datasource_and_block_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
-        name="my_fluent_datasource", base_directory=filesystem_csv_2
-    )
+    empty_data_context.sources.add_pandas_filesystem(name="my_fluent_datasource", base_directory=filesystem_csv_2)
     empty_data_context.add_datasource(
         name="my_block_datasource",
         module_name="great_expectations.datasource",
@@ -2924,9 +2780,7 @@ def filesystem_csv_4(tmp_path):
 @pytest.fixture
 def titanic_profiled_evrs_1():
     with open(
-        file_relative_path(
-            __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
-        ),
+        file_relative_path(__file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"),
     ) as infile:
         return expectationSuiteValidationResultSchema.loads(infile.read())
 
@@ -3004,16 +2858,8 @@ def sqlite_view_engine(test_backends) -> Engine:
                 index=True,
             )
             with sqlite_engine.begin() as connection:
-                connection.execute(
-                    sa.text(
-                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                    )
-                )
-                connection.execute(
-                    sa.text(
-                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                    )
-                )
+                connection.execute(sa.text("CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"))
+                connection.execute(sa.text("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"))
             return sqlite_engine
         except ImportError:
             sa = None
@@ -3048,9 +2894,7 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
         add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
-        add_dataframe_to_db(
-            df=df2, name="table_2", con=engine, index=True, schema="main"
-        )
+        add_dataframe_to_db(df=df2, name="table_2", con=engine, index=True, schema="main")
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)
@@ -3063,15 +2907,11 @@ def test_df(tmp_path_factory):
     def generate_ascending_list_of_datetimes(
         k, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ):
-        start_time = datetime.datetime(
-            start_date.year, start_date.month, start_date.day
-        )
+        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
         days_between_dates = (end_date - start_date).total_seconds()
 
         datetime_list = [
-            start_time
-            + datetime.timedelta(seconds=random.randrange(round(days_between_dates)))
-            for i in range(k)
+            start_time + datetime.timedelta(seconds=random.randrange(round(days_between_dates))) for i in range(k)
         ]
         datetime_list.sort()
         return datetime_list
@@ -3079,9 +2919,7 @@ def test_df(tmp_path_factory):
     k = 120
     random.seed(1)
 
-    timestamp_list = generate_ascending_list_of_datetimes(
-        k, end_date=datetime.date(2020, 1, 31)
-    )
+    timestamp_list = generate_ascending_list_of_datetimes(k, end_date=datetime.date(2020, 1, 31))
     date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
 
     batch_ids = [random.randint(0, 10) for i in range(k)]
@@ -3101,13 +2939,9 @@ def test_df(tmp_path_factory):
             "d": [d.day for d in date_list],
             "timestamp": timestamp_list,
             "session_ids": session_ids,
-            "event_type": [
-                random.choice(["start", "stop", "continue"]) for i in range(k)
-            ],
+            "event_type": [random.choice(["start", "stop", "continue"]) for i in range(k)],
             "favorite_color": [
-                "#"
-                + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)])
-                for i in range(k)
+                "#" + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)]) for i in range(k)
             ],
         }
     )
@@ -3334,9 +3168,7 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
-def data_context_with_query_store(
-    empty_data_context, titanic_sqlite_db_connection_string
-):
+def data_context_with_query_store(empty_data_context, titanic_sqlite_db_connection_string):
     context = empty_data_context
     config = yaml.load(
         f"""
@@ -3413,9 +3245,7 @@ def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access
 
 
 @pytest.fixture(scope="function")
-def empty_ge_cloud_data_context_config(
-    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
-):
+def empty_ge_cloud_data_context_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     config_yaml_str = f"""
 stores:
   default_evaluation_parameter_store:
@@ -3590,9 +3420,7 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-def cloud_details(
-    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
-) -> CloudDetails:
+def cloud_details(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token) -> CloudDetails:
     return CloudDetails(
         base_url=ge_cloud_base_url,
         org_id=ge_cloud_organization_id,
@@ -3607,9 +3435,7 @@ def cloud_api_fake(cloud_details: CloudDetails):
 
 
 @pytest.fixture
-def empty_cloud_context_fluent(
-    cloud_api_fake, cloud_details: CloudDetails
-) -> CloudDataContext:
+def empty_cloud_context_fluent(cloud_api_fake, cloud_details: CloudDetails) -> CloudDataContext:
     context = gx.get_context(
         cloud_access_token=cloud_details.access_token,
         cloud_organization_id=cloud_details.org_id,
@@ -3653,9 +3479,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(
-    empty_cloud_data_context: CloudDataContext, db_file
-):
+def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context: CloudDataContext, db_file):
     context: CloudDataContext = empty_cloud_data_context
 
     fds = PandasDatasource(name="my_datasource")
@@ -3755,9 +3579,7 @@ def populated_profiler_store(
     profiler_key: ConfigurationIdentifier,
 ) -> ProfilerStore:
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(
-        profiler_config_with_placeholder_args
-    )
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(profiler_config_with_placeholder_args)
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
 
     deserialized_config.pop("module_name")
@@ -3852,9 +3674,7 @@ def alice_columnar_table_single_batch():
             "observed_max_time_str": "2004-10-19 11:05:22",
         },
     ]
-    my_rule_for_timestamps_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = []
+    my_rule_for_timestamps_expectation_configurations: List[ExpectationConfiguration] = []
     column_data: Dict[str, str]
 
     expected_candidate_strings_dict: dict = {
@@ -3965,9 +3785,7 @@ def alice_columnar_table_single_batch():
                     kwargs={
                         "column": column_data["column_name"],
                         "min_value": "2004-10-19T10:23:54",  # From variables
-                        "max_value": event_ts_column_data[
-                            "observed_max_time_str"
-                        ],  # Pin to event_ts column
+                        "max_value": event_ts_column_data["observed_max_time_str"],  # Pin to event_ts column
                     },
                     meta={
                         "notes": {
@@ -3982,9 +3800,7 @@ def alice_columnar_table_single_batch():
                     expectation_type="expect_column_values_to_match_strftime_format",
                     kwargs={
                         "column": column_data["column_name"],
-                        "strftime_format": event_ts_column_data[
-                            "observed_strftime_format"
-                        ],  # Pin to event_ts column
+                        "strftime_format": event_ts_column_data["observed_strftime_format"],  # Pin to event_ts column
                     },
                     meta={
                         "profiler_details": {
@@ -4002,9 +3818,7 @@ def alice_columnar_table_single_batch():
             ]
         )
 
-    my_rule_for_one_cardinality_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = [
+    my_rule_for_one_cardinality_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             kwargs={
@@ -4021,9 +3835,7 @@ def alice_columnar_table_single_batch():
 
     expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
     expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
-    expectation_configurations.extend(
-        my_rule_for_one_cardinality_expectation_configurations
-    )
+    expectation_configurations.extend(my_rule_for_one_cardinality_expectation_configurations)
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite = ExpectationSuite(name=expectation_suite_name)
@@ -4032,9 +3844,7 @@ def alice_columnar_table_single_batch():
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
-        expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration
-        )
+        expected_expectation_suite._add_expectation(expectation_configuration=expectation_configuration)
 
     expected_effective_profiler_config: dict = {
         "name": "alice user workflow",
@@ -4504,9 +4314,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_quantiles_estimator: List[
-        ExpectationConfiguration
-    ] = [
+    my_row_count_range_rule_expectation_configurations_quantiles_estimator: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "kwargs": {"min_value": 7500.0, "max_value": 9000.0},
@@ -4525,9 +4333,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_quantiles_estimator: List[
-        ExpectationConfiguration
-    ] = [
+    my_column_ranges_rule_expectation_configurations_quantiles_estimator: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "kwargs": {
@@ -5178,9 +4984,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_quantiles_estimator: List[
-        ExpectationConfiguration
-    ] = [
+    my_column_timestamps_rule_expectation_configurations_quantiles_estimator: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_strftime_format",
@@ -5231,9 +5035,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_regex_rule_expectation_configurations_quantiles_estimator: List[
-        ExpectationConfiguration
-    ] = [
+    my_column_regex_rule_expectation_configurations_quantiles_estimator: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
@@ -5320,9 +5122,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_rule_for_very_few_cardinality_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = [
+    my_rule_for_very_few_cardinality_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_be_in_set",
@@ -5347,25 +5147,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
     expectation_configurations: List[ExpectationConfiguration] = []
 
-    expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_quantiles_estimator
-    )
-    expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_quantiles_estimator
-    )
-    expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_quantiles_estimator
-    )
+    expectation_configurations.extend(my_row_count_range_rule_expectation_configurations_quantiles_estimator)
+    expectation_configurations.extend(my_column_ranges_rule_expectation_configurations_quantiles_estimator)
+    expectation_configurations.extend(my_column_timestamps_rule_expectation_configurations_quantiles_estimator)
 
-    expectation_configurations.extend(
-        my_column_regex_rule_expectation_configurations_quantiles_estimator
-    )
-    expectation_configurations.extend(
-        my_rule_for_very_few_cardinality_expectation_configurations
-    )
-    expectation_suite_name_quantiles_estimator: str = (
-        "bobby_columnar_table_multi_batch_quantiles_estimator"
-    )
+    expectation_configurations.extend(my_column_regex_rule_expectation_configurations_quantiles_estimator)
+    expectation_configurations.extend(my_rule_for_very_few_cardinality_expectation_configurations)
+    expectation_suite_name_quantiles_estimator: str = "bobby_columnar_table_multi_batch_quantiles_estimator"
     expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
         name=expectation_suite_name_quantiles_estimator,
     )
@@ -5419,9 +5207,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_configuration_builders": [
                     {
                         "min_value": "$parameter.row_count_range.value[0]",
-                        "meta": {
-                            "profiler_details": "$parameter.row_count_range.details"
-                        },
+                        "meta": {"profiler_details": "$parameter.row_count_range.details"},
                         "condition": None,
                         "expectation_type": "expect_table_row_count_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
@@ -5661,9 +5447,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         profiler_config=expected_effective_profiler_config,
     )
 
-    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
-        Domain, List[str]
-    ] = {
+    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[Domain, List[str]] = {
         Domain(
             **{
                 "domain_type": MetricDomainTypes.TABLE,
@@ -7536,18 +7320,14 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_estimator: str = (
-        "bobster_columnar_table_multi_batch_bootstrap_estimator"
-    )
+    expectation_suite_name_bootstrap_estimator: str = "bobster_columnar_table_multi_batch_bootstrap_estimator"
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = 5000
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = 1.0e3
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = 3.00
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
-        float(
-            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
-        )
+        float(my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value)
         - (
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
             * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
@@ -7555,9 +7335,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
-        float(
-            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
-        )
+        float(my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value)
         + (
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
             * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
@@ -7627,18 +7405,14 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     random_state: np.random.Generator = RANDOM_STATE
     rnd_num_sample: np.float64
     output_file_lenths: List[int] = [
-        round(rnd_num_sample)
-        for rnd_num_sample in random_state.normal(
-            loc=5.0e3, scale=1.0e3, size=num_files
-        )
+        round(rnd_num_sample) for rnd_num_sample in random_state.normal(loc=5.0e3, scale=1.0e3, size=num_files)
     ]
 
     idx: int
     file_name: str
 
     output_file_name_length_map: Dict[str, int] = {
-        file_name_list[idx]: output_file_lenths[idx]
-        for idx, file_name in enumerate(file_name_list)
+        file_name_list[idx]: output_file_lenths[idx] for idx, file_name in enumerate(file_name_list)
     }
 
     csv_source_path: str
@@ -7646,9 +7420,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     for file_name in file_name_list:
         csv_source_path = os.path.join(base_directory, file_name)  # noqa: PTH118
         df = pd.read_csv(filepath_or_buffer=csv_source_path)
-        df = df.sample(
-            n=output_file_name_length_map[file_name], replace=False, random_state=1
-        )
+        df = df.sample(n=output_file_name_length_map[file_name], replace=False, random_state=1)
         # noinspection PyTypeChecker
         df.to_csv(
             path_or_buf=os.path.join(  # noqa: PTH118
@@ -7691,9 +7463,7 @@ def quentin_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_estimator: str = (
-        "quentin_columnar_table_multi_batch"
-    )
+    expectation_suite_name_bootstrap_estimator: str = "quentin_columnar_table_multi_batch"
 
     """
     [[8.276101187, 11.420814914], [11.29625, 14.8625], [16.766350257, 21.32575015]]
@@ -7857,22 +7627,16 @@ def multibatch_generic_csv_generator():
         }
         for batch_num in range(num_event_batches):
             # generate a dataframe with multiple column types
-            batch_start_date = start_date + datetime.timedelta(
-                days=(batch_num * num_events_per_batch)
-            )
+            batch_start_date = start_date + datetime.timedelta(days=(batch_num * num_events_per_batch))
             # TODO: AJB 20210416 Add more column types
             df = pd.DataFrame(
                 {
                     "event_date": [
-                        (batch_start_date + datetime.timedelta(days=i)).strftime(
-                            "%Y-%m-%d"
-                        )
+                        (batch_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
                         for i in range(num_events_per_batch)
                     ],
                     "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],
-                    "string_cardinality_3": [
-                        category_strings[i % 3] for i in range(num_events_per_batch)
-                    ],
+                    "string_cardinality_3": [category_strings[i % 3] for i in range(num_events_per_batch)],
                 }
             )
             filename = f"csv_batch_{batch_num + 1:03}_of_{num_event_batches:03}.csv"
@@ -8067,10 +7831,7 @@ def spark_df_from_pandas_df():
     ):
         spark_df = spark_session.createDataFrame(
             [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
+                tuple(None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist())
                 for record in pandas_df.to_records(index=False)
             ],
             pandas_df.columns.tolist(),
@@ -8095,9 +7856,7 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
         "random_seed",
         RANDOM_SEED,
     )
-    logger.info(
-        "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
-    )
+    logger.info("Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value")
 
 
 @pytest.fixture
@@ -8258,9 +8017,7 @@ def spark_dataframe_for_unexpected_rows_with_index(
 
 @pytest.fixture
 def ephemeral_context_with_defaults() -> EphemeralDataContext:
-    project_config = DataContextConfig(
-        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
-    )
+    project_config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True))
     return get_context(project_config=project_config, mode="ephemeral")
 
 
@@ -8274,9 +8031,7 @@ def validator_with_mock_execution_engine() -> Validator:
 @pytest.fixture
 def csv_path() -> pathlib.Path:
     relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    abs_csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     return abs_csv_path
 
 

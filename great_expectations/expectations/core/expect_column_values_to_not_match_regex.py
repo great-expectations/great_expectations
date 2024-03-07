@@ -126,21 +126,15 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if not params.regex:
-            template_str = (
-                "values must not match a regular expression but none was specified."
-            )
+            template_str = "values must not match a regular expression but none was specified."
         else:
             if renderer_configuration.include_column_name:
-                template_str = (
-                    "$column values must not match this regular expression: $regex"
-                )
+                template_str = "$column values must not match this regular expression: $regex"
             else:
                 template_str = "values must not match this regular expression: $regex"
 
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -160,9 +154,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -170,28 +162,22 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         )
 
         if not params.get("regex"):
-            template_str = (
-                "values must not match a regular expression but none was specified."
-            )
+            template_str = "values must not match a regular expression but none was specified."
         else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
                     template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
                 else:
-                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+                    template_str = (
+                        "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+                    )
             else:  # noqa: PLR5501
                 if include_column_name:
-                    template_str = (
-                        "$column values must not match this regular expression: $regex."
-                    )
+                    template_str = "$column values must not match this regular expression: $regex."
                 else:
-                    template_str = (
-                        "values must not match this regular expression: $regex."
-                    )
+                    template_str = "values must not match this regular expression: $regex."
 
         if params["row_condition"] is not None:
             (
@@ -215,9 +201,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW)
     def _descriptive_column_properties_table_regex_count_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

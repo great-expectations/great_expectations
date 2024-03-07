@@ -68,8 +68,8 @@ def test_reconcile_profiler_variables_no_overrides(
     variables_multi_part_name_parameter_container,
 ):
     variables: Dict[str, Any] = {}
-    effective_variables: Optional[ParameterContainer] = (
-        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    effective_variables: Optional[ParameterContainer] = profiler_with_placeholder_args.reconcile_profiler_variables(
+        variables=variables
     )
     assert effective_variables == variables_multi_part_name_parameter_container
 
@@ -83,12 +83,10 @@ def test_reconcile_profiler_variables_with_overrides(
         "estimator": "bootstrap",
         "mostly": 8.0e-1,
     }
-    effective_variables: Optional[ParameterContainer] = (
-        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    effective_variables: Optional[ParameterContainer] = profiler_with_placeholder_args.reconcile_profiler_variables(
+        variables=variables
     )
-    assert effective_variables.to_dict()["parameter_nodes"]["variables"][
-        "variables"
-    ] == {
+    assert effective_variables.to_dict()["parameter_nodes"]["variables"]["variables"] == {
         "false_positive_threshold": 2.0e-2,
         "estimator": "bootstrap",
         "mostly": 8.0e-1,
@@ -101,9 +99,7 @@ def test_reconcile_profiler_rules_no_overrides(
 ):
     rules: Dict[str, Dict[str, Any]] = {}
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
     assert effective_rules == profiler_with_placeholder_args.rules
 
 
@@ -268,14 +264,10 @@ def test_reconcile_profiler_rules_new_rule_override(
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -340,14 +332,10 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -440,14 +428,10 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -542,14 +526,10 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -682,21 +662,17 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(
-            rules=rules,
-            reconciliation_directives=ReconciliationDirectives(
-                domain_builder=ReconciliationStrategy.UPDATE,
-                parameter_builder=ReconciliationStrategy.UPDATE,
-                expectation_configuration_builder=ReconciliationStrategy.NESTED_UPDATE,
-            ),
-        )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules,
+        reconciliation_directives=ReconciliationDirectives(
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.NESTED_UPDATE,
+        ),
     )
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -783,21 +759,17 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(
-            rules=rules,
-            reconciliation_directives=ReconciliationDirectives(
-                domain_builder=ReconciliationStrategy.UPDATE,
-                parameter_builder=ReconciliationStrategy.REPLACE,
-                expectation_configuration_builder=ReconciliationStrategy.REPLACE,
-            ),
-        )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules,
+        reconciliation_directives=ReconciliationDirectives(
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.REPLACE,
+            expectation_configuration_builder=ReconciliationStrategy.REPLACE,
+        ),
     )
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -928,14 +900,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         },
     }
 
-    effective_rules: List[Rule] = (
-        profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
-    )
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: Dict[str, dict] = {
-        rule.name: rule.to_json_dict() for rule in effective_rules
-    }
+    effective_rule_configs_actual: Dict[str, dict] = {rule.name: rule.to_json_dict() for rule in effective_rules}
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
     assert effective_rule_configs_actual == expected_rules
@@ -1067,9 +1035,7 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
 
     assert mock_rule_based_profiler_run.called
 
-    resulting_batch_request: dict = mock_rule_based_profiler_run.call_args[1][
-        "batch_request"
-    ].to_json_dict()
+    resulting_batch_request: dict = mock_rule_based_profiler_run.call_args[1]["batch_request"].to_json_dict()
     deep_filter_properties_iterable(resulting_batch_request, inplace=True)
     expected_batch_request: dict = batch_request.to_json_dict()
     deep_filter_properties_iterable(expected_batch_request, inplace=True)
@@ -1106,18 +1072,12 @@ def test_serialize_profiler_config(
     assert profiler.config == profiler_config_with_placeholder_args
     assert len(profiler.rules) == 1
     assert isinstance(profiler.rules[0].domain_builder, TableDomainBuilder)
-    assert DomainBuilderConfig(
-        **profiler.rules[0].domain_builder.to_json_dict()
-    ).to_json_dict() == {
+    assert DomainBuilderConfig(**profiler.rules[0].domain_builder.to_json_dict()).to_json_dict() == {
         "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
         "class_name": "TableDomainBuilder",
     }
-    assert isinstance(
-        profiler.rules[0].parameter_builders[0], MetricMultiBatchParameterBuilder
-    )
-    assert ParameterBuilderConfig(
-        **profiler.rules[0].parameter_builders[0].to_json_dict()
-    ).to_json_dict() == {
+    assert isinstance(profiler.rules[0].parameter_builders[0], MetricMultiBatchParameterBuilder)
+    assert ParameterBuilderConfig(**profiler.rules[0].parameter_builders[0].to_json_dict()).to_json_dict() == {
         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
         "class_name": "MetricMultiBatchParameterBuilder",
         "name": "my_parameter",
@@ -1275,9 +1235,7 @@ def test_delete_profiler(
         )
 
     assert mock_remove_key.call_count == 1
-    assert mock_remove_key.call_args == mock.call(
-        key=ConfigurationIdentifier("my_profiler")
-    )
+    assert mock_remove_key.call_args == mock.call(key=ConfigurationIdentifier("my_profiler"))
 
 
 @pytest.mark.unit

@@ -146,9 +146,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None) -> None:
         """Raise an exception if the configuration is not viable for an expectation.
 
         Args:
@@ -160,19 +158,13 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         """
         super().validate_configuration(configuration)
         try:
-            assert (
-                getattr(self, "set_", None) is not None
-            ), "set_ is required for SetBasedColumnMap Expectations"
+            assert getattr(self, "set_", None) is not None, "set_ is required for SetBasedColumnMap Expectations"
 
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for ColumnMap expectations"
+            assert "column" in configuration.kwargs, "'column' parameter is required for ColumnMap expectations"
 
             if "mostly" in configuration.kwargs:
                 mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
+                assert isinstance(mostly, (int, float)), "'mostly' parameter must be an integer or float"
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
 
         except AssertionError as e:
@@ -200,9 +192,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         set_ = cls.set_
@@ -216,12 +206,16 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                     return f'All values in column "{column}" are in the set {set_!s}.'
             else:  # noqa: PLR5501
                 if set_semantic_name is not None:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                    return (
+                        f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                    )
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" are in the set {set!s}.'
         else:  # noqa: PLR5501
             if set_semantic_name is not None:
-                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                return (
+                    f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                )
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" are in the set {set_!s}.'
 
@@ -250,9 +244,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 template_str = "values must match this set: $set_"
 
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -275,9 +267,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -299,9 +289,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

@@ -135,9 +135,7 @@ def _get_indentation(value: str) -> int:
     return len(value) - len(value.lstrip())
 
 
-def _get_dictionary_from_block_in_docstring(
-    docstring: str, block_heading_text: str
-) -> Dict[str, str]:
+def _get_dictionary_from_block_in_docstring(docstring: str, block_heading_text: str) -> Dict[str, str]:
     """Builds a dictionary of key: description pairs from a block of text in a docstring.
 
     Note: The description portion of the key: description pair will have all non-alphanumerics that are used in Markdown
@@ -163,21 +161,15 @@ def _get_dictionary_from_block_in_docstring(
         base_indent = _get_indentation(arg_lines[0])
         key = None
         for line in arg_lines:
-            if _get_indentation(line) == base_indent and re.search(
-                r" *[a-z|A-Z|_|0-9]+:", line
-            ):
+            if _get_indentation(line) == base_indent and re.search(r" *[a-z|A-Z|_|0-9]+:", line):
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
-                block_dict[key] = (
-                    f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
-                )
+                block_dict[key] = f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:
-                raise BlockValueIndentationError(
-                    block_heading_text, block_contents, line
-                )
+                raise BlockValueIndentationError(block_heading_text, block_contents, line)
     return block_dict
 
 
@@ -323,9 +315,7 @@ def condense_whitespace(docstring: str) -> str:
     return docstring
 
 
-def build_relevant_api_reference_files(
-    docstring: str, api_doc_id: str, api_doc_path: str
-) -> Set[str]:
+def build_relevant_api_reference_files(docstring: str, api_doc_id: str, api_doc_path: str) -> Set[str]:
     """Builds importable link snippets according to the contents of a docstring's `# Documentation` block.
 
     This method will create files if they do not exist, and will append links to the files that already do exist.
@@ -370,9 +360,7 @@ def get_whitelisted_methods(
             yield method_name, class_method
 
 
-def parse_method_signature(
-    signature: inspect.Signature, param_dict: Dict[str, str]
-) -> List[List[str]]:
+def parse_method_signature(signature: inspect.Signature, param_dict: Dict[str, str]) -> List[List[str]]:
     """Combines Signature with the contents of a param_dict to create rows for a parameter table.
 
     Args:
@@ -399,9 +387,7 @@ def parse_method_signature(
             sig_parameter, sig_default = value.split("=", 1)
         else:
             sig_parameter = value
-        sig_results.append(
-            [sig_parameter, sig_type, sig_default, param_dict.get(sig_parameter, "")]
-        )
+        sig_results.append([sig_parameter, sig_type, sig_default, param_dict.get(sig_parameter, "")])
     return sig_results
 
 
@@ -528,9 +514,7 @@ def build_method_document(  # noqa: C901
     return_or_yield_content = get_yield_or_return_block(docstring)
     if return_or_yield_content:
         return_or_yield, content = return_or_yield_content
-        in_progress_output.extend(
-            ["", f"### {return_or_yield.replace(':', '')}", "", content]
-        )
+        in_progress_output.extend(["", f"### {return_or_yield.replace(':', '')}", "", content])
 
     # Add raises block to document content, if found in docstring.
     raises_dict = get_raises_dictionary(docstring)
@@ -547,9 +531,7 @@ def build_method_document(  # noqa: C901
 
     # Create importable cross-linking snippets for documents in `# Document` block.
     output_file = f"{qualified_path}.{method_name}".replace(".", "-")
-    crosslink_snippets = build_relevant_api_reference_files(
-        docstring, title, f"{API_METHODS_FOLDER}{output_file}"
-    )
+    crosslink_snippets = build_relevant_api_reference_files(docstring, title, f"{API_METHODS_FOLDER}{output_file}")
 
     # Write document contents to file.
     file_path = f"../docs/api_docs/methods/{output_file}"
@@ -558,9 +540,7 @@ def build_method_document(  # noqa: C901
         f.write(output)
 
     # Generate abbreviated line describing the method and linking to its API documentation.
-    abbreviated_output = (
-        f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
-    )
+    abbreviated_output = f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
     sidebar_id = file_path.replace("../docs/", "")
 
     return abbreviated_output, crosslink_snippets, sidebar_id
@@ -592,9 +572,7 @@ def build_class_document(
     class_docstring = inspect.getdoc(imported_class)
     synopsis, docstring = pydoc.splitdoc(class_docstring)
     output_file = f"{qualified_class_path}".replace(".", "-")
-    build_relevant_api_reference_files(
-        docstring, f"class {class_name}", f"{API_CLASSES_FOLDER}{output_file}"
-    )
+    build_relevant_api_reference_files(docstring, f"class {class_name}", f"{API_CLASSES_FOLDER}{output_file}")
 
     # Add title block and GitHub link to document content.
     in_progress_output = [
@@ -636,15 +614,11 @@ def build_class_document(
         )
         in_progress_methods.append(f"- {abbreviated_method}")
         all_edited_cross_link_files.update(cross_links)
-        sidebar_method_items.append(
-            f"{{ label: '  .{method_name}(...)', type: 'doc', id: '{sidebar_id}' }}"
-        )
+        sidebar_method_items.append(f"{{ label: '  .{method_name}(...)', type: 'doc', id: '{sidebar_id}' }}")
 
     # Add class methods in the Public API to the document.
     if in_progress_methods:
-        in_progress_output.extend(
-            ["", "## Public Methods (API documentation links)", ""]
-        )
+        in_progress_output.extend(["", "## Public Methods (API documentation links)", ""])
         in_progress_output.extend(in_progress_methods)
 
     # Add links to relevant documentation to the document.
@@ -820,9 +794,7 @@ if __name__ == "__main__":
         removed_cross_link_files = remove_existing_api_reference_files(Path("../docs"))
 
         # Generate the new documentation.
-        for source_file_path in get_relevant_source_files(
-            Path("..", "great_expectations")
-        ):
+        for source_file_path in get_relevant_source_files(Path("..", "great_expectations")):
             github_path = (
                 f"https://github.com/great-expectations/great_expectations/blob/develop"
                 f"{str(source_file_path).replace('..', '')}"
@@ -855,9 +827,7 @@ if __name__ == "__main__":
         for _ in all_snippet_paths:
             print(_)
 
-        cross_links_to_remove_from_docs = set(removed_cross_link_files).difference(
-            all_snippet_paths
-        )
+        cross_links_to_remove_from_docs = set(removed_cross_link_files).difference(all_snippet_paths)
         if cross_links_to_remove_from_docs:
             print(
                 "\n\nThe following are the importable snippet files that were removed at the start of the script and"

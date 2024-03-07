@@ -71,6 +71,4 @@ def test_instantiation_from_datasource(
         name="my_datasource",
         **data_source_config_with_aws_glue_catalog_data_connectors,
     )
-    _: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
-        datasource_name="my_datasource"
-    )
+    _: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(datasource_name="my_datasource")

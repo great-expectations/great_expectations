@@ -29,9 +29,7 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
             {"connection_string": "snowflake://my_user:password@my_account"},
             id="connection_string str",
         ),
-        param(
-            {"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"
-        ),
+        param({"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"),
         param(
             {
                 "connection_string": {
@@ -58,15 +56,11 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
     ],
 )
-def test_valid_config(
-    empty_file_context: AbstractDataContext, seed_env_vars: None, config_kwargs: dict
-):
+def test_valid_config(empty_file_context: AbstractDataContext, seed_env_vars: None, config_kwargs: dict):
     my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
     assert my_sf_ds_1
 
-    my_sf_ds_1._data_context = (
-        empty_file_context  # attach to enable config substitution
-    )
+    my_sf_ds_1._data_context = empty_file_context  # attach to enable config substitution
     sql_engine = my_sf_ds_1.get_engine()
     assert isinstance(sql_engine, sa.engine.Engine)
 
@@ -187,27 +181,19 @@ def test_conflicting_connection_string_and_args_raises_error(
         ),
     ],
 )
-def test_invalid_connection_string_raises_dsn_error(
-    connection_string: str, expected_errors: list[dict]
-):
+def test_invalid_connection_string_raises_dsn_error(connection_string: str, expected_errors: list[dict]):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = SnowflakeDatasource(
-            name="my_snowflake", connection_string=connection_string
-        )
+        _ = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
 
     assert expected_errors == exc_info.value.errors()
 
 
 # TODO: Cleanup how we install test dependencies and remove this skipif
-@pytest.mark.skipif(
-    True if not snowflake else False, reason="snowflake is not installed"
-)
+@pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
     connection_string = "snowflake://my_user:password@my_account"
-    datasource = SnowflakeDatasource(
-        name="my_snowflake", connection_string=connection_string
-    )
+    datasource = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
     # testing that this doesn't raise an exception
     datasource.get_execution_engine()
 

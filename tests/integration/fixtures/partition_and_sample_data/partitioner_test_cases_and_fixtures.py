@@ -30,17 +30,13 @@ class TaxiTestData:
             )
             > 1
         ):
-            raise ValueError(
-                "No more than one of test_column_name or test_column_names can be specified."
-            )
+            raise ValueError("No more than one of test_column_name or test_column_names can be specified.")
 
         self._test_column_name = test_column_name
         self._test_column_names = test_column_names
 
         # Convert specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
-        convert_string_columns_to_datetime(
-            df=test_df, column_names_to_convert=column_names_to_convert
-        )
+        convert_string_columns_to_datetime(df=test_df, column_names_to_convert=column_names_to_convert)
 
         self._test_df = test_df
 
@@ -58,22 +54,14 @@ class TaxiTestData:
 
     @staticmethod
     def years_in_taxi_data() -> List[datetime.datetime]:
-        return (
-            pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
-            .to_pydatetime()
-            .tolist()
-        )
+        return pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS").to_pydatetime().tolist()
 
     def year_batch_identifier_data(self) -> List[dict]:
         return [{DatePart.YEAR.value: dt.year} for dt in self.years_in_taxi_data()]
 
     @staticmethod
     def months_in_taxi_data() -> List[datetime.datetime]:
-        return (
-            pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
-            .to_pydatetime()
-            .tolist()
-        )
+        return pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS").to_pydatetime().tolist()
 
     def get_unique_sorted_months_in_taxi_data(self) -> List[str]:
         months: List[datetime.datetime] = sorted(set(self.months_in_taxi_data()))
@@ -82,10 +70,7 @@ class TaxiTestData:
         return [month.strftime("%Y-%m-%d") for month in months]
 
     def year_month_batch_identifier_data(self) -> List[dict]:
-        return [
-            {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
-            for dt in self.months_in_taxi_data()
-        ]
+        return [{DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month} for dt in self.months_in_taxi_data()]
 
     def month_batch_identifier_data(self) -> List[dict]:
         return [{DatePart.MONTH.value: dt.month} for dt in self.months_in_taxi_data()]
@@ -118,15 +103,11 @@ class TaxiTestData:
         )
 
     def get_test_column_values(self) -> List[Optional[Any]]:
-        column_values: List[Optional[Any]] = self.test_df[
-            self.test_column_name
-        ].tolist()
+        column_values: List[Optional[Any]] = self.test_df[self.test_column_name].tolist()
         return column_values
 
     def get_test_multi_column_values(self) -> List[dict]:
-        multi_column_values: List[dict] = self.test_df[self.test_column_names].to_dict(
-            "records"
-        )
+        multi_column_values: List[dict] = self.test_df[self.test_column_names].to_dict("records")
         return multi_column_values
 
     def get_unique_sorted_test_column_values(
@@ -170,11 +151,7 @@ class TaxiTestData:
             key=lambda element: sum(
                 map(
                     ord,
-                    hashlib.md5(
-                        str(tuple(zip(element.keys(), element.values()))).encode(
-                            "utf-8"
-                        )
-                    ).hexdigest(),
+                    hashlib.md5(str(tuple(zip(element.keys(), element.values()))).encode("utf-8")).hexdigest(),
                 )
             ),
             reverse=reverse,
@@ -187,9 +164,7 @@ class TaxiTestData:
         dictionary_element: dict
         for dictionary_element in multi_column_values:
             hash_code = hashlib.md5(
-                str(
-                    tuple(zip(dictionary_element.keys(), dictionary_element.values()))
-                ).encode("utf-8")
+                str(tuple(zip(dictionary_element.keys(), dictionary_element.values()))).encode("utf-8")
             ).hexdigest()
             if hash_code not in hash_codes:
                 unique_multi_column_values.append(dictionary_element)
@@ -200,9 +175,7 @@ class TaxiTestData:
 
         return unique_multi_column_values[:limit]
 
-    def get_divided_integer_test_column_values(
-        self, divisor: int
-    ) -> List[Optional[Any]]:
+    def get_divided_integer_test_column_values(self, divisor: int) -> List[Optional[Any]]:
         column_values: List[Optional[Any]] = self.get_test_column_values()
 
         column_value: Any
@@ -230,9 +203,7 @@ class TaxiTestData:
 
         column_value: Any
         column_values = [
-            hashlib.md5(str(column_value).encode("utf-8")).hexdigest()[
-                -1 * hash_digits :
-            ]
+            hashlib.md5(str(column_value).encode("utf-8")).hexdigest()[-1 * hash_digits :]
             for column_value in column_values
         ]
 
@@ -318,9 +289,7 @@ class TaxiPartitioningTestCasesDividedInteger(TaxiPartitioningTestCasesBase):
                 },
                 num_expected_batch_definitions=41,
                 num_expected_rows_in_first_batch_definition=2,
-                expected_column_values=self.taxi_test_data.get_divided_integer_test_column_values(
-                    divisor=5
-                ),
+                expected_column_values=self.taxi_test_data.get_divided_integer_test_column_values(divisor=5),
             ),
         ]
 
@@ -337,9 +306,7 @@ class TaxiPartitioningTestCasesModInteger(TaxiPartitioningTestCasesBase):
                 },
                 num_expected_batch_definitions=5,
                 num_expected_rows_in_first_batch_definition=61,
-                expected_column_values=self.taxi_test_data.get_mod_integer_test_column_values(
-                    mod=5
-                ),
+                expected_column_values=self.taxi_test_data.get_mod_integer_test_column_values(mod=5),
             ),
         ]
 
@@ -356,9 +323,7 @@ class TaxiPartitioningTestCasesHashedColumn(TaxiPartitioningTestCasesBase):
                 },
                 num_expected_batch_definitions=5,
                 num_expected_rows_in_first_batch_definition=5,
-                expected_column_values=self.taxi_test_data.get_hashed_test_column_values(
-                    hash_digits=2
-                ),
+                expected_column_values=self.taxi_test_data.get_hashed_test_column_values(hash_digits=2),
             ),
         ]
 
@@ -387,9 +352,7 @@ class TaxiPartitioningTestCasesDateTime(TaxiPartitioningTestCasesBase):
             TaxiPartitioningTestCase(
                 table_domain_test_case=False,
                 partitioner_method_name="partition_on_year",
-                partitioner_kwargs={
-                    "column_name": self.taxi_test_data.test_column_name
-                },
+                partitioner_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=3,
                 num_expected_rows_in_first_batch_definition=120,
                 expected_column_values=self.taxi_test_data.year_batch_identifier_data(),
@@ -397,9 +360,7 @@ class TaxiPartitioningTestCasesDateTime(TaxiPartitioningTestCasesBase):
             TaxiPartitioningTestCase(
                 table_domain_test_case=False,
                 partitioner_method_name="partition_on_year_and_month",
-                partitioner_kwargs={
-                    "column_name": self.taxi_test_data.test_column_name
-                },
+                partitioner_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
                 expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
@@ -407,9 +368,7 @@ class TaxiPartitioningTestCasesDateTime(TaxiPartitioningTestCasesBase):
             TaxiPartitioningTestCase(
                 table_domain_test_case=False,
                 partitioner_method_name="partition_on_year_and_month_and_day",
-                partitioner_kwargs={
-                    "column_name": self.taxi_test_data.test_column_name
-                },
+                partitioner_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=299,
                 num_expected_rows_in_first_batch_definition=2,
                 expected_column_values=self.taxi_test_data.year_month_day_batch_identifier_data(),

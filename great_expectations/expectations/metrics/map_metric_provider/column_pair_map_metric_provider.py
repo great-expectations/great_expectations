@@ -68,9 +68,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
         table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k not in ["column_A", "column_B", "ignore_row_if"]
+            k: v for k, v in metric.metric_domain_kwargs.items() if k not in ["column_A", "column_B", "ignore_row_if"]
         }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",

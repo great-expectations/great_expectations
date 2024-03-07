@@ -42,81 +42,61 @@ def expected_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
     ]
     return expected
@@ -134,81 +114,61 @@ def expected_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     return expected
@@ -219,9 +179,7 @@ def expected_batch_definitions_sorted():
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_account_url_and_credential(
     mock_azure_conn,
     mock_list_keys,
@@ -252,9 +210,7 @@ def test_instantiation_with_account_url_and_credential(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_conn_str_and_credential(
     mock_azure_conn,
     mock_list_keys,
@@ -281,9 +237,7 @@ def test_instantiation_with_conn_str_and_credential(
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
@@ -304,9 +258,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
@@ -327,9 +279,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_multiple_auth_methods_raises_error(
     mock_azure_conn,
 ):
@@ -354,9 +304,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
 
 
 # noinspection PyUnusedLocal,GrazieInspection
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
 ):
@@ -397,9 +345,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -430,12 +376,8 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -487,12 +429,8 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -534,12 +472,8 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     mock_azure_conn,
     mock_list_keys,
@@ -593,24 +527,18 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
-    unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
-            BatchRequestBase(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="",
-            )
+    unsorted_batch_definition_list = my_data_connector._get_batch_definition_list_from_batch_request(
+        BatchRequestBase(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="",
         )
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     mock_azure_conn,
     mock_list_keys,
@@ -664,24 +592,18 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="DEFAULT_ASSET_NAME",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
         )
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_return_all_batch_definitions_basic_sorted(
     mock_azure_conn,
     mock_list_keys,
@@ -739,24 +661,18 @@ def test_return_all_batch_definitions_basic_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="DEFAULT_ASSET_NAME",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 def test_return_all_batch_definitions_returns_specified_partition(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -826,10 +742,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
         ),
     )
 
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
 
     assert len(my_batch_definition_list) == 1
@@ -850,12 +764,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
 def test_return_all_batch_definitions_sorted_without_data_connector_query(
     mock_azure_conn,
     mock_list_keys,
@@ -913,25 +823,19 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="DEFAULT_ASSET_NAME",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
 def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -983,19 +887,13 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys")
 def test_return_all_batch_definitions_too_many_sorters(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
@@ -1048,22 +946,16 @@ def test_return_all_batch_definitions_too_many_sorters(
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
-def test_get_full_file_path_pandas(
-    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path_pandas(mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -1119,17 +1011,13 @@ azure_options:
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
-        )
+        my_data_connector._get_full_file_path(path="my_base_directory/gamma-202005.csv", data_asset_name="gamma")
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
     )
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
@@ -1194,23 +1082,17 @@ azure_options:
         == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
-        )
+        my_data_connector._get_full_file_path(path="my_base_directory/gamma-202005.csv", data_asset_name="gamma")
         == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
     )
 
 
 # noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
-)
+@mock.patch("great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient")
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
-def test_get_full_file_path_bad_execution_engine(
-    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path_bad_execution_engine(mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -1237,8 +1119,6 @@ azure_options:
                 runtime_environment={
                     "name": "my_data_connector",
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )

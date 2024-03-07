@@ -61,9 +61,7 @@ class DataConnector(ABC):
         return self._datasource_name
 
     @abstractmethod
-    def get_batch_definition_list(
-        self, batch_request: BatchRequest
-    ) -> List[BatchDefinition]:
+    def get_batch_definition_list(self, batch_request: BatchRequest) -> List[BatchDefinition]:
         """
         This interface method, implemented by subclasses, examines "BatchRequest" and converts it to one or more
         "BatchDefinition" objects, each of which can be later converted to ExecutionEngine-specific "BatchSpec" object
@@ -86,10 +84,8 @@ class DataConnector(ABC):
         Returns:
             BatchSpec object built from BatchDefinition
         """
-        batch_spec_params: dict = (
-            self._generate_batch_spec_parameters_from_batch_definition(
-                batch_definition=batch_definition
-            )
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
@@ -100,9 +96,7 @@ class DataConnector(ABC):
         Raises:
             bool: True of connection test succeeds; False, otherwise.
         """
-        return (
-            self.get_unmatched_data_reference_count() < self.get_data_reference_count()
-        )
+        return self.get_unmatched_data_reference_count() < self.get_data_reference_count()
 
     @abstractmethod
     def get_data_references(self) -> List[Any]:
@@ -162,9 +156,7 @@ class DataConnector(ABC):
         pass
 
     @abstractmethod
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _generate_batch_spec_parameters_from_batch_definition(self, batch_definition: BatchDefinition) -> dict:
         """
         This interface method, implemented by subclasses, examines "BatchDefinition" and converts it to
         ExecutionEngine-specific "BatchSpec" object for loading "Batch" of data.  Implementers will typically define
@@ -179,9 +171,7 @@ class DataConnector(ABC):
         pass
 
     @staticmethod
-    def _batch_definition_matches_batch_request(
-        batch_definition: BatchDefinition, batch_request: BatchRequest
-    ) -> bool:
+    def _batch_definition_matches_batch_request(batch_definition: BatchDefinition, batch_request: BatchRequest) -> bool:
         if not (
             batch_request.datasource_name == batch_definition.datasource_name
             and batch_request.data_asset_name == batch_definition.data_asset_name
@@ -192,10 +182,7 @@ class DataConnector(ABC):
             for key, value in batch_request.options.items():
                 if value is not None and not (
                     (key in batch_definition.batch_identifiers)
-                    and (
-                        batch_definition.batch_identifiers[key]
-                        == batch_request.options[key]
-                    )
+                    and (batch_definition.batch_identifiers[key] == batch_request.options[key])
                 ):
                     return False
 

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from great_expectations.compatibility.not_imported import NotImported
 
-DOCSTRING_PARSER_NOT_IMPORTED = NotImported(
-    "docstring_parser is not installed, please 'pip install docstring-parser'"
-)
+DOCSTRING_PARSER_NOT_IMPORTED = NotImported("docstring_parser is not installed, please 'pip install docstring-parser'")
 
 try:
     import docstring_parser

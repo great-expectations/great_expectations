@@ -10,9 +10,7 @@ from great_expectations.exceptions import BatchKwargsError
 
 @pytest.mark.filesystem
 def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_subdir_reader_path_partitioning")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_path_partitioning"))
     mock_files = [
         "asset_1/20190101__asset_1.csv",
         "asset_1/20190102__asset_1.csv",
@@ -39,29 +37,18 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     assert set(known_assets) == {("asset_2", "directory"), ("asset_1", "directory")}
 
     # We should see three partitions for the first:
-    known_partitions = subdir_reader_generator.get_available_partition_ids(
-        data_asset_name="asset_1"
-    )
+    known_partitions = subdir_reader_generator.get_available_partition_ids(data_asset_name="asset_1")
     assert set(known_partitions) == {
         "20190101__asset_1",
         "20190102__asset_1",
         "20190103__asset_1",
     }
 
-    asset_1_kwargs = [
-        kwargs
-        for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_1")
-    ]
-    asset_2_kwargs = [
-        kwargs
-        for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_2")
-    ]
+    asset_1_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_1")]
+    asset_2_kwargs = [kwargs for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_2")]
     with pytest.raises(BatchKwargsError):
         not_an_asset_kwargs = [  # noqa: F841
-            kwargs
-            for kwargs in subdir_reader_generator.get_iterator(
-                data_asset_name="not_an_asset"
-            )
+            kwargs for kwargs in subdir_reader_generator.get_iterator(data_asset_name="not_an_asset")
         ]
 
     assert len(asset_1_kwargs) == 3
@@ -71,9 +58,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         os.path.join(base_directory, "asset_1/20190102__asset_1.csv"),  # noqa: PTH118
         os.path.join(base_directory, "asset_1/20190103__asset_1.csv"),  # noqa: PTH118
     }
-    partitions = subdir_reader_generator.get_available_partition_ids(
-        data_asset_name="asset_1"
-    )
+    partitions = subdir_reader_generator.get_available_partition_ids(data_asset_name="asset_1")
 
     # SubdirReaderBatchKwargsGenerator uses filenames from subdirectories to generate partition names
     assert set(partitions) == {
@@ -89,18 +74,14 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         os.path.join(base_directory, "asset_2/20190101__asset_2.csv"),  # noqa: PTH118
         os.path.join(base_directory, "asset_2/20190102__asset_2.csv"),  # noqa: PTH118
     }
-    partitions = subdir_reader_generator.get_available_partition_ids(
-        data_asset_name="asset_2"
-    )
+    partitions = subdir_reader_generator.get_available_partition_ids(data_asset_name="asset_2")
     assert set(partitions) == {("20190101__asset_2"), ("20190102__asset_2")}
     assert len(asset_2_kwargs[0].keys()) == 2
 
 
 @pytest.mark.filesystem
 def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_subdir_reader_file_partitioning")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_file_partitioning"))
     mock_files = [
         "20190101__asset_1.csv",
         "20190102__asset_1.csv",
@@ -132,9 +113,7 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
     }
 
     # SubdirReaderBatchKwargsGenerator uses the filename as partition name for root files
-    known_partitions = subdir_reader_generator.get_available_partition_ids(
-        data_asset_name="20190101__asset_1"
-    )
+    known_partitions = subdir_reader_generator.get_available_partition_ids(data_asset_name="20190101__asset_1")
     assert set(known_partitions) == {"20190101__asset_1"}
 
     kwargs = subdir_reader_generator.build_batch_kwargs(
@@ -155,12 +134,8 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
 
 
 @pytest.mark.filesystem
-def test_subdir_reader_configurable_reader_method(
-    basic_pandas_datasource, tmp_path_factory
-):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_subdir_reader_configurable_reader_method")
-    )
+def test_subdir_reader_configurable_reader_method(basic_pandas_datasource, tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_subdir_reader_configurable_reader_method"))
     mock_files = [
         "20190101__asset_1.dat",
         "20190102__asset_1.dat",

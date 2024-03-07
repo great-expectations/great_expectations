@@ -91,19 +91,14 @@ class ConfigurationBundle:
         # to all Data Contexts.
         datasource_configs: List[DatasourceConfig | FluentDatasource] = []
         for datasource_name in datasource_names:
-            datasource_config = self._context._datasource_store.retrieve_by_name(
-                datasource_name=datasource_name
-            )
+            datasource_config = self._context._datasource_store.retrieve_by_name(datasource_name=datasource_name)
             datasource_config.name = datasource_name
             datasource_configs.append(datasource_config)
 
         return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
-        return [
-            self._context.suites.get(name)
-            for name in self._context.list_expectation_suite_names()
-        ]
+        return [self._context.suites.get(name) for name in self._context.list_expectation_suite_names()]
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
         return [
@@ -146,9 +141,7 @@ class ConfigurationBundleSchema(Schema):
             required=True,
             allow_none=False,
         ),
-        values=fields.Nested(
-            ExpectationSuiteValidationResultSchema, allow_none=True, required=True
-        ),
+        values=fields.Nested(ExpectationSuiteValidationResultSchema, allow_none=True, required=True),
         required=True,
     )
 

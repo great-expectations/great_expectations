@@ -28,9 +28,7 @@ yaml = YAMLHandler()
 
 
 @pytest.fixture
-def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(
-    spark_session, test_backends
-):
+def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(spark_session, test_backends):
     if "sqlite" not in test_backends:
         pytest.skip("skipping fixture because sqlite not selected")
 
@@ -79,9 +77,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
@@ -104,9 +100,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
@@ -129,9 +123,7 @@ def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
     with pytest.raises(gx_exceptions.DataConnectorError):
@@ -153,9 +145,7 @@ def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifi
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
@@ -186,9 +176,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
@@ -223,9 +211,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
 
     batch_identifiers: Dict[str, str] = {"unknown_key": "some_value"}
@@ -255,9 +241,7 @@ def test_batch_data_sparkdf_execution_engine_set_data_asset_name_for_runtime_dat
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
     batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
@@ -287,9 +271,7 @@ def test_batch_data_sparkdf_execution_engine_set_data_asset_name_for_runtime_dat
 def test_batch_data_sparkdf_execution_engine_get_available_data_asset_names(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    expected_available_data_asset_names: Dict[str, List[str]] = {
-        "test_runtime_data_connector": ["asset_a", "asset_b"]
-    }
+    expected_available_data_asset_names: Dict[str, List[str]] = {"test_runtime_data_connector": ["asset_a", "asset_b"]}
     available_data_asset_names: Dict[str, List[str]] = (
         datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_available_data_asset_names()
     )
@@ -300,9 +282,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batc
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
 
     batch_identifiers: Dict[str, int] = {
@@ -338,9 +318,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
 
     data_connector_name: str = "test_runtime_data_connector"
@@ -387,9 +365,7 @@ def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
@@ -424,9 +400,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+        spark_session.createDataFrame(data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
     )
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
@@ -687,9 +661,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1.data, SparkDFBatchData)
-    assert (
-        my_batch_1.data.dataframe.count() == 10001
-    )  # headers are not read-in by default
+    assert my_batch_1.data.dataframe.count() == 10001  # headers are not read-in by default
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
@@ -721,9 +693,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1.data, SparkDFBatchData)
-    assert (
-        my_batch_1.data.dataframe.count() == 10001
-    )  # headers are not read-in by default
+    assert my_batch_1.data.dataframe.count() == 10001  # headers are not read-in by default
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 

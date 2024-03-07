@@ -36,9 +36,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
 
 
 @pytest.mark.spark
-def test_force_reuse_spark_context(
-    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
-):
+def test_force_reuse_spark_context(data_context_parameterized_expectation_suite, tmp_path_factory, test_backends):
     """
     Ensure that an external sparkSession can be reused by specifying the
     force_reuse_spark_context argument.
@@ -101,9 +99,7 @@ def test_spark_kwargs_are_passed_through(
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource = data_context_parameterized_expectation_suite.get_datasource(
-        dataset_name
-    )
+    datasource = data_context_parameterized_expectation_suite.get_datasource(dataset_name)
     old_app_id = datasource.spark.sparkContext.applicationId
     datasource_config = datasource.config
 
@@ -128,9 +124,7 @@ def test_spark_kwargs_are_passed_through(
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource = data_context_parameterized_expectation_suite.get_datasource(
-        dataset_name
-    )
+    datasource = data_context_parameterized_expectation_suite.get_datasource(dataset_name)
     new_app_id = datasource.spark.sparkContext.applicationId
     datasource_config = datasource.config
     assert datasource_config["spark_config"] == {}
@@ -139,9 +133,7 @@ def test_spark_kwargs_are_passed_through(
 
 
 @pytest.mark.spark
-def test_create_sparkdf_datasource(
-    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
-):
+def test_create_sparkdf_datasource(data_context_parameterized_expectation_suite, tmp_path_factory, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     base_dir = tmp_path_factory.mktemp("test_create_sparkdf_datasource")
@@ -163,9 +155,9 @@ def test_create_sparkdf_datasource(
 
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
-    assert data_context_config["datasources"][name]["batch_kwargs_generators"][
-        "default"
-    ]["base_directory"] == str(base_dir)
+    assert data_context_config["datasources"][name]["batch_kwargs_generators"]["default"]["base_directory"] == str(
+        base_dir
+    )
 
     base_dir = tmp_path_factory.mktemp("test_create_sparkdf_datasource-2")
     name = "test_sparkdf_datasource"
@@ -185,10 +177,7 @@ def test_create_sparkdf_datasource(
     assert name in data_context_config["datasources"]
     assert data_context_config["datasources"][name]["class_name"] == class_name
     assert (
-        data_context_config["datasources"][name]["batch_kwargs_generators"]["default"][
-            "reader_options"
-        ]["sep"]
-        == "|"
+        data_context_config["datasources"][name]["batch_kwargs_generators"]["default"]["reader_options"]["sep"] == "|"
     )
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
@@ -205,13 +194,10 @@ def test_create_sparkdf_datasource(
 
 @pytest.mark.spark
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
+    not is_library_loadable(library_name="pyarrow") and not is_library_loadable(library_name="fastparquet"),
     reason="pyarrow and fastparquet are not installed",
 )
-def test_standalone_spark_parquet_datasource(
-    test_parquet_folder_connection_path, spark_session
-):
+def test_standalone_spark_parquet_datasource(test_parquet_folder_connection_path, spark_session):
     assert spark_session  # Ensure a sparksession exists
     datasource = SparkDFDatasource(
         "SparkParquet",
@@ -223,9 +209,7 @@ def test_standalone_spark_parquet_datasource(
         },
     )
 
-    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [
-        ("test", "file")
-    ]
+    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [("test", "file")]
     batch = datasource.get_batch(
         batch_kwargs={
             "path": os.path.join(  # noqa: PTH118
@@ -254,9 +238,7 @@ def test_standalone_spark_parquet_datasource(
 
 
 @pytest.mark.spark
-def test_standalone_spark_csv_datasource(
-    test_folder_connection_path_csv, test_backends
-):
+def test_standalone_spark_csv_datasource(test_folder_connection_path_csv, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -269,9 +251,7 @@ def test_standalone_spark_csv_datasource(
         },
     )
 
-    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [
-        ("test", "file")
-    ]
+    assert datasource.get_available_data_asset_names()["subdir_reader"]["names"] == [("test", "file")]
     batch = datasource.get_batch(
         batch_kwargs={
             "path": os.path.join(  # noqa: PTH118
@@ -353,9 +333,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 
 @pytest.mark.spark
-def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, test_backends
-):
+def test_spark_datasource_processes_dataset_options(test_folder_connection_path_csv, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -367,9 +345,7 @@ def test_spark_datasource_processes_dataset_options(
             }
         },
     )
-    batch_kwargs = datasource.build_batch_kwargs(
-        "subdir_reader", data_asset_name="test"
-    )
+    batch_kwargs = datasource.build_batch_kwargs("subdir_reader", data_asset_name="test")
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
     validator = BridgeValidator(batch, ExpectationSuite(name="foo"))

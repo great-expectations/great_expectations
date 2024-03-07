@@ -38,9 +38,7 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
     )
     os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../../test_sets/Titanic.csv"
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../../test_sets/Titanic.csv")
     titanic_csv_destination_file_path: str = str(
         os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
@@ -90,9 +88,7 @@ def test_get_validator(context_with_single_titanic_csv):
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.add_expectation_suite(expectation_suite_name="temp_suite")
-    my_validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="temp_suite"
-    )
+    my_validator: Validator = context.get_validator(batch_request=batch_request, expectation_suite_name="temp_suite")
     assert isinstance(my_validator, Validator)
     assert len(my_validator.batches) == 1
     assert my_validator.active_batch.data.dataframe.shape == (1313, 7)
@@ -110,9 +106,7 @@ def test_get_validator_bad_batch_request(
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
-        context.get_validator(
-            batch_request=batch_request, expectation_suite_name="temp_suite"
-        )
+        context.get_validator(batch_request=batch_request, expectation_suite_name="temp_suite")
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
@@ -223,9 +217,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     assert batch.data.dataframe.shape == (1313, 7)
 
 
-def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
-    empty_data_context, tmp_path_factory
-):
+def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(empty_data_context, tmp_path_factory):
     context = empty_data_context
     config = yaml.load(
         """
@@ -643,9 +635,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     )
 
     # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request
-    batch_list: List[Batch] = context.get_batch_list(
-        batch_request=batch_request, limit=2
-    )
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request, limit=2)
     assert len(batch_list) == 4
 
     # first batch

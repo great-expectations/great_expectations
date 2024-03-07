@@ -62,9 +62,7 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
         table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k not in ["column_list", "ignore_row_if"]
+            k: v for k, v in metric.metric_domain_kwargs.items() if k not in ["column_list", "ignore_row_if"]
         }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",

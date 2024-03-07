@@ -121,9 +121,7 @@ class _Partitioner(Protocol):
         Look at Partitioner* classes for concrete examples.
         """
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         """Translates `options` to the execution engine batch spec kwarg identifiers
 
         Arguments:
@@ -163,13 +161,9 @@ class _Partitioner(Protocol):
         """
 
 
-def _partitioner_and_sql_asset_to_batch_identifier_data(
-    partitioner: _Partitioner, asset: _SQLAsset
-) -> list[dict]:
+def _partitioner_and_sql_asset_to_batch_identifier_data(partitioner: _Partitioner, asset: _SQLAsset) -> list[dict]:
     execution_engine = asset.datasource.get_execution_engine()
-    sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner(
-        execution_engine.dialect_name
-    )
+    sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner(execution_engine.dialect_name)
     return sqlalchemy_data_partitioner.get_data_for_batch_identifiers(
         execution_engine=execution_engine,
         selectable=asset.as_selectable(),
@@ -187,24 +181,18 @@ class _PartitionerDatetime(FluentBaseModel):
         return [self.column_name]
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(
-            partitioner=self, asset=sql_asset
-        )
+        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(partitioner=self, asset=sql_asset)
         params: list[dict] = []
         for identifer_data in batch_identifier_data:
             params.append(identifer_data[self.column_name])
         return params
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(
-                    f"'{part}' must be specified in the batch request options"
-                )
+                raise ValueError(f"'{part}' must be specified in the batch request options")
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -246,9 +234,7 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
-    method_name: Literal["partition_on_year_and_month_and_day"] = (
-        "partition_on_year_and_month_and_day"
-    )
+    method_name: Literal["partition_on_year_and_month_and_day"] = "partition_on_year_and_month_and_day"
 
     @property
     @override
@@ -277,9 +263,7 @@ class SqlPartitionerDatetimePart(_PartitionerDatetime):
     @pydantic.validator("datetime_parts", each_item=True)
     def _check_param_name_allowed(cls, v: str):
         allowed_date_parts = [part.value for part in DatePart]
-        assert (
-            v in allowed_date_parts
-        ), f"Only the following param_names are allowed: {allowed_date_parts}"
+        assert v in allowed_date_parts, f"Only the following param_names are allowed: {allowed_date_parts}"
         return v
 
 
@@ -292,9 +276,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
         return [self.column_name]
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(
-            partitioner=self, asset=sql_asset
-        )
+        batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(partitioner=self, asset=sql_asset)
         params: list[dict] = []
         for identifer_data in batch_identifier_data:
             params.append({self.param_names[0]: identifer_data[self.column_name]})
@@ -307,18 +289,14 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         raise NotImplementedError
 
 
 class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal["partition_on_divided_integer"] = (
-        "partition_on_divided_integer"
-    )
+    method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
 
     @property
     @override
@@ -330,13 +308,9 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "divisor": self.divisor}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError(
-                "'quotient' must be specified in the batch request options"
-            )
+            raise ValueError("'quotient' must be specified in the batch request options")
         return {self.column_name: options["quotient"]}
 
 
@@ -355,13 +329,9 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "mod": self.mod}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError(
-                "'remainder' must be specified in the batch request options"
-            )
+            raise ValueError("'remainder' must be specified in the batch request options")
         return {self.column_name: options["remainder"]}
 
 
@@ -379,29 +349,21 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(
-                f"'{self.column_name}' must be specified in the batch request options"
-            )
+            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")
         return {self.column_name: options[self.column_name]}
 
     @override
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
         # The superclass version of param_defaults is correct, but here we leverage that
         # the parameter name is the same as the column name to make this much faster.
-        return _partitioner_and_sql_asset_to_batch_identifier_data(
-            partitioner=self, asset=sql_asset
-        )
+        return _partitioner_and_sql_asset_to_batch_identifier_data(partitioner=self, asset=sql_asset)
 
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal["partition_on_multi_column_values"] = (
-        "partition_on_multi_column_values"
-    )
+    method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
     def columns(self):
@@ -414,9 +376,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_names": self.column_names}
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(
                 f"All column names, {self.column_names}, must be specified in the batch request options. "
@@ -425,9 +385,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
         return {col: options[col] for col in self.column_names}
 
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
-        return _partitioner_and_sql_asset_to_batch_identifier_data(
-            partitioner=self, asset=sql_asset
-        )
+        return _partitioner_and_sql_asset_to_batch_identifier_data(partitioner=self, asset=sql_asset)
 
 
 class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
@@ -443,9 +401,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
     @override
@@ -462,13 +418,9 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         }
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if "datetime" not in options:
-            raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
-            )
+            raise ValueError("'datetime' must be specified in the batch request options to create a batch identifier")
         return {self.column_name: options["datetime"]}
 
 
@@ -500,9 +452,7 @@ class _SQLAsset(DataAsset):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     name: str
-    _partitioner_implementation_map: Dict[
-        Type[Partitioner], Optional[Type[SqlPartitioner]]
-    ] = pydantic.PrivateAttr(
+    _partitioner_implementation_map: Dict[Type[Partitioner], Optional[Type[SqlPartitioner]]] = pydantic.PrivateAttr(
         default={
             PartitionerYear: SqlPartitionerYear,
             PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
@@ -516,12 +466,8 @@ class _SQLAsset(DataAsset):
         }
     )
 
-    def get_partitioner_implementation(
-        self, abstract_partitioner: Partitioner
-    ) -> SqlPartitioner:
-        PartitionerClass = self._partitioner_implementation_map.get(
-            type(abstract_partitioner)
-        )
+    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SqlPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if not PartitionerClass:
             raise ValueError(
                 f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
@@ -545,9 +491,7 @@ class _SQLAsset(DataAsset):
         pass
 
     @staticmethod
-    def _matches_request_options(
-        candidate: Dict, requested_options: BatchRequestOptions
-    ) -> bool:
+    def _matches_request_options(candidate: Dict, requested_options: BatchRequestOptions) -> bool:
         for k, v in requested_options.items():
             if isinstance(candidate[k], (datetime, date)):
                 candidate[k] = str(candidate[k])
@@ -556,9 +500,7 @@ class _SQLAsset(DataAsset):
                 return False
         return True
 
-    def _fully_specified_batch_requests(
-        self, batch_request: BatchRequest
-    ) -> List[BatchRequest]:
+    def _fully_specified_batch_requests(self, batch_request: BatchRequest) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
 
         if batch_request.partitioner is None:
@@ -592,9 +534,7 @@ class _SQLAsset(DataAsset):
         return batch_requests
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
         Args:
@@ -608,37 +548,25 @@ class _SQLAsset(DataAsset):
 
         batch_list: List[Batch] = []
         if batch_request.partitioner:
-            sql_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
+            sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
         else:
             sql_partitioner = None
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-                batch_request=request
-            )
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(batch_request=request)
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if sql_partitioner:
                 batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
-                batch_spec_kwargs["partitioner_kwargs"] = (
-                    sql_partitioner.partitioner_method_kwargs()
-                )
+                batch_spec_kwargs["partitioner_kwargs"] = sql_partitioner.partitioner_method_kwargs()
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    sql_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
-                        request.options
-                    )
+                    sql_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(request.options)
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = self._create_batch_spec(batch_spec_kwargs)
-            execution_engine: SqlAlchemyExecutionEngine = (
-                self.datasource.get_execution_engine()
-            )
-            data, markers = execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
+            execution_engine: SqlAlchemyExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -692,12 +620,8 @@ class _SQLAsset(DataAsset):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options is not None and not self._batch_request_options_are_valid(
-            options=options, partitioner=partitioner
-        ):
-            allowed_keys = set(
-                self.get_batch_request_options_keys(partitioner=partitioner)
-            )
+        if options is not None and not self._batch_request_options_are_valid(options=options, partitioner=partitioner):
+            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -729,10 +653,7 @@ class _SQLAsset(DataAsset):
             )
         ):
             options = {
-                option: None
-                for option in self.get_batch_request_options_keys(
-                    partitioner=batch_request.partitioner
-                )
+                option: None for option in self.get_batch_request_options_keys(partitioner=batch_request.partitioner)
             }
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
@@ -820,18 +741,12 @@ class TableAsset(_SQLAsset):
 
     @property
     def qualified_name(self) -> str:
-        return (
-            f"{self.schema_name}.{self.table_name}"
-            if self.schema_name
-            else self.table_name
-        )
+        return f"{self.schema_name}.{self.table_name}" if self.schema_name else self.table_name
 
     @pydantic.validator("table_name", pre=True, always=True)
     def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
         if not (validated_table_name := table_name or values.get("name")):
-            raise ValueError(
-                "table_name cannot be empty and should default to name if not provided"
-            )
+            raise ValueError("table_name cannot be empty and should default to name if not provided")
 
         return validated_table_name
 
@@ -881,9 +796,7 @@ class TableAsset(_SQLAsset):
                 # don't need to fetch any data, just want to make sure the table is accessible
                 connection.execute(sa.select(1, table).limit(1))
         except Exception as query_error:
-            LOGGER.info(
-                f"{self.name} `.test_connection()` query failed: {query_error!r}"
-            )
+            LOGGER.info(f"{self.name} `.test_connection()` query failed: {query_error!r}")
             raise TestConnectionError(
                 f"Attempt to connect to table: {self.qualified_name} failed because the test query "
                 f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"
@@ -908,9 +821,7 @@ class TableAsset(_SQLAsset):
         }
 
     @override
-    def _create_batch_spec(
-        self, batch_spec_kwargs: dict
-    ) -> SqlAlchemyDatasourceBatchSpec:
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> SqlAlchemyDatasourceBatchSpec:
         return SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
 
     @staticmethod
@@ -938,8 +849,7 @@ def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     connector: str = connection_string.split("://")[0].split("+")[0]
 
     type_lookup_plus: dict[str, str] = {
-        n: _SourceFactories.type_lookup[n].__name__
-        for n in _SourceFactories.type_lookup.type_names()
+        n: _SourceFactories.type_lookup[n].__name__ for n in _SourceFactories.type_lookup.type_names()
     }
     # type names are not always exact match to connector strings
     type_lookup_plus.update(
@@ -1020,8 +930,7 @@ class SQLDatasource(Datasource):
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine due to the "
-                    f"following exception: {e!s}"
+                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
         return self._engine
@@ -1031,9 +940,7 @@ class SQLDatasource(Datasource):
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
         )
-        _check_config_substitutions_needed(
-            self, model_dict, raise_warning_if_provider_not_present=True
-        )
+        _check_config_substitutions_needed(self, model_dict, raise_warning_if_provider_not_present=True)
         # the connection_string has had config substitutions applied
         connection_string = model_dict.pop("connection_string")
         if self.__class__.__name__ == "SQLDatasource":
@@ -1053,10 +960,7 @@ class SQLDatasource(Datasource):
             # but we want to include them here
             exclude_unset=False,
         )
-        if (
-            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
-            or not self._execution_engine
-        ):
+        if current_execution_engine_kwargs != self._cached_execution_engine_kwargs or not self._execution_engine:
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
             engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
             self._execution_engine = self._execution_engine_type()(
@@ -1080,8 +984,7 @@ class SQLDatasource(Datasource):
             engine.connect()
         except Exception as e:
             raise TestConnectionError(
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{e!s}"
+                "Attempt to connect to datasource failed with the following error message: " f"{e!s}"
             ) from e
         if self.assets and test_assets:
             for asset in self.assets:

@@ -28,9 +28,7 @@ This integration test tests the following:
 
 gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
-    raise ValueError(
-        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-    )
+    raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests")
 bigquery_dataset: str = "test_ci"
 CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
@@ -71,25 +69,19 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 context.add_expectation_suite(expectation_suite_name="test_suite")
-validator: Validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator: Validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 assert validator
 
 # What is the name of the temp_table that was created as part of `get_validator`?
 temp_table_name: str = validator.active_batch.data.selectable.description
 client: bigquery.Client = bigquery.Client()
 project: str = client.project
-dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(
-    project, bigquery_dataset
-)
+dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(project, bigquery_dataset)
 table_ref: bigquery.TableReference = dataset_ref.table(temp_table_name)
 table: bigquery.Table = client.get_table(table_ref)
 
 # what is its expiration
-expected_expiration: datetime.datetime = datetime.datetime.now(
-    datetime.timezone.utc
-) + datetime.timedelta(days=1)
+expected_expiration: datetime.datetime = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
 assert table.expires <= expected_expiration
 
 # Ensure that passing in `bigquery_temp_table` will fire off a DeprecationWarning
@@ -105,9 +97,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
 )
 
 context.add_expectation_suite(expectation_suite_name="test_suite_2")
-validator: Validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite_2"
-)
+validator: Validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite_2")
 
 # Testing `validator.head()` when using BigQuery without temp tables
 batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(

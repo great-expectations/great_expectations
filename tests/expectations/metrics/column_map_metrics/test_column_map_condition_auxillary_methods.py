@@ -66,9 +66,7 @@ def sql_execution_engine_with_mini_taxi_loaded(sa, mini_taxi_df):
         con=sqlite_engine,
         index=False,
     )
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     return execution_engine
 
 
@@ -80,10 +78,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
     pandas_df = mini_taxi_df
     spark_df = spark_session.createDataFrame(
         [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
+            tuple(None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist())
             for record in pandas_df.to_records(index=False)
         ],
         pandas_df.columns.tolist(),
@@ -96,9 +91,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_table_name(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_table_name(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with `table_name`
     batch_data = SqlAlchemyBatchData(
@@ -110,9 +103,7 @@ def sql_execution_engine_with_mini_taxi_table_name(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_query(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_query(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with query
     batch_data = SqlAlchemyBatchData(
@@ -124,9 +115,7 @@ def sql_execution_engine_with_mini_taxi_query(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_selectable(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with Selectable
     batch_data = SqlAlchemyBatchData(
@@ -194,9 +183,7 @@ def test_sqlalchemy_column_map_condition_values(
     )
 
     # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
-    table_columns_metric, table_column_metrics_results = get_table_columns_metric(
-        execution_engine=execution_engine
-    )
+    table_columns_metric, table_column_metrics_results = get_table_columns_metric(execution_engine=execution_engine)
     desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
 
     results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
@@ -268,9 +255,7 @@ def test_spark_column_map_condition_values(
     )
 
     # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
-    table_columns_metric, table_column_metrics_results = get_table_columns_metric(
-        execution_engine=execution_engine
-    )
+    table_columns_metric, table_column_metrics_results = get_table_columns_metric(execution_engine=execution_engine)
     desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
     results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     metrics = {

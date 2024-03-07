@@ -52,33 +52,15 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         totalVals = (column.apply(lambda x: 1.0 if x is not None else 0.0)).sum()
-        num1 = (
-            column.apply(lambda x: matchFirstDigit(x, 1) if x is not None else 0.0)
-        ).sum()
-        num2 = (
-            column.apply(lambda x: matchFirstDigit(x, 2) if x is not None else 0.0)
-        ).sum()
-        num3 = (
-            column.apply(lambda x: matchFirstDigit(x, 3) if x is not None else 0.0)
-        ).sum()
-        num4 = (
-            column.apply(lambda x: matchFirstDigit(x, 4) if x is not None else 0.0)
-        ).sum()
-        num5 = (
-            column.apply(lambda x: matchFirstDigit(x, 5) if x is not None else 0.0)
-        ).sum()
-        num6 = (
-            column.apply(lambda x: matchFirstDigit(x, 6) if x is not None else 0.0)
-        ).sum()
-        num7 = (
-            column.apply(lambda x: matchFirstDigit(x, 7) if x is not None else 0.0)
-        ).sum()
-        num8 = (
-            column.apply(lambda x: matchFirstDigit(x, 8) if x is not None else 0.0)
-        ).sum()
-        num9 = (
-            column.apply(lambda x: matchFirstDigit(x, 9) if x is not None else 0.0)
-        ).sum()
+        num1 = (column.apply(lambda x: matchFirstDigit(x, 1) if x is not None else 0.0)).sum()
+        num2 = (column.apply(lambda x: matchFirstDigit(x, 2) if x is not None else 0.0)).sum()
+        num3 = (column.apply(lambda x: matchFirstDigit(x, 3) if x is not None else 0.0)).sum()
+        num4 = (column.apply(lambda x: matchFirstDigit(x, 4) if x is not None else 0.0)).sum()
+        num5 = (column.apply(lambda x: matchFirstDigit(x, 5) if x is not None else 0.0)).sum()
+        num6 = (column.apply(lambda x: matchFirstDigit(x, 6) if x is not None else 0.0)).sum()
+        num7 = (column.apply(lambda x: matchFirstDigit(x, 7) if x is not None else 0.0)).sum()
+        num8 = (column.apply(lambda x: matchFirstDigit(x, 8) if x is not None else 0.0)).sum()
+        num9 = (column.apply(lambda x: matchFirstDigit(x, 9) if x is not None else 0.0)).sum()
         listdata = [
             num1 / totalVals,
             num2 / totalVals,
@@ -183,17 +165,9 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
 
-        dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
-        )
+        dependencies.update({"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)})
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
@@ -339,11 +313,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
         # return {"success": metrics.get("column.custom.DistributionMatchesBenfordsLaw"), "observed_value": metrics.get("column.custom.DistributionMatchesBenfordsLaw")}
         return {
             "success": metrics.get("column.custom.DistributionMatchesBenfordsLaw"),
-            "result": {
-                "observed_value": metrics.get(
-                    "column.custom.DistributionMatchesBenfordsLaw"
-                )
-            },
+            "result": {"observed_value": metrics.get("column.custom.DistributionMatchesBenfordsLaw")},
         }
 
 

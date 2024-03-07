@@ -20,9 +20,7 @@ from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
-@pytest.mark.xfail(
-    reason="add_or_update not responsible for rendered content - rewrite test for new suites factory"
-)
+@pytest.mark.xfail(reason="add_or_update not responsible for rendered content - rewrite test for new suites factory")
 @pytest.mark.cloud
 @responses.activate
 def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rendered_content(
@@ -52,13 +50,9 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         "great_expectations.data_context.data_context.CloudDataContext.get_expectation_suite",
         return_value=empty_expectation_suite,
     ):
-        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
-            "test_suite"
-        )
+        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite("test_suite")
     expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
     assert expectation_suite.expectation_configurations[0].rendered_content is None
 
@@ -82,12 +76,8 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
                         {
                             "value": {
                                 "template": "Must have exactly $value rows.",
-                                "params": {
-                                    "value": {"schema": {"type": "number"}, "value": 10}
-                                },
-                                "schema": {
-                                    "type": "com.superconductive.rendered.string"
-                                },
+                                "params": {"value": {"schema": {"type": "number"}, "value": 10}},
+                                "schema": {"type": "com.superconductive.rendered.string"},
                             },
                             "value_type": "StringValueType",
                             "name": "atomic.prescriptive.summary",
@@ -123,14 +113,10 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
         create_expectation_suite_with_name=suite_name,
     )
 
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_table_row_count_to_equal(value=10)
-    )
+    expectation_validation_result: ExpectationValidationResult = validator.expect_table_row_count_to_equal(value=10)
 
     for rendered_content in expectation_validation_result.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)
 
-    for (
-        rendered_content
-    ) in expectation_validation_result.expectation_config.rendered_content:
+    for rendered_content in expectation_validation_result.expectation_config.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)

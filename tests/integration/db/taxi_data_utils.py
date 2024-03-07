@@ -35,21 +35,13 @@ def _load_data(
     table_name: str = TAXI_DATA_TABLE_NAME,
     random_table_suffix: bool = True,
 ) -> LoadedTable:
-    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
-        "redshift"
-    ]
-    to_sql_method: str = (
-        "multi"
-        if dialect in dialects_supporting_multiple_values_in_single_insert_clause
-        else None
-    )
+    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = ["redshift"]
+    to_sql_method: str = "multi" if dialect in dialects_supporting_multiple_values_in_single_insert_clause else None
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
         table_name=table_name,
-        csv_paths=[
-            "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
-        ],
+        csv_paths=["./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
         load_full_dataset=True,
@@ -71,9 +63,7 @@ def loaded_table(dialect: str, connection_string: str) -> LoadedTable:
     if _is_dialect_athena(dialect):
         table_name = "ten_trips_from_each_month"
         test_df = load_and_concatenate_csvs(
-            csv_paths=[
-                "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
-            ],
+            csv_paths=["./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"],
             convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
             load_full_dataset=True,
         )
@@ -100,9 +90,7 @@ def _execute_taxi_partitioning_test_cases(
     connection_string: str,
     table_name: str,
 ) -> None:
-    test_cases: List[TaxiPartitioningTestCase] = (
-        taxi_partitioning_test_cases.test_cases()
-    )
+    test_cases: List[TaxiPartitioningTestCase] = taxi_partitioning_test_cases.test_cases()
 
     test_case: TaxiPartitioningTestCase
     for test_case in test_cases:
@@ -141,13 +129,9 @@ def _execute_taxi_partitioning_test_cases(
             data_connectors={data_connector_name: data_connector_config},
         )
 
-        datasource: BaseDatasource = context.get_datasource(
-            datasource_name=datasource_name
-        )
+        datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
 
-        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
-            data_connector_name
-        ]
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[data_connector_name]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()
@@ -156,10 +140,8 @@ def _execute_taxi_partitioning_test_cases(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
         )
-        batch_definition_list: List[BatchDefinition] = (
-            data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=batch_request
-            )
+        batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
         )
         print(len(batch_definition_list), "batch definitions found")
         print(test_case.num_expected_batch_definitions, "expected batch definitions")
@@ -199,9 +181,7 @@ def _execute_taxi_partitioning_test_cases(
                     for dictionary_element in test_case.expected_column_values
                 ]
             else:
-                raise ValueError(
-                    "Missing test_column_names or test_column_names attribute."
-                )
+                raise ValueError("Missing test_column_names or test_column_names attribute.")
 
         assert (
             set(batch_definition_list) == set(expected_batch_definition_list)
@@ -211,13 +191,11 @@ def _execute_taxi_partitioning_test_cases(
 
         # Use expected_batch_definition_list since it is sorted, and we already
         # asserted that it contains the same items as batch_definition_list
-        batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-            expected_batch_definition_list[0]
-        )
+        batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(expected_batch_definition_list[0])
 
-        batch_data: SqlAlchemyBatchData = context.datasources[
-            datasource_name
-        ].execution_engine.get_batch_data(batch_spec=batch_spec)
+        batch_data: SqlAlchemyBatchData = context.datasources[datasource_name].execution_engine.get_batch_data(
+            batch_spec=batch_spec
+        )
 
         num_rows: int = batch_data.execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)

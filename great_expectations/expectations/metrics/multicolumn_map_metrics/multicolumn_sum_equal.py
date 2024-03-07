@@ -41,8 +41,6 @@ class MulticolumnSumEqual(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, **kwargs):
         sum_total = kwargs.get("sum_total")
-        expression = "+".join(
-            [f"COALESCE({column_name}, 0)" for column_name in column_list.columns]
-        )
+        expression = "+".join([f"COALESCE({column_name}, 0)" for column_name in column_list.columns])
         row_wise_cond = F.expr(expression) == F.lit(sum_total)
         return row_wise_cond

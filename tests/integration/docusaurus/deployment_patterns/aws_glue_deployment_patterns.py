@@ -22,9 +22,7 @@ with warnings.catch_warnings():
     spark = glueContext.spark_session
 
 s3_client = boto3.client("s3")
-response = s3_client.get_object(
-    Bucket="bucket", Key="bucket/great_expectations/great_expectations.yml"
-)
+response = s3_client.get_object(Bucket="bucket", Key="bucket/great_expectations/great_expectations.yml")
 config_file = yaml.load(response["Body"])
 
 config = DataContextConfig(
@@ -41,9 +39,7 @@ config = DataContextConfig(
     anonymous_usage_statistics=config_file["anonymous_usage_statistics"],
     checkpoint_store_name=config_file["checkpoint_store_name"],
     store_backend_defaults=S3StoreBackendDefaults(
-        default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"][
-            "bucket"
-        ]
+        default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"]["bucket"]
     ),
 )
 context_gx = get_context(project_config=config)
@@ -62,9 +58,7 @@ validator = context_gx.get_validator(
     expectation_suite_name=expectation_suite_name,
 )
 print(validator.head())
-validator.expect_column_values_to_not_be_null(
-    column="passenger_count"
-)  ## add some test
+validator.expect_column_values_to_not_be_null(column="passenger_count")  ## add some test
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 checkpoint_config = {
@@ -77,8 +71,6 @@ checkpoint_config = {
     ],
 }
 
-checkpoint = context_gx.add_or_update_checkpoint(
-    f"_tmp_checkpoint_{expectation_suite_name}", **checkpoint_config
-)
+checkpoint = context_gx.add_or_update_checkpoint(f"_tmp_checkpoint_{expectation_suite_name}", **checkpoint_config)
 results = checkpoint.run(result_format="SUMMARY", run_name="test")
 validation_result_identifier = results.list_validation_result_identifiers()[0]

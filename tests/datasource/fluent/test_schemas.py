@@ -28,9 +28,7 @@ def min_supported_python() -> Version:
     return Version("3.8")
 
 
-def _models_and_schema_dirs() -> (
-    Generator[tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None]
-):
+def _models_and_schema_dirs() -> Generator[tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None]:
     datasource: Type[Datasource] = Datasource
     ds_type_name: str = ""
 

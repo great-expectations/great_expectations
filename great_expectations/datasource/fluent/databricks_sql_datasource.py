@@ -114,20 +114,14 @@ class DatabricksDsn(AnyUrl):
 
     @overload
     @classmethod
-    def parse_url(
-        cls, url: ConfigStr, config_provider: _ConfigurationProvider = ...
-    ) -> DatabricksDsn: ...
+    def parse_url(cls, url: ConfigStr, config_provider: _ConfigurationProvider = ...) -> DatabricksDsn: ...
 
     @overload
     @classmethod
-    def parse_url(
-        cls, url: str, config_provider: _ConfigurationProvider | None = ...
-    ) -> DatabricksDsn: ...
+    def parse_url(cls, url: str, config_provider: _ConfigurationProvider | None = ...) -> DatabricksDsn: ...
 
     @classmethod
-    def parse_url(
-        cls, url: ConfigStr | str, config_provider: _ConfigurationProvider | None = None
-    ) -> DatabricksDsn:
+    def parse_url(cls, url: ConfigStr | str, config_provider: _ConfigurationProvider | None = None) -> DatabricksDsn:
         if isinstance(url, ConfigStr):
             assert config_provider, "`config_provider` must be provided"
             url = url.get_config_value(config_provider=config_provider)
@@ -225,18 +219,12 @@ class DatabricksSQLDatasource(SQLDatasource):
         connection_string = model_dict.pop("connection_string")
         # is connection_string was a ConfigStr it's parts will not have been validated yet
         if not isinstance(connection_string, DatabricksDsn):
-            connection_string = DatabricksDsn.parse_url(
-                url=connection_string, config_provider=self._config_provider
-            )
+            connection_string = DatabricksDsn.parse_url(url=connection_string, config_provider=self._config_provider)
 
         kwargs = model_dict.pop("kwargs", {})
 
-        http_path = _parse_param_from_query_string(
-            param="http_path", query=connection_string.query
-        )
-        assert (
-            http_path
-        ), "Presence of http_path query string is guaranteed due to prior validation"
+        http_path = _parse_param_from_query_string(param="http_path", query=connection_string.query)
+        assert http_path, "Presence of http_path query string is guaranteed due to prior validation"
 
         # Databricks connection is a bit finicky - the http_path portion of the connection string needs to be passed in connect_args
         connect_args = {"http_path": http_path}

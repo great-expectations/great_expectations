@@ -53,38 +53,28 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_conflicts
     with pytest.raises(ValueError) as ve:
         runtime = base_block.copy()
         runtime["batch_data"] = 1
-        get_batch_request_from_acceptable_arguments(
-            "ds", "dc", "da", runtime_parameters=runtime, batch_data=1
-        )
+        get_batch_request_from_acceptable_arguments("ds", "dc", "da", runtime_parameters=runtime, batch_data=1)
 
     assert "runtime_parameters" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         runtime = base_block.copy()
         runtime["query"] = "1"
-        get_batch_request_from_acceptable_arguments(
-            "ds", "dc", "da", runtime_parameters=runtime, query="1"
-        )
+        get_batch_request_from_acceptable_arguments("ds", "dc", "da", runtime_parameters=runtime, query="1")
 
     assert "runtime_parameters" in str(ve.value)
 
     with pytest.raises(ValueError) as ve:
         runtime = base_block.copy()
         runtime["path"] = "."
-        get_batch_request_from_acceptable_arguments(
-            "ds", "dc", "da", runtime_parameters=runtime, path="."
-        )
+        get_batch_request_from_acceptable_arguments("ds", "dc", "da", runtime_parameters=runtime, path=".")
 
     assert "runtime_parameters" in str(ve.value)
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")]
-)
-def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
-    base_block: Dict[str, str], param, value
-):
+@pytest.mark.parametrize("param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")])
+def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(base_block: Dict[str, str], param, value):
     """Setting any of the parameters should result in a runtime batch request"""
     base_block["batch_identifiers"] = {"a": "1"}
     base_block[param] = value

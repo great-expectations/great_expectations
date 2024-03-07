@@ -51,20 +51,14 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # no
                         values_iterator = iter(values)
                         first_value_length: int = len(next(values_iterator))
                         current_value: Sized
-                        if not all(
-                            len(current_value) == first_value_length
-                            for current_value in values_iterator
-                        ):
+                        if not all(len(current_value) == first_value_length for current_value in values_iterator):
                             return True
 
                     # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
                     values_iterator = iter(values)
                     first_value_type: type = type(next(values_iterator))
                     current_type: type
-                    if not all(
-                        type(current_value) == first_value_type
-                        for current_value in values_iterator
-                    ):
+                    if not all(type(current_value) == first_value_type for current_value in values_iterator):
                         return True
 
                 # Recursively evaluate each element of properly shaped iterable (list or tuple).
@@ -120,9 +114,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if attributed_metric_values is None:
             return None
 
-        metric_values_all_batches: MetricValues = list(
-            attributed_metric_values.values()
-        )
+        metric_values_all_batches: MetricValues = list(attributed_metric_values.values())
         return _condition_metric_values(metric_values=metric_values_all_batches)
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:

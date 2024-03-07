@@ -24,18 +24,14 @@ from tests.test_utils import (
 )
 
 if __name__ == "test_script_module":
-    dialect, connection_string = get_connection_string_and_dialect(
-        athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
-    )
+    dialect, connection_string = get_connection_string_and_dialect(athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME")
     print(f"Testing dialect: {dialect}")
 
     with loaded_table(dialect, connection_string) as table:
         test_df: pd.DataFrame = table.inserted_dataframe
         table_name: str = table.table_name
 
-        taxi_test_data: SamplerTaxiTestData = SamplerTaxiTestData(
-            test_df, test_column_name="pickup_datetime"
-        )
+        taxi_test_data: SamplerTaxiTestData = SamplerTaxiTestData(test_df, test_column_name="pickup_datetime")
         test_cases: TaxiSamplingTestCases = TaxiSamplingTestCases(taxi_test_data)
 
         test_cases: List[TaxiSamplingTestCase] = test_cases.test_cases()
@@ -72,13 +68,9 @@ if __name__ == "test_script_module":
                 data_connectors={data_connector_name: data_connector_config},
             )
 
-            datasource: BaseDatasource = context.get_datasource(
-                datasource_name=datasource_name
-            )
+            datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
 
-            data_connector: ConfiguredAssetSqlDataConnector = (
-                datasource.data_connectors[data_connector_name]
-            )
+            data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[data_connector_name]
 
             # 3. Check if resulting batches are as expected
             # using data_connector.get_batch_definition_list_from_batch_request()
@@ -87,25 +79,19 @@ if __name__ == "test_script_module":
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
             )
-            batch_definition_list: List[BatchDefinition] = (
-                data_connector.get_batch_definition_list_from_batch_request(
-                    batch_request
-                )
+            batch_definition_list: List[BatchDefinition] = data_connector.get_batch_definition_list_from_batch_request(
+                batch_request
             )
 
-            assert (
-                len(batch_definition_list) == test_case.num_expected_batch_definitions
-            )
+            assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
             # 4. Check that loaded data is as expected
 
-            batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-                batch_definition_list[0]
-            )
+            batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(batch_definition_list[0])
 
-            batch_data: SqlAlchemyBatchData = context.datasources[
-                datasource_name
-            ].execution_engine.get_batch_data(batch_spec=batch_spec)
+            batch_data: SqlAlchemyBatchData = context.datasources[datasource_name].execution_engine.get_batch_data(
+                batch_spec=batch_spec
+            )
 
             num_rows: int = batch_data.execution_engine.execute_query(
                 sa.select(sa.func.count()).select_from(batch_data.selectable)

@@ -146,9 +146,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str += f"values must not belong to this set: {value_set_str}"
 
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -191,16 +189,12 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"values must not belong to this set: {values_string}"
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -217,9 +211,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(
@@ -251,12 +243,8 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             # Vacuously true
             return np.ones(len(series), dtype=np.bool_)
         if pd.api.types.is_datetime64_any_dtype(series):
-            parsed_value_set = PandasExecutionEngine.parse_value_set(
-                value_set=value_set
-            )
+            parsed_value_set = PandasExecutionEngine.parse_value_set(value_set=value_set)
         else:
             parsed_value_set = value_set
 
-        return pd.DataFrame(
-            {"column_values.not_in_set": ~series.isin(parsed_value_set)}
-        )
+        return pd.DataFrame({"column_values.not_in_set": ~series.isin(parsed_value_set)})

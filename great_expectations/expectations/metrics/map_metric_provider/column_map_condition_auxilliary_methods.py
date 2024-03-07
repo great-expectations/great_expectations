@@ -71,9 +71,7 @@ def _pandas_column_map_condition_values(
     # currently handle filter_column_isnull differently than other map_fn / map_condition
     # cases.
     ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
+    filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
     if filter_column_isnull:
         df = df[df[column_name].notnull()]
 
@@ -139,9 +137,7 @@ def _pandas_column_map_series_and_domain_values(
     # currently handle filter_column_isnull differently than other map_fn / map_condition
     # cases.
     ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
+    filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
     if filter_column_isnull:
         df = df[df[column_name].notnull()]
 
@@ -202,9 +198,7 @@ def _pandas_column_map_condition_value_counts(
     # currently handle filter_column_isnull differently than other map_fn / map_condition
     # cases.
     ###
-    filter_column_isnull = kwargs.get(
-        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-    )
+    filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
     if filter_column_isnull:
         df = df[df[column_name].notnull()]
 
@@ -216,11 +210,7 @@ def _pandas_column_map_condition_value_counts(
         value_counts = domain_values[boolean_mapped_unexpected_values].value_counts()
     except ValueError:
         try:
-            value_counts = (
-                domain_values[boolean_mapped_unexpected_values]
-                .apply(tuple)
-                .value_counts()
-            )
+            value_counts = domain_values[boolean_mapped_unexpected_values].apply(tuple).value_counts()
         except ValueError:
             pass
 
@@ -245,9 +235,7 @@ def _sqlalchemy_column_map_condition_values(
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
-        "unexpected_condition"
-    ]
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -263,13 +251,9 @@ def _sqlalchemy_column_map_condition_values(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    query = sa.select(sa.column(column_name).label("unexpected_values")).where(
-        unexpected_condition
-    )
+    query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         if hasattr(selectable, "subquery"):
             query = query.select_from(selectable.subquery())
@@ -290,10 +274,7 @@ def _sqlalchemy_column_map_condition_values(
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
 
-    return [
-        val.unexpected_values
-        for val in execution_engine.execute_query(query).fetchall()
-    ]
+    return [val.unexpected_values for val in execution_engine.execute_query(query).fetchall()]
 
 
 def _sqlalchemy_column_map_condition_value_counts(
@@ -308,9 +289,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
-        "unexpected_condition"
-    ]
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -328,15 +307,9 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    query = (
-        sa.select(column, sa.func.count(column))
-        .where(unexpected_condition)
-        .group_by(column)
-    )
+    query = sa.select(column, sa.func.count(column)).where(unexpected_condition).group_by(column)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
@@ -352,9 +325,7 @@ def _spark_column_map_condition_values(
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
-        "unexpected_condition"
-    ]
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -403,9 +374,7 @@ def _spark_column_map_condition_value_counts(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
-        "unexpected_condition"
-    ]
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -421,9 +390,7 @@ def _spark_column_map_condition_value_counts(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    df: pyspark.DataFrame = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    df: pyspark.DataFrame = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)

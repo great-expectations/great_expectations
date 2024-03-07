@@ -19,9 +19,7 @@ class PartitionerYearAndMonth(pydantic.BaseModel):
 @public_api
 class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
     column_name: str
-    method_name: Literal["partition_on_year_and_month_and_day"] = (
-        "partition_on_year_and_month_and_day"
-    )
+    method_name: Literal["partition_on_year_and_month_and_day"] = "partition_on_year_and_month_and_day"
 
 
 @public_api
@@ -35,9 +33,7 @@ class PartitionerDatetimePart(pydantic.BaseModel):
 class PartitionerDividedInteger(pydantic.BaseModel):
     divisor: int
     column_name: str
-    method_name: Literal["partition_on_divided_integer"] = (
-        "partition_on_divided_integer"
-    )
+    method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
 
 
 @public_api
@@ -56,17 +52,13 @@ class PartitionerColumnValue(pydantic.BaseModel):
 @public_api
 class PartitionerMultiColumnValue(pydantic.BaseModel):
     column_names: List[str]
-    method_name: Literal["partition_on_multi_column_values"] = (
-        "partition_on_multi_column_values"
-    )
+    method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
 
 @public_api
 class PartitionerConvertedDatetime(pydantic.BaseModel):
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
     date_format_string: str
 
 

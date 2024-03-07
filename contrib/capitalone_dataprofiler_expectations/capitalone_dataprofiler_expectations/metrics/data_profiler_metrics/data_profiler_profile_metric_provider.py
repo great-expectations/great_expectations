@@ -28,6 +28,4 @@ class DataProfilerProfileMetricProvider(MetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return super()._get_evaluation_dependencies(
-            metric, configuration, execution_engine, runtime_configuration
-        )
+        return super()._get_evaluation_dependencies(metric, configuration, execution_engine, runtime_configuration)

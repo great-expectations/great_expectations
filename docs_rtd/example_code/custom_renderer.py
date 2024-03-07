@@ -31,9 +31,7 @@ class CustomPageRenderer(Renderer):
                 "subheader": subheader,
                 "styling": {
                     "classes": ["col-12"],
-                    "header": {
-                        "classes": ["alert", "alert-secondary"] if highlight else []
-                    },
+                    "header": {"classes": ["alert", "alert-secondary"] if highlight else []},
                 },
             }
         )
@@ -72,9 +70,7 @@ class CustomPageRenderer(Renderer):
                     ["", "column_1", "column_2"],
                     [
                         "row_1",
-                        cls._get_bullet_list_content_block(
-                            subheader="Nested Bullet List Content Block"
-                        ),
+                        cls._get_bullet_list_content_block(subheader="Nested Bullet List Content Block"),
                         "buffalo",
                     ],
                     ["row_2", "crayon", "derby"],
@@ -89,9 +85,7 @@ class CustomPageRenderer(Renderer):
 
     @classmethod
     def _get_graph_content_block(cls, header="", subheader="", col=12):
-        df = pd.DataFrame(
-            {"value": [1, 2, 3, 4, 5, 6], "count": [123, 232, 543, 234, 332, 888]}
-        )
+        df = pd.DataFrame({"value": [1, 2, 3, 4, 5, 6], "count": [123, 232, 543, 234, 332, 888]})
         bars = (
             alt.Chart(df)
             .mark_bar(size=20)
@@ -208,9 +202,7 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Header Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Header Content Block", subheader="subheader"
-                                )
+                                cls._get_header_content_block(header="Header Content Block", subheader="subheader")
                             ],
                         }
                     ),
@@ -218,9 +210,7 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Bullet List Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Bullet List Content Block"
-                                ),
+                                cls._get_header_content_block(header="Bullet List Content Block"),
                                 cls._get_bullet_list_content_block(
                                     header="My Important List",
                                     subheader="Unremarkable Subheader",
@@ -232,12 +222,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Table Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Table Content Block"
-                                ),
-                                cls._get_table_content_block(
-                                    header="My Big Data Table"
-                                ),
+                                cls._get_header_content_block(header="Table Content Block"),
+                                cls._get_table_content_block(header="My Big Data Table"),
                             ],
                         }
                     ),
@@ -245,12 +231,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Value List Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Value List Content Block"
-                                ),
-                                cls._get_value_list_content_block(
-                                    header="My Name Value List"
-                                ),
+                                cls._get_header_content_block(header="Value List Content Block"),
+                                cls._get_value_list_content_block(header="My Name Value List"),
                             ],
                         }
                     ),
@@ -258,12 +240,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Graph Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Graph Content Block"
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My Big Data Graph"
-                                ),
+                                cls._get_header_content_block(header="Graph Content Block"),
+                                cls._get_graph_content_block(header="My Big Data Graph"),
                             ],
                         }
                     ),
@@ -271,9 +249,7 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "String Template Content Block With Icon",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="String Template Content Block With Icon"
-                                ),
+                                cls._get_header_content_block(header="String Template Content Block With Icon"),
                                 cls._get_string_template_content_block(),
                             ],
                         }
@@ -282,9 +258,7 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "String Template Content Block With Tooltip",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="String Template Content Block With Tooltip"
-                                ),
+                                cls._get_header_content_block(header="String Template Content Block With Tooltip"),
                                 cls._get_tooltip_string_template_content_block(),
                             ],
                         }
@@ -293,21 +267,11 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Multiple Content Block Section",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Multiple Content Block Section"
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_table_content_block(
-                                    header="My col-6 Table", col=6
-                                ),
+                                cls._get_header_content_block(header="Multiple Content Block Section"),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_table_content_block(header="My col-6 Table", col=6),
                                 cls._get_bullet_list_content_block(
                                     header="My col-6 List", subheader="subheader", col=6
                                 ),

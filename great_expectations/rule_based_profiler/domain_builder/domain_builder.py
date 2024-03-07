@@ -127,9 +127,7 @@ class DomainBuilder(ABC, Builder):
             for batch_id in batch_ids  # type: ignore[union-attr] # could be None
         }
 
-        resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
-        ] = get_resolved_metrics_by_key(
+        resolved_metrics_by_batch_id: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = get_resolved_metrics_by_key(
             validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
             runtime_configuration=runtime_configuration,
@@ -142,8 +140,7 @@ class DomainBuilder(ABC, Builder):
             for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
         }
         table_row_counts_by_batch_id: Dict[str, int] = {
-            batch_id: metric_value[0]
-            for batch_id, metric_value in table_row_count_lists_by_batch_id.items()
+            batch_id: metric_value[0] for batch_id, metric_value in table_row_count_lists_by_batch_id.items()
         }
 
         return table_row_counts_by_batch_id

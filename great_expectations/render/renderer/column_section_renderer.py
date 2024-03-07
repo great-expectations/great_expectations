@@ -59,14 +59,10 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(
-        self, properties_table_renderer=None, runtime_environment=None
-    ) -> None:
+    def __init__(self, properties_table_renderer=None, runtime_environment=None) -> None:
         super().__init__()
         if properties_table_renderer is None:
-            properties_table_renderer = {
-                "class_name": "ProfilingColumnPropertiesTableContentBlockRenderer"
-            }
+            properties_table_renderer = {"class_name": "ProfilingColumnPropertiesTableContentBlockRenderer"}
         module_name = "great_expectations.render.renderer.content_block"
         self._properties_table_renderer = instantiate_class_from_config(
             config=properties_table_renderer,
@@ -104,13 +100,9 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
         for content_block_function_name in self.content_block_function_names:
             try:
                 if content_block_function_name == "_render_header":
-                    content_blocks.append(
-                        getattr(self, content_block_function_name)(evrs, column_type)
-                    )
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs, column_type))
                 else:
-                    content_blocks.append(
-                        getattr(self, content_block_function_name)(evrs)
-                    )
+                    content_blocks.append(getattr(self, content_block_function_name)(evrs))
             except Exception as e:
                 exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -118,9 +110,7 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
-                exception_message += (
-                    f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
-                )
+                exception_message += f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out
@@ -259,12 +249,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     def _render_properties_table(self, evrs):
         evr_list = [
-            self._find_evr_by_type(
-                evrs, "expect_column_unique_value_count_to_be_between"
-            ),
-            self._find_evr_by_type(
-                evrs, "expect_column_proportion_of_unique_values_to_be_between"
-            ),
+            self._find_evr_by_type(evrs, "expect_column_unique_value_count_to_be_between"),
+            self._find_evr_by_type(evrs, "expect_column_proportion_of_unique_values_to_be_between"),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_be_null"),
             self._find_evr_by_type(evrs, "expect_column_values_to_not_match_regex"),
         ]
@@ -289,9 +275,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _render_quantile_table(cls, evrs):
-        quantile_evr = cls._find_evr_by_type(
-            evrs, "expect_column_quantile_values_to_be_between"
-        )
+        quantile_evr = cls._find_evr_by_type(evrs, "expect_column_quantile_values_to_be_between")
 
         if not quantile_evr or quantile_evr.exception_info["raised_exception"]:
             return
@@ -315,9 +299,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         for expectation_type, renderer_type in expectation_renderers.items():
             evr = cls._find_evr_by_type(evrs, expectation_type)
             if evr and not evr.exception_info["raised_exception"]:
-                renderer_impl = get_renderer_impl(
-                    object_name=expectation_type, renderer_type=renderer_type
-                )[1]
+                renderer_impl = get_renderer_impl(object_name=expectation_type, renderer_type=renderer_type)[1]
                 table_rows.append(renderer_impl(result=evr))
 
         if len(table_rows) > 0:
@@ -362,15 +344,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     def _render_histogram(self, evrs):
         # NOTE: This code is very brittle
-        kl_divergence_evr = self._find_evr_by_type(
-            evrs, "expect_column_kl_divergence_to_be_less_than"
-        )
+        kl_divergence_evr = self._find_evr_by_type(evrs, "expect_column_kl_divergence_to_be_less_than")
         # print(json.dumps(kl_divergence_evr, indent=2))
-        if (
-            kl_divergence_evr is None
-            or kl_divergence_evr.result is None
-            or "details" not in kl_divergence_evr.result
-        ):
+        if kl_divergence_evr is None or kl_divergence_evr.result is None or "details" not in kl_divergence_evr.result:
             return
 
         return get_renderer_impl(
@@ -380,13 +356,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _render_value_counts_bar_chart(cls, evrs):
-        distinct_values_set_evr = cls._find_evr_by_type(
-            evrs, "expect_column_distinct_values_to_be_in_set"
-        )
-        if (
-            not distinct_values_set_evr
-            or distinct_values_set_evr.exception_info["raised_exception"]
-        ):
+        distinct_values_set_evr = cls._find_evr_by_type(evrs, "expect_column_distinct_values_to_be_in_set")
+        if not distinct_values_set_evr or distinct_values_set_evr.exception_info["raised_exception"]:
             return
 
         return get_renderer_impl(
@@ -403,17 +374,11 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
     def __init__(self, table_renderer=None) -> None:
         super().__init__()
         if table_renderer is None:
-            table_renderer = {
-                "class_name": "ValidationResultsTableContentBlockRenderer"
-            }
-        module_name = table_renderer.get(
-            "module_name", "great_expectations.render.renderer.content_block"
-        )
+            table_renderer = {"class_name": "ValidationResultsTableContentBlockRenderer"}
+        module_name = table_renderer.get("module_name", "great_expectations.render.renderer.content_block")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = table_renderer.get("class_name")
-        self._table_renderer = load_class(
-            class_name=class_name, module_name=module_name
-        )
+        self._table_renderer = load_class(class_name=class_name, module_name=module_name)
 
     @classmethod
     def _render_header(cls, validation_results):
@@ -453,30 +418,20 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = self._render_table(
-            remaining_evrs, evaluation_parameters
-        )
+        remaining_evrs, content_block = self._render_table(remaining_evrs, evaluation_parameters)
         content_blocks.append(content_block)
-        return RenderedSectionContent(
-            **{"section_name": column, "content_blocks": content_blocks}
-        )
+        return RenderedSectionContent(**{"section_name": column, "content_blocks": content_blocks})
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def __init__(self, bullet_list_renderer=None) -> None:
         super().__init__()
         if bullet_list_renderer is None:
-            bullet_list_renderer = {
-                "class_name": "ExpectationSuiteBulletListContentBlockRenderer"
-            }
-        module_name = bullet_list_renderer.get(
-            "module_name", "great_expectations.render.renderer.content_block"
-        )
+            bullet_list_renderer = {"class_name": "ExpectationSuiteBulletListContentBlockRenderer"}
+        module_name = bullet_list_renderer.get("module_name", "great_expectations.render.renderer.content_block")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = bullet_list_renderer.get("class_name")
-        self._bullet_list_renderer = load_class(
-            class_name=class_name, module_name=module_name
-        )
+        self._bullet_list_renderer = load_class(class_name=class_name, module_name=module_name)
 
     @classmethod
     def _render_header(cls, expectations):
@@ -519,13 +474,9 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         content_blocks.append(header_block)
         # remaining_expectations, content_blocks = cls._render_column_type(
         # remaining_expectations, content_blocks)
-        remaining_expectations, bullet_block = self._render_bullet_list(
-            remaining_expectations
-        )
+        remaining_expectations, bullet_block = self._render_bullet_list(remaining_expectations)
         content_blocks.append(bullet_block)
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
-        return RenderedSectionContent(
-            section_name=column, content_blocks=populated_content_blocks
-        )
+        return RenderedSectionContent(section_name=column, content_blocks=populated_content_blocks)

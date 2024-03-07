@@ -101,9 +101,7 @@ def safe_remove(path):
             print(e)
 
 
-def create_files_in_directory(
-    directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"
-):
+def create_files_in_directory(directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"):
     subdirectories = []
     for file_name in file_name_list:
         splits = file_name.split("/")
@@ -206,9 +204,7 @@ def build_checkpoint_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> CheckpointStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -239,9 +235,7 @@ def build_profiler_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> ProfilerStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     store = build_profiler_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -259,9 +253,7 @@ def save_config_to_filesystem(
     configuration: BaseYamlConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     save_config_to_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -280,9 +272,7 @@ def load_config_from_filesystem(
     configuration_key: str,
 ) -> BaseYamlConfig:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return load_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -301,9 +291,7 @@ def build_configuration_store(
     overwrite_existing: bool = False,
     **kwargs,
 ) -> ConfigurationStore:
-    logger.debug(
-        f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
-    )
+    logger.debug(f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}")
 
     if store_backend is not None and isinstance(store_backend, StoreBackend):
         store_backend = store_backend.config
@@ -365,9 +353,7 @@ def load_checkpoint_config_from_store_backend(
         return config_store.get(key=key)  # type: ignore[return-value]
     except gx_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
-        raise gx_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.", exc
-        )
+        raise gx_exceptions.InvalidCheckpointConfigError("Error while processing DataContextConfig.", exc)
 
 
 def delete_checkpoint_config_from_store_backend(
@@ -451,9 +437,7 @@ def delete_config_from_filesystem(
     configuration_key: str,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     delete_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -508,9 +492,7 @@ def get_bigquery_table_prefix() -> str:
     """
     gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
     if not gcp_project:
-        raise ValueError(
-            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-        )
+        raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests")
     bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "test_ci")
     return f"""{gcp_project}.{bigquery_dataset}"""
 
@@ -525,9 +507,7 @@ def get_bigquery_connection_url() -> str:
     """
     gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
     if not gcp_project:
-        raise ValueError(
-            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-        )
+        raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests")
     bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
 
     return f"bigquery://{gcp_project}/{bigquery_dataset}"
@@ -567,9 +547,7 @@ def load_and_concatenate_csvs(
     dfs: List[pd.DataFrame] = []
     for csv_path in csv_paths:
         df = pd.read_csv(csv_path)
-        convert_string_columns_to_datetime(
-            df=df, column_names_to_convert=convert_column_names_to_datetime
-        )
+        convert_string_columns_to_datetime(df=df, column_names_to_convert=convert_column_names_to_datetime)
         if not load_full_dataset:
             # Improving test performance by only loading the first 10 rows of our test data into the db
             df = df.head(10)
@@ -581,9 +559,7 @@ def load_and_concatenate_csvs(
     return all_dfs_concatenated
 
 
-def convert_string_columns_to_datetime(
-    df: pd.DataFrame, column_names_to_convert: Optional[List[str]] = None
-) -> None:
+def convert_string_columns_to_datetime(df: pd.DataFrame, column_names_to_convert: Optional[List[str]] = None) -> None:
     """
     Converts specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
     Side-effect: Passed DataFrame is modified (in-place).
@@ -639,9 +615,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
     if random_table_suffix:
         table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
 
-    return_value: LoadedTable = LoadedTable(
-        table_name=table_name, inserted_dataframe=all_dfs_concatenated
-    )
+    return_value: LoadedTable = LoadedTable(table_name=table_name, inserted_dataframe=all_dfs_concatenated)
     connection = None
     if sa:
         engine = sa.create_engine(connection_string)
@@ -675,7 +649,9 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
             )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = (
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
@@ -691,9 +667,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
-                print(
-                    f"Adding to existing table {table_name} and adding data from {csv_paths}"
-                )
+                print(f"Adding to existing table {table_name} and adding data from {csv_paths}")
 
             with engine.connect() as connection:
                 add_dataframe_to_db(
@@ -707,7 +681,9 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                 )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = (
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
@@ -719,9 +695,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                 engine.dispose()
 
 
-def load_data_into_test_bigquery_database_with_bigquery_client(
-    dataframe: pd.DataFrame, table_name: str
-) -> None:
+def load_data_into_test_bigquery_database_with_bigquery_client(dataframe: pd.DataFrame, table_name: str) -> None:
     """
     Loads dataframe into bigquery table using BigQuery client. Follows pattern specified in the GCP documentation here:
         - https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
@@ -736,13 +710,9 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
 
     gcp_project: Optional[str] = os.environ.get("GE_TEST_GCP_PROJECT")
     if not gcp_project:
-        raise ValueError(
-            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-        )
+        raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests")
     client: bigquery.Client = bigquery.Client(project=gcp_project)
-    job: bigquery.LoadJob = client.load_table_from_dataframe(
-        dataframe, table_id
-    )  # Make an API request.
+    job: bigquery.LoadJob = client.load_table_from_dataframe(dataframe, table_id)  # Make an API request.
     load_job = job.result()  # Wait for the job to complete
     if load_job.errors or load_job.error_result:
         raise gx_exceptions.DatabaseConnectionError(
@@ -803,9 +773,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
     Returns:
         List of deleted tables.
     """
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        connection_string=connection_string
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(connection_string=connection_string)
     data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
@@ -828,9 +796,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
 
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        execution_engine.execute_query_in_transaction(
-            sa.text(f"DROP TABLE IF EXISTS {table_name}")
-        )
+        execution_engine.execute_query_in_transaction(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
@@ -858,9 +824,7 @@ def set_directory(path: str) -> Generator:
         os.chdir(origin)
 
 
-def check_athena_table_count(
-    connection_string: str, db_name: str, expected_table_count: int
-) -> bool:
+def check_athena_table_count(connection_string: str, db_name: str, expected_table_count: int) -> bool:
     """
     Helper function used by awsathena integration test. Checks whether expected number of tables exist in database
     """
@@ -879,7 +843,9 @@ def check_athena_table_count(
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError:
-        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+        error_message: str = (
+            """Docs integration tests encountered an error while loading test-data into test-database."""
+        )
         logger.error(error_message)
         raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that

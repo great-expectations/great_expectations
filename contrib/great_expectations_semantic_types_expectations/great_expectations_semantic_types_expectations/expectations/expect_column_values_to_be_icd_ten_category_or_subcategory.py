@@ -27,9 +27,7 @@ class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider)
         def check_if_icd_ten_category_or_subcategory(code: str) -> bool:
             return icd.is_category_or_subcategory(code)
 
-        column_icd_ten_category_or_subcategory = column.apply(
-            check_if_icd_ten_category_or_subcategory
-        )
+        column_icd_ten_category_or_subcategory = column.apply(check_if_icd_ten_category_or_subcategory)
         return column_icd_ten_category_or_subcategory
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine

@@ -75,9 +75,7 @@ class TableColumns(TableMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs: dict = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
         metric_value_kwargs = {
             "include_nested": True,
         }

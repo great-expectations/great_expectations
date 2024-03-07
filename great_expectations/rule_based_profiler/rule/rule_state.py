@@ -140,9 +140,7 @@ class RuleState:
         allow_duplicates: bool = False,
     ) -> None:
         domain_cursor: Domain
-        if not allow_duplicates and domain.id in [
-            domain_cursor.id for domain_cursor in self.domains
-        ]:
+        if not allow_duplicates and domain.id in [domain_cursor.id for domain_cursor in self.domains]:
             raise gx_exceptions.ProfilerConfigurationError(
                 f"""Error: Domain\n{domain}\nalready exists.  In order to add it, either pass "allow_duplicates=True" \
 or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{domain.id}" as argument first.

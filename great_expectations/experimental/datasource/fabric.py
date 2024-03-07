@@ -71,14 +71,10 @@ class _PowerBIAsset(DataAsset):
         Whatever is needed to test the connection to and/or validity of the asset.
         This could be a noop.
         """
-        LOGGER.debug(
-            f"Testing connection to {self.__class__.__name__} has not been implemented"
-        )
+        LOGGER.debug(f"Testing connection to {self.__class__.__name__} has not been implemented")
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
@@ -94,14 +90,10 @@ class _PowerBIAsset(DataAsset):
             ),
         }
 
-        batch_spec = FabricBatchSpec(
-            reader_method=self._reader_method, reader_options=reader_options
-        )
+        batch_spec = FabricBatchSpec(reader_method=self._reader_method, reader_options=reader_options)
         # TODO: update get_batch_data_and_markers types
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -118,9 +110,7 @@ class _PowerBIAsset(DataAsset):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
-            batch_request=batch_request
-        )
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(batch_request=batch_request)
 
         batch_list.append(
             Batch(
@@ -271,9 +261,7 @@ class FabricPowerBIDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         if not self._running_on_fabric():
-            raise TestConnectionError(
-                "Must be running Microsoft Fabric to use this datasource"
-            )
+            raise TestConnectionError("Must be running Microsoft Fabric to use this datasource")
 
         try:
             from sempy import fabric  # noqa: F401 # test if fabric is installed

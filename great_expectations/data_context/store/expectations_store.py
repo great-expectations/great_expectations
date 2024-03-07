@@ -48,31 +48,19 @@ class ExpectationsStore(Store):
         # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
         self._data_context = data_context
         if store_backend is not None:
-            store_backend_module_name = store_backend.get(
-                "module_name", "great_expectations.data_context.store"
-            )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_suffix"] = store_backend.get(
-                    "filepath_suffix", ".json"
-                )
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_expectations_store"
-                )
-                store_backend["key_columns"] = store_backend.get(
-                    "key_columns", ["expectation_suite_name"]
-                )
+                store_backend["table_name"] = store_backend.get("table_name", "ge_expectations_store")
+                store_backend["key_columns"] = store_backend.get("key_columns", ["expectation_suite_name"])
 
         super().__init__(
             store_backend=store_backend,
@@ -104,9 +92,7 @@ class ExpectationsStore(Store):
             if len(response_json["data"]) == 1:
                 suite_data = response_json["data"][0]
             else:
-                raise ValueError(
-                    "More than one Expectation Suite was found with the expectation_suite_name."
-                )
+                raise ValueError("More than one Expectation Suite was found with the expectation_suite_name.")
         else:
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
@@ -118,9 +104,7 @@ class ExpectationsStore(Store):
 
         return suite_dict
 
-    def add_expectation(
-        self, suite: ExpectationSuite, expectation: _TExpectation
-    ) -> _TExpectation:
+    def add_expectation(self, suite: ExpectationSuite, expectation: _TExpectation) -> _TExpectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
 
         # we need to find which ID has been added by the backend
@@ -136,9 +120,7 @@ class ExpectationsStore(Store):
         if self.cloud_mode:
             # since update doesn't return the object we need (here), we refetch the suite
             suite_identifier, fetched_suite = self._refresh_suite(suite)
-            new_ids = [
-                exp.id for exp in fetched_suite.expectations if exp.id not in old_ids
-            ]
+            new_ids = [exp.id for exp in fetched_suite.expectations if exp.id not in old_ids]
             if len(new_ids) > 1:
                 # edge case: suite has been changed remotely, and one or more new expectations
                 #            have been added. Since the store doesn't return the updated object,
@@ -152,17 +134,13 @@ class ExpectationsStore(Store):
             elif len(new_ids) == 0:
                 # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,
                 #            it should have already raised an exception.
-                raise RuntimeError(
-                    "Unknown error occurred and Expectation was not added."
-                )
+                raise RuntimeError("Unknown error occurred and Expectation was not added.")
             else:
                 new_id = new_ids[0]
             expectation.id = new_id
         return expectation
 
-    def update_expectation(
-        self, suite: ExpectationSuite, expectation: Expectation
-    ) -> Expectation:
+    def update_expectation(self, suite: ExpectationSuite, expectation: Expectation) -> Expectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
 
         if expectation.id not in {exp.id for exp in fetched_suite.expectations}:
@@ -179,9 +157,7 @@ class ExpectationsStore(Store):
 
         return expectation
 
-    def delete_expectation(
-        self, suite: ExpectationSuite, expectation: Expectation
-    ) -> Expectation:
+    def delete_expectation(self, suite: ExpectationSuite, expectation: Expectation) -> Expectation:
         suite_identifier, suite = self._refresh_suite(suite)
 
         if expectation.id not in {exp.id for exp in suite.expectations}:
@@ -195,9 +171,7 @@ class ExpectationsStore(Store):
         self.update(key=suite_identifier, value=suite)
         return expectation
 
-    def _refresh_suite(
-        self, suite
-    ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
+    def _refresh_suite(self, suite) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
         """Get the latest state of an ExpectationSuite from the backend."""
         suite_identifier = self.get_key(name=suite.name, id=suite.id)
         suite_dict = self.get(key=suite_identifier)
@@ -227,9 +201,7 @@ class ExpectationsStore(Store):
                 )
             return result
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.ExpectationSuiteError(
-                f"An ExpectationSuite named {value.name} already exists."
-            )
+            raise gx_exceptions.ExpectationSuiteError(f"An ExpectationSuite named {value.name} already exists.")
 
     def _update(self, key, value, **kwargs):
         if not self.cloud_mode:
@@ -300,9 +272,7 @@ class ExpectationsStore(Store):
         # since we aren't using the public ExpectationSuite API to add the Expectations.
         # This means that `Expectation._save_callback` is provided by a different copy of the
         # same ExpectationSuite.
-        local_suite.expectations = [
-            expectation for expectation in cloud_suite.expectations
-        ]
+        local_suite.expectations = [expectation for expectation in cloud_suite.expectations]
         return local_suite
 
     @override
@@ -335,9 +305,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def get_key(
-        self, name: str, id: Optional[str] = None
-    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
+    def get_key(self, name: str, id: Optional[str] = None) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
         """Given a name and optional ID, build the correct key for use in the ExpectationsStore."""
         key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:

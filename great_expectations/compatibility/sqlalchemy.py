@@ -3,9 +3,7 @@ from __future__ import annotations
 from great_expectations.compatibility.not_imported import NotImported
 
 # GX optional imports
-SQLALCHEMY_NOT_IMPORTED = NotImported(
-    "sqlalchemy is not installed, please 'pip install sqlalchemy'"
-)
+SQLALCHEMY_NOT_IMPORTED = NotImported("sqlalchemy is not installed, please 'pip install sqlalchemy'")
 
 try:
     import sqlalchemy

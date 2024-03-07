@@ -43,15 +43,10 @@ def test_batches_are_accessible(
     data_connector = datasource.data_connectors[data_connector_name]
 
     total_batches: int = 20
-    file_list = multibatch_generic_csv_generator(
-        data_path=data_path, num_event_batches=total_batches
-    )
+    file_list = multibatch_generic_csv_generator(data_path=data_path, num_event_batches=total_batches)
 
     assert (
-        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name=asset_name
-        )
-        == file_list
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(data_asset_name=asset_name) == file_list
     )
 
     batch_request_1 = BatchRequest(
@@ -67,9 +62,7 @@ def test_batches_are_accessible(
         batch_request=batch_request_1,
         create_expectation_suite_with_name="my_expectation_suite_name_1",
     )
-    metric_max = validator_1.get_metric(
-        MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
-    )
+    metric_max = validator_1.get_metric(MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"}))
     assert metric_max == total_batches
     metric_value_set = validator_1.get_metric(
         MetricConfiguration(
@@ -91,9 +84,7 @@ def test_batches_are_accessible(
         batch_request=batch_request_2,
         create_expectation_suite_with_name="my_expectation_suite_name_2",
     )
-    metric_max = validator_2.get_metric(
-        MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
-    )
+    metric_max = validator_2.get_metric(MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"}))
     assert metric_max == total_batches - 1
     metric_value_set = validator_2.get_metric(
         MetricConfiguration(
@@ -117,9 +108,7 @@ def test_batches_are_accessible(
             create_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
         )
         metric_max = validator.get_metric(
-            MetricConfiguration(
-                "column.max", metric_domain_kwargs={"column": "batch_num"}
-            )
+            MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
         )
         assert metric_max == (total_batches + 1) - batch_num
         metric_value_set = set(
@@ -163,9 +152,7 @@ def test_profile_includes_citations(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    result: RuleBasedProfilerResult = profiler.run(
-        batch_request=alice_single_batch_data_batch_request
-    )
+    result: RuleBasedProfilerResult = profiler.run(batch_request=alice_single_batch_data_batch_request)
 
     assert result.citation is not None and len(result.citation.keys()) > 0
 
@@ -200,14 +187,10 @@ def test_profile_get_expectation_suite(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    result: RuleBasedProfilerResult = profiler.run(
-        batch_request=alice_single_batch_data_batch_request
-    )
+    result: RuleBasedProfilerResult = profiler.run(batch_request=alice_single_batch_data_batch_request)
 
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = result.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    suite: ExpectationSuite = result.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     assert suite is not None and len(suite.expectations) > 0

@@ -33,9 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
@@ -52,19 +50,13 @@ def run_checkpoint_and_data_doc(
         expectation_suite_name=suite_name,
     )
     validator.expect_table_row_count_to_be_between(0, 10000)
-    validator.expect_column_max_to_be_between(
-        column="passenger_count", min_value=1, max_value=7
-    )
-    validator.expect_column_median_to_be_between(
-        column="passenger_count", min_value=1, max_value=4
-    )
+    validator.expect_column_max_to_be_between(column="passenger_count", min_value=1, max_value=7)
+    validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     # Configure and run a checkpoint
     checkpoint_config = {
-        "validations": [
-            {"batch_request": batch_request, "expectation_suite_name": suite_name}
-        ],
+        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
         "action_list": [
             ActionDict(
                 name="store_validation_result",
@@ -84,9 +76,7 @@ def run_checkpoint_and_data_doc(
     if isinstance(datasource, PandasDatasource):
         checkpoint_name = "single_batch_checkpoint"
     else:
-        checkpoint_name = (
-            f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
-        )
+        checkpoint_name = f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
     checkpoint = Checkpoint(
         checkpoint_name,
         context,
@@ -97,14 +87,10 @@ def run_checkpoint_and_data_doc(
     # Verify checkpoint runs successfully
     assert checkpoint_result._success, "Running expectation suite failed"
     number_of_runs = len(checkpoint_result.run_results)
-    assert (
-        number_of_runs == 1
-    ), f"{number_of_runs} runs were done when we only expected 1"
+    assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result["run_results"][
-        list(checkpoint_result["run_results"].keys())[0]
-    ]
+    result = checkpoint_result["run_results"][list(checkpoint_result["run_results"].keys())[0]]
     validation_result = result["validation_result"]
     assert validation_result.success
 
@@ -126,10 +112,7 @@ def run_checkpoint_and_data_doc(
 
     for r in validation_result.results:
         assert r.success
-        assert (
-            r.result["observed_value"]
-            == expected_metric_values[r.expectation_config.expectation_type]["value"]
-        )
+        assert r.result["observed_value"] == expected_metric_values[r.expectation_config.expectation_type]["value"]
 
         if include_rendered_content:
             # There is a prescriptive atomic renderer on r.expectation_config
@@ -141,24 +124,15 @@ def run_checkpoint_and_data_doc(
             assert rendered_content.name == AtomicPrescriptiveRendererType.SUMMARY
             assert (
                 rendered_content.value.template
-                == expected_metric_values[r.expectation_config.expectation_type][
-                    "rendered_template"
-                ]
+                == expected_metric_values[r.expectation_config.expectation_type]["rendered_template"]
             )
 
             # There is a diagnostic atomic renderer on r, a validation result result.
             num_diagnostic_render = len(r.rendered_content)
-            assert (
-                num_diagnostic_render == 1
-            ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
+            assert num_diagnostic_render == 1, f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
             diagnostic_renderer = r.rendered_content[0]
-            assert (
-                diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
-            )
-            assert (
-                diagnostic_renderer.value.schema["type"]
-                == "com.superconductive.rendered.string"
-            )
+            assert diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
+            assert diagnostic_renderer.value.schema["type"] == "com.superconductive.rendered.string"
         else:
             assert r.rendered_content is None
             assert r.expectation_config.rendered_content is None
@@ -166,9 +140,7 @@ def run_checkpoint_and_data_doc(
     # Rudimentary test for data doc generation
     docs_dict = context.build_data_docs()
     assert "local_site" in docs_dict, "build_data_docs returned dictionary has changed"
-    assert docs_dict["local_site"].startswith(
-        "file://"
-    ), "build_data_docs returns file path in unexpected form"
+    assert docs_dict["local_site"].startswith("file://"), "build_data_docs returns file path in unexpected form"
     path = docs_dict["local_site"][7:]
     with open(path) as f:
         data_doc_index = f.read()
@@ -179,17 +151,13 @@ def run_checkpoint_and_data_doc(
 
 
 def run_batch_head(  # noqa: PLR0915
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     fetch_all: bool | str,
     n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data
-    batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
-    )
+    batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
     assert len(batch_list) > 0
 
     # arbitrarily select the first batch for testing
@@ -206,9 +174,7 @@ def run_batch_head(  # noqa: PLR0915
         table_columns_metric: MetricConfiguration
         results: Dict[Tuple[str, str, str], MetricValue]
 
-        table_columns_metric, results = get_table_columns_metric(
-            execution_engine=execution_engine
-        )
+        table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
         metrics.update(results)
 
         metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
@@ -266,15 +232,9 @@ def run_batch_head(  # noqa: PLR0915
         with pytest.raises(ValidationError) as e:
             batch.head(n_rows=n_rows, fetch_all=fetch_all)  # type: ignore[arg-type]
         n_rows_validation_error = (
-            "1 validation error for Head\n"
-            "n_rows\n"
-            "  value is not a valid integer (type=type_error.integer)"
+            "1 validation error for Head\n" "n_rows\n" "  value is not a valid integer (type=type_error.integer)"
         )
         fetch_all_validation_error = (
-            "1 validation error for Head\n"
-            "fetch_all\n"
-            "  value is not a valid boolean (type=value_error.strictbool)"
+            "1 validation error for Head\n" "fetch_all\n" "  value is not a valid boolean (type=value_error.strictbool)"
         )
-        assert n_rows_validation_error in str(
-            e.value
-        ) or fetch_all_validation_error in str(e.value)
+        assert n_rows_validation_error in str(e.value) or fetch_all_validation_error in str(e.value)

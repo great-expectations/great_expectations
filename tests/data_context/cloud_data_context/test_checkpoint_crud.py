@@ -35,9 +35,7 @@ def validation_ids() -> Tuple[str, str]:
 
 
 @pytest.fixture
-def checkpoint_config_with_ids(
-    checkpoint_config: dict, checkpoint_id: str, validation_ids: Tuple[str, str]
-) -> dict:
+def checkpoint_config_with_ids(checkpoint_config: dict, checkpoint_id: str, validation_ids: Tuple[str, str]) -> dict:
     validation_id_1, validation_id_2 = validation_ids
 
     updated_checkpoint_config = copy.deepcopy(checkpoint_config)
@@ -149,9 +147,7 @@ def mocked_get_by_name_response_1_result(
                 "data": [
                     {
                         "attributes": {
-                            "checkpoint_config": copy.deepcopy(
-                                checkpoint_config_with_ids
-                            ),
+                            "checkpoint_config": copy.deepcopy(checkpoint_config_with_ids),
                             "class_name": "Checkpoint",
                             "created_by_id": created_by_id,
                             "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
@@ -246,9 +242,7 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
+    with mock.patch("requests.Session.post", autospec=True, side_effect=mocked_post_response) as mock_post, mock.patch(
         "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
         autospec=True,
         return_value=False,
@@ -256,9 +250,7 @@ def test_cloud_backed_data_context_add_checkpoint(
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(**checkpoint_config))
 
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -303,9 +295,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
+    with mock.patch("requests.Session.post", autospec=True, side_effect=mocked_post_response) as mock_post, mock.patch(
         "great_expectations.data_context.store.GXCloudStoreBackend._get",
         autospec=True,
         side_effect=StoreBackendError("Does not exist."),
@@ -313,9 +303,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(**checkpoint_config))
 
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -359,21 +347,15 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
+    with mock.patch("requests.Session.post", autospec=True, side_effect=mocked_post_response) as mock_post, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=gx_exceptions.StoreBackendError(
-            "Unable to get object in GX Cloud Store Backend"
-        ),
+        side_effect=gx_exceptions.StoreBackendError("Unable to get object in GX Cloud Store Backend"),
     ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(**checkpoint_config))
 
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -418,9 +400,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
+    with mock.patch("requests.Session.put", autospec=True, side_effect=mocked_put_response) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
@@ -429,9 +409,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
 
         # Round trip through schema to mimic updates made during store serialization process
         id = checkpoint_config_with_ids.pop("id")
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(id=id, **checkpoint_config_with_ids)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(id=id, **checkpoint_config_with_ids))
         expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
@@ -478,9 +456,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
+    with mock.patch("requests.Session.put", autospec=True, side_effect=mocked_put_response) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
@@ -490,9 +466,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(**checkpoint_config))
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -534,9 +508,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
+    with mock.patch("requests.Session.put", autospec=True, side_effect=mocked_put_response) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
@@ -554,9 +526,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
         )
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(id=id, **checkpoint_config_with_ids)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(id=id, **checkpoint_config_with_ids))
         expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
@@ -633,9 +603,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
 
     validation_id_1, validation_id_2 = validation_ids
 
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
+    with mock.patch("requests.Session.put", autospec=True, side_effect=mocked_put_response) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
@@ -652,9 +620,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
         )
 
         # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
+        expected_checkpoint_config = checkpointConfigSchema.dump(CheckpointConfig(**checkpoint_config))
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -788,9 +754,7 @@ def test_list_checkpoints(
     checkpoint_name_2, checkpoint_id_2 = checkpoint_2
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
-            status_code=200, json=lambda: mock_get_all_checkpoints_json
-        )
+        mock_get.return_value = mock.Mock(status_code=200, json=lambda: mock_get_all_checkpoints_json)
         checkpoints = context.list_checkpoints()
 
     assert checkpoints == [

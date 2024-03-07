@@ -55,11 +55,7 @@ class ExpectColumnValuesToBeLineKMDistanceBetween(ColumnMapExpectation):
         {
             "data": {
                 "linestring_less_than_1000_km": [
-                    mapping(
-                        LineString(
-                            [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
-                        )
-                    ),
+                    mapping(LineString([(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)])),
                     mapping(
                         LineString(
                             [
@@ -70,11 +66,7 @@ class ExpectColumnValuesToBeLineKMDistanceBetween(ColumnMapExpectation):
                             ]
                         )
                     ),
-                    mapping(
-                        LineString(
-                            [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
-                        )
-                    ),
+                    mapping(LineString([(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)])),
                 ],
                 "linestring_between_1000_and_2000_km": [
                     mapping(

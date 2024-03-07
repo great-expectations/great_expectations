@@ -77,12 +77,8 @@ def test_get_fully_qualified_parameter_names(
         variables=variables,
         parameters=parameters,
     )
-    assert len(fully_qualified_parameter_names) == len(
-        expected_fully_qualified_parameter_names
-    )
-    assert sorted(fully_qualified_parameter_names) == sorted(
-        expected_fully_qualified_parameter_names
-    )
+    assert len(fully_qualified_parameter_names) == len(expected_fully_qualified_parameter_names)
+    assert sorted(fully_qualified_parameter_names) == sorted(expected_fully_qualified_parameter_names)
 
 
 def test_get_parameter_values_for_fully_qualified_parameter_names(

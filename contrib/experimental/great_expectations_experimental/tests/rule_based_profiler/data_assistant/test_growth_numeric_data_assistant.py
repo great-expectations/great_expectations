@@ -112,17 +112,9 @@ def quentin_implicit_invocation_result_frozen_time(
 def test_growth_numeric_data_assistant_result_serialization(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ) -> None:
-    growth_numeric_data_assistant_result_as_dict: dict = (
-        bobby_growth_numeric_data_assistant_result.to_dict()
-    )
-    assert (
-        set(growth_numeric_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
-    )
-    assert (
-        bobby_growth_numeric_data_assistant_result.to_json_dict()
-        == growth_numeric_data_assistant_result_as_dict
-    )
+    growth_numeric_data_assistant_result_as_dict: dict = bobby_growth_numeric_data_assistant_result.to_dict()
+    assert set(growth_numeric_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
+    assert bobby_growth_numeric_data_assistant_result.to_json_dict() == growth_numeric_data_assistant_result_as_dict
     assert len(bobby_growth_numeric_data_assistant_result.profiler_config.rules) == 4
 
 
@@ -184,10 +176,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_growth_numeric_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
-            batch_id
-        ]
-        is not None
+        bobby_growth_numeric_data_assistant_result._batch_id_to_batch_identifier_display_name_map[batch_id] is not None
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
         for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
         for batch_id in (
@@ -224,22 +213,13 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
             # "round_decimals": 4,
         },
     )
+    assert data_assistant_result.profiler_config.rules["numeric_columns_rule"]["variables"]["round_decimals"] == 15
     assert (
-        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
-            "variables"
-        ]["round_decimals"]
-        == 15
-    )
-    assert (
-        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"]["variables"]["false_positive_rate"]
         == 1.0e-1
     )
     assert (
-        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"]["variables"]["false_positive_rate"]
         == 1.0e-1
     )
 
@@ -263,9 +243,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 
     rule_config: dict
     assert all(
-        rule_config["variables"]["estimator"] == "exact"
-        if "estimator" in rule_config["variables"]
-        else True
+        rule_config["variables"]["estimator"] == "exact" if "estimator" in rule_config["variables"] else True
         for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
@@ -335,17 +313,11 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     assert len(batch_list) == 12
 
     # Running growth_numeric data assistant
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
 
     # saving resulting ExpectationSuite
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
-    suite.add_expectation_configurations(
-        expectation_configurations=result.expectation_configurations
-    )
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
+    suite.add_expectation_configurations(expectation_configurations=result.expectation_configurations)
     data_context.save_expectation_suite(expectation_suite=suite)
 
     # batch_request for checkpoint
@@ -353,9 +325,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2020",
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2020", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2020", "month": "01"}},
     )
 
     # configuring and running checkpoint
@@ -396,9 +366,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
 
 @pytest.mark.big
 @pytest.mark.slow  # 149 seconds
-def test_spark_happy_path_growth_numeric_data_assistant(
-    empty_data_context, spark_df_taxi_data_schema
-) -> None:
+def test_spark_happy_path_growth_numeric_data_assistant(empty_data_context, spark_df_taxi_data_schema) -> None:
     """
     The intent of this test is to ensure that our "happy path", exercised by notebooks is in working order.
 
@@ -453,32 +421,22 @@ def test_spark_happy_path_growth_numeric_data_assistant(
             "reader_method": "csv",
             "reader_options": {"header": True, "schema": schema},
         },
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2019", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2019", "month": "01"}},
     )
     batch_request: BatchRequest = multi_batch_batch_request
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 1
 
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
-    suite.add_expectation_configurations(
-        expectation_configurations=result.expectation_configurations
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
+    suite.add_expectation_configurations(expectation_configurations=result.expectation_configurations)
     data_context.save_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2020",
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2020", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2020", "month": "01"}},
     )
     checkpoint_config: dict = {
         "name": "my_checkpoint",
@@ -517,9 +475,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
 
 @pytest.mark.big
 @pytest.mark.slow  # 104 seconds
-def test_sql_happy_path_growth_numeric_data_assistant(
-    empty_data_context, test_backends, sa
-) -> None:
+def test_sql_happy_path_growth_numeric_data_assistant(empty_data_context, test_backends, sa) -> None:
     """
     The intent of this test is to ensure that our "happy path", exercised by notebooks is in working order.
 
@@ -578,15 +534,9 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 13
 
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
-    suite.add_expectation_configurations(
-        expectation_configurations=result.expectation_configurations
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
+    suite.add_expectation_configurations(expectation_configurations=result.expectation_configurations)
     data_context.save_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(

@@ -29,9 +29,7 @@ What does this test and why?
 This file will hold various tests to ensure that the UI functions as expected when creating a DataContextConfig object. It will ensure that the appropriate defaults are used, including when the store_backend_defaults parameter is set.
 """
 
-_DEFAULT_CONFIG_VERSION: Final[float] = float(
-    DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
-)
+_DEFAULT_CONFIG_VERSION: Final[float] = float(DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value)
 
 
 @pytest.fixture(scope="function")
@@ -59,9 +57,7 @@ def construct_data_context_config():
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         if data_docs_sites is None:
-            data_docs_sites = copy.deepcopy(
-                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
-            )
+            data_docs_sites = copy.deepcopy(DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value)
 
         return {
             "config_version": config_version,
@@ -167,26 +163,20 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
 
 @pytest.mark.unit
-def test_DataContextConfig_with_S3StoreBackendDefaults(
-    construct_data_context_config, default_pandas_datasource_config
-):
+def test_DataContextConfig_with_S3StoreBackendDefaults(construct_data_context_config, default_pandas_datasource_config):
     """
     What does this test and why?
     Make sure that using S3StoreBackendDefaults as the store_backend_defaults applies appropriate
     defaults, including default_bucket_name getting propagated to all stores.
     """
 
-    store_backend_defaults = S3StoreBackendDefaults(
-        default_bucket_name="my_default_bucket"
-    )
+    store_backend_defaults = S3StoreBackendDefaults(default_bucket_name="my_default_bucket")
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -282,9 +272,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -339,9 +327,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {
-            "class_name": "EvaluationParameterStore"
-        },
+        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
         "custom_expectations_S3_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -419,9 +405,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -438,9 +422,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     test_root_directory = "test_root_dir"
 
-    store_backend_defaults = FilesystemStoreBackendDefaults(
-        root_directory=test_root_directory
-    )
+    store_backend_defaults = FilesystemStoreBackendDefaults(root_directory=test_root_directory)
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -462,25 +444,21 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         data_context_id=data_context_id, datasources=default_pandas_datasource_config
     )
     # Add root_directory to stores and data_docs
-    desired_config["stores"][desired_config["expectations_store_name"]][
-        "store_backend"
-    ]["root_directory"] = test_root_directory
-    desired_config["stores"][desired_config["validations_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["stores"][desired_config["profiler_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["data_docs_sites"]["local_site"]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
+    desired_config["stores"][desired_config["expectations_store_name"]]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["stores"][desired_config["validations_store_name"]]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["stores"][desired_config["profiler_store_name"]]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["data_docs_sites"]["local_site"]["store_backend"]["root_directory"] = test_root_directory
 
-    desired_config["stores"]["validation_config_store"]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
+    desired_config["stores"]["validation_config_store"]["store_backend"]["root_directory"] = test_root_directory
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
@@ -491,9 +469,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -541,9 +517,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -670,9 +644,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -733,9 +705,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {
-            "class_name": "EvaluationParameterStore"
-        },
+        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
         "custom_expectations_GCS_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -818,9 +788,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -974,9 +942,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -1060,9 +1026,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {
-            "class_name": "EvaluationParameterStore"
-        },
+        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
         "custom_expectations_database_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1169,9 +1133,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -1245,9 +1207,7 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
-            "custom_evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore"
-            },
+            "custom_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "checkpoint_S3_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1441,9 +1401,7 @@ def test_override_general_defaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
@@ -1461,9 +1419,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data/")
 
-    store_backend_defaults = S3StoreBackendDefaults(
-        default_bucket_name="my_default_bucket"
-    )
+    store_backend_defaults = S3StoreBackendDefaults(default_bucket_name="my_default_bucket")
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -1550,9 +1506,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         data_docs_sites=desired_data_docs_sites_config,
     )
 
-    desired_config["datasources"]["my_pandas_datasource"]["batch_kwargs_generators"][
-        "subdir_reader"
-    ]["base_directory"] = "${SUBSTITUTED_BASE_DIRECTORY}"
+    desired_config["datasources"]["my_pandas_datasource"]["batch_kwargs_generators"]["subdir_reader"][
+        "base_directory"
+    ] = "${SUBSTITUTED_BASE_DIRECTORY}"
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
@@ -1563,17 +1519,13 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 
     data_context = get_context(project_config=data_context_config)
     assert (
-        data_context.datasources["my_pandas_datasource"]
-        .get_batch_kwargs_generator("subdir_reader")
-        ._base_directory
+        data_context.datasources["my_pandas_datasource"].get_batch_kwargs_generator("subdir_reader")._base_directory
         == "../data/"
     )
 
@@ -1637,9 +1589,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        SerializableDataContext.get_or_create_data_context_config(
-            project_config=data_context_config
-        ),
+        SerializableDataContext.get_or_create_data_context_config(project_config=data_context_config),
         DataContextConfig,
     )
 

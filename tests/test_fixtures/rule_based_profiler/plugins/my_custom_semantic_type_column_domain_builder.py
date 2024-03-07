@@ -20,9 +20,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context,
-        semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
         super().__init__(data_context=data_context)
@@ -46,9 +44,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     @property
     def semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
         return self._semantic_types
 
     @property
@@ -65,9 +61,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
+        table_column_names: List[str] = self.get_validator(variables=variables).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
@@ -80,9 +74,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         # First check the column name ends in "_id".
         candidate_column_names: List[str] = list(
             filter(
-                lambda candidate_column_name: candidate_column_name.endswith(
-                    tuple(self.column_name_suffixes)
-                ),
+                lambda candidate_column_name: candidate_column_name.endswith(tuple(self.column_name_suffixes)),
                 table_column_names,
             )
         )

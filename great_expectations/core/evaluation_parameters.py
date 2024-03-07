@@ -135,10 +135,7 @@ class EvaluationParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
-            ge_urn = Combine(
-                Literal("urn:great_expectations:")
-                + Word(alphas, f"{alphanums}_$:?=%.&")
-            )
+            ge_urn = Combine(Literal("urn:great_expectations:") + Word(alphas, f"{alphanums}_$:?=%.&"))
             variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
 
@@ -163,9 +160,7 @@ class EvaluationParameterParser:
             # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
             # 20211009 - JPC - Note that it's important that we consider kwarglist
             # first as part of disabling backtracking for the function's arguments
-            fn_call = (ident + lpar + rpar).setParseAction(
-                lambda t: t.insert(0, (t.pop(0), 0, False))
-            ) | (
+            fn_call = (ident + lpar + rpar).setParseAction(lambda t: t.insert(0, (t.pop(0), 0, False))) | (
                 (ident + lpar - Group(expr_list) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
                 )
@@ -175,10 +170,7 @@ class EvaluationParameterParser:
             )
             atom = (
                 addop[...]
-                + (
-                    (fn_call | pi | e | fnumber | ident).setParseAction(self.push_first)
-                    | Group(lpar + expr + rpar)
-                )
+                + ((fn_call | pi | e | fnumber | ident).setParseAction(self.push_first) | Group(lpar + expr + rpar))
             ).setParseAction(self.push_unary_minus)
 
             # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
@@ -224,27 +216,19 @@ class EvaluationParameterParser:
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info(
-                    "Evaluation parameter operand successfully parsed as integer."
-                )
+                logger.info("Evaluation parameter operand successfully parsed as integer.")
             except ValueError:
                 logger.info("Parsing evaluation parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info(
-                        "Evaluation parameter operand successfully parsed as float."
-                    )
+                    logger.info("Evaluation parameter operand successfully parsed as float.")
                 except ValueError:
                     logger.info("Parsing evaluation parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info(
-                            "Evaluation parameter operand successfully parsed as datetime."
-                        )
+                        logger.info("Evaluation parameter operand successfully parsed as datetime.")
                     except ValueError as e:
-                        logger.info(
-                            "Parsing evaluation parameter operand as datetime failed."
-                        )
+                        logger.info("Parsing evaluation parameter operand as datetime failed.")
                         raise e
             return evaluated
 
@@ -393,27 +377,17 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                 if store:
-                    return store.get_query_result(
-                        res["metric_name"], res.get("metric_kwargs", {})
-                    )
+                    return store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
                 return None
             else:
-                logger.error(
-                    "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
-                )
-                raise EvaluationParameterError(
-                    f"No value found for $PARAMETER {parse_results[0]!s}"
-                )
+                logger.error("Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store.")
+                raise EvaluationParameterError(f"No value found for $PARAMETER {parse_results[0]!s}")
         except ParseException as e:
             logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
-            raise EvaluationParameterError(
-                f"No value found for $PARAMETER {parse_results[0]!s}"
-            ) from e
+            raise EvaluationParameterError(f"No value found for $PARAMETER {parse_results[0]!s}") from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
-            raise EvaluationParameterError(
-                f"No value found for $PARAMETER {parse_results[0]!s}"
-            ) from e
+            raise EvaluationParameterError(f"No value found for $PARAMETER {parse_results[0]!s}") from e
 
     elif len(parse_results) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
@@ -436,9 +410,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                         store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                         if store:
                             EXPR.exprStack[i] = str(
-                                store.get_query_result(
-                                    res["metric_name"], res.get("metric_kwargs", {})
-                                )
+                                store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
                             )  # value placed back in stack must be a string
                     else:
                         # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
@@ -451,22 +423,16 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     else:
         err_str, err_line, err_col = parse_results[-1]
-        raise EvaluationParameterError(
-            f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
-        )
+        raise EvaluationParameterError(f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}")
 
     try:
         result = EXPR.evaluate_stack(EXPR.exprStack)
         result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
-        exception_message = (
-            f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
-        )
+        exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
-        raise EvaluationParameterError(
-            f"Error while evaluating evaluation parameter expression: {e!s}"
-        ) from e
+        raise EvaluationParameterError(f"Error while evaluating evaluation parameter expression: {e!s}") from e
 
     return result
 
@@ -489,11 +455,7 @@ def _get_parse_results(
 
 def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> bool:
     # Represents a valid parser result of a single function that has no arguments
-    return (
-        len(parse_results) == 1
-        and isinstance(parse_results[0], tuple)
-        and parse_results[0][2] is False
-    )
+    return len(parse_results) == 1 and isinstance(parse_results[0], tuple) and parse_results[0][2] is False
 
 
 def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
@@ -517,8 +479,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
             deduplicated[suite_name] = deduplicated[suite_name] + [
                 {
                     "metric_kwargs_id": {
-                        metric_kwargs: list(metrics_set)
-                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                        metric_kwargs: list(metrics_set) for (metric_kwargs, metrics_set) in metric_kwargs.items()
                     }
                 }
             ]

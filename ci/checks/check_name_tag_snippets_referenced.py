@@ -380,9 +380,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
         )
         return res_snippet_names.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        ) from e
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}") from e
 
 
 def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
@@ -412,9 +410,7 @@ def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
         )
         return res_snippet_used_names.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        ) from e
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}") from e
 
 
 def main() -> None:
@@ -430,9 +426,7 @@ def main() -> None:
         .difference(set(IGNORED_VIOLATIONS))
     )
     if new_violations:
-        print(
-            f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file."
-        )
+        print(f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file.")
         for line in new_violations:
             print(line)
         sys.exit(1)

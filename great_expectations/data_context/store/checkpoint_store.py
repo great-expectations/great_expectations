@@ -48,9 +48,7 @@ class CheckpointStore(ConfigurationStore):
         cp_data: Dict
         if isinstance(response_data, list):
             if len(response_data) == 0:
-                raise ValueError(
-                    f"Cannot parse empty data from GX Cloud payload: {response_json}"
-                )
+                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")
             cp_data = response_data[0]
         else:
             cp_data = response_data
@@ -72,9 +70,7 @@ class CheckpointStore(ConfigurationStore):
         )
         return os.path.isdir(checkpoints_directory_path)  # noqa: PTH112
 
-    def list_checkpoints(
-        self, ge_cloud_mode: bool = False
-    ) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_checkpoints(self, ge_cloud_mode: bool = False) -> Union[List[str], List[ConfigurationIdentifier]]:
         keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:
             return keys
@@ -85,9 +81,7 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.get_key(
-            name=name, id=id
-        )
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.get_key(name=name, id=id)
         try:
             self.remove_key(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
@@ -95,9 +89,7 @@ class CheckpointStore(ConfigurationStore):
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
-    def get_checkpoint(
-        self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]
-    ) -> CheckpointConfig:
+    def get_checkpoint(self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]) -> CheckpointConfig:
         key: GXCloudIdentifier | ConfigurationIdentifier
         if not isinstance(name, ConfigurationIdentifier):
             key = self.get_key(name=name, id=id)
@@ -134,17 +126,11 @@ class CheckpointStore(ConfigurationStore):
         """
         key = self._construct_key_from_checkpoint(checkpoint)
         try:
-            return self._persist_checkpoint(
-                key=key, checkpoint=checkpoint, persistence_fn=self.add
-            )
+            return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.add)
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.CheckpointError(
-                f"A Checkpoint named {checkpoint.name} already exists."
-            )
+            raise gx_exceptions.CheckpointError(f"A Checkpoint named {checkpoint.name} already exists.")
 
-    def update_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> Checkpoint | CheckpointConfig:
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to update a persisted value.
 
         Args:
@@ -158,17 +144,13 @@ class CheckpointStore(ConfigurationStore):
         """
         key = self._construct_key_from_checkpoint(checkpoint)
         try:
-            return self._persist_checkpoint(
-                key=key, checkpoint=checkpoint, persistence_fn=self.update
-            )
+            return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.update)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.CheckpointNotFoundError(
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
 
-    def add_or_update_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> Checkpoint | CheckpointConfig:
+    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to either add or update a persisted value.
 
         Args:
@@ -178,13 +160,9 @@ class CheckpointStore(ConfigurationStore):
             The persisted Checkpoint (possibly modified state based on store backend).
         """
         key = self._construct_key_from_checkpoint(checkpoint)
-        return self._persist_checkpoint(
-            key=key, checkpoint=checkpoint, persistence_fn=self.add_or_update
-        )
+        return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.add_or_update)
 
-    def _construct_key_from_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> GXCloudIdentifier | ConfigurationIdentifier:
+    def _construct_key_from_checkpoint(self, checkpoint: Checkpoint) -> GXCloudIdentifier | ConfigurationIdentifier:
         name = checkpoint.name
         id = checkpoint.id
         if id:
@@ -200,9 +178,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudResourceRef):
             # return CheckpointConfig from cloud POST response to account for any defaults/new ids added in cloud
-            checkpoint_config = checkpoint_ref.response["data"]["attributes"][
-                "checkpoint_config"
-            ]
+            checkpoint_config = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"]
             checkpoint_config["id"] = checkpoint_config.pop("id")
             return self.deserialize(checkpoint_config)
         elif self.cloud_mode:
@@ -229,9 +205,7 @@ class CheckpointStore(ConfigurationStore):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(
-            key, checkpoint_config
-        )  # type: ignore[func-returns-value]
+        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 

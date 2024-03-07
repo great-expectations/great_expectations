@@ -135,14 +135,10 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str = cls._get_strict_min_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_least_str = cls._get_strict_min_string(renderer_configuration=renderer_configuration)
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str = cls._get_strict_max_string(
-                    renderer_configuration=renderer_configuration
-                )
+                at_most_str = cls._get_strict_max_string(renderer_configuration=renderer_configuration)
 
             if params.min_value and params.max_value:
                 template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
@@ -170,9 +166,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

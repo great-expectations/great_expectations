@@ -32,9 +32,7 @@ class ReconciliationDirectives(SerializableDictDot):
     variables: ReconciliationStrategy = ReconciliationStrategy.UPDATE
     domain_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
     parameter_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    expectation_configuration_builder: ReconciliationStrategy = (
-        ReconciliationStrategy.UPDATE
-    )
+    expectation_configuration_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
 
     @override
     def to_dict(self) -> dict:

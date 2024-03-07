@@ -99,9 +99,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         template_str = "values must be parseable as JSON"
 
         if params.mostly and params.mostly.value < 1.0:
-            renderer_configuration = cls._add_mostly_pct_param(
-                renderer_configuration=renderer_configuration
-            )
+            renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
@@ -124,9 +122,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -136,9 +132,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         template_str = "values must be parseable as JSON"
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

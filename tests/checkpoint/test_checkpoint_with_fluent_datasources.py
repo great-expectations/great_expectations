@@ -48,7 +48,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -63,12 +65,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -83,7 +81,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -101,12 +101,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     assert len(data_context.validations_store.list_keys()) == 0
@@ -117,11 +113,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = (
-        data_context.validations_store.list_keys()[0]
-    )
-    validation_result: ExpectationSuiteValidationResult = (
-        data_context.validations_store.get(validation_result_identifier)
+    validation_result_identifier: DataContextKey = data_context.validations_store.list_keys()[0]
+    validation_result: ExpectationSuiteValidationResult = data_context.validations_store.get(
+        validation_result_identifier
     )
 
     assert "checkpoint_name" in validation_result.meta
@@ -135,7 +129,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -162,7 +158,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -190,7 +188,9 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -218,7 +218,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -244,12 +246,10 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
-    validation_result_identifier: ValidationResultIdentifier = (
-        result.list_validation_result_identifiers()[0]
-    )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    validation_result_identifier: ValidationResultIdentifier = result.list_validation_result_identifiers()[0]
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -261,7 +261,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -286,12 +288,10 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
-    validation_result_identifier: ValidationResultIdentifier = (
-        result.list_validation_result_identifiers()[0]
-    )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    validation_result_identifier: ValidationResultIdentifier = result.list_validation_result_identifiers()[0]
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -405,7 +405,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     data_context.add_checkpoint(**checkpoint_config_dict)
@@ -414,9 +416,7 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(
-        result.run_results.values()
-    )[0]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0]["validation_result"]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
@@ -427,7 +427,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request = FluentBatchRequest(
         datasource_name="my_pandas_dataframes_datasource",
@@ -452,7 +454,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request = FluentBatchRequest(
         datasource_name="my_spark_dataframes_datasource",
@@ -508,7 +512,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
 
@@ -592,7 +598,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -620,7 +628,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -707,7 +717,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -738,7 +750,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -801,7 +815,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -834,7 +850,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -901,7 +919,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -929,7 +949,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    )
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -959,7 +981,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -985,18 +1009,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     result = checkpoint.run()
     assert not result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
 
     expectation = gxe.ExpectColumnValuesToBeBetween(
@@ -1011,18 +1025,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         batch_request=batch_request_1,
     )
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 1.75s
@@ -1058,18 +1062,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     result = checkpoint.run()
     assert not result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
     expectation = gxe.ExpectColumnValuesToBeBetween(
@@ -1084,18 +1078,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         batch_request=batch_request_1,
     )
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.35s
@@ -1105,7 +1089,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1132,18 +1118,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
     expectation = gxe.ExpectColumnValuesToBeBetween(
@@ -1163,30 +1139,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.35s
@@ -1223,18 +1179,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
 
@@ -1255,30 +1201,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 1.91s
@@ -1288,7 +1214,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1323,18 +1251,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
@@ -1342,18 +1260,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_suite_name="my_new_expectation_suite",
     )
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 1.91s
@@ -1398,18 +1306,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(
@@ -1417,18 +1315,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         expectation_suite_name="my_new_expectation_suite",
     )
     assert result["success"]
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.46s
@@ -1438,7 +1326,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1465,18 +1355,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
 
@@ -1498,30 +1378,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.slow  # 2.46s
@@ -1558,18 +1418,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
 
     suite = context.suites.add(ExpectationSuite("my_new_expectation_suite"))
 
@@ -1591,30 +1441,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert result["success"] is False
     assert len(result.run_results.values()) == 2
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[0]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 0
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "evaluated_expectations"
-        ]
-        == 1
-    )
-    assert (
-        list(result.run_results.values())[1]["validation_result"]["statistics"][
-            "successful_expectations"
-        ]
-        == 1
-    )
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[0]["validation_result"]["statistics"]["successful_expectations"] == 0
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["evaluated_expectations"] == 1
+    assert list(result.run_results.values())[1]["validation_result"]["statistics"]["successful_expectations"] == 1
 
 
 @pytest.mark.filesystem

@@ -50,9 +50,7 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
     with pytest.raises(TypeError):
-        checkpoint_store.set(
-            key="my_first_checkpoint", value="this is not a checkpoint"
-        )
+        checkpoint_store.set(key="my_first_checkpoint", value="this is not a checkpoint")
 
     assert len(checkpoint_store.list_keys()) == 0
 
@@ -370,9 +368,7 @@ def test_delete_checkpoint(
 
     store.delete_checkpoint(name="my_checkpoint")
 
-    mock_backend.remove_key.assert_called_once_with(
-        ConfigurationIdentifier("my_checkpoint")
-    )
+    mock_backend.remove_key.assert_called_once_with(ConfigurationIdentifier("my_checkpoint"))
 
 
 @pytest.mark.cloud
@@ -401,9 +397,7 @@ def test_delete_checkpoint_with_invalid_key_raises_error(
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         store.delete_checkpoint(name="my_fake_checkpoint")
 
-    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
-        e.value
-    )
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(e.value)
 
 
 @pytest.mark.unit
@@ -434,9 +428,7 @@ def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         store.get_checkpoint(name="my_fake_checkpoint", id=None)
 
-    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
-        e.value
-    )
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(e.value)
 
 
 @pytest.mark.unit

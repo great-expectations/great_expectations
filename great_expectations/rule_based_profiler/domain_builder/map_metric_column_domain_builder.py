@@ -40,12 +40,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
         semantic_type_filter_module_name: Optional[str] = None,
         semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        include_semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
+        exclude_semantic_types: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]] = None,
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
@@ -114,9 +110,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         self._map_metric_name = map_metric_name
         self._max_unexpected_values = max_unexpected_values
         self._max_unexpected_ratio = max_unexpected_ratio
-        self._min_max_unexpected_values_proportion = (
-            min_max_unexpected_values_proportion
-        )
+        self._min_max_unexpected_values_proportion = min_max_unexpected_values_proportion
 
     @property
     def map_metric_name(self) -> str:
@@ -169,25 +163,21 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_unexpected_ratio: Optional[float] = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.max_unexpected_ratio,
-                expected_return_type=None,
-                variables=variables,
-                parameters=None,
-            )
+        max_unexpected_ratio: Optional[float] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_unexpected_ratio,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
         )
 
         # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        min_max_unexpected_values_proportion: float = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.min_max_unexpected_values_proportion,
-                expected_return_type=float,
-                variables=variables,
-                parameters=None,
-            )
+        min_max_unexpected_values_proportion: float = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.min_max_unexpected_values_proportion,
+            expected_return_type=float,
+            variables=variables,
+            parameters=None,
         )
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
@@ -207,9 +197,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             runtime_configuration=runtime_configuration,
         )
-        mean_table_row_count_as_float: float = (
-            1.0 * sum(table_row_counts.values()) / num_batch_ids
-        ) + NP_EPSILON
+        mean_table_row_count_as_float: float = (1.0 * sum(table_row_counts.values()) / num_batch_ids) + NP_EPSILON
 
         # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.
         if max_unexpected_ratio is None:
@@ -223,15 +211,13 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             )
         )
 
-        candidate_column_names: List[str] = (
-            self._get_column_names_satisfying_tolerance_limits(
-                validator=validator,
-                num_batch_ids=num_batch_ids,
-                metric_configurations_by_column_name=metric_configurations_by_column_name,
-                mean_table_row_count_as_float=mean_table_row_count_as_float,
-                max_unexpected_ratio=max_unexpected_ratio,
-                min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
-            )
+        candidate_column_names: List[str] = self._get_column_names_satisfying_tolerance_limits(
+            validator=validator,
+            num_batch_ids=num_batch_ids,
+            metric_configurations_by_column_name=metric_configurations_by_column_name,
+            mean_table_row_count_as_float=mean_table_row_count_as_float,
+            max_unexpected_ratio=max_unexpected_ratio,
+            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
         )
 
         column_name: str
@@ -310,19 +296,18 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
-        resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
-        ] = get_resolved_metrics_by_key(
-            validator=validator,
-            metric_configurations_by_key=metric_configurations_by_column_name,
-            runtime_configuration=runtime_configuration,
+        resolved_metrics_by_column_name: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = (
+            get_resolved_metrics_by_key(
+                validator=validator,
+                metric_configurations_by_key=metric_configurations_by_column_name,
+                runtime_configuration=runtime_configuration,
+            )
         )
 
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
-                (metric_value or 0.0) / mean_table_row_count_as_float
-                for metric_value in resolved_metrics.values()
+                (metric_value or 0.0) / mean_table_row_count_as_float for metric_value in resolved_metrics.values()
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
         }
@@ -330,17 +315,12 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         metric_value_ratios: List[float]
         metric_value_ratio: float
         intra_batch_adherence_by_column_name: Dict[str, List[bool]] = {
-            column_name: [
-                metric_value_ratio <= max_unexpected_ratio
-                for metric_value_ratio in metric_value_ratios
-            ]
+            column_name: [metric_value_ratio <= max_unexpected_ratio for metric_value_ratio in metric_value_ratios]
             for column_name, metric_value_ratios in intra_batch_unexpected_ratios_by_column_name.items()
         }
 
         inter_batch_adherence_by_column_name: Dict[str, float] = {
-            column_name: 1.0
-            * sum(intra_batch_adherence_by_column_name[column_name])
-            / num_batch_ids
+            column_name: 1.0 * sum(intra_batch_adherence_by_column_name[column_name]) / num_batch_ids
             for column_name in intra_batch_adherence_by_column_name.keys()
         }
 
@@ -348,8 +328,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         candidate_column_names: List[str] = [
             column_name
             for column_name, inter_batch_unexpected_values_proportion in inter_batch_adherence_by_column_name.items()
-            if inter_batch_unexpected_values_proportion
-            >= min_max_unexpected_values_proportion
+            if inter_batch_unexpected_values_proportion >= min_max_unexpected_values_proportion
         ]
 
         return candidate_column_names

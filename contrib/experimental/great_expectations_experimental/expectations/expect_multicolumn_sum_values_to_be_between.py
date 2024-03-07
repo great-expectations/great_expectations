@@ -53,12 +53,8 @@ class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvide
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, min_value, max_value, **kwargs):
         columns_to_sum = column_list.columns
-        return (
-            functools.reduce(operator.add, [F.col(column) for column in columns_to_sum])
-            >= F.lit(min_value)
-        ) & (
-            functools.reduce(operator.add, [F.col(column) for column in columns_to_sum])
-            <= F.lit(max_value)
+        return (functools.reduce(operator.add, [F.col(column) for column in columns_to_sum]) >= F.lit(min_value)) & (
+            functools.reduce(operator.add, [F.col(column) for column in columns_to_sum]) <= F.lit(max_value)
         )
 
 

@@ -43,8 +43,8 @@ def validation_operator_result():
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result["validation_result"] = (
-                ExpectationSuiteValidationResultSchema().load(validation_result["validation_result"])
+            validation_result["validation_result"] = ExpectationSuiteValidationResultSchema().load(
+                validation_result["validation_result"]
             )
         return validation_operator_result
 
@@ -59,12 +59,8 @@ def expectation_suite_to_render_with_notes():
                 expectation_type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
+            ExpectationConfiguration(expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
                 expectation_type="expect_column_distinct_values_to_be_in_set",
                 kwargs={"column": "irrationals", "value_set": ["*", "1st", "2nd"]},
@@ -112,9 +108,7 @@ def test_render_section_page():
         }
     )
 
-    rendered_doc = gx.render.view.view.DefaultMarkdownPageView().render(
-        RenderedDocumentContent(sections=[section])
-    )
+    rendered_doc = gx.render.view.view.DefaultMarkdownPageView().render(RenderedDocumentContent(sections=[section]))
 
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
 
@@ -144,14 +138,10 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     """
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
-    rendered_document_content_list = (
-        validation_results_page_renderer.render_validation_operator_result(
-            validation_operator_result=validation_operator_result
-        )
+    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+        validation_operator_result=validation_operator_result
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -312,14 +302,10 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
-    rendered_document_content_list = (
-        validation_results_page_renderer.render_validation_operator_result(
-            validation_operator_result=validation_operator_result
-        )
+    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
+        validation_operator_result=validation_operator_result
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -473,9 +459,7 @@ Powered by [Great Expectations](https://greatexpectations.io/)
 
 def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_notes):
     expectation_suite_page_renderer = ExpectationSuitePageRenderer()
-    rendered_document_content_list = expectation_suite_page_renderer.render(
-        expectation_suite_to_render_with_notes
-    )
+    rendered_document_content_list = expectation_suite_page_renderer.render(expectation_suite_to_render_with_notes)
     md_str = DefaultMarkdownPageView().render(rendered_document_content_list)
     md_str = " ".join(md_str)
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")

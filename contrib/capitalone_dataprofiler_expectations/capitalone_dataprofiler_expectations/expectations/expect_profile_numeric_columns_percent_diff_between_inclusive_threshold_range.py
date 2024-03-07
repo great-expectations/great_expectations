@@ -25,9 +25,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(
-    DataProfilerProfileMetricProvider
-):
+class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(DataProfilerProfileMetricProvider):
     metric_name = "data_profiler.profile_numeric_columns_percent_diff_between_inclusive_threshold_range"
 
     value_keys = (
@@ -69,9 +67,7 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
 
             # adds stats if generic stat key is provided
             numerical_diff_statistics_copy = copy.deepcopy(numerical_diff_statistics)
-            stats = replace_generic_operator_in_report_keys(
-                stats, numerical_diff_statistics_copy
-            )
+            stats = replace_generic_operator_in_report_keys(stats, numerical_diff_statistics_copy)
 
             if col not in columns:  # Makes sure column exists within profile schema
                 requested_columns[col] = "Column requested was not found."
@@ -90,18 +86,13 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
                     requested_columns[col][stat] = "Statistic requested was not found."
                     continue
                 diff_val = col_data_stats[stat]
-                if (
-                    diff_val == "ERR_divide_by_zero"
-                    or diff_val == "ERR_no_original_value"
-                ):
+                if diff_val == "ERR_divide_by_zero" or diff_val == "ERR_no_original_value":
                     unavailable_stats[col][stat] = diff_val
                     requested_columns[col][stat] = diff_val
                     continue
                 if diff_val == "unchanged":  # In the case there is no delta
                     diff_val = 0
-                between_bounds = is_value_between_bounds(
-                    diff_val, bounds["lower"], bounds["upper"], inclusive=True
-                )
+                between_bounds = is_value_between_bounds(diff_val, bounds["lower"], bounds["upper"], inclusive=True)
                 if not between_bounds:
                     requested_columns[col][stat] = {
                         "lower_bound": bounds["lower"],
@@ -134,10 +125,14 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
                 for div_by_zero_stat in div_by_zero_stats:
                     warning += "   " + div_by_zero_stat + "\n"
             if len(no_original_value) > 0:
-                warning += "Value not Found ERROR:\nStatistic was not found in profile report for the following column: stat\n"
+                warning += (
+                    "Value not Found ERROR:\nStatistic was not found in profile report for the following column: stat\n"
+                )
                 for no_original_value_string in no_original_value:
                     warning += "   " + no_original_value_string + "\n"
-            warning += "\nTo avoid these errors, you should use the replace 'limit_check_report_keys' with the following:\n"
+            warning += (
+                "\nTo avoid these errors, you should use the replace 'limit_check_report_keys' with the following:\n"
+            )
             warning += r"" + json.dumps(limit_check_report_keys_copy, indent=2)
             warning += "\n"
             warnings.warn(warning)
@@ -162,10 +157,7 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
             runtime_configuration=runtime_configuration,
         )
 
-        if (
-            metric.metric_name
-            == "data_profiler.profile_numeric_columns_percent_diff_between_inclusive_threshold_range"
-        ):
+        if metric.metric_name == "data_profiler.profile_numeric_columns_percent_diff_between_inclusive_threshold_range":
             dependencies["data_profiler.profile_percent_diff"] = MetricConfiguration(
                 metric_name="data_profiler.profile_percent_diff",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
@@ -180,9 +172,7 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
         return dependencies
 
 
-class ExpectProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(
-    ProfileNumericColumnsDiffExpectation
-):
+class ExpectProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(ProfileNumericColumnsDiffExpectation):
     """Expect a statistic's percent delta for a given column of a DataProfiler percent difference report to be within the specified threshold, inclusive.
 
     This expectation takes the percent difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
@@ -231,9 +221,7 @@ class ExpectProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(
 
     example_profile = dp.Profiler(df, options=profiler_opts)
 
-    profile_path = (
-        "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
-    )
+    profile_path = "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
 
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path

@@ -105,23 +105,15 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list(
-                data_asset_name=data_asset_name
-            ):
-                mapped_batch_definition_list: List[BatchDefinition] = (
-                    self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-                        data_reference=data_reference,
-                        data_asset_name=data_asset_name,
-                    )
+            for data_reference in self._get_data_reference_list(data_asset_name=data_asset_name):
+                mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                    data_reference=data_reference,
+                    data_asset_name=data_asset_name,
                 )
-                self._data_references_cache[data_asset_name][data_reference] = (
-                    mapped_batch_definition_list
-                )
+                self._data_references_cache[data_asset_name][data_reference] = mapped_batch_definition_list
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
@@ -140,8 +132,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             number of data_references known by this DataConnector.
         """
         total_references: int = sum(
-            len(self._data_references_cache[data_asset_name])
-            for data_asset_name in self._data_references_cache
+            len(self._data_references_cache[data_asset_name]) for data_asset_name in self._data_references_cache
         )
 
         return total_references
@@ -160,9 +151,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             data_asset_name,
             data_reference_sub_cache,
         ) in self._data_references_cache.items():
-            unmatched_data_references += [
-                k for k, v in data_reference_sub_cache.items() if v is None
-            ]
+            unmatched_data_references += [k for k, v in data_reference_sub_cache.items() if v is None]
 
         return unmatched_data_references
 
@@ -177,9 +166,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return batch_definition_list
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -206,11 +193,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
         asset: Optional[Asset] = None
-        if (
-            data_asset_name is not None
-            and self.assets
-            and data_asset_name in self.assets
-        ):
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
 
         return asset
@@ -243,15 +226,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             batch_spec_passthrough = deepcopy(
                 self.assets[data_asset_name]["batch_spec_passthrough"]  # type: ignore[index]
             )
-            batch_definition_batch_spec_passthrough = (
-                deepcopy(batch_definition.batch_spec_passthrough) or {}
-            )
+            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
             # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return batch_spec

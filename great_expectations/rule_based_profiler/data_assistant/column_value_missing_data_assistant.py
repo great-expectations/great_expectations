@@ -90,9 +90,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         ]
 
     @override
-    def _build_data_assistant_result(
-        self, data_assistant_result: DataAssistantResult
-    ) -> DataAssistantResult:
+    def _build_data_assistant_result(self, data_assistant_result: DataAssistantResult) -> DataAssistantResult:
         return ColumnValueMissingDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
@@ -136,8 +134,12 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
 
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+            column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
+        )
+        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        )
 
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
@@ -155,9 +157,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ParameterBuilderConfig(
                 **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
-            ParameterBuilderConfig(
-                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
-            ),
+            ParameterBuilderConfig(**total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()),
         ]
 
         mode = "unexpected_count_fraction_values"
@@ -219,9 +219,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ParameterBuilderConfig(
                 **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
-            ParameterBuilderConfig(
-                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
-            ),
+            ParameterBuilderConfig(**total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()),
         ]
 
         mode = "unexpected_count_fraction_values"

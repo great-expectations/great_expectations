@@ -102,9 +102,7 @@ def _build_table_columns_and_unexpected(
     unexpected_condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    metrics = engine.resolve_metrics(
-        metrics_to_resolve=(unexpected_condition_metric,), metrics=metrics
-    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(unexpected_condition_metric,), metrics=metrics)
 
     return table_columns_metric, unexpected_condition_metric, metrics
 
@@ -185,9 +183,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
 
 
 @pytest.mark.unit
-def test_pd_unexpected_index_list_metric_with_id_pk(
-    metric_value_kwargs_complete, animal_table_df
-):
+def test_pd_unexpected_index_list_metric_with_id_pk(metric_value_kwargs_complete, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
@@ -261,9 +257,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
 
 
 @pytest.mark.unit
-def test_sa_unexpected_index_list_metric_with_id_pk(
-    sa, animal_table_df, metric_value_kwargs_complete
-):
+def test_sa_unexpected_index_list_metric_with_id_pk(sa, animal_table_df, metric_value_kwargs_complete):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
@@ -372,9 +366,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
 
 
 @pytest.mark.unit
-def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
-    sa, animal_table_df
-):
+def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(sa, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -410,9 +402,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
 
 
 @pytest.mark.unit
-def test_sa_unexpected_index_query_metric_with_id_pk(
-    sa, animal_table_df, metric_value_kwargs_complete
-):
+def test_sa_unexpected_index_query_metric_with_id_pk(sa, animal_table_df, metric_value_kwargs_complete):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
@@ -483,12 +473,8 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
 
 
 @pytest.mark.spark
-def test_spark_unexpected_index_list_metric_with_id_pk(
-    spark_session, animal_table_df, metric_value_kwargs_complete
-):
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+def test_spark_unexpected_index_list_metric_with_id_pk(spark_session, animal_table_df, metric_value_kwargs_complete):
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
 
     (
         table_columns_metric,
@@ -517,9 +503,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk(
 
 
 @pytest.mark.spark
-def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
-    spark_session, animal_table_df
-):
+def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(spark_session, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
@@ -532,9 +516,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
         },
     }
 
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
 
     (
         table_columns_metric,
@@ -561,9 +543,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
 
 
 @pytest.mark.spark
-def test_spark_unexpected_index_list_metric_without_id_pk(
-    spark_session, animal_table_df
-):
+def test_spark_unexpected_index_list_metric_without_id_pk(spark_session, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
@@ -574,9 +554,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
         },
     }
 
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -599,9 +577,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
 
 
 @pytest.mark.spark
-def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
-    spark_session, animal_table_df
-):
+def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(spark_session, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
@@ -613,9 +589,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
         },
     }
 
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -638,9 +612,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
 
 
 @pytest.mark.big
-def test_pd_unexpected_index_query_metric_with_id_pk(
-    animal_table_df, metric_value_kwargs_complete
-):
+def test_pd_unexpected_index_query_metric_with_id_pk(animal_table_df, metric_value_kwargs_complete):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
     engine: PandasExecutionEngine = build_pandas_engine(df=df)
@@ -704,14 +676,10 @@ def test_pd_unexpected_index_query_metric_without_id_pk(
 
 
 @pytest.mark.big
-def test_spark_unexpected_index_query_metric_with_id_pk(
-    spark_session, animal_table_df, metric_value_kwargs_complete
-):
+def test_spark_unexpected_index_query_metric_with_id_pk(spark_session, animal_table_df, metric_value_kwargs_complete):
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -730,10 +698,7 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for val in results.values():
-        assert (
-            val
-            == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
-        )
+        assert val == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
 
 
 @pytest.mark.big
@@ -750,9 +715,7 @@ def test_spark_unexpected_index_query_metric_without_id_pk(
         },
     }
 
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session, df=animal_table_df, batch_id="my_id"
-    )
+    engine: SparkDFExecutionEngine = build_spark_engine(spark=spark_session, df=animal_table_df, batch_id="my_id")
 
     (
         table_columns_metric,
@@ -772,7 +735,4 @@ def test_spark_unexpected_index_query_metric_without_id_pk(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for val in results.values():
-        assert (
-            val
-            == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
-        )
+        assert val == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"

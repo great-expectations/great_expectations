@@ -39,9 +39,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         key = self._store.get_key(name=checkpoint.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(
-                f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
-            )
+            raise DataContextError(f"Cannot add Checkpoint with name {checkpoint.name} because it already exists.")
 
         self._store.add(key=key, value=checkpoint.get_config())
 
@@ -61,9 +59,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         key = self._store.get_key(name=checkpoint.name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(
-                f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found."
-            )
+            raise DataContextError(f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found.")
 
         self._store.remove_key(key=key)
         return checkpoint

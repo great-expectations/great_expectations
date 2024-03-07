@@ -23,9 +23,7 @@ class SlackRenderer(Renderer):
         if validation_result_urls is None:
             validation_result_urls = []
 
-        default_text = (
-            "No validation occurred. Please ensure you passed a validation_result."
-        )
+        default_text = "No validation occurred. Please ensure you passed a validation_result."
         status = "Failed :x:"
 
         failed_expectations_text = ""
@@ -65,21 +63,15 @@ class SlackRenderer(Renderer):
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
-            batch_id = BatchKwargs(
-                validation_result.meta.get("batch_kwargs", {})
-            ).to_id()
-            check_details_text = (
-                f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
-            )
+            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
+            check_details_text = f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
 
             if validation_result.success:
                 status = "Success :tada:"
 
             else:  # noqa: PLR5501
                 if show_failed_expectations:
-                    failed_expectations_text = self.create_failed_expectations_text(
-                        validation_result["results"]
-                    )
+                    failed_expectations_text = self.create_failed_expectations_text(validation_result["results"])
             summary_text = ""
             if validation_result_urls:
                 # This adds hyperlinks for defined URL
@@ -211,9 +203,7 @@ class SlackRenderer(Renderer):
                 )
                 return
         else:
-            logger.warning(
-                "No docs link found. Skipping data docs link in Slack message."
-            )
+            logger.warning("No docs link found. Skipping data docs link in Slack message.")
         return report_element
 
     def create_failed_expectations_text(self, validation_results: list[dict]) -> str:
@@ -222,25 +212,17 @@ class SlackRenderer(Renderer):
             if not expectation["success"]:
                 expectation_name = expectation["expectation_config"]["expectation_type"]
                 expectation_kwargs = expectation["expectation_config"]["kwargs"]
-                failed_expectations_str += self.create_failed_expectation_text(
-                    expectation_kwargs, expectation_name
-                )
+                failed_expectations_str += self.create_failed_expectation_text(expectation_kwargs, expectation_name)
         return failed_expectations_str
 
-    def create_failed_expectation_text(
-        self, expectation_kwargs, expectation_name
-    ) -> str:
-        expectation_entity = self.get_failed_expectation_domain(
-            expectation_name, expectation_kwargs
-        )
+    def create_failed_expectation_text(self, expectation_kwargs, expectation_name) -> str:
+        expectation_entity = self.get_failed_expectation_domain(expectation_name, expectation_kwargs)
         if expectation_entity:
             return f":x:{expectation_name} ({expectation_entity})\n"
         return f":x:{expectation_name}\n"
 
     @staticmethod
-    def get_failed_expectation_domain(
-        expectation_name, expectation_config_kwargs: dict
-    ) -> str:
+    def get_failed_expectation_domain(expectation_name, expectation_config_kwargs: dict) -> str:
         if "expect_table_" in expectation_name:
             return "Table"
 

@@ -29,8 +29,5 @@ def test_ColumnsExistProfiler():
     expectations_config, _evr_config = ColumnsExistProfiler.profile(toy_dataset)
 
     assert len(expectations_config.expectations) == 1
-    assert (
-        expectations_config.expectation_configurations[0].expectation_type
-        == "expect_column_to_exist"
-    )
+    assert expectations_config.expectation_configurations[0].expectation_type == "expect_column_to_exist"
     assert expectations_config.expectation_configurations[0].kwargs["column"] == "x"

@@ -73,9 +73,7 @@ class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwa
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "dataset" not in self:
-            raise InvalidBatchKwargsError(
-                "InMemoryBatchKwargs requires a 'dataset' element"
-            )
+            raise InvalidBatchKwargsError("InMemoryBatchKwargs requires a 'dataset' element")
 
     @property
     def dataset(self):
@@ -88,9 +86,7 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
         import pandas as pd
 
         if not isinstance(self["dataset"], pd.DataFrame):
-            raise InvalidBatchKwargsError(
-                "PandasDatasourceInMemoryBatchKwargs 'dataset' must be a pandas DataFrame"
-            )
+            raise InvalidBatchKwargsError("PandasDatasourceInMemoryBatchKwargs 'dataset' must be a pandas DataFrame")
 
 
 class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
@@ -104,18 +100,14 @@ class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
             )
 
         if not (pyspark.DataFrame and isinstance(self["dataset"], pyspark.DataFrame)):  # type: ignore[truthy-function]
-            raise InvalidBatchKwargsError(
-                "SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame"
-            )
+            raise InvalidBatchKwargsError("SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame")
 
 
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "table" not in self:
-            raise InvalidBatchKwargsError(
-                "SqlAlchemyDatasourceTableBatchKwargs requires a 'table' element"
-            )
+            raise InvalidBatchKwargsError("SqlAlchemyDatasourceTableBatchKwargs requires a 'table' element")
 
     @property
     def table(self):
@@ -126,9 +118,7 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "query" not in self:
-            raise InvalidBatchKwargsError(
-                "SqlAlchemyDatasourceQueryBatchKwargs requires a 'query' element"
-            )
+            raise InvalidBatchKwargsError("SqlAlchemyDatasourceQueryBatchKwargs requires a 'query' element")
 
     @property
     def query(self):
@@ -143,9 +133,7 @@ class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "query" not in self:
-            raise InvalidBatchKwargsError(
-                "SparkDFDatasourceQueryBatchKwargs requires a 'query' element"
-            )
+            raise InvalidBatchKwargsError("SparkDFDatasourceQueryBatchKwargs requires a 'query' element")
 
     @property
     def query(self):

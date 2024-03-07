@@ -29,9 +29,7 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     )
     data_path = os.path.join(context_path, "../data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    titanic_yml_path = file_relative_path(
-        __file__, "./fixtures/great_expectations_titanic_0.13.yml"
-    )
+    titanic_yml_path = file_relative_path(__file__, "./fixtures/great_expectations_titanic_0.13.yml")
     shutil.copy(
         titanic_yml_path,
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
@@ -75,14 +73,8 @@ def get_set_of_columns_and_expectations_from_suite(
     Returns:
         A tuple containing a set of columns and a set of expectations found in a suite
     """
-    columns: Set[str] = {
-        i.kwargs.get("column")
-        for i in suite.expectation_configurations
-        if i.kwargs.get("column")
-    }
-    expectations: Set[str] = {
-        i.expectation_type for i in suite.expectation_configurations
-    }
+    columns: Set[str] = {i.kwargs.get("column") for i in suite.expectation_configurations if i.kwargs.get("column")}
+    expectations: Set[str] = {i.expectation_type for i in suite.expectation_configurations}
 
     return columns, expectations
 

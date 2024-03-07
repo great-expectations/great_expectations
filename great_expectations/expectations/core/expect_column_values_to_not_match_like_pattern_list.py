@@ -75,9 +75,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         cls, like_pattern_list: list[str] | EvaluationParameterDict
     ) -> list[str] | EvaluationParameterDict:
         if len(like_pattern_list) < 1:
-            raise ValueError(
-                "At least one like_pattern must be supplied in the like_pattern_list."
-            )
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         return like_pattern_list
 
@@ -120,30 +118,19 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
             ["column", "like_pattern_list", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
 
-        if (
-            not params.get("like_pattern_list")
-            or len(params.get("like_pattern_list")) == 0
-        ):
+        if not params.get("like_pattern_list") or len(params.get("like_pattern_list")) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["like_pattern_list"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["like_pattern_list"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["like_pattern_list"])])
 
-        template_str = (
-            "Values must not match the following like patterns: " + values_string
-        )
+        template_str = "Values must not match the following like patterns: " + values_string
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."

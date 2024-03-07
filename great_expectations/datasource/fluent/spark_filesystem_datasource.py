@@ -23,9 +23,7 @@ logger = logging.getLogger(__name__)
 @public_api
 class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = (
-        FilesystemDataConnector
-    )
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = FilesystemDataConnector
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",
@@ -50,9 +48,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         """
         # tests Filesystem connection
         if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"base_directory path: {self.base_directory.resolve()} does not exist."
-            )
+            raise TestConnectionError(f"base_directory path: {self.base_directory.resolve()} does not exist.")
 
         # tests Spark connection, raising TestConnectionError
         super().test_connection()
@@ -70,9 +66,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
-                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
-            )
+            raise TypeError(f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}")
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
@@ -84,11 +78,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         )
 
         # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
-            self.data_connector_type.build_test_connection_error_message(
-                data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
-                glob_directive=glob_directive,
-                base_directory=self.base_directory,
-            )
+        data_asset._test_connection_error_message = self.data_connector_type.build_test_connection_error_message(
+            data_asset_name=data_asset.name,
+            batching_regex=data_asset.batching_regex,
+            glob_directive=glob_directive,
+            base_directory=self.base_directory,
         )

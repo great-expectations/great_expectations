@@ -51,9 +51,7 @@ expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name=expectation_suite_name
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name=expectation_suite_name)
 
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)

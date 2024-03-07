@@ -169,12 +169,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if params.mostly and params.mostly.value < 1.0:
-            renderer_configuration = cls._add_mostly_pct_param(
-                renderer_configuration=renderer_configuration
-            )
-            template_str = (
-                "values must be of type $type_, at least $mostly_pct % of the time."
-            )
+            renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
+            template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
 
@@ -197,9 +193,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
 
         kwargs = configuration.kwargs if configuration is not None else {}
@@ -210,13 +204,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str = (
-                "values must be of type $type_, at least $mostly_pct % of the time."
-            )
+            template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
 
@@ -299,8 +289,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 # bigquery geography requires installing an extra package
                 if (
                     expected_type.lower() == "geography"
-                    and execution_engine.engine.dialect.name.lower()
-                    == GXSqlDialect.BIGQUERY
+                    and execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(
@@ -309,9 +298,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         + "  $ pip install 'sqlalchemy-bigquery[geography]'"
                     )
                 elif type_module.__name__ == "pyathena.sqlalchemy_athena":
-                    potential_type = get_pyathena_potential_type(
-                        type_module, expected_type
-                    )
+                    potential_type = get_pyathena_potential_type(type_module, expected_type)
                     # In the case of the PyAthena dialect we need to verify that
                     # the type returned is indeed a type and not an instance.
                     if not inspect.isclass(potential_type):
@@ -320,12 +307,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         real_type = potential_type
                     types.append(real_type)
                 elif type_module.__name__ == "clickhouse_sqlalchemy.drivers.base":
-                    actual_column_type = get_clickhouse_sqlalchemy_potential_type(
-                        type_module, actual_column_type
-                    )()
-                    potential_type = get_clickhouse_sqlalchemy_potential_type(
-                        type_module, expected_type
-                    )
+                    actual_column_type = get_clickhouse_sqlalchemy_potential_type(type_module, actual_column_type)()
+                    potential_type = get_clickhouse_sqlalchemy_potential_type(type_module, expected_type)
                     types.append(potential_type)
                 else:
                     potential_type = getattr(type_module, expected_type)
@@ -333,9 +316,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
-                logger.warning(
-                    "No recognized sqlalchemy types in type_list for current dialect."
-                )
+                logger.warning("No recognized sqlalchemy types in type_list for current dialect.")
             types = tuple(types)
             success = isinstance(actual_column_type, types)
 
@@ -384,9 +365,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
-        validation_dependencies: ValidationDependencies = super(
-            ColumnMapExpectation, self
-        ).get_validation_dependencies(execution_engine, runtime_configuration)
+        validation_dependencies: ValidationDependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
+            execution_engine, runtime_configuration
+        )
 
         configuration = self.configuration
 
@@ -408,14 +389,12 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
             )
-            actual_column_types_list = execution_engine.resolve_metrics(
-                [table_column_types_configuration]
-            )[table_column_types_configuration.id]
+            actual_column_types_list = execution_engine.resolve_metrics([table_column_types_configuration])[
+                table_column_types_configuration.id
+            ]
             try:
                 actual_column_type = [
-                    type_dict["type"]
-                    for type_dict in actual_column_types_list
-                    if type_dict["name"] == column_name
+                    type_dict["type"] for type_dict in actual_column_types_list if type_dict["name"] == column_name
                 ][0]
             except IndexError:
                 actual_column_type = None
@@ -433,9 +412,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 ]
             ):
                 # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
-                validation_dependencies = super().get_validation_dependencies(
-                    execution_engine, runtime_configuration
-                )
+                validation_dependencies = super().get_validation_dependencies(execution_engine, runtime_configuration)
 
         # this adds table.column_types dependency for both aggregate and map versions of expectation
         column_types_metric_kwargs = get_metric_kwargs(
@@ -472,9 +449,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         expected_type = configuration.kwargs.get("type_")
         actual_column_types_list = metrics.get("table.column_types", [])
         actual_column_type = [
-            type_dict["type"]
-            for type_dict in actual_column_types_list
-            if type_dict["name"] == column_name
+            type_dict["type"] for type_dict in actual_column_types_list if type_dict["name"] == column_name
         ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
@@ -487,12 +462,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 None,
             ]:
                 # this calls ColumnMapMetric._validate
-                return super()._validate(
-                    metrics, runtime_configuration, execution_engine
-                )
-            return self._validate_pandas(
-                actual_column_type=actual_column_type, expected_type=expected_type
-            )
+                return super()._validate(metrics, runtime_configuration, execution_engine)
+            return self._validate_pandas(actual_column_type=actual_column_type, expected_type=expected_type)
         elif isinstance(execution_engine, SqlAlchemyExecutionEngine):
             return self._validate_sqlalchemy(
                 actual_column_type=actual_column_type,
@@ -500,18 +471,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 execution_engine=execution_engine,
             )
         elif isinstance(execution_engine, SparkDFExecutionEngine):
-            return self._validate_spark(
-                actual_column_type=actual_column_type, expected_type=expected_type
-            )
+            return self._validate_spark(actual_column_type=actual_column_type, expected_type=expected_type)
 
 
 def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
-        logger.warning(
-            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-        )
+        logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
 
     # Redshift does not (yet) export types to top level; only recognize base SA types

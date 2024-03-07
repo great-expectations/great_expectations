@@ -123,13 +123,9 @@ def test_evaluation_parameter_store_methods(
         success=True,
     )
 
-    data_context_parameterized_expectation_suite.store_evaluation_parameters(
-        source_patient_data_results
-    )
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_patient_data_results)
 
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
-    )
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024
@@ -162,12 +158,8 @@ def test_evaluation_parameter_store_methods(
         success=True,
     )
 
-    data_context_parameterized_expectation_suite.store_evaluation_parameters(
-        source_diabetes_data_results
-    )
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
-    )
+    data_context_parameterized_expectation_suite.store_evaluation_parameters(source_diabetes_data_results)
+    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(run_id)
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
@@ -178,11 +170,7 @@ def test_evaluation_parameter_store_methods(
 
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
-    run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
-    )
+    run_id = RunIdentifier(run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         data_asset_name=None,
@@ -215,11 +203,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
-    run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
-    )
+    run_id = RunIdentifier(run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"))
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
         data_asset_name=None,
@@ -264,12 +248,8 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     }
 
 
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
-)
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys")
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.cloud
 def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
@@ -296,12 +276,8 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     assert not mock_parent_list_keys.called
 
 
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
-)
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys")
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
@@ -315,9 +291,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     """
     evaluation_parameter_store = EvaluationParameterStore()
     run_id = RunIdentifier()
-    azure_store = TupleAzureBlobStoreBackend(
-        container="my_container", connection_string="my_connection_string"
-    )
+    azure_store = TupleAzureBlobStoreBackend(container="my_container", connection_string="my_connection_string")
     evaluation_parameter_store._store_backend = azure_store
 
     # Sanity check to ensure neither parent nor child method has been called
@@ -330,12 +304,8 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     assert not mock_parent_list_keys.called
 
 
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
-)
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys")
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,

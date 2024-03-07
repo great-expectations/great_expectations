@@ -111,9 +111,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return self._partitions
 
     @override
-    def build_batch_spec(
-        self, batch_definition: BatchDefinition
-    ) -> GlueDataCatalogBatchSpec:
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> GlueDataCatalogBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -128,24 +126,16 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         if (
             data_asset_name in self.assets
             and self.assets[data_asset_name].get("batch_spec_passthrough")
-            and isinstance(
-                self.assets[data_asset_name].get("batch_spec_passthrough"), dict
-            )
+            and isinstance(self.assets[data_asset_name].get("batch_spec_passthrough"), dict)
         ):
             # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
-            batch_definition_batch_spec_passthrough = (
-                deepcopy(batch_definition.batch_spec_passthrough) or {}
-            )
+            batch_spec_passthrough = deepcopy(self.assets[data_asset_name]["batch_spec_passthrough"])
+            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
             # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return GlueDataCatalogBatchSpec(batch_spec)
 
@@ -171,9 +161,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return []
 
     @override
-    def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequestBase
-    ):
+    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequestBase):
         """
         Retrieve batch_definitions that match batch_request
 
@@ -198,9 +186,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 data_asset_name=batch_request.data_asset_name
             )
         except KeyError:
-            raise KeyError(
-                f"data_asset_name {batch_request.data_asset_name} is not recognized."
-            )
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
 
         for batch_identifiers in sub_cache:
             batch_definition = BatchDefinition(
@@ -215,15 +201,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
-            if (
-                batch_request.limit is not None
-                and data_connector_query_dict.get("limit") is None
-            ):
+            if batch_request.limit is not None and data_connector_query_dict.get("limit") is None:
                 data_connector_query_dict["limit"] = batch_request.limit
 
-            batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=data_connector_query_dict
-            )
+            batch_filter_obj: BatchFilter = build_batch_filter(data_connector_query_dict=data_connector_query_dict)
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
             )
@@ -257,9 +238,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'partitions' must be a list, got {type(partitions)}"
             )
 
-        name = self._update_data_asset_name_from_config(
-            data_asset_name=name, data_asset_config=config
-        )
+        name = self._update_data_asset_name_from_config(data_asset_name=name, data_asset_config=config)
 
         self._assets[name] = config
 
@@ -278,13 +257,9 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 f"ConfiguredAssetAWSGlueDataCatalogDataConnector could not find a table with name: {database_name}.{table_name}"
             )
 
-    def _get_batch_identifiers(
-        self, partition_keys: List[str], database_name: str, table_name: str
-    ) -> List[dict]:
+    def _get_batch_identifiers(self, partition_keys: List[str], database_name: str, table_name: str) -> List[dict]:
         batch_identifiers: List[dict] = []
-        table_partitions: List[str] = self._get_table_partitions(
-            database_name=database_name, table_name=table_name
-        )
+        table_partitions: List[str] = self._get_table_partitions(database_name=database_name, table_name=table_name)
 
         paginator_kwargs: dict = self._get_glue_paginator_kwargs()
         paginator_kwargs["DatabaseName"] = database_name
@@ -295,18 +270,14 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             for partition in page["Partitions"]:
                 partition_values = partition["Values"]
                 batch_id = dict(zip(table_partitions, partition_values))
-                filtered_batch_id = dict(
-                    filter(lambda k: k[0] in partition_keys, batch_id.items())
-                )
+                filtered_batch_id = dict(filter(lambda k: k[0] in partition_keys, batch_id.items()))
 
                 if filtered_batch_id not in batch_identifiers:
                     batch_identifiers.append(filtered_batch_id)
 
         return batch_identifiers
 
-    def _get_batch_identifiers_list_from_data_asset_config(
-        self, data_asset_config: dict
-    ) -> List[dict]:
+    def _get_batch_identifiers_list_from_data_asset_config(self, data_asset_config: dict) -> List[dict]:
         table_name: str = data_asset_config["table_name"]
         database_name: str = data_asset_config["database_name"]
         partitions: Optional[list] = data_asset_config.get("partitions")
@@ -327,33 +298,21 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         for data_asset_name in self.assets:
             data_asset_config: dict = self.assets[data_asset_name]
-            batch_identifiers_list: List[dict] = (
-                self._get_batch_identifiers_list_from_data_asset_config(
-                    data_asset_config=data_asset_config
-                )
+            batch_identifiers_list: List[dict] = self._get_batch_identifiers_list_from_data_asset_config(
+                data_asset_config=data_asset_config
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
     @override
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[dict]:
+    def _get_data_reference_list_from_cache_by_data_asset_name(self, data_asset_name: str) -> List[dict]:
         return self._data_references_cache[data_asset_name]
 
-    def _update_data_asset_name_from_config(
-        self, data_asset_name: str, data_asset_config: dict
-    ) -> str:
-        data_asset_name_prefix: str = data_asset_config.get(
-            "data_asset_name_prefix", ""
-        )
+    def _update_data_asset_name_from_config(self, data_asset_name: str, data_asset_config: dict) -> str:
+        data_asset_name_prefix: str = data_asset_config.get("data_asset_name_prefix", "")
 
-        data_asset_name_suffix: str = data_asset_config.get(
-            "data_asset_name_suffix", ""
-        )
+        data_asset_name_suffix: str = data_asset_config.get("data_asset_name_suffix", "")
 
-        data_asset_name = (
-            f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
-        )
+        data_asset_name = f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
         return data_asset_name
 
     @override
@@ -371,9 +330,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         ]
 
     @override
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _generate_batch_spec_parameters_from_batch_definition(self, batch_definition: BatchDefinition) -> dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
@@ -394,9 +351,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             **data_asset_config,
         }
 
-    def _refresh_data_assets_cache(
-        self, assets: Optional[Dict[str, dict]] = None
-    ) -> None:
+    def _refresh_data_assets_cache(self, assets: Optional[Dict[str, dict]] = None) -> None:
         # Clear assets already stored in memory.
         self._assets = {}
 

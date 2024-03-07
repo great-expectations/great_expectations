@@ -249,9 +249,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def dataframe(self) -> pyspark.DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if self.batch_manager.active_batch_data is None:
-            raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
-            )
+            raise ValueError("Batch has not been loaded - please run load_batch() to load a batch.")
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
@@ -308,11 +306,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         )
 
         if stopped:
-            spark_session = (
-                SparkDFExecutionEngine._start_spark_session_with_spark_config(
-                    spark_session=spark_session,
-                    spark_config=spark_config,
-                )
+            spark_session = SparkDFExecutionEngine._start_spark_session_with_spark_config(
+                spark_session=spark_session,
+                spark_config=spark_config,
             )
 
         return spark_session
@@ -368,15 +364,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 # Py4J Java Error can be raised if the option has not been set on the context at all
                 except py4j.protocol.Py4JJavaError:
                     current_value = None
-                if key != "spark.app.name" and (
-                    current_value != value or current_value is None
-                ):
+                if key != "spark.app.name" and (current_value != value or current_value is None):
                     # attempts to update the runtime config
                     spark_session.conf.set(key, value)
-                elif (
-                    key == "spark.app.name"
-                    and spark_session.sparkContext.appName != value
-                ):
+                elif key == "spark.app.name" and spark_session.sparkContext.appName != value:
                     spark_session.sparkContext.appName = value
             # attribute error can be raised for connect sessions that haven't implemented a conf for sparkContext method
             # analysis exception can be raised in environments that don't allow updating config of that option
@@ -384,9 +375,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 pyspark.PySparkAttributeError,
                 pyspark.AnalysisException,
             ):
-                if SparkDFExecutionEngine._session_is_not_stoppable(
-                    spark_session=spark_session
-                ):
+                if SparkDFExecutionEngine._session_is_not_stoppable(spark_session=spark_session):
                     warning_messages.append(
                         f"Passing spark_config option `{key}` had no effect, because in this environment "
                         "it is not modifiable and the Spark Session cannot be restarted."
@@ -395,8 +384,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                     spark_session.stop()
                     stopped = True
                     warning_messages.append(
-                        f"Spark Session was restarted, because `{key}` "
-                        "is not modifiable in this environment."
+                        f"Spark Session was restarted, because `{key}` " "is not modifiable in this environment."
                     )
                     break
 
@@ -430,11 +418,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
+            {"ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")}
         )
 
         """
@@ -476,9 +460,7 @@ illegal.  Please check your config."""
                         "fs.wasb.impl",
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
-                    self.spark.conf.set(
-                        f"fs.azure.account.key.{storage_account_url}", credential
-                    )
+                    self.spark.conf.set(f"fs.azure.account.key.{storage_account_url}", credential)
                 reader = self.spark.read.options(**reader_options)
                 reader_fn = self._get_reader_fn(
                     reader=reader,
@@ -545,9 +527,7 @@ illegal.  Please check your config."""
                 """
             )
 
-        batch_data = self._apply_partitioning_and_sampling_methods(
-            batch_spec, batch_data
-        )
+        batch_data = self._apply_partitioning_and_sampling_methods(batch_spec, batch_data)
         typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
@@ -564,17 +544,13 @@ illegal.  Please check your config."""
 
         partitioner_method_name: Optional[str] = batch_spec.get("partitioner_method")
         if partitioner_method_name:
-            partitioner_fn: Callable = self._data_partitioner.get_partitioner_method(
-                partitioner_method_name
-            )
+            partitioner_fn: Callable = self._data_partitioner.get_partitioner_method(partitioner_method_name)
             partitioner_kwargs: dict = batch_spec.get("partitioner_kwargs") or {}
             batch_data = partitioner_fn(batch_data, **partitioner_kwargs)
 
         sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
         if sampler_method_name:
-            sampling_fn: Callable = self._data_sampler.get_sampler_method(
-                sampler_method_name
-            )
+            sampling_fn: Callable = self._data_sampler.get_sampler_method(sampler_method_name)
             batch_data = sampling_fn(batch_data, batch_spec)
 
         return batch_data
@@ -596,24 +572,16 @@ illegal.  Please check your config."""
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return "parquet"
 
-        raise ExecutionEngineError(
-            f"Unable to determine reader method from path: {path}"
-        )
+        raise ExecutionEngineError(f"Unable to determine reader method from path: {path}")
 
     @overload
-    def _get_reader_fn(
-        self, reader, reader_method: str = ..., path: Optional[str] = ...
-    ) -> Callable: ...
+    def _get_reader_fn(self, reader, reader_method: str = ..., path: Optional[str] = ...) -> Callable: ...
 
     @overload
-    def _get_reader_fn(
-        self, reader, reader_method: None = ..., path: str = ...
-    ) -> Callable: ...
+    def _get_reader_fn(self, reader, reader_method: None = ..., path: str = ...) -> Callable: ...
 
     def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
@@ -628,9 +596,7 @@ illegal.  Please check your config."""
 
         """
         if reader_method is None and path is None:
-            raise ExecutionEngineError(
-                "Unable to determine spark reader function without reader_method or path"
-            )
+            raise ExecutionEngineError("Unable to determine spark reader function without reader_method or path")
 
         if reader_method is None:
             reader_method = self.guess_reader_method_from_path(path=path)
@@ -666,26 +632,18 @@ illegal.  Please check your config."""
         """
         table = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(
-                "SparkDFExecutionEngine does not currently support multiple named tables."
-            )
+            raise ValueError("SparkDFExecutionEngine does not currently support multiple named tables.")
 
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.batch_manager.active_batch_data:
-                data = cast(
-                    SparkDFBatchData, self.batch_manager.active_batch_data
-                ).dataframe
+                data = cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
             else:
-                raise ValidationError(
-                    "No batch is specified, but could not identify a loaded batch."
-                )
+                raise ValidationError("No batch is specified, but could not identify a loaded batch.")
         else:  # noqa: PLR5501
             if batch_id in self.batch_manager.batch_data_cache:
-                data = cast(
-                    SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
-                ).dataframe
+                data = cast(SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]).dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -704,9 +662,7 @@ illegal.  Please check your config."""
                 )
 
         # Filtering by filter_conditions
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
-            "filter_conditions", []
-        )
+        filter_conditions: List[RowCondition] = domain_kwargs.get("filter_conditions", [])
         if len(filter_conditions) > 0:
             filter_condition = self._combine_row_conditions(filter_conditions)
             data = data.filter(filter_condition.condition)
@@ -715,11 +671,7 @@ illegal.  Please check your config."""
             return data
 
         # Filtering by ignore_row_if directive
-        if (
-            "column_A" in domain_kwargs
-            and "column_B" in domain_kwargs
-            and "ignore_row_if" in domain_kwargs
-        ):
+        if "column_A" in domain_kwargs and "column_B" in domain_kwargs and "ignore_row_if" in domain_kwargs:
             # noinspection PyPep8Naming
             column_A_name = domain_kwargs["column_A"]
             # noinspection PyPep8Naming
@@ -727,20 +679,14 @@ illegal.  Please check your config."""
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
-                ignore_condition = (
-                    F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
-                )
+                ignore_condition = F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
                 data = data.filter(~ignore_condition)
             elif ignore_row_if == "either_value_is_missing":
-                ignore_condition = (
-                    F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
-                )
+                ignore_condition = F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
-                    raise ValueError(
-                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -748,22 +694,16 @@ illegal.  Please check your config."""
             column_list = domain_kwargs["column_list"]
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
-                conditions = [
-                    F.col(column_name).isNull() for column_name in column_list
-                ]
+                conditions = [F.col(column_name).isNull() for column_name in column_list]
                 ignore_condition = reduce(lambda a, b: a & b, conditions)
                 data = data.filter(~ignore_condition)
             elif ignore_row_if == "any_value_is_missing":
-                conditions = [
-                    F.col(column_name).isNull() for column_name in column_list
-                ]
+                conditions = [F.col(column_name).isNull() for column_name in column_list]
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "never":
-                    raise ValueError(
-                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -784,16 +724,11 @@ illegal.  Please check your config."""
             Single Row Condition combined
         """
         assert all(
-            condition.condition_type == RowConditionParserType.SPARK_SQL
-            for condition in row_conditions
+            condition.condition_type == RowConditionParserType.SPARK_SQL for condition in row_conditions
         ), "All row conditions must have type SPARK_SQL"
-        conditions: List[str] = [
-            row_condition.condition for row_condition in row_conditions
-        ]
+        conditions: List[str] = [row_condition.condition for row_condition in row_conditions]
         joined_condition: str = " AND ".join(conditions)
-        return RowCondition(
-            condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
-        )
+        return RowCondition(condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL)
 
     @public_api
     @override
@@ -831,14 +766,12 @@ illegal.  Please check your config."""
         """
         table: str = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(
-                "SparkDFExecutionEngine does not currently support multiple named tables."
-            )
+            raise ValueError("SparkDFExecutionEngine does not currently support multiple named tables.")
 
         data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        partitioned_domain_kwargs: PartitionDomainKwargs = (
-            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
+        partitioned_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
         )
 
         return (
@@ -847,9 +780,7 @@ illegal.  Please check your config."""
             partitioned_domain_kwargs.accessor,
         )
 
-    def add_column_row_condition(
-        self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
-    ):
+    def add_column_row_condition(self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
@@ -876,9 +807,7 @@ illegal.  Please check your config."""
             )
 
         if not (filter_null or filter_nan):
-            logger.warning(
-                "add_column_row_condition called without specifying a desired row condition"
-            )
+            logger.warning("add_column_row_condition called without specifying a desired row condition")
 
         new_domain_kwargs.setdefault("filter_conditions", []).extend(filter_conditions)
 
@@ -914,13 +843,9 @@ illegal.  Please check your config."""
 
         bundled_metric_configuration: MetricComputationConfiguration
         for bundled_metric_configuration in metric_fn_bundle:
-            metric_to_resolve: MetricConfiguration = (
-                bundled_metric_configuration.metric_configuration
-            )
+            metric_to_resolve: MetricConfiguration = bundled_metric_configuration.metric_configuration
             metric_fn: Any = bundled_metric_configuration.metric_fn
-            compute_domain_kwargs: dict = (
-                bundled_metric_configuration.compute_domain_kwargs or {}
-            )
+            compute_domain_kwargs: dict = bundled_metric_configuration.compute_domain_kwargs or {}
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
@@ -947,21 +872,15 @@ illegal.  Please check your config."""
                 f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
             )
 
-            assert (
-                len(res) == 1
-            ), "all bundle-computed metrics must be single-value statistics"
-            assert len(aggregate["metric_ids"]) == len(
-                res[0]
-            ), "unexpected number of metrics returned"
+            assert len(res) == 1, "all bundle-computed metrics must be single-value statistics"
+            assert len(aggregate["metric_ids"]) == len(res[0]), "unexpected number of metrics returned"
 
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(aggregate["metric_ids"]):
                 # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
                 # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
-                resolved_metrics[metric_id] = convert_to_json_serializable(
-                    data=res[0][idx]
-                )
+                resolved_metrics[metric_id] = convert_to_json_serializable(data=res[0][idx])
 
         return resolved_metrics
 

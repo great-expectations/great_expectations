@@ -18,9 +18,7 @@ from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 
 class StubUsageStats:
-    def __init__(
-        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
+    def __init__(self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig):
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
 
     @property
@@ -82,9 +80,7 @@ class StubBaseDataContext:
 
     def __init__(
         self,
-        anonymized_usage_statistics_config: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
+        anonymized_usage_statistics_config: Optional[AnonymizedUsageStatisticsConfig] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         validation_results_keys: Tuple[Optional[str]] = ("some_key",),
@@ -103,9 +99,7 @@ class StubBaseDataContext:
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
-        return StubUsageStats(
-            anonymized_usage_statistics_config=self._anonymized_usage_statistics_config
-        )
+        return StubUsageStats(anonymized_usage_statistics_config=self._anonymized_usage_statistics_config)
 
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
@@ -117,12 +111,8 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-        config = DataContextConfig(
-            anonymous_usage_statistics=self._anonymized_usage_statistics_config
-        )
-        return EphemeralDataContextVariables(
-            config=config, config_provider=StubConfigurationProvider()
-        )
+        config = DataContextConfig(anonymous_usage_statistics=self._anonymized_usage_statistics_config)
+        return EphemeralDataContextVariables(config=config, config_provider=StubConfigurationProvider())
 
     @property
     def _datasource_store(self):
@@ -132,10 +122,7 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {
-            datasource_name: DummyDatasource()
-            for datasource_name in self._datasource_names
-        }
+        return {datasource_name: DummyDatasource() for datasource_name in self._datasource_names}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -162,20 +149,12 @@ class StubBaseDataContext:
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True)
-    )
+    return StubBaseDataContext(anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True))
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
-    StubBaseDataContext
-):
-    return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
-            enabled=False
-        )
-    )
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+    return StubBaseDataContext(anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=False))
 
 
 @pytest.fixture
@@ -285,7 +264,5 @@ def stub_serialized_configuration_bundle(
 ) -> dict:
     """Configuration bundle based on StubBaseDataContext."""
     assert "data_context_id" in serialized_configuration_bundle
-    serialized_configuration_bundle["data_context_id"] = (
-        StubBaseDataContext.DATA_CONTEXT_ID
-    )
+    serialized_configuration_bundle["data_context_id"] = StubBaseDataContext.DATA_CONTEXT_ID
     return serialized_configuration_bundle

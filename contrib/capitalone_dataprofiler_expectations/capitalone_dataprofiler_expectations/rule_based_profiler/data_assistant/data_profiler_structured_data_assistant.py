@@ -68,9 +68,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             float_rule,
         ]
 
-    def _build_data_assistant_result(
-        self, data_assistant_result: DataAssistantResult
-    ) -> DataAssistantResult:
+    def _build_data_assistant_result(self, data_assistant_result: DataAssistantResult) -> DataAssistantResult:
         return DataProfilerStructuredDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
@@ -99,20 +97,22 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         Subject to inclusion/exclusion arguments, "DataProfilerColumnDomainBuilder" emits "Domain" object for every
         column name in profiler report; GreatExpectations "table.columns" metric is used to validate column existence.
         """
-        data_profiler_column_domain_builder: DomainBuilder = (
-            DataProfilerColumnDomainBuilder()
+        data_profiler_column_domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder()
+
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
+                metric_name="data_profiler.column_profile_report",
+                suffix=None,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "profile_path": f"{VARIABLES_KEY}profile_path",
+                },
+            )
         )
 
-        data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
-            metric_name="data_profiler.column_profile_report",
-            suffix=None,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "profile_path": f"{VARIABLES_KEY}profile_path",
-            },
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = (
+            data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
         )
-
-        data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
@@ -212,20 +212,22 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         Currently, the float_rule uses DataProfilerColumnDomainBuilder, so it doesn't discriminate by data type when applying the
         rule.
         """
-        data_profiler_column_domain_builder: DomainBuilder = (
-            DataProfilerColumnDomainBuilder()
+        data_profiler_column_domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder()
+
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
+                metric_name="data_profiler.column_profile_report",
+                suffix=None,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "profile_path": f"{VARIABLES_KEY}profile_path",
+                },
+            )
         )
 
-        data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
-            metric_name="data_profiler.column_profile_report",
-            suffix=None,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "profile_path": f"{VARIABLES_KEY}profile_path",
-            },
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = (
+            data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
         )
-
-        data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 

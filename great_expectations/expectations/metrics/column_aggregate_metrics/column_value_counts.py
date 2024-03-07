@@ -36,9 +36,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
-        collate: Optional[str] = metric_value_kwargs.get(
-            "collate", cls.default_kwarg_values["collate"]
-        )
+        collate: Optional[str] = metric_value_kwargs.get("collate", cls.default_kwarg_values["collate"])
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
@@ -78,9 +76,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
-        collate: Optional[str] = metric_value_kwargs.get(
-            "collate", cls.default_kwarg_values["collate"]
-        )
+        collate: Optional[str] = metric_value_kwargs.get("collate", cls.default_kwarg_values["collate"])
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
@@ -124,9 +120,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sqlalchemy.Row] = execution_engine.execute_query(
-            query.select_from(selectable)
-        ).fetchall()
+        results: List[sqlalchemy.Row] = execution_engine.execute_query(query.select_from(selectable)).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
             data=[row[1] for row in results],
@@ -144,9 +138,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         **kwargs,
     ) -> pd.Series:
         sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
-        collate: Optional[str] = metric_value_kwargs.get(
-            "collate", cls.default_kwarg_values["collate"]
-        )
+        collate: Optional[str] = metric_value_kwargs.get("collate", cls.default_kwarg_values["collate"])
 
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
@@ -160,9 +152,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
         column: str = accessor_domain_kwargs["column"]
 
-        value_counts_df: pyspark.DataFrame = (
-            df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
-        )
+        value_counts_df: pyspark.DataFrame = df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
 
         if sort == "value":
             value_counts_df = value_counts_df.orderBy(column)

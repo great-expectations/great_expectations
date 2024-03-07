@@ -99,9 +99,7 @@ class BatchManager:
         """
         active_batch_data_id: Optional[str] = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
-            logger.warning(
-                "ID of active Batch and ID of active loaded BatchData differ."
-            )
+            logger.warning("ID of active Batch and ID of active loaded BatchData differ.")
 
         return self._active_batch_id
 
@@ -109,9 +107,7 @@ class BatchManager:
     def active_batch(self) -> Optional[AnyBatch]:
         """Getter for active Batch"""
         active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[AnyBatch] = (
-            None if active_batch_id is None else self.batch_cache.get(active_batch_id)
-        )
+        batch: Optional[AnyBatch] = None if active_batch_id is None else self.batch_cache.get(active_batch_id)
         return batch
 
     @property

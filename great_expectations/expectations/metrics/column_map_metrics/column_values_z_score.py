@@ -48,20 +48,12 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         try:
             return (column - mean) / std_dev
         except TypeError:
-            raise (
-                TypeError(
-                    "Cannot complete Z-score calculations on a non-numerical column."
-                )
-            )
+            raise (TypeError("Cannot complete Z-score calculations on a non-numerical column."))
 
     @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _pandas_condition(
-        cls, column, _metrics, threshold, double_sided, **kwargs
-    ) -> pd.Series:
+    def _pandas_condition(cls, column, _metrics, threshold, double_sided, **kwargs) -> pd.Series:
         z_score: pd.Series
-        z_score, _, _ = _metrics[
-            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-        ]
+        z_score, _, _ = _metrics[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"]
         try:
             if double_sided:
                 under_threshold = z_score.abs() < abs(threshold)
@@ -69,9 +61,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 under_threshold = z_score < threshold
             return under_threshold
         except TypeError:
-            raise (
-                TypeError("Cannot check if a string lies under a numerical threshold")
-            )
+            raise (TypeError("Cannot check if a string lies under a numerical threshold"))
 
     @column_function_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):
@@ -81,9 +71,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-        z_score, _, _ = _metrics[
-            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-        ]
+        z_score, _, _ = _metrics[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"]
         if double_sided:
             under_threshold = sa.func.abs(z_score) < abs(threshold)
         else:
@@ -100,9 +88,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
-        z_score, _, _ = _metrics[
-            f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-        ]
+        z_score, _, _ = _metrics[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"]
 
         if double_sided:
             threshold = abs(threshold)
@@ -132,17 +118,12 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
             metric.metric_name
             == f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
         ):
-            dependencies[
-                f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-            ] = MetricConfiguration(
+            dependencies[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"] = MetricConfiguration(
                 metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
-        if (
-            metric.metric_name
-            == f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
-        ):
+        if metric.metric_name == f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}":
             dependencies["column.mean"] = MetricConfiguration(
                 metric_name="column.mean",
                 metric_domain_kwargs=metric.metric_domain_kwargs,

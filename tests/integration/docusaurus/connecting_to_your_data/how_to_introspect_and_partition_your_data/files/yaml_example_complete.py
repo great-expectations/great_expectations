@@ -68,9 +68,7 @@ context.test_yaml_config(datasource_yaml)
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
 )["default_inferred_data_connector_name"]
 assert len(available_data_asset_names) == 36
@@ -87,9 +85,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -124,8 +120,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
 batch_request.data_connector_query["custom_filter_function"] = (
-    lambda batch_identifiers: batch_identifiers["name"] == "yellow"
-    and 1 < int(batch_identifiers["month"]) < 11
+    lambda batch_identifiers: batch_identifiers["name"] == "yellow" and 1 < int(batch_identifiers["month"]) < 11
 )
 
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -226,7 +221,5 @@ assert batch_list[0].data.dataframe.shape[0] < 200
 assert isinstance(validator, gx.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
 assert "yellow_tripdata_sample_2019-01.csv" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "default_inferred_data_connector_name"
-    ]
+    context.get_available_data_asset_names()["taxi_datasource"]["default_inferred_data_connector_name"]
 )

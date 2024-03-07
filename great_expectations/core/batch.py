@@ -373,9 +373,7 @@ class BatchRequestBase(SerializableDictDot):
         serializeable_dict: dict
         if batch_request_contains_batch_data(batch_request=self):
             if self.runtime_parameters is None:
-                raise ValueError(
-                    "BatchRequestBase missing runtime_parameters during serialization"
-                )
+                raise ValueError("BatchRequestBase missing runtime_parameters during serialization")
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
@@ -639,9 +637,7 @@ class RuntimeBatchRequest(BatchRequestBase):
         We must have both or neither of runtime_parameters and batch_identifiers (but not either one of them).
         This is strict equivalence ("if-and-only") condition ("exclusive NOR"); otherwise, ("exclusive OR") means error.
         """
-        if (not runtime_parameters and batch_identifiers) or (
-            runtime_parameters and not batch_identifiers
-        ):
+        if (not runtime_parameters and batch_identifiers) or (runtime_parameters and not batch_identifiers):
             raise ValueError(
                 "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"
             )
@@ -766,11 +762,7 @@ class Batch(SerializableDictDot):
 
         if batch_markers is None:
             batch_markers = BatchMarkers(
-                {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
-                }
+                {"ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")}
             )
 
         self._batch_markers = batch_markers
@@ -918,10 +910,7 @@ def materialize_batch_request(
         return (
             ("datasource_name" in args)
             and ("data_asset_name" in args)
-            and (
-                ("data_connector_name" not in args)
-                or (args["data_connector_name"].lower() == _DATA_CONNECTOR_NAME)
-            )
+            and (("data_connector_name" not in args) or (args["data_connector_name"].lower() == _DATA_CONNECTOR_NAME))
         )
 
     effective_batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -932,9 +921,7 @@ def materialize_batch_request(
     batch_request_class: type
     if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
-    elif batch_request_contains_runtime_parameters(
-        batch_request=effective_batch_request
-    ):
+    elif batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -943,11 +930,7 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: BatchRequestBase | FluentBatchRequest | dict | BlockConfigBatchRequestTypedDict | None = None,
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
@@ -956,11 +939,7 @@ def batch_request_contains_batch_data(
 
 
 def batch_request_contains_runtime_parameters(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: BatchRequestBase | FluentBatchRequest | dict | BlockConfigBatchRequestTypedDict | None = None,
 ) -> bool:
     return (
         batch_request is not None
@@ -971,10 +950,7 @@ def batch_request_contains_runtime_parameters(
 
 @overload
 def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with None
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict = ...,
+    batch_request: BatchRequestBase | FluentBatchRequest | dict | BlockConfigBatchRequestTypedDict = ...,
 ) -> dict: ...
 
 
@@ -985,11 +961,7 @@ def get_batch_request_as_dict(
 
 
 def get_batch_request_as_dict(
-    batch_request: BatchRequestBase
-    | FluentBatchRequest
-    | dict
-    | BlockConfigBatchRequestTypedDict
-    | None = None,
+    batch_request: BatchRequestBase | FluentBatchRequest | dict | BlockConfigBatchRequestTypedDict | None = None,
 ) -> dict | None:
     if batch_request is None:
         return None
@@ -1028,9 +1000,7 @@ def _get_block_batch_request(  # noqa: PLR0913
     """
     if data_connector_query is None:
         if batch_filter_parameters is not None and batch_identifiers is not None:
-            raise ValueError(
-                'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
-            )
+            raise ValueError('Must provide either "batch_filter_parameters" or "batch_identifiers", not both.')
 
         if batch_filter_parameters is None and batch_identifiers is not None:
             logger.warning(
@@ -1104,9 +1074,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
     **kwargs,
 ) -> RuntimeBatchRequest | None:
     """Returns a `RuntimeBatchRequest`, or `None` if the arguments don't support it."""
-    if any(
-        [batch_data, query, path, runtime_parameters]
-    ):  # one of these must be specified for runtime batch requests
+    if any([batch_data, query, path, runtime_parameters]):  # one of these must be specified for runtime batch requests
         # parameter checking
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")
@@ -1250,9 +1218,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
     # from passing in batch_request as an unnamed parameter.
     if datasource_name and not isinstance(datasource_name, str):
-        raise TypeError(
-            f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
-        )
+        raise TypeError(f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}")
 
     # if batch_request is specified, ignore all other arguments and return the batch_request
     if batch_request:
@@ -1378,9 +1344,7 @@ if TYPE_CHECKING:
 if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     BatchDataUnion: TypeAlias = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
 
-    BatchDataType: TypeAlias = Union[
-        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
-    ]
+    BatchDataType: TypeAlias = Union[Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
     BatchDataUnion = Union[BatchData, pd.DataFrame]  # type: ignore[misc] # Cannot assign multiple types

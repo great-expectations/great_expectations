@@ -43,9 +43,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
         parameter_builder = ValueSetMultiBatchParameterBuilder(  # noqa: F841
             data_context=data_context,
         )
-    assert "__init__() missing 1 required positional argument: 'name'" in str(
-        excinfo.value
-    )
+    assert "__init__() missing 1 required positional argument: 'name'" in str(excinfo.value)
 
 
 @pytest.mark.big
@@ -72,12 +70,10 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_event_type_value_set",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    value_set_multi_batch_parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_event_type_value_set",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     assert parameter_container.parameter_nodes is None
@@ -91,10 +87,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         runtime_configuration=None,
     )
 
-    assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
-    )
+    assert parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
 
     expected_value_set: List[int] = [19, 22, 73]
     expected_parameter_node_as_dict: dict = {
@@ -151,12 +144,10 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_user_agent_value_set",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    value_set_multi_batch_parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_user_agent_value_set",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     assert parameter_container.parameter_nodes is None
@@ -170,10 +161,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         runtime_configuration=None,
     )
 
-    assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
-    )
+    assert parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
 
     expected_value_set: List[str] = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
@@ -208,9 +196,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
 def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -219,12 +205,10 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_passenger_count_value_set",
-            metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
-            data_context=data_context,
-        )
+    value_set_multi_batch_parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_passenger_count_value_set",
+        metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
+        data_context=data_context,
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
@@ -249,10 +233,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         runtime_configuration=None,
     )
 
-    assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
-    )
+    assert parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
 
     expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
     expected_parameter_node_as_dict: dict = {
@@ -268,9 +249,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         },
     }
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_passenger_count_value_set"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_passenger_count_value_set"
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
@@ -287,9 +266,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
 def test_value_set_multi_batch_parameter_builder_bobby_string(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -298,12 +275,10 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_store_and_fwd_flag_value_set",
-            metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
-            data_context=data_context,
-        )
+    value_set_multi_batch_parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_store_and_fwd_flag_value_set",
+        metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
+        data_context=data_context,
     )
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
@@ -328,10 +303,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         runtime_configuration=None,
     )
 
-    assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
-    )
+    assert parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
 
     expected_value_set: List[str] = ["N", "Y"]
     expected_parameter_node_as_dict: dict = {
@@ -347,9 +319,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         },
     }
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_store_and_fwd_flag_value_set"
-    )
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_store_and_fwd_flag_value_set"
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
@@ -391,7 +361,4 @@ def test__get_unique_values_from_nested_collection_of_sets(test_input, expected)
     by _get_unique_values_from_nested_collection_of_sets
     """
     test_input = cast(Collection[Collection[Set[Any]]], test_input)
-    assert (
-        _get_unique_values_from_nested_collection_of_sets(collection=test_input)
-        == expected
-    )
+    assert _get_unique_values_from_nested_collection_of_sets(collection=test_input) == expected

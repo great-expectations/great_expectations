@@ -139,10 +139,7 @@ class MetricConfiguration:
         if "column" in self._metric_domain_kwargs:
             return MetricDomainTypes.COLUMN
 
-        if (
-            "column_A" in self._metric_domain_kwargs
-            and "column_B" in self._metric_domain_kwargs
-        ):
+        if "column_A" in self._metric_domain_kwargs and "column_B" in self._metric_domain_kwargs:
             return MetricDomainTypes.COLUMN_PAIR
 
         if "column_list" in self._metric_domain_kwargs:

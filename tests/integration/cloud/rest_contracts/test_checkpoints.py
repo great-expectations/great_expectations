@@ -31,9 +31,7 @@ GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
     },
 }
 
-GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
-    "data": pact.Like(GET_CHECKPOINT_MIN_CHECKPOINT_BODY)
-}
+GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {"data": pact.Like(GET_CHECKPOINT_MIN_CHECKPOINT_BODY)}
 GET_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 string")
 
 # Get Checkpoints

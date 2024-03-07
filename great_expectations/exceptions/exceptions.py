@@ -99,9 +99,7 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
                 and isinstance(validation_error.messages, dict)
                 and all(key is None for key in validation_error.messages.keys())
             ):
-                validation_error.messages = list(
-                    itertools.chain.from_iterable(validation_error.messages.values())
-                )
+                validation_error.messages = list(itertools.chain.from_iterable(validation_error.messages.values()))
         super().__init__(message=message, validation_error=validation_error)
         self.field_name = field_name
 
@@ -269,9 +267,7 @@ No module named `{}` could be found in your plugins directory.
 
         colored_template = f"<red>{template}</red>"
         module_snippet = f"</red><yellow>{module_name}</yellow><red>"
-        self.cli_colored_message = colored_template.format(
-            module_snippet, module_snippet
-        )
+        self.cli_colored_message = colored_template.format(module_snippet, module_snippet)
         super().__init__(self.message)
 
 
@@ -296,9 +292,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
         if class_name_changes.get(class_name):
             template = """The module: `{}` does not contain the class: `{}`.
             The class name `{}` has changed to `{}`."""
-            self.message = template.format(
-                module_name, class_name, class_name, class_name_changes.get(class_name)
-            )
+            self.message = template.format(module_name, class_name, class_name, class_name_changes.get(class_name))
         else:
             template = """The module: `{}` does not contain the class: `{}`.
         - Please verify that the class named `{}` exists."""
@@ -308,9 +302,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
         module_snippet = f"</red><yellow>{module_name}</yellow><red>"
         class_snippet = f"</red><yellow>{class_name}</yellow><red>"
         if class_name_changes.get(class_name):
-            new_class_snippet = (
-                f"</red><yellow>{class_name_changes.get(class_name)}</yellow><red>"
-            )
+            new_class_snippet = f"</red><yellow>{class_name_changes.get(class_name)}</yellow><red>"
             self.cli_colored_message = colored_template.format(
                 module_snippet, class_snippet, class_snippet, new_class_snippet
             )
@@ -326,8 +318,8 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
         # noinspection PyUnresolvedReferences
-        module_spec: Optional[importlib.machinery.ModuleSpec] = (
-            importlib.util.find_spec(module_name, package=package_name)
+        module_spec: Optional[importlib.machinery.ModuleSpec] = importlib.util.find_spec(
+            module_name, package=package_name
         )
         if not module_spec:
             if not package_name:
@@ -347,9 +339,7 @@ properly defined inside its intended module and declared correctly by the callin
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name) -> None:
         self.data_asset_name = data_asset_name
-        self.message = (
-            f"No expectation suite found for data_asset_name {data_asset_name}"
-        )
+        self.message = f"No expectation suite found for data_asset_name {data_asset_name}"
         super().__init__(self.message)
 
 
@@ -374,9 +364,7 @@ class BatchSpecError(DataContextError):
 
 class DatasourceError(DataContextError):
     def __init__(self, datasource_name: str, message: str) -> None:
-        self.message = (
-            f"Cannot initialize datasource {datasource_name}, error: {message}"
-        )
+        self.message = f"Cannot initialize datasource {datasource_name}, error: {message}"
         super().__init__(self.message)
 
 

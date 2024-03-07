@@ -51,14 +51,10 @@ def datasource(
     )
     datasource.create_temp_table = True
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
-    assert (
-        datasource.create_temp_table is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.create_temp_table is True, "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.create_temp_table is False
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.create_temp_table is False, "The datasource was not updated in the previous method call."
     datasource.create_temp_table = True
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
@@ -66,9 +62,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
-    assert (
-        datasource.create_temp_table is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.create_temp_table is True, "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
@@ -76,9 +70,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
-    assert (
-        datasource.create_temp_table is False
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.create_temp_table is False, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -160,18 +152,14 @@ def test_interactive_validator(
     Note: There is no need to test getting a Validator or using Validator.head(). That is already
     tested in the validator fixture.
     """
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.expect_column_values_to_not_be_null(
-            column="id",
-            mostly=1,
-        )
+    expectation_validation_result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        column="id",
+        mostly=1,
     )
     assert expectation_validation_result.success
 
 
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
+@pytest.mark.xfail(reason="1.0 API requires a backend change. Test should pass once #2623 is merged")
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

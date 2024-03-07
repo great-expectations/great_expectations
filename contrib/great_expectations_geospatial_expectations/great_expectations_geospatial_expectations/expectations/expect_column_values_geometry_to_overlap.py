@@ -20,9 +20,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         geo_ser = geopandas.GeoSeries(column)
-        _input_indices, result_indices = geo_ser.sindex.query_bulk(
-            geo_ser.geometry, predicate="overlaps"
-        )
+        _input_indices, result_indices = geo_ser.sindex.query_bulk(geo_ser.geometry, predicate="overlaps")
         overlapping = np.unique(result_indices)  # integer indeces of overlapping
         if np.any(overlapping):
             return {"success": True, "indices": overlapping}

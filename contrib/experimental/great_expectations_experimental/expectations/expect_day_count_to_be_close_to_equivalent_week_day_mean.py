@@ -65,9 +65,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
@@ -231,24 +229,16 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
 
         days_ago_dict = get_days_ago_dict(run_date)
 
-        equivalent_previous_days: List[datetime] = [
-            days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
-        ]
+        equivalent_previous_days: List[datetime] = [days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS]
 
-        assert min(equivalent_previous_days) > (
-            datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)
-        ), (
+        assert min(equivalent_previous_days) > (datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)), (
             f"Data includes only up to {METRIC_SAMPLE_LIMIT} days prior to today ({datetime.today()}), "
             f"but 4 weeks before the given run_date is {min(equivalent_previous_days)}",
         )
 
-        day_counts_dict = get_counts_per_day_as_dict(
-            metrics, run_date_str, equivalent_previous_days
-        )
+        day_counts_dict = get_counts_per_day_as_dict(metrics, run_date_str, equivalent_previous_days)
         run_date_count: int = day_counts_dict[run_date_str]
-        diff_fraction = get_diff_fraction(
-            run_date_count, day_counts_dict, equivalent_previous_days
-        )
+        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, equivalent_previous_days)
 
         if diff_fraction > threshold:
             msg = (
@@ -266,12 +256,8 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         return {"success": success, "result": {"details": msg}}
 
 
-def get_counts_per_day_as_dict(
-    metrics: dict, run_date: str, equivalent_previous_days: list
-) -> dict:
-    equivalent_previous_days_str: List[str] = [
-        datetime.strftime(i, date_format) for i in equivalent_previous_days
-    ]
+def get_counts_per_day_as_dict(metrics: dict, run_date: str, equivalent_previous_days: list) -> dict:
+    equivalent_previous_days_str: List[str] = [datetime.strftime(i, date_format) for i in equivalent_previous_days]
     all_days_list = equivalent_previous_days_str + [run_date]
 
     counts_per_days = metrics["column.counts_per_days_custom"]
@@ -284,22 +270,16 @@ def get_counts_per_day_as_dict(
     return day_counts_dict
 
 
-def get_diff_fraction(
-    run_date_count: int, day_counts_dict: dict, equivalent_previous_days: list
-) -> float:
+def get_diff_fraction(run_date_count: int, day_counts_dict: dict, equivalent_previous_days: list) -> float:
     """
     Calculates the fractional difference between current and past average row counts (how much is the
     difference relative to the average).
     Added +1 to both nuemrator and denominator, to account for cases when previous average is 0.
     """
 
-    equivalent_previous_days_str: List[str] = [
-        datetime.strftime(i, date_format) for i in equivalent_previous_days
-    ]
+    equivalent_previous_days_str: List[str] = [datetime.strftime(i, date_format) for i in equivalent_previous_days]
 
-    previous_days_counts: List[int] = [
-        day_counts_dict[i] for i in day_counts_dict if i in equivalent_previous_days_str
-    ]
+    previous_days_counts: List[int] = [day_counts_dict[i] for i in day_counts_dict if i in equivalent_previous_days_str]
 
     avg_equivalent_previous_days_count = average_if_nonempty(previous_days_counts)
 

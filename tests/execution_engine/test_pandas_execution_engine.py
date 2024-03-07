@@ -59,9 +59,7 @@ def test_reader_fn():
 @pytest.mark.unit
 def test_get_domain_records_with_column_domain():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame(
-        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
-    )
+    df = pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]})
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
@@ -75,9 +73,7 @@ def test_get_domain_records_with_column_domain():
 
     expected_column_df = df.iloc[:3]
 
-    assert data.equals(
-        expected_column_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_column_df), "Data does not match after getting full access compute domain"
 
 
 @pytest.mark.unit
@@ -111,9 +107,7 @@ def test_get_domain_records_with_column_pair_domain():
         },
         index=[1, 2, 3, 5],
     )
-    assert data.equals(
-        expected_column_pair_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_column_pair_df), "Data does not match after getting full access compute domain"
 
     data = engine.get_domain_records(
         domain_kwargs={
@@ -126,13 +120,9 @@ def test_get_domain_records_with_column_pair_domain():
     )
     data = data.astype(int)
 
-    expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}, index=[1, 2, 3]
-    )
+    expected_column_pair_df = pd.DataFrame({"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}, index=[1, 2, 3])
 
-    assert data.equals(
-        expected_column_pair_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_column_pair_df), "Data does not match after getting full access compute domain"
 
     data = engine.get_domain_records(
         domain_kwargs={
@@ -152,9 +142,7 @@ def test_get_domain_records_with_column_pair_domain():
         }
     )
 
-    assert data.equals(
-        expected_column_pair_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_column_pair_df), "Data does not match after getting full access compute domain"
 
 
 @pytest.mark.unit
@@ -184,9 +172,7 @@ def test_get_domain_records_with_multicolumn_domain():
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[1, 2, 3, 5]
     )
 
-    assert data.equals(
-        expected_multicolumn_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_multicolumn_df), "Data does not match after getting full access compute domain"
 
     data = engine.get_domain_records(
         domain_kwargs={
@@ -202,9 +188,7 @@ def test_get_domain_records_with_multicolumn_domain():
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
     )
 
-    assert data.equals(
-        expected_multicolumn_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_multicolumn_df), "Data does not match after getting full access compute domain"
 
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
@@ -233,9 +217,7 @@ def test_get_domain_records_with_multicolumn_domain():
         index=[0, 1, 2, 3, 4, 5],
     )
 
-    assert data.equals(
-        expected_multicolumn_df
-    ), "Data does not match after getting full access compute domain"
+    assert data.equals(expected_multicolumn_df), "Data does not match after getting full access compute domain"
 
 
 @pytest.mark.unit
@@ -245,9 +227,7 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={}, domain_type="table"
-    )
+    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(domain_kwargs={}, domain_type="table")
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
@@ -282,9 +262,7 @@ def test_get_compute_domain_with_column_pair_domain():
 @pytest.mark.unit
 def test_get_compute_domain_with_multicolumn_domain():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 2, 3], "d": [2, 7, 9, 2]}
-    )
+    df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 2, 3], "d": [2, 7, 9, 2]})
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -293,9 +271,7 @@ def test_get_compute_domain_with_multicolumn_domain():
     )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {
-        "column_list": ["a", "b", "c"]
-    }, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {"column_list": ["a", "b", "c"]}, "Accessor kwargs have been modified"
 
 
 @pytest.mark.unit
@@ -327,14 +303,10 @@ def test_get_compute_domain_with_row_condition():
         domain_type="table",
     )
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data["b"].equals(expected_df["b"]), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
@@ -357,14 +329,10 @@ def test_get_compute_domain_with_unmeetable_row_condition():
         domain_type="column",
     )
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data["b"].equals(expected_df["b"]), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
+    assert "row_condition" in compute_kwargs.keys(), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
@@ -401,15 +369,11 @@ def test_resolve_metric_bundle():
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
-    results = engine.resolve_metrics(
-        metrics_to_resolve=desired_metrics, metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=desired_metrics, metrics=metrics)
     metrics.update(results)
 
     # Ensuring metrics have been properly resolved
-    assert (
-        metrics[("column.mean", "column=a", ())] == 2.0
-    ), "mean metric not properly computed"
+    assert metrics[("column.mean", "column=a", ())] == 2.0, "mean metric not properly computed"
     assert metrics[("column.standard_deviation", "column=a", ())] == 1.0, (
         "standard deviation " "metric not properly computed"
     )
@@ -484,10 +448,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 
 @pytest.mark.skipif(
     not aws.boto3
-    or (
-        not is_library_loadable(library_name="pyarrow")
-        and not is_library_loadable(library_name="fastparquet")
-    ),
+    or (not is_library_loadable(library_name="pyarrow") and not is_library_loadable(library_name="fastparquet")),
     reason="pyarrow and fastparquet are not installed",
 )
 @pytest.mark.big
@@ -580,15 +541,11 @@ def test_get_batch_data_with_azure_batch_spec(
 ):
     mock_blob_client = mock_azure_conn().get_blob_client()
     mock_azure_obj = mock_blob_client.download_blob()
-    mock_azure_obj.readall.return_value = (
-        b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
-    )
+    mock_azure_obj.readall.return_value = b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
 
     df = PandasExecutionEngine().get_batch_data(batch_spec=azure_batch_spec)
 
-    mock_azure_conn().get_blob_client.assert_called_with(
-        container="test_container", blob="path/A-100.csv"
-    )
+    mock_azure_conn().get_blob_client.assert_called_with(container="test_container", blob="path/A-100.csv")
     mock_azure_obj.readall.assert_called_once()
 
     assert df.dataframe.shape == (3, 3)
@@ -644,9 +601,7 @@ def test_get_batch_data_with_gcs_batch_spec(
 ):
     mock_gcs_bucket = mock_gcs_conn().get_bucket()
     mock_gcs_blob = mock_gcs_bucket.blob()
-    mock_gcs_blob.download_as_bytes.return_value = (
-        b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
-    )
+    mock_gcs_blob.download_as_bytes.return_value = b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
 
     # Necessary to pass kwargs to bypass "os.getenv | gcs_options == {}" check
     kwargs = {"gcs_options": {"my_option": "my_value"}}

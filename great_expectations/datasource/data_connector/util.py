@@ -36,28 +36,17 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
     assert isinstance(batch_definition, BatchDefinition)
     assert isinstance(batch_request, BatchRequestBase)
 
-    if (
-        batch_request.datasource_name
-        and batch_request.datasource_name != batch_definition.datasource_name
-    ):
+    if batch_request.datasource_name and batch_request.datasource_name != batch_definition.datasource_name:
         return False
 
-    if (
-        batch_request.data_connector_name
-        and batch_request.data_connector_name != batch_definition.data_connector_name
-    ):
+    if batch_request.data_connector_name and batch_request.data_connector_name != batch_definition.data_connector_name:
         return False
 
-    if (
-        batch_request.data_asset_name
-        and batch_request.data_asset_name != batch_definition.data_asset_name
-    ):
+    if batch_request.data_asset_name and batch_request.data_asset_name != batch_definition.data_asset_name:
         return False
 
     if batch_request.data_connector_query:
-        batch_filter_parameters: Any = batch_request.data_connector_query.get(
-            "batch_filter_parameters"
-        )
+        batch_filter_parameters: Any = batch_request.data_connector_query.get("batch_filter_parameters")
         if batch_filter_parameters:
             if not isinstance(batch_filter_parameters, dict):
                 return False
@@ -65,8 +54,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
             for key in batch_filter_parameters.keys():
                 if not (
                     key in batch_definition.batch_identifiers
-                    and batch_definition.batch_identifiers[key]
-                    == batch_filter_parameters[key]
+                    and batch_definition.batch_identifiers[key] == batch_filter_parameters[key]
                 ):
                     return False
 
@@ -77,8 +65,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
         for key in batch_request.batch_identifiers.keys():
             if not (
                 key in batch_definition.batch_identifiers
-                and batch_definition.batch_identifiers[key]
-                == batch_request.batch_identifiers[key]
+                and batch_definition.batch_identifiers[key] == batch_request.batch_identifiers[key]
             ):
                 return False
 
@@ -133,33 +120,25 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     # Check for `(?P<name>)` named group syntax
     match_dict = matches.groupdict()
     if match_dict:  # Only named groups will populate this dict
-        batch_identifiers = _determine_batch_identifiers_using_named_groups(
-            match_dict, group_names
-        )
+        batch_identifiers = _determine_batch_identifiers_using_named_groups(match_dict, group_names)
     else:
         groups: list = list(matches.groups())
         batch_identifiers = IDDict(dict(zip(group_names, groups)))
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
     # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
-    data_asset_name: str = batch_identifiers.pop(
-        "data_asset_name", DEFAULT_DATA_ASSET_NAME
-    )
+    data_asset_name: str = batch_identifiers.pop("data_asset_name", DEFAULT_DATA_ASSET_NAME)
 
     return data_asset_name, batch_identifiers
 
 
-def _determine_batch_identifiers_using_named_groups(
-    match_dict: dict, group_names: List[str]
-) -> IDDict:
+def _determine_batch_identifiers_using_named_groups(match_dict: dict, group_names: List[str]) -> IDDict:
     batch_identifiers = IDDict()
     for key, value in match_dict.items():
         if key in group_names:
             batch_identifiers[key] = value
         else:
-            logger.warning(
-                f"The named group '{key}' must explicitly be stated in group_names to be parsed"
-            )
+            logger.warning(f"The named group '{key}' must explicitly be stated in group_names to be parsed")
 
     return batch_identifiers
 
@@ -170,19 +149,15 @@ def map_batch_definition_to_data_reference_string_using_regex(
     group_names: List[str],
 ) -> str:
     if not isinstance(batch_definition, BatchDefinition):
-        raise TypeError(
-            "batch_definition is not of an instance of type BatchDefinition"
-        )
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
 
     data_asset_name: str = batch_definition.data_asset_name
     batch_identifiers: IDDict = batch_definition.batch_identifiers
-    data_reference: str = (
-        convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers=batch_identifiers,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-            data_asset_name=data_asset_name,
-        )
+    data_reference: str = convert_batch_identifiers_to_data_reference_string_using_regex(
+        batch_identifiers=batch_identifiers,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+        data_asset_name=data_asset_name,
     )
     return data_reference
 
@@ -279,9 +254,7 @@ def _invert_regex_to_data_reference_template(
         ]:
             pass
         else:
-            raise ValueError(
-                f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
-            )
+            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
@@ -354,10 +327,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
     globbed_paths = base_directory_path.glob(glob_directive)
 
-    path_list: List[str] = [
-        os.path.relpath(str(posix_path), base_directory_path)
-        for posix_path in globbed_paths
-    ]
+    path_list: List[str] = [os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths]
 
     return path_list
 
@@ -387,9 +357,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: azure.ContainerClient = azure_client.get_container_client(
-        container=container
-    )
+    container_client: azure.ContainerClient = azure_client.get_container_client(container=container)
 
     path_list: List[str] = []
 
@@ -472,9 +440,7 @@ def list_gcs_keys(
     return keys
 
 
-def list_s3_keys(
-    s3, query_options: dict, iterator_dict: dict, recursive: bool = False
-) -> Generator[str, None, None]:
+def list_s3_keys(s3, query_options: dict, iterator_dict: dict, recursive: bool = False) -> Generator[str, None, None]:
     """
     For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
     specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
@@ -502,9 +468,7 @@ def list_s3_keys(
         raise ValueError("S3 query may not have been configured correctly.")
 
     if "Contents" in s3_objects_info:
-        keys: List[str] = [
-            item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
-        ]
+        keys: List[str] = [item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0]
         yield from keys
 
     if recursive and "CommonPrefixes" in s3_objects_info:
@@ -563,18 +527,14 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     sorter: Sorter = instantiate_class_from_config(
         config=sorter_config,
         runtime_environment=runtime_environment,
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector.sorter"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector.sorter"},
     )
     return sorter
 
 
 def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, DataConnector] = {
-        "data_connector": runtime_environment
-    }
+    runtime_environment_dict: Dict[str, DataConnector] = {"data_connector": runtime_environment}
     config = assetConfigSchema.load(config)
     config = assetConfigSchema.dump(config)
     asset: Asset = instantiate_class_from_config(

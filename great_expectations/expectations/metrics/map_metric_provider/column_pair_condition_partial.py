@@ -71,9 +71,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
-            assert (
-                partial_fn_type is not None
-            )  # mypy has trouble type narrowing with closures
+            assert partial_fn_type is not None  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
@@ -99,9 +97,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     df,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=metric_domain_kwargs, domain_type=domain_type)
 
                 # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
@@ -141,9 +137,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
-            assert (
-                partial_fn_type is not None
-            )  # mypy has trouble type narrowing with closures
+            assert partial_fn_type is not None  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
@@ -169,9 +163,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=metric_domain_kwargs, domain_type=domain_type)
 
                 # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
@@ -243,9 +235,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=metric_domain_kwargs, domain_type=domain_type)
 
                 # noinspection PyPep8Naming
                 column_A_name = accessor_domain_kwargs["column_A"]
@@ -270,6 +260,4 @@ def column_pair_condition_partial(  # noqa: C901 - 16
         return wrapper
 
     else:
-        raise ValueError(
-            'Unsupported engine for "column_pair_condition_partial" metric function decorator.'
-        )
+        raise ValueError('Unsupported engine for "column_pair_condition_partial" metric function decorator.')

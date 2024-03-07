@@ -90,9 +90,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         try:
             self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
-            )
+            raise ImportError("Unable to load boto3 (it is required for InferredAssetS3DataConnector).")
 
     @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
@@ -105,15 +103,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 

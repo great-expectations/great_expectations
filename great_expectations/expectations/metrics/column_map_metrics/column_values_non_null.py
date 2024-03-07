@@ -52,21 +52,15 @@ class ColumnValuesNonNullCount(MetricProvider):
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(*, metrics, **kwargs):
-        return metrics[
-            f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        ]
+        return metrics[f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(*, metrics, **kwargs):
-        return metrics[
-            f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        ]
+        return metrics[f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(*, metrics, **kwargs):
-        return metrics[
-            f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        ]
+        return metrics[f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"]
 
     @classmethod
     @override
@@ -83,10 +77,10 @@ class ColumnValuesNonNullCount(MetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        dependencies[
-            f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        ] = MetricConfiguration(
-            metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            metric_domain_kwargs=metric.metric_domain_kwargs,
+        dependencies[f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"] = (
+            MetricConfiguration(
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
         )
         return dependencies

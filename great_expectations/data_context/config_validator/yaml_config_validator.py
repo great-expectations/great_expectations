@@ -165,9 +165,7 @@ class _YamlConfigValidator:
         # Based on the particular object type we are attempting to instantiate,
         # we may need the original config, the substituted config, or both.
         config = self._test_yaml_config_prepare_config(yaml_config=yaml_config)
-        config_with_substitutions = self._test_yaml_config_prepare_substituted_config(
-            yaml_config, runtime_environment
-        )
+        config_with_substitutions = self._test_yaml_config_prepare_substituted_config(yaml_config, runtime_environment)
 
         if "class_name" in config:
             class_name = config["class_name"]
@@ -188,43 +186,33 @@ class _YamlConfigValidator:
                     config=config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_checkpoint_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                    )
+                instantiated_class = self._test_instantiation_of_checkpoint_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_data_connector_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                        runtime_environment=runtime_environment,
-                    )
+                instantiated_class = self._test_instantiation_of_data_connector_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_profiler_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                    )
+                instantiated_class = self._test_instantiation_of_profiler_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
                 )
             else:
-                instantiated_class = (
-                    self._test_instantiation_of_misc_class_from_yaml_config(
-                        name=name,
-                        config=config_with_substitutions,
-                        runtime_environment=runtime_environment,
-                    )
+                instantiated_class = self._test_instantiation_of_misc_class_from_yaml_config(
+                    name=name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
 
             if pretty_print:
-                print(
-                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
-                )
+                print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n")
 
             return instantiated_class
 
@@ -240,27 +228,21 @@ class _YamlConfigValidator:
         )
         return config
 
-    def _test_yaml_config_prepare_substituted_config(
-        self, yaml_config: str, runtime_environment: dict
-    ) -> CommentedMap:
+    def _test_yaml_config_prepare_substituted_config(self, yaml_config: str, runtime_environment: dict) -> CommentedMap:
         """
         Performs variable substitution and conversion from YAML to CommentedMap.
         See `test_yaml_config` for more details.
         """
-        config_str_with_substituted_variables = (
-            self._prepare_config_string_with_substituted_variables(
-                yaml_config=yaml_config,
-                runtime_environment=runtime_environment,
-            )
+        config_str_with_substituted_variables = self._prepare_config_string_with_substituted_variables(
+            yaml_config=yaml_config,
+            runtime_environment=runtime_environment,
         )
         config = self._load_config_string_as_commented_map(
             config_str=config_str_with_substituted_variables,
         )
         return config
 
-    def _prepare_config_string_with_substituted_variables(
-        self, yaml_config: str, runtime_environment: dict
-    ) -> str:
+    def _prepare_config_string_with_substituted_variables(self, yaml_config: str, runtime_environment: dict) -> str:
         config_provider = self._data_context.config_provider
         config_values = config_provider.get_values()
 
@@ -268,9 +250,7 @@ class _YamlConfigValidator:
         # we need to account for `runtime_environment` values that may have been passed.
         config_values.update(runtime_environment)
 
-        return config_provider.substitute_config(
-            config=yaml_config, config_values=config_values
-        )
+        return config_provider.substitute_config(config=yaml_config, config_values=config_values)
 
     def _load_config_string_as_commented_map(self, config_str: str) -> CommentedMap:
         substituted_config: CommentedMap = yaml.load(config_str)
@@ -305,10 +285,8 @@ class _YamlConfigValidator:
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         datasource_config = datasourceConfigSchema.load(config)
         datasource_config.name = datasource_name
-        instantiated_class = (
-            self._data_context._instantiate_datasource_from_config_with_substitution(
-                config=datasource_config
-            )
+        instantiated_class = self._data_context._instantiate_datasource_from_config_with_substitution(
+            config=datasource_config
         )
 
         return instantiated_class
@@ -337,9 +315,7 @@ class _YamlConfigValidator:
         )
 
         if class_name == "Checkpoint":
-            instantiated_class = Checkpoint(
-                data_context=self._data_context, **checkpoint_class_args
-            )
+            instantiated_class = Checkpoint(data_context=self._data_context, **checkpoint_class_args)
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
@@ -381,8 +357,8 @@ class _YamlConfigValidator:
 
         profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config: Union[RuleBasedProfilerConfig, dict] = (
-            RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config: Union[RuleBasedProfilerConfig, dict] = RuleBasedProfilerConfig.from_commented_map(
+            commented_map=config
         )
         profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
@@ -409,9 +385,7 @@ class _YamlConfigValidator:
         Attempts to match config to the relevant class/parent and update usage stats payload.
         See `test_yaml_config` for more details.
         """
-        print(
-            "\tNo matching class found. Attempting to instantiate class from the raw config..."
-        )
+        print("\tNo matching class found. Attempting to instantiate class from the raw config...")
         instantiated_class = instantiate_class_from_config(
             config=config,
             runtime_environment={

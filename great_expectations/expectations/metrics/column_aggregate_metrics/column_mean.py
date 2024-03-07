@@ -44,7 +44,5 @@ class ColumnMean(ColumnAggregateMetricProvider):
             types.FloatType,
             types.LongType,
         ):
-            raise TypeError(
-                f"Expected numeric column type for function mean(). Recieved type: {column_data_type}"
-            )
+            raise TypeError(f"Expected numeric column type for function mean(). Recieved type: {column_data_type}")
         return F.mean(column)

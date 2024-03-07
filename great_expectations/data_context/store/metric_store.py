@@ -30,23 +30,15 @@ class MetricStore(Store):
 
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
-            store_backend_module_name = store_backend.get(
-                "module_name", "great_expectations.data_context.store"
-            )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 if "table_name" not in store_backend:
-                    store_backend["table_name"] = store_backend.get(
-                        "table_name", "ge_metrics"
-                    )
+                    store_backend["table_name"] = store_backend.get("table_name", "ge_metrics")
                 if "key_columns" not in store_backend:
                     store_backend["key_columns"] = store_backend.get(
                         "key_columns",
@@ -73,23 +65,15 @@ class MetricStore(Store):
 class EvaluationParameterStore(MetricStore):
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
-            store_backend_module_name = store_backend.get(
-                "module_name", "great_expectations.data_context.store"
-            )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_module_name = store_backend.get("module_name", "great_expectations.data_context.store")
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_evaluation_parameters"
-                )
+                store_backend["table_name"] = store_backend.get("table_name", "ge_evaluation_parameters")
         super().__init__(store_backend=store_backend, store_name=store_name)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter

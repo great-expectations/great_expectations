@@ -37,13 +37,9 @@ class BatchConfig(pydantic.BaseModel):
         # pydantic prevents us from using @data_asset.setter
         self._data_asset = data_asset
 
-    def build_batch_request(
-        self, batch_request_options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
+    def build_batch_request(self, batch_request_options: Optional[BatchRequestOptions] = None) -> BatchRequest:
         """Build a BatchRequest from the asset and batch request options."""
-        return self.data_asset.build_batch_request(
-            options=batch_request_options, partitioner=self.partitioner
-        )
+        return self.data_asset.build_batch_request(options=batch_request_options, partitioner=self.partitioner)
 
     def save(self) -> None:
         self.data_asset._save_batch_config(self)

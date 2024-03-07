@@ -78,16 +78,12 @@ class BasicDatasetProfilerBase(DatasetProfiler):
         df.set_config_value("interactive_evaluation", True)
 
         try:
-            num_unique = df.expect_column_unique_value_count_to_be_between(
-                column, None, None
-            ).result["observed_value"]
-            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-                column, None, None
-            ).result["observed_value"]
+            num_unique = df.expect_column_unique_value_count_to_be_between(column, None, None).result["observed_value"]
+            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(column, None, None).result[
+                "observed_value"
+            ]
         except KeyError:  # if observed_value value is not set
-            logger.error(
-                f"Failed to get cardinality of column {column:s} - continuing..."
-            )
+            logger.error(f"Failed to get cardinality of column {column:s} - continuing...")
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = ProfilerCardinality.NONE
@@ -142,9 +138,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
 
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            logger.info(
-                f"            Preparing column {i + 1} of {number_of_columns}: {column}"
-            )
+            logger.info(f"            Preparing column {i + 1} of {number_of_columns}: {column}")
 
             # df.expect_column_to_exist(column)
 
@@ -164,30 +158,18 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_FEW,
                     ProfilerCardinality.FEW,
                 ]:
-                    df.expect_column_distinct_values_to_be_in_set(
-                        column, value_set=None, result_format="SUMMARY"
-                    )
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 elif cardinality in [
                     ProfilerCardinality.MANY,
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
                     # TODO: change to class-first expectation structure?
-                    df.expect_column_min_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_max_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_mean_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_median_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_stdev_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_stdev_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(
                         column,
                         quantile_ranges={
@@ -219,9 +201,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_FEW,
                     ProfilerCardinality.FEW,
                 ]:
-                    df.expect_column_distinct_values_to_be_in_set(
-                        column, value_set=None, result_format="SUMMARY"
-                    )
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
                 elif cardinality in [
                     ProfilerCardinality.MANY,
@@ -229,18 +209,10 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.UNIQUE,
                 ]:
                     # TODO: migrate to class first structure
-                    df.expect_column_min_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_max_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_mean_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
-                    df.expect_column_median_to_be_between(
-                        column, min_value=None, max_value=None
-                    )
+                    df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_mean_to_be_between(column, min_value=None, max_value=None)
+                    df.expect_column_median_to_be_between(column, min_value=None, max_value=None)
                     df.expect_column_quantile_values_to_be_between(
                         column,
                         quantile_ranges={
@@ -278,20 +250,14 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_FEW,
                     ProfilerCardinality.FEW,
                 ]:
-                    df.expect_column_distinct_values_to_be_in_set(
-                        column, value_set=None, result_format="SUMMARY"
-                    )
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
                     pass
 
             elif type_ == ProfilerDataType.DATETIME:
-                df.expect_column_min_to_be_between(
-                    column, min_value=None, max_value=None
-                )
+                df.expect_column_min_to_be_between(column, min_value=None, max_value=None)
 
-                df.expect_column_max_to_be_between(
-                    column, min_value=None, max_value=None
-                )
+                df.expect_column_max_to_be_between(column, min_value=None, max_value=None)
 
                 # Re-add once kl_divergence has been modified to support datetimes
                 # df.expect_column_kl_divergence_to_be_less_than(column, partition_object=None,
@@ -303,9 +269,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_FEW,
                     ProfilerCardinality.FEW,
                 ]:
-                    df.expect_column_distinct_values_to_be_in_set(
-                        column, value_set=None, result_format="SUMMARY"
-                    )
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
 
             else:  # noqa: PLR5501
                 if cardinality == ProfilerCardinality.UNIQUE:
@@ -317,16 +281,12 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_FEW,
                     ProfilerCardinality.FEW,
                 ]:
-                    df.expect_column_distinct_values_to_be_in_set(
-                        column, value_set=None, result_format="SUMMARY"
-                    )
+                    df.expect_column_distinct_values_to_be_in_set(column, value_set=None, result_format="SUMMARY")
                 else:
                     pass
 
         df.set_config_value("interactive_evaluation", True)
-        expectation_suite = df.get_expectation_suite(
-            suppress_warnings=True, discard_failed_expectations=False
-        )
+        expectation_suite = df.get_expectation_suite(suppress_warnings=True, discard_failed_expectations=False)
         expectation_suite.meta["columns"] = meta_columns
 
         return expectation_suite

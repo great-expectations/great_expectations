@@ -35,12 +35,8 @@ def default_pandas_data(
     test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    relative_path = pathlib.Path(
-        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     pandas_ds = context.sources.pandas_default
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
@@ -76,12 +72,8 @@ def pandas_filesystem_datasource(
     test_backends,
     context: AbstractDataContext,
 ) -> PandasFilesystemDatasource:
-    relative_path = pathlib.Path(
-        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     pandas_ds = context.sources.add_pandas_filesystem(
         name="my_pandas",
         base_directory=csv_path,
@@ -94,9 +86,7 @@ def pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, PandasFilesystemDatasource, DataAsset, BatchRequest]:
     context.config_variables.update({"pipeline_filename": __file__})
-    pandas_ds = pandas_filesystem_datasource(
-        test_backends=test_backends, context=context
-    )
+    pandas_ds = pandas_filesystem_datasource(test_backends=test_backends, context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
@@ -107,9 +97,7 @@ def pandas_data(
     return context, pandas_ds, asset, batch_request
 
 
-def sqlite_datasource(
-    context: AbstractDataContext, db_filename: str | pathlib.Path
-) -> SqliteDatasource:
+def sqlite_datasource(context: AbstractDataContext, db_filename: str | pathlib.Path) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
         "..",
@@ -151,12 +139,8 @@ def spark_filesystem_datasource(
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    relative_path = pathlib.Path(
-        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
@@ -187,12 +171,8 @@ def multibatch_pandas_data(
     test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    relative_path = pathlib.Path(
-        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     pandas_ds = context.sources.add_pandas_filesystem(
         name="my_pandas",
         base_directory=csv_path,
@@ -210,9 +190,7 @@ def multibatch_sql_data(
     test_backends,
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    datasource = sqlite_datasource(
-        context, "yellow_tripdata_sample_2020_all_months_combined.db"
-    )
+    datasource = sqlite_datasource(context, "yellow_tripdata_sample_2020_all_months_combined.db")
     asset = datasource.add_table_asset(
         name="my_asset",
         table_name="yellow_tripdata_sample_2020",
@@ -231,12 +209,8 @@ def multibatch_spark_data(
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    relative_path = pathlib.Path(
-        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,

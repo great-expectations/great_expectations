@@ -154,9 +154,7 @@ class SiteIndexPageRenderer(Renderer):
                 "table_options": table_options,
                 "styling": {
                     "classes": ["col-12", "ge-index-page-table-container"],
-                    "body": {
-                        "classes": ["table-sm", "ge-index-page-profiling-results-table"]
-                    },
+                    "body": {"classes": ["table-sm", "ge-index-page-profiling-results-table"]},
                 },
             }
         )
@@ -236,9 +234,7 @@ class SiteIndexPageRenderer(Renderer):
         for dict_ in validation_link_dicts:
             table_data.append(
                 {
-                    "validation_success": cls._render_validation_success_cell(
-                        dict_.get("validation_success")
-                    ),
+                    "validation_success": cls._render_validation_success_cell(dict_.get("validation_success")),
                     "run_time": cls._get_formatted_datetime(dict_.get("run_time")),
                     "_run_time_sort": cls._get_timestamp(dict_.get("run_time")),
                     "run_name": dict_.get("run_name"),
@@ -254,9 +250,7 @@ class SiteIndexPageRenderer(Renderer):
                     ),
                     "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
                     "_table_row_link_path": dict_.get("filepath"),
-                    "_validation_success_text": "Success"
-                    if dict_.get("validation_success")
-                    else "Failed",
+                    "_validation_success_text": "Success" if dict_.get("validation_success") else "Failed",
                     "asset_name": dict_.get("asset_name"),
                 }
             )
@@ -279,9 +273,7 @@ class SiteIndexPageRenderer(Renderer):
         )
 
     @classmethod
-    def _render_expectation_suite_cell(
-        cls, expectation_suite_name, expectation_suite_path
-    ):
+    def _render_expectation_suite_cell(cls, expectation_suite_name, expectation_suite_path):
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -396,9 +388,7 @@ class SiteIndexPageRenderer(Renderer):
                                     "site_name": index_links_dict.get("site_name"),
                                     "title_prefix": "Data Docs",
                                 },
-                                "styling": {
-                                    "params": {"title_prefix": {"tag": "strong"}}
-                                },
+                                "styling": {"params": {"title_prefix": {"tag": "strong"}}},
                             },
                         }
                     ),
@@ -416,27 +406,21 @@ class SiteIndexPageRenderer(Renderer):
                 tabs.append(
                     {
                         "tab_name": "Validation Results",
-                        "tab_content": cls._generate_validation_results_link_table(
-                            index_links_dict
-                        ),
+                        "tab_content": cls._generate_validation_results_link_table(index_links_dict),
                     }
                 )
             if index_links_dict.get("profiling_links"):
                 tabs.append(
                     {
                         "tab_name": "Profiling Results",
-                        "tab_content": cls._generate_profiling_results_link_table(
-                            index_links_dict
-                        ),
+                        "tab_content": cls._generate_profiling_results_link_table(index_links_dict),
                     }
                 )
             if index_links_dict.get("expectations_links"):
                 tabs.append(
                     {
                         "tab_name": "Expectation Suites",
-                        "tab_content": cls._generate_expectation_suites_link_table(
-                            index_links_dict
-                        ),
+                        "tab_content": cls._generate_expectation_suites_link_table(index_links_dict),
                     }
                 )
 
@@ -479,7 +463,5 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
             """
             exception_traceback = traceback.format_exc()
-            exception_message += (
-                f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
-            )
+            exception_message += f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             logger.error(exception_message)

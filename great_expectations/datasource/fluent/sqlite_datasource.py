@@ -63,9 +63,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
     @override
@@ -82,13 +80,9 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         }
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
+    def batch_request_options_to_batch_spec_kwarg_identifiers(self, options: BatchRequestOptions) -> Dict[str, Any]:
         if "datetime" not in options:
-            raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
-            )
+            raise ValueError("'datetime' must be specified in the batch request options to create a batch identifier")
         return {self.column_name: options["datetime"]}
 
 
@@ -106,9 +100,7 @@ class SqliteTableAsset(SqlTableAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the Sqlite specific partitioner
-        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
-            SqlitePartitionerConvertedDateTime
-        )
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = SqlitePartitionerConvertedDateTime
 
     type: Literal["table"] = "table"
 
@@ -117,9 +109,7 @@ class SqliteQueryAsset(SqlQueryAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the  Sqlite specific partitioner
-        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
-            SqlitePartitionerConvertedDateTime
-        )
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = SqlitePartitionerConvertedDateTime
 
     type: Literal["query"] = "query"
 
@@ -183,9 +173,7 @@ class SqliteDatasource(SQLDatasource):
     ) -> SqliteQueryAsset:
         return cast(
             SqliteQueryAsset,
-            super().add_query_asset(
-                name=name, query=query, order_by=order_by, batch_metadata=batch_metadata
-            ),
+            super().add_query_asset(name=name, query=query, order_by=order_by, batch_metadata=batch_metadata),
         )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__

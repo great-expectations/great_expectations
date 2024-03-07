@@ -89,22 +89,16 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
 
         # Step-2: Build "DataConnector" objects for tables (using "ConfiguredAssetSqlDataConnector").
         for data_asset_name, table_config in table_configs.items():
-            for partitioner_name, partitioner_config in table_config[
-                "partitioners"
-            ].items():
+            for partitioner_name, partitioner_config in table_config["partitioners"].items():
                 data_connector_name: str = partitioner_name
                 if data_connector_name not in self.data_connectors:
                     data_connector_config = {
                         "class_name": "ConfiguredAssetSqlDataConnector",
                         "assets": {},
                     }
-                    self._build_data_connector_from_config(
-                        name=data_connector_name, config=data_connector_config
-                    )
+                    self._build_data_connector_from_config(name=data_connector_name, config=data_connector_config)
 
-                data_connector: ConfiguredAssetSqlDataConnector = self.data_connectors[
-                    data_connector_name
-                ]
+                data_connector: ConfiguredAssetSqlDataConnector = self.data_connectors[data_connector_name]
 
                 data_asset_config: dict = copy.deepcopy(partitioner_config)
 

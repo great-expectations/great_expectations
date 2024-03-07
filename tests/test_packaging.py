@@ -33,9 +33,7 @@ def parse_requirements_files_to_strings(files: list[pathlib.Path]) -> dict:
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
             req_set_dict[key] = {
-                f'{line.name}{",".join(["".join(spec) for spec in line.specs])}'
-                for line in rp.parse(f)
-                if line.specs
+                f'{line.name}{",".join(["".join(spec) for spec in line.specs])}' for line in rp.parse(f) if line.specs
             }
 
     return req_set_dict
@@ -55,9 +53,7 @@ def parse_requirements_files_to_specs(files: list[pathlib.Path]) -> dict:
         abs_path = req_file.absolute().as_posix()
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
-            req_set_dict[key] = {
-                line.name: line.specs for line in rp.parse(f) if line.specs
-            }
+            req_set_dict[key] = {line.name: line.specs for line in rp.parse(f) if line.specs}
 
     return req_set_dict
 
@@ -79,11 +75,7 @@ def test_requirements_files():
         == req_set_dict["requirements-dev-test.txt"]
     )
 
-    assert (
-        req_set_dict["requirements-dev-lite.txt"]
-        & req_set_dict["requirements-dev-spark.txt"]
-        == set()
-    )
+    assert req_set_dict["requirements-dev-lite.txt"] & req_set_dict["requirements-dev-spark.txt"] == set()
 
     assert (
         req_set_dict["requirements-dev-spark.txt"]
@@ -92,11 +84,7 @@ def test_requirements_files():
         == set()
     )
 
-    assert (
-        req_set_dict["requirements-dev-lite.txt"]
-        & req_set_dict["requirements-dev-contrib.txt"]
-        == set()
-    )
+    assert req_set_dict["requirements-dev-lite.txt"] & req_set_dict["requirements-dev-contrib.txt"] == set()
 
     assert (
         req_set_dict["requirements-dev-lite.txt"]

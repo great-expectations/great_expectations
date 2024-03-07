@@ -40,9 +40,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         reference_group = metric_value_kwargs.get("reference_group")
         alpha = metric_value_kwargs.get("alpha")
 
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
         df = df.rename(columns={y_true: "label_value", y_pred: "score"})
         df, _ = preprocess_input_df(df)
 
@@ -87,9 +85,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         runtime_configuration=None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -205,9 +201,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
         "meta": None,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -237,9 +231,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
             assert (
                 isinstance(alpha, float) and (0 <= alpha <= 1)
             ) or alpha is None, "alpha must be a float between 0 and 1"
-            assert (
-                isinstance(partial_success, bool)
-            ) or partial_success is None, "reference_group must be a boolean"
+            assert (isinstance(partial_success, bool)) or partial_success is None, "reference_group must be a boolean"
             assert (
                 isinstance(reference_group, dict)
             ) or reference_group is None, "reference_group must be a dictionary"

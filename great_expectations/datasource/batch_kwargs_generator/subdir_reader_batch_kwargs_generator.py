@@ -156,9 +156,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     )
 
             if path is None:
-                logger.warning(
-                    "Unable to find path with the provided partition; searching for asset-name partitions."
-                )
+                logger.warning("Unable to find path with the provided partition; searching for asset-name partitions.")
                 # Fall through to this case in the event that there is not a subdir available, or if partition_id was
                 # not provided
                 if os.path.isfile(  # noqa: PTH113
@@ -186,9 +184,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             return self._build_batch_kwargs_from_path(path, **batch_parameters)
 
         else:
-            return self.yield_batch_kwargs(
-                data_asset_name=data_asset_name, **batch_parameters
-            )
+            return self.yield_batch_kwargs(data_asset_name=data_asset_name, **batch_parameters)
 
     def _get_valid_file_options(self, base_directory=None):
         valid_options = []
@@ -212,17 +208,12 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                             base_directory, file_option
                         )
                     )
-                    if (
-                        len(subdir_options) > 0
-                        and (file_option, "directory") not in valid_options
-                    ):
+                    if len(subdir_options) > 0 and (file_option, "directory") not in valid_options:
                         valid_options.append((file_option, "directory"))
         return valid_options
 
     def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
-        logger.debug(
-            f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
-        )
+        logger.debug(f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}")
         # If the data asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
         if os.path.isdir(  # noqa: PTH112
@@ -234,35 +225,24 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             batches = []
             for file_option in subdir_options:
                 for extension in self.known_extensions:
-                    if file_option.endswith(extension) and not file_option.startswith(
-                        "."
-                    ):
+                    if file_option.endswith(extension) and not file_option.startswith("."):
                         batches.append(
                             os.path.join(  # noqa: PTH118
                                 self.base_directory, data_asset_name, file_option
                             )
                         )
 
-            return self._build_batch_kwargs_path_iter(
-                batches, reader_options=reader_options, limit=limit
-            )
+            return self._build_batch_kwargs_path_iter(batches, reader_options=reader_options, limit=limit)
         else:
             for extension in self.known_extensions:
                 path = os.path.join(  # noqa: PTH118
                     self.base_directory, data_asset_name + extension
                 )
                 if os.path.isfile(path):  # noqa: PTH113
-                    return iter(
-                        [
-                            self._build_batch_kwargs_from_path(
-                                path, reader_options=reader_options, limit=limit
-                            )
-                        ]
-                    )
+                    return iter([self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit)])
             # If we haven't returned yet, raise
             raise BatchKwargsError(
-                "No valid files found when searching {:s} using configured known_extensions: "
-                "{:s} ".format(
+                "No valid files found when searching {:s} using configured known_extensions: " "{:s} ".format(
                     os.path.join(self.base_directory, data_asset_name),  # noqa: PTH118
                     ", ".join(map(str, self.known_extensions)),
                 ),
@@ -273,17 +253,11 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 ),
             )
 
-    def _build_batch_kwargs_path_iter(
-        self, path_list, reader_options=None, limit=None
-    ) -> Iterable[PathBatchKwargs]:
+    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None) -> Iterable[PathBatchKwargs]:
         for path in path_list:
-            yield self._build_batch_kwargs_from_path(
-                path, reader_options=reader_options, limit=limit
-            )
+            yield self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit)
 
-    def _build_batch_kwargs_from_path(
-        self, path, reader_method=None, reader_options=None, limit=None
-    ):
+    def _build_batch_kwargs_from_path(self, path, reader_method=None, reader_options=None, limit=None):
         batch_kwargs = self._datasource.process_batch_parameters(
             reader_method=reader_method or self.reader_method,
             reader_options=reader_options or self.reader_options,

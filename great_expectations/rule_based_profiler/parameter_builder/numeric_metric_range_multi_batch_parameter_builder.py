@@ -116,12 +116,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "column.unique_proportion",
     }
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        MetricMultiBatchParameterBuilder.exclude_field_names
-        | {
-            "single_batch_mode",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
+    }
 
     def __init__(  # noqa: PLR0913
         self,
@@ -142,13 +139,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
-        truncate_values: Optional[
-            Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
-        ] = None,
+        truncate_values: Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]] = None,
         round_decimals: Optional[Union[str, int]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -208,9 +201,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             data_context=data_context,
         )
 
-        self._metric_multi_batch_parameter_builder_name = (
-            metric_multi_batch_parameter_builder_name
-        )
+        self._metric_multi_batch_parameter_builder_name = metric_multi_batch_parameter_builder_name
 
         if false_positive_rate is None:
             false_positive_rate = 5.0e-2
@@ -223,21 +214,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._random_seed = random_seed
 
-        self._quantile_statistic_interpolation_method = (
-            quantile_statistic_interpolation_method
-        )
+        self._quantile_statistic_interpolation_method = quantile_statistic_interpolation_method
 
         self._quantile_bias_correction = quantile_bias_correction
 
-        self._quantile_bias_std_error_ratio_threshold = (
-            quantile_bias_std_error_ratio_threshold
-        )
+        self._quantile_bias_std_error_ratio_threshold = quantile_bias_std_error_ratio_threshold
 
         self._bw_method = bw_method
 
-        self._include_estimator_samples_histogram_in_details = (
-            include_estimator_samples_histogram_in_details
-        )
+        self._include_estimator_samples_histogram_in_details = include_estimator_samples_histogram_in_details
 
         self._round_decimals = round_decimals
 
@@ -341,18 +326,14 @@ detected.
         parameter_reference: str
         if self.metric_multi_batch_parameter_builder_name:
             # Obtain metric_multi_batch_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            metric_multi_batch_parameter_builder_name: str = (
-                get_parameter_value_and_validate_return_type(
-                    domain=domain,
-                    parameter_reference=self.metric_multi_batch_parameter_builder_name,
-                    expected_return_type=str,
-                    variables=variables,
-                    parameters=parameters,
-                )
+            metric_multi_batch_parameter_builder_name: str = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.metric_multi_batch_parameter_builder_name,
+                expected_return_type=str,
+                variables=variables,
+                parameters=parameters,
             )
-            parameter_reference = (
-                f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
-            )
+            parameter_reference = f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
         else:
             # Compute metric value for each Batch object.
             super().build_parameters(
@@ -372,14 +353,11 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        metric_values: MetricValues = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         round_decimals: int
         if (
-            self.metric_name
-            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            self.metric_name not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
             and integer_semantic_domain_type(domain=domain)
         ):
             round_decimals = 0
@@ -391,45 +369,35 @@ detected.
                 parameters=parameters,
             )
 
-        numeric_range_estimator: NumericRangeEstimator = (
-            self._build_numeric_range_estimator(
-                round_decimals=round_decimals,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        numeric_range_estimator: NumericRangeEstimator = self._build_numeric_range_estimator(
+            round_decimals=round_decimals,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
-        numeric_range_estimation_result: NumericRangeEstimationResult = (
-            self._estimate_metric_value_range(
-                metric_values=metric_values,
-                numeric_range_estimator=numeric_range_estimator,
-                round_decimals=round_decimals,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        numeric_range_estimation_result: NumericRangeEstimationResult = self._estimate_metric_value_range(
+            metric_values=metric_values,
+            numeric_range_estimator=numeric_range_estimator,
+            round_decimals=round_decimals,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
 
         value_range: np.ndarray = numeric_range_estimation_result.value_range
-        details: Dict[str, Any] = copy.deepcopy(
-            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
-        )
+        details: Dict[str, Any] = copy.deepcopy(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY])
 
         # Obtain include_estimator_samples_histogram_in_details from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_estimator_samples_histogram_in_details: bool = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.include_estimator_samples_histogram_in_details,
-                expected_return_type=bool,
-                variables=variables,
-                parameters=parameters,
-            )
+        include_estimator_samples_histogram_in_details: bool = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.include_estimator_samples_histogram_in_details,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
         )
 
         if include_estimator_samples_histogram_in_details:
-            details["estimation_histogram"] = (
-                numeric_range_estimation_result.estimation_histogram
-            )
+            details["estimation_histogram"] = numeric_range_estimation_result.estimation_histogram
 
         return Attributes(
             {
@@ -456,10 +424,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if (
-            estimator
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
-        ):
+        if estimator not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES:
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
 {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
@@ -560,8 +525,7 @@ detected.
         # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
         metric_value_shape_idx: int
         axes: List[np.ndarray] = [
-            np.indices(dimensions=(metric_value_shape_idx,))[0]
-            for metric_value_shape_idx in metric_value_shape
+            np.indices(dimensions=(metric_value_shape_idx,))[0] for metric_value_shape_idx in metric_value_shape
         ]
         metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
@@ -569,8 +533,7 @@ detected.
         # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
         metric_value_idx: tuple
         metric_value_vector_indices: List[tuple] = [
-            (slice(None, None, None),) + metric_value_idx
-            for metric_value_idx in metric_value_indices
+            (slice(None, None, None),) + metric_value_idx for metric_value_idx in metric_value_indices
         ]
 
         # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
@@ -593,20 +556,14 @@ detected.
         metric_value_range: np.ndarray
         estimation_histogram: np.ndarray
         if datetime_detected:
-            metric_value_range = np.full(
-                shape=metric_value_range_shape, fill_value=datetime.datetime.min
-            )
-            estimation_histogram = np.full(
-                shape=estimation_histogram_shape, fill_value=datetime.datetime.min
-            )
+            metric_value_range = np.full(shape=metric_value_range_shape, fill_value=datetime.datetime.min)
+            estimation_histogram = np.full(shape=estimation_histogram_shape, fill_value=datetime.datetime.min)
         else:
             if self._is_metric_values_ndarray_decimal_dtype(
                 metric_values=metric_values,
                 metric_value_vector_indices=metric_value_vector_indices,
             ):
-                metric_values = convert_ndarray_decimal_to_float_dtype(
-                    data=metric_values
-                )
+                metric_values = convert_ndarray_decimal_to_float_dtype(data=metric_values)
 
             metric_value_range = np.zeros(shape=metric_value_range_shape)
             estimation_histogram = np.empty(shape=estimation_histogram_shape)
@@ -620,9 +577,7 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            if not datetime_detected and np.all(
-                np.isclose(metric_value_vector, metric_value_vector[0])
-            ):
+            if not datetime_detected and np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
                 # Computation is unnecessary if distribution is degenerate.
                 numeric_range_estimation_result = build_numeric_range_estimation_result(
                     metric_values=metric_value_vector,
@@ -631,13 +586,11 @@ detected.
                 )
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
-                numeric_range_estimation_result = (
-                    numeric_range_estimator.get_numeric_range_estimate(
-                        metric_values=metric_value_vector,
-                        domain=domain,
-                        variables=variables,
-                        parameters=parameters,
-                    )
+                numeric_range_estimation_result = numeric_range_estimator.get_numeric_range_estimate(
+                    metric_values=metric_value_vector,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
                 )
 
             min_value = numeric_range_estimation_result.value_range[0]
@@ -652,12 +605,8 @@ detected.
             metric_value_idx = metric_value_idx[1:]  # noqa: PLW2901
 
             # Compute indices for metric value range min and max estimates.
-            metric_value_range_min_idx = metric_value_idx + (
-                slice(0, 1, None),
-            )  # appends "[0]" element
-            metric_value_range_max_idx = metric_value_idx + (
-                slice(1, 2, None),
-            )  # appends "[1]" element
+            metric_value_range_min_idx = metric_value_idx + (slice(0, 1, None),)  # appends "[0]" element
+            metric_value_range_max_idx = metric_value_idx + (slice(1, 2, None),)  # appends "[1]" element
 
             # Compute index for metric value estimation histogram.
             metric_value_estimation_histogram_idx = metric_value_idx
@@ -668,19 +617,11 @@ detected.
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:  # noqa: PLR5501
                 if round_decimals is None:
-                    metric_value_range[metric_value_range_min_idx] = np.float64(
-                        min_value
-                    )
-                    metric_value_range[metric_value_range_max_idx] = np.float64(
-                        max_value
-                    )
+                    metric_value_range[metric_value_range_min_idx] = np.float64(min_value)
+                    metric_value_range[metric_value_range_max_idx] = np.float64(max_value)
                 else:
-                    metric_value_range[metric_value_range_min_idx] = round(
-                        np.float64(min_value), round_decimals
-                    )
-                    metric_value_range[metric_value_range_max_idx] = round(
-                        np.float64(max_value), round_decimals
-                    )
+                    metric_value_range[metric_value_range_min_idx] = round(np.float64(min_value), round_decimals)
+                    metric_value_range[metric_value_range_max_idx] = round(np.float64(max_value), round_decimals)
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[metric_value_estimation_histogram_idx] = (
@@ -739,14 +680,12 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        truncate_values: Dict[str, Optional[Number]] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.truncate_values,
-                expected_return_type=dict,
-                variables=variables,
-                parameters=parameters,
-            )
+        truncate_values: Dict[str, Optional[Number]] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.truncate_values,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
         )
 
         distribution_boundary: Optional[Union[int, float]]
@@ -794,10 +733,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if not (
-            round_decimals is None
-            or (isinstance(round_decimals, int) and (round_decimals >= 0))
-        ):
+        if not (round_decimals is None or (isinstance(round_decimals, int) and (round_decimals >= 0))):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).

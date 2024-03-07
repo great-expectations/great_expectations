@@ -57,9 +57,7 @@ expr = infixNotation(
 )
 
 
-class ExpectationConfigurationConditionParserError(
-    gx_exceptions.GreatExpectationsError
-):
+class ExpectationConfigurationConditionParserError(gx_exceptions.GreatExpectationsError):
     pass
 
 
@@ -71,21 +69,16 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        ExpectationConfigurationBuilder.exclude_field_names
-        | {
-            "kwargs",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = ExpectationConfigurationBuilder.exclude_field_names | {
+        "kwargs",
+    }
 
     def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
         condition: Optional[str] = None,
-        validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
@@ -130,9 +123,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         self._condition = condition
 
-        self._validation_parameter_builder_configs = (
-            validation_parameter_builder_configs
-        )
+        self._validation_parameter_builder_configs = validation_parameter_builder_configs
 
         self._kwargs = kwargs
 
@@ -224,14 +215,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
-                term_list[idx]: Dict[str, Any] = (
-                    get_parameter_value_and_validate_return_type(
-                        domain=domain,
-                        parameter_reference=token,
-                        expected_return_type=None,
-                        variables=variables,
-                        parameters=parameters,
-                    )
+                term_list[idx]: Dict[str, Any] = get_parameter_value_and_validate_return_type(
+                    domain=domain,
+                    parameter_reference=token,
+                    expected_return_type=None,
+                    variables=variables,
+                    parameters=parameters,
                 )
             elif isinstance(token, ParseResults):
                 self._substitute_parameters_and_variables(
@@ -339,9 +328,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             parameters=parameters,
         )
 
-        binary_list: ParseResults = self._build_binary_list(
-            substituted_term_list=substituted_term_list
-        )
+        binary_list: ParseResults = self._build_binary_list(substituted_term_list=substituted_term_list)
         boolean_result: bool = self._build_boolean_result(binary_list=binary_list)
 
         return boolean_result

@@ -91,9 +91,7 @@ class DatasourceStore(Store):
         return self._store_backend.remove_key(key.to_tuple())
 
     @override
-    def serialize(
-        self, value: DatasourceConfig | FluentDatasource
-    ) -> Union[str, dict, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig | FluentDatasource) -> Union[str, dict, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
@@ -108,9 +106,7 @@ class DatasourceStore(Store):
     def deserialize(self, value: FluentDatasource) -> FluentDatasource: ...
 
     @override
-    def deserialize(
-        self, value: dict | DatasourceConfig | FluentDatasource
-    ) -> DatasourceConfig | FluentDatasource:
+    def deserialize(self, value: dict | DatasourceConfig | FluentDatasource) -> DatasourceConfig | FluentDatasource:
         """
         See parent 'Store.deserialize()' for more information
         """
@@ -150,9 +146,7 @@ class DatasourceStore(Store):
         if isinstance(data, list):
             if len(data) > 1:
                 # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`
-                raise TypeError(
-                    f"GX Cloud returned {len(data)} Datasources but expected 1"
-                )
+                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")
             data = data[0]
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
@@ -169,9 +163,7 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if not isinstance(data, list):
-            raise TypeError(
-                "GX Cloud did not return a collection of Datasources when expected"
-            )
+            raise TypeError("GX Cloud did not return a collection of Datasources when expected")
 
         return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
 
@@ -182,9 +174,7 @@ class DatasourceStore(Store):
         datasource_config_dict["id"] = datasource_id
         return datasource_config_dict
 
-    def retrieve_by_name(
-        self, datasource_name: str
-    ) -> DatasourceConfig | FluentDatasource:
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig | FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -197,8 +187,8 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = (
-            self.store_backend.build_key(name=datasource_name)
+        datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = self.store_backend.build_key(
+            name=datasource_name
         )
         if not self.has_key(datasource_key):
             raise ValueError(
@@ -272,14 +262,10 @@ class DatasourceStore(Store):
             key = self._build_key_from_config(value)
         return self._persist_datasource(key=key, config=value)
 
-    def _persist_datasource(
-        self, key: DataContextKey, config: DatasourceConfig | FluentDatasource
-    ) -> DatasourceConfig:
+    def _persist_datasource(self, key: DataContextKey, config: DatasourceConfig | FluentDatasource) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(
-            key=key, value=config
-        )
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key=key, value=config)
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 
@@ -291,9 +277,7 @@ class DatasourceStore(Store):
 
         return return_value
 
-    def add_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def add_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Persists a DatasourceConfig in the store by a given name.
 
         Args:
@@ -303,9 +287,7 @@ class DatasourceStore(Store):
         Raises:
             DatasourceError: A DatasourceConfig with the given key already exists in the store.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(datasource_name=datasource_name)
         try:
             self.add(key=datasource_key, value=datasource_config)
         except gx_exceptions.StoreBackendError:
@@ -314,9 +296,7 @@ class DatasourceStore(Store):
                 message="A Datasource with the given name already exists",
             )
 
-    def update_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def update_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Updates a DatasourceConfig that already exists in the store.
 
         Args:
@@ -326,9 +306,7 @@ class DatasourceStore(Store):
         Raises:
             DatasourceNotFoundError: If a DatasourceConfig is not found.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(datasource_name=datasource_name)
         try:
             self.update(key=datasource_key, value=datasource_config)
         except gx_exceptions.StoreBackendError:

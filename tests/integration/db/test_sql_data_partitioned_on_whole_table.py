@@ -14,9 +14,7 @@ from tests.test_utils import get_connection_string_and_dialect
 if __name__ == "test_script_module":
     dialect: str
     connection_string: str
-    dialect, connection_string = get_connection_string_and_dialect(
-        athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
-    )
+    dialect, connection_string = get_connection_string_and_dialect(athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME")
     print(f"Testing dialect: {dialect}")
 
     with loaded_table(dialect=dialect, connection_string=connection_string) as table:
@@ -28,8 +26,8 @@ if __name__ == "test_script_module":
             test_column_name=None,
             test_column_names=None,
         )
-        taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase = (
-            TaxiPartitioningTestCasesWholeTable(taxi_test_data=taxi_test_data)
+        taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase = TaxiPartitioningTestCasesWholeTable(
+            taxi_test_data=taxi_test_data
         )
         _execute_taxi_partitioning_test_cases(
             taxi_partitioning_test_cases=taxi_partitioning_test_cases,

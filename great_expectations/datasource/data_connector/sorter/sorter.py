@@ -21,14 +21,10 @@ class Sorter:
         elif orderby == "desc":
             reverse = True
         else:
-            raise gx_exceptions.SorterError(
-                f'Illegal sort order "{orderby}" for attribute "{name}".'
-            )
+            raise gx_exceptions.SorterError(f'Illegal sort order "{orderby}" for attribute "{name}".')
         self._reverse = reverse
 
-    def get_sorted_batch_definitions(
-        self, batch_definitions: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
+    def get_sorted_batch_definitions(self, batch_definitions: List[BatchDefinition]) -> List[BatchDefinition]:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
@@ -38,9 +34,7 @@ class Sorter:
             if len(list(batch_definition.batch_identifiers.values())) == 0:
                 batch_identifier_values = [None]
             elif isinstance(list(batch_definition.batch_identifiers.values())[0], dict):
-                batch_identifier_values = list(
-                    batch_definition.batch_identifiers.values()
-                )[0].values()
+                batch_identifier_values = list(batch_definition.batch_identifiers.values())[0].values()
             else:
                 batch_identifier_values = batch_definition.batch_identifiers.values()
 
@@ -49,9 +43,7 @@ class Sorter:
             else:
                 value_batches.append(idx)
 
-        none_batch_definitions: List[BatchDefinition] = [
-            batch_definitions[idx] for idx in none_batches
-        ]
+        none_batch_definitions: List[BatchDefinition] = [batch_definitions[idx] for idx in none_batches]
         value_batch_definitions: List[BatchDefinition] = sorted(
             [batch_definitions[idx] for idx in value_batches],
             key=self.get_batch_key,

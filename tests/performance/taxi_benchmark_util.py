@@ -21,9 +21,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 
-def create_checkpoint(
-    number_of_tables: int, backend_api: str = "V3", html_dir: Optional[str] = None
-) -> Checkpoint:
+def create_checkpoint(number_of_tables: int, backend_api: str = "V3", html_dir: Optional[str] = None) -> Checkpoint:
     """Create a checkpoint from scratch, including setting up data sources/etc.
 
     Args:
@@ -251,9 +249,7 @@ def _create_context(
     )
     bigquery_project = os.environ.get("GE_TEST_GCP_PROJECT")
     if not bigquery_project:
-        raise ValueError(
-            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery performance tests"
-        )
+        raise ValueError("Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery performance tests")
     bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_PERFORMANCE_DATASET")
     if not bigquery_dataset:
         raise ValueError(

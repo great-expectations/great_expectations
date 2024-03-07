@@ -220,16 +220,12 @@ class DictDot:
         if include_keys:
             # Make sure that all properties, marked for inclusion, actually exist on the object.
             assert_valid_keys(keys=include_keys, purpose="inclusion")
-            keys_for_exclusion.extend(
-                [key for key in property_names if key not in include_keys]
-            )
+            keys_for_exclusion.extend([key for key in property_names if key not in include_keys])
 
         if exclude_keys:
             # Make sure that all properties, marked for exclusion, actually exist on the object.
             assert_valid_keys(keys=exclude_keys, purpose="exclusion")
-            keys_for_exclusion.extend(
-                [key for key in property_names if key in exclude_keys]
-            )
+            keys_for_exclusion.extend([key for key in property_names if key in exclude_keys])
 
         keys_for_exclusion = list(set(keys_for_exclusion))
 
@@ -256,18 +252,14 @@ def safe_deep_copy(data, memo=None):
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
-    if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark.pyspark and isinstance(data, pyspark.DataFrame)
-    ):
+    if isinstance(data, (pd.Series, pd.DataFrame)) or (pyspark.pyspark and isinstance(data, pyspark.DataFrame)):
         return data
 
     if isinstance(data, (list, tuple)):
         return [safe_deep_copy(data=element, memo=memo) for element in data]
 
     if isinstance(data, dict):
-        return {
-            key: safe_deep_copy(data=value, memo=memo) for key, value in data.items()
-        }
+        return {key: safe_deep_copy(data=value, memo=memo) for key, value in data.items()}
 
     # noinspection PyArgumentList
     return copy.deepcopy(data, memo)

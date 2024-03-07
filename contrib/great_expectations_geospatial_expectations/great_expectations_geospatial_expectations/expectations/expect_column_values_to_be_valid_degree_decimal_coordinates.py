@@ -43,9 +43,7 @@ class ColumnValuesCoordinatesDegreeDecimal(ColumnMapMetricProvider):
     @staticmethod
     def _point_in_bounds(point, bounds):
         try:
-            result = bounds.intersects(
-                Point(float(eval(point)[1]), float(eval(point)[0]))
-            )
+            result = bounds.intersects(Point(float(eval(point)[1]), float(eval(point)[0])))
         except TypeError:
             try:
                 result = bounds.intersects(Point(float(point[1]), float(point[0])))
@@ -142,9 +140,7 @@ class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -153,9 +149,7 @@ class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
 
         template_str = "values must be valid degree-decimal, lat/lon coordinates"
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

@@ -35,9 +35,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(
-                f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
-            )
+            raise DataContextError(f"Cannot add ExpectationSuite with name {suite.name} because it already exists.")
         self._store.add(key=key, value=suite)
 
         submit_event(
@@ -61,9 +59,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=suite.id)
         if not self._store.has_key(key=key):
-            raise DataContextError(
-                f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
-            )
+            raise DataContextError(f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found.")
         self._store.remove_key(key=key)
 
         submit_event(

@@ -76,9 +76,7 @@ class QueryMultipleColumns(QueryMetricProvider):
                 batch=f"({selectable})",
             )
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(
-            sa.text(query)
-        ).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
 
         return [element._asdict() for element in result]
 
@@ -97,9 +95,7 @@ class QueryMultipleColumns(QueryMetricProvider):
             raise TypeError("Query must be supplied as a string")
 
         df: pyspark.DataFrame
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
 
         df.createOrReplaceTempView("tmp_view")
         columns = metric_value_kwargs.get("columns")

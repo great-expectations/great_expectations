@@ -50,9 +50,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
-    parameter_values_for_fully_qualified_parameter_names_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ]
+    parameter_values_for_fully_qualified_parameter_names_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]]
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
     rule_domain_builder_execution_time: Dict[str, float]
@@ -70,9 +68,9 @@ class RuleBasedProfilerResult(SerializableDictDot):
         fully_qualified_parameter_names: List[str]
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
-        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = self.parameter_values_for_fully_qualified_parameter_names_by_domain or {}
+        parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[Domain, Dict[str, ParameterNode]] = (
+            self.parameter_values_for_fully_qualified_parameter_names_by_domain or {}
+        )
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {

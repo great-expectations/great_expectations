@@ -30,9 +30,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     data_directory: pathlib.Path
 
     @override
-    def _get_batch_definition_list(
-        self, batch_request: BatchRequest
-    ) -> list[BatchDefinition]:
+    def _get_batch_definition_list(self, batch_request: BatchRequest) -> list[BatchDefinition]:
         """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
@@ -56,9 +54,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
             )
             batch_definition_list = [batch_definition]
         else:
-            batch_definition_list = self._data_connector.get_batch_definition_list(
-                batch_request=batch_request
-            )
+            batch_definition_list = self._data_connector.get_batch_definition_list(batch_request=batch_request)
         return batch_definition_list
 
     @override
@@ -66,9 +62,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
         """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
-        return make_directory_get_unfiltered_batch_definition_list_fn(
-            self.data_directory
-        )
+        return make_directory_get_unfiltered_batch_definition_list_fn(self.data_directory)
 
     @override
     def _get_reader_method(self) -> str:

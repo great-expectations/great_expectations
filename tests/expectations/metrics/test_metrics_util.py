@@ -59,12 +59,8 @@ def _compare_select_statement_with_converted_string(engine) -> None:
         engine (ExecutionEngine): SqlAlchemyExecutionEngine with connection to backend under test
     """
     select_statement: sqlalchemy.Select = select_with_post_compile_statements()
-    returned_string = sql_statement_with_post_compile_to_string(
-        engine=engine, select_statement=select_statement
-    )
-    assert returned_string == (
-        "SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000';"
-    )
+    returned_string = sql_statement_with_post_compile_to_string(engine=engine, select_statement=select_statement)
+    assert returned_string == ("SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000';")
 
 
 @pytest.fixture
@@ -157,14 +153,8 @@ def test_sql_statement_conversion_to_string_bigquery(test_backends):
         connection_string = get_bigquery_connection_url()
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         select_statement: sqlalchemy.Select = select_with_post_compile_statements()
-        returned_string = sql_statement_with_post_compile_to_string(
-            engine=engine, select_statement=select_statement
-        )
-        assert returned_string == (
-            "SELECT `a`.`id`, `a`.`data` \n"
-            "FROM `a` \n"
-            "WHERE `a`.`data` = '00000000';"
-        )
+        returned_string = sql_statement_with_post_compile_to_string(engine=engine, select_statement=select_statement)
+        assert returned_string == ("SELECT `a`.`id`, `a`.`data` \n" "FROM `a` \n" "WHERE `a`.`data` = '00000000';")
     else:
         pytest.skip("skipping sql statement conversion test for : bigquery")
 
@@ -203,10 +193,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
         expectation_domain_column_list=expectation_domain_column_list,
         exclude_unexpected_values=True,  # the new argument
     )
-    assert (
-        unexpected_index_list
-        == unexpected_index_list_one_index_column_without_column_values
-    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
 
 
 @pytest.mark.unit
@@ -243,10 +230,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_without_column_val
         expectation_domain_column_list=expectation_domain_column_list,
         exclude_unexpected_values=True,  # the new argument
     )
-    assert (
-        unexpected_index_list
-        == unexpected_index_list_one_index_column_without_column_values
-    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
 
 
 @pytest.mark.unit
@@ -283,10 +267,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column
         expectation_domain_column_list=expectation_domain_column_list,
         exclude_unexpected_values=True,  # the new argument
     )
-    assert (
-        unexpected_index_list
-        == unexpected_index_list_two_index_columns_without_column_values
-    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
 
 
 @pytest.mark.unit
@@ -323,10 +304,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         expectation_domain_column_list=expectation_domain_column_list,
         exclude_unexpected_values=True,  # the new argument
     )
-    assert (
-        unexpected_index_list
-        == unexpected_index_list_two_index_columns_without_column_values
-    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
 
 
 @pytest.mark.unit
@@ -363,10 +341,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         expectation_domain_column_list=expectation_domain_column_list,
         exclude_unexpected_values=True,  # the new argument
     )
-    assert (
-        unexpected_index_list
-        == unexpected_index_list_one_index_column_without_column_values
-    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
 
 
 @pytest.mark.unit
@@ -384,8 +359,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
             expectation_domain_column_list=expectation_domain_column_list,
         )
     assert e.value.message == (
-        "Error: The column i_dont_exist does not exist in the named indices. Please "
-        "check your configuration."
+        "Error: The column i_dont_exist does not exist in the named indices. Please " "check your configuration."
     )
 
 
@@ -404,8 +378,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
             expectation_domain_column_list=expectation_domain_column_list,
         )
     assert e.value.message == (
-        "Error: The list of domain columns is currently empty. Please check your "
-        "configuration."
+        "Error: The list of domain columns is currently empty. Please check your " "configuration."
     )
 
 
@@ -427,19 +400,14 @@ def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[st
 
 
 @pytest.mark.unit
-def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
-    sa, column_names_all_lowercase: list[str]
-):
+def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(sa, column_names_all_lowercase: list[str]):
     test_column_names: list[str] = column_names_all_lowercase
     with pytest.raises(gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
         _ = get_dbms_compatible_metric_domain_kwargs(
             metric_domain_kwargs={"column": "non_existent_column"},
             batch_columns_list=test_column_names,
         )
-    assert (
-        str(eee.value)
-        == 'Error: The column "non_existent_column" in BatchData does not exist.'
-    )
+    assert str(eee.value) == 'Error: The column "non_existent_column" in BatchData does not exist.'
 
 
 @pytest.mark.unit
@@ -472,9 +440,7 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
     confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
 ):
     not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
-    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="should_be_quoted", quote=True
-    )
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(value="should_be_quoted", quote=True)
     test_column_names: list[str] = column_names_all_uppercase + [
         not_quoted_column_name,
         quoted_column_name,
@@ -525,9 +491,7 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
     output_column_name_b: Union[str, sqlalchemy.quoted_name],
 ):
     not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
-    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="should_be_quoted", quote=True
-    )
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(value="should_be_quoted", quote=True)
     test_column_names: list[str] = column_names_all_uppercase + [
         not_quoted_column_name,
         quoted_column_name,
@@ -578,15 +542,9 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
     output_column_list: list[Union[str, sqlalchemy.quoted_name]],
 ):
     not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
-    quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="should_be_quoted_0", quote=True
-    )
-    quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="should_be_quoted_1", quote=True
-    )
-    quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="should_be_quoted_2", quote=True
-    )
+    quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(value="should_be_quoted_0", quote=True)
+    quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(value="should_be_quoted_1", quote=True)
+    quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(value="should_be_quoted_2", quote=True)
     test_column_names: list[str] = column_names_all_uppercase + [
         not_quoted_column_name,
         quoted_column_name_0,

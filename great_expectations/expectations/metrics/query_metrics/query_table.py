@@ -56,9 +56,7 @@ class QueryTable(QueryMetricProvider):
         else:
             query = query.format(batch=f"({selectable})")
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(
-            sa.text(query)
-        ).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
         return [element._asdict() for element in result]
         # </snippet>
 
@@ -74,9 +72,7 @@ class QueryTable(QueryMetricProvider):
         query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         df: pyspark.DataFrame
-        df, _, _ = execution_engine.get_compute_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
-        )
+        df, _, _ = execution_engine.get_compute_domain(metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE)
 
         df.createOrReplaceTempView("tmp_view")
         query = query.format(batch="tmp_view")

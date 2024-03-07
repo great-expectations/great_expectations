@@ -124,9 +124,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
             )
-            template_str += (
-                f"most common value must belong to this set: {value_set_str}."
-            )
+            template_str += f"most common value must belong to this set: {value_set_str}."
 
             if params.ties_okay:
                 template_str += " Values outside this set that are as common (but not more common) are allowed."
@@ -149,9 +147,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -164,9 +160,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"most common value must belong to this set: {values_string}."
 

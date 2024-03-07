@@ -91,7 +91,5 @@ def test_invalid_urn():
 
     # Cannot have too many parts
     with pytest.raises(ParseException) as e:
-        ge_urn.parseString(
-            "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo"
-        )
+        ge_urn.parseString("urn:great_expectations:validations:foo:bar:baz:bin:barg:boo")
     assert "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo" in e.value.line

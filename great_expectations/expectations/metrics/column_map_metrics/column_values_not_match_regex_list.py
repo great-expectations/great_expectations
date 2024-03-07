@@ -37,19 +37,12 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
         if len(regex_list) == 0:
             raise ValueError("At least one regex must be supplied in the regex_list.")
 
-        regex_expression = get_dialect_regex_expression(
-            column, regex_list[0], _dialect, positive=False
-        )
+        regex_expression = get_dialect_regex_expression(column, regex_list[0], _dialect, positive=False)
         if regex_expression is None:
             logger.warning(f"Regex is not supported for dialect {_dialect!s}")
             raise NotImplementedError
 
-        return sa.and_(
-            *(
-                get_dialect_regex_expression(column, regex, _dialect, positive=False)
-                for regex in regex_list
-            )
-        )
+        return sa.and_(*(get_dialect_regex_expression(column, regex, _dialect, positive=False) for regex in regex_list))
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, regex_list, **kwargs):

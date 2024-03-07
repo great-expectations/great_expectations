@@ -30,9 +30,7 @@ class ColumnValuesIsVector(ColumnMapMetricProvider):
             """Checks if the row is a list containing only numbers with length
             greater than 1. If a string uses regular expression to check
             Returns true for such rows"""
-            if isinstance(x, str) and re.match(
-                ColumnValuesIsVector.VECTOR_REGEX, str(x)
-            ):
+            if isinstance(x, str) and re.match(ColumnValuesIsVector.VECTOR_REGEX, str(x)):
                 return True
             elif isinstance(x, list) and len(x) > 1:
                 return all(isinstance(listobject, (int, float)) for listobject in x)

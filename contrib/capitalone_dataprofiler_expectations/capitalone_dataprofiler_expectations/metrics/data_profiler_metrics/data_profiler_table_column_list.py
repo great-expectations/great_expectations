@@ -33,18 +33,10 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
         metrics,
         runtime_configuration,
     ):
-        profile_report_filtering_key = metric_value_kwargs[
-            "profile_report_filtering_key"
-        ]
-        profile_report_accepted_filtering_values = metric_value_kwargs[
-            "profile_report_accepted_filtering_values"
-        ]
-        profile_report_column_data_stats: dict = metrics[
-            "data_profiler.table_column_infos"
-        ]
-        profile_report_column_names: List[str] = list(
-            profile_report_column_data_stats.keys()
-        )
+        profile_report_filtering_key = metric_value_kwargs["profile_report_filtering_key"]
+        profile_report_accepted_filtering_values = metric_value_kwargs["profile_report_accepted_filtering_values"]
+        profile_report_column_data_stats: dict = metrics["data_profiler.table_column_infos"]
+        profile_report_column_names: List[str] = list(profile_report_column_data_stats.keys())
         profile_report_column_names = get_dbms_compatible_column_names(
             column_names=profile_report_column_names,
             batch_columns_list=metrics["table.columns"],
@@ -52,9 +44,7 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
         profile_report_filtered_column_names: list = []
         for col in profile_report_column_names:
             if (
-                metrics["data_profiler.table_column_infos"][col][
-                    profile_report_filtering_key
-                ]
+                metrics["data_profiler.table_column_infos"][col][profile_report_filtering_key]
                 in profile_report_accepted_filtering_values
             ):
                 profile_report_filtered_column_names.append(col)
@@ -74,9 +64,7 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs: dict = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
         dependencies["data_profiler.table_column_infos"] = MetricConfiguration(
             metric_name="data_profiler.table_column_infos",
             metric_domain_kwargs={},

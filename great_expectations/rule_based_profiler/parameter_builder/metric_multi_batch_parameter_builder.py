@@ -46,9 +46,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -183,19 +181,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             if (
                 reduce_scalar_metric
                 and isinstance(
-                    metric_computation_result.attributed_resolved_metrics[
-                        0
-                    ].conditioned_metric_values,
+                    metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values,
                     np.ndarray,
                 )
-                and metric_computation_result.attributed_resolved_metrics[
-                    0
-                ].conditioned_metric_values.ndim
-                > 1
-                and metric_computation_result.attributed_resolved_metrics[
-                    0
-                ].conditioned_metric_values.shape[1]
-                == 1
+                and metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.ndim > 1
+                and metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape[1] == 1
             ):
                 return Attributes(
                     {

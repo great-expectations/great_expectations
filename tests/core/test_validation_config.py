@@ -55,9 +55,7 @@ class TestValidationRun:
         with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:
             with mock.patch.object(OldValidator, "graph_validate"):
                 gx.get_context()
-                mock_validator = OldValidator(
-                    execution_engine=mock.MagicMock(spec=ExecutionEngine)
-                )
+                mock_validator = OldValidator(execution_engine=mock.MagicMock(spec=ExecutionEngine))
                 mock_get_validator.return_value = mock_validator
 
                 yield mock_validator
@@ -68,12 +66,8 @@ class TestValidationRun:
         mock_validator: mock.MagicMock,
         validation_config: ValidationConfig,
     ):
-        validation_config.suite.add_expectation(
-            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
-        )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        validation_config.suite.add_expectation(gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1))
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run()
 
@@ -96,13 +90,9 @@ class TestValidationRun:
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
-            gxe.ExpectColumnMaxToBeBetween(
-                column="foo", max_value={"$PARAMETER": "max_value"}
-            )
+            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value={"$PARAMETER": "max_value"})
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run(
             batch_config_options={"year": 2024},
@@ -366,9 +356,7 @@ class TestValidationConfigSerialization:
             ),
         ],
     )
-    def test_validation_config_deserialization_bad_format(
-        self, serialized_config: dict, error_substring: str
-    ):
+    def test_validation_config_deserialization_bad_format(self, serialized_config: dict, error_substring: str):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationConfig.parse_obj(serialized_config)
 

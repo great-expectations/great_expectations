@@ -53,9 +53,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         """SqlAlchemy Median Implementation"""
@@ -80,8 +78,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             # An even number of column values: take the average of the two center values
             column_median = (
                 float(
-                    column_values[0][0]
-                    + column_values[1][0]  # left center value  # right center value
+                    column_values[0][0] + column_values[1][0]  # left center value  # right center value
                 )
                 / 2.0
             )  # Average center values
@@ -107,9 +104,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             df,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column = accessor_domain_kwargs["column"]
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
@@ -122,9 +117,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
 
         """Spark Median Implementation"""
         table_row_count = metrics["table.row_count"]
-        result = df.approxQuantile(
-            column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
-        )
+        result = df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0)
         return np.mean(result)
 
     @classmethod

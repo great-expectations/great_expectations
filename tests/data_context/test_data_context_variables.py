@@ -99,9 +99,7 @@ class StubConfigurationProvider(_ConfigurationProvider):
 def ephemeral_data_context_variables(
     data_context_config: DataContextConfig,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(
-        config=data_context_config, config_provider=StubConfigurationProvider()
-    )
+    return EphemeralDataContextVariables(config=data_context_config, config_provider=StubConfigurationProvider())
 
 
 @pytest.fixture
@@ -132,15 +130,11 @@ def cloud_data_context_variables(
 
 
 @pytest.fixture
-def file_data_context(
-    tmp_path: pathlib.Path, data_context_config: DataContextConfig
-) -> FileDataContext:
+def file_data_context(tmp_path: pathlib.Path, data_context_config: DataContextConfig) -> FileDataContext:
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
     context_root_dir = project_path / FileDataContext.GX_DIR
-    context = FileDataContext(
-        project_config=data_context_config, context_root_dir=context_root_dir
-    )
+    context = FileDataContext(project_config=data_context_config, context_root_dir=context_root_dir)
     project_manager.set_project(context)
     return context
 
@@ -298,9 +292,7 @@ def test_data_context_variables_get_with_substitutions(
     env_var_name: str = "MY_CONFIG_VERSION"
     value_associated_with_env_var: float = 7.0
 
-    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = (
-        f"${env_var_name}"
-    )
+    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     config_values: dict = {
         env_var_name: value_associated_with_env_var,
@@ -417,13 +409,8 @@ def test_data_context_variables_save_config(
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save_config()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
-    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(
-        key=key
-    )
-    assert (
-        persisted_value.to_json_dict()
-        == ephemeral_data_context_variables.config.to_json_dict()
-    )
+    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
+    assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
 
     # FileDataContextVariables
     with mock.patch(
@@ -528,9 +515,7 @@ def test_file_data_context_variables_e2e(
     updated_progress_bars.profilers = True
 
     # Prepare updated include_rendered_content to set and serialize to disk
-    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(
-        include_rendered_content
-    )
+    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(include_rendered_content)
     updated_include_rendered_content.expectation_validation_result = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
@@ -540,29 +525,20 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
-    file_data_context.variables.include_rendered_content = (
-        updated_include_rendered_content
-    )
+    file_data_context.variables.include_rendered_content = updated_include_rendered_content
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
     # Review great_expectations.yml where values were written and confirm changes
-    config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
-        file_data_context.GX_YML
-    )
+    config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(file_data_context.GX_YML)
 
     with open(config_filepath) as f:
         contents: dict = yaml.load(f)
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
-    assert (
-        config_saved_to_disk.include_rendered_content.to_dict()
-        == updated_include_rendered_content.to_dict()
-    )
-    assert (
-        file_data_context.variables.plugins_directory == value_associated_with_env_var
-    )
+    assert config_saved_to_disk.include_rendered_content.to_dict() == updated_include_rendered_content.to_dict()
+    assert file_data_context.variables.plugins_directory == value_associated_with_env_var
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
@@ -611,7 +587,9 @@ def test_cloud_enabled_data_context_variables_e2e(
     """
     # Prepare updated plugins directory to set and save to the Cloud backend.
     # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    updated_plugins_dir = (
+        f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    )
 
     updated_data_docs_sites = data_docs_sites
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"

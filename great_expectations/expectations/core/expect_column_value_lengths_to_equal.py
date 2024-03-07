@@ -90,9 +90,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     )
 
     @classmethod
-    def _prescriptive_template(
-        cls, renderer_configuration: RendererConfiguration
-    ) -> RendererConfiguration:
+    def _prescriptive_template(cls, renderer_configuration: RendererConfiguration) -> RendererConfiguration:
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value", RendererValueType.NUMBER),
@@ -110,9 +108,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         else:
             template_str = "values must be $value characters long"
             if params.mostly and params.mostly.value < 1.0:
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
+                renderer_configuration = cls._add_mostly_pct_param(renderer_configuration=renderer_configuration)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -135,9 +131,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -149,9 +143,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         else:
             template_str = "values must be $value characters long"
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:

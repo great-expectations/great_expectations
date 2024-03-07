@@ -48,9 +48,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
-datasource_yaml = datasource_yaml.replace(
-    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
-)
+datasource_yaml = datasource_yaml.replace("<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/")
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
@@ -79,9 +77,7 @@ batch_request.runtime_parameters["path"] = (
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
@@ -101,26 +97,18 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = (
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
-)
+batch_request.data_asset_name = "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
-assert set(
-    context.get_available_data_asset_names()["my_gcs_datasource"][
-        "default_inferred_data_connector_name"
-    ]
-) == {
+assert set(context.get_available_data_asset_names()["my_gcs_datasource"]["default_inferred_data_connector_name"]) == {
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",

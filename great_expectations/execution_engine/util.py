@@ -21,9 +21,9 @@ def is_valid_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    return is_valid_continuous_partition_object(
+    return is_valid_continuous_partition_object(partition_object) or is_valid_categorical_partition_object(
         partition_object
-    ) or is_valid_categorical_partition_object(partition_object)
+    )
 
 
 def is_valid_categorical_partition_object(partition_object):
@@ -31,17 +31,13 @@ def is_valid_categorical_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    if (
-        partition_object is None
-        or ("weights" not in partition_object)
-        or ("values" not in partition_object)
-    ):
+    if partition_object is None or ("weights" not in partition_object) or ("values" not in partition_object):
         return False
 
     # Expect the same number of values as weights; weights should sum to one
-    return len(partition_object["values"]) == len(
-        partition_object["weights"]
-    ) and np.allclose(np.sum(partition_object["weights"]), 1)
+    return len(partition_object["values"]) == len(partition_object["weights"]) and np.allclose(
+        np.sum(partition_object["weights"]), 1
+    )
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -50,11 +46,7 @@ def is_valid_continuous_partition_object(partition_object):
     :param partition_object: The partition_object to evaluate
     :return: Boolean
     """
-    if (
-        (partition_object is None)
-        or ("weights" not in partition_object)
-        or ("bins" not in partition_object)
-    ):
+    if (partition_object is None) or ("weights" not in partition_object) or ("bins" not in partition_object):
         return False
 
     if "tail_weights" in partition_object:
@@ -112,9 +104,7 @@ def build_continuous_partition_object(
             "allow_relative_error": allow_relative_error,
         },
     )
-    bins = execution_engine.resolve_metrics([partition_metric_configuration])[
-        partition_metric_configuration.id
-    ]
+    bins = execution_engine.resolve_metrics([partition_metric_configuration])[partition_metric_configuration.id]
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
     else:
@@ -132,13 +122,8 @@ def build_continuous_partition_object(
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs=None,
     )
-    metrics = execution_engine.resolve_metrics(
-        (hist_metric_configuration, nonnull_configuration)
-    )
-    weights = list(
-        np.array(metrics[hist_metric_configuration.id])
-        / metrics[nonnull_configuration.id]
-    )
+    metrics = execution_engine.resolve_metrics((hist_metric_configuration, nonnull_configuration))
+    weights = list(np.array(metrics[hist_metric_configuration.id]) / metrics[nonnull_configuration.id])
     tail_weights = (1 - sum(weights)) / 2
     partition_object = {
         "bins": bins,
@@ -180,16 +165,11 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs=None,
     )
-    metrics = execution_engine.resolve_metrics(
-        (counts_configuration, nonnull_configuration)
-    )
+    metrics = execution_engine.resolve_metrics((counts_configuration, nonnull_configuration))
 
     return {
         "values": list(metrics[counts_configuration.id].index),
-        "weights": list(
-            np.array(metrics[counts_configuration.id])
-            / metrics[nonnull_configuration.id]
-        ),
+        "weights": list(np.array(metrics[counts_configuration.id]) / metrics[nonnull_configuration.id]),
     }
 
 
@@ -225,9 +205,7 @@ def infer_distribution_parameters(  # noqa: C901, PLR0912
     if params is None:
         params = {}
     elif not isinstance(params, dict):
-        raise TypeError(
-            "params must be a dictionary object, see great_expectations documentation"
-        )
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")
 
     if "mean" not in params.keys():
         params["mean"] = data.mean()
@@ -281,9 +259,7 @@ def infer_distribution_parameters(  # noqa: C901, PLR0912
     # Lambda is optional
     #        params['scale'] = 1 / params['lambda']
     elif distribution != "norm":
-        raise AttributeError(
-            "Unsupported distribution type. Please refer to Great Expectations Documentation"
-        )
+        raise AttributeError("Unsupported distribution type. Please refer to Great Expectations Documentation")
 
     params["loc"] = params.get("loc", 0)
     params["scale"] = params.get("scale", 1)
@@ -353,19 +329,13 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
 
     """
 
-    norm_msg = (
-        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    )
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
     gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
     # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
-    uniform_msg = (
-        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = (
-        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if distribution not in [
         "norm",
@@ -384,9 +354,7 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
             raise ValueError("std_dev and scale must be positive.")
 
         # alpha and beta are required and positive
-        if distribution == "beta" and (
-            params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
-        ):
+        if distribution == "beta" and (params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0):
             raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
@@ -499,12 +467,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
 def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) -> str:
     return ", ".join(
         [
-            "approximate "
-            + str(
-                stmt.compile(
-                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}
-                )
-            )
+            "approximate " + str(stmt.compile(dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}))
             for stmt in selects
         ]
     )

@@ -77,9 +77,7 @@ class VolumeDataAssistant(DataAssistant):
         ]
 
     @override
-    def _build_data_assistant_result(
-        self, data_assistant_result: DataAssistantResult
-    ) -> DataAssistantResult:
+    def _build_data_assistant_result(self, data_assistant_result: DataAssistantResult) -> DataAssistantResult:
         return VolumeDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
@@ -105,20 +103,22 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-            ParameterBuilderConfig(
-                **table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
-            ),
+            ParameterBuilderConfig(**table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()),
         ]
-        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name=None,
-            suffix=None,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+                metric_name=None,
+                suffix=None,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            )
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
@@ -178,22 +178,20 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: DomainBuilder = (
-            CategoricalColumnDomainBuilder(
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
-                max_unique_values=None,
-                max_proportion_unique=None,
-                data_context=None,
-            )
+        categorical_column_type_domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            allowed_semantic_types_passthrough=None,
+            cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
+            max_unique_values=None,
+            max_proportion_unique=None,
+            data_context=None,
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
@@ -207,11 +205,13 @@ class VolumeDataAssistant(DataAssistant):
                 **column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
         ]
-        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name=None,
-            suffix=None,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+                metric_name=None,
+                suffix=None,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            )
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").

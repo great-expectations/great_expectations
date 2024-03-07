@@ -120,9 +120,7 @@ def table_exp2() -> ExpectationConfiguration:
 
 @pytest.fixture
 def table_exp3() -> ExpectationConfiguration:
-    return ExpectationConfiguration(
-        expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1}
-    )
+    return ExpectationConfiguration(expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1})
 
 
 @pytest.fixture
@@ -249,9 +247,7 @@ def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
 
 
 @pytest.mark.filesystem
-def test_find_expectation_indexes(
-    exp1, exp4, domain_success_runtime_suite, single_expectation_suite
-):
+def test_find_expectation_indexes(exp1, exp4, domain_success_runtime_suite, single_expectation_suite):
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
         1,
         2,
@@ -266,14 +262,10 @@ def test_find_expectation_indexes(
     assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
 
     with pytest.raises(InvalidExpectationConfigurationError):
-        domain_success_runtime_suite.remove_expectation(
-            "not an expectation", match_type="runtime"
-        )
+        domain_success_runtime_suite.remove_expectation("not an expectation", match_type="runtime")
 
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(
-            exp1, match_type="not a match_type"
-        )
+        domain_success_runtime_suite.remove_expectation(exp1, match_type="not a match_type")
 
 
 @pytest.mark.cloud
@@ -297,9 +289,7 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
     with pytest.raises(InvalidExpectationConfigurationError) as err:
-        ge_cloud_suite.find_expectation_indexes(
-            expectation_configuration={"foo": "bar"}
-        )
+        ge_cloud_suite.find_expectation_indexes(expectation_configuration={"foo": "bar"})
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
@@ -311,9 +301,7 @@ def test_find_expectations_without_necessary_args(ge_cloud_suite):
 
 
 @pytest.mark.filesystem
-def test_remove_expectation(
-    exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
-):
+def test_remove_expectation(exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite):
     domain_success_runtime_suite.remove_expectation(
         exp5, match_type="runtime", remove_multiple_matches=False
     )  # remove one matching expectation
@@ -328,32 +316,24 @@ def test_remove_expectation(
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [3]
 
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(
-            exp4, match_type="domain", remove_multiple_matches=False
-        )
+        domain_success_runtime_suite.remove_expectation(exp4, match_type="domain", remove_multiple_matches=False)
 
     # remove 3 matching expectations
-    domain_success_runtime_suite.remove_expectation(
-        exp4, match_type="domain", remove_multiple_matches=True
-    )
+    domain_success_runtime_suite.remove_expectation(exp4, match_type="domain", remove_multiple_matches=True)
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp2, match_type="runtime")
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
-    assert domain_success_runtime_suite.find_expectation_indexes(
-        exp1, match_type="domain"
-    ) == [0]
+    assert domain_success_runtime_suite.find_expectation_indexes(exp1, match_type="domain") == [0]
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
 
 
 @pytest.mark.filesystem
 def test_remove_expectation_without_necessary_args(single_expectation_suite):
     with pytest.raises(TypeError) as err:
-        single_expectation_suite.remove_expectation(
-            expectation_configuration=None, id=None
-        )
+        single_expectation_suite.remove_expectation(expectation_configuration=None, id=None)
     assert str(err.value) == "Must provide either expectation_configuration or id"
 
 
@@ -403,30 +383,22 @@ def test_add_expectation(
 ):
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
-    single_expectation_suite.add_expectation_configuration(
-        exp2, match_type="runtime", overwrite_existing=False
-    )
+    single_expectation_suite.add_expectation_configuration(exp2, match_type="runtime", overwrite_existing=False)
     assert single_expectation_suite.isEquivalentTo(baseline_suite)
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if overwrite_existing=False and a matching expectation is found
     with pytest.raises(DataContextError):
-        single_expectation_suite.add_expectation_configuration(
-            exp4, match_type="domain", overwrite_existing=False
-        )
+        single_expectation_suite.add_expectation_configuration(exp4, match_type="domain", overwrite_existing=False)
 
     assert not single_expectation_suite.isEquivalentTo(different_suite)
-    single_expectation_suite.add_expectation_configuration(
-        exp4, match_type="domain", overwrite_existing=True
-    )
+    single_expectation_suite.add_expectation_configuration(exp4, match_type="domain", overwrite_existing=True)
     assert single_expectation_suite.isEquivalentTo(different_suite)
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if more than one matching expectation is found
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.add_expectation_configuration(
-            exp2, match_type="success", overwrite_existing=False
-        )
+        domain_success_runtime_suite.add_expectation_configuration(exp2, match_type="success", overwrite_existing=False)
 
     config = ExpectationConfiguration(expectation_type="not an expectation", kwargs={})
     with pytest.raises(InvalidExpectationConfigurationError):
@@ -440,9 +412,7 @@ def test_add_expectation_with_ge_cloud_id(
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
     """
-    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-        0
-    ].id
+    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[0].id
     # updated expectation does not have ge_cloud_id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -457,24 +427,17 @@ def test_add_expectation_with_ge_cloud_id(
         updated_expectation, overwrite_existing=True
     )
     assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-            0
-        ].id
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[0].id
         == expectation_ge_cloud_id
     )
     # make sure expectation config was actually updated
-    assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-            0
-        ].kwargs["value_set"]
-        == [
-            11,
-            22,
-            33,
-            44,
-            55,
-        ]
-    )
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[0].kwargs["value_set"] == [
+        11,
+        22,
+        33,
+        44,
+        55,
+    ]
 
 
 @pytest.mark.filesystem
@@ -486,9 +449,7 @@ def test_remove_all_expectations_of_type(
         expectation.expectation_type == expectation_type
         for expectation in suite_with_table_and_column_expectations.expectations
     )
-    suite_with_table_and_column_expectations.remove_all_expectations_of_type(
-        expectation_type
-    )
+    suite_with_table_and_column_expectations.remove_all_expectations_of_type(expectation_type)
     assert not any(
         expectation.expectation_type == expectation_type
         for expectation in suite_with_table_and_column_expectations.expectations

@@ -64,9 +64,7 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_available_data_asset(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
-    expected_available_data_asset_names: Dict[List[str]] = {
-        "test_runtime_data_connector": ["asset_a", "asset_b"]
-    }
+    expected_available_data_asset_names: Dict[List[str]] = {"test_runtime_data_connector": ["asset_a", "asset_b"]}
     available_data_asset_names: Dict[List[str]] = (
         datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_available_data_asset_names()
     )

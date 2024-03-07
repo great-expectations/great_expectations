@@ -72,9 +72,7 @@ class SampleConfigurationStore(ConfigurationStore):
 
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
-        return [
-            ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase
-        ]
+        return [ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase]
 
 
 @pytest.mark.filesystem
@@ -114,23 +112,12 @@ def test_v3_configuration_store(tmp_path_factory):
     test_config_name_0.yml
 """
     )
-    assert (
-        len(
-            [
-                path
-                for path in Path(base_directory).iterdir()
-                if str(path).find(".ge_store_backend_id") == (-1)
-            ]
-        )
-        == 1
-    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
 
     stored_file_name_0: str = Path(base_directory) / f"{configuration_name_0}.yml"
     with open(stored_file_name_0) as f:
         config: CommentedMap = yaml.load(f)
-        expected_config: CommentedMap = CommentedMap(
-            {"some_param_0": "test_str_0", "some_param_1": 65}
-        )
+        expected_config: CommentedMap = CommentedMap({"some_param_0": "test_str_0", "some_param_1": 65})
         assert config == expected_config
 
     with pytest.raises(ValueError):
@@ -182,23 +169,12 @@ def test_v3_configuration_store(tmp_path_factory):
     test_config_name_1.yml
 """
     )
-    assert (
-        len(
-            [
-                path
-                for path in Path(base_directory).iterdir()
-                if str(path).find(".ge_store_backend_id") == (-1)
-            ]
-        )
-        == 2
-    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 2
 
     stored_file_name_1: str = Path(base_directory) / f"{configuration_name_1}.yml"
     with open(stored_file_name_1) as f:
         config: CommentedMap = yaml.load(f)
-        expected_config: CommentedMap = CommentedMap(
-            {"some_param_0": "test_str_1", "some_param_1": 26}
-        )
+        expected_config: CommentedMap = CommentedMap({"some_param_0": "test_str_1", "some_param_1": 26})
         assert config == expected_config
 
     loaded_config: BaseYamlConfig = load_config_from_filesystem(
@@ -217,16 +193,7 @@ def test_v3_configuration_store(tmp_path_factory):
         base_directory=base_directory,
         configuration_key=configuration_name_0,
     )
-    assert (
-        len(
-            [
-                path
-                for path in Path(base_directory).iterdir()
-                if str(path).find(".ge_store_backend_id") == (-1)
-            ]
-        )
-        == 1
-    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 1
 
     delete_config_from_filesystem(
         configuration_store_class_name="SampleConfigurationStore",
@@ -235,16 +202,7 @@ def test_v3_configuration_store(tmp_path_factory):
         base_directory=base_directory,
         configuration_key=configuration_name_1,
     )
-    assert (
-        len(
-            [
-                path
-                for path in Path(base_directory).iterdir()
-                if str(path).find(".ge_store_backend_id") == (-1)
-            ]
-        )
-        == 0
-    )
+    assert len([path for path in Path(base_directory).iterdir() if str(path).find(".ge_store_backend_id") == (-1)]) == 0
 
 
 @pytest.mark.unit
@@ -280,17 +238,13 @@ def test_config_property_and_defaults() -> None:
         pytest.param(
             None,
             "abc123",
-            GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"
-            ),
+            GXCloudIdentifier(resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"),
             id="id",
         ),
     ],
 )
 @pytest.mark.unit
-def test_get_key_constructs_key(
-    name: Optional[str], id: Optional[str], expected_key: DataContextKey
-) -> None:
+def test_get_key_constructs_key(name: Optional[str], id: Optional[str], expected_key: DataContextKey) -> None:
     actual_key = ConfigurationStore(store_name="test").get_key(name=name, id=id)
     assert actual_key == expected_key
 
@@ -307,9 +261,7 @@ def test_get_key_constructs_key(
     ],
 )
 @pytest.mark.unit
-def test_get_key_raises_error_with_conflicting_args(
-    name: Optional[str], id: Optional[str]
-) -> None:
+def test_get_key_raises_error_with_conflicting_args(name: Optional[str], id: Optional[str]) -> None:
     with pytest.raises(AssertionError) as e:
         ConfigurationStore(store_name="test").get_key(name=name, id=id)
 
@@ -327,7 +279,6 @@ def test_init_with_invalid_configuration_class_raises_error() -> None:
     with pytest.raises(DataContextError) as e:
         InvalidConfigurationStore(store_name="my_configuration_store")
 
-    assert (
-        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
-        in str(e.value)
+    assert "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class." in str(
+        e.value
     )

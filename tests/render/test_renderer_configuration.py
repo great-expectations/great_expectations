@@ -79,11 +79,9 @@ def test_successful_renderer_configuration_instantiation(
     assert renderer_configuration.kwargs == kwargs
     assert renderer_configuration.include_column_name is include_column_name
 
-    expectation_validation_result = (
-        mock_expectation_validation_result_from_expectation_configuration(
-            expectation_configuration=expectation_configuration,
-            fake_result=fake_result,
-        )
+    expectation_validation_result = mock_expectation_validation_result_from_expectation_configuration(
+        expectation_configuration=expectation_configuration,
+        fake_result=fake_result,
     )
     renderer_configuration = RendererConfiguration(
         result=expectation_validation_result,
@@ -105,11 +103,8 @@ def test_failed_renderer_configuration_instantiation():
             runtime_configuration={},
         )
     assert any(
-        str(error_wrapper_exc)
-        == "RendererConfiguration must be passed either configuration or result."
-        for error_wrapper_exc in [
-            error_wrapper.exc for error_wrapper in e.value.raw_errors
-        ]
+        str(error_wrapper_exc) == "RendererConfiguration must be passed either configuration or result."
+        for error_wrapper_exc in [error_wrapper.exc for error_wrapper in e.value.raw_errors]
     )
 
 
@@ -128,30 +123,20 @@ class NotString:
         (RendererValueType.ARRAY, 3),
     ],
 )
-def test_renderer_configuration_add_param_validation(
-    param_type: RendererValueType, value: Union[NotString, str, int]
-):
+def test_renderer_configuration_add_param_validation(param_type: RendererValueType, value: Union[NotString, str, int]):
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal",
         kwargs={"value": value},
     )
-    renderer_configuration = RendererConfiguration(
-        configuration=expectation_configuration
-    )
+    renderer_configuration = RendererConfiguration(configuration=expectation_configuration)
     with pytest.raises(pydantic_error_wrappers.ValidationError) as e:
         renderer_configuration.add_param(name="value", param_type=param_type)
 
     if param_type is RendererValueType.STRING:
-        exception_message = (
-            "Value was unable to be represented as a string: I'm not a string"
-        )
+        exception_message = "Value was unable to be represented as a string: I'm not a string"
     else:
-        exception_message = (
-            f"Param type: <{param_type}> does not match value: <{value}>."
-        )
+        exception_message = f"Param type: <{param_type}> does not match value: <{value}>."
     assert any(
         str(error_wrapper_exc) == exception_message
-        for error_wrapper_exc in [
-            error_wrapper.exc for error_wrapper in e.value.raw_errors
-        ]
+        for error_wrapper_exc in [error_wrapper.exc for error_wrapper in e.value.raw_errors]
     )

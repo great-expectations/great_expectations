@@ -46,9 +46,7 @@ class StoreBackend(metaclass=ABCMeta):
         """
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
-        self._manually_initialize_store_backend_id = (
-            manually_initialize_store_backend_id
-        )
+        self._manually_initialize_store_backend_id = manually_initialize_store_backend_id
         self._store_name = store_name
 
     @property
@@ -59,9 +57,7 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(
-        self, suppress_warning: bool = False
-    ) -> Optional[str]:
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[str]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -81,15 +77,9 @@ class StoreBackend(metaclass=ABCMeta):
             return None
         try:
             try:
-                ge_store_backend_id_file_contents = self.get(
-                    key=self.STORE_BACKEND_ID_KEY
-                )
-                store_backend_id_file_parser = self.STORE_BACKEND_ID_PREFIX + pp.Word(
-                    f"{pp.hexnums}-"
-                )
-                parsed_store_backend_id = store_backend_id_file_parser.parseString(
-                    ge_store_backend_id_file_contents
-                )
+                ge_store_backend_id_file_contents = self.get(key=self.STORE_BACKEND_ID_KEY)
+                store_backend_id_file_parser = self.STORE_BACKEND_ID_PREFIX + pp.Word(f"{pp.hexnums}-")
+                parsed_store_backend_id = store_backend_id_file_parser.parseString(ge_store_backend_id_file_contents)
                 return parsed_store_backend_id[1]
             except InvalidKeyError:
                 store_id = (
@@ -155,9 +145,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def _update(self, key, value, **kwargs):
         if not self.has_key(key):
-            raise StoreBackendError(
-                f"Store does not have a value associated the following key: {key}."
-            )
+            raise StoreBackendError(f"Store does not have a value associated the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
 
     def add_or_update(self, key, value, **kwargs):
@@ -189,9 +177,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
-            "Store backend of type {:s} does not have an implementation of get_url_for_key".format(
-                type(self).__name__
-            )
+            f"Store backend of type {type(self).__name__:s} does not have an implementation of get_url_for_key"
         )
 
     def _validate_key(self, key) -> None:
@@ -206,13 +192,7 @@ class StoreBackend(metaclass=ABCMeta):
                         )
                     )
         else:
-            raise TypeError(
-                "Keys in {} must be instances of {}, not {}".format(
-                    self.__class__.__name__,
-                    tuple,
-                    type(key),
-                )
-            )
+            raise TypeError(f"Keys in {self.__class__.__name__} must be instances of {tuple}, not {type(key)}")
 
     def _validate_value(self, value) -> None:  # noqa: B027 # no abstract decorator
         pass

@@ -44,9 +44,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         if all(_column.str.isdigit()) is True:
             temp_column = _column.astype(int)
         else:
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         series_diff = np.diff(temp_column)
 
@@ -72,18 +70,12 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
     ):
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = [col for col in table_columns if col["name"] == column_name][
-            0
-        ]
+        column_metadata = [col for col in table_columns if col["name"] == column_name][0]
 
-        if pyspark.types and isinstance(
-            column_metadata["type"], pyspark.types.StringType
-        ):
+        if pyspark.types and isinstance(column_metadata["type"], pyspark.types.StringType):
             column = F.col(column_name).cast(pyspark.types.IntegerType())
         else:
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         compute_domain_kwargs = metric_domain_kwargs
 
@@ -91,14 +83,10 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN)
 
         if any(np.array(df.select(column.isNull()).collect())):
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
@@ -131,9 +119,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs: dict = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
@@ -217,9 +203,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
             if not rule(param_value):
                 raise InvalidExpectationKwargsError(error_message)
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         super().validate_configuration(configuration=configuration)
 
     def get_validation_dependencies(
@@ -261,11 +245,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         success = all(string_integers_increasing[0])
 
         return ExpectationValidationResult(
-            result={
-                "observed_value": np.unique(
-                    string_integers_increasing[0], return_counts=True
-                )
-            },
+            result={"observed_value": np.unique(string_integers_increasing[0], return_counts=True)},
             success=success,
         )
 

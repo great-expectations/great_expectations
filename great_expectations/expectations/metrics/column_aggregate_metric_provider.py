@@ -72,9 +72,7 @@ def column_aggregate_value(
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
 
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
@@ -85,9 +83,7 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -103,9 +99,7 @@ def column_aggregate_value(
 
         return wrapper
     else:
-        raise ValueError(
-            "column_aggregate_value decorator only supports PandasExecutionEngine"
-        )
+        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")
 
 
 @public_api
@@ -127,9 +121,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     Returns:
         An annotated metric_function which will be called with a simplified signature.
     """
-    partial_fn_type: MetricPartialFunctionTypes = (
-        MetricPartialFunctionTypes.AGGREGATE_FN
-    )
+    partial_fn_type: MetricPartialFunctionTypes = MetricPartialFunctionTypes.AGGREGATE_FN
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
@@ -148,9 +140,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
 
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
@@ -158,9 +148,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_row_condition(
-                        metric_domain_kwargs
-                    )
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(metric_domain_kwargs)
                 else:
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
@@ -168,13 +156,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    compute_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(compute_domain_kwargs, domain_type=domain_type)
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -212,9 +196,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                filter_column_isnull = kwargs.get(
-                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                )
+                filter_column_isnull = kwargs.get("filter_column_isnull", getattr(cls, "filter_column_isnull", False))
 
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
@@ -222,9 +204,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 )
 
                 if filter_column_isnull:
-                    compute_domain_kwargs = execution_engine.add_column_row_condition(
-                        metric_domain_kwargs
-                    )
+                    compute_domain_kwargs = execution_engine.add_column_row_condition(metric_domain_kwargs)
                 else:
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
@@ -233,13 +213,9 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
-                ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
-                )
+                ) = execution_engine.get_compute_domain(domain_kwargs=compute_domain_kwargs, domain_type=domain_type)
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
@@ -305,9 +281,7 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
+        table_domain_kwargs: dict = {k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"}
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
@@ -328,7 +302,5 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         return dependencies
 
 
-class ColumnMetricProvider(
-    ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider
-):
+class ColumnMetricProvider(ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider):
     _DeprecatedMetaMetricProvider__alias = ColumnAggregateMetricProvider
