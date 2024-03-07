@@ -6,7 +6,7 @@ description: Create and manage Checkpoints in GX Cloud.
 
 A Checkpoint validates Expectation Suite data. After you create a Checkpoint to validate data, you can save and reuse the Checkpoint. 
 
-To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpoint.md).
+[//]: # (TODO: To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpoint.md).)
 
 ## Prerequisites
 

@@ -142,7 +142,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created.
+11. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created.
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -185,7 +185,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-10. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
+10. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created. 
 
 </TabItem>
 </Tabs>
