@@ -149,7 +149,9 @@ Add Validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 ## Configure the Checkpoint result format parameter 
 
-You can use the `result_format` parameter to define the level of detail you want returned with your Validation Results. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. For more information, see [Result format](../../reference/learn/expectations/result_format.md).
+You can use the `result_format` parameter to define the level of detail you want returned with your Validation Results. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. 
+
+<!-- [//]: # (TODO: For more information, see Result format.) -->
 
 Run the following code to apply `result_format` to every Expectation in a Suite:
 
