@@ -4,6 +4,10 @@ from unittest.mock import Mock
 
 import pytest
 
+from great_expectations.analytics.events import (
+    ValidationConfigCreatedEvent,
+    ValidationConfigDeletedEvent,
+)
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_factory import ValidationFactory
@@ -24,42 +28,46 @@ from great_expectations.exceptions import DataContextError
 
 
 @pytest.fixture
-def validation_config() -> ValidationConfig:
-    data = Mock(spec=BatchConfig)
-    suite = Mock(spec=ExpectationSuite)
-    return ValidationConfig(
-        name="test-validation",
-        data=data,
-        suite=suite,
-    )
+def validation_config_json() -> dict:
+    return {
+        "name": "test-validation",
+        "id": None,
+        "data": {
+            "datasource": {
+                "name": "test-datasource",
+                "id": "f4b3d8f2-7e4d-4f0b-9b90-6f711d0e3e2f",
+            },
+            "asset": {
+                "name": "test-asset",
+                "id": "10b7e57d-958b-4d28-aa1d-e89bc0401eea",
+            },
+            "batch_config": {
+                "name": "test-batch-config",
+                "id": "bcd13e3e-3e3e-4e3e-8e3e-3e3e3e3e3e3e",
+            },
+        },
+        "suite": {
+            "name": "test-expectation-suite",
+            "id": "06022df2-6699-49b2-8c03-df77678363a0",
+        },
+    }
 
 
 @pytest.fixture
-def validation_config_json(validation_config: ValidationConfig) -> str:
-    return json.dumps(
-        {
-            "name": validation_config.name,
-            "id": None,
-            "data": {
-                "datasource": {
-                    "name": "test-datasource",
-                    "id": "f4b3d8f2-7e4d-4f0b-9b90-6f711d0e3e2f",
-                },
-                "asset": {
-                    "name": "test-asset",
-                    "id": "10b7e57d-958b-4d28-aa1d-e89bc0401eea",
-                },
-                "batch_config": {
-                    "name": "test-batch-config",
-                    "id": "bcd13e3e-3e3e-4e3e-8e3e-3e3e3e3e3e3e",
-                },
-            },
-            "suite": {
-                "name": "test-expectation-suite",
-                "id": "06022df2-6699-49b2-8c03-df77678363a0",
-            },
-        }
-    )
+def validation_config(validation_config_json: dict):
+    data = Mock(spec=BatchConfig)
+    data.id = validation_config_json["data"]["batch_config"]["id"]
+    suite = Mock(spec=ExpectationSuite)
+    suite.id = validation_config_json["suite"]["id"]
+
+    with mock.patch.object(
+        ValidationConfig, "json", return_value=json.dumps(validation_config_json)
+    ):
+        yield ValidationConfig(
+            name=validation_config_json["name"],
+            data=data,
+            suite=suite,
+        )
 
 
 @pytest.mark.unit
@@ -196,12 +204,10 @@ def test_validation_factory_is_initialized_with_context_cloud(
 def test_validation_factory_add_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     _test_validation_factory_add_success(
         context=empty_data_context,
         validation_config=validation_config,
-        validation_config_json=validation_config_json,
     )
 
 
@@ -209,19 +215,16 @@ def test_validation_factory_add_success_filesystem(
 def test_validation_factory_add_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     _test_validation_factory_add_success(
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
-        validation_config_json=validation_config_json,
     )
 
 
 def _test_validation_factory_add_success(
     context: AbstractDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     # Arrange
     name = validation_config.name
@@ -231,10 +234,7 @@ def _test_validation_factory_add_success(
         context.validations.get(name)
 
     # Act
-    with mock.patch.object(
-        ValidationConfig, "json", return_value=validation_config_json
-    ):
-        created_validation = context.validations.add(validation=validation_config)
+    created_validation = context.validations.add(validation=validation_config)
 
     # Assert
     validation_names = {
@@ -247,12 +247,10 @@ def _test_validation_factory_add_success(
 def test_validation_factory_delete_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     _test_validation_factory_delete_success(
         context=empty_data_context,
         validation_config=validation_config,
-        validation_config_json=validation_config_json,
     )
 
 
@@ -260,27 +258,21 @@ def test_validation_factory_delete_success_filesystem(
 def test_validation_factory_delete_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     _test_validation_factory_delete_success(
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
-        validation_config_json=validation_config_json,
     )
 
 
 def _test_validation_factory_delete_success(
     context: AbstractDataContext,
     validation_config: ValidationConfig,
-    validation_config_json: str,
 ):
     # Arrange
     name = validation_config.name
 
-    with mock.patch.object(
-        ValidationConfig, "json", return_value=validation_config_json
-    ):
-        validation_config = context.validations.add(validation=validation_config)
+    validation_config = context.validations.add(validation=validation_config)
 
     # Act
     context.validations.delete(validation_config)
@@ -294,5 +286,78 @@ def _test_validation_factory_delete_success(
 
 
 class TestValidationFactoryAnalytics:
-    # TODO: Write tests once analytics are in place
-    pass
+    @pytest.mark.filesystem
+    def test_validation_factory_add_emits_event_filesystem(
+        self, empty_data_context: FileDataContext, validation_config: ValidationConfig
+    ):
+        self._test_validation_factory_add_emits_event(
+            context=empty_data_context, validation_config=validation_config
+        )
+
+    @pytest.mark.cloud
+    def test_validation_factory_add_emits_event_cloud(
+        self,
+        empty_cloud_context_fluent: CloudDataContext,
+        validation_config: ValidationConfig,
+    ):
+        self._test_validation_factory_add_emits_event(
+            context=empty_cloud_context_fluent, validation_config=validation_config
+        )
+
+    def _test_validation_factory_add_emits_event(
+        self, context: AbstractDataContext, validation_config: ValidationConfig
+    ):
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.validation_factory.submit_event",
+            autospec=True,
+        ) as mock_submit:
+            _ = context.validations.add(validation=validation_config)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationConfigCreatedEvent(
+                validation_config_id=validation_config.id,
+                expectation_suite_id=validation_config.suite.id,
+                batch_config_id=validation_config.data.id,
+            )
+        )
+
+    @pytest.mark.filesystem
+    def test_validation_factory_delete_emits_event_filesystem(
+        self, empty_data_context: FileDataContext, validation_config: ValidationConfig
+    ):
+        self._test_validation_factory_delete_emits_event(
+            context=empty_data_context, validation_config=validation_config
+        )
+
+    @pytest.mark.cloud
+    def test_validation_factory_delete_emits_event_cloud(
+        self,
+        empty_cloud_context_fluent: CloudDataContext,
+        validation_config: ValidationConfig,
+    ):
+        self._test_validation_factory_delete_emits_event(
+            context=empty_cloud_context_fluent, validation_config=validation_config
+        )
+
+    def _test_validation_factory_delete_emits_event(
+        self, context: AbstractDataContext, validation_config: ValidationConfig
+    ):
+        # Arrange
+        validation_config = context.validations.add(validation=validation_config)
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
+        ) as mock_submit:
+            context.validations.delete(validation=validation_config)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationConfigDeletedEvent(
+                validation_config_id=validation_config.id,
+                expectation_suite_id=validation_config.suite.id,
+                batch_config_id=validation_config.data.id,
+            )
+        )

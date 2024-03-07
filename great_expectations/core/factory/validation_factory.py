@@ -44,7 +44,7 @@ class ValidationFactory(Factory[ValidationConfig]):
         submit_event(
             event=ValidationConfigCreatedEvent(
                 validation_config_id=validation.id,
-                expectation_suite_id=validation.expectation_suite.id,
+                expectation_suite_id=validation.suite.id,
                 batch_config_id=validation.data.id,
             )
         )
@@ -72,7 +72,7 @@ class ValidationFactory(Factory[ValidationConfig]):
         submit_event(
             event=ValidationConfigDeletedEvent(
                 validation_config_id=validation.id,
-                expectation_suite_id=validation.expectation_suite.id,
+                expectation_suite_id=validation.suite.id,
                 batch_config_id=validation.data.id,
             )
         )
