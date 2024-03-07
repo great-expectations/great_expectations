@@ -16,7 +16,7 @@ A Data Asset is a collection of records that you create when you connect to your
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to a data](/core/manage_and_access_data/connect_to_data/connect_to_data.md) in the GX 1.0 documentation. 
 
 <Tabs
   groupId="manage-data-assets"

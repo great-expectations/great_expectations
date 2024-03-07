@@ -82,7 +82,7 @@ Slack is good for that, too: [join Slack](https://greatexpectations.io/slack) an
 If you have bugfix or feature request, see [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new).
 
 ### Contribute code or documentation
-To make a contribution to GX, see [Contribute](../../oss/contributing/contributing_overview.md).
+To make a contribution to GX, see [Contribute](/core/contribute/contribute.md).
 
 ### Not interested in managing your own configuration or infrastructure? 
 Learn more about GX Cloud, a fully managed SaaS offering. Sign up for [the weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to preview the latest features and participate in the private Alpha program!

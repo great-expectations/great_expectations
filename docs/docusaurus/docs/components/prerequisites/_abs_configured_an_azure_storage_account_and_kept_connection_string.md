@@ -1,1 +1,0 @@
-<span>An <a href='https://docs.microsoft.com/en-us/azure/storage'>Azure Storage account</a>. A <a href='https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal'> connection string</a> is required to complete the setup.</span>
