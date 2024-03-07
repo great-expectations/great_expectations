@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from great_expectations.compatibility.typing_extensions import override
+
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
@@ -14,21 +16,14 @@ serialized_value = serializer.serialize(datasource_config)
 """
 
 import abc
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
-from great_expectations.compatibility.pydantic import BaseModel
-from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from marshmallow import Schema
 
     from great_expectations.core.configuration import AbstractConfig
-
-
-class _IdentifierBundle(BaseModel):
-    name: str
-    id: Union[str, None]
 
 
 class AbstractConfigSerializer(abc.ABC):

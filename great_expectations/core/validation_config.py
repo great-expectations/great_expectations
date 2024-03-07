@@ -15,7 +15,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
-from great_expectations.core.serializer import _IdentifierBundle
+from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.data_context.store.validation_config_store import (
     ValidationConfigStore,  # noqa: TCH001
 )
