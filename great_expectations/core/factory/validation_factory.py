@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ValidationConfigCreatedEvent,
+    ValidationConfigDeletedEvent,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
 from great_expectations.core.validation_config import ValidationConfig
@@ -14,7 +19,6 @@ if TYPE_CHECKING:
     )
 
 
-# TODO: Add analytics as needed
 class ValidationFactory(Factory[ValidationConfig]):
     def __init__(self, store: ValidationConfigStore) -> None:
         self._store = store
@@ -37,6 +41,14 @@ class ValidationFactory(Factory[ValidationConfig]):
             )
         self._store.add(key=key, value=validation)
 
+        submit_event(
+            event=ValidationConfigCreatedEvent(
+                validation_config_id=validation.id,
+                expectation_suite_id=validation.expectation_suite.id,
+                batch_config_id=validation.data.id,
+            )
+        )
+
         return validation
 
     @public_api
@@ -56,6 +68,14 @@ class ValidationFactory(Factory[ValidationConfig]):
                 f"Cannot delete ValidationConfig with name {validation.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
+
+        submit_event(
+            event=ValidationConfigDeletedEvent(
+                validation_config_id=validation.id,
+                expectation_suite_id=validation.expectation_suite.id,
+                batch_config_id=validation.data.id,
+            )
+        )
 
         return validation
 

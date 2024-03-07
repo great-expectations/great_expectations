@@ -10,6 +10,9 @@ from great_expectations.analytics.actions import (
     EXPECTATION_SUITE_EXPECTATION_CREATED,
     EXPECTATION_SUITE_EXPECTATION_DELETED,
     EXPECTATION_SUITE_EXPECTATION_UPDATED,
+    VALIDATION_CONFIG_CREATED,
+    VALIDATION_CONFIG_DELETED,
+    VALIDATION_CONFIG_UPDATED,
 )
 from great_expectations.analytics.base_event import Action, Event
 from great_expectations.compatibility.typing_extensions import override
@@ -135,4 +138,79 @@ class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
         super().__init__(
             action=EXPECTATION_SUITE_DELETED,
             expectation_suite_id=expectation_suite_id,
+        )
+
+
+@dataclass
+class _ValidationConfigEvent(Event):
+    validation_config_id: str | None = None
+    expectation_suite_id: str | None = None
+    batch_config_id: str | None = None
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "validation_config_id": self.validation_config_id,
+            "expectation_suite_id": self.expectation_suite_id,
+            "batch_config_id": self.batch_config_id,
+        }
+
+
+@dataclass
+class ValidationConfigCreatedEvent(_ValidationConfigEvent):
+    _allowed_actions: ClassVar[List[Action]] = [
+        VALIDATION_CONFIG_CREATED,
+    ]
+
+    def __init__(
+        self,
+        validation_config_id: str | None = None,
+        expectation_suite_id: str | None = None,
+        batch_config_id: str | None = None,
+    ):
+        super().__init__(
+            action=VALIDATION_CONFIG_CREATED,
+            validation_config_id=validation_config_id,
+            expectation_suite_id=expectation_suite_id,
+            batch_config_id=batch_config_id,
+        )
+
+
+@dataclass
+class ValidationConfigDeletedEvent(_ValidationConfigEvent):
+    _allowed_actions: ClassVar[List[Action]] = [
+        VALIDATION_CONFIG_DELETED,
+    ]
+
+    def __init__(
+        self,
+        validation_config_id: str | None = None,
+        expectation_suite_id: str | None = None,
+        batch_config_id: str | None = None,
+    ):
+        super().__init__(
+            action=VALIDATION_CONFIG_DELETED,
+            validation_config_id=validation_config_id,
+            expectation_suite_id=expectation_suite_id,
+            batch_config_id=batch_config_id,
+        )
+
+
+@dataclass
+class ValidationConfigUpdatedEvent(_ValidationConfigEvent):
+    _allowed_actions: ClassVar[List[Action]] = [
+        VALIDATION_CONFIG_UPDATED,
+    ]
+
+    def __init__(
+        self,
+        validation_config_id: str | None = None,
+        expectation_suite_id: str | None = None,
+        batch_config_id: str | None = None,
+    ):
+        super().__init__(
+            action=VALIDATION_CONFIG_UPDATED,
+            validation_config_id=validation_config_id,
+            expectation_suite_id=expectation_suite_id,
+            batch_config_id=batch_config_id,
         )

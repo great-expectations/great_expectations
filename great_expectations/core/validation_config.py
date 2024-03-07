@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.events import ValidationConfigUpdatedEvent
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     PrivateAttr,
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
+from great_expectations.analytics.client import submit as submit_event
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.datasource.new_datasource import (
     BaseDatasource as LegacyDatasource,
@@ -121,7 +123,7 @@ class ValidationConfig(BaseModel):
         }
 
     name: str
-    data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
+    data: BatchConfig
     suite: ExpectationSuite
     id: Union[str, None] = None
 
@@ -242,3 +244,11 @@ class ValidationConfig(BaseModel):
             self._store.update(key=key, value=self)
         except gx_exceptions.StoreBackendError:
             raise ValueError("ValidationConfig must be added to a store before saving.")
+
+        submit_event(
+            event=ValidationConfigUpdatedEvent(
+                validation_config_id=self.id,
+                expectation_suite_id=self.suite.id,
+                batch_config_id=self.data.id,
+            )
+        )
