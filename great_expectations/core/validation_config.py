@@ -15,6 +15,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.core.serializer import _IdentifierBundle
 from great_expectations.data_context.store.validation_config_store import (
     ValidationConfigStore,  # noqa: TCH001
 )
@@ -30,11 +31,6 @@ from great_expectations.data_context.data_context.context_factory import project
 from great_expectations.datasource.new_datasource import (
     BaseDatasource as LegacyDatasource,
 )
-
-
-class _IdentifierBundle(BaseModel):
-    name: str
-    id: Union[str, None]
 
 
 class _EncodedValidationData(BaseModel):

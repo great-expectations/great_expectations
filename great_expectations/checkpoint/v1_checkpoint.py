@@ -6,16 +6,11 @@ from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.core.serializer import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-
-
-# TODO: Copied from ValidationConfig - how can we DRY this up?
-class _IdentifierBundle(BaseModel):
-    name: str
-    id: Union[str, None]
 
 
 def _encode_validation_config(validation: ValidationConfig) -> dict:
@@ -42,7 +37,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validations: List[ValidationConfig]
-    actions: List[ValidationAction]  # Should this be optional?
+    actions: List[ValidationAction]
     id: Union[str, None] = None
 
     class Config:
