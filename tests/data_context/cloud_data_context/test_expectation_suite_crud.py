@@ -487,7 +487,9 @@ def test_save_expectation_suite_overwrites_existing_suite(
     suite = ExpectationSuite(suite_name, id=suite_id)
 
     with mock.patch(
-        "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)  # noqa: TID251
+        "requests.Session.put",
+        autospec=True,
+        return_value=mock.Mock(status_code=405),  # noqa: TID251
     ) as mock_put, mock.patch(
         "requests.Session.patch", autospec=True
     ) as mock_patch, pytest.deprecated_call():
