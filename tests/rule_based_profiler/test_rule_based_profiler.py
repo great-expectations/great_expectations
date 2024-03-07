@@ -1249,7 +1249,7 @@ def test_get_profiler(
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock,
-    empty_profiler_store: ProfilerStore,  # noqa: TID251
+    empty_profiler_store: ProfilerStore,
 ):
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(

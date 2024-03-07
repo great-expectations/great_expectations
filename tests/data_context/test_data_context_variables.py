@@ -596,7 +596,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 def test_cloud_enabled_data_context_variables_e2e(
     mock_save_project_config: mock.MagicMock,
     data_docs_sites: dict,
-    monkeypatch,  # noqa: TID251
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
