@@ -223,6 +223,7 @@ class ValidationConfig(BaseModel):
         )
         return validator.validate_expectation_suite(self.suite, evaluation_parameters)
 
+    @public_api
     def save(self) -> None:
         store = project_manager.get_validation_config_store()
         key = store.get_key(name=self.name, id=self.id)
