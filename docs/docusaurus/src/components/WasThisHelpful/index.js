@@ -1,13 +1,25 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import {useLocation} from "@docusaurus/router";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import { posthog as posthogJS } from 'posthog-js';
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import BrowserOnly from "@docusaurus/BrowserOnly";
 
 export default function WasThisHelpful(){
-
     const { pathname } = useLocation();
     const [feedbackSent, setFeedbackSent] = useState(false)
     const [isOpen, setIsOpen] = useState(false);
+    const config = useDocusaurusContext()
+
+    useEffect(() => {
+        const posthog = window.posthog
+        if (!posthog ) {
+            // Checking if Posthog is already initialized
+            posthogJS.init(config.siteConfig.customFields.posthogApiKey)
+            window.posthog = posthogJS
+        }
+    }, []);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -58,7 +70,7 @@ export default function WasThisHelpful(){
 
     const closeImg = useBaseUrl(`img/close_icon.svg`);
 
-    return <>
+    return <BrowserOnly>
             <hr className={styles.feedbackDivider}/>
             <section className={styles.feedbackCard}>
                 <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
@@ -124,5 +136,5 @@ export default function WasThisHelpful(){
                     </form>
                 </dialog>
             </>}
-    </>
+    </BrowserOnly>
 }
