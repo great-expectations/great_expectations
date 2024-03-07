@@ -622,57 +622,7 @@ module.exports = {
       'reference/learn/conceptual_guides/expectation_classes',
       'reference/learn/conceptual_guides/metricproviders',
       'reference/learn/usage_statistics',
-      {
-      type: 'category',
-      label: 'Glossary',
-      link: { type: 'doc', id: 'reference/learn/glossary' },
-      items: [
-        'reference/learn/terms/action',
-        'reference/learn/terms/batch',
-        'reference/learn/terms/batch_request',
-        'reference/learn/terms/custom_expectation',
-        'reference/learn/terms/checkpoint',
-        'reference/learn/terms/datasource',
-        'reference/learn/terms/data_context',
-        'reference/learn/terms/data_asset',
-        'reference/learn/terms/data_assistant',
-        'reference/learn/terms/data_docs',
-        'reference/learn/terms/evaluation_parameter',
-        'reference/learn/terms/execution_engine',
-        {
-          type: 'category',
-          label: 'Expectations',
-          link: { type: 'doc', id: 'reference/learn/terms/expectation' },
-          collapsed: true,
-          items: [
-            { type: 'doc', id: 'reference/learn/expectations/conditional_expectations' },
-            { type: 'doc', id: 'reference/learn/expectations/distributional_expectations' },
-            { type: 'doc', id: 'reference/learn/expectation_suite_operations' },
-            { type: 'doc', id: 'reference/learn/expectations/result_format' },
-            { type: 'doc', id: 'reference/learn/expectations/standard_arguments' }
-          ]
-        },
-        'reference/learn/terms/expectation_suite',
-        'reference/learn/terms/metric',
-        {
-          type: 'category',
-          label: 'Stores',
-          link: { type: 'doc', id: 'reference/learn/terms/store' },
-          items: [
-            'reference/learn/terms/checkpoint_store',
-            'reference/learn/terms/data_docs_store',
-            'reference/learn/terms/evaluation_parameter_store',
-            'reference/learn/terms/expectation_store',
-            'reference/learn/terms/metric_store',
-            'reference/learn/terms/validation_result_store'
-          ]
-        },
-        'reference/learn/terms/renderer',
-        'reference/learn/terms/supporting_resource',
-        'reference/learn/terms/validator',
-        'reference/learn/terms/validation_result'
-      ]
-    },
+      'reference/learn/glossary'
   ],
 }
 
