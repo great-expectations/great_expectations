@@ -49,7 +49,7 @@ Define the data you want GX Cloud to access within Snowflake.
 
 3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
 
-4. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. The connection string format is `snowflake://<user_login_name>:<password>@<account_identifier>`.
+4. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. The connection string format is: `snowflake://<user_login_name>:<password>@<accountname>`.
 
 5. Complete the following fields:
 
