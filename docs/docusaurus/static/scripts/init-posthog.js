@@ -1,4 +1,5 @@
 !function (t, e) {
+    if(Array.from(document.querySelectorAll("script")).some((s) => s.src === "https://app.posthog.com/static/array.js")) return;
     var o, n, p, r;
     e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
         function g(t, e) {
