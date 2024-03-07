@@ -95,8 +95,7 @@ This results in the following Expectation Suite:
             },
             "expectation_type": "expect_column_values_to_be_in_set"
         }
-    ],
-    "data_asset_type": "Dataset"
+    ]
 }
 ```
 
