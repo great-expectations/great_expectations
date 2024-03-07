@@ -6,6 +6,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    PrivateAttr,
     ValidationError,
     validator,
 )
@@ -13,6 +14,9 @@ from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
+)
+from great_expectations.data_context.store.validation_config_store import (
+    ValidationConfigStore,  # noqa: TCH001
 )
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
@@ -121,6 +125,13 @@ class ValidationConfig(BaseModel):
     suite: ExpectationSuite
     id: Union[str, None] = None
 
+    # private attributes that must be set immediately after instantiation
+    _store: ValidationConfigStore = PrivateAttr()
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self._store = project_manager.get_validation_config_store()
+
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
         # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.
@@ -225,10 +236,9 @@ class ValidationConfig(BaseModel):
 
     @public_api
     def save(self) -> None:
-        store = project_manager.get_validation_config_store()
-        key = store.get_key(name=self.name, id=self.id)
+        key = self._store.get_key(name=self.name, id=self.id)
 
         try:
-            store.update(key=key, value=self)
+            self._store.update(key=key, value=self)
         except gx_exceptions.StoreBackendError:
             raise ValueError("ValidationConfig must be added to a store before saving.")
