@@ -2,8 +2,20 @@ import React, {useState} from 'react';
 import styles from './styles.module.scss';
 import {useLocation} from "@docusaurus/router";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import { posthog as posthogJS } from 'posthog-js';
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 
 export default function WasThisHelpful(){
+
+    const posthog = window.posthog
+    const config = useDocusaurusContext()
+
+    if (!posthog ) {
+        // Checking if Posthog is already initialized
+        posthogJS.init(config.siteConfig.customFields.posthogApiKey)
+        window.posthog = posthogJS
+    }
+
 
     const { pathname } = useLocation();
     const [feedbackSent, setFeedbackSent] = useState(false)
