@@ -8,6 +8,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.analytics.events import ValidationConfigUpdatedEvent
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -52,6 +53,14 @@ def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConf
         data=batch_config,
         suite=ExpectationSuite(name="my_suite"),
     )
+
+
+@pytest.fixture
+def saved_validation_config(
+    ephemeral_context: EphemeralDataContext, validation_config: ValidationConfig
+) -> ValidationConfig:
+    context = ephemeral_context
+    return context.validations.add(validation_config)
 
 
 class TestValidationRun:
@@ -501,12 +510,10 @@ class TestValidationConfigSerialization:
 
 @pytest.mark.unit
 def test_validation_config_save_success(
-    ephemeral_context: EphemeralDataContext, validation_config: ValidationConfig
+    ephemeral_context: EphemeralDataContext, saved_validation_config: ValidationConfig
 ):
     context = ephemeral_context
-    vc = validation_config
-
-    vc = context.validations.add(vc)
+    vc = saved_validation_config
 
     other_suite = ExpectationSuite(name="my_other_suite")
     vc.suite = other_suite
@@ -522,3 +529,25 @@ def test_validation_config_save_failure(validation_config: ValidationConfig):
         ValueError, match="ValidationConfig must be added to a store before saving."
     ):
         validation_config.save()
+
+
+@pytest.mark.unit
+def test_validation_config_save_emits_analytics_event(
+    saved_validation_config: ValidationConfig,
+):
+    vc = saved_validation_config
+
+    with mock.patch(
+        "great_expectations.core.validation_config.submit_event",
+        autospec=True,
+    ) as mock_submit:
+        vc.save()
+
+    # Assert
+    mock_submit.assert_called_once_with(
+        event=ValidationConfigUpdatedEvent(
+            validation_config_id=vc.id,
+            expectation_suite_id=vc.suite.id,
+            batch_config_id=vc.data.id,
+        )
+    )
