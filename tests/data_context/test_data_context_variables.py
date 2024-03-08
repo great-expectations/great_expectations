@@ -435,13 +435,13 @@ def test_data_context_variables_save_config(
     )
 
     # FileDataContextVariables
-    with mocker.patch(
+    mock_save = mocker.patch(
         "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
-    ) as mock_save:
-        file_data_context_variables.save_config()
+    )
+    file_data_context_variables.save_config()
 
-        assert mock_save.call_count == 1
+    assert mock_save.call_count == 1
 
     # CloudDataContextVariables
     mock_put = mocker.patch("requests.Session.put", autospec=True)
