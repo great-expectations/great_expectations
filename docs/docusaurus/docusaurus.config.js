@@ -3,13 +3,14 @@
 const remarkNamedSnippets = require('./scripts/remark-named-snippets/index');
 const remarkCodeImport = require('remark-code-import');
 
-require('dotenv').config()
+const config = require('dotenv').config()
 
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
+  customFields: {posthogApiKey: config.parsed.POSTHOG_API_KEY},
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   favicon: '/img/gx-mark.png',
@@ -23,15 +24,6 @@ module.exports = {
       require.resolve('docusaurus-gtm-plugin'),
       {
         id: 'GTM-K63L45F', // GTM Container ID
-      },
-    ],
-    [
-      'posthog-docusaurus',
-      {
-        apiKey: process.env.POSTHOG_API_KEY,
-        enableInDevelopment: true
-        // for more information on how to set up this value go to
-        // https://greatexpectations.atlassian.net/wiki/spaces/DVRL/pages/956334083/Manage+the+feedback+survey
       },
     ],
   ],
