@@ -9,6 +9,6 @@ export default function MDXContent({children}) {
   } = children.type;
   return <MDXProvider components={MDXComponents}>
       {children}
-    { !frontMatter.hide_feedback_survey && <WasThisHelpful/> }
+    { !frontMatter.hide_feedback_survey && <BrowserOnly><WasThisHelpful/></BrowserOnly> }
   </MDXProvider>;
 }
