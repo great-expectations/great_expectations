@@ -317,9 +317,9 @@ class TestValidationFactoryAnalytics:
         # Assert
         mock_submit.assert_called_once_with(
             event=ValidationConfigCreatedEvent(
-                validation_config_id=validation_config.id,
+                validation_id=validation_config.id,
                 expectation_suite_id=validation_config.suite.id,
-                batch_config_id=validation_config.data.id,
+                batch_definition_id=validation_config.data.id,
             )
         )
 
@@ -357,8 +357,8 @@ class TestValidationFactoryAnalytics:
         # Assert
         mock_submit.assert_called_once_with(
             event=ValidationConfigDeletedEvent(
-                validation_config_id=validation_config.id,
+                validation_id=validation_config.id,
                 expectation_suite_id=validation_config.suite.id,
-                batch_config_id=validation_config.data.id,
+                batch_definition_id=validation_config.data.id,
             )
         )

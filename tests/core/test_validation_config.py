@@ -546,8 +546,8 @@ def test_validation_config_save_emits_analytics_event(
     # Assert
     mock_submit.assert_called_once_with(
         event=ValidationConfigUpdatedEvent(
-            validation_config_id=vc.id,
+            validation_id=vc.id,
             expectation_suite_id=vc.suite.id,
-            batch_config_id=vc.data.id,
+            batch_definition_id=vc.data.id,
         )
     )

@@ -247,8 +247,8 @@ class ValidationConfig(BaseModel):
 
         submit_event(
             event=ValidationConfigUpdatedEvent(
-                validation_config_id=self.id,
+                validation_id=self.id,
                 expectation_suite_id=self.suite.id,
-                batch_config_id=self.data.id,
+                batch_definition_id=self.data.id,
             )
         )

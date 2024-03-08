@@ -143,16 +143,16 @@ class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
 
 @dataclass
 class _ValidationConfigEvent(Event):
-    validation_config_id: str | None = None
+    validation_id: str | None = None
     expectation_suite_id: str | None = None
-    batch_config_id: str | None = None
+    batch_definition_id: str | None = None
 
     @override
     def _properties(self) -> dict:
         return {
-            "validation_config_id": self.validation_config_id,
+            "validation_id": self.validation_id,
             "expectation_suite_id": self.expectation_suite_id,
-            "batch_config_id": self.batch_config_id,
+            "batch_definition_id": self.batch_definition_id,
         }
 
 
@@ -164,15 +164,15 @@ class ValidationConfigCreatedEvent(_ValidationConfigEvent):
 
     def __init__(
         self,
-        validation_config_id: str | None = None,
+        validation_id: str | None = None,
         expectation_suite_id: str | None = None,
-        batch_config_id: str | None = None,
+        batch_definition_id: str | None = None,
     ):
         super().__init__(
             action=VALIDATION_CONFIG_CREATED,
-            validation_config_id=validation_config_id,
+            validation_id=validation_id,
             expectation_suite_id=expectation_suite_id,
-            batch_config_id=batch_config_id,
+            batch_definition_id=batch_definition_id,
         )
 
 
@@ -184,15 +184,15 @@ class ValidationConfigDeletedEvent(_ValidationConfigEvent):
 
     def __init__(
         self,
-        validation_config_id: str | None = None,
+        validation_id: str | None = None,
         expectation_suite_id: str | None = None,
-        batch_config_id: str | None = None,
+        batch_definition_id: str | None = None,
     ):
         super().__init__(
             action=VALIDATION_CONFIG_DELETED,
-            validation_config_id=validation_config_id,
+            validation_id=validation_id,
             expectation_suite_id=expectation_suite_id,
-            batch_config_id=batch_config_id,
+            batch_definition_id=batch_definition_id,
         )
 
 
@@ -204,13 +204,13 @@ class ValidationConfigUpdatedEvent(_ValidationConfigEvent):
 
     def __init__(
         self,
-        validation_config_id: str | None = None,
+        validation_id: str | None = None,
         expectation_suite_id: str | None = None,
-        batch_config_id: str | None = None,
+        batch_definition_id: str | None = None,
     ):
         super().__init__(
             action=VALIDATION_CONFIG_UPDATED,
-            validation_config_id=validation_config_id,
+            validation_id=validation_id,
             expectation_suite_id=expectation_suite_id,
-            batch_config_id=batch_config_id,
+            batch_definition_id=batch_definition_id,
         )
