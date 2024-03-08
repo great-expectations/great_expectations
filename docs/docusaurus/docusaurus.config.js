@@ -48,7 +48,7 @@ module.exports = {
     announcementBar: {
       id: 'cta_bar',
       content:
-        '<a style="font-weight:600" href="https://hubs.li/Q02lHZ_j0">Sign up for our Snowflake workshop, or join the waitlist for future workshops.</a>',
+        '<a style="font-weight:600" href="https://hubs.li/Q02nK_ZH0">Get started with GX Cloud by joining our bi-weekly hands on workshop.</a>',
       backgroundColor: '#141432',
       textColor: '#fff',
       isCloseable: true,
