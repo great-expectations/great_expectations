@@ -218,6 +218,36 @@ class SphinxInvokeDocsBuilder:
         title_str = title.get_text(strip=True)
         title_str = title_str.replace("#", "")
 
+        for item in soup.find_all("dt"):
+            lengthChildren = len(item.findChildren())
+            if "expectation" in str(html_file_path) and "Relevant Documentation Links" in item.get_text():
+                item.string.replaceWith(item.get_text(strip=True))
+            if lengthChildren > 1:
+                item.append("\r\n")
+
+        for item in soup.find_all(["th", "td", "li"]):
+            item.append("\r\n")
+
+        for item in soup.find_all(["pre", "dd", "li"]):
+            item.insert(0, "\r\n")
+
+        for item in soup.find_all(["dd", "p"]):
+            item.insert_before("\r\n")
+
+        if "ConfiguredAssetFilesystemDataConnector" in str(html_file_path):
+            for item in soup.find_all("cite"):
+              item.append("\r\n")
+
+        for item in soup.find_all("span"):
+            if item and item.string and "*" in item.get_text():
+                item.string.replaceWith(item.get_text().replace("*", "&#42;"))
+
+        for item in soup.find_all("p"):
+            lengthChildren = len(item.findChildren())
+            if lengthChildren > 0:
+                item.insert(0, "\r\n")
+                item.append("\r\n")
+
         sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
         # Add .py suffix to module titles
