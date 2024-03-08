@@ -83,6 +83,11 @@ class Validator:
             },
         )
 
+    @property
+    def active_batch_id(self) -> Optional[str]:
+        # See validation_operators line 343
+        return self._wrapped_validator.active_batch_id
+
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
         batch_request = self._batch_config.build_batch_request(

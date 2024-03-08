@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
+from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     PrivateAttr,
@@ -18,12 +19,16 @@ from great_expectations.core.expectation_suite import (
 from great_expectations.data_context.store.validation_config_store import (
     ValidationConfigStore,  # noqa: TCH001
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+)
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 from great_expectations.data_context.data_context.context_factory import project_manager
@@ -71,6 +76,7 @@ def _encode_data(data: BatchConfig) -> _EncodedValidationData:
     )
 
 
+# @dataclass_transform
 class ValidationConfig(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
@@ -127,10 +133,13 @@ class ValidationConfig(BaseModel):
 
     # private attributes that must be set immediately after instantiation
     _store: ValidationConfigStore = PrivateAttr()
+    _validation_results_store: ValidationsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+        # TODO: Migrate this to model_post_init when we get to pydantic 2
         self._store = project_manager.get_validation_config_store()
+        self._validation_results_store = project_manager.get_validations_store()
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -227,12 +236,23 @@ class ValidationConfig(BaseModel):
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
+        # run_time = datetime.datetime.now(tz=datetime.timezone.utc)
         validator = Validator(
             batch_config=self.data,
             batch_request_options=batch_config_options,
             result_format=result_format,
         )
-        return validator.validate_expectation_suite(self.suite, evaluation_parameters)
+        results = validator.validate_expectation_suite(
+            self.suite, evaluation_parameters
+        )
+        store_validation_results(
+            self._validation_results_store,
+            results,
+            None,  # type: ignore
+            expectation_suite_identifier=ExpectationSuiteIdentifier(self.suite.name),
+        )
+
+        return results
 
     @public_api
     def save(self) -> None:

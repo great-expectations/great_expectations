@@ -218,7 +218,7 @@ class Store:
 
         return list(map(self.deserialize, objs))
 
-    def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def set(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
 
