@@ -2557,7 +2557,6 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
     return ExpectationSuite(
         name="Titanic.warning",
         meta={},
-        data_asset_type="Dataset",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}

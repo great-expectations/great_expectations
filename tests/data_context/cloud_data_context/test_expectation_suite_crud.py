@@ -57,7 +57,6 @@ def mock_get_all_suites_json(
                     "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
                     "rendered_data_doc_id": None,
                     "suite": {
-                        "data_asset_type": None,
                         "name": suite_1.name,
                         "expectations": [
                             {
@@ -85,7 +84,6 @@ def mock_get_all_suites_json(
                     "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
                     "rendered_data_doc_id": None,
                     "suite": {
-                        "data_asset_type": None,
                         "name": suite_2.name,
                         "expectations": [
                             {
@@ -143,7 +141,6 @@ def mocked_get_response(
                         "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
                         "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                         "suite": {
-                            "data_asset_type": None,
                             "name": "my_mock_suite",
                             "expectations": [
                                 {
@@ -195,7 +192,6 @@ def mocked_get_by_name_response(
                             "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
                             "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                             "suite": {
-                                "data_asset_type": None,
                                 "name": "my_mock_suite",
                                 "expectations": [
                                     {
@@ -496,7 +492,6 @@ def test_save_expectation_suite_overwrites_existing_suite(
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
-        "data_asset_type": None,
         "name": suite_name,
         "expectations": [],
         "id": suite_id,

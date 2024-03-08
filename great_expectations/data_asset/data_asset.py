@@ -353,7 +353,6 @@ class DataAsset:
                 name=expectation_suite_name,
             )
 
-        self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
             "include_config": True,
             "catch_exceptions": False,

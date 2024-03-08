@@ -84,6 +84,7 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    @override
     def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
