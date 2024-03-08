@@ -12,8 +12,7 @@ export default function WasThisHelpful(){
     const config = useDocusaurusContext()
 
     useEffect(() => {
-        const posthog = window.posthog
-        if (!posthog ) {
+        if (window && !window.posthog) {
             // Checking if Posthog is already initialized
             posthogJS.init(config.siteConfig.customFields.posthogApiKey)
             window.posthog = posthogJS
