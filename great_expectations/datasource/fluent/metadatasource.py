@@ -31,7 +31,7 @@ class MetaDatasource(ModelMetaclass):
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
-        if cls_name == "Datasource" or cls_name.startswith("_"):
+        if cls_name in ("Datasource", "InvalidDatasource") or cls_name.startswith("_"):
             # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
             logger.debug(f"1c. Skip factory registration of base `{cls_name}`")
             return cls
