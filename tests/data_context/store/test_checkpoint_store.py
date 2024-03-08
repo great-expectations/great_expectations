@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
-from unittest.mock import ANY
+from unittest.mock import ANY as MOCK_MOCK_ANY
 
 import pytest
 from marshmallow.exceptions import ValidationError
@@ -481,5 +481,5 @@ def test_add_checkpoint(
 
     mock_backend.add.assert_called_once_with(
         (checkpoint_name,),
-        ANY,  # Complex serialized payload so keeping it simple
+        MOCK_ANY,  # Complex serialized payload so keeping it simple
     )
