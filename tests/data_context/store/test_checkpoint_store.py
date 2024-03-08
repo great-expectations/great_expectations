@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
-from unittest.mock import ANY as MOCK_MOCK_ANY
 
 import pytest
 from marshmallow.exceptions import ValidationError
