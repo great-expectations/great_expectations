@@ -35,25 +35,25 @@ class TestCheckpointSerialization:
         return gx.get_context(mode="ephemeral")
 
     @pytest.fixture
-    def validation_config_1(self):
+    def validation_config_1(self, in_memory_context: EphemeralDataContext):
         vc = ValidationConfig(
             name="my_first_validation",
             data=Mock(spec=BatchConfig),
             suite=Mock(spec=ExpectationSuite),
         )
 
-        with mock.patch.obj(ValidationConfig, "json", return_value={}):
+        with mock.patch.object(ValidationConfig, "json", return_value={}):
             yield vc
 
     @pytest.fixture
-    def validation_config_2(self):
+    def validation_config_2(self, in_memory_context: EphemeralDataContext):
         vc = ValidationConfig(
             name="my_second_validation",
             data=Mock(spec=BatchConfig),
             suite=Mock(spec=ExpectationSuite),
         )
 
-        with mock.patch.obj(ValidationConfig, "json", return_value={}):
+        with mock.patch.object(ValidationConfig, "json", return_value={}):
             yield vc
 
     @pytest.fixture
@@ -65,14 +65,22 @@ class TestCheckpointSerialization:
     @pytest.fixture
     def slack_action(self, in_memory_context: EphemeralDataContext):
         return SlackNotificationAction(
-            data_context=in_memory_context, renderer={"class_name": "SlackRenderer"}
+            data_context=in_memory_context,
+            renderer={
+                "class_name": "SlackRenderer",
+                "module_name": "great_expectations.render.renderer",
+            },
         )
 
     @pytest.fixture
     def teams_action(self, in_memory_context: EphemeralDataContext):
         return MicrosoftTeamsNotificationAction(
             data_context=in_memory_context,
-            renderer={"class_name": "MicrosoftTeamsRenderer"},
+            microsoft_teams_webhook="https://teams.microsoft.com/...",
+            renderer={
+                "class_name": "MicrosoftTeamsRenderer",
+                "module_name": "great_expectations.render.renderer",
+            },
         )
 
     @pytest.fixture
