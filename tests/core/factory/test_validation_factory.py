@@ -204,8 +204,10 @@ def test_validation_factory_add_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_add_success(
+        mocker=mocker,
         context=empty_data_context,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -217,8 +219,10 @@ def test_validation_factory_add_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_add_success(
+        mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -256,8 +260,10 @@ def test_validation_factory_delete_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_delete_success(
+        mocker=mocker,
         context=empty_data_context,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -269,8 +275,10 @@ def test_validation_factory_delete_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_delete_success(
+        mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
