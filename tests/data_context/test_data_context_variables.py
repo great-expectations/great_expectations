@@ -444,55 +444,55 @@ def test_data_context_variables_save_config(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mocker.patch("requests.Session.put", autospec=True) as mock_put:
-        type(mock_put.return_value).status_code = mocker.PropertyMock(return_value=200)
+    mock_put = mocker.patch("requests.Session.put", autospec=True)
+    type(mock_put.return_value).status_code = mocker.PropertyMock(return_value=200)
 
-        cloud_data_context_variables.save_config()
+    cloud_data_context_variables.save_config()
 
-        expected_config_dict = {
-            "config_variables_file_path": "uncommitted/config_variables.yml",
-            "config_version": 3.0,
-            "data_docs_sites": {},
-            "plugins_directory": "plugins/",
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
+    expected_config_dict = {
+        "config_variables_file_path": "uncommitted/config_variables.yml",
+        "config_version": 3.0,
+        "data_docs_sites": {},
+        "plugins_directory": "plugins/",
+        "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
                 },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-                "checkpoint_store": {"class_name": "CheckpointStore"},
-                "profiler_store": {"class_name": "ProfilerStore"},
-                "validations_store": {"class_name": "ValidationsStore"},
-                "validation_config_store": {"class_name": "ValidationConfigStore"},
             },
-            "include_rendered_content": {
-                "expectation_suite": False,
-                "expectation_validation_result": False,
-                "globally": False,
+            "evaluation_parameter_store": {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "EvaluationParameterStore",
             },
-            "profiler_store_name": "profiler_store",
-        }
+            "checkpoint_store": {"class_name": "CheckpointStore"},
+            "profiler_store": {"class_name": "ProfilerStore"},
+            "validations_store": {"class_name": "ValidationsStore"},
+            "validation_config_store": {"class_name": "ValidationConfigStore"},
+        },
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
+        "profiler_store_name": "profiler_store",
+    }
 
-        assert mock_put.call_count == 1
-        mock_put.assert_called_with(
-            MOCK_ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
-            json={
-                "data": {
-                    "type": "data_context_variables",
-                    "attributes": {
-                        "organization_id": ge_cloud_organization_id,
-                        "data_context_variables": expected_config_dict,
-                    },
-                }
-            },
-        )
+    assert mock_put.call_count == 1
+    mock_put.assert_called_with(
+        MOCK_ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
+        json={
+            "data": {
+                "type": "data_context_variables",
+                "attributes": {
+                    "organization_id": ge_cloud_organization_id,
+                    "data_context_variables": expected_config_dict,
+                },
+            }
+        },
+    )
 
 
 @pytest.mark.unit
