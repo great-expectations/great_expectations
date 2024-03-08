@@ -9,7 +9,7 @@ import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch  # noqa: TID251
 
 import pytest
 import requests

@@ -916,7 +916,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
-    mock_sql_alchemy_execution_engine: mock.MagicMock,
+    mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -955,7 +955,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
-    mock_sql_alchemy_execution_engine: mock.MagicMock,
+    mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -984,7 +984,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name(
-    mock_sql_alchemy_execution_engine: mock.MagicMock,
+    mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
