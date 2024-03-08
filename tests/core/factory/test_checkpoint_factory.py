@@ -71,7 +71,7 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     store.get.return_value = checkpoint_dict
-    context = MockerFixture(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
 

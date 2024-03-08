@@ -951,9 +951,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 @mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_without_dynamic_args(
-    mocker: MockerFixture,
     mock_data_context: MagicMock,
     mock_profiler_run: MagicMock,
+    mocker: MockerFixture,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -986,9 +986,9 @@ def test_run_profiler_without_dynamic_args(
 @mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_with_dynamic_args(
-    mocker: MockerFixture,
     mock_data_context: MagicMock,
     mock_profiler_run: MagicMock,
+    mocker: MockerFixture,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1349,10 +1349,10 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: MagicMock):
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_single_rule(
-    mocker: MockerFixture,
     mock_expectation_configuration_builder: MagicMock,
     mock_domain_builder: MagicMock,
     mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1390,10 +1390,10 @@ def test_add_single_rule(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_rule_overwrite_first_rule(
-    mocker: MockerFixture,
     mock_expectation_configuration_builder: MagicMock,
     mock_domain_builder: MagicMock,
     mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1422,6 +1422,7 @@ def test_add_rule_add_second_rule(
     mock_expectation_configuration_builder: MagicMock,
     mock_domain_builder: MagicMock,
     mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1435,7 +1436,7 @@ def test_add_rule_add_second_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    first_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
@@ -1445,7 +1446,7 @@ def test_add_rule_add_second_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    second_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    second_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=second_rule)
     assert len(profiler.rules) == 2
 
