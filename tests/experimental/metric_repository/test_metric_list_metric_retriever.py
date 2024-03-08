@@ -138,10 +138,7 @@ def test_get_metrics_full_list():
 
     assert metrics == [
         TableMetric[int](
-            batch_id="batch_id",
-            metric_name="table.row_count",
-            value=2,
-            exception=None,
+            batch_id="batch_id", metric_name="table.row_count", value=2, exception=None
         ),
         TableMetric[List[str]](
             batch_id="batch_id",
@@ -160,31 +157,17 @@ def test_get_metrics_full_list():
         ),
         ColumnMetric[float](
             batch_id="batch_id",
-            metric_name="column.min",
-            column="col1",
-            value=2.5,
-            exception=None,
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.min",
-            column="col2",
-            value=2.7,
-            exception=None,
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
             metric_name="column.max",
-            column="col1",
             value=5.5,
             exception=None,
+            column="col1",
         ),
         ColumnMetric[float](
             batch_id="batch_id",
             metric_name="column.max",
-            column="col2",
             value=5.7,
             exception=None,
+            column="col2",
         ),
         ColumnMetric[float](
             batch_id="batch_id",
@@ -210,6 +193,20 @@ def test_get_metrics_full_list():
         ColumnMetric[float](
             batch_id="batch_id",
             metric_name="column.median",
+            value=2.7,
+            exception=None,
+            column="col2",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            value=2.5,
+            exception=None,
+            column="col1",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
             value=2.7,
             exception=None,
             column="col2",

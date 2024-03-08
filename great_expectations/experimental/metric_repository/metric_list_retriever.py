@@ -117,7 +117,9 @@ class MetricListMetricRetriever(MetricRetriever):
     ) -> Sequence[Metric]:
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = column_metric_names.intersection(metrics_list_as_set)
+        metrics_to_calculate = sorted(
+            column_metric_names.intersection(metrics_list_as_set)
+        )
 
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, list(metrics_to_calculate)
@@ -165,7 +167,9 @@ class MetricListMetricRetriever(MetricRetriever):
             MetricTypes.COLUMN_MEDIAN,
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = column_metric_names.intersection(metrics_list_as_set)
+        metrics_to_calculate = sorted(
+            column_metric_names.intersection(metrics_list_as_set)
+        )
 
         return self._get_column_metrics(
             batch_request=batch_request,
@@ -187,7 +191,9 @@ class MetricListMetricRetriever(MetricRetriever):
             # "column.median",  # Currently not supported for timestamp in Snowflake
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = column_metric_names.intersection(metrics_list_as_set)
+        metrics_to_calculate = sorted(
+            column_metric_names.intersection(metrics_list_as_set)
+        )
 
         # Note: Timestamps are returned as strings for Snowflake, this may need to be adjusted
         # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().
