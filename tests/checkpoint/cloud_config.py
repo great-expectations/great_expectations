@@ -301,7 +301,6 @@ def _expectation_suite():
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
                 "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
                 "suite": {
-                    "data_asset_type": None,
                     "name": "single-snippet-suite-2",
                     "expectations": [
                         {

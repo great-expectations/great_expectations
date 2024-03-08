@@ -95,7 +95,6 @@ class TestInit:
         assert suite.name == fake_expectation_suite_name
         assert suite.expectations == []
         assert suite.evaluation_parameters == {}
-        assert suite.data_asset_type is None
         assert suite.execution_engine_type is None
         assert suite.meta == default_meta
         assert suite.id is None
@@ -110,7 +109,6 @@ class TestInit:
             pass
 
         test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
-        test_data_asset_type = "test_data_asset_type"
         dummy_execution_engine_type = type(DummyExecutionEngine())
         default_meta = {"great_expectations_version": ge_version}
         test_meta_base = {"test_key": "test_value"}
@@ -121,7 +119,6 @@ class TestInit:
             name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             evaluation_parameters=test_evaluation_parameters,
-            data_asset_type=test_data_asset_type,
             execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
             id=test_id,
@@ -131,7 +128,6 @@ class TestInit:
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
         assert suite.evaluation_parameters == test_evaluation_parameters
-        assert suite.data_asset_type == test_data_asset_type
         assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
         assert suite.id == test_id
@@ -916,7 +912,6 @@ class TestIsEquivalentTo:
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
         different_but_equivalent_suite.name = "different_name"
         different_but_equivalent_suite.meta = {"notes": "Different meta."}
-        different_but_equivalent_suite.data_asset_type = "different_data_asset_type"
         different_but_equivalent_suite.id = "different_id"
 
         assert suite_with_single_expectation.isEquivalentTo(
@@ -1010,7 +1005,6 @@ class TestEqDunder:
             pytest.param(
                 "evaluation_parameters", {"different": "evaluation_parameters"}
             ),
-            pytest.param("data_asset_type", "different_data_asset_type"),
             pytest.param(
                 "execution_engine_type",
                 type(ExecutionEngine),
@@ -1216,9 +1210,9 @@ def profiler_config():
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
     assert suite_copy == baseline_suite
-    suite_copy.data_asset_type = "blarg!"
+    suite_copy.name = "blarg!"
     assert (
-        baseline_suite.data_asset_type != "blarg"
+        baseline_suite.name != "blarg"
     )  # copy on primitive properties shouldn't propagate
 
 
@@ -1226,9 +1220,9 @@ def test_expectation_suite_copy(baseline_suite):
 def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy = deepcopy(baseline_suite)
     assert suite_deepcopy == baseline_suite
-    suite_deepcopy.data_asset_type = "blarg!"
+    suite_deepcopy.name = "blarg!"
     assert (
-        baseline_suite.data_asset_type != "blarg"
+        baseline_suite.name != "blarg"
     )  # copy on primitive properties shouldn't propagate
     suite_deepcopy.expectation_configurations[0].meta["notes"] = "a different note"
     # deepcopy on deep attributes does not propagate
