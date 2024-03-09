@@ -3,7 +3,6 @@ from __future__ import annotations
 import warnings
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
     Final,
     List,
@@ -25,9 +24,12 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
-    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
-    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.interfaces import (
+        Batch,
+        BatchRequestOptions,
+        BatchSlice,
+    )
 
 
 # Controls which methods should raise an error when called on an InvalidDatasource
@@ -76,37 +78,23 @@ class InvalidAsset(DataAsset):
             "This Asset configuration is invalid and cannot be used. Please fix the error and try again"
         )
 
+    @property
     @override
-    def add_batch_config(self, name: str, partitioner: Any | None = None) -> NoReturn:
-        self._raise_type_error()
-
-    @override
-    def add_sorters(self, sorters: List[Any]) -> NoReturn:
+    def batch_request_options(self) -> tuple[str, ...]:
         self._raise_type_error()
 
     @override
     def build_batch_request(
         self,
-        options: dict | None = None,
-        batch_slice: Any = None,
-        partitioner: Any = None,
-    ) -> NoReturn:
+        options: BatchRequestOptions | None = None,
+        batch_slice: BatchSlice | None = None,
+    ) -> BatchRequest:
         self._raise_type_error()
 
     @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> NoReturn:
-        self._raise_type_error()
-
-    @override
-    def sort_batches(self, batch_list: List[Batch]) -> None:
-        self._raise_type_error()
-
-    @override
-    def get_batch_request_options_keys(
-        self, partitioner: Partitioner | None = None
-    ) -> NoReturn:
+    ) -> List[Batch]:
         self._raise_type_error()
 
 
