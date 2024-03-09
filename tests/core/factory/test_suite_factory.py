@@ -112,7 +112,7 @@ def test_suite_factory_delete_uses_store_remove_key():
     suite = ExpectationSuite(name=name)
 
     # Act
-    factory.delete(suite=suite)
+    factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -136,7 +136,7 @@ def test_suite_factory_delete_raises_for_missing_suite():
         DataContextError,
         match=f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found.",
     ):
-        factory.delete(suite=suite)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -191,8 +191,10 @@ def _test_suite_factory_delete_success(context):
     name = "test-suite"
     suite = ExpectationSuite(name=name)
     suite = context.suites.add(suite=suite)
+
     # Act
-    context.suites.delete(suite)
+    context.suites.delete(name=name)
+
     # Assert
     with pytest.raises(
         DataContextError,
@@ -244,7 +246,7 @@ class TestSuiteFactoryAnalytics:
         with mock.patch(
             "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
-            context.suites.delete(suite=suite)
+            context.suites.delete(name=name)
 
         # Assert
         mock_submit.assert_called_once_with(

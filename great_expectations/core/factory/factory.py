@@ -14,7 +14,7 @@ class Factory(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def delete(self, obj: T) -> T:
+    def delete(self, name: str) -> None:
         pass
 
     @abstractmethod

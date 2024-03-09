@@ -149,13 +149,14 @@ def test_validation_factory_delete_uses_store_remove_key(
     validation_config: ValidationConfig,
 ):
     # Arrange
+    name = validation_config.name
     store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     factory = ValidationFactory(store=store)
 
     # Act
-    factory.delete(validation=validation_config)
+    factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -179,7 +180,7 @@ def test_validation_factory_delete_raises_for_missing_validation(
         DataContextError,
         match=f"Cannot delete ValidationConfig with name {name} because it cannot be found.",
     ):
-        factory.delete(validation=validation_config)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -300,7 +301,7 @@ def _test_validation_factory_delete_success(
         validation_config = context.validations.add(validation=validation_config)
 
     # Act
-    context.validations.delete(validation_config)
+    context.validations.delete(name=name)
 
     # Assert
     with pytest.raises(

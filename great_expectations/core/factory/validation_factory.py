@@ -41,23 +41,21 @@ class ValidationFactory(Factory[ValidationConfig]):
 
     @public_api
     @override
-    def delete(self, validation: ValidationConfig) -> ValidationConfig:
+    def delete(self, name: str) -> None:
         """Delete a ValidationConfig from the collection.
 
         Parameters:
-            validation: ValidationConfig to delete
+            name: Name of the ValidationConfig to delete
 
         Raises:
             DataContextError if ValidationConfig doesn't exist
         """
-        key = self._store.get_key(name=validation.name, id=validation.id)
+        key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(
-                f"Cannot delete ValidationConfig with name {validation.name} because it cannot be found."
+                f"Cannot delete ValidationConfig with name {name} because it cannot be found."
             )
         self._store.remove_key(key=key)
-
-        return validation
 
     @public_api
     @override

@@ -50,20 +50,21 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
     @public_api
     @override
-    def delete(self, suite: ExpectationSuite) -> ExpectationSuite:
+    def delete(self, name: str) -> None:
         """Delete an ExpectationSuite from the collection.
 
         Parameters:
-            suite: ExpectationSuite to delete
+            name: Name of the ExpectationSuite to delete
 
         Raises:
             DataContextError if ExpectationSuite doesn't exist
         """
-        key = self._store.get_key(name=suite.name, id=suite.id)
+        key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(
-                f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
+                f"Cannot delete ExpectationSuite with name {name} because it cannot be found."
             )
+        suite = self._store.get(key=key)
         self._store.remove_key(key=key)
 
         submit_event(
@@ -71,8 +72,6 @@ class SuiteFactory(Factory[ExpectationSuite]):
                 expectation_suite_id=suite.id,
             )
         )
-
-        return suite
 
     @public_api
     @override
