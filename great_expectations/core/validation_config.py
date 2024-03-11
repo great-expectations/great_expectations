@@ -234,12 +234,3 @@ class ValidationConfig(BaseModel):
             result_format=result_format,
         )
         return validator.validate_expectation_suite(self.suite, evaluation_parameters)
-
-    @public_api
-    def save(self) -> None:
-        key = self._store.get_key(name=self.name, id=self.id)
-
-        try:
-            self._store.update(key=key, value=self)
-        except gx_exceptions.StoreBackendError:
-            raise ValueError("ValidationConfig must be added to a store before saving.")
