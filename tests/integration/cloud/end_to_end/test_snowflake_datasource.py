@@ -39,17 +39,19 @@ def datasource(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    datasource.create_temp_table = True
+    updated_connection_string = datasource.connection_string + "&foo=bar"  # type: ignore[assignment,operator] # is a str
+
+    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
     assert (
-        datasource.create_temp_table is True
+        datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
+    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.create_temp_table is False
+        datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = True
+    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
@@ -57,9 +59,9 @@ def datasource(
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
     assert (
-        datasource.create_temp_table is True
+        datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
+    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
@@ -68,7 +70,7 @@ def datasource(
     _ = context.add_or_update_datasource(**datasource_dict)
     datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
-        datasource.create_temp_table is False
+        datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
