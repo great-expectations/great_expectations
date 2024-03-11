@@ -8,6 +8,10 @@ div[role="tabpanel"]{
   font-weight: var(--ifm-font-weight-normal);
   line-height: var(--p-line-height);
 
+  &.hidden {
+    display: none;
+  }
+
   & .tabs__item--active {
     border-bottom: 0;
     font-weight: var(--ifm-font-weight-bold);

@@ -47,10 +47,6 @@ context.add_or_update_checkpoint(
                     "action": {"class_name": "StoreValidationResultAction"},
                 },
                 {
-                    "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
-                },
-                {
                     "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
                     "action": {"class_name": "UpdateDataDocsAction"},
                 },
@@ -154,10 +150,6 @@ context.add_or_update_checkpoint(
                     "action": {"class_name": "StoreValidationResultAction"},
                 },
                 {
-                    "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
-                },
-                {
                     "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
                     "action": {"class_name": "UpdateDataDocsAction"},
                 },
@@ -215,10 +207,6 @@ context.add_or_update_checkpoint(
         {
             "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
             "action": {"class_name": "StoreValidationResultAction"},
-        },
-        {
-            "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
         },
         {
             "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
@@ -283,10 +271,6 @@ context.add_or_update_checkpoint(
         {
             "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
             "action": {"class_name": "StoreValidationResultAction"},
-        },
-        {
-            "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
         },
         {
             "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
@@ -446,9 +430,6 @@ action_list:
   - name: store_validation_result
     action:
       class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction

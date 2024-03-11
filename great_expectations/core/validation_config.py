@@ -8,7 +8,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
-    PrivateAttr,
+    Field,
     ValidationError,
     validator,
 )
@@ -19,9 +19,6 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store.validation_config_store import (
-    ValidationConfigStore,  # noqa: TCH001
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -33,7 +30,6 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 from great_expectations.data_context.data_context.context_factory import project_manager
@@ -98,6 +94,7 @@ class ValidationConfig(BaseModel):
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with suite's Marshmallow dep
         )
+        validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
         These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
@@ -131,19 +128,14 @@ class ValidationConfig(BaseModel):
             BatchConfig: lambda b: _encode_data(b),
         }
 
-    name: str
-    data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
-    suite: ExpectationSuite
+    name: str = Field(..., allow_mutation=False)
+    data: BatchConfig = Field(..., allow_mutation=False)
+    suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
-
-    # private attributes that must be set immediately after instantiation
-    _store: ValidationConfigStore = PrivateAttr()
-    _validation_results_store: ValidationsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
         # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._store = project_manager.get_validation_config_store()
         self._validation_results_store = project_manager.get_validations_store()
 
     @validator("suite", pre=True)
@@ -281,12 +273,3 @@ class ValidationConfig(BaseModel):
         )
 
         return results
-
-    @public_api
-    def save(self) -> None:
-        key = self._store.get_key(name=self.name, id=self.id)
-
-        try:
-            self._store.update(key=key, value=self)
-        except gx_exceptions.StoreBackendError:
-            raise ValueError("ValidationConfig must be added to a store before saving.")

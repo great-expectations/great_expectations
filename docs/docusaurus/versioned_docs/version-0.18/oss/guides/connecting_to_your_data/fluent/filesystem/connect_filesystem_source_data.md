@@ -475,7 +475,7 @@ Modify the following code to connect to your <TechnicalTag tag="datasource" text
 Do not include sensitive information such as credentials in the configuration when you connect to your Data Source. This information appears as plain text in the database. If you must include credentials or a full connection string, GX recommends using a [config variables file](https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
 :::
 
-```python title="Jupyter Notebook"
+```python title="Python"
 # Give your Datasource a name
 datasource_name = None
 datasource = context.sources.add_pandas(datasource_name)

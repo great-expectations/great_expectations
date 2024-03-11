@@ -234,10 +234,6 @@ def _checkpoint_config(data_file_name, with_slack):
             "action": {"class_name": "StoreValidationResultAction"},
             "name": "store_validation_result",
         },
-        {
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-            "name": "store_evaluation_params",
-        },
     ]
     if with_slack:
         action_list.append(
