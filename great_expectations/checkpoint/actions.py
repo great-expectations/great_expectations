@@ -974,7 +974,7 @@ class UpdateDataDocsAction(ValidationAction):
 
         from great_expectations import project_manager
 
-        self._using_cloud_context = project_manager.cloud_mode
+        self._using_cloud_context = project_manager.is_using_cloud()
         self._docs_manager = project_manager.get_docs_manager()
 
     @override

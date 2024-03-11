@@ -149,6 +149,17 @@ class ProjectManager:
             )
         return self._project.docs_manager
 
+    def is_using_cloud(self) -> bool:
+        from great_expectations.data_context.data_context import CloudDataContext
+
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+
+        return isinstance(self._project, CloudDataContext)
+
     def _build_context(  # noqa: PLR0913
         self,
         project_config: DataContextConfig | Mapping | None = None,
