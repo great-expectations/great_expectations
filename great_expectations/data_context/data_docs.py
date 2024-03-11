@@ -26,6 +26,10 @@ class DataDocsManager:
         self._root_directory = root_directory
         self._context = context
 
+        from great_expectations.data_context import CloudDataContext
+
+        self._cloud_mode = isinstance(context, CloudDataContext)
+
     def build_data_docs(
         self,
         site_names: list[str] | None = None,
@@ -89,6 +93,7 @@ class DataDocsManager:
                 "data_context": self._context,
                 "root_directory": self._root_directory,
                 "site_name": site_name,
+                "cloud_mode": self._cloud_mode,
             },
             config_defaults={
                 "class_name": "SiteBuilder",
