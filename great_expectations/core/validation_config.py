@@ -7,7 +7,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
-    PrivateAttr,
     ValidationError,
     validator,
 )
@@ -15,9 +14,6 @@ from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
-)
-from great_expectations.data_context.store.validation_config_store import (
-    ValidationConfigStore,  # noqa: TCH001
 )
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
@@ -88,6 +84,7 @@ class ValidationConfig(BaseModel):
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with suite's Marshmallow dep
         )
+        validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
         These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
@@ -121,17 +118,10 @@ class ValidationConfig(BaseModel):
             BatchConfig: lambda b: _encode_data(b),
         }
 
-    name: str = Field(allow_mutation=False)
-    data: BatchConfig = Field(allow_mutation=False)
-    suite: ExpectationSuite = Field(allow_mutation=False)
+    name: str = Field(..., allow_mutation=False)
+    data: BatchConfig = Field(..., allow_mutation=False)
+    suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
-
-    # private attributes that must be set immediately after instantiation
-    _store: ValidationConfigStore = PrivateAttr()
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self._store = project_manager.get_validation_config_store()
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
