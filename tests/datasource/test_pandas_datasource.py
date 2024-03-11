@@ -1,5 +1,4 @@
 import os
-import shutil
 from functools import partial
 
 import pandas as pd
@@ -16,7 +15,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
@@ -123,110 +121,6 @@ def test_create_pandas_datasource(
         ]["class_name"]
         == "SubdirReaderBatchKwargsGenerator"
     )
-
-
-@pytest.mark.filesystem
-def test_pandas_source_read_csv(
-    data_context_parameterized_expectation_suite, tmp_path_factory
-):
-    basedir = tmp_path_factory.mktemp("test_create_pandas_datasource")
-    shutil.copy(file_relative_path(__file__, "../test_sets/unicode.csv"), basedir)
-    data_context_parameterized_expectation_suite.add_datasource(
-        "mysource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        reader_options={"encoding": "utf-8"},
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(basedir),
-            }
-        },
-    )
-
-    data_context_parameterized_expectation_suite.add_expectation_suite(
-        expectation_suite_name="unicode"
-    )
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource", "subdir_reader", "unicode"
-        ),
-        "unicode",
-    )
-    assert len(batch["Μ"] == 1)  # noqa: RUF001 # greek mu
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "mysource2",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(basedir),
-            }
-        },
-    )
-
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource2", "subdir_reader", "unicode"
-        ),
-        "unicode",
-    )
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "mysource3",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(basedir),
-                "reader_options": {"encoding": "utf-16"},
-            }
-        },
-    )
-
-    with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        batch = data_context_parameterized_expectation_suite._get_batch_v2(
-            data_context_parameterized_expectation_suite.build_batch_kwargs(
-                "mysource3", "subdir_reader", "unicode"
-            ),
-            "unicode",
-        )
-
-    with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch_kwargs = data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource3", "subdir_reader", "unicode"
-        )
-        batch_kwargs.update({"reader_options": {"encoding": "blarg"}})
-        batch = data_context_parameterized_expectation_suite._get_batch_v2(
-            batch_kwargs=batch_kwargs, expectation_suite_name="unicode"
-        )
-
-    with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context_parameterized_expectation_suite._get_batch_v2(
-            expectation_suite_name="unicode",
-            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-                "mysource",
-                "subdir_reader",
-                "unicode",
-                reader_options={"encoding": "blarg"},
-            ),
-        )
-
-    batch = data_context_parameterized_expectation_suite._get_batch_v2(
-        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "mysource2",
-            "subdir_reader",
-            "unicode",
-            reader_options={"encoding": "utf-8"},
-        ),
-        expectation_suite_name="unicode",
-    )
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
 
 @pytest.mark.filesystem

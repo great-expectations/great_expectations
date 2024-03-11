@@ -2722,6 +2722,55 @@ def filesystem_csv(tmp_path_factory):
     return base_dir
 
 
+@pytest.fixture(scope="function")
+def filesystem_csv_2(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_2"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = pd.DataFrame({"x": [1, 2, 3]})
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
+    assert os.path.isabs(base_dir)  # noqa: PTH117
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))  # noqa: PTH118, PTH113
+
+    return base_dir
+
+
+@pytest.fixture(scope="function")
+def filesystem_csv_3(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_3"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = pd.DataFrame({"x": [1, 2, 3]})
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
+
+    toy_dataset_2 = pd.DataFrame({"y": [1, 2, 3]})
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)  # noqa: PTH118
+
+    return base_dir
+
+
+@pytest.fixture(scope="function")
+def filesystem_csv_4(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_4"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
+
+    # Put a file in the directory
+    toy_dataset = pd.DataFrame(
+        {
+            "x": [1, 2, 3],
+            "y": [1, 2, 3],
+        }
+    )
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)  # noqa: PTH118
+
+    return base_dir
+
+
 @pytest.fixture
 def titanic_profiled_evrs_1():
     with open(
