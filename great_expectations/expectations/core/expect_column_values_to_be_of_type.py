@@ -87,6 +87,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type will
     independently check each row's type.
 
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name.
@@ -100,12 +104,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
             fail the expectation, while `Timestamp` would pass with valid data.
 
-    Keyword Args:
+    Other Parameters:
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
-
-    Other Parameters:
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -123,6 +125,80 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	"12345" 1
+            1 	"abcde" 2
+            2 	"1b3d5" 3
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValuesToBeOfType(
+                    column="test2",
+                    type_="NUMBER"
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnValuesToBeOfType(
+                    column="test",
+                    type_="DOUBLE"
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                        "12345",
+                        "abcde",
+                        "1b3d5"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     type_: str

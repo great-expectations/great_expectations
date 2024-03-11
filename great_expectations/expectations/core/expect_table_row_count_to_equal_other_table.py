@@ -40,6 +40,9 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     expect_table_row_count_to_equal_other_table is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
         other_table_name (str): \
             The name of the other table.
@@ -63,6 +66,72 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     See Also:
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Volume
+
+    Example Data:
+            test_table
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+            test_table_two
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+            test_table_three
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableRowCountToEqualOtherTable(
+                    other_table_name=test_table_two
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 3
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectTableRowCountToEqualOtherTable(
+                    other_table_name=test_table_three
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 2
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     other_table_name: str

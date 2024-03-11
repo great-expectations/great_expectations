@@ -82,6 +82,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     expect_column_kl_divergence_to_be_less_than is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name.
@@ -90,8 +94,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         threshold (float or None): \
             The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
             provided threshold, the test will return success=False.
-
-    Keyword Args:
         internal_weight_holdout (float between 0 and 1 or None): \
             The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
             provides a mechanisms to make the test less strict by assigning positive weights to values \
@@ -159,6 +161,123 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed \
         value will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json \
         parsers to crash when encountered. The python None token will be serialized to null in json.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Distribution
+
+    Example Data:
+                test
+            0 	"A"
+            1 	"A"
+            2 	"A"
+            3   "A"
+            4   "A"
+            5   "B"
+            6   "B"
+            7   "B"
+            8   "C"
+            9   "C"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={"weights": [0.5, 0.3, 0.2], "values": ["A", "B", "C"]},
+                    threshold=0.1
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 0.0,
+                    "details": {
+                      "observed_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      },
+                      "expected_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={"weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333], "values": ["A", "B", "C"]},
+                    threshold=0.01
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 0.06895927460353621,
+                    "details": {
+                      "observed_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      },
+                      "expected_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.3333333333333333,
+                          0.3333333333333333,
+                          0.3333333333333333
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     partition_object: Union[dict, None]
