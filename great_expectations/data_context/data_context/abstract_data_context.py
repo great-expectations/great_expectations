@@ -296,12 +296,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._init_factories()
 
-        self._docs_manager = DataDocsManager(
-            data_docs_sites=self.variables.data_docs_sites,
-            root_directory=self.root_directory,
-            context=self,
-        )
-
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
         if (
@@ -1017,7 +1011,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return self._docs_manager.get_site_names()
+        return self.docs_manager.get_site_names()
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -2851,7 +2845,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        return self._docs_manager.get_docs_sites_urls(
+        return self.docs_manager.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
@@ -2868,7 +2862,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        return self._docs_manager.clean_data_docs(site_name=site_name)
+        return self.docs_manager.clean_data_docs(site_name=site_name)
 
     @staticmethod
     def _get_global_config_value(
@@ -3222,7 +3216,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def docs_manager(self) -> DataDocsManager:
-        return self._docs_manager
+        return DataDocsManager(
+            data_docs_sites=self.variables.data_docs_sites,
+            root_directory=self.root_directory,
+            context=self,
+        )
 
     @property
     def data_context_id(self) -> str:
@@ -3881,7 +3879,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ClassInstantiationError: Site config in your Data Context config is not valid.
         """
-        return self._docs_manager.build_data_docs(
+        return self.docs_manager.build_data_docs(
             site_names=site_names,
             resource_identifiers=resource_identifiers,
             dry_run=dry_run,
