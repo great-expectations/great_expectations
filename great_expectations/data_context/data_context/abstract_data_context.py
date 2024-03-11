@@ -3221,6 +3221,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         }
 
     @property
+    def docs_manager(self) -> DataDocsManager:
+        return self._docs_manager
+
+    @property
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
