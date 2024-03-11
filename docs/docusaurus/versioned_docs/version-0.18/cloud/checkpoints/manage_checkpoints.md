@@ -92,7 +92,7 @@ Add validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 3. Copy the code snippet and then close the **Edit Checkpoint** dialog.
 
-4. Paste the the code snippet into Jupyter Notebook and then add the following code block:
+4. Paste the code snippet into a Python interpreter and then add the following code block:
 
     ```python title="Python"
         validations = [
@@ -139,7 +139,7 @@ Add validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 4. Copy the code snippet and then close the **Edit Checkpoint** dialog.
 
-5. Paste the the code snippet into Jupyter Notebook and then edit the Checkpoint configuration.
+5. Paste the the code snippet into a Python interpreter and then edit the Checkpoint configuration.
 
 6. Run the following code to update the Checkpoint configuration:
 

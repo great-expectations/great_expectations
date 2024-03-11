@@ -85,10 +85,10 @@ The Validator provides access to all the available Expectations as methods.  Whe
 ```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
 ```
 
-Since we are working in a Jupyter Notebook, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
+Since we are working in a Python interpreter, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
 
 :::info Working outside a Jupyter Notebook
-If you are not working in a Jupyter Notebook you may need to explicitly print your results:
+If you are not working in a Python interpreter you may need to explicitly print your results:
 
 ```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
 ```

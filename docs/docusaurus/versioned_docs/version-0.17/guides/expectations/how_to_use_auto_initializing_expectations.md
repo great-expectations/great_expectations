@@ -7,7 +7,7 @@ import TechnicalTag from '../../term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you create Expectations interactively using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
-This guide assumes that you are creating and editing expectations in a Jupyter Notebook.  For more information about this process, see [How to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
+This guide assumes that you are creating and editing expectations in a Python interpreter.  For more information about this process, see [How to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
 
 Additionally, this guide assumes that you are using a multi-batch <TechnicalTag tag="batch_request" text="Batch Request" /> to provide your sample data. Auto-initializing Expectations will work when run on a single Batch, but they really shine when run on multiple Batches that would have otherwise needed to be individually processed if a manual approach were taken.
 

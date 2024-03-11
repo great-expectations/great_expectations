@@ -28,7 +28,7 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 ## Import the Great Expectations module and instantiate a Data Context
 
-For this guide we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
+For this guide we will be working with Python code in a Python interpreter. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
 
 Run the following code to import Great Expectations and instantiate a Data Context:
 
@@ -84,10 +84,10 @@ The Validator provides access to all the available Expectations as methods.  Whe
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation"
 ```
 
-Since we are working in a Jupyter Notebook, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
+Since we are working in a Python interpreter, the results of the Validation are printed after we run an `expect_*()` method.  We can examine those results to determine if the Expectation needs to be edited.
 
 :::info Working outside a Jupyter Notebook
-If you are not working in a Jupyter Notebook you may need to explicitly print your results:
+If you are not working in a Python interpreter you may need to explicitly print your results:
 
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
 ```
