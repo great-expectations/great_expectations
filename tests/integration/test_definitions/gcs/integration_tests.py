@@ -77,21 +77,21 @@ partition_data = []
 sample_data = []
 
 deployment_patterns = [
-    # IntegrationTestFixture(
-    #     name="deployment_patterns_file_gcs",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py",
-    #     data_context_dir=None,
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
+    IntegrationTestFixture(
+        name="deployment_patterns_file_gcs",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
 ]
 
 fluent_datasources = [
-    # IntegrationTestFixture(
-    #     name="how_to_connect_to_data_on_gcs_using_pandas",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_pandas",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
 ]
 
 gcs_integration_tests += connecting_to_your_data

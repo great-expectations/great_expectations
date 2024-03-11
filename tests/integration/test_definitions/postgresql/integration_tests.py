@@ -5,13 +5,13 @@ postgresql_integration_tests = []
 
 
 connecting_to_your_data = [
-    # IntegrationTestFixture(
-    #     name="how_to_configure_credentials",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_configure_credentials",
+        user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
     IntegrationTestFixture(
         name="postgres_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
@@ -165,30 +165,30 @@ sample_data = [
 ]
 
 creating_custom_expectations = [
-    # IntegrationTestFixture(
-    #     name="expect_multicolumn_values_to_be_multiples_of_three",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # ),
+    IntegrationTestFixture(
+        name="expect_multicolumn_values_to_be_multiples_of_three",
+        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
 ]
 
 evaluation_parameters = [
-    # IntegrationTestFixture(
-    #     name="dynamically_load_evaluation_parameters_from_a_database",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py",
-    #     data_context_dir="tests/integration/fixtures/query_store/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # )
+    IntegrationTestFixture(
+        name="dynamically_load_evaluation_parameters_from_a_database",
+        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py",
+        data_context_dir="tests/integration/fixtures/query_store/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    )
 ]
 
 fluent_datasources = [
-    # IntegrationTestFixture(
-    #     name="how_to_connect_to_postgresql_data",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_postgresql_data",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
 ]
 
 getting_started = [

@@ -62,26 +62,26 @@ emr_deployment_patterns = [
 ]
 
 creating_custom_expectations = [
-    # IntegrationTestFixture(
-    #     name="expect_queried_column_value_frequency_to_meet_threshold",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py",
-    #     backend_dependencies=[BackendDependencies.SPARK],
-    # ),
-    # IntegrationTestFixture(
-    #     name="expect_queried_table_row_count_to_be",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
-    #     backend_dependencies=[BackendDependencies.SPARK],
-    # ),
+    IntegrationTestFixture(
+        name="expect_queried_column_value_frequency_to_meet_threshold",
+        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="expect_queried_table_row_count_to_be",
+        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
 ]
 
 fluent_datasources = [
-    # IntegrationTestFixture(
-    #     name="how_to_connect_to_one_or_more_files_using_spark",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.SPARK],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_spark",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
 ]
 
 spark_integration_tests += connecting_to_your_data
