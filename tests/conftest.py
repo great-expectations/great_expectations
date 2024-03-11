@@ -1291,12 +1291,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1335,12 +1329,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1393,12 +1381,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1437,12 +1419,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
                 },
             },
             {
@@ -1892,12 +1868,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1936,12 +1906,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1994,12 +1958,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -2038,12 +1996,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
                 },
             },
             {

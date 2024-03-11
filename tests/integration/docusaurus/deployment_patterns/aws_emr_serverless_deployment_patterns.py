@@ -76,10 +76,6 @@ if __name__ == "__main__":
                 "name": "store_validation_result",
                 "action": {"class_name": "StoreValidationResultAction"},
             },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-            },
         ],
         "validations": [
             {
