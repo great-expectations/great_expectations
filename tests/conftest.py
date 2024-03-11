@@ -124,6 +124,10 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251 # type-checking only
+
+    from pytest_mock import MockerFixture
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import Engine
 
@@ -2555,7 +2559,6 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
     return ExpectationSuite(
         name="Titanic.warning",
         meta={},
-        data_asset_type="Dataset",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}
@@ -3511,7 +3514,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode(
-    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_list_keys: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3626,7 +3629,7 @@ def empty_cloud_context_fluent(
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode_custom_base_url(
-    mock_get_all: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_get_all: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -8265,8 +8268,8 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
 
 
 @pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
+def validator_with_mock_execution_engine(mocker: MockerFixture) -> Validator:
+    execution_engine = mocker.MagicMock()
     validator = Validator(execution_engine=execution_engine)
     return validator
 

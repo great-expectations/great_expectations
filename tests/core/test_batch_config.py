@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 

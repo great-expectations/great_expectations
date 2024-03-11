@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import copy
 import pathlib
 import random
 import string
-from typing import Any
-from unittest import mock
+from typing import TYPE_CHECKING, Any
+from unittest.mock import ANY as MOCK_ANY
+from unittest.mock import patch as mock_patch
 
 import pytest
 
@@ -36,6 +39,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 from tests.data_context.conftest import (
     USAGE_STATISTICS_QA_URL,
 )
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
+    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 
@@ -405,6 +413,7 @@ def test_data_context_variables_set(
 
 @pytest.mark.unit
 def test_data_context_variables_save_config(
+    mocker: MockerFixture,
     data_context_config_dict: dict,
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
@@ -426,64 +435,64 @@ def test_data_context_variables_save_config(
     )
 
     # FileDataContextVariables
-    with mock.patch(
+    mock_save = mocker.patch(
         "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
-    ) as mock_save:
-        file_data_context_variables.save_config()
+    )
+    file_data_context_variables.save_config()
 
-        assert mock_save.call_count == 1
+    assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.Session.put", autospec=True) as mock_put:
-        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
+    mock_put = mocker.patch("requests.Session.put", autospec=True)
+    type(mock_put.return_value).status_code = mocker.PropertyMock(return_value=200)
 
-        cloud_data_context_variables.save_config()
+    cloud_data_context_variables.save_config()
 
-        expected_config_dict = {
-            "config_variables_file_path": "uncommitted/config_variables.yml",
-            "config_version": 3.0,
-            "data_docs_sites": {},
-            "plugins_directory": "plugins/",
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
+    expected_config_dict = {
+        "config_variables_file_path": "uncommitted/config_variables.yml",
+        "config_version": 3.0,
+        "data_docs_sites": {},
+        "plugins_directory": "plugins/",
+        "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
                 },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-                "checkpoint_store": {"class_name": "CheckpointStore"},
-                "profiler_store": {"class_name": "ProfilerStore"},
-                "validations_store": {"class_name": "ValidationsStore"},
-                "validation_config_store": {"class_name": "ValidationConfigStore"},
             },
-            "include_rendered_content": {
-                "expectation_suite": False,
-                "expectation_validation_result": False,
-                "globally": False,
+            "evaluation_parameter_store": {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "EvaluationParameterStore",
             },
-            "profiler_store_name": "profiler_store",
-        }
+            "checkpoint_store": {"class_name": "CheckpointStore"},
+            "profiler_store": {"class_name": "ProfilerStore"},
+            "validations_store": {"class_name": "ValidationsStore"},
+            "validation_config_store": {"class_name": "ValidationConfigStore"},
+        },
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
+        "profiler_store_name": "profiler_store",
+    }
 
-        assert mock_put.call_count == 1
-        mock_put.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
-            json={
-                "data": {
-                    "type": "data_context_variables",
-                    "attributes": {
-                        "organization_id": ge_cloud_organization_id,
-                        "data_context_variables": expected_config_dict,
-                    },
-                }
-            },
-        )
+    assert mock_put.call_count == 1
+    mock_put.assert_called_with(
+        MOCK_ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
+        json={
+            "data": {
+                "type": "data_context_variables",
+                "attributes": {
+                    "organization_id": ge_cloud_organization_id,
+                    "data_context_variables": expected_config_dict,
+                },
+            }
+        },
+    )
 
 
 @pytest.mark.unit
@@ -586,7 +595,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 @pytest.mark.e2e
 @pytest.mark.cloud
-@mock.patch(
+@mock_patch(
     "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
 )
 @pytest.mark.xfail(
@@ -594,7 +603,9 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
 )
 def test_cloud_enabled_data_context_variables_e2e(
-    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+    mock_save_project_config: MagicMock,
+    data_docs_sites: dict,
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?

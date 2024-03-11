@@ -1,6 +1,5 @@
-from unittest.mock import Mock
-
 import pytest
+from pytest_mock import MockerFixture
 
 from great_expectations import set_context
 from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -42,14 +41,16 @@ def _assert_checkpoint_equality(actual: Checkpoint, expected: Checkpoint):
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict):
+def test_checkpoint_factory_get_uses_store_get(
+    checkpoint_dict: dict, mocker: MockerFixture
+):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     store.get.return_value = checkpoint_dict
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
 
@@ -62,13 +63,15 @@ def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict):
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_raises_error_on_missing_key(checkpoint_dict: dict):
+def test_checkpoint_factory_get_raises_error_on_missing_key(
+    checkpoint_dict: dict, mocker: MockerFixture
+):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     store.get.return_value = checkpoint_dict
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
 
@@ -83,13 +86,13 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(checkpoint_dict: dic
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_add_uses_store_add():
+def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
     checkpoint = Checkpoint(name=name)
@@ -104,12 +107,12 @@ def test_checkpoint_factory_add_uses_store_add():
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_add_raises_for_duplicate_key():
+def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
     checkpoint = Checkpoint(name=name)
@@ -126,13 +129,13 @@ def test_checkpoint_factory_add_raises_for_duplicate_key():
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_delete_uses_store_remove_key():
+def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
     checkpoint = Checkpoint(name=name)
@@ -147,12 +150,12 @@ def test_checkpoint_factory_delete_uses_store_remove_key():
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_delete_raises_for_missing_checkpoint():
+def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = Mock(spec=CheckpointStore)
+    store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    context = Mock(spec=AbstractDataContext)
+    context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
     checkpoint = Checkpoint(name=name)

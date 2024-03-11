@@ -81,7 +81,7 @@ pytestmark = [
 )
 @pytest.mark.sqlite
 def test_named_date_part_methods(
-    mock_partition_on_date_parts: mock.MagicMock,
+    mock_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
     partitioner_method_name: str,
     called_with_date_parts: List[DatePart],
 ):
@@ -203,8 +203,8 @@ def test_partition_on_date_parts_multiple_date_parts(
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year(
-    mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
+    mock_execution_engine: mock.MagicMock,  # noqa: TID251
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
@@ -236,8 +236,8 @@ def test_get_data_for_batch_identifiers_year(
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month(
-    mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
+    mock_execution_engine: mock.MagicMock,  # noqa: TID251
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(
@@ -266,8 +266,8 @@ def test_get_data_for_batch_identifiers_year_and_month(
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month_and_day(
-    mock_execution_engine: mock.MagicMock,
-    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,
+    mock_execution_engine: mock.MagicMock,  # noqa: TID251
+    mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
     """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(

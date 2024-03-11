@@ -58,7 +58,6 @@ def test_data_asset_expectation_suite():
     asset = DataAsset()
     default_suite = ExpectationSuite(
         name="default",
-        data_asset_type="DataAsset",
         meta={"great_expectations_version": ge_version},
         expectations=[],
     )
