@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Literal,
     Mapping,
@@ -140,57 +139,6 @@ class ProjectManager:
                 + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.get_validator(batch_request=batch_request)
-
-    def is_using_cloud(self) -> bool:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
-        from great_expectations.data_context import CloudDataContext
-
-        return isinstance(self._project, CloudDataContext)
-
-    def build_data_docs(
-        self,
-        site_names: list[str] | None = None,
-        resource_identifiers: list | None = None,
-        dry_run: bool = False,
-        build_index: bool = True,
-    ) -> dict:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
-        return self._project.build_data_docs(
-            site_names=site_names,
-            resource_identifiers=resource_identifiers,
-            dry_run=dry_run,
-            build_index=build_index,
-        )
-
-    def get_docs_sites_urls(
-        self,
-        resource_identifier: Any | None = None,
-        site_name: str | None = None,
-        only_if_exists: bool = True,
-        site_names: list[str] | None = None,
-    ) -> list[dict[str, str]]:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
-        return self._project.get_docs_sites_urls(
-            resource_identifier=resource_identifier,
-            site_name=site_name,
-            only_if_exists=only_if_exists,
-            site_names=site_names,
-        )
 
     def _build_context(  # noqa: PLR0913
         self,
