@@ -261,7 +261,6 @@ def serialized_configuration_bundle() -> dict:
         ],
         "expectation_suites": [
             {
-                "data_asset_type": None,
                 "name": "my_suite",
                 "expectations": [],
                 "id": None,

@@ -62,7 +62,7 @@ class TestValidationRun:
             with mock.patch.object(OldValidator, "graph_validate"):
                 gx.get_context()
                 mock_validator = OldValidator(
-                    execution_engine=mock.MagicMock(spec=ExecutionEngine)
+                    execution_engine=mock.MagicMock(spec=ExecutionEngine)  # noqa: TID251
                 )
                 mock_get_validator.return_value = mock_validator
 
@@ -71,7 +71,7 @@ class TestValidationRun:
     @pytest.mark.unit
     def test_passes_simple_data_to_validator(
         self,
-        mock_validator: mock.MagicMock,
+        mock_validator: mock.MagicMock,  # noqa: TID251
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
@@ -98,7 +98,7 @@ class TestValidationRun:
     def test_passes_complex_data_to_validator(
         self,
         mock_build_batch_request,
-        mock_validator: mock.MagicMock,
+        mock_validator: mock.MagicMock,  # noqa: TID251
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
@@ -129,7 +129,7 @@ class TestValidationRun:
     @pytest.mark.unit
     def test_returns_expected_data(
         self,
-        mock_validator: mock.MagicMock,
+        mock_validator: mock.MagicMock,  # noqa: TID251
         validation_config: ValidationConfig,
     ):
         graph_validate_results = [ExpectationValidationResult(success=True)]

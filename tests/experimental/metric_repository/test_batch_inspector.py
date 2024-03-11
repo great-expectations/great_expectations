@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock  # noqa: TID251
 
 import pytest
 

@@ -126,7 +126,6 @@ print(expectation_configurations)
 row_count_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.16.7"},
-        "data_asset_type": None,
         "expectations": [
             {
                 "kwargs": {"min_value": 10000, "max_value": 10000, "mostly": 1.0},

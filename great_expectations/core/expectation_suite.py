@@ -26,7 +26,6 @@ import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import (
-    deprecated_argument,
     public_api,
 )
 from great_expectations.analytics.anonymizer import anonymize
@@ -68,7 +67,6 @@ logger = logging.getLogger(__name__)
 
 
 @public_api
-@deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 class ExpectationSuite(SerializableDictDot):
     """Set-like collection of Expectations.
 
@@ -76,7 +74,6 @@ class ExpectationSuite(SerializableDictDot):
         name: Name of the Expectation Suite
         expectations: Expectation Configurations to associate with this Expectation Suite.
         evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
-        data_asset_type: Type of data asset to associate with this suite.
         execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
         id: Great Expectations Cloud id for this Expectation Suite.
@@ -89,7 +86,6 @@ class ExpectationSuite(SerializableDictDot):
             Sequence[Union[dict, ExpectationConfiguration, Expectation]]
         ] = None,
         evaluation_parameters: Optional[dict] = None,
-        data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
@@ -107,7 +103,6 @@ class ExpectationSuite(SerializableDictDot):
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
-        self.data_asset_type = data_asset_type
         self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
@@ -348,7 +343,6 @@ class ExpectationSuite(SerializableDictDot):
         - data_asset_name
         - name
         - meta
-        - data_asset_type
         """
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
@@ -387,7 +381,6 @@ class ExpectationSuite(SerializableDictDot):
                 self.name == other.name,
                 self.expectations == other.expectations,
                 self.evaluation_parameters == other.evaluation_parameters,
-                self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
             )
         )
@@ -1123,7 +1116,6 @@ class ExpectationSuiteSchema(Schema):
     id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)
-    data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
     notes = fields.Raw(required=False, allow_none=True)
 

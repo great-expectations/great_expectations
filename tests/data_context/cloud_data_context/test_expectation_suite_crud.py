@@ -57,7 +57,6 @@ def mock_get_all_suites_json(
                     "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
                     "rendered_data_doc_id": None,
                     "suite": {
-                        "data_asset_type": None,
                         "name": suite_1.name,
                         "expectations": [
                             {
@@ -85,7 +84,6 @@ def mock_get_all_suites_json(
                     "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
                     "rendered_data_doc_id": None,
                     "suite": {
-                        "data_asset_type": None,
                         "name": suite_2.name,
                         "expectations": [
                             {
@@ -143,7 +141,6 @@ def mocked_get_response(
                         "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
                         "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                         "suite": {
-                            "data_asset_type": None,
                             "name": "my_mock_suite",
                             "expectations": [
                                 {
@@ -195,7 +192,6 @@ def mocked_get_by_name_response(
                             "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
                             "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
                             "suite": {
-                                "data_asset_type": None,
                                 "name": "my_mock_suite",
                                 "expectations": [
                                     {
@@ -220,7 +216,7 @@ def mocked_get_by_name_response(
 
 
 @pytest.fixture
-def mock_list_expectation_suite_names() -> mock.MagicMock:
+def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -231,7 +227,7 @@ def mock_list_expectation_suite_names() -> mock.MagicMock:
 
 
 @pytest.fixture
-def mock_list_expectation_suites() -> mock.MagicMock:
+def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -242,7 +238,7 @@ def mock_list_expectation_suites() -> mock.MagicMock:
 
 
 @pytest.fixture
-def mock_expectations_store_has_key() -> mock.MagicMock:
+def mock_expectations_store_has_key() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -272,7 +268,7 @@ def test_list_expectation_suites(
     )
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
+        mock_get.return_value = mock.Mock(  # noqa: TID251
             status_code=200, json=lambda: mock_get_all_suites_json
         )
         suites = context.list_expectation_suites()
@@ -295,7 +291,7 @@ def test_list_expectation_suites(
 def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -314,8 +310,8 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,
-    mock_list_expectation_suites: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suites: mock.MagicMock,  # noqa: TID251
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -345,7 +341,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -487,14 +483,15 @@ def test_save_expectation_suite_overwrites_existing_suite(
     suite = ExpectationSuite(suite_name, id=suite_id)
 
     with mock.patch(
-        "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
+        "requests.Session.put",
+        autospec=True,
+        return_value=mock.Mock(status_code=405),  # noqa: TID251
     ) as mock_put, mock.patch(
         "requests.Session.patch", autospec=True
     ) as mock_patch, pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
-        "data_asset_type": None,
         "name": suite_name,
         "expectations": [],
         "id": suite_id,
@@ -514,8 +511,8 @@ def test_save_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_expectations_store_has_key: mock.MagicMock,
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -539,7 +536,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,
+    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
