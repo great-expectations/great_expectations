@@ -1460,7 +1460,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_minimal_simple_checkpoint",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1476,7 +1475,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_slack",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1499,7 +1497,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1520,7 +1517,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_site_names",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -2036,7 +2032,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_minimal_simple_checkpoint",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -2052,7 +2047,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_slack",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -2075,7 +2069,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -2096,7 +2089,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_site_names",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
