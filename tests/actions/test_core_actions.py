@@ -134,7 +134,6 @@ def test_SlackNotificationAction(
 
     # test with just web_hook set; expect pass
     slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
@@ -148,7 +147,6 @@ def test_SlackNotificationAction(
 
     # Test with slack_token and slack_channel set; expect pass
     slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_token=slack_token,
         slack_channel=slack_channel,
@@ -178,7 +176,6 @@ def test_SlackNotificationAction(
     # Test with just slack_token set; expect fail
     with pytest.raises(AssertionError):
         SlackNotificationAction(
-            data_context=data_context_parameterized_expectation_suite,
             renderer=renderer,
             slack_token=slack_token,
             notify_on=notify_on,
@@ -187,7 +184,6 @@ def test_SlackNotificationAction(
     # Test with just slack_channel set; expect fail
     with pytest.raises(AssertionError):
         slack_action = SlackNotificationAction(
-            data_context=data_context_parameterized_expectation_suite,
             renderer=renderer,
             slack_channel=slack_channel,
             notify_on=notify_on,
@@ -196,7 +192,6 @@ def test_SlackNotificationAction(
     # Test with slack_channel, slack_token, and slack_webhook set; expect fail
     with pytest.raises(AssertionError):
         SlackNotificationAction(
-            data_context=data_context_parameterized_expectation_suite,
             renderer=renderer,
             slack_channel=slack_channel,
             slack_token=slack_token,
@@ -207,7 +202,6 @@ def test_SlackNotificationAction(
     # test notify on with failed run; expect pass
     notify_on = "failure"
     slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
@@ -230,7 +224,6 @@ def test_SlackNotificationAction(
     notify_on = "failure"
     validation_result_suite.success = False
     slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
@@ -265,7 +258,6 @@ def test_PagerdutyAlertAction(
     routing_key = "test"
 
     pagerduty_action = PagerdutyAlertAction(
-        data_context=data_context_parameterized_expectation_suite,
         api_key=api_key,
         routing_key=routing_key,
     )
@@ -300,7 +292,6 @@ def test_OpsgenieAlertAction(
         "class_name": "OpsgenieRenderer",
     }
     opsgenie_action = OpsgenieAlertAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         api_key="testapikey",
         region=None,
@@ -341,7 +332,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     teams_webhook = "http://testing"
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -378,7 +368,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = False
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -392,7 +381,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = True
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -410,7 +398,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = False
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -426,7 +413,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = True
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -456,7 +442,6 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     # notify : all
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
@@ -609,7 +594,6 @@ def test_EmailAction(
         receiver_emails = "test"
         notify_on = "all"
         email_action = EmailAction(
-            data_context=data_context_parameterized_expectation_suite,
             renderer=renderer,
             smtp_address=smtp_address,
             smtp_port=smtp_port,
@@ -631,12 +615,9 @@ def test_EmailAction(
 
 @pytest.mark.unit
 def test_api_action_create_payload():
-    mock_data_context = ""
     mock_validation_results = []
     expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
-    api_notification_action = APINotificationAction(
-        mock_data_context, "http://www.example.com"
-    )
+    api_notification_action = APINotificationAction("http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
     )
@@ -655,9 +636,7 @@ def test_api_action_run(
     mock_response = mocker.MagicMock()
     mock_response.status_code = 200
     mock_requests.post.return_value = mock_response
-    api_notification_action = APINotificationAction(
-        data_context_simple_expectation_suite, "http://www.example.com"
-    )
+    api_notification_action = APINotificationAction("http://www.example.com")
     response = api_notification_action.run(
         validation_result_suite, validation_result_suite_id, file_data_asset
     )
@@ -678,7 +657,6 @@ def test_cloud_sns_notification_action(
     sns_action = SNSNotificationAction(
         sns_topic_arn=arn,
         sns_message_subject="Subject",
-        data_context=cloud_data_context_with_datasource_pandas_engine,
     )
     assert sns_action.run(
         validation_result_suite=validation_result_suite,
