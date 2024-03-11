@@ -202,7 +202,7 @@ class SlackNotificationAction(ValidationAction):
 
         from great_expectations import project_manager
 
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+        self._docs_manager = project_manager.get_docs_manager()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
@@ -242,7 +242,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self._docs_manager.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -975,8 +975,7 @@ class UpdateDataDocsAction(ValidationAction):
         from great_expectations import project_manager
 
         self._using_cloud_context = project_manager.cloud_mode
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
-        self._build_data_docs = project_manager.build_data_docs
+        self._docs_manager = project_manager.get_docs_manager()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1010,7 +1009,7 @@ class UpdateDataDocsAction(ValidationAction):
 
         # TODO Update for RenderedDataDocs
         # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
-        self._build_data_docs(
+        self._docs_manager.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
@@ -1022,7 +1021,7 @@ class UpdateDataDocsAction(ValidationAction):
             return data_docs_validation_results
 
         # get the URL for the validation result
-        docs_site_urls_list = self._get_docs_sites_urls(
+        docs_site_urls_list = self._docs_manager.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
         )
