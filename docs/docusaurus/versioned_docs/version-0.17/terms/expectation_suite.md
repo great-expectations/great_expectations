@@ -58,5 +58,5 @@ In almost all other circumstances you will simply pass the name of any relevant 
 
 Each Expectation Suite is saved in an Expectation Store, as a JSON file in the `great_expectations/expectations` subdirectory of the Data Context. Best practice is for users to check these files into the version control each time they are updated, in the same way they treat their source files. This discipline allows data quality to be an integral part of versioned pipeline releases.
 
-You can save an Expectation Suite by using a <TechnicalTag relative="../" tag="validator" text="Validator's" /> `save_expectation_suite()` method.  This method will be included in the last cell of any Python interpreter launched from the CLI for the purpose of creating or editing Expectations.
+You can save an Expectation Suite by using a <TechnicalTag relative="../" tag="validator" text="Validator's" /> `save_expectation_suite()` method.
 
