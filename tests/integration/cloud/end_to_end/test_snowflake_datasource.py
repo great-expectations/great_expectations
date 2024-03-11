@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
+    from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
@@ -30,7 +31,7 @@ def connection_string() -> str:
 @pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
-    connection_string: str,
+    connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
@@ -39,7 +40,7 @@ def datasource(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    updated_connection_string = datasource.connection_string + "&foo=bar"  # type: ignore[operator] # is a str
+    updated_connection_string = f"{datasource.connection_string}&foo=bar"
 
     datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
