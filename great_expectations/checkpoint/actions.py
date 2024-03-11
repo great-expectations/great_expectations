@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import requests
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 try:
     import pypd
@@ -836,6 +837,116 @@ class EmailAction(ValidationAction):
             return {"email_result": email_result}
         else:
             return {"email_result": ""}
+
+
+@public_api
+class StoreValidationResultAction(ValidationAction):
+    """Store a validation result in the ValidationsStore.
+    Typical usage example:
+        ```yaml
+        - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          # name of the store where the actions will store validation results
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: validations_store
+        ```
+    Args:
+        data_context: GX Data Context.
+        target_store_name: The name of the store where the actions will store the validation result.
+    Raises:
+        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
+    """
+
+    def __init__(
+        self,
+        data_context: AbstractDataContext,
+        target_store_name: Optional[str] = None,
+    ) -> None:
+        super().__init__(data_context)
+        if target_store_name is None:
+            self.target_store = data_context.stores[data_context.validations_store_name]
+        else:
+            self.target_store = data_context.stores[target_store_name]
+
+    @override
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+        data_asset,
+        payload=None,
+        expectation_suite_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+    ):
+        logger.debug("StoreValidationResultAction.run")
+        run_return_value = self._basic_run(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            expectation_suite_identifier,
+            checkpoint_identifier,
+        )
+        if self._using_cloud_context and isinstance(
+            run_return_value, GXCloudResourceRef
+        ):
+            return self._run_cloud_post_process_resource_ref(
+                run_return_value, validation_result_suite_identifier
+            )
+
+    def _basic_run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+        expectation_suite_identifier,
+        checkpoint_identifier: Optional[GXCloudIdentifier],
+    ) -> Union[bool, GXCloudResourceRef]:
+        if validation_result_suite is None:
+            logger.warning(
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+            )
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier,
+            (ValidationResultIdentifier, GXCloudIdentifier),
+        ):
+            raise TypeError(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
+        checkpoint_id = None
+        if self._using_cloud_context and checkpoint_identifier:
+            checkpoint_id = checkpoint_identifier.id
+
+        expectation_suite_id = None
+        if self._using_cloud_context and expectation_suite_identifier:
+            expectation_suite_id = expectation_suite_identifier.id
+
+        return self.target_store.set(
+            validation_result_suite_identifier,
+            validation_result_suite,
+            checkpoint_id=checkpoint_id,
+            expectation_suite_id=expectation_suite_id,
+        )
+
+    def _run_cloud_post_process_resource_ref(
+        self,
+        gx_cloud_resource_ref: GXCloudResourceRef,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+    ):
+        store_set_return_value: GXCloudResourceRef
+        new_id = gx_cloud_resource_ref.id
+        # ValidationResultIdentifier has no `.id`
+        validation_result_suite_identifier.id = new_id  # type: ignore[union-attr]
+        return gx_cloud_resource_ref
 
 
 @public_api
