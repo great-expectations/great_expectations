@@ -167,10 +167,6 @@ class ActionListValidationOperator(ValidationOperator):
                             "action": {"class_name": "StoreValidationResultAction"},
                         },
                         {
-                            "name": "store_evaluation_params",
-                            "action": {"class_name": "StoreEvaluationParametersAction"},
-                        },
-                        {
                             "name": "update_data_docs",
                             "action": {"class_name": "UpdateDataDocsAction"},
                         },
@@ -547,11 +543,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 action:
                   class_name: StoreValidationResultAction
                   target_store_name: validations_store
-              - name: store_evaluation_params
-                action:
-                  class_name: StoreEvaluationParametersAction
-                  target_store_name: evaluation_parameter_store
-
 
     **Invocation**
 
@@ -591,10 +582,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                         {
                             "name": "store_validation_result",
                             "action": {"class_name": "StoreValidationResultAction"},
-                        },
-                        {
-                            "name": "store_evaluation_params",
-                            "action": {"class_name": "StoreEvaluationParametersAction"},
                         },
                         {
                             "name": "update_data_docs",

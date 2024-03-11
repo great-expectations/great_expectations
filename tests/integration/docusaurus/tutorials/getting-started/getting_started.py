@@ -118,10 +118,6 @@ checkpoint = context.add_or_update_checkpoint(
             "name": "store_validation_result",
             "action": {"class_name": "StoreValidationResultAction"},
         },
-        {
-            "name": "store_evaluation_params",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-        },
     ],
 )
 checkpoint_result = checkpoint.run()
@@ -154,10 +150,6 @@ new_checkpoint = context.add_or_update_checkpoint(
         {
             "name": "store_validation_result",
             "action": {"class_name": "StoreValidationResultAction"},
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
         },
     ],
 )

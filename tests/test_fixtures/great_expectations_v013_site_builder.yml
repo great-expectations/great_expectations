@@ -83,9 +83,6 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -105,10 +102,6 @@ validation_operators:
         action:
           class_name: StoreValidationResultAction
           target_store_name: validations_store
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

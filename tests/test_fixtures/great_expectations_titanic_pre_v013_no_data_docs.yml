@@ -45,9 +45,5 @@ validation_operators:
         action:
           class_name: StoreValidationResultAction
           target_store_name: validations_store
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
 
 data_docs_sites:
