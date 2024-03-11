@@ -42,7 +42,6 @@ def basic_data_context_config_for_validation_operator():
                         "name": "store_validation_result",
                         "action": {
                             "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
                         },
                     },
                 ],
@@ -54,7 +53,6 @@ def basic_data_context_config_for_validation_operator():
                         "name": "store_validation_result",
                         "action": {
                             "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
                         },
                     },
                 ],

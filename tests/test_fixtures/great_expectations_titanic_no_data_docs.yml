@@ -51,6 +51,5 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
 
 data_docs_sites:

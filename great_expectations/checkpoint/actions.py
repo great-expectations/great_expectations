@@ -817,9 +817,6 @@ class StoreValidationResultAction(ValidationAction):
         - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          # name of the store where the actions will store validation results
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
         ```
     Args:
         target_store_name: The name of the store where the actions will store the validation result.
