@@ -41,6 +41,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -817,17 +820,28 @@ class StoreValidationResultAction(ValidationAction):
         - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
+          # name of the store where the actions will store validation results
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: validations_store
         ```
     Args:
+        data_context: GX Data Context.
         target_store_name: The name of the store where the actions will store the validation result.
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
+    ) -> None:
         from great_expectations import project_manager
 
-        self.target_store = project_manager.get_validations_store()
+        if target_store_name is None:
+            self.target_store = project_manager.get_validations_store()
+        else:
+            # TODO: Decouple context dependency from the action
+            self.target_store = data_context.stores[target_store_name]
+
         self._using_cloud_context = project_manager.is_using_cloud()
 
     @override
