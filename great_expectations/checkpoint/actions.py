@@ -1011,7 +1011,7 @@ class UpdateDataDocsAction(ValidationAction):
         # get the URL for the validation result
         docs_site_urls_list = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
+            site_names=self._site_names,
         )
         # process payload
         for sites in docs_site_urls_list:
