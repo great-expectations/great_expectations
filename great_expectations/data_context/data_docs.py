@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.util import instantiate_class_from_config
+from great_expectations.data_context.util import instantiate_class_from_config
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
