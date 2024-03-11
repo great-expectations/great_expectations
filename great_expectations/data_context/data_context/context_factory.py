@@ -140,6 +140,57 @@ class ProjectManager:
             )
         return self._project.get_validator(batch_request=batch_request)
 
+    def is_using_cloud(self) -> bool:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+
+        from great_expectations.data_context import CloudDataContext
+
+        return isinstance(self._project, CloudDataContext)
+
+    def build_data_docs(
+        self,
+        site_names=None,
+        resource_identifiers=None,
+        dry_run: bool = False,
+        build_index: bool = True,
+    ):
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+
+        return self._project.build_data_docs(
+            site_names=site_names,
+            resource_identifiers=resource_identifiers,
+            dry_run=dry_run,
+            build_index=build_index,
+        )
+
+    def get_docs_sites_urls(
+        self,
+        resource_identifier=None,
+        site_name: str | None = None,
+        only_if_exists: bool = True,
+        site_names: list[str] | None = None,
+    ):
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+
+        return self._project.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+            site_names=site_names,
+        )
+
     def _build_context(  # noqa: PLR0913
         self,
         project_config: DataContextConfig | Mapping | None = None,
