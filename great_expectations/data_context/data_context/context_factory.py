@@ -52,10 +52,10 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 class ProjectManager:
     """Singleton class to manage projects in the global namespace."""
 
-    _project: AbstractDataContext | None
+    __project: AbstractDataContext | None
 
     def __init__(self):
-        self._project = None
+        self.__project = None
 
     def get_project(  # noqa: PLR0913
         self,
@@ -69,7 +69,7 @@ class ProjectManager:
         cloud_mode: bool | None = None,
         mode: ContextModes | None = None,
     ) -> AbstractDataContext:
-        self._project = self._build_context(
+        self.__project = self._build_context(
             project_config=project_config,
             context_root_dir=context_root_dir,
             project_root_dir=project_root_dir,
@@ -80,74 +80,42 @@ class ProjectManager:
             cloud_mode=cloud_mode,
             mode=mode,
         )
-        return self._project
+        return self.__project
 
     def set_project(self, project: AbstractDataContext) -> None:
-        self._project = project
+        self.__project = project
 
-    def get_expectations_store(self) -> ExpectationsStore:
-        if not self._project:
+    @property
+    def _project(self) -> AbstractDataContext:
+        if not self.__project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
                 + "Please call `great_expectations.get_context()` first, then try your action again."
             )
+        return self.__project
+
+    def get_expectations_store(self) -> ExpectationsStore:
         return self._project.expectations_store
 
     def get_checkpoints_store(self) -> CheckpointStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.checkpoint_store
 
     def get_validations_store(self) -> ValidationsStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.validations_store
 
     def get_validation_config_store(self) -> ValidationConfigStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.validation_config_store
 
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.evaluation_parameter_store
 
     def get_datasources(self) -> DatasourceDict:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.datasources
 
     def get_validator(self, batch_request: BatchRequest) -> Validator:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
         return self._project.get_validator(batch_request=batch_request)
 
     def is_using_cloud(self) -> bool:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
         from great_expectations.data_context import CloudDataContext
 
         return isinstance(self._project, CloudDataContext)
@@ -159,12 +127,6 @@ class ProjectManager:
         dry_run: bool = False,
         build_index: bool = True,
     ) -> dict:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
         return self._project.build_data_docs(
             site_names=site_names,
             resource_identifiers=resource_identifiers,
@@ -179,12 +141,6 @@ class ProjectManager:
         only_if_exists: bool = True,
         site_names: list[str] | None = None,
     ) -> list[dict[str, str]]:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
-            )
-
         return self._project.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,

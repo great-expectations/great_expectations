@@ -48,7 +48,19 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class ValidationAction:
-    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure."""
+    """
+    ValidationActions define a set of steps to be run after a validation result is produced.
+
+    Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
+    and other actions to take place after the validation result is produced.
+    """
+
+    def __init__(self) -> None:
+        from great_expectations import project_manager
+
+        self._using_cloud_context = project_manager.is_using_cloud()
+        self._build_data_docs = project_manager.build_data_docs
+        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
 
     @public_api
     def run(  # noqa: PLR0913
@@ -196,9 +208,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
-        from great_expectations import project_manager
-
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+        super().__init__()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
@@ -839,9 +849,7 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-        from great_expectations import project_manager
-
-        self._using_cloud_context = project_manager.is_using_cloud()
+        super().__init__()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -959,11 +967,7 @@ class UpdateDataDocsAction(ValidationAction):
         """
         self._site_names = site_names
 
-        from great_expectations import project_manager
-
-        self._using_cloud_context = project_manager.is_using_cloud()
-        self._build_data_docs = project_manager.build_data_docs
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+        super().__init__()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
