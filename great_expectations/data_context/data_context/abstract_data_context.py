@@ -3927,7 +3927,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         resource_identifiers: list | None = None,
         dry_run: bool = False,
         build_index: bool = True,
-    ) -> bool:
+    ) -> dict:
         """Build Data Docs for your project.
 
         --Documentation--
