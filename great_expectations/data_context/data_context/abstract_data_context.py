@@ -65,7 +65,6 @@ from great_expectations.core.factory import (
     SuiteFactory,
     ValidationFactory,
 )
-from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
@@ -117,7 +116,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
     DataAssistantDispatcher,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -1025,72 +1024,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not config:
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
-
-    # 2023-08-17 - Chetan - This method is only kept around to support profile_data_asset (a V2 method) and V2-specific tests
-    #                       We should delete this as soon as possible as it has been deprecated in v13.
-    def _get_batch_v2(
-        self,
-        batch_kwargs: Union[dict, BatchKwargs],
-        expectation_suite_name: Union[str, ExpectationSuite],
-        data_asset_type=None,
-        batch_parameters=None,
-    ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
-        batch_parameters are included, they will be available as attributes of the batch.
-        Args:
-            batch_kwargs: the batch_kwargs to use; must include a datasource key
-            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
-            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
-                generally be inferred from the datasource.
-            batch_parameters: optional parameters to store as the reference description of the batch. They should
-                reflect parameters that would provide the passed BatchKwargs.
-        Returns:
-            DataAsset
-        """
-        if isinstance(batch_kwargs, dict):
-            batch_kwargs = BatchKwargs(batch_kwargs)
-
-        if not isinstance(batch_kwargs, BatchKwargs):
-            raise gx_exceptions.BatchKwargsError(
-                "BatchKwargs must be a BatchKwargs object or dictionary."
-            )
-
-        if not isinstance(
-            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)
-        ):
-            raise gx_exceptions.DataContextError(
-                "expectation_suite_name must be an ExpectationSuite, "
-                "ExpectationSuiteIdentifier or string."
-            )
-
-        if isinstance(expectation_suite_name, ExpectationSuite):
-            expectation_suite = expectation_suite_name
-        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
-            expectation_suite = self.get_expectation_suite(expectation_suite_name.name)
-        else:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
-        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
-        datasource: LegacyDatasource | BaseDatasource | FluentDatasource
-        if isinstance(datasource_name, str):
-            datasource = self.get_datasource(datasource_name)
-        else:
-            datasource = self.get_datasource(None)  #  type: ignore[arg-type]
-        assert not isinstance(
-            datasource, FluentDatasource
-        ), "Fluent Datasource cannot be built from batch_kwargs"
-        batch = datasource.get_batch(  #  type: ignore[union-attr]
-            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
-        )
-        if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")
-
-        validator = BridgeValidator(
-            batch=batch,
-            expectation_suite=expectation_suite,
-            expectation_engine=data_asset_type,
-        )
-        return validator.get_dataset()
 
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""

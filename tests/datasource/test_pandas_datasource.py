@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -24,7 +23,6 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAMLHandler()
 
@@ -328,27 +326,6 @@ def test_process_batch_parameters():
         dataset_options={"caching": False}
     )
     assert batch_kwargs == {"dataset_options": {"caching": False}}
-
-
-@pytest.mark.filesystem
-def test_pandas_datasource_processes_dataset_options(test_folder_connection_path_csv):
-    datasource = PandasDatasource(
-        "PandasCSV",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path_csv,
-            }
-        },
-    )
-    batch_kwargs = datasource.build_batch_kwargs(
-        "subdir_reader", data_asset_name="test"
-    )
-    batch_kwargs["dataset_options"] = {"caching": False}
-    batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(name="foo"))
-    dataset = validator.get_dataset()
-    assert dataset.caching is False
 
 
 @pytest.mark.unit

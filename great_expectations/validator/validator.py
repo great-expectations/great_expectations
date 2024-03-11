@@ -42,8 +42,6 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationConfig
-from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -67,8 +65,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
 )
-from great_expectations.types import ClassConfig
-from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
@@ -1733,99 +1729,3 @@ class Validator:
             validations.append(validation)
 
         return validations
-
-
-class BridgeValidator:
-    """This is currently helping bridge APIs"""
-
-    def __init__(
-        self, batch, expectation_suite, expectation_engine=None, **kwargs
-    ) -> None:
-        """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
-        determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
-
-        Args:
-            batch (Batch): A Batch in Pandas, Spark, or SQL format
-            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current
-            Data Context
-            expectation_engine (ExecutionEngine): The current Execution Engine being utilized. If this is not set, it is
-            determined by the type of data within the given batch
-        """
-        self.batch = batch
-        self._expectation_suite = expectation_suite
-
-        if isinstance(expectation_engine, dict):
-            expectation_engine = ClassConfig(**expectation_engine)
-
-        if isinstance(expectation_engine, ClassConfig):
-            module_name = expectation_engine.module_name or "great_expectations.dataset"
-            verify_dynamic_loading_support(module_name=module_name)
-            expectation_engine = load_class(
-                class_name=expectation_engine.class_name, module_name=module_name
-            )
-
-        self.expectation_engine = expectation_engine
-
-        if self.expectation_engine is None:
-            # Guess the engine
-            if pd is not None:
-                if isinstance(batch.data, pd.DataFrame):
-                    self.expectation_engine = PandasDataset
-
-        if self.expectation_engine is None:
-            from great_expectations.compatibility import pyspark
-
-            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):  # type: ignore [truthy-function]
-                self.expectation_engine = SparkDFDataset
-
-        if self.expectation_engine is None:
-            raise ValueError(
-                "Unable to identify expectation_engine. It must be a subclass of DataAsset."
-            )
-
-        self.init_kwargs = kwargs
-
-    def get_dataset(self):
-        """
-        Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
-        contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
-        """
-        if self.expectation_engine and issubclass(
-            self.expectation_engine, PandasDataset
-        ):
-            if not isinstance(self.batch["data"], pd.DataFrame):
-                raise ValueError(
-                    "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
-                )
-
-            return self.expectation_engine(
-                self.batch.data,
-                expectation_suite=self._expectation_suite,
-                batch_kwargs=self.batch.batch_kwargs,
-                batch_parameters=self.batch.batch_parameters,
-                batch_markers=self.batch.batch_markers,
-                data_context=self.batch.data_context,
-                **self.init_kwargs,
-                **self.batch.batch_kwargs.get("dataset_options", {}),
-            )
-
-        elif issubclass(self.expectation_engine, SparkDFDataset):
-            from great_expectations.compatibility import pyspark
-
-            if not (
-                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)  # type: ignore [truthy-function]
-            ):
-                raise ValueError(
-                    "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
-                )
-
-            return self.expectation_engine(
-                spark_df=self.batch.data,
-                expectation_suite=self._expectation_suite,
-                batch_kwargs=self.batch.batch_kwargs,
-                batch_parameters=self.batch.batch_parameters,
-                batch_markers=self.batch.batch_markers,
-                data_context=self.batch.data_context,
-                **self.init_kwargs,
-                **self.batch.batch_kwargs.get("dataset_options", {}),
-            )

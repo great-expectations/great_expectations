@@ -298,6 +298,7 @@ class ActionListValidationOperator(ValidationOperator):
             A batch of data
 
         """
+        # BDIRKS - delete conditional
         # if not isinstance(item, (DataAsset, Validator)):
         if isinstance(item, tuple):
             if not (
@@ -305,13 +306,15 @@ class ActionListValidationOperator(ValidationOperator):
                 and isinstance(item[0], dict)
                 and isinstance(item[1], str)
             ):
-                raise ValueError("Unable to build batch from item.")
-            batch = self.data_context._get_batch_v2(
-                batch_kwargs=item[0], expectation_suite_name=item[1]
-            )
-        else:
-            batch = item
+                raise ValueError(
+                    "BDIRKS does this ever appear in tests - previoulsy Unable-to-build-batch-from-item."
+                )
+            else:
+                raise ValueError(
+                    "BDIRKS if this is raised in tests, this is an error. We no longer support DataSets"
+                )
 
+        batch = item
         return batch
 
     def run(  # noqa: PLR0913
