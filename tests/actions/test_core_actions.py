@@ -480,13 +480,12 @@ class MockSMTPServer:
 @pytest.mark.parametrize(
     (
         "class_to_patch,use_tls,use_ssl,sender_login,sender_password,raise_on,exception,expected,"
-        "data_context_parameterized_expectation_suite,"
         "validation_result_suite,validation_result_suite_id"
     ),
     [
-        ("SMTP", False, False, "test", "test", None, None, "success", None, None, None),
-        ("SMTP", True, False, "test", "test", None, None, "success", None, None, None),
-        ("SMTP", False, False, "test", "test", None, None, "success", None, None, None),
+        ("SMTP", False, False, "test", "test", None, None, "success", None, None),
+        ("SMTP", True, False, "test", "test", None, None, "success", None, None),
+        ("SMTP", False, False, "test", "test", None, None, "success", None, None),
         (
             "SMTP_SSL",
             False,
@@ -498,7 +497,6 @@ class MockSMTPServer:
             "success",
             None,
             None,
-            None,
         ),
         (
             "SMTP_SSL",
@@ -508,7 +506,6 @@ class MockSMTPServer:
             "test",
             "__init__",
             smtplib.SMTPConnectError(421, "Can't connect"),
-            None,
             None,
             None,
             None,
@@ -524,7 +521,6 @@ class MockSMTPServer:
             None,
             None,
             None,
-            None,
         ),
         (
             "SMTP",
@@ -534,7 +530,6 @@ class MockSMTPServer:
             "test",
             "login",
             smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
-            None,
             None,
             None,
             None,
@@ -550,11 +545,9 @@ class MockSMTPServer:
             "success",
             None,
             None,
-            None,
         ),
     ],
     indirect=[
-        "data_context_parameterized_expectation_suite",
         "validation_result_suite",
         "validation_result_suite_id",
     ],
