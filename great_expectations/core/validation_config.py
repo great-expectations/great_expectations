@@ -6,6 +6,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Field,
     PrivateAttr,
     ValidationError,
     validator,
@@ -120,9 +121,9 @@ class ValidationConfig(BaseModel):
             BatchConfig: lambda b: _encode_data(b),
         }
 
-    name: str
-    data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
-    suite: ExpectationSuite
+    name: str = Field(allow_mutation=False)
+    data: BatchConfig = Field(allow_mutation=False)
+    suite: ExpectationSuite = Field(allow_mutation=False)
     id: Union[str, None] = None
 
     # private attributes that must be set immediately after instantiation
