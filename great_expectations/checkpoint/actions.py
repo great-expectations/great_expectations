@@ -1,4 +1,5 @@
-"""An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
+"""
+An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
 
 The only requirement from an action is for it to have a take_action method.
 """
