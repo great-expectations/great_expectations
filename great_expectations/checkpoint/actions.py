@@ -938,11 +938,7 @@ def store_validation_results(
         checkpoint_id = checkpoint_identifier.id
 
     expectation_suite_id: Optional[str] = None
-    if (
-        using_cloud_context
-        and expectation_suite_identifier
-        and expectation_suite_identifier is not None
-    ):
+    if isinstance(expectation_suite_identifier, GXCloudIdentifier):
         expectation_suite_id = expectation_suite_identifier.id
 
     run_return_value = validation_result_store.set(
