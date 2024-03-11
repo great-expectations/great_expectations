@@ -953,7 +953,7 @@ class UpdateDataDocsAction(ValidationAction):
 
     def __init__(
         self,
-        site_names: list[str] | str | None = None,
+        site_names: list[str] | None = None,
     ) -> None:
         """
         :param site_names: *optional* List of site names for building data docs

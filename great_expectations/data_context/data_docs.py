@@ -22,7 +22,7 @@ class DataDocsManager:
         root_directory: str | None,
         context: AbstractDataContext,
     ):
-        self._sites = data_docs_sites
+        self._sites = data_docs_sites or {}
         self._root_directory = root_directory
         self._context = context
 
