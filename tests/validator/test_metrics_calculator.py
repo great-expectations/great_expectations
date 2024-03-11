@@ -47,13 +47,33 @@ def integer_and_datetime_sample_dataset() -> dict:
     [
         pytest.param("pandas", marks=pytest.mark.unit),
         pytest.param("sqlite", marks=pytest.mark.sqlite),
-        pytest.param("spark", marks=pytest.mark.spark),
     ],
 )
 def test_column_partition_metric(
     sa,
     in_memory_runtime_context,
+    integer_and_datetime_sample_dataset: dict,
+    backend: str,
+):
+    _test_column_partition_metric(
+        sa, in_memory_runtime_context, integer_and_datetime_sample_dataset, backend
+    )
+
+
+def test_column_partition_metric_for_spark(
+    sa,
+    in_memory_runtime_context,
+    integer_and_datetime_sample_dataset: dict,
     spark_session,
+):
+    _test_column_partition_metric(
+        sa, in_memory_runtime_context, integer_and_datetime_sample_dataset, "spark"
+    )
+
+
+def _test_column_partition_metric(
+    sa,
+    in_memory_runtime_context,
     integer_and_datetime_sample_dataset: dict,
     backend: str,
 ):
