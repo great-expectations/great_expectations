@@ -76,6 +76,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
+from great_expectations.data_context.data_docs import DataDocsManager
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
@@ -295,6 +296,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._init_factories()
+
+        self._docs_manager = DataDocsManager(
+            data_docs_sites=self.variables.data_docs_sites,
+            root_directory=self.root_directory,
+            context=self,
+        )
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
@@ -3954,85 +3961,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ClassInstantiationError: Site config in your Data Context config is not valid.
         """
-        return self._build_data_docs(
+        return self._docs_manager.build_data_docs(
             site_names=site_names,
             resource_identifiers=resource_identifiers,
             dry_run=dry_run,
             build_index=build_index,
         )
-
-    def _build_data_docs(
-        self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
-        build_index: bool = True,
-    ):
-        logger.debug("Starting DataContext.build_data_docs")
-
-        index_page_locator_infos = {}
-
-        sites = self.variables.data_docs_sites
-        if sites:
-            logger.debug("Found data_docs_sites. Building sites...")
-
-            for site_name, site_config in sites.items():
-                logger.debug(
-                    f"Building Data Docs Site {site_name}",
-                )
-
-                if (site_names and (site_name in site_names)) or not site_names:
-                    complete_site_config = site_config
-                    module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder: SiteBuilder = (
-                        self._init_site_builder_for_data_docs_site_creation(
-                            site_name=site_name,
-                            site_config=site_config,
-                        )
-                    )
-                    if not site_builder:
-                        raise gx_exceptions.ClassInstantiationError(
-                            module_name=module_name,
-                            package_name=None,
-                            class_name=complete_site_config["class_name"],
-                        )
-                    if dry_run:
-                        index_page_locator_infos[site_name] = (
-                            site_builder.get_resource_url(only_if_exists=False)
-                        )
-                    else:
-                        index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers,
-                            build_index=build_index,
-                        )
-                        if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[site_name] = (
-                                index_page_resource_identifier_tuple[0]
-                            )
-
-        else:
-            logger.debug("No data_docs_config found. No site(s) built.")
-
-        return index_page_locator_infos
-
-    def _init_site_builder_for_data_docs_site_creation(
-        self,
-        site_name: str,
-        site_config: dict,
-    ) -> SiteBuilder:
-        site_builder: SiteBuilder = instantiate_class_from_config(
-            config=site_config,
-            runtime_environment={
-                "data_context": self,
-                "root_directory": self.root_directory,
-                "site_name": site_name,
-            },
-            config_defaults={
-                "class_name": "SiteBuilder",
-                "module_name": "great_expectations.render.renderer.site_builder",
-            },
-        )
-        return site_builder
 
     @public_api
     @new_method_or_class(version="0.16.15")
