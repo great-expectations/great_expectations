@@ -831,6 +831,7 @@ class StoreValidationResultAction(ValidationAction):
         from great_expectations import project_manager
 
         self.target_store = project_manager.get_validations_store()
+        self._using_cloud_context = project_manager.is_using_cloud()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
