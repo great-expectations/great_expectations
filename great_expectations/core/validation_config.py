@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
@@ -16,11 +17,15 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.validation_config_store import (
     ValidationConfigStore,  # noqa: TCH001
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
@@ -236,7 +241,7 @@ class ValidationConfig(BaseModel):
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
-        # run_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        run_time = datetime.datetime.now(tz=datetime.timezone.utc)
         validator = Validator(
             batch_config=self.data,
             batch_request_options=batch_config_options,
@@ -245,10 +250,33 @@ class ValidationConfig(BaseModel):
         results = validator.validate_expectation_suite(
             self.suite, evaluation_parameters
         )
+
+        expectation_suite_identifier: GXCloudIdentifier | ExpectationSuiteIdentifier
+        validation_result_id: GXCloudIdentifier | ValidationResultIdentifier
+
+        if self._validation_results_store.cloud_mode:
+            expectation_suite_identifier = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                id=self.suite.id,
+            )
+            validation_result_id = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.VALIDATION_RESULT
+            )
+        else:
+            run_id = RunIdentifier(run_time=run_time)
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                name=self.suite.name
+            )
+            validation_result_id = ValidationResultIdentifier(
+                batch_identifier=validator.active_batch_id,
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_id,
+            )
+
         store_validation_results(
-            self._validation_results_store,
-            results,
-            None,  # type: ignore
+            validation_result_store=self._validation_results_store,
+            suite_validation_result=results,
+            suite_validation_result_identifier=validation_result_id,
             expectation_suite_identifier=ExpectationSuiteIdentifier(self.suite.name),
         )
 

@@ -922,11 +922,11 @@ class StoreValidationResultAction(ValidationAction):
 
 def store_validation_results(
     validation_result_store: ValidationsStore,
-    validation_result_suite: ExpectationSuiteValidationResult,
-    validation_result_suite_identifier: Union[
-        ValidationResultIdentifier, GXCloudIdentifier
-    ],
-    expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+    suite_validation_result: ExpectationSuiteValidationResult,
+    suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
+    expectation_suite_identifier: Optional[
+        ExpectationSuiteIdentifier | GXCloudIdentifier
+    ] = None,
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
 ) -> Any:
     """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
@@ -946,19 +946,19 @@ def store_validation_results(
         expectation_suite_id = expectation_suite_identifier.id
 
     run_return_value = validation_result_store.set(
-        validation_result_suite_identifier,
-        validation_result_suite,
+        suite_validation_result_identifier,
+        suite_validation_result,
         checkpoint_id=checkpoint_id,
         expectation_suite_id=expectation_suite_id,
     )
     if (
         using_cloud_context
         and isinstance(run_return_value, GXCloudResourceRef)
-        and isinstance(validation_result_suite_identifier, GXCloudIdentifier)
+        and isinstance(suite_validation_result_identifier, GXCloudIdentifier)
     ):
-        new_id = validation_result_suite_identifier.id
+        new_id = suite_validation_result_identifier.id
         assert new_id is not None
-        validation_result_suite_identifier.id = new_id
+        suite_validation_result_identifier.id = new_id
     return run_return_value
 
 
