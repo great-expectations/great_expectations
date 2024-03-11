@@ -71,10 +71,6 @@ def run_checkpoint_and_data_doc(
                 action=ActionDetails(class_name="StoreValidationResultAction"),
             ),
             ActionDict(
-                name="store_evaluation_params",
-                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
-            ),
-            ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(class_name="UpdateDataDocsAction"),
             ),

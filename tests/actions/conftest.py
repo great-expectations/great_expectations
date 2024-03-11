@@ -45,13 +45,6 @@ def basic_data_context_config_for_validation_operator():
                             "target_store_name": "validation_result_store",
                         },
                     },
-                    {
-                        "name": "extract_and_store_eval_parameters",
-                        "action": {
-                            "class_name": "StoreEvaluationParametersAction",
-                            "target_store_name": "evaluation_parameter_store",
-                        },
-                    },
                 ],
             },
             "errors_and_warnings_validation_operator": {
@@ -62,13 +55,6 @@ def basic_data_context_config_for_validation_operator():
                         "action": {
                             "class_name": "StoreValidationResultAction",
                             "target_store_name": "validation_result_store",
-                        },
-                    },
-                    {
-                        "name": "extract_and_store_eval_parameters",
-                        "action": {
-                            "class_name": "StoreEvaluationParametersAction",
-                            "target_store_name": "evaluation_parameter_store",
                         },
                     },
                 ],

@@ -36,7 +36,7 @@ Data Sources do not modify your data during profiling or validation, but they ma
 
 ## Create and access
 
-Data Sources can be created and accessed using Python code, which can be executed from a script, a Python console, or a Jupyter Notebook. To access a Data Source all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Data Source. The below snippet shows how to create a Pandas Data Source for local files:
+Data Sources can be created and accessed using Python code, which can be executed from a script, a Python console, or a Python interpreter. To access a Data Source all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Data Source. The below snippet shows how to create a Pandas Data Source for local files:
 
 ```python title="Python" name="docs/docusaurus/docs/snippets/connect_to_your_data_overview add_datasource"
 ```

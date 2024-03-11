@@ -28,9 +28,9 @@ Data Assistants leverage the ability to process multiple Batches from a single B
 
 ## Visual plots for Metrics
 
-When working in a Jupyter Notebook you can use the `plot_metrics()` method of a Data Assistant's result object to generate a visual representation of your Expectations, the values that were assigned to their parameters, and the Metrics that informed those values.  This assists in exploratory data analysis and fine-tuning your Expectations, while providing complete transparency into the information used by the Data Assistant to build your Expectations.
+When working in a Python interpreter you can use the `plot_metrics()` method of a Data Assistant's result object to generate a visual representation of your Expectations, the values that were assigned to their parameters, and the Metrics that informed those values.  This assists in exploratory data analysis and fine-tuning your Expectations, while providing complete transparency into the information used by the Data Assistant to build your Expectations.
 
-Data Assistants can be accessed from your Data Context. To select a Data Assistant in a Jupyter Notebook, enter `context.assistants.` and use code completion.  All Data Assistants have a `run(...)` method that takes in a Batch Request and numerous optional parameters, and then loads the results into an Expectation Suite for future use.
+Data Assistants can be accessed from your Data Context. To select a Data Assistant in a Python interpreter, enter `context.assistants.` and use code completion.  All Data Assistants have a `run(...)` method that takes in a Batch Request and numerous optional parameters, and then loads the results into an Expectation Suite for future use.
 
 ## Configure
 

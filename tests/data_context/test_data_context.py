@@ -1164,12 +1164,6 @@ def test_run_checkpoint_new_style(
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1450,10 +1444,6 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
             {
                 "name": "store_validation_result",
                 "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
             },
             {
                 "name": "update_data_docs",

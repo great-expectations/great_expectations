@@ -376,12 +376,6 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -497,12 +491,6 @@ def test_spark_happy_path_growth_numeric_data_assistant(
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -611,12 +599,6 @@ def test_sql_happy_path_growth_numeric_data_assistant(
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {

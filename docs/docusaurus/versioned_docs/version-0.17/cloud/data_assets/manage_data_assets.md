@@ -97,22 +97,22 @@ The following table lists the available Data Asset metrics.
 
 ## Edit a Data Asset
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. Run the following code to import the `great_expectations` module and the existing Data Context:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     import great_expectations as gx
     context = gx.get_context()
     ```
 
 2. Run the following code to retrieve the Data Source:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     datasource = context.get_datasource("<data_source_name>")
     ```
 
 3. Edit the Data Asset settings. For example, run the following code to change the name of the Data Source:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     datasource.name = "<new_data_source_name>"
     ```
 
@@ -120,7 +120,7 @@ The following table lists the available Data Asset metrics.
 
  4. Run the following code to save your changes:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     context.sources.update_snowflake(datasource)
     ```
 

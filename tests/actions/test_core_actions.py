@@ -664,45 +664,6 @@ def test_api_action_run(
     assert response == "Successfully Posted results to API, status code - 200"
 
 
-# def test_ExtractAndStoreEvaluationParamsAction():
-#     fake_in_memory_store = ValidationsStore(
-#         root_directory = None,
-#         store_backend = {
-#             "class_name": "InMemoryStoreBackend",
-#         }
-#     )
-#     stores = {
-#         "fake_in_memory_store" : fake_in_memory_store
-#     }
-#
-#     # NOTE: This is a hack meant to last until we implement runtime_environments
-#     class Object(object):
-#         pass
-#
-#     data_context = Object()
-#     data_context.stores = stores
-#
-#     action = StoreValidationResultAction(
-#         data_context = data_context,
-#         target_store_name = "fake_in_memory_store",
-#     )
-#     assert fake_in_memory_store.list_keys() == []
-#
-#     vr_id = "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
-#     action.run(
-#         validation_result_suite_id=ValidationResultIdentifier(from_string=vr_id),
-#         validation_result_suite={},
-#         data_asset=None
-#     )
-#
-#     assert len(fake_in_memory_store.list_keys()) == 1
-#     assert fake_in_memory_store.list_keys()[0].to_string() == "ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
-#     assert fake_in_memory_store.get(ValidationResultIdentifier(
-#         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
-#     )) == {}
-#
-
-
 @pytest.mark.cloud
 def test_cloud_sns_notification_action(
     sns,

@@ -3,13 +3,14 @@ title: Install and set up Azure Blob Storage support
 ---
 import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
 
-Azure Blob Storage allows users to store unstructured data on Microsoft's cloud data storage platform.  With the installation of some additional Python libraries and the provision of a connection string, you will be able to use Great Expectations (GX) alongside data kept in Azure Blob Storge.
+Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with Great Expectations (GX) you install additional Python libraries and define a connection string.
 
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
 - (Recommended) [A Python virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment).
-- An [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage). A [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) is required to complete the setup.
+- An [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage). 
+- [Azure storage account access keys](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 
 ## Installation
   

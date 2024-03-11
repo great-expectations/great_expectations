@@ -326,26 +326,19 @@ fluent_datasources = [
         backend_dependencies=[],
     ),
     # IntegrationTestFixture(
-    #     name="how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
-    #     backend_dependencies=[],
-    # ),
-    # IntegrationTestFixture(
     #     name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[],
     # ),
-    IntegrationTestFixture(
-        name="rule_base_profiler_multi_batch_example",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
+    # IntegrationTestFixture(
+    #     name="rule_base_profiler_multi_batch_example",
+    #     data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    #     backend_dependencies=[BackendDependencies.PANDAS],
+    # ),
     IntegrationTestFixture(
         name="glossary_batch_request",
         data_context_dir=None,
