@@ -206,7 +206,7 @@ def test_partition_on_date_parts_multiple_date_parts(
     ],
 )
 def test_named_date_part_methods(
-    mock_partition_on_date_parts: mock.MagicMock,
+    mock_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
     partitioner_method_name: str,
     called_with_date_parts: List[DatePart],
     simple_multi_year_spark_df: pyspark.DataFrame,

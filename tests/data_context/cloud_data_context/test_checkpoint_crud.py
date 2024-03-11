@@ -788,7 +788,7 @@ def test_list_checkpoints(
     checkpoint_name_2, checkpoint_id_2 = checkpoint_2
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
+        mock_get.return_value = mock.Mock(  # noqa: TID251
             status_code=200, json=lambda: mock_get_all_checkpoints_json
         )
         checkpoints = context.list_checkpoints()

@@ -1,8 +1,7 @@
 import json
-from unittest import mock
-from unittest.mock import Mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -24,9 +23,9 @@ from great_expectations.exceptions import DataContextError
 
 
 @pytest.fixture
-def validation_config() -> ValidationConfig:
-    data = Mock(spec=BatchConfig)
-    suite = Mock(spec=ExpectationSuite)
+def validation_config(mocker: MockerFixture) -> ValidationConfig:
+    data = mocker.Mock(spec=BatchConfig)
+    suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationConfig(
         name="test-validation",
         data=data,
@@ -63,10 +62,12 @@ def validation_config_json(validation_config: ValidationConfig) -> str:
 
 
 @pytest.mark.unit
-def test_validation_factory_get_uses_store_get(validation_config: ValidationConfig):
+def test_validation_factory_get_uses_store_get(
+    mocker: MockerFixture, validation_config: ValidationConfig
+):
     # Arrange
     name = validation_config.name
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     store.get.return_value = validation_config
@@ -82,11 +83,12 @@ def test_validation_factory_get_uses_store_get(validation_config: ValidationConf
 
 @pytest.mark.unit
 def test_validation_factory_get_raises_error_on_missing_key(
+    mocker: MockerFixture,
     validation_config: ValidationConfig,
 ):
     # Arrange
     name = validation_config.name
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = False
     store.get.return_value = validation_config
     factory = ValidationFactory(store=store)
@@ -102,9 +104,11 @@ def test_validation_factory_get_raises_error_on_missing_key(
 
 
 @pytest.mark.unit
-def test_validation_factory_add_uses_store_add(validation_config: ValidationConfig):
+def test_validation_factory_add_uses_store_add(
+    mocker: MockerFixture, validation_config: ValidationConfig
+):
     # Arrange
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
     factory = ValidationFactory(store=store)
@@ -119,11 +123,12 @@ def test_validation_factory_add_uses_store_add(validation_config: ValidationConf
 
 @pytest.mark.unit
 def test_validation_factory_add_raises_for_duplicate_key(
+    mocker: MockerFixture,
     validation_config: ValidationConfig,
 ):
     # Arrange
     name = validation_config.name
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = True
     factory = ValidationFactory(store=store)
 
@@ -140,10 +145,11 @@ def test_validation_factory_add_raises_for_duplicate_key(
 
 @pytest.mark.unit
 def test_validation_factory_delete_uses_store_remove_key(
+    mocker: MockerFixture,
     validation_config: ValidationConfig,
 ):
     # Arrange
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     factory = ValidationFactory(store=store)
@@ -159,11 +165,12 @@ def test_validation_factory_delete_uses_store_remove_key(
 
 @pytest.mark.unit
 def test_validation_factory_delete_raises_for_missing_validation(
+    mocker: MockerFixture,
     validation_config: ValidationConfig,
 ):
     # Arrange
     name = validation_config.name
-    store = Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationConfigStore)
     store.has_key.return_value = False
     factory = ValidationFactory(store=store)
 
@@ -197,8 +204,10 @@ def test_validation_factory_add_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_add_success(
+        mocker=mocker,
         context=empty_data_context,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -210,8 +219,10 @@ def test_validation_factory_add_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_add_success(
+        mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -219,6 +230,7 @@ def test_validation_factory_add_success_cloud(
 
 
 def _test_validation_factory_add_success(
+    mocker: MockerFixture,
     context: AbstractDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
@@ -231,7 +243,7 @@ def _test_validation_factory_add_success(
         context.validations.get(name)
 
     # Act
-    with mock.patch.object(
+    with mocker.patch.object(
         ValidationConfig, "json", return_value=validation_config_json
     ):
         created_validation = context.validations.add(validation=validation_config)
@@ -248,8 +260,10 @@ def test_validation_factory_delete_success_filesystem(
     empty_data_context: FileDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_delete_success(
+        mocker=mocker,
         context=empty_data_context,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -261,8 +275,10 @@ def test_validation_factory_delete_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
+    mocker: MockerFixture,
 ):
     _test_validation_factory_delete_success(
+        mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_config=validation_config,
         validation_config_json=validation_config_json,
@@ -270,6 +286,7 @@ def test_validation_factory_delete_success_cloud(
 
 
 def _test_validation_factory_delete_success(
+    mocker: MockerFixture,
     context: AbstractDataContext,
     validation_config: ValidationConfig,
     validation_config_json: str,
@@ -277,7 +294,7 @@ def _test_validation_factory_delete_success(
     # Arrange
     name = validation_config.name
 
-    with mock.patch.object(
+    with mocker.patch.object(
         ValidationConfig, "json", return_value=validation_config_json
     ):
         validation_config = context.validations.add(validation=validation_config)

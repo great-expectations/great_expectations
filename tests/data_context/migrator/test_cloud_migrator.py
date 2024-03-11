@@ -36,7 +36,7 @@ def migrator_factory(
 def migrator_with_mock_context(
     migrator_factory: Callable,
 ) -> CloudMigrator:
-    return migrator_factory(context=mock.MagicMock)
+    return migrator_factory(context=mock.MagicMock)  # noqa: TID251
 
 
 @pytest.fixture
@@ -53,8 +53,8 @@ def mock_successful_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,
@@ -83,8 +83,8 @@ def mock_failed_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,

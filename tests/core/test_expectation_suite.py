@@ -5,7 +5,7 @@ import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest import mock
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock  # noqa: TID251
 from uuid import UUID, uuid4
 
 import pytest
