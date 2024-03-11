@@ -834,7 +834,6 @@ class StoreValidationResultAction(ValidationAction):
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:

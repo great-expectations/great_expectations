@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Literal,
     Mapping,
@@ -153,11 +154,11 @@ class ProjectManager:
 
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
         dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
@@ -173,11 +174,11 @@ class ProjectManager:
 
     def get_docs_sites_urls(
         self,
-        resource_identifier=None,
+        resource_identifier: Any | None = None,
         site_name: str | None = None,
         only_if_exists: bool = True,
         site_names: list[str] | None = None,
-    ):
+    ) -> list[dict[str, str]]:
         if not self._project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
