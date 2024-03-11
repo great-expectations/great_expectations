@@ -41,18 +41,13 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
 
 @public_api
 class ValidationAction:
-    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
-
-    Args:
-        data_context: Data Context that is used by the Action.
-    """
+    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure."""
 
     @public_api
     def run(  # noqa: PLR0913
@@ -331,23 +326,20 @@ class PagerdutyAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Events API v2 key for pagerduty.
         routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
         severity: str = "critical",
     ) -> None:
         """Create a PagerdutyAlertAction"""
-        super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
         self.api_key = api_key
@@ -437,7 +429,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
             ```python
             {
@@ -451,13 +442,11 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
     ) -> None:
         """Create a MicrosoftTeamsNotificationAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -551,7 +540,6 @@ class OpsgenieAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Opsgenie API key.
         region: Specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set.
         priority: Specifies the priority of the alert (P1 - P5).
@@ -561,7 +549,6 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -570,7 +557,6 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Optional[list[str]] = None,
     ) -> None:
         """Create an OpsgenieAlertAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -680,7 +666,6 @@ class EmailAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate an email, for example:
             ```python
             {
@@ -702,7 +687,6 @@ class EmailAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -716,7 +700,6 @@ class EmailAction(ValidationAction):
         notify_with: Optional[list[str]] = None,
     ) -> None:
         """Create an EmailAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -839,22 +822,15 @@ class StoreValidationResultAction(ValidationAction):
           target_store_name: validations_store
         ```
     Args:
-        data_context: GX Data Context.
         target_store_name: The name of the store where the actions will store the validation result.
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
-    def __init__(
-        self,
-        data_context: AbstractDataContext,
-        target_store_name: Optional[str] = None,
-    ) -> None:
-        super().__init__(data_context)
-        if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
-        else:
-            self.target_store = data_context.stores[target_store_name]
+    def __init__(self) -> None:
+        from great_expectations import project_manager
+
+        self.target_store = project_manager.get_validations_store()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1043,25 +1019,21 @@ class SNSNotificationAction(ValidationAction):
           class_name: SNSNotificationAction
           # put the actual SNS Arn in the uncommitted/config_variables.yml file
           # or pass in as environment variable
-          data_context:
           sns_topic_arn:
           sns_subject:
         ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         sns_topic_arn: The SNS Arn to publish messages to.
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
         """Inits SNSNotificationAction."""
-        super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
@@ -1103,8 +1075,7 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, data_context, url) -> None:
-        super().__init__(data_context)
+    def __init__(self, url) -> None:
         self.url = url
 
     @override
