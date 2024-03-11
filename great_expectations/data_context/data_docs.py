@@ -157,3 +157,45 @@ class DataDocsManager:
                 class_name=site_config["class_name"],
             )
         return site_builder
+
+    def clean_data_docs(self, site_name: str | None = None) -> bool:
+        data_docs_sites = self._sites
+        if not data_docs_sites:
+            raise gx_exceptions.DataContextError(
+                "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
+            )
+
+        data_docs_site_names = list(data_docs_sites.keys())
+        if site_name:
+            if site_name not in data_docs_site_names:
+                raise gx_exceptions.DataContextError(
+                    f"The specified site name `{site_name}` does not exist in this project."
+                )
+            return self._clean_data_docs_site(site_name)
+
+        cleaned = []
+        for existing_site_name in data_docs_site_names:
+            cleaned.append(self._clean_data_docs_site(existing_site_name))
+        return all(cleaned)
+
+    def _clean_data_docs_site(self, site_name: str) -> bool:
+        sites = self._sites
+        if not sites:
+            return False
+        site_config = sites.get(site_name)
+
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self._context,
+                "root_directory": self._root_directory,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        site_builder.clean_site()
+        return True
+
+    def get_site_names(self) -> list[str]:
+        return list(self._sites.keys())  # type: ignore[union-attr]

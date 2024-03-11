@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
+    from great_expectations.data_context.data_docs import DataDocsManager
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
@@ -139,6 +140,14 @@ class ProjectManager:
                 + "Please call `great_expectations.get_context()` first, then try your action again."
             )
         return self._project.get_validator(batch_request=batch_request)
+
+    def get_docs_manager(self) -> DataDocsManager:
+        if not self._project:
+            raise RuntimeError(
+                "This action requires an active DataContext. "
+                + "Please call `great_expectations.get_context()` first, then try your action again."
+            )
+        return self._project.docs_manager
 
     def _build_context(  # noqa: PLR0913
         self,

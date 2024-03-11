@@ -168,7 +168,6 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
-    from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
@@ -1018,7 +1017,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
+        return self._docs_manager.get_site_names()
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -2852,59 +2851,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = self.variables.data_docs_sites
-
-        # Filter out sites that are not in site_names
-        sites = (
-            {k: v for k, v in unfiltered_sites.items() if k in site_names}  # type: ignore[union-attr]
-            if site_names
-            else unfiltered_sites
+        return self._docs_manager.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+            site_names=site_names,
         )
-
-        if not sites:
-            logger.debug("Found no data_docs_sites.")
-            return []
-        logger.debug(f"Found {len(sites)} data_docs_sites.")
-
-        if site_name:
-            if site_name not in sites.keys():
-                raise gx_exceptions.DataContextError(
-                    f"Could not find site named {site_name}. Please check your configurations"
-                )
-            site = sites[site_name]
-            site_builder = self._load_site_builder_from_site_config(site)
-            url = site_builder.get_resource_url(
-                resource_identifier=resource_identifier, only_if_exists=only_if_exists
-            )
-            return [{"site_name": site_name, "site_url": url}]
-
-        site_urls = []
-        for _site_name, site_config in sites.items():
-            site_builder = self._load_site_builder_from_site_config(site_config)
-            url = site_builder.get_resource_url(
-                resource_identifier=resource_identifier, only_if_exists=only_if_exists
-            )
-            site_urls.append({"site_name": _site_name, "site_url": url})
-
-        return site_urls
-
-    def _load_site_builder_from_site_config(self, site_config) -> SiteBuilder:
-        default_module_name = "great_expectations.render.renderer.site_builder"
-        site_builder = instantiate_class_from_config(
-            config=site_config,
-            runtime_environment={
-                "data_context": self,
-                "root_directory": self.root_directory,
-            },
-            config_defaults={"module_name": default_module_name},
-        )
-        if not site_builder:
-            raise gx_exceptions.ClassInstantiationError(
-                module_name=default_module_name,
-                package_name=None,
-                class_name=site_config["class_name"],
-            )
-        return site_builder
 
     def clean_data_docs(self, site_name=None) -> bool:
         """
@@ -2916,43 +2868,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        data_docs_sites = self.variables.data_docs_sites
-        if not data_docs_sites:
-            raise gx_exceptions.DataContextError(
-                "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
-            )
-
-        data_docs_site_names = list(data_docs_sites.keys())
-        if site_name:
-            if site_name not in data_docs_site_names:
-                raise gx_exceptions.DataContextError(
-                    f"The specified site name `{site_name}` does not exist in this project."
-                )
-            return self._clean_data_docs_site(site_name)
-
-        cleaned = []
-        for existing_site_name in data_docs_site_names:
-            cleaned.append(self._clean_data_docs_site(existing_site_name))
-        return all(cleaned)
-
-    def _clean_data_docs_site(self, site_name: str) -> bool:
-        sites = self.variables.data_docs_sites
-        if not sites:
-            return False
-        site_config = sites.get(site_name)
-
-        site_builder = instantiate_class_from_config(
-            config=site_config,
-            runtime_environment={
-                "data_context": self,
-                "root_directory": self.root_directory,
-            },
-            config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
-            },
-        )
-        site_builder.clean_site()
-        return True
+        return self._docs_manager.clean_data_docs(site_name=site_name)
 
     @staticmethod
     def _get_global_config_value(
