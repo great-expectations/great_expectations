@@ -78,7 +78,7 @@ class TypeLookup(
             msg = f"{key} was not found."
             if isinstance(key, str):
                 msg = f"type {msg} Available types are: {', '.join(self.type_names())}"
-            raise LookupError(msg) from key_err
+            raise KeyError(msg) from key_err
 
     @override
     def __delitem__(self, key: ValidTypes):
