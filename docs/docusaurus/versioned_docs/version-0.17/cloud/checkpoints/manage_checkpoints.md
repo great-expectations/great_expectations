@@ -18,27 +18,27 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 ## Add a Checkpoint
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. Run the following code to import the `great_expectations` module and the existing Data Context:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     import great_expectations as gx
     context = gx.get_context()
     ```
 2. Run the following code to retrieve the Expectation Suite:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     expectation_suite = context.get_expectation_suite(expectation_suite_name=<expectation_name>)
     ```
 
 3. Run the following code to assign a name to the Checkpoint:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint_name = <checkpoint_name> 
     ```
 
 4. Run the following code to define the Checkpoint configuration including the Data Source and Data Asset names:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint_config = {
         "name": checkpoint_name,
         "validations": [{
@@ -53,19 +53,19 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
     ```
 5. Run the following code to add the Checkpoint:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 
 6. Optional. Run the following code to confirm the Checkpoint name:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     print(checkpoint) 
     ```
 
 7. Optional. Run the following code to run the Checkpoint:
     
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     result = checkpoint.run() 
     ```
 
@@ -82,22 +82,22 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 ## Edit a Checkpoint configuration
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. Run the following code to import the `great_expectations` module and the existing Data Context:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     import great_expectations as gx
     context = gx.get_context()
     ```
 2. Run the following Python code to retrieve the Checkpoint:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     retrieved_checkpoint = context.get_checkpoint(name="<checkpoint_name>") 
     ```
 3. Edit the Checkpoint configuration. 
 
 4. Run the following code to update the Checkpoint configuration:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 

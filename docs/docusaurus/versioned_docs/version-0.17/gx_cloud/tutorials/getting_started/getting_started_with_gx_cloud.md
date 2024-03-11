@@ -44,7 +44,7 @@ Any Python Interpreter or script file will work for the remaining steps in the g
 
 Switch to Jupyter Notebook and import modules we're going to use in this tutorial.
 
-```python title="Jupyter Notebook"
+```python title="Python"
 import great_expectations as gx
 import pandas as pd
 import os
@@ -58,7 +58,7 @@ Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTa
 Please note that access tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
 :::
 
-```python title="Jupyter Notebook"
+```python title="Python"
 os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
 # your organization_id is indicated on https://app.greatexpectations.io/tokens page
 os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
@@ -75,7 +75,7 @@ In case you don't have some data handy to test in this guide, we can use the [NY
 Please note you should not include sensitive info/credentials directly in the config while connecting to your Data Source, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
 :::
 
-```python title="Jupyter Notebook"
+```python title="Python"
 # Give your datasource a name
 datasource_name = None
 datasource = context.sources.add_pandas(datasource_name)
@@ -99,7 +99,7 @@ In case you need more details on how to connect to your specific data system, we
 
 An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collection of verifiable assertions about data. Run this snippet to create a new, empty <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
 
-```python title="Jupyter Notebook"
+```python title="Python"
 expectation_suite_name = None
 assert expectation_suite_name is not None, "Please set expectation_suite_name."
 
@@ -112,7 +112,7 @@ expectation_suite = context.add_expectation_suite(
 
 Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expectation"/> to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> you just created:
 
-```python title="Jupyter Notebook"
+```python title="Python"
 # Get an existing Expectation Suite
 expectation_suite_id = expectation_suite.ge_cloud_id
 expectation_suite = context.get_expectation_suite(ge_cloud_id=expectation_suite_id)
@@ -149,7 +149,7 @@ Now that we have connected to data and defined an <TechnicalTag tag="expectation
 
 Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
 
-```python title="Jupyter Notebook"
+```python title="Python"
 checkpoint_name = None # name your checkpoint here
 assert checkpoint_name is not None, "Please set checkpoint_name."
 
@@ -196,7 +196,7 @@ Add the `send_slack_notification_on_validation_result` Action to the <TechnicalT
 
 #### Webhook config
 
-```python title="Jupyter Notebook"
+```python title="Python"
 slack_webhook = None # put the actual webhook URL
 assert slack_webhook is not None, "Please set slack_webhook."
 
@@ -237,7 +237,7 @@ checkpoint_config = {
 
 #### Slack bot config
 
-```python title="Jupyter Notebook"
+```python title="Python"
 bot_token = None # put the actual bot token
 assert bot_token is not None, "Please set bot_token."
 channel_name = None # put the actual Slack channel name
