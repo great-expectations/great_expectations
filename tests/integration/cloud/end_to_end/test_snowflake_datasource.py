@@ -40,7 +40,7 @@ def datasource(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    updated_connection_string = f"{datasource.connection_string}&numpy=true"
+    updated_connection_string = f"{datasource.connection_string}&numpy=True"
 
     datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
