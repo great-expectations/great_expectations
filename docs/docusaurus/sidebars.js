@@ -33,22 +33,22 @@ module.exports = {
             {
               type: 'link',
               label: 'Amazon S3',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies/additional_dependencies?dependencies=amazon',
             },
             {
               type: 'link',
               label: 'Microsoft Azure Blob Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies/additional_dependencies?dependencies=azure',
             },
             {
               type: 'link',
               label: 'Google Cloud Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies/additional_dependencies?dependencies=gcs',
             },
             {
               type: 'link',
               label: 'SQL Databases',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies/additional_dependencies?dependencies=sql',
             },
           ]
         },
