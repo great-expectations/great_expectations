@@ -48,7 +48,7 @@ module.exports = {
             {
               type: 'doc',
               id: 'core/installation_and_setup/additional_dependencies/sql_data_sources',
-              label: '🚧 SQL Data Sources'
+              label: 'SQL Data Sources'
             },
           ]
         },
