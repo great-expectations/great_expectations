@@ -8,8 +8,6 @@ import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_
 
 Some environments and Data Sources require additional Python libraries or third party utilities that are not included in the base installation of GX Core. Use the information provided here to install the necessary dependencies for Amazon S3, Azure Blob Storage, Google Cloud Storage, and SQL Data Sources.
 
-## Install dependencies
-
 <Tabs
   queryString="dependencies"
   groupId="install-dependencies"
@@ -26,9 +24,9 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
 
 ## Prerequisites
 
-- Install the AWS CLI.  See the official AWS documentation [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) for guidance.
+- The AWS CLI. See [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
-- Configure your AWS credentials.  See the offical AWS documentation [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) for guidance.
+- AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
 
 ## Installation
 
@@ -38,7 +36,7 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
   aws --version
   ```
 
-  If this command does not respond by informing you of the version information of the AWS CLI, you may need to install the AWS CLI or otherwise troubleshoot your current installation.  For detailed guidance on how to do this, please refer to [Amazon's documentation on how to install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
+  If this command does not return AWS CLI version information, reinstall or update the AWS CLI.  See [Install or update to the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
 2. Verify that your AWS credentials are properly configured by running the command:
 
@@ -66,10 +64,11 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
 
   This will install Great Expectations along with the requirements for the `boto3` Python library.
 
-  </TabItem>
-  <TabItem value="azure">
 
-  Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with Great Expectations (GX) you install additional Python libraries and define a connection string.
+</TabItem>
+<TabItem value="azure">
+
+Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with Great Expectations (GX) you install additional Python libraries and define a connection string.
 
 ## Prerequisites
 
@@ -110,10 +109,10 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
   
   :::
 
-  </TabItem>
-  <TabItem value="gcs">
+</TabItem>
+<TabItem value="gcs">
 
-  To validate Google Cloud Platform (GCP) data with GX Core, you create your GX Python environment, install GX Core locally, and then configure the necessary dependencies.
+To validate Google Cloud Platform (GCP) data with GX Core, you create your GX Python environment, install GX Core locally, and then configure the necessary dependencies.
 
 ## Prerequisites
 
