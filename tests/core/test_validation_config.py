@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -33,6 +34,9 @@ from great_expectations.validator.v1_validator import (
     ResultFormat,
 )
 
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
 
 @pytest.fixture
 def ephemeral_context():
@@ -56,14 +60,16 @@ def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConf
 
 class TestValidationRun:
     @pytest.fixture
-    def mock_validator(self):
+    def mock_validator(self, mocker: MockerFixture):
         """Set up our ProjectManager to return a mock Validator"""
         with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:
             with mock.patch.object(OldValidator, "graph_validate"):
                 gx.get_context()
-                mock_validator = OldValidator(
-                    execution_engine=mock.MagicMock(spec=ExecutionEngine)  # noqa: TID251
+                mock_execution_engine = mocker.MagicMock(
+                    spec=ExecutionEngine,
+                    batch_manager=mocker.MagicMock(active_batch_id="my_batch_id"),
                 )
+                mock_validator = OldValidator(execution_engine=mock_execution_engine)
                 mock_get_validator.return_value = mock_validator
 
                 yield mock_validator
