@@ -35,6 +35,8 @@ from great_expectations.validator.v1_validator import (
 )
 
 if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
     from pytest_mock import MockerFixture
 
 
@@ -77,7 +79,7 @@ class TestValidationRun:
     @pytest.mark.unit
     def test_passes_simple_data_to_validator(
         self,
-        mock_validator: mock.MagicMock,  # noqa: TID251
+        mock_validator: MagicMock,
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
@@ -104,7 +106,7 @@ class TestValidationRun:
     def test_passes_complex_data_to_validator(
         self,
         mock_build_batch_request,
-        mock_validator: mock.MagicMock,  # noqa: TID251
+        mock_validator: MagicMock,
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
@@ -135,7 +137,7 @@ class TestValidationRun:
     @pytest.mark.unit
     def test_returns_expected_data(
         self,
-        mock_validator: mock.MagicMock,  # noqa: TID251
+        mock_validator: MagicMock,
         validation_config: ValidationConfig,
     ):
         graph_validate_results = [ExpectationValidationResult(success=True)]
@@ -152,6 +154,31 @@ class TestValidationRun:
                 "unsuccessful_expectations": 0,
                 "success_percent": 100.0,
             },
+        )
+
+    @pytest.mark.unit
+    def test_persists_validation_results(
+        self,
+        mock_validator: MagicMock,
+        validation_config: ValidationConfig,
+    ):
+        validation_config.suite.add_expectation(
+            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        )
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True)
+        ]
+
+        validation_config.run()
+
+        mock_validator.graph_validate.assert_called_with(
+            configurations=[
+                ExpectationConfiguration(
+                    expectation_type="expect_column_max_to_be_between",
+                    kwargs={"column": "foo", "max_value": 1.0},
+                )
+            ],
+            runtime_configuration={"result_format": "SUMMARY"},
         )
 
 
