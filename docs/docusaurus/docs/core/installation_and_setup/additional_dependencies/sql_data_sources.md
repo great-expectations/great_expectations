@@ -12,20 +12,6 @@ To validate data stored on SQL databases with GX Core, you create your GX Python
 - pip. See [Installation and downloads](https://pypi.org/project/pip/).
 - The necessary environment variables are set to allow access to the SQL database. See [Manage credentials](../manage_credentials.md).
 
-## SQL database dependency commands
-
-The following table lists the installation commands used to install GX Core dependencies for specific SQL databases. These dependencies are required for the successful operation of GX Core.
-
-| SQL Database | Command |
-| :-- | :-- | 
-| AWS Athena | `pip install 'great_expectations[athena]'` |
-| BigQuery | `pip install 'great_expectations[bigquery]'` |
-| MSSQL | `pip install 'great_expectations[mssql]'` |
-| PostgreSQL | `pip install 'great_expectations[postgresql]'` |
-| Redshift | `pip install 'great_expectations[redshift]'` |
-| Snowflake | `pip install 'great_expectations[snowflake]'` |
-| Trino | `pip install 'great_expectations[trino]'` |
-
 ## Installation
 
 1. Run the following code to confirm your Python version:
@@ -63,6 +49,20 @@ The following table lists the installation commands used to install GX Core depe
     great_expectations --version
     ```
     The output should be `great_expectations, version <version_number>`.
+
+## SQL database dependency commands
+
+The following table lists the installation commands used to install GX Core dependencies for specific SQL databases. These dependencies are required for the successful operation of GX Core.
+
+| SQL Database | Command |
+| :-- | :-- | 
+| AWS Athena | `pip install 'great_expectations[athena]'` |
+| BigQuery | `pip install 'great_expectations[bigquery]'` |
+| MSSQL | `pip install 'great_expectations[mssql]'` |
+| PostgreSQL | `pip install 'great_expectations[postgresql]'` |
+| Redshift | `pip install 'great_expectations[redshift]'` |
+| Snowflake | `pip install 'great_expectations[snowflake]'` |
+| Trino | `pip install 'great_expectations[trino]'` |
 
 ## Next steps
 
