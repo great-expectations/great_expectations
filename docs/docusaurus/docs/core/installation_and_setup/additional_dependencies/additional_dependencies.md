@@ -10,7 +10,7 @@ Some environments and Data Sources require additional Python libraries or third 
 
 <Tabs
   queryString="dependencies"
-  groupId="install-dependencies"
+  groupId="additional-dependencies"
   defaultValue='amazon'
   values={[
   {label: 'Amazon S3', value:'amazon'},
