@@ -1090,4 +1090,6 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
         # Happens when an ExpectationIdentifier is being evaluated as ValidationResultIdentifier
         context.build_data_docs()
 
-    checkpoint.run()
+    with pytest.raises(IndexError):
+        # Happens when an ExpectationIdentifier is being evaluated as ValidationResultIdentifier
+        checkpoint.run()
