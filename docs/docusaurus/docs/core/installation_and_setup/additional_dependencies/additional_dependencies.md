@@ -20,7 +20,6 @@ Some environments and Data Sources require additional Python libraries or third 
   {label: 'Google Cloud Storage', value:'gcs'},
   {label: 'SQL Databases', value:'sql'},
   ]}>
-
 <TabItem value="amazon">
 
 Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon.com).  With it, you can access objects stored in S3 buckets through a web interface.  Great Expectations (GX) uses the Python library `boto3` to access S3, but you will need to configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
@@ -49,7 +48,7 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
 
   If your credentials are properly configured, this will output your `UserId`, `Account` and `Arn`.  If your credentials are not configured correctly, this will throw an error.
 
-  If an error is thrown, or if you were unable to use the AWS CLI to verify your credentials configuration, you can find additional guidance on configuring your AWS credentials by referencing [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+  If an error is thrown, or if you were unable to use the AWS CLI to verify your credentials' configuration, you can find additional guidance on configuring your AWS credentials by referencing [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
   
 3. Install the Python dependencies for AWS S3 support.
 
@@ -68,7 +67,6 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
   This will install Great Expectations along with the requirements for the `boto3` Python library.
 
   </TabItem>
-
   <TabItem value="azure">
 
   Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with Great Expectations (GX) you install additional Python libraries and define a connection string.
@@ -113,7 +111,6 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
   :::
 
   </TabItem>
-
   <TabItem value="gcs">
 
   To validate Google Cloud Platform (GCP) data with GX Core, you create your GX Python environment, install GX Core locally, and then configure the necessary dependencies.
@@ -164,7 +161,6 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
     The output should be `great_expectations, version <version_number>`.
 
 </TabItem>
-
 <TabItem value="sql">
 
 To validate data stored on SQL databases with GX Core, you create your GX Python environment, install GX Core locally, and then configure the necessary dependencies.
@@ -228,8 +224,8 @@ The following table lists the installation commands used to install GX Core depe
 | Trino | `pip install 'great_expectations[trino]'` |
 
 </TabItem>
-
 </Tabs>
+
 
 ## Next steps
 
