@@ -41,17 +41,16 @@ class MetricListMetricRetriever(MetricRetriever):
         metric_list: Optional[List[MetricTypes]] = None,
     ) -> Sequence[Metric]:
         metrics_result: List[Metric] = []
+
         if not metric_list:
             raise ValueError("metric_list cannot be empty")
-        # first check that these are all valid metric types
+
         self._check_valid_metric_types(metric_list)
+
         table_metrics = self._get_table_metrics(
             batch_request=batch_request, metric_list=metric_list
         )
-        # TODO WILL: check if this is efficient
-        # make sure to take care of this case
-        for metric in table_metrics:
-            metrics_result.append(metric)
+        metrics_result.extend(table_metrics)
 
         # exit early if only Table Metrics exist
         if not self._column_metrics_in_metric_list(metric_list):
