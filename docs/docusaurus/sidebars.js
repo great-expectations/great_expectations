@@ -605,10 +605,8 @@ module.exports = {
       type: 'category',
       label: 'GX API',
       link: {
-        type: 'generated-index',
-        title: 'GX API',
-        description: 'GX API reference content is generated from classes and methods docstrings.',
-        slug: '/reference/api/'
+        type: 'doc',
+        id: 'reference/index'
       },
       items: [
         {
