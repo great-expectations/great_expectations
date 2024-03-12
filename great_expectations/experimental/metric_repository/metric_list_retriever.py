@@ -56,16 +56,16 @@ class MetricListMetricRetriever(MetricRetriever):
         if not self._column_metrics_in_metric_list(metric_list):
             return metrics_result
 
-        # keep this in for now. We will always guarantee that TABLE_COLUMN_TYPES is present
-        # We need to skip columns that do not report a type, because the metric computation
-        # to determine semantic type will fail.
         table_column_types = list(
             filter(
                 lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics
             )
         )[0]
 
+        # We need to skip columns that do not report a type, because the metric computation
+        # to determine semantic type will fail.
         exclude_column_names = self._get_columns_to_exclude(table_column_types)
+
         numeric_column_names = self._get_numeric_column_names(
             batch_request=batch_request, exclude_column_names=exclude_column_names
         )
@@ -101,10 +101,14 @@ class MetricListMetricRetriever(MetricRetriever):
         column_list: List[str],
     ) -> Sequence[Metric]:
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
+        metrics: list[Metric] = []
         metrics_list_as_set = set(metrics_list)
         metrics_to_calculate = sorted(
             column_metric_names.intersection(metrics_list_as_set)
         )
+
+        if not metrics_to_calculate:
+            return metrics
 
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, list(metrics_to_calculate)
@@ -114,7 +118,6 @@ class MetricListMetricRetriever(MetricRetriever):
         )
 
         # Convert computed_metrics
-        metrics: list[Metric] = []
         ColumnMetric.update_forward_refs()
         metric_lookup_key: _MetricKey
 
@@ -145,6 +148,7 @@ class MetricListMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
     ) -> Sequence[Metric]:
+        metrics: list[Metric] = []
         column_metric_names = {
             MetricTypes.COLUMN_MIN,
             MetricTypes.COLUMN_MAX,
@@ -155,6 +159,8 @@ class MetricListMetricRetriever(MetricRetriever):
         metrics_to_calculate = sorted(
             column_metric_names.intersection(metrics_list_as_set)
         )
+        if not metrics_to_calculate:
+            return metrics
 
         return self._get_column_metrics(
             batch_request=batch_request,
@@ -169,6 +175,7 @@ class MetricListMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
     ) -> Sequence[Metric]:
+        metrics: list[Metric] = []
         column_metric_names = {
             "column.min",
             "column.max",
@@ -179,6 +186,8 @@ class MetricListMetricRetriever(MetricRetriever):
         metrics_to_calculate = sorted(
             column_metric_names.intersection(metrics_list_as_set)
         )
+        if not metrics_to_calculate:
+            return metrics
 
         # Note: Timestamps are returned as strings for Snowflake, this may need to be adjusted
         # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().
