@@ -202,7 +202,6 @@ class MetricListMetricRetriever(MetricRetriever):
         self, batch_request: BatchRequest, metric_list: List[MetricTypes]
     ) -> List[Metric]:
         metrics: List[Metric] = []
-        # in is typically a o(1) operation.
         if MetricTypes.TABLE_ROW_COUNT in metric_list:
             metrics.append(self._get_table_row_count(batch_request=batch_request))
         if MetricTypes.TABLE_COLUMNS in metric_list:
@@ -283,7 +282,7 @@ class MetricListMetricRetriever(MetricRetriever):
         return TableMetric[List[str]](
             batch_id=batch_id,
             metric_name=metric_name,
-            value=column_types_converted_to_str,  # type: ignore
+            value=column_types_converted_to_str,
             exception=exception,
         )
 
