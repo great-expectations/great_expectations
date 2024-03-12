@@ -914,8 +914,8 @@ def store_validation_results(
         expectation_suite_id = expectation_suite_identifier.id
 
     run_return_value = validation_result_store.set(
-        suite_validation_result_identifier,
-        suite_validation_result,
+        key=suite_validation_result_identifier,
+        value=suite_validation_result,
         checkpoint_id=checkpoint_id,
         expectation_suite_id=expectation_suite_id,
     )

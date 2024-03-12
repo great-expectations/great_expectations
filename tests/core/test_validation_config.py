@@ -16,9 +16,15 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.validation_config import ValidationConfig
-from great_expectations.data_context.data_context.context_factory import ProjectManager
+from great_expectations.data_context.data_context.context_factory import (
+    ProjectManager,
+)
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
+)
+from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
     CSVAsset,
@@ -38,6 +44,8 @@ if TYPE_CHECKING:
     from unittest.mock import MagicMock  # noqa: TID251
 
     from pytest_mock import MockerFixture
+
+BATCH_ID = "my_batch_id"
 
 
 @pytest.fixture
@@ -69,7 +77,7 @@ class TestValidationRun:
                 gx.get_context()
                 mock_execution_engine = mocker.MagicMock(
                     spec=ExecutionEngine,
-                    batch_manager=mocker.MagicMock(active_batch_id="my_batch_id"),
+                    batch_manager=mocker.MagicMock(active_batch_id=BATCH_ID),
                 )
                 mock_validator = OldValidator(execution_engine=mock_execution_engine)
                 mock_get_validator.return_value = mock_validator
@@ -156,9 +164,11 @@ class TestValidationRun:
             },
         )
 
+    @mock.patch.object(ValidationsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results(
         self,
+        mock_validations_store_set: MagicMock,
         mock_validator: MagicMock,
         validation_config: ValidationConfig,
     ):
@@ -180,6 +190,14 @@ class TestValidationRun:
             ],
             runtime_configuration={"result_format": "SUMMARY"},
         )
+
+        # validate we are calling set on the store with data that's roughly the right shape
+        [(_, kwargs)] = mock_validations_store_set.call_args_list
+        key = kwargs["key"]
+        value = kwargs["value"]
+        assert isinstance(key, ValidationResultIdentifier)
+        assert key.batch_identifier == BATCH_ID
+        assert value.success is True
 
 
 class TestValidationConfigSerialization:
