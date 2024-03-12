@@ -202,10 +202,10 @@ class MetricListMetricRetriever(MetricRetriever):
         """
         metrics: list[Metric] = []
         column_metric_names = {
-            "column.min",
-            "column.max",
-            # "column.mean",  # Currently not supported for timestamp in Snowflake
-            # "column.median",  # Currently not supported for timestamp in Snowflake
+            MetricTypes.COLUMN_MIN,
+            MetricTypes.COLUMN_MAX,
+            # MetricTypes.COLUMN_MEAN,  # Currently not supported for timestamp in Snowflake
+            #  MetricTypes.COLUMN_MEDIAN,  # Currently not supported for timestamp in Snowflake
         }
         metrics_list_as_set = set(metrics_list)
         metrics_to_calculate = sorted(

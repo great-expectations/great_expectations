@@ -638,3 +638,152 @@ def test_get_metrics_only_gets_a_validator_once():
         )
 
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
+
+
+def test_get_metrics_with_no_metrics():
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    computed_metrics = {}
+    cdm_metrics_list: List[MetricTypes] = []
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (
+        computed_metrics,
+        aborted_metrics,
+    )
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+
+    mock_batch_request = Mock(spec=BatchRequest)
+
+    with pytest.raises(ValueError):
+        metric_retriever.get_metrics(
+            batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        )
+
+
+def test_valid_metric_types_true():
+    mock_context = Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+
+    valid_metric_types = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+        MetricTypes.COLUMN_MIN,
+        MetricTypes.COLUMN_MAX,
+        MetricTypes.COLUMN_MEAN,
+        MetricTypes.COLUMN_MEDIAN,
+        MetricTypes.COLUMN_NULL_COUNT,
+    ]
+    assert metric_retriever._check_valid_metric_types(valid_metric_types) is True
+
+
+def test_valid_metric_types_false():
+    mock_context = Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+
+    invalid_metric_type = ["I_am_invalid"]
+    assert metric_retriever._check_valid_metric_types(invalid_metric_type) is False
+
+
+def test_column_metrics_in_metrics_list_only_table_metrics():
+    mock_context = Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    table_metrics_only = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+    ]
+    assert metric_retriever._column_metrics_in_metric_list(table_metrics_only) is False
+
+
+def test_column_metrics_in_metrics_list_with_column_metrics():
+    mock_context = Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    metrics_list_with_column_metrics = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+        MetricTypes.COLUMN_MIN,
+    ]
+    assert (
+        metric_retriever._column_metrics_in_metric_list(
+            metrics_list_with_column_metrics
+        )
+        is True
+    )
+
+
+def test_get_table_column_types():
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    mock_batch_request = Mock(spec=BatchRequest)
+    computed_metrics = {
+        ("table.column_types", (), "include_nested=True"): [
+            {"name": "col1", "type": "float"},
+            {"name": "col2", "type": "float"},
+        ],
+    }
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (
+        computed_metrics,
+        aborted_metrics,
+    )
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    ret = metric_retriever._get_table_column_types(mock_batch_request)
+    print(ret)
+
+
+def test_get_table_columns():
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    mock_batch_request = Mock(spec=BatchRequest)
+    computed_metrics = {
+        ("table.columns", (), ()): ["col1", "col2"],
+    }
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (computed_metrics, aborted_metrics)
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    ret = metric_retriever._get_table_columns(mock_batch_request)
+    assert ret == TableMetric[List[str]](
+        batch_id="batch_id",
+        metric_name="table.columns",
+        value=["col1", "col2"],
+        exception=None,
+    )
+
+
+def test_get_table_row_count():
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    mock_batch_request = Mock(spec=BatchRequest)
+    computed_metrics = {("table.row_count", (), ()): 2}
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (computed_metrics, aborted_metrics)
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    ret = metric_retriever._get_table_row_count(mock_batch_request)
+    assert ret == TableMetric[int](
+        batch_id="batch_id",
+        metric_name="table.row_count",
+        value=2,
+        exception=None,
+    )
