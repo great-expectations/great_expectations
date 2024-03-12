@@ -121,6 +121,8 @@ def test_get_metrics_full_cdm(
         MetricTypes.TABLE_COLUMN_TYPES,
         MetricTypes.COLUMN_MIN,
         MetricTypes.COLUMN_MAX,
+        MetricTypes.COLUMN_MEAN,
+        MetricTypes.COLUMN_MEDIAN,
         MetricTypes.COLUMN_NULL_COUNT,
     ]
     metric_retriever = MetricListMetricRetriever(context)
@@ -277,7 +279,6 @@ def test_get_metrics_full_cdm(
         ),
     ]
 
-    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
     assert len(metrics) == len(expected_metrics)
     for metric in metrics:
         assert metric.dict() in [

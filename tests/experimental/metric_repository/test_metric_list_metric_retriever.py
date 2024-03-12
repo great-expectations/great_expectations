@@ -546,7 +546,7 @@ def test_get_metrics_with_column_type_missing():
         metrics = metric_retriever.get_metrics(
             batch_request=mock_batch_request, metric_list=cdm_metrics_list
         )
-
+    # why is this not sorted?
     assert metrics == [
         TableMetric[int](
             batch_id="batch_id",
@@ -569,20 +569,6 @@ def test_get_metrics_with_column_type_missing():
                     "name": "col2",
                 },  # Note: No type for col2
             ],
-            exception=None,
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.min",
-            column="col1",
-            value=None,
-            exception=MetricException(type="Unknown", message="test exception message"),
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.min",
-            column="col2",
-            value=2.7,
             exception=None,
         ),
         ColumnMetric[float](
@@ -626,6 +612,20 @@ def test_get_metrics_with_column_type_missing():
             value=2.7,
             exception=None,
             column="col2",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            column="col1",
+            value=None,
+            exception=MetricException(type="Unknown", message="test exception message"),
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            column="col2",
+            value=2.7,
+            exception=None,
         ),
         ColumnMetric[int](
             batch_id="batch_id",
@@ -711,15 +711,15 @@ def test_get_metrics_with_timestamp_columns():
         ),
         ColumnMetric[str](
             batch_id="batch_id",
-            metric_name="column.min",
-            value="2023-01-01T00:00:00",
+            metric_name="column.max",
+            value="2023-12-31T00:00:00",
             exception=None,
             column="timestamp_col",
         ),
         ColumnMetric[str](
             batch_id="batch_id",
-            metric_name="column.max",
-            value="2023-12-31T00:00:00",
+            metric_name="column.min",
+            value="2023-01-01T00:00:00",
             exception=None,
             column="timestamp_col",
         ),
