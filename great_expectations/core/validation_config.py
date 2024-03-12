@@ -9,6 +9,7 @@ from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
+    PrivateAttr,
     ValidationError,
     validator,
 )
@@ -30,6 +31,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 from great_expectations.data_context.data_context.context_factory import project_manager
@@ -132,9 +134,11 @@ class ValidationConfig(BaseModel):
     data: BatchConfig = Field(..., allow_mutation=False)
     suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
+    _validation_results_store: ValidationsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
+
         # TODO: Migrate this to model_post_init when we get to pydantic 2
         self._validation_results_store = project_manager.get_validations_store()
 
