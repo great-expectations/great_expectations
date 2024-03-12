@@ -50,12 +50,6 @@ module.exports = {
               label: 'SQL Databases',
               href: 'core/installation_and_setup/additional_dependencies?dependencies=sql',
             },
-            
-            {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/amazon_s3',
-              label: 'Amazon S3'
-            },
           ]
         },
         {
