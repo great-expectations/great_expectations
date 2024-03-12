@@ -5,12 +5,8 @@ import uuid
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    Hashable,
     List,
     Sequence,
-    Tuple,
-    Union,
 )
 
 from great_expectations.core.domain import SemanticDomainTypes
@@ -21,25 +17,19 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricTypes,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.experimental.metric_repository.metrics import Metric
-    from great_expectations.validator.validator import Validator
-
-
-_MetricKey: TypeAlias = Union[Tuple[str, Hashable, Hashable], Tuple[str, str, str]]
-_MetricsDict: TypeAlias = Dict[_MetricKey, MetricValue]
-_AbortedMetricsInfoDict: TypeAlias = Dict[
-    _MetricKey,
-    Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
-]
+    from great_expectations.validator.validator import (
+        Validator,
+        _AbortedMetricsInfoDict,
+        _MetricKey,
+        _MetricsDict,
+    )
 
 
 class MetricRetriever(abc.ABC):
