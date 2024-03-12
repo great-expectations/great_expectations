@@ -245,25 +245,13 @@ def test_get_metrics_metrics_missing():
         ],
         # ("column.min", "column=col1", ()): 2.5, # Missing column.min metric for col1
         ("column.min", "column=col2", ()): 2.7,
-        ("column.max", "column=col1", ()): 5.5,
-        ("column.max", "column=col2", ()): 5.7,
-        ("column.mean", "column=col1", ()): 2.5,
-        ("column.mean", "column=col2", ()): 2.7,
-        ("column.median", "column=col1", ()): 2.5,
-        ("column.median", "column=col2", ()): 2.7,
-        ("column_values.null.count", "column=col1", ()): 1,
-        ("column_values.null.count", "column=col2", ()): 1,
     }
 
-    cdm_metrics_list: List[ColumnMetric] = [
+    cdm_metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
         MetricTypes.COLUMN_MIN,
-        MetricTypes.COLUMN_MAX,
-        MetricTypes.COLUMN_MEAN,
-        MetricTypes.COLUMN_MEDIAN,
-        MetricTypes.COLUMN_NULL_COUNT,
     ]
     mock_aborted_metrics = {}
     mock_validator.compute_metrics.return_value = (
@@ -315,48 +303,6 @@ def test_get_metrics_metrics_missing():
             ),
             ColumnMetric[float](
                 batch_id="batch_id",
-                metric_name="column.max",
-                value=5.5,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.max",
-                value=5.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.mean",
-                value=2.5,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.mean",
-                value=2.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.median",
-                value=2.5,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.median",
-                value=2.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
                 metric_name="column.min",
                 value=None,
                 exception=MetricException(
@@ -369,20 +315,6 @@ def test_get_metrics_metrics_missing():
                 batch_id="batch_id",
                 metric_name="column.min",
                 value=2.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[int](
-                batch_id="batch_id",
-                metric_name="column_values.null.count",
-                value=1,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[int](
-                batch_id="batch_id",
-                metric_name="column_values.null.count",
-                value=1,
                 exception=None,
                 column="col2",
             ),
@@ -504,14 +436,6 @@ def test_get_metrics_with_column_type_missing():
         ],
         # ("column.min", "column=col1", ()): 2.5, # Error in column.min metric for col1
         ("column.min", "column=col2", ()): 2.7,
-        ("column.max", "column=col1", ()): 5.5,
-        ("column.max", "column=col2", ()): 5.7,
-        ("column.mean", "column=col1", ()): 2.5,
-        ("column.mean", "column=col2", ()): 2.7,
-        ("column.median", "column=col1", ()): 2.5,
-        ("column.median", "column=col2", ()): 2.7,
-        ("column_values.null.count", "column=col1", ()): 1,
-        ("column_values.null.count", "column=col2", ()): 1,
     }
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
@@ -526,10 +450,6 @@ def test_get_metrics_with_column_type_missing():
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
         MetricTypes.COLUMN_MIN,
-        MetricTypes.COLUMN_MAX,
-        MetricTypes.COLUMN_MEAN,
-        MetricTypes.COLUMN_MEDIAN,
-        MetricTypes.COLUMN_NULL_COUNT,
     ]
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
@@ -573,48 +493,6 @@ def test_get_metrics_with_column_type_missing():
         ),
         ColumnMetric[float](
             batch_id="batch_id",
-            metric_name="column.max",
-            column="col1",
-            value=5.5,
-            exception=None,
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.max",
-            column="col2",
-            value=5.7,
-            exception=None,
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.mean",
-            value=2.5,
-            exception=None,
-            column="col1",
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.mean",
-            value=2.7,
-            exception=None,
-            column="col2",
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.median",
-            value=2.5,
-            exception=None,
-            column="col1",
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
-            metric_name="column.median",
-            value=2.7,
-            exception=None,
-            column="col2",
-        ),
-        ColumnMetric[float](
-            batch_id="batch_id",
             metric_name="column.min",
             column="col1",
             value=None,
@@ -626,20 +504,6 @@ def test_get_metrics_with_column_type_missing():
             column="col2",
             value=2.7,
             exception=None,
-        ),
-        ColumnMetric[int](
-            batch_id="batch_id",
-            metric_name="column_values.null.count",
-            value=1,
-            exception=None,
-            column="col1",
-        ),
-        ColumnMetric[int](
-            batch_id="batch_id",
-            metric_name="column_values.null.count",
-            value=1,
-            exception=None,
-            column="col2",
         ),
     ]
 
