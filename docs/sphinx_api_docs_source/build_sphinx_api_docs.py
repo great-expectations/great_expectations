@@ -220,7 +220,10 @@ class SphinxInvokeDocsBuilder:
 
         for item in soup.find_all("dt"):
             lengthChildren = len(item.findChildren())
-            if "expectation" in str(html_file_path) and "Relevant Documentation Links" in item.get_text():
+            if (
+                "expectation" in str(html_file_path)
+                and "Relevant Documentation Links" in item.get_text()
+            ):
                 item.string.replaceWith(item.get_text(strip=True))
             if lengthChildren > 1:
                 item.append("\r\n")
@@ -236,7 +239,7 @@ class SphinxInvokeDocsBuilder:
 
         if "ConfiguredAssetFilesystemDataConnector" in str(html_file_path):
             for item in soup.find_all("cite"):
-              item.append("\r\n")
+                item.append("\r\n")
 
         for item in soup.find_all("span"):
             if item and item.string and "*" in item.get_text():
