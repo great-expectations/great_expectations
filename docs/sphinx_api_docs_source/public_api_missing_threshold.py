@@ -80,6 +80,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/regex_based_column_map_expectation.py Name: register_metric",
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: register_metric",
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: validate_configuration",
+    "File: great_expectations/experimental/metric_repository/metric_retriever.py Name: get_validator",
     "File: great_expectations/experimental/datasource/fabric.py Name: build_batch_request",
     "File: great_expectations/experimental/datasource/fabric.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/profile/base.py Name: validate",
