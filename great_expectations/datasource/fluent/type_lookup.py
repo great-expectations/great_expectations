@@ -72,7 +72,13 @@ class TypeLookup(
 
     @override
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
-        return super().__getitem__(key)
+        try:
+            return super().__getitem__(key)
+        except KeyError as key_err:
+            msg = f"{key} was not found."
+            if isinstance(key, str):
+                msg = f"type {msg} Available types are: {', '.join(self.type_names())}"
+            raise KeyError(msg) from key_err
 
     @override
     def __delitem__(self, key: ValidTypes):

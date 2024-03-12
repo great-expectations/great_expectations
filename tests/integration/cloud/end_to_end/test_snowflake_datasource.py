@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
+    from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
@@ -30,7 +31,7 @@ def connection_string() -> str:
 @pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
-    connection_string: str,
+    connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
@@ -38,38 +39,41 @@ def datasource(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
+        # kwargs must set here otherwise the field will be 'unset' and never serialized even if updated
+        kwargs={"echo": False},  # type: ignore[call-overload]
     )
-    datasource.create_temp_table = True
+
+    datasource.kwargs.update(echo=True)
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
-    assert (
-        datasource.create_temp_table is True
-    ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
-    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.create_temp_table is False
-    ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = True
+    assert datasource.kwargs == {
+        "echo": True
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = False
+    datasource = context.add_or_update_datasource(datasource=datasource)
+    assert datasource.kwargs == {
+        "echo": False
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = True
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
-    assert (
-        datasource.create_temp_table is True
-    ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
+    assert datasource.kwargs == {
+        "echo": True
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = False
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    assert (
-        datasource.create_temp_table is False
-    ), "The datasource was not updated in the previous method call."
+    datasource = context.get_datasource(datasource_name=datasource_name)
+    assert datasource.kwargs == {
+        "echo": False
+    }, "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(get_missing_datasource_error_type):

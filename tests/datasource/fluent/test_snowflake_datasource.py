@@ -26,7 +26,7 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     "config_kwargs",
     [
         param(
-            {"connection_string": "snowflake://my_user:password@my_account"},
+            {"connection_string": "snowflake://my_user:password@my_account?numpy=True"},
             id="connection_string str",
         ),
         param(
