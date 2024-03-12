@@ -34,20 +34,6 @@ class MetricListMetricRetriever(MetricRetriever):
         super().__init__(context=context)
         self._validator: Validator | None = None
 
-    def _column_metrics_in_metric_list(self, metric_list: List[MetricTypes]) -> bool:
-        # all the column metrics we are considering
-        column_metrics: List[MetricTypes] = [
-            MetricTypes.COLUMN_MIN,
-            MetricTypes.COLUMN_MAX,
-            MetricTypes.COLUMN_MEDIAN,
-            MetricTypes.COLUMN_MEAN,
-            MetricTypes.COLUMN_NULL_COUNT,
-        ]
-        for metric in column_metrics:
-            if metric in metric_list:
-                return True
-        return False
-
     @override
     def get_metrics(
         self,
@@ -62,7 +48,7 @@ class MetricListMetricRetriever(MetricRetriever):
         table_metrics = self._get_table_metrics(
             batch_request=batch_request, metric_list=metric_list
         )
-        # TODO: check if this is efficient
+        # TODO WILL: check if this is efficient
         # make sure to take care of this case
         for metric in table_metrics:
             metrics_result.append(metric)
@@ -294,47 +280,36 @@ class MetricListMetricRetriever(MetricRetriever):
         )
 
     def _check_valid_metric_types(self, metric_list: List[MetricTypes]) -> bool:
+        """Check whether all the metric types in the list are valid.
+
+        Args:
+            metric_list (List[MetricTypes]): list of MetricTypes that are passed in to MetricListMetricRetriever.
+
+        Returns:
+            bool: True if all the metric types in the list are valid, False otherwise.
+        """
         for metric in metric_list:
             if metric not in MetricTypes:
                 return False
         return True
 
-    def _get_table_row_count(self, batch_request: BatchRequest):
-        table_metric_configs = self._generate_table_metric_configurations(
-            table_metric_names=[MetricTypes.TABLE_ROW_COUNT]
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, table_metric_configs
-        )
-        metric_name = MetricTypes.TABLE_ROW_COUNT
-        value, exception = self._get_metric_from_computed_metrics(
-            metric_name=metric_name,
-            computed_metrics=computed_metrics,
-            aborted_metrics=aborted_metrics,
-        )
-        return TableMetric[int](
-            batch_id=batch_id,
-            metric_name=metric_name,
-            value=value,
-            exception=exception,
-        )
+    def _column_metrics_in_metric_list(self, metric_list: List[MetricTypes]) -> bool:
+        """Helper method to check whether any column metrics are present in the metric list.
 
-    def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
-        table_metric_configs = self._generate_table_metric_configurations(
-            table_metric_names=[MetricTypes.TABLE_COLUMNS]
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, table_metric_configs
-        )
-        metric_name = MetricTypes.TABLE_COLUMNS
-        value, exception = self._get_metric_from_computed_metrics(
-            metric_name=metric_name,
-            computed_metrics=computed_metrics,
-            aborted_metrics=aborted_metrics,
-        )
-        return TableMetric[List[str]](
-            batch_id=batch_id,
-            metric_name=metric_name,
-            value=value,
-            exception=exception,
-        )
+        Args:
+            metric_list (List[MetricTypes]): list of MetricTypes that are passed in to MetricListMetricRetriever.
+
+        Returns:
+            bool: True if any column metrics are present in the metric list, False otherwise.
+        """
+        column_metrics: List[MetricTypes] = [
+            MetricTypes.COLUMN_MIN,
+            MetricTypes.COLUMN_MAX,
+            MetricTypes.COLUMN_MEDIAN,
+            MetricTypes.COLUMN_MEAN,
+            MetricTypes.COLUMN_NULL_COUNT,
+        ]
+        for metric in column_metrics:
+            if metric in metric_list:
+                return True
+        return False

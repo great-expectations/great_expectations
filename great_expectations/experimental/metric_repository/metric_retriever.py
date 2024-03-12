@@ -43,7 +43,9 @@ _AbortedMetricsInfoDict: TypeAlias = Dict[
 
 
 class MetricRetriever(abc.ABC):
-    """A MetricRetriever is responsible for retrieving metrics for a batch of data."""
+    """A MetricRetriever is responsible for retrieving metrics for a batch of data. It is an ABC that contains base logic and
+    methods share by both the ColumnDescriptiveMetricsMetricReceiver and MetricListMetricRetriver.
+    """
 
     def __init__(self, context: AbstractDataContext):
         self._context = context
