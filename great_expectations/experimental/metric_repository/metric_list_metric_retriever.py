@@ -94,6 +94,17 @@ class MetricListMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
     ) -> Sequence[Metric]:
+        """Calculate column metrics for non-numeric columns.
+
+        Args:
+            metrics_list (List[MetricTypes]): list of metrics sent from Agent.
+            batch_request (BatchRequest): for current batch.
+            column_list (List[str]): list of non-numeric columns.
+
+        Returns:
+            Sequence[Metric]: List of metrics for non-numeric columns.
+        """
+        # currently only the null-count is supported. If more metrics are added, this set will need to be updated.
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
         metrics: list[Metric] = []
         metrics_list_as_set = set(metrics_list)
@@ -142,6 +153,16 @@ class MetricListMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
     ) -> Sequence[Metric]:
+        """Calculate column metrics for numeric columns.
+
+        Args:
+            metrics_list (List[MetricTypes]): list of metrics sent from Agent.
+            batch_request (BatchRequest): for current batch.
+            column_list (List[str]): list of numeric columns.
+
+        Returns:
+            Sequence[Metric]: List of metrics for numeric columns.
+        """
         metrics: list[Metric] = []
         column_metric_names = {
             MetricTypes.COLUMN_MIN,
@@ -169,6 +190,16 @@ class MetricListMetricRetriever(MetricRetriever):
         batch_request: BatchRequest,
         column_list: List[str],
     ) -> Sequence[Metric]:
+        """Calculate column metrics for timestamp columns.
+
+        Args:
+            metrics_list (List[MetricTypes]): list of metrics sent from Agent.
+            batch_request (BatchRequest): for current batch.
+            column_list (List[str]): list of timestamp columns.
+
+        Returns:
+            Sequence[Metric]: List of metrics for timestamp columns.
+        """
         metrics: list[Metric] = []
         column_metric_names = {
             "column.min",
@@ -195,6 +226,15 @@ class MetricListMetricRetriever(MetricRetriever):
     def _get_table_metrics(
         self, batch_request: BatchRequest, metric_list: List[MetricTypes]
     ) -> List[Metric]:
+        """Calculate column metrics for table metrics, which include row_count, column names and types.
+
+        Args:
+            metrics_list (List[MetricTypes]): list of metrics sent from Agent.
+            batch_request (BatchRequest): for current batch.
+
+        Returns:
+            Sequence[Metric]: List of table metrics.
+        """
         metrics: List[Metric] = []
         if MetricTypes.TABLE_ROW_COUNT in metric_list:
             metrics.append(self._get_table_row_count(batch_request=batch_request))
@@ -205,6 +245,14 @@ class MetricListMetricRetriever(MetricRetriever):
         return metrics
 
     def _get_table_row_count(self, batch_request: BatchRequest) -> Metric:
+        """Return row_count for the table.
+
+        Args:
+            batch_request (BatchRequest): For current batch.
+
+        Returns:
+            Metric: Row count for the table.
+        """
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names=[MetricTypes.TABLE_ROW_COUNT]
         )
@@ -225,6 +273,14 @@ class MetricListMetricRetriever(MetricRetriever):
         )
 
     def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
+        """Return column names for the table.
+
+        Args:
+            batch_request (BatchRequest): For current batch.
+
+        Returns:
+            Metric: Column names for the table.
+        """
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names=[MetricTypes.TABLE_COLUMNS]
         )
@@ -245,6 +301,14 @@ class MetricListMetricRetriever(MetricRetriever):
         )
 
     def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
+        """Return column types for the table.
+
+        Args:
+            batch_request (BatchRequest): For current batch.
+
+        Returns:
+            Metric: Column types for the table.
+        """
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names=[MetricTypes.TABLE_COLUMN_TYPES]
         )
