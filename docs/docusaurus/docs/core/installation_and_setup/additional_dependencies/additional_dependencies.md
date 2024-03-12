@@ -1,6 +1,6 @@
 ---
 title: Install additional dependencies
-id: additional-dependencies
+id: additional_dependencies
 ---
 
 import TabItem from '@theme/TabItem';
