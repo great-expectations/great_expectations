@@ -8,6 +8,7 @@ import pytest
 from moto import mock_s3
 
 import great_expectations as gx
+from great_expectations import set_context
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import S3Url
@@ -1027,6 +1028,7 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
 
     base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
     context = gx.data_context.FileDataContext.create(base_directory)
+    set_context(context)
     # Configure the stores
     context.add_store(
         "expectations_S3_store",
