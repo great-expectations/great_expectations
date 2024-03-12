@@ -60,6 +60,7 @@ def test_column_partition_metric(
     )
 
 
+@pytest.mark.spark
 def test_column_partition_metric_for_spark(
     sa,
     in_memory_runtime_context,
