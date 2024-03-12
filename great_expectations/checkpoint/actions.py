@@ -183,6 +183,7 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: bool = False,
     ) -> None:
         """Create a SlackNotificationAction"""
+        super().__init__()
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -207,8 +208,6 @@ class SlackNotificationAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
-
-        super().__init__()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
@@ -844,12 +843,11 @@ class StoreValidationResultAction(ValidationAction):
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
+        super().__init__()
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
             self.target_store = data_context.stores[target_store_name]
-
-        super().__init__()
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -965,9 +963,8 @@ class UpdateDataDocsAction(ValidationAction):
         """
         :param site_names: *optional* List of site names for building data docs
         """
-        self._site_names = site_names
-
         super().__init__()
+        self._site_names = site_names
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
