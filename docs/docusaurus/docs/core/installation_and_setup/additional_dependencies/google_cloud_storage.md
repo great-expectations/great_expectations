@@ -9,7 +9,7 @@ To validate Google Cloud Platform (GCP) data with GX Core, you create your GX Py
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
-- pip can be used to install Python modules.
+- pip. See [Installation and downloads](https://pypi.org/project/pip/).
 - A [GCP service account](https://cloud.google.com/iam/docs/service-account-overview) with permissions to access GCP resources and storage Objects.
 - The `GOOGLE_APPLICATION_CREDENTIALS` environment variable is set. See [Set up Application Default Credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc).  
 - Google Cloud API authentication is set up. See [Set up authentication](https://cloud.google.com/storage/docs/reference/libraries#authentication).
