@@ -31,24 +31,30 @@ module.exports = {
           link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
           items: [
             {
+              type: 'link',
+              label: 'Amazon S3',
+              href: 'core/installation_and_setup/additional_dependencies?dependencies=amazon',
+            },
+            {
+              type: 'link',
+              label: 'Microsoft Azure Blob Storage',
+              href: 'core/installation_and_setup/additional_dependencies?dependencies=azure',
+            },
+            {
+              type: 'link',
+              label: 'Google Cloud Storage',
+              href: 'core/installation_and_setup/additional_dependencies?dependencies=gcs',
+            },
+            {
+              type: 'link',
+              label: 'SQL Databases',
+              href: 'core/installation_and_setup/additional_dependencies?dependencies=sql',
+            },
+            
+            {
               type: 'doc',
               id: 'core/installation_and_setup/additional_dependencies/amazon_s3',
               label: 'Amazon S3'
-            },
-            {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/azure_blob_storage',
-              label: 'Azure Blob Storage'
-            },
-            {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/google_cloud_storage',
-              label: 'Google Cloud Storage'
-            },
-            {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/sql_data_sources',
-              label: 'SQL Data Sources'
             },
           ]
         },
