@@ -39,30 +39,31 @@ def datasource(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
+        # kwargs must set here otherwise the field will be 'unset' and never serialized even if updated
+        kwargs={"echo": False},  # type: ignore[call-overload]
     )
-    updated_connection_string = f"{datasource.connection_string}&numpy=True"
 
-    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
+    datasource.kwargs.update(echo=True)
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
-    assert (
-        datasource.connection_string == updated_connection_string
-    ), "The datasource was not updated in the previous method call."
-    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
+    assert datasource.kwargs == {
+        "echo": True
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = False
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.connection_string == connection_string
-    ), "The datasource was not updated in the previous method call."
-    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
+    assert datasource.kwargs == {
+        "echo": False
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = True
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
-    assert (
-        datasource.connection_string == updated_connection_string
-    ), "The datasource was not updated in the previous method call."
-    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
+    assert datasource.kwargs == {
+        "echo": True
+    }, "The datasource was not updated in the previous method call."
+    datasource.kwargs["echo"] = False
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
@@ -70,9 +71,9 @@ def datasource(
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
     datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    assert (
-        datasource.connection_string == connection_string
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.kwargs == {
+        "echo": False
+    }, "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(get_missing_datasource_error_type):
