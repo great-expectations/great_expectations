@@ -179,7 +179,7 @@ class SphinxInvokeDocsBuilder:
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.debug(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
-                    fout.write(doc_str)
+                    fout.write(doc_str.replace("amp;#42;", "#42;"))
 
     def _get_generated_html_file_paths(self):
         """Collect html file paths from Sphinx-generated html, skipping known index paths."""
