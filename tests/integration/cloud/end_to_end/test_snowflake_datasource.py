@@ -49,7 +49,7 @@ def datasource(
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
+    datasource = context.add_or_update_datasource(datasource=datasource)
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
@@ -70,7 +70,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.get_datasource(datasource_name=datasource_name)
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
