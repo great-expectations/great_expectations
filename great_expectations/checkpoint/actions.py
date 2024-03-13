@@ -59,8 +59,6 @@ class ValidationAction:
         from great_expectations import project_manager
 
         self._using_cloud_context = project_manager.is_using_cloud()
-        self._build_data_docs = project_manager.build_data_docs
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
 
     @public_api
     def run(  # noqa: PLR0913
@@ -929,8 +927,17 @@ class StoreValidationResultAction(ValidationAction):
         return gx_cloud_resource_ref
 
 
+class DataDocsAction(ValidationAction):
+    def __init__(self) -> None:
+        from great_expectations import project_manager
+
+        super().__init__()
+        self._build_data_docs = project_manager.build_data_docs
+        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+
+
 @public_api
-class UpdateDataDocsAction(ValidationAction):
+class UpdateDataDocsAction(DataDocsAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
     YAML configuration example:
