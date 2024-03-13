@@ -12,14 +12,9 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Installation and setup',
+      label: 'Install and manage GX 1.0',
       link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
       items: [
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/set_up_a_python_environment',
-          label: 'Set up a Python environment'
-        },
         {
           type: 'doc',
           id: 'core/installation_and_setup/install_gx',
@@ -31,24 +26,24 @@ module.exports = {
           link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
           items: [
             {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/amazon_s3',
-              label: 'Amazon S3'
+              type: 'link',
+              label: 'Amazon S3',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon',
             },
             {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/azure_blob_storage',
-              label: 'Azure Blob Storage'
+              type: 'link',
+              label: 'Microsoft Azure Blob Storage',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure',
             },
             {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/google_cloud_storage',
-              label: 'Google Cloud Storage'
+              type: 'link',
+              label: 'Google Cloud Storage',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs',
             },
             {
-              type: 'doc',
-              id: 'core/installation_and_setup/additional_dependencies/sql_data_sources',
-              label: 'SQL Data Sources'
+              type: 'link',
+              label: 'SQL databases',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
             },
           ]
         },
