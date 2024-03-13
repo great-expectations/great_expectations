@@ -17,6 +17,7 @@ from typing import (
     Literal,
     Optional,
     Union,
+    cast,
 )
 
 import requests
@@ -238,6 +239,7 @@ class SlackNotificationAction(DataDocsAction):
 
     class Config:
         arbitrary_types_allowed = True
+        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
         json_encoders = {SlackRenderer: lambda s: _encode_renderer(s)}
 
     type: Literal["slack"] = "slack"
@@ -253,7 +255,7 @@ class SlackNotificationAction(DataDocsAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
+            renderer = cast(SlackRenderer, _build_renderer(config=renderer))
         return renderer
 
     @root_validator
@@ -514,6 +516,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     class Config:
         arbitrary_types_allowed = True
+        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
         json_encoders = {MicrosoftTeamsRenderer: lambda m: _encode_renderer(m)}
 
     type: Literal["microsoft"] = "microsoft"
@@ -527,7 +530,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         cls, renderer: dict | MicrosoftTeamsRenderer
     ) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
+            renderer = cast(MicrosoftTeamsRenderer, _build_renderer(config=renderer))
         return renderer
 
     @override
@@ -614,6 +617,7 @@ class OpsgenieAlertAction(ValidationAction):
 
     class Config:
         arbitrary_types_allowed = True
+        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
         json_encoders = {OpsgenieRenderer: lambda o: _encode_renderer(o)}
 
     type: Literal["opsgenie"] = "opsgenie"
@@ -628,7 +632,7 @@ class OpsgenieAlertAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
+            renderer = cast(OpsgenieRenderer, _build_renderer(config=renderer))
         return renderer
 
     @override
@@ -741,6 +745,7 @@ class EmailAction(ValidationAction):
 
     class Config:
         arbitrary_types_allowed = True
+        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
         json_encoders = {EmailRenderer: lambda e: _encode_renderer(e)}
 
     type: Literal["email"] = "email"
@@ -760,7 +765,7 @@ class EmailAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
+            renderer = cast(EmailRenderer, _build_renderer(config=renderer))
         return renderer
 
     @root_validator
