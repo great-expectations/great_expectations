@@ -8,7 +8,17 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+    cast,
+)
 
 import requests
 
@@ -21,16 +31,16 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.render.renderer.email_renderer import (
-    EmailRenderer,  # noqa: TCH001
+    EmailRenderer,
 )
 from great_expectations.render.renderer.microsoft_teams_renderer import (
-    MicrosoftTeamsRenderer,  # noqa: TCH001
+    MicrosoftTeamsRenderer,
 )
 from great_expectations.render.renderer.opsgenie_renderer import (
-    OpsgenieRenderer,  # noqa: TCH001
+    OpsgenieRenderer,
 )
 from great_expectations.render.renderer.slack_renderer import (
-    SlackRenderer,  # noqa: TCH001
+    SlackRenderer,
 )
 
 try:
@@ -234,7 +244,7 @@ class SlackNotificationAction(DataDocsAction):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        self._renderer = self._build_renderer(config=self.renderer)
+        self._renderer = cast(SlackRenderer, self._build_renderer(config=self.renderer))
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
@@ -501,7 +511,9 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        self._renderer = self._build_renderer(config=self.renderer)
+        self._renderer = cast(
+            MicrosoftTeamsRenderer, self._build_renderer(config=self.renderer)
+        )
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -599,7 +611,9 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
-        self._renderer = self._build_renderer(config=self.renderer)
+        self._renderer = cast(
+            OpsgenieRenderer, self._build_renderer(config=self.renderer)
+        )
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -732,7 +746,7 @@ class EmailAction(ValidationAction):
         self._receiver_emails_list = list(
             map(lambda x: x.strip(), self.receiver_emails.split(","))
         )
-        self._renderer = self._build_renderer(config=self.renderer)
+        self._renderer = cast(EmailRenderer, self._build_renderer(config=self.renderer))
 
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
