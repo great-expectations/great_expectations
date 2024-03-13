@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type
+from typing import Type, Union
 from unittest import mock
 
 import pytest
@@ -16,7 +16,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
-from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.compatibility.pydantic import ValidationError, parse_obj_as
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -779,14 +779,30 @@ def test_cloud_sns_notification_action(
     ],
 )
 @pytest.mark.unit
-def test_action_serialization(
+def test_action_serialization_and_deserialization(
     mock_context,
     action_class: Type[ValidationAction],
     init_params: dict,
     expected: dict,
 ):
     action = action_class(**init_params)
+
+    # Test serialization
     json_dict = action.json()
     actual = json.loads(json_dict)
-
     assert actual == expected
+
+    # Test deserialization
+    parsed_obj = parse_obj_as(
+        Union[
+            SlackNotificationAction,
+            MicrosoftTeamsNotificationAction,
+            OpsgenieAlertAction,
+            EmailAction,
+            UpdateDataDocsAction,
+            SNSNotificationAction,
+            APINotificationAction,
+        ],
+        actual,
+    )
+    assert isinstance(parsed_obj, action_class)
