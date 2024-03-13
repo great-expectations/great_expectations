@@ -691,7 +691,7 @@ class EmailAction(ValidationAction):
         "module_name": "great_expectations.render.renderer.email_renderer",
     }
 
-    _receiver_emails_list: list[str] = PrivateAttr()
+    _receiver_emails_list: List[str] = PrivateAttr()
 
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
