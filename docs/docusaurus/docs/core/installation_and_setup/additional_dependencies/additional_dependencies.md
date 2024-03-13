@@ -19,7 +19,7 @@ Some environments and Data Sources require additional Python libraries or third 
   {label: 'Amazon S3', value:'amazon'},
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
   {label: 'Google Cloud Storage', value:'gcs'},
-  {label: 'SQL Databases', value:'sql'},
+  {label: 'SQL databases', value:'sql'},
   ]}>
 <TabItem value="amazon">
 
