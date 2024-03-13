@@ -41,13 +41,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.render.renderer.renderer import Renderer  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -212,6 +212,8 @@ class SlackNotificationAction(DataDocsAction):
         "module_name": "great_expectations.render.renderer.slack_renderer",
     }
 
+    _renderer: Renderer = PrivateAttr()
+
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
         slack_token = values["slack_token"]
@@ -228,6 +230,8 @@ class SlackNotificationAction(DataDocsAction):
             raise ValueError(
                 "Please provide either slack_webhook or slack_token and slack_channel"
             )
+
+        values["_renderer"] = cls._build_renderer(config=values["renderer"])
 
         return values
 
@@ -300,8 +304,7 @@ class SlackNotificationAction(DataDocsAction):
             or self.notify_on == "failure"
             and not validation_success
         ):
-            renderer = self._build_renderer(config=self.renderer)
-            query: Dict = renderer.render(
+            query: Dict = self._renderer.render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -474,6 +477,13 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
     }
 
+    _renderer: Renderer = PrivateAttr()
+
+    @root_validator
+    def _root_validate_microsoft_teams_params(cls, values: dict) -> dict:
+        values["_renderer"] = cls._build_renderer(config=values["renderer"])
+        return values
+
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
@@ -518,8 +528,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             or self.notify_on == "failure"
             and not validation_success
         ):
-            renderer = self._build_renderer(config=self.renderer)
-            query = renderer.render(
+            query = self._renderer.render(
                 validation_result_suite,
                 validation_result_suite_identifier,
                 data_docs_pages,
@@ -566,6 +575,13 @@ class OpsgenieAlertAction(ValidationAction):
         "class_name": "OpsgenieRenderer",
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
     }
+
+    _renderer: Renderer = PrivateAttr()
+
+    @root_validator
+    def _root_validate_opsgenie_params(cls, values: dict) -> dict:
+        values["_renderer"] = cls._build_renderer(config=values["renderer"])
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -616,8 +632,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "tags": self.tags,
             }
 
-            renderer = self._build_renderer(config=self.renderer)
-            description = renderer.render(validation_result_suite, None, None)
+            description = self._renderer.render(validation_result_suite, None, None)
 
             alert_result = send_opsgenie_alert(
                 description, expectation_suite_name, settings
@@ -692,6 +707,7 @@ class EmailAction(ValidationAction):
     }
 
     _receiver_emails_list: List[str] = PrivateAttr()
+    _renderer: Renderer = PrivateAttr()
 
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
@@ -712,6 +728,8 @@ class EmailAction(ValidationAction):
                 "No password found for sending the email in action config."
                 "This will only work for email server that does not require authentication."
             )
+
+        values["_renderer"] = cls._build_renderer(config=values["renderer"])
 
         return values
 
@@ -758,8 +776,7 @@ class EmailAction(ValidationAction):
             or (self.notify_on == "success" and validation_success)
             or (self.notify_on == "failure" and not validation_success)
         ):
-            renderer = self._build_renderer(config=self.renderer)
-            title, html = renderer.render(
+            title, html = self._renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
             # this will actually send the email
