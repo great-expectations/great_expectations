@@ -28,7 +28,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Install additional dependencies',
-          link: {type: 'doc', id: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies'},
+          link: {type: 'doc', id: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies/additional_dependencies'},
           items: [
             {
               type: 'link',
