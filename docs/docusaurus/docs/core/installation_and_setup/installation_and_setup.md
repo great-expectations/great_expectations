@@ -13,12 +13,15 @@ import GxData from '../../components/_data.jsx';
 
 <OverviewCard title={frontMatter.title}>
 
-  To use GX 1.0, you'll install Python, the GX Python library, and additional dependencies for your deployment environment or preferred Data Source.
+  To use GX 1.0, you'll install Python, the GX Python library, and additional dependencies for your deployment environment or your preferred Data Source.
 
 </OverviewCard>
 
-<LinkCardGrid>
+## Install GX 1.0 and dependencies
 
+After you install GX 1.0, you might need to install additional Python libraries or third party utilities for your deployment environment or preferred Data Sources.
+
+<LinkCardGrid>
   <LinkCard 
     topIcon 
     label="Install GX 1.0"
@@ -26,14 +29,6 @@ import GxData from '../../components/_data.jsx';
     to="/core/installation_and_setup/install_gx" 
     icon="/img/expectation_icon.svg" 
   />
-
-</LinkCardGrid>
-
-## Install additional dependencies
-
-Some environments and Data Sources utilize additional Python libraries or third party utilities that are not included in the base installation of Great Expectations (GX).  If your use cases involve any of the following, follow the corresponding guidance to install the necessary dependencies.
-
-<LinkCardGrid>
   <LinkCard 
     topIcon 
     label="Amazon S3"
@@ -64,7 +59,7 @@ Some environments and Data Sources utilize additional Python libraries or third 
   />
 </LinkCardGrid>
 
-## Manage a GX project
+## Manage a GX 1.0 project
 
 A Data Context is your entry point to managing a Great Expectations (GX) project. It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It contains your Validation Results and the metrics associated with them. The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API.
 
