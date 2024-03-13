@@ -19,6 +19,18 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.render.renderer.email_renderer import (
+    EmailRenderer,  # noqa: TCH001
+)
+from great_expectations.render.renderer.microsoft_teams_renderer import (
+    MicrosoftTeamsRenderer,  # noqa: TCH001
+)
+from great_expectations.render.renderer.opsgenie_renderer import (
+    OpsgenieRenderer,  # noqa: TCH001
+)
+from great_expectations.render.renderer.slack_renderer import (
+    SlackRenderer,  # noqa: TCH001
+)
 
 try:
     import pypd
@@ -41,13 +53,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
-from great_expectations.render.renderer.renderer import Renderer  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +224,7 @@ class SlackNotificationAction(DataDocsAction):
         "module_name": "great_expectations.render.renderer.slack_renderer",
     }
 
-    _renderer: Renderer = PrivateAttr()
+    _renderer: SlackRenderer = PrivateAttr()
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
@@ -477,7 +489,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
     }
 
-    _renderer: Renderer = PrivateAttr()
+    _renderer: MicrosoftTeamsRenderer = PrivateAttr()
 
     @root_validator
     def _root_validate_microsoft_teams_params(cls, values: dict) -> dict:
@@ -576,7 +588,7 @@ class OpsgenieAlertAction(ValidationAction):
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
     }
 
-    _renderer: Renderer = PrivateAttr()
+    _renderer: OpsgenieRenderer = PrivateAttr()
 
     @root_validator
     def _root_validate_opsgenie_params(cls, values: dict) -> dict:
@@ -707,7 +719,7 @@ class EmailAction(ValidationAction):
     }
 
     _receiver_emails_list: List[str] = PrivateAttr()
-    _renderer: Renderer = PrivateAttr()
+    _renderer: EmailRenderer = PrivateAttr()
 
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
