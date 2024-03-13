@@ -129,8 +129,17 @@ class ValidationAction:
         return NotImplementedError
 
 
+class DataDocsAction(ValidationAction):
+    def __init__(self) -> None:
+        from great_expectations import project_manager
+
+        super().__init__()
+        self._build_data_docs = project_manager.build_data_docs
+        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+
+
 @public_api
-class SlackNotificationAction(ValidationAction):
+class SlackNotificationAction(DataDocsAction):
     """Sends a Slack notification to a given webhook.
 
     ```yaml
@@ -925,15 +934,6 @@ class StoreValidationResultAction(ValidationAction):
         # ValidationResultIdentifier has no `.id`
         validation_result_suite_identifier.id = new_id  # type: ignore[union-attr]
         return gx_cloud_resource_ref
-
-
-class DataDocsAction(ValidationAction):
-    def __init__(self) -> None:
-        from great_expectations import project_manager
-
-        super().__init__()
-        self._build_data_docs = project_manager.build_data_docs
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
 
 
 @public_api
