@@ -329,7 +329,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
 
@@ -365,7 +365,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
     assert teams_action.run(
@@ -378,7 +378,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
     assert teams_action.run(
@@ -395,7 +395,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
     assert teams_action.run(
@@ -410,7 +410,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
     assert teams_action.run(
@@ -438,7 +438,7 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
         renderer=renderer,
-        microsoft_teams_webhook=teams_webhook,
+        teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
     assert teams_action.run(

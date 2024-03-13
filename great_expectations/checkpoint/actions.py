@@ -18,6 +18,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
 )
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.render.renderer.email_renderer import (
     EmailRenderer,  # noqa: TCH001
@@ -835,6 +836,11 @@ class StoreValidationResultAction(ValidationAction):
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
+    class Config:
+        arbitrary_types_allowed = True
+
+    _target_store: Store = PrivateAttr()
+
     def __init__(
         self,
         data_context: AbstractDataContext,
@@ -842,9 +848,11 @@ class StoreValidationResultAction(ValidationAction):
     ) -> None:
         super().__init__()
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
+            self._target_store = data_context.stores[
+                data_context.validations_store_name
+            ]
         else:
-            self.target_store = data_context.stores[target_store_name]
+            self._target_store = data_context.stores[target_store_name]
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -905,7 +913,7 @@ class StoreValidationResultAction(ValidationAction):
         if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_id = expectation_suite_identifier.id
 
-        return self.target_store.set(
+        return self._target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             checkpoint_id=checkpoint_id,
