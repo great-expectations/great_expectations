@@ -54,7 +54,7 @@ After you install GX 1.0, you might need to install additional Python libraries 
   />
 <LinkCard 
     topIcon 
-    label="SQL Data Sources"
+    label="SQL databases"
     description="Install and set up support for SQL Data Sources and GX"
     to="/core/installation_and_setup/additional_dependencies?dependencies=sql" 
     icon="/img/expectation_icon.svg" 
