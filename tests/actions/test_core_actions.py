@@ -788,6 +788,4 @@ def test_action_serialization(
     json_dict = action.json()
     actual = json.loads(json_dict)
 
-    # Add deserialization test
-
     assert actual == expected
