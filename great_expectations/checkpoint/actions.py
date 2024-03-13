@@ -14,6 +14,7 @@ import requests
 
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    PrivateAttr,
     root_validator,
 )
 from great_expectations.compatibility.typing_extensions import override
@@ -690,88 +691,29 @@ class EmailAction(ValidationAction):
         "module_name": "great_expectations.render.renderer.email_renderer",
     }
 
+    _receiver_emails_list: list[str] = PrivateAttr()
+
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
         if not values["sender_alias"]:
             values["sender_alias"] = values["sender_login"]
 
-        values["receiver_emails_list"] = list(
+        values["_receiver_emails_list"] = list(
             map(lambda x: x.strip(), values["receiver_emails"].split(","))
         )
 
-        # assert (
-        #     receiver_emails
-        # ), "No email addresses to send the email to in action config."
-        # if not sender_login:
-        #     logger.warning(
-        #         "No login found for sending the email in action config. "
-        #         "This will only work for email server that does not require authentication."
-        #     )
-        # if not sender_password:
-        #     logger.warning(
-        #         "No password found for sending the email in action config."
-        #         "This will only work for email server that does not require authentication."
-        #     )
-        # self.notify_on = notify_on
-        # self.notify_with = notify_with
-
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        smtp_address: str,
-        smtp_port: str,
-        receiver_emails: str,
-        sender_login: Optional[str] = None,
-        sender_password: Optional[str] = None,
-        sender_alias: Optional[str] = None,
-        use_tls: Optional[bool] = None,
-        use_ssl: Optional[bool] = None,
-        notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
-    ) -> None:
-        """Create an EmailAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        self.smtp_address = smtp_address
-        self.smtp_port = smtp_port
-        self.sender_login = sender_login
-        self.sender_password = sender_password
-        if not sender_alias:
-            self.sender_alias = sender_login
-        else:
-            self.sender_alias = sender_alias
-        self.receiver_emails_list = list(
-            map(lambda x: x.strip(), receiver_emails.split(","))
-        )
-        self.use_tls = use_tls
-        self.use_ssl = use_ssl
-        assert smtp_address, "No SMTP server address found in action config."
-        assert smtp_port, "No SMTP server port found in action config."
-        assert (
-            receiver_emails
-        ), "No email addresses to send the email to in action config."
-        if not sender_login:
+        if not values["sender_login"]:
             logger.warning(
                 "No login found for sending the email in action config. "
                 "This will only work for email server that does not require authentication."
             )
-        if not sender_password:
+        if not values["sender_password"]:
             logger.warning(
                 "No password found for sending the email in action config."
                 "This will only work for email server that does not require authentication."
             )
-        self.notify_on = notify_on
-        self.notify_with = notify_with
+
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -816,7 +758,8 @@ class EmailAction(ValidationAction):
             or (self.notify_on == "success" and validation_success)
             or (self.notify_on == "failure" and not validation_success)
         ):
-            title, html = self.renderer.render(
+            renderer = self._build_renderer(config=self.renderer)
+            title, html = renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
             # this will actually send the email
@@ -828,7 +771,7 @@ class EmailAction(ValidationAction):
                 self.sender_login,
                 self.sender_password,
                 self.sender_alias,
-                self.receiver_emails_list,
+                self._receiver_emails_list,
                 self.use_tls,
                 self.use_ssl,
             )
@@ -976,15 +919,7 @@ class UpdateDataDocsAction(DataDocsAction):
         site_names: Optional. A list of the names of sites to update.
     """
 
-    def __init__(
-        self,
-        site_names: list[str] | None = None,
-    ) -> None:
-        """
-        :param site_names: *optional* List of site names for building data docs
-        """
-        super().__init__()
-        self._site_names = site_names
+    site_names: list[str] = []
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1061,14 +996,8 @@ class SNSNotificationAction(ValidationAction):
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
-    def __init__(
-        self,
-        sns_topic_arn: str,
-        sns_message_subject: Optional[str],
-    ) -> None:
-        """Inits SNSNotificationAction."""
-        self.sns_topic_arn = sns_topic_arn
-        self.sns_message_subject = sns_message_subject
+    sns_topic_arn: str
+    sns_message_subject: Optional[str]
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1108,8 +1037,7 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, url) -> None:
-        self.url = url
+    url: str
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
