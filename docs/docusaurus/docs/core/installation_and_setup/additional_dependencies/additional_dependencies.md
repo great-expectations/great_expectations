@@ -1,13 +1,15 @@
 ---
 title: Install additional dependencies
 id: additional_dependencies
+toc_min_heading_level: 3
+toc_max_heading_level: 3
 ---
 
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
 
-Some environments and Data Sources require additional Python libraries or third party utilities that are not included in the base installation of GX Core. Use the information provided here to install the necessary dependencies for Amazon S3, Azure Blob Storage, Google Cloud Storage, and SQL Data Sources.
+Some environments and Data Sources require additional Python libraries or third party utilities that are not included in the base installation of GX Core. Use the information provided here to install the necessary dependencies for Amazon S3, Azure Blob Storage, Google Cloud Storage, and SQL databases.
 
 <Tabs
   queryString="dependencies"
@@ -21,7 +23,7 @@ Some environments and Data Sources require additional Python libraries or third 
   ]}>
 <TabItem value="amazon">
 
-Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon.com).  With it, you can access objects stored in S3 buckets through a web interface.  Great Expectations (GX) uses the Python library `boto3` to access S3, but you will need to configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
+GX Core uses the Python library `boto3` to access objects stored in Amazon S3 buckets, but you must configure your Amazon S3 account and credentials through AWS and the AWS command line interface (CLI).
 
 ## Prerequisites
 
@@ -31,7 +33,7 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
 
 ## Installation
 
-1. Verify the installation of the AWS CLI by running the command:
+1. Run the following code to verify the AWS CLI version:
 
   ```bash title="Terminal command"
   aws --version
@@ -39,37 +41,37 @@ Amazon S3 is a service offered by [Amazon Web Services (AWS)](https://aws.amazon
 
   If this command does not return AWS CLI version information, reinstall or update the AWS CLI.  See [Install or update to the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
-2. Verify that your AWS credentials are properly configured by running the command:
+2. Run the following code to verify your AWS credentials are properly configured:
 
   ```bash title="Terminal command"
   aws sts get-caller-identity
   ```
 
-  If your credentials are properly configured, this will output your `UserId`, `Account` and `Arn`.  If your credentials are not configured correctly, this will throw an error.
+  If your credentials are properly configured, the output `UserId`, `Account` and `Arn` appears.  If your credentials are not configured correctly, an error message appears.
 
-  If an error is thrown, or if you were unable to use the AWS CLI to verify your credentials' configuration, you can find additional guidance on configuring your AWS credentials by referencing [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+  If an error message appears, or if you can't use the AWS CLI to verify your credentials, see [Configure the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
   
 3. Install the Python dependencies for AWS S3 support.
 
   :::info 
   
-  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
+  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment), your environment should be active when you install these dependencies.
   
   :::
 
-  To install the optional dependencies required by GX to work with AWS S3, run the command:
+  Run the following code to install the optional dependencies required by GX to work with AWS S3:
 
   ```bash title="Terminal input"
   python -m pip install 'great_expectations[s3]'
   ```
 
-  This will install Great Expectations along with the requirements for the `boto3` Python library.
+  GX Core and the requirements for the `boto3` Python library are installed.
 
 
 </TabItem>
 <TabItem value="azure">
 
-Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with Great Expectations (GX) you install additional Python libraries and define a connection string.
+Azure Blob Storage stores unstructured data on the Microsoft cloud data storage platform. To validate Azure Blob Storage data with GX Core you install additional Python libraries and define a connection string.
 
 ## Prerequisites
 
@@ -84,11 +86,11 @@ Azure Blob Storage stores unstructured data on the Microsoft cloud data storage 
 
   :::info 
   
-  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment) then that environment should be active when installing these dependencies.
+  If you [installed GX in a virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment), your environment should be active when you install these dependencies.
   
   :::
 
-  To install Great Expectations with the additional Python libraries needed to work with Azure Blob Storage run the following command:
+  Run the following code to install GX Core with the additional Python libraries needed to work with Azure Blob Storage:
 
   ```bash title="Terminal input"
   python -m pip install 'great_expectations[azure]'
@@ -96,17 +98,17 @@ Azure Blob Storage stores unstructured data on the Microsoft cloud data storage 
 
 2. Configure your Azure Blob Storage credentials.
 
-  You can manage your credentials by storing them as environment variables.  To do this, you will enter `export ENV_VARIABLE_NAME=env_var_value` in the terminal or adding the equivalent command to your `~/.bashrc` file.  For Azure Blob Storage credentials, that should look like:
+  You can manage your credentials by storing them as environment variables.  To do this, enter `export ENV_VARIABLE_NAME=env_var_value` in the terminal or add the equivalent command to your `~/.bashrc` file. For example:
 
   ```title="Terminal input"
   export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY>"
   ```
 
-  When entering this command, replace `<YOUR-STORAGE-ACCOUNT-NAME>` and `<YOUR-STORAGE-ACCOUNT-KEY>` with the appropriate values for your Azure Blob Storage account.
+  When entering this command, replace `<YOUR-STORAGE-ACCOUNT-NAME>` and `<YOUR-STORAGE-ACCOUNT-KEY>` with your Azure Blob Storage account values.
 
   :::info 
   
-  If you do not want to store your credentials as environment variables, you can alternatively [store them in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md?credential-style=yaml) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
+  If you do not want to store your credentials as environment variables, you can [store them in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md?credential-style=yaml) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
   
   :::
 
