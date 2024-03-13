@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 
 import requests
 
@@ -47,7 +47,7 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer import Renderer
+    from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ class SlackNotificationAction(DataDocsAction):
     slack_token: Optional[str] = None
     slack_channel: Optional[str] = None
     notify_on: Literal["all", "failure", "success"] = "all"
-    notify_with: Optional[list[str]] = None
+    notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
     renderer: dict = {
         "class_name": "SlackRenderer",
@@ -467,7 +467,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    microsoft_teams_webhook: str
+    teams_webhook: str
     notify_on: Literal["all", "failure", "success"] = "all"
     renderer: dict = {
         "class_name": "MicrosoftTeamsRenderer",
@@ -561,7 +561,7 @@ class OpsgenieAlertAction(ValidationAction):
     region: Optional[str] = None
     priority: Literal["P1", "P2", "P3", "P4", "P5"] = "P3"
     notify_on: Literal["all", "failure", "success"] = "failure"
-    tags: Optional[list[str]] = None
+    tags: Optional[List[str]] = None
     renderer: dict = {
         "class_name": "OpsgenieRenderer",
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
@@ -685,7 +685,7 @@ class EmailAction(ValidationAction):
     use_tls: Optional[bool] = None
     use_ssl: Optional[bool] = None
     notify_on: Literal["all", "failure", "success"] = "all"
-    notify_with: Optional[list[str]] = None
+    notify_with: Optional[List[str]] = None
     renderer: dict = {
         "class_name": "EmailRenderer",
         "module_name": "great_expectations.render.renderer.email_renderer",
@@ -919,7 +919,7 @@ class UpdateDataDocsAction(DataDocsAction):
         site_names: Optional. A list of the names of sites to update.
     """
 
-    site_names: list[str] = []
+    site_names: List[str] = []
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -954,7 +954,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # TODO Update for RenderedDataDocs
         # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
         self._build_data_docs(
-            site_names=self._site_names,
+            site_names=self.site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
                 expectation_suite_identifier,
@@ -967,7 +967,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # get the URL for the validation result
         docs_site_urls_list = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,
+            site_names=self.site_names,
         )
         # process payload
         for sites in docs_site_urls_list:
