@@ -928,7 +928,7 @@ class StoreValidationResultAction(ValidationAction):
         if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_id = expectation_suite_identifier.id
 
-        return self._target_store.set(
+        return self._target_store.set(  # type: ignore[func-returns-value]
             validation_result_suite_identifier,
             validation_result_suite,
             checkpoint_id=checkpoint_id,
