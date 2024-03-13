@@ -12,7 +12,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Install and configure GX 1.0',
+      label: 'Install and manage GX 1.0',
       link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
       items: [
         {

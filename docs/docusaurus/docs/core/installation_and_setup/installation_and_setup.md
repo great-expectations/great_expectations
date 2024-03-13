@@ -1,7 +1,9 @@
 ---
-title: 'Install and configure GX 1.0'
+title: 'Install and manage GX 1.0'
 hide_feedback_survey: true
 hide_title: true
+toc_min_heading_level: 3
+toc_max_heading_level: 3
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
@@ -19,7 +21,7 @@ import GxData from '../../components/_data.jsx';
 
 ## Install GX 1.0 and dependencies
 
-After you install GX 1.0, you might need to install additional Python libraries or third party utilities for your deployment environment or preferred Data Sources.
+After you install GX 1.0, you might need to install additional Python libraries or third party utilities for your deployment environment or your preferred Data Sources.
 
 <LinkCardGrid>
   <LinkCard 
