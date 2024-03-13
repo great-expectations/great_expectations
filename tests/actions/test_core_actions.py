@@ -604,7 +604,7 @@ def test_EmailAction(
 def test_api_action_create_payload():
     mock_validation_results = []
     expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
-    api_notification_action = APINotificationAction("http://www.example.com")
+    api_notification_action = APINotificationAction(url="http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
     )
@@ -622,7 +622,7 @@ def test_api_action_run(
     mock_response = mocker.MagicMock()
     mock_response.status_code = 200
     mock_requests.post.return_value = mock_response
-    api_notification_action = APINotificationAction("http://www.example.com")
+    api_notification_action = APINotificationAction(url="http://www.example.com")
     response = api_notification_action.run(
         validation_result_suite, validation_result_suite_id, file_data_asset
     )

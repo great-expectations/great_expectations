@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 import requests
 
@@ -61,10 +61,10 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, **data: Any) -> None:
         from great_expectations import project_manager
 
-        super().__init__()
+        super().__init__(**data)
         self._using_cloud_context = project_manager.is_using_cloud()
 
     @public_api
@@ -152,10 +152,10 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
-    def __init__(self) -> None:
+    def __init__(self, **data: Any) -> None:
         from great_expectations import project_manager
 
-        super().__init__()
+        super().__init__(**data)
         self._build_data_docs = project_manager.build_data_docs
         self._get_docs_sites_urls = project_manager.get_docs_sites_urls
 
