@@ -85,7 +85,6 @@ class Validator:
 
     @property
     def active_batch_id(self) -> Optional[str]:
-        # See validation_operators line 343
         return self._wrapped_validator.active_batch_id
 
     @cached_property
