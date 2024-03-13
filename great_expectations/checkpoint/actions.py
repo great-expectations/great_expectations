@@ -232,6 +232,10 @@ class SlackNotificationAction(DataDocsAction):
 
     _renderer: SlackRenderer = PrivateAttr()
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._renderer = self._build_renderer(config=self.renderer)
+
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
         slack_token = values["slack_token"]
@@ -248,8 +252,6 @@ class SlackNotificationAction(DataDocsAction):
             raise ValueError(
                 "Please provide either slack_webhook or slack_token and slack_channel"
             )
-
-        values["_renderer"] = cls._build_renderer(config=values["renderer"])
 
         return values
 
@@ -497,10 +499,9 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     _renderer: MicrosoftTeamsRenderer = PrivateAttr()
 
-    @root_validator
-    def _root_validate_microsoft_teams_params(cls, values: dict) -> dict:
-        values["_renderer"] = cls._build_renderer(config=values["renderer"])
-        return values
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._renderer = self._build_renderer(config=self.renderer)
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -596,10 +597,9 @@ class OpsgenieAlertAction(ValidationAction):
 
     _renderer: OpsgenieRenderer = PrivateAttr()
 
-    @root_validator
-    def _root_validate_opsgenie_params(cls, values: dict) -> dict:
-        values["_renderer"] = cls._build_renderer(config=values["renderer"])
-        return values
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._renderer = self._build_renderer(config=self.renderer)
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -727,14 +727,17 @@ class EmailAction(ValidationAction):
     _receiver_emails_list: List[str] = PrivateAttr()
     _renderer: EmailRenderer = PrivateAttr()
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        self._receiver_emails_list = list(
+            map(lambda x: x.strip(), self.receiver_emails.split(","))
+        )
+        self._renderer = self._build_renderer(config=self.renderer)
+
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
         if not values["sender_alias"]:
             values["sender_alias"] = values["sender_login"]
-
-        values["_receiver_emails_list"] = list(
-            map(lambda x: x.strip(), values["receiver_emails"].split(","))
-        )
 
         if not values["sender_login"]:
             logger.warning(
@@ -746,8 +749,6 @@ class EmailAction(ValidationAction):
                 "No password found for sending the email in action config."
                 "This will only work for email server that does not require authentication."
             )
-
-        values["_renderer"] = cls._build_renderer(config=values["renderer"])
 
         return values
 

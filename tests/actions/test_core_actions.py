@@ -13,6 +13,7 @@ from great_expectations.checkpoint.actions import (
     SNSNotificationAction,
 )
 from great_expectations.checkpoint.util import smtplib
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -185,7 +186,7 @@ def test_SlackNotificationAction(
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # Test with just slack_token set; expect fail
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValidationError):
         SlackNotificationAction(
             renderer=renderer,
             slack_token=slack_token,
@@ -193,7 +194,7 @@ def test_SlackNotificationAction(
         )
 
     # Test with just slack_channel set; expect fail
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValidationError):
         slack_action = SlackNotificationAction(
             renderer=renderer,
             slack_channel=slack_channel,
@@ -201,7 +202,7 @@ def test_SlackNotificationAction(
         )
 
     # Test with slack_channel, slack_token, and slack_webhook set; expect fail
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValidationError):
         SlackNotificationAction(
             renderer=renderer,
             slack_channel=slack_channel,
