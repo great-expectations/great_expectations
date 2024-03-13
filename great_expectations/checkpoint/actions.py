@@ -8,10 +8,14 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Union
 
 import requests
 
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    root_validator,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -42,12 +46,13 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.render.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
 
 @public_api
-class ValidationAction:
+class ValidationAction(BaseModel):
     """
     ValidationActions define a set of steps to be run after a validation result is produced.
 
@@ -58,6 +63,7 @@ class ValidationAction:
     def __init__(self) -> None:
         from great_expectations import project_manager
 
+        super().__init__()
         self._using_cloud_context = project_manager.is_using_cloud()
 
     @public_api
@@ -128,6 +134,21 @@ class ValidationAction:
         """
         return NotImplementedError
 
+    @staticmethod
+    def _build_renderer(config: dict) -> Renderer:
+        renderer = instantiate_class_from_config(
+            config=config,
+            runtime_environment={},
+            config_defaults={},
+        )
+        if not renderer:
+            raise ClassInstantiationError(
+                module_name=config.get("module_name"),
+                package_name=None,
+                class_name=config.get("class_name"),
+            )
+        return renderer
+
 
 class DataDocsAction(ValidationAction):
     def __init__(self) -> None:
@@ -179,42 +200,35 @@ class SlackNotificationAction(DataDocsAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        slack_webhook: Optional[str] = None,
-        slack_token: Optional[str] = None,
-        slack_channel: Optional[str] = None,
-        notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
-        show_failed_expectations: bool = False,
-    ) -> None:
-        """Create a SlackNotificationAction"""
-        super().__init__()
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        if not slack_token and slack_channel:
-            assert slack_webhook
-        if not slack_webhook:
-            assert slack_token and slack_channel
-        assert not (slack_webhook and slack_channel and slack_token)
+    slack_webhook: Optional[str] = None
+    slack_token: Optional[str] = None
+    slack_channel: Optional[str] = None
+    notify_on: Literal["all", "failure", "success"] = "all"
+    notify_with: Optional[list[str]] = None
+    show_failed_expectations: bool = False
+    renderer: dict = {
+        "class_name": "SlackRenderer",
+        "module_name": "great_expectations.render.renderer.slack_renderer",
+    }
 
-        self.slack_webhook = slack_webhook
-        self.slack_token = slack_token
-        self.slack_channel = slack_channel
-        self.notify_on = notify_on
-        self.notify_with = notify_with
-        self.show_failed_expectations = show_failed_expectations
+    @root_validator
+    def _root_validate_slack_params(cls, values: dict) -> dict:
+        slack_token = values["slack_token"]
+        slack_channel = values["slack_channel"]
+        slack_webhook = values["slack_webhook"]
+
+        try:
+            if not slack_token and slack_channel:
+                assert slack_webhook
+            if not slack_webhook:
+                assert slack_token and slack_channel
+            assert not (slack_webhook and slack_channel and slack_token)
+        except AssertionError:
+            raise ValueError(
+                "Please provide either slack_webhook or slack_token and slack_channel"
+            )
+
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
@@ -285,7 +299,8 @@ class SlackNotificationAction(DataDocsAction):
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query: Dict = self.renderer.render(
+            renderer = self._build_renderer(config=self.renderer)
+            query: Dict = renderer.render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -349,22 +364,16 @@ class PagerdutyAlertAction(ValidationAction):
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(
-        self,
-        api_key: str,
-        routing_key: str,
-        notify_on: str = "failure",
-        severity: str = "critical",
-    ) -> None:
-        """Create a PagerdutyAlertAction"""
+    api_key: str
+    routing_key: str
+    notify_on: Literal["all", "failure", "success"] = "failure"
+    severity: Literal["critical", "error", "warning", "info"] = "critical"
+
+    @root_validator
+    def _root_validate_deps(cls, values: dict) -> dict:
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
-        self.api_key = api_key
-        assert api_key, "No Pagerduty api_key found in action config."
-        self.routing_key = routing_key
-        assert routing_key, "No Pagerduty routing_key found in action config."
-        self.notify_on = notify_on
-        self.severity = severity
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -457,30 +466,12 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    def __init__(
-        self,
-        renderer: dict,
-        microsoft_teams_webhook: str,
-        notify_on: str = "all",
-    ) -> None:
-        """Create a MicrosoftTeamsNotificationAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        self.teams_webhook = microsoft_teams_webhook
-        assert (
-            microsoft_teams_webhook
-        ), "No Microsoft teams webhook found in action config."
-        self.notify_on = notify_on
+    microsoft_teams_webhook: str
+    notify_on: Literal["all", "failure", "success"] = "all"
+    renderer: dict = {
+        "class_name": "MicrosoftTeamsRenderer",
+        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+    }
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -526,7 +517,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(
+            renderer = self._build_renderer(config=self.renderer)
+            query = renderer.render(
                 validation_result_suite,
                 validation_result_suite_identifier,
                 data_docs_pages,
@@ -564,35 +556,15 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Tags to include in the alert
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        api_key: str,
-        region: Optional[str] = None,
-        priority: str = "P3",
-        notify_on: str = "failure",
-        tags: Optional[list[str]] = None,
-    ) -> None:
-        """Create an OpsgenieAlertAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-
-        self.api_key = api_key
-        assert api_key, "opsgenie_api_key missing in config_variables.yml"
-        self.region = region
-        self.priority = priority
-        self.notify_on = notify_on
-        self.tags = tags
+    api_key: str
+    region: Optional[str] = None
+    priority: Literal["P1", "P2", "P3", "P4", "P5"] = "P3"
+    notify_on: Literal["all", "failure", "success"] = "failure"
+    tags: Optional[list[str]] = None
+    renderer: dict = {
+        "class_name": "OpsgenieRenderer",
+        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+    }
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -643,7 +615,8 @@ class OpsgenieAlertAction(ValidationAction):
                 "tags": self.tags,
             }
 
-            description = self.renderer.render(validation_result_suite, None, None)
+            renderer = self._build_renderer(config=self.renderer)
+            description = renderer.render(validation_result_suite, None, None)
 
             alert_result = send_opsgenie_alert(
                 description, expectation_suite_name, settings
@@ -701,6 +674,46 @@ class EmailAction(ValidationAction):
         notify_on: "Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
+
+    smtp_address: str
+    smtp_port: str
+    receiver_emails: str
+    sender_login: Optional[str] = None
+    sender_password: Optional[str] = None
+    sender_alias: Optional[str] = None
+    use_tls: Optional[bool] = None
+    use_ssl: Optional[bool] = None
+    notify_on: Literal["all", "failure", "success"] = "all"
+    notify_with: Optional[list[str]] = None
+    renderer: dict = {
+        "class_name": "EmailRenderer",
+        "module_name": "great_expectations.render.renderer.email_renderer",
+    }
+
+    @root_validator
+    def _root_validate_email_params(cls, values: dict) -> dict:
+        if not values["sender_alias"]:
+            values["sender_alias"] = values["sender_login"]
+
+        values["receiver_emails_list"] = list(
+            map(lambda x: x.strip(), values["receiver_emails"].split(","))
+        )
+
+        # assert (
+        #     receiver_emails
+        # ), "No email addresses to send the email to in action config."
+        # if not sender_login:
+        #     logger.warning(
+        #         "No login found for sending the email in action config. "
+        #         "This will only work for email server that does not require authentication."
+        #     )
+        # if not sender_password:
+        #     logger.warning(
+        #         "No password found for sending the email in action config."
+        #         "This will only work for email server that does not require authentication."
+        #     )
+        # self.notify_on = notify_on
+        # self.notify_with = notify_with
 
     def __init__(  # noqa: PLR0913
         self,
