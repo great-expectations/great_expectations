@@ -97,183 +97,41 @@ majority of Data Context functionality lives here.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name to give the checkpoint.</p></li>
-
-<li>
-  <p>
-    <strong>config_version</strong> – The config version of this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>template_name</strong> – The template to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>module_name</strong> – The module name to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>class_name</strong> – The class name to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_name_template</strong> – The run name template to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_name</strong> – The expectation suite name to use
-    in generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>batch_request</strong> – The batch request to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>action_list</strong> – The action list to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>evaluation_parameters</strong> – The evaluation parameters to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>runtime_configuration</strong> – The runtime configuration to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>validations</strong> – The validations to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>profilers</strong> – The profilers to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>site_names</strong> – The site names to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>slack_webhook</strong> – The slack webhook to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>notify_on</strong> – The notify on setting to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>notify_with</strong> – The notify with setting to use in generating
-    this checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> – The GE Cloud ID to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_ge_cloud_id</strong> – The expectation suite GE
-    Cloud ID to use in generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>default_validation_id</strong> – The default validation ID to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>id</strong> – The ID to use in generating this checkpoint (preferred
-    over <cite>ge_cloud_id</cite>).
-  </p>
-</li>
+<li><p><strong>config_version</strong> – The config version of this checkpoint.</p></li>
+<li><p><strong>template_name</strong> – The template to use in generating this checkpoint.</p></li>
+<li><p><strong>module_name</strong> – The module name to use in generating this checkpoint.</p></li>
+<li><p><strong>class_name</strong> – The class name to use in generating this checkpoint.</p></li>
+<li><p><strong>run_name_template</strong> – The run name template to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_name</strong> – The expectation suite name to use in generating this checkpoint.</p></li>
+<li><p><strong>batch_request</strong> – The batch request to use in generating this checkpoint.</p></li>
+<li><p><strong>action_list</strong> – The action list to use in generating this checkpoint.</p></li>
+<li><p><strong>evaluation_parameters</strong> – The evaluation parameters to use in generating this checkpoint.</p></li>
+<li><p><strong>runtime_configuration</strong> – The runtime configuration to use in generating this checkpoint.</p></li>
+<li><p><strong>validations</strong> – The validations to use in generating this checkpoint.</p></li>
+<li><p><strong>profilers</strong> – The profilers to use in generating this checkpoint.</p></li>
+<li><p><strong>site_names</strong> – The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>slack_webhook</strong> – The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_on</strong> – The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_with</strong> – The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>ge_cloud_id</strong> – The GE Cloud ID to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_ge_cloud_id</strong> – The expectation suite GE Cloud ID to use in generating this checkpoint.</p></li>
+<li><p><strong>default_validation_id</strong> – The default validation ID to use in generating this checkpoint.</p></li>
+<li><p><strong>id</strong> – The ID to use in generating this checkpoint (preferred over <cite>ge_cloud_id</cite>).</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>ge_cloud_id</cite></p>
 </div>
 
 <li><p><strong>expectation_suite_id</strong> – The expectation suite ID to use in generating this checkpoint (preferred over <cite>expectation_suite_ge_cloud_id</cite>).</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>expectation_suite_ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>expectation_suite_ge_cloud_id</cite></p>
 </div>
-
-<li>
-  <p>
-    <strong>validator</strong> – An existing validator used to generate a
-    validations list.
-  </p>
-</li>
+<li><p><strong>validator</strong> – An existing validator used to generate a validations list.</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.16.15: </span>Pass in
-    an existing validator instead of individual validations
-  </p>
+<p><span class="versionmodified added">New in version 0.16.15: </span>Pass in an existing validator instead of individual validations</p>
 </div>
-
-<li>
-  <p>
-    <strong>checkpoint</strong> – An existing checkpoint you wish to persist.
-  </p>
-</li>
+<li><p><strong>checkpoint</strong> – An existing checkpoint you wish to persist.</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>Pass in
-    an existing checkpoint instead of individual constructor args
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>Pass in an existing checkpoint instead of individual constructor args</p>
 </div>
 </ul>
 </dd>
@@ -322,25 +180,11 @@ majority of Data Context functionality lives here.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – the name of the new Datasource to add</p></li>
-
-<li>
-  <p>
-    <strong>initialize</strong> – if False, add the Datasource to the config,
-    but do not initialize it, for example if a user needs to debug database
-    connectivity.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>datasource</strong> – an existing Datasource you wish to persist
-  </p>
-</li>
+<li><p><strong>initialize</strong> – if False, add the Datasource to the config, but do not
+initialize it, for example if a user needs to debug database connectivity.</p></li>
+<li><p><strong>datasource</strong> – an existing Datasource you wish to persist</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.49: </span>Pass in
-    an existing Datasource instead of individual constructor arguments
-  </p>
+<p><span class="versionmodified added">New in version 0.15.49: </span>Pass in an existing Datasource instead of individual constructor arguments</p>
 </div>
 <li><p><strong>kwargs</strong> – the configuration for the new Datasource</p></li>
 </ul>
@@ -364,26 +208,27 @@ majority of Data Context functionality lives here.</p>
 <p><span class="versionmodified added">New in version 0.15.48.</span></p>
 </div>
 <p>Note that this method can be called by itself or run within the get_validator workflow.</p>
-
 <p>When run with create_expectation_suite():</p>
-
 <div class="highlight-default notranslate"><div class="highlight">
-
+<pre>
 <span></span><span class="n">expectation_suite_name</span> <span class="o">=</span> <span class="s2">"genres_movies.fkey"</span>
 <span class="n">context</span><span class="o">.</span><span class="n">create_expectation_suite</span><span class="p">(</span><span class="n">expectation_suite_name</span><span class="p">,</span> <span class="n">overwrite_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">batch</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_batch_list</span><span class="p">(</span>
     <span class="n">expectation_suite_name</span><span class="o">=</span><span class="n">expectation_suite_name</span>
 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
 </div>
 <p>When run as part of get_validator():</p>
 <div class="highlight-default notranslate"><div class="highlight">
+<pre>
 <span></span><span class="n">validator</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_validator</span><span class="p">(</span>
-<span class="n">datasource_name</span><span class="o">=</span><span class="s2">"my_datasource"</span><span class="p">,</span>
-<span class="n">data_connector_name</span><span class="o">=</span><span class="s2">"whole_table"</span><span class="p">,</span>
-<span class="n">data_asset_name</span><span class="o">=</span><span class="s2">"my_table"</span><span class="p">,</span>
-<span class="n">create_expectation_suite_with_name</span><span class="o">=</span><span class="s2">"my_expectation_suite"</span><span class="p">,</span>
+    <span class="n">datasource_name</span><span class="o">=</span><span class="s2">"my_datasource"</span><span class="p">,</span>
+    <span class="n">data_connector_name</span><span class="o">=</span><span class="s2">"whole_table"</span><span class="p">,</span>
+    <span class="n">data_asset_name</span><span class="o">=</span><span class="s2">"my_table"</span><span class="p">,</span>
+    <span class="n">create_expectation_suite_with_name</span><span class="o">=</span><span class="s2">"my_expectation_suite"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">validator</span><span class="o">.</span><span class="n">expect_column_values_to_be_in_set</span><span class="p">(</span><span class="s2">"c1"</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
+</pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -408,6 +253,7 @@ majority of Data Context functionality lives here.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_or_update_checkpoint">
 <span class="sig-name descname"><span class="pre">add_or_update_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'great_expectations.checkpoint'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Checkpoint'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">ActionDict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profilers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slack_webhook</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite_ge_cloud_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_validation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../validator/validator/Validator_class" title="great_expectations.validator.validator.Validator"><span class="pre">great_expectations.validator.validator.Validator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="../checkpoint/Checkpoint_class" title="great_expectations.checkpoint.checkpoint.Checkpoint"><span class="pre">great_expectations.checkpoint.checkpoint.Checkpoint</span></a></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_or_update_checkpoint" title="Permalink to this definition">#</a>
@@ -424,156 +270,29 @@ majority of Data Context functionality lives here.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name to give the checkpoint.</p></li>
-
-<li>
-  <p>
-    <strong>id</strong> – The ID to associate with this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>config_version</strong> – The config version of this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>template_name</strong> – The template to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>module_name</strong> – The module name to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>class_name</strong> – The class name to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_name_template</strong> – The run name template to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_name</strong> – The expectation suite name to use
-    in generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>batch_request</strong> – The batch request to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>action_list</strong> – The action list to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>evaluation_parameters</strong> – The evaluation parameters to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>runtime_configuration</strong> – The runtime configuration to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>validations</strong> – The validations to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>profilers</strong> – The profilers to use in generating this
-    checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>site_names</strong> – The site names to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>slack_webhook</strong> – The slack webhook to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>notify_on</strong> – The notify on setting to use in generating this
-    checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>notify_with</strong> – The notify with setting to use in generating
-    this checkpoint. This is only used for SimpleCheckpoint configuration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_id</strong> – The expectation suite GE Cloud ID to
-    use in generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_ge_cloud_id</strong> – An alias for{" "}
-    <cite>expectation_suite_id</cite>.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>default_validation_id</strong> – The default validation ID to use in
-    generating this checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>validator</strong> – An existing validator used to generate a
-    validations list.
-  </p>
-</li>
+<li><p><strong>id</strong> – The ID to associate with this checkpoint.</p></li>
+<li><p><strong>config_version</strong> – The config version of this checkpoint.</p></li>
+<li><p><strong>template_name</strong> – The template to use in generating this checkpoint.</p></li>
+<li><p><strong>module_name</strong> – The module name to use in generating this checkpoint.</p></li>
+<li><p><strong>class_name</strong> – The class name to use in generating this checkpoint.</p></li>
+<li><p><strong>run_name_template</strong> – The run name template to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_name</strong> – The expectation suite name to use in generating this checkpoint.</p></li>
+<li><p><strong>batch_request</strong> – The batch request to use in generating this checkpoint.</p></li>
+<li><p><strong>action_list</strong> – The action list to use in generating this checkpoint.</p></li>
+<li><p><strong>evaluation_parameters</strong> – The evaluation parameters to use in generating this checkpoint.</p></li>
+<li><p><strong>runtime_configuration</strong> – The runtime configuration to use in generating this checkpoint.</p></li>
+<li><p><strong>validations</strong> – The validations to use in generating this checkpoint.</p></li>
+<li><p><strong>profilers</strong> – The profilers to use in generating this checkpoint.</p></li>
+<li><p><strong>site_names</strong> – The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>slack_webhook</strong> – The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_on</strong> – The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_with</strong> – The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>expectation_suite_id</strong> – The expectation suite GE Cloud ID to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_ge_cloud_id</strong> – An alias for <cite>expectation_suite_id</cite>.</p></li>
+<li><p><strong>default_validation_id</strong> – The default validation ID to use in generating this checkpoint.</p></li>
+<li><p><strong>validator</strong> – An existing validator used to generate a validations list.</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.16.15: </span>Pass in
-    an existing validator instead of individual validations
-  </p>
+<p><span class="versionmodified added">New in version 0.16.15: </span>Pass in an existing validator instead of individual validations</p>
 </div>
 <li><p><strong>checkpoint</strong> – An existing checkpoint you wish to persist.</p></li>
 </ul>
@@ -712,24 +431,10 @@ of their index.html files as values</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name of the target Checkpoint.</p></li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> – The id associated with the target Checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>id</strong> – The id associated with the target Checkpoint
-    (preferred over <cite>ge_cloud_id</cite>).
-  </p>
-</li>
+<li><p><strong>ge_cloud_id</strong> – The id associated with the target Checkpoint.</p></li>
+<li><p><strong>id</strong> – The id associated with the target Checkpoint (preferred over <cite>ge_cloud_id</cite>).</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>ge_cloud_id</cite></p>
 </div>
 </ul>
 </dd>
@@ -783,25 +488,10 @@ of their index.html files as values</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite_name</strong> – The name of the expectation suite to delete</p></li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> – The identifier of the expectation suite to
-    delete
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>id</strong> – The identifier of the expectation suite to delete
-    (preferred over <cite>ge_cloud_id</cite>)
-  </p>
-</li>
+<li><p><strong>ge_cloud_id</strong> – The identifier of the expectation suite to delete</p></li>
+<li><p><strong>id</strong> – The identifier of the expectation suite to delete (preferred over <cite>ge_cloud_id</cite>)</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>ge_cloud_id</cite></p>
 </div>
 </ul>
 </dd>
@@ -927,24 +617,10 @@ numbers retrieve from the end of the list (ex: <cite>-1</cite> retrieves the las
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name of the target Checkpoint.</p></li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> – The id associated with the target Checkpoint.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>id</strong> – The id associated with the target Checkpoint
-    (preferred over <cite>ge_cloud_id</cite>).
-  </p>
-</li>
+<li><p><strong>ge_cloud_id</strong> – The id associated with the target Checkpoint.</p></li>
+<li><p><strong>id</strong> – The id associated with the target Checkpoint (preferred over <cite>ge_cloud_id</cite>).</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>ge_cloud_id</cite></p>
 </div>
 </ul>
 </dd>
@@ -989,26 +665,11 @@ numbers retrieve from the end of the list (ex: <cite>-1</cite> retrieves the las
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expectation_suite_name</strong> (<em>str</em>) – The name of the Expectation Suite</p></li>
-
-<li>
-  <p>
-    <strong>include_rendered_content</strong> (<em>bool</em>) – Whether to
-    re-populate rendered_content for each ExpectationConfiguration.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> (<em>str</em>) – The GX Cloud ID for the
-    Expectation Suite (unused)
-  </p>
-</li>
+<li><p><strong>include_rendered_content</strong> (<em>bool</em>) – Whether to re-populate rendered_content for each
+ExpectationConfiguration.</p></li>
+<li><p><strong>ge_cloud_id</strong> (<em>str</em>) – The GX Cloud ID for the Expectation Suite (unused)</p></li>
 <div class="deprecated">
-  <p>
-    <span class="versionmodified deprecated">
-      Deprecated since version 0.15.45.
-    </span>
-  </p>
+<p><span class="versionmodified deprecated">Deprecated since version 0.15.45.</span></p>
 </div>
 </ul>
 </dd>
@@ -1151,133 +812,28 @@ numbers retrieve from the end of the list (ex: <cite>-1</cite> retrieves the las
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>checkpoint_name</strong> – The name of a Checkpoint defined via the CLI or by manually creating a yml file</p></li>
-
-<li>
-  <p>
-    <strong>template_name</strong> – The name of a Checkpoint template to
-    retrieve from the CheckpointStore
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_name_template</strong> – The template to use for run_name
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_name</strong> – Expectation suite to be used by
-    Checkpoint run
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>batch_request</strong> – Batch request to be used by Checkpoint run
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>action_list</strong> – List of actions to be performed by the
-    Checkpoint
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>evaluation_parameters</strong> – $parameter_name syntax references
-    to be evaluated at runtime
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>runtime_configuration</strong> – Runtime configuration override
-    parameters
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>validations</strong> – Validations to be performed by the Checkpoint
-    run
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>profilers</strong> – Profilers to be used by the Checkpoint run
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_id</strong> – The run_id for the validation; if None, a default
-    value will be used
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_name</strong> – The run_name for the validation; if None, a
-    default value will be used
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>run_time</strong> – The date/time of the run
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>result_format</strong> – One of several supported formatting
-    directives for expectation validation results
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>ge_cloud_id</strong> – Great Expectations Cloud id for the
-    checkpoint
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>expectation_suite_ge_cloud_id</strong> – An alias for{" "}
-    <cite>expectation_suite_id</cite>.
-  </p>
-</li>
-
-<li>
-  <p>
-    <strong>id</strong> – Great Expectations Cloud id for the checkpoint
-    (preferred over <cite>ge_cloud_id</cite>)
-  </p>
-</li>
+<li><p><strong>template_name</strong> – The name of a Checkpoint template to retrieve from the CheckpointStore</p></li>
+<li><p><strong>run_name_template</strong> – The template to use for run_name</p></li>
+<li><p><strong>expectation_suite_name</strong> – Expectation suite to be used by Checkpoint run</p></li>
+<li><p><strong>batch_request</strong> – Batch request to be used by Checkpoint run</p></li>
+<li><p><strong>action_list</strong> – List of actions to be performed by the Checkpoint</p></li>
+<li><p><strong>evaluation_parameters</strong> – $parameter_name syntax references to be evaluated at runtime</p></li>
+<li><p><strong>runtime_configuration</strong> – Runtime configuration override parameters</p></li>
+<li><p><strong>validations</strong> – Validations to be performed by the Checkpoint run</p></li>
+<li><p><strong>profilers</strong> – Profilers to be used by the Checkpoint run</p></li>
+<li><p><strong>run_id</strong> – The run_id for the validation; if None, a default value will be used</p></li>
+<li><p><strong>run_name</strong> – The run_name for the validation; if None, a default value will be used</p></li>
+<li><p><strong>run_time</strong> – The date/time of the run</p></li>
+<li><p><strong>result_format</strong> – One of several supported formatting directives for expectation validation results</p></li>
+<li><p><strong>ge_cloud_id</strong> – Great Expectations Cloud id for the checkpoint</p></li>
+<li><p><strong>expectation_suite_ge_cloud_id</strong> – An alias for <cite>expectation_suite_id</cite>.</p></li>
+<li><p><strong>id</strong> – Great Expectations Cloud id for the checkpoint (preferred over <cite>ge_cloud_id</cite>)</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>ge_cloud_id</cite></p>
 </div>
-
-<li>
-  <p>
-    <strong>expectation_suite_id</strong> – Great Expectations Cloud id for the
-    expectation suite (preferred over <cite>expectation_suite_ge_cloud_id</cite>
-    )
-  </p>
-</li>
+<li><p><strong>expectation_suite_id</strong> – Great Expectations Cloud id for the expectation suite (preferred over <cite>expectation_suite_ge_cloud_id</cite>)</p></li>
 <div class="versionadded">
-  <p>
-    <span class="versionmodified added">New in version 0.15.48: </span>To be
-    used in place of <cite>expectation_suite_ge_cloud_id</cite>
-  </p>
+<p><span class="versionmodified added">New in version 0.15.48: </span>To be used in place of <cite>expectation_suite_ge_cloud_id</cite></p>
 </div>
 <li><p><strong>**kwargs</strong> – Additional kwargs to pass to the validation operator</p></li>
 </ul>
@@ -1459,6 +1015,7 @@ The returned object is determined by return_mode.</p>
 <p>The updated project config.</p>
 </dd>
 </dl>
+</dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.view_validation_result">
 <span class="sig-name descname"><span class="pre">view_validation_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../checkpoint/types/checkpoint_result/CheckpointResult_class" title="great_expectations.checkpoint.types.checkpoint_result.CheckpointResult"><span class="pre">CheckpointResult</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.view_validation_result" title="Permalink to this definition">#</a>
@@ -1470,7 +1027,7 @@ The returned object is determined by return_mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd">
-<strong>result</strong> – The result of a Checkpoint run.
+<p><strong>result</strong> – The result of a Checkpoint run.</p>
 </dd>
 </dl>
 </dd></dl>
