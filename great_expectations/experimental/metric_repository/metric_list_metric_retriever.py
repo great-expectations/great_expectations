@@ -17,9 +17,11 @@ from great_expectations.experimental.metric_repository.metrics import (
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.validator.metrics_calculator import (
+        _MetricKey,
+    )
     from great_expectations.validator.validator import (
         Validator,
-        _MetricKey,
     )
 
 
