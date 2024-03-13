@@ -328,7 +328,7 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
 @pytest.mark.filesystem
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
-    mock_update_by_name: mock.MagicMock,
+    mock_update_by_name: mock.MagicMock,  # noqa: TID251
     data_context_parameterized_expectation_suite,
 ) -> None:
     context = data_context_parameterized_expectation_suite
@@ -1164,12 +1164,6 @@ def test_run_checkpoint_new_style(
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1450,10 +1444,6 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
             {
                 "name": "store_validation_result",
                 "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
             },
             {
                 "name": "update_data_docs",

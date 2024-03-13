@@ -263,7 +263,7 @@ def test_add_datasource_with_existing_datasource(
     "datasource, datasource_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_datasource",
             "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
@@ -278,7 +278,7 @@ def test_add_datasource_with_existing_datasource(
 )
 def test_add_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,
+    datasource: mock.MagicMock | None,  # noqa: TID251
     datasource_name: str | None,
     error_message: str,
 ):
@@ -446,7 +446,7 @@ def test_add_or_update_datasource_adds_successfully(
     "datasource, datasource_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_datasource",
             "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
@@ -461,7 +461,7 @@ def test_add_or_update_datasource_adds_successfully(
 )
 def test_add_or_update_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,
+    datasource: mock.MagicMock | None,  # noqa: TID251
     datasource_name: str | None,
     error_message: str,
 ):
@@ -752,7 +752,7 @@ def test_add_checkpoint_namespace_collision(
     "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_checkpoint_name",
             "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
@@ -768,7 +768,7 @@ def test_add_checkpoint_namespace_collision(
 def test_add_checkpoint_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
-    checkpoint: mock.MagicMock | None,
+    checkpoint: mock.MagicMock | None,  # noqa: TID251
     checkpoint_name: str | None,
     error_message: str,
 ):
@@ -802,12 +802,6 @@ def test_update_checkpoint_success(
             "name": "store_validation_result",
             "action": {
                 "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
             },
         },
         {
@@ -1007,7 +1001,7 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_checkpoint_name",
             "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
@@ -1023,7 +1017,7 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
 def test_add_or_update_checkpoint_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
-    checkpoint: mock.MagicMock | None,
+    checkpoint: mock.MagicMock | None,  # noqa: TID251
     checkpoint_name: str | None,
     error_message: str,
 ):

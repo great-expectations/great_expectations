@@ -2753,9 +2753,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def get_docs_sites_urls(
         self,
-        resource_identifier=None,
+        resource_identifier: Any | None = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
@@ -3856,11 +3856,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict:
         """Build Data Docs for your project.
 
         --Documentation--
@@ -3896,11 +3896,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict:
         logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}

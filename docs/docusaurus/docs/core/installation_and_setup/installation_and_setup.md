@@ -1,7 +1,9 @@
 ---
-title: 'Installation and setup'
+title: 'Install and manage GX 1.0'
 hide_feedback_survey: true
 hide_title: true
+toc_min_heading_level: 3
+toc_max_heading_level: 3
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
@@ -13,70 +15,53 @@ import GxData from '../../components/_data.jsx';
 
 <OverviewCard title={frontMatter.title}>
 
-  Set up your deployment environment with Python, the Great Expectations (GX) Python library, and any additional dependencies or credentials you will need to work in a given deployment environment or with a particular data source format.
+  To use GX 1.0, you'll install Python, the GX Python library, and additional dependencies for your deployment environment or your preferred Data Source.
 
 </OverviewCard>
 
+## Install GX 1.0 and dependencies
 
-## Basic installation
-
-<p>At a minimum, using Great Expectations in Python scripts requires an installation of Python (version {GxData.min_python} to {GxData.max_python}) that includes the Great Expectations library.</p>
+After you install GX 1.0, you might need to install additional Python libraries or third party utilities for your deployment environment or your preferred Data Sources.
 
 <LinkCardGrid>
-
   <LinkCard 
     topIcon 
-    label="Set up a Python environment"
-    description="Install Python and set up a virtual environment for your GX project."
-    to="/core/installation_and_setup/set_up_a_python_environment" 
-    icon="/img/expectation_icon.svg" 
-  />
-  <LinkCard 
-    topIcon 
-    label="Install Great Expectations"
-    description="Install the GX Python library locally or in a hosted environment such as an EMR Spark cluster or Databricks cluster."
+    label="Install GX 1.0"
+    description="Install Python and the GX 1.0 Python library."
     to="/core/installation_and_setup/install_gx" 
     icon="/img/expectation_icon.svg" 
   />
-
-</LinkCardGrid>
-
-## Install additional dependencies
-
-Some environments and Data Sources utilize additional Python libraries or third party utilities that are not included in the base installation of Great Expectations (GX).  If your use cases involve any of the following, follow the corresponding guidance to install the necessary dependencies.
-
-<LinkCardGrid>
   <LinkCard 
     topIcon 
     label="Amazon S3"
     description="Install and set up support for Amazon S3 and GX"
-    to="/core/installation_and_setup/additional_dependencies/amazon_s3" 
+    to="/core/installation_and_setup/additional_dependencies?dependencies=amazon" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
     label="Azure Blob Storage"
     description="Install and set up support for Azure Blob Storage and GX"
-    to="/core/installation_and_setup/additional_dependencies/azure_blob_storage" 
+    to="/core/installation_and_setup/additional_dependencies?dependencies=azure" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
     label="Google Cloud Storage"
     description="Install and set up support for Google Cloud Storage and GX"
-    to="/core/installation_and_setup/additional_dependencies/google_cloud_storage" 
+    to="/core/installation_and_setup/additional_dependencies?dependencies=gcs" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
-    label="SQL Data Sources"
+    label="SQL databases"
     description="Install and set up support for SQL Data Sources and GX"
-    to="/core/installation_and_setup/additional_dependencies/sql_data_sources" 
+    to="/core/installation_and_setup/additional_dependencies?dependencies=sql" 
     icon="/img/expectation_icon.svg" 
   />
 </LinkCardGrid>
 
-## Manage a GX project
+## Manage a GX 1.0 project
 
 A Data Context is your entry point to managing a Great Expectations (GX) project. It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It contains your Validation Results and the metrics associated with them. The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API.
 

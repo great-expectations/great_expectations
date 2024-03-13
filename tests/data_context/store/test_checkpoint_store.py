@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
-from unittest import mock
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from unittest.mock import ANY as MOCK_ANY
 
 import pytest
 from marshmallow.exceptions import ValidationError
@@ -24,13 +24,20 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
+    from pytest_mock import MockerFixture
+
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMock]:
+def checkpoint_store_with_mock_backend(
+    mocker: MockerFixture,
+) -> Tuple[CheckpointStore, MagicMock]:
     store = CheckpointStore(store_name="checkpoint_store")
-    mock_backend = mock.MagicMock()
+    mock_backend = mocker.MagicMock()
     store._store_backend = mock_backend
 
     return store, mock_backend
@@ -69,12 +76,6 @@ def test_checkpoint_store(empty_data_context):
                     "name": "store_validation_result",
                     "action": {
                         "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "StoreEvaluationParametersAction",
                     },
                 },
                 {
@@ -139,12 +140,6 @@ def test_checkpoint_store(empty_data_context):
                     "name": "store_validation_result",
                     "action": {
                         "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "StoreEvaluationParametersAction",
                     },
                 },
                 {
@@ -339,7 +334,7 @@ def test_default_checkpoints_exist(path: str, exists: bool) -> None:
 
 @pytest.mark.unit
 def test_list_checkpoints(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -350,7 +345,7 @@ def test_list_checkpoints(
 
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -364,7 +359,7 @@ def test_list_checkpoints_cloud_mode(
 
 @pytest.mark.unit
 def test_delete_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
@@ -377,7 +372,7 @@ def test_delete_checkpoint(
 
 @pytest.mark.cloud
 def test_delete_checkpoint_with_cloud_id(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
@@ -390,7 +385,7 @@ def test_delete_checkpoint_with_cloud_id(
 
 @pytest.mark.unit
 def test_delete_checkpoint_with_invalid_key_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -408,7 +403,7 @@ def test_delete_checkpoint_with_invalid_key_raises_error(
 
 @pytest.mark.unit
 def test_get_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
     checkpoint_config: dict,
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
@@ -423,7 +418,7 @@ def test_get_checkpoint(
 
 @pytest.mark.unit
 def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -441,7 +436,8 @@ def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
 
 @pytest.mark.unit
 def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
+    mocker: MockerFixture,
 ) -> None:
     def _raise_validation_error(_: Any) -> None:
         raise ValidationError(message="invalid config")
@@ -449,7 +445,7 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.get.return_value = {"class_name": "Checkpoint"}
 
-    with mock.patch(
+    with mocker.patch(
         "great_expectations.data_context.store.CheckpointStore.deserialize",
         side_effect=_raise_validation_error,
     ), pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
@@ -460,11 +456,12 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
 
 @pytest.mark.unit
 def test_add_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
+    mocker: MockerFixture,
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
-    context = mock.MagicMock(spec=FileDataContext)
+    context = mocker.MagicMock(spec=FileDataContext)
     checkpoint_name = "my_checkpoint"
     checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 
@@ -472,5 +469,5 @@ def test_add_checkpoint(
 
     mock_backend.add.assert_called_once_with(
         (checkpoint_name,),
-        mock.ANY,  # Complex serialized payload so keeping it simple
+        MOCK_ANY,  # Complex serialized payload so keeping it simple
     )

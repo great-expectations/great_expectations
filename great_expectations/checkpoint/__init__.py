@@ -2,13 +2,10 @@ from ..util import verify_dynamic_loading_support
 from .actions import (
     EmailAction,
     MicrosoftTeamsNotificationAction,
-    NoOpAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
     SNSNotificationAction,
-    StoreEvaluationParametersAction,
-    StoreMetricsAction,
     StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,

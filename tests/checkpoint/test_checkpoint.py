@@ -6,7 +6,6 @@ import pathlib
 import pickle
 import shutil
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -39,10 +38,13 @@ from great_expectations.validator.validator import Validator
 from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
     from great_expectations.core.data_context_key import DataContextKey
     from great_expectations.data_context.data_context.ephemeral_data_context import (
         EphemeralDataContext,
     )
+
 
 yaml = YAMLHandler()
 
@@ -114,9 +116,6 @@ def test_basic_checkpoint_config_validation(
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -2650,8 +2649,9 @@ def test_run_spark_checkpoint_with_schema(
 @pytest.mark.unit
 def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
     validator_with_mock_execution_engine,
+    mocker: MockerFixture,
 ):
-    context = mock.MagicMock()
+    context = mocker.MagicMock()
     validator = validator_with_mock_execution_engine
     validations = [
         {

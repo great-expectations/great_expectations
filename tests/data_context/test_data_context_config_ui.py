@@ -1277,10 +1277,6 @@ def test_override_general_defaults(
                         "action": {"class_name": "CustomStoreValidationResultAction"},
                     },
                     {
-                        "name": "store_evaluation_params",
-                        "action": {"class_name": "StoreEvaluationParametersAction"},
-                    },
-                    {
                         "name": "update_data_docs",
                         "action": {"class_name": "UpdateDataDocsAction"},
                     },
@@ -1375,10 +1371,6 @@ def test_override_general_defaults(
                 {
                     "name": "custom_store_validation_result",
                     "action": {"class_name": "CustomStoreValidationResultAction"},
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
                 },
                 {
                     "name": "update_data_docs",

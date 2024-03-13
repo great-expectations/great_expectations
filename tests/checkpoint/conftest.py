@@ -25,14 +25,6 @@ def update_data_docs_action():
 
 
 @pytest.fixture
-def store_eval_parameter_action():
-    return {
-        "name": "store_evaluation_params",
-        "action": {"class_name": "StoreEvaluationParametersAction"},
-    }
-
-
-@pytest.fixture
 def store_validation_result_action():
     return {
         "name": "store_validation_result",
@@ -65,12 +57,10 @@ def slack_notification_action(webhook):
 @pytest.fixture
 def common_action_list(
     store_validation_result_action: dict,
-    store_eval_parameter_action: dict,
     update_data_docs_action: dict,
 ) -> List[dict]:
     return [
         store_validation_result_action,
-        store_eval_parameter_action,
         update_data_docs_action,
     ]
 

@@ -38,6 +38,10 @@ html[data-announcement-bar-initially-dismissed='true'] .announcementBar {
   flex: 1 1 auto;
 }
 
+.announcementBarContent a:hover {
+  color: #ff6310;
+}
+
 @media print {
   .announcementBar {
     display: block;

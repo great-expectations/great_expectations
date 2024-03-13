@@ -122,6 +122,10 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251 # type-checking only
+
+    from pytest_mock import MockerFixture
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import Engine
 
@@ -1138,12 +1142,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1182,12 +1180,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1240,12 +1232,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1287,12 +1273,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1331,7 +1311,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_minimal_simple_checkpoint",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1347,7 +1326,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_slack",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1370,7 +1348,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1391,7 +1368,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_checkpoint_with_site_names",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -1739,12 +1715,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1783,12 +1753,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1841,12 +1805,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1888,12 +1846,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1931,7 +1883,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_minimal_simple_checkpoint",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1947,7 +1898,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_slack",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1970,7 +1920,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1991,7 +1940,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_checkpoint_with_site_names",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -3361,7 +3309,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode(
-    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_list_keys: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3476,7 +3424,7 @@ def empty_cloud_context_fluent(
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode_custom_base_url(
-    mock_get_all: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_get_all: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -8115,8 +8063,8 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
 
 
 @pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
+def validator_with_mock_execution_engine(mocker: MockerFixture) -> Validator:
+    execution_engine = mocker.MagicMock()
     validator = Validator(execution_engine=execution_engine)
     return validator
 

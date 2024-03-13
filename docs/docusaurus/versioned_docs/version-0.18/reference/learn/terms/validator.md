@@ -22,7 +22,7 @@ Checkpoints utilize a Validator when running an Expectation Suite against a Batc
 
 ## Access
 
-Validators are not typically saved.  Instead, they are instantiated when needed.  If you need a Validator outside a Checkpoint (for example, to create Expectations interactively in a Jupyter Notebook) you will use one that is created for that purpose.
+Validators are not typically saved.  Instead, they are instantiated when needed.  If you need a Validator outside a Checkpoint (for example, to create Expectations interactively in a Python interpreter) you will use one that is created for that purpose.
 
 ## Create
 

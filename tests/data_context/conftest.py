@@ -9,7 +9,7 @@ import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch  # noqa: TID251
 
 import pytest
 import requests
@@ -680,10 +680,6 @@ def checkpoint_config() -> dict:
             {
                 "action": {"class_name": "StoreValidationResultAction"},
                 "name": "store_validation_result",
-            },
-            {
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-                "name": "store_evaluation_params",
             },
         ],
     }
