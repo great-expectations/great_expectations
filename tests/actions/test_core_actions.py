@@ -12,6 +12,7 @@ from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     SNSNotificationAction,
+    UpdateDataDocsAction,
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
@@ -691,16 +692,90 @@ def test_cloud_sns_notification_action(
                 "slack_webhook": "test",
                 "type": "slack",
             },
-            id="slack_action",
+            id="slack",
         ),
-        # PagerdutyAlertAction,
-        # MicrosoftTeamsNotificationAction,
-        # OpsgenieAlertAction,
-        # EmailAction,
-        # StoreValidationResultAction,
-        # UpdateDataDocsAction,
-        # SNSNotificationAction,
-        # APINotificationAction,
+        pytest.param(
+            MicrosoftTeamsNotificationAction,
+            {"teams_webhook": "test"},
+            {
+                "notify_on": "all",
+                "renderer": {
+                    "class_name": "MicrosoftTeamsRenderer",
+                    "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                },
+                "teams_webhook": "test",
+                "type": "microsoft",
+            },
+            id="microsoft",
+        ),
+        pytest.param(
+            OpsgenieAlertAction,
+            {"api_key": "abc123"},
+            {
+                "api_key": "abc123",
+                "notify_on": "failure",
+                "priority": "P3",
+                "region": None,
+                "renderer": {
+                    "class_name": "OpsgenieRenderer",
+                    "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+                },
+                "tags": None,
+                "type": "opsgenie",
+            },
+            id="opsgenie",
+        ),
+        pytest.param(
+            EmailAction,
+            {
+                "smtp_address": "smtp.test.com",
+                "smtp_port": 587,
+                "receiver_emails": "bob@gmail.com, jim@hotmail.com",
+            },
+            {
+                "notify_on": "all",
+                "notify_with": None,
+                "receiver_emails": "bob@gmail.com, jim@hotmail.com",
+                "renderer": {
+                    "class_name": "EmailRenderer",
+                    "module_name": "great_expectations.render.renderer.email_renderer",
+                },
+                "sender_alias": None,
+                "sender_login": None,
+                "sender_password": None,
+                "smtp_address": "smtp.test.com",
+                "smtp_port": "587",
+                "type": "email",
+                "use_ssl": None,
+                "use_tls": None,
+            },
+            id="email",
+        ),
+        pytest.param(
+            UpdateDataDocsAction,
+            {"site_names": ["foo", "bar"]},
+            {
+                "site_names": ["foo", "bar"],
+                "type": "update_data_docs",
+            },
+            id="update_data_docs",
+        ),
+        pytest.param(
+            SNSNotificationAction,
+            {"sns_topic_arn": "my_test_arn"},
+            {
+                "sns_message_subject": None,
+                "sns_topic_arn": "my_test_arn",
+                "type": "sns",
+            },
+            id="sns",
+        ),
+        pytest.param(
+            APINotificationAction,
+            {"url": "http://www.example.com"},
+            {"type": "api", "url": "http://www.example.com"},
+            id="api",
+        ),
     ],
 )
 def test_action_serialization(
@@ -712,5 +787,7 @@ def test_action_serialization(
     action = action_class(**init_params)
     json_dict = action.json()
     actual = json.loads(json_dict)
+
+    # Add deserialization test
 
     assert actual == expected
