@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from requests import Session
 
+from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     SNSNotificationAction,
@@ -16,6 +17,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
@@ -34,6 +38,13 @@ from great_expectations.validation_operators import (
 from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def mock_context(mocker: MockerFixture):
+    context = mocker.MagicMock(spec=AbstractDataContext)
+    set_context(context)
+    return context
 
 
 class MockTeamsResponse:
@@ -61,7 +72,7 @@ class MockCloudResponse:
 
 @pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
-def test_StoreAction():
+def test_StoreAction(mock_context):
     fake_in_memory_store = ValidationsStore(
         store_backend={
             "class_name": "InMemoryStoreBackend",
@@ -121,6 +132,7 @@ def test_StoreAction():
 def test_SlackNotificationAction(
     validation_result_suite,
     validation_result_suite_id,
+    mock_context,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.slack_renderer",
@@ -251,6 +263,7 @@ def test_SlackNotificationAction(
 def test_PagerdutyAlertAction(
     validation_result_suite,
     validation_result_suite_id,
+    mock_context,
 ):
     api_key = "test"
     routing_key = "test"
@@ -283,6 +296,7 @@ def test_PagerdutyAlertAction(
 def test_OpsgenieAlertAction(
     validation_result_suite,
     validation_result_suite_id,
+    mock_context,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
@@ -320,6 +334,7 @@ def test_OpsgenieAlertAction(
 def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite,
     validation_result_suite_extended_id,
+    mock_context,
 ):
     renderer = {
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
@@ -426,6 +441,7 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     validation_result_suite,
     validation_result_suite_extended_id,
     caplog,
+    mock_context,
 ):
     caplog.set_level(logging.WARNING)
     renderer = {
@@ -565,6 +581,7 @@ def test_EmailAction(
     expected,
     validation_result_suite,
     validation_result_suite_id,
+    mock_context,
 ):
     with mock.patch.object(
         smtplib,
@@ -601,7 +618,7 @@ def test_EmailAction(
 
 
 @pytest.mark.unit
-def test_api_action_create_payload():
+def test_api_action_create_payload(mock_context):
     mock_validation_results = []
     expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
     api_notification_action = APINotificationAction(url="http://www.example.com")
@@ -618,6 +635,7 @@ def test_api_action_run(
     validation_result_suite,
     validation_result_suite_id,
     mocker: MockerFixture,
+    mock_context,
 ):
     mock_response = mocker.MagicMock()
     mock_response.status_code = 200
@@ -635,6 +653,7 @@ def test_cloud_sns_notification_action(
     validation_result_suite,
     validation_result_suite_id,
     aws_credentials,
+    mock_context,
 ):
     subj_topic = "test-subj"
     created_subj = sns.create_topic(Name=subj_topic)
