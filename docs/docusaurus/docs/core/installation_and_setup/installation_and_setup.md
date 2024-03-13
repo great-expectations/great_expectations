@@ -50,28 +50,28 @@ Some environments and Data Sources utilize additional Python libraries or third 
     topIcon 
     label="Amazon S3"
     description="Install and set up support for Amazon S3 and GX"
-    to="/core/installation_and_setup/additional_dependencies/amazon_s3" 
+    to="/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
     label="Azure Blob Storage"
     description="Install and set up support for Azure Blob Storage and GX"
-    to="/core/installation_and_setup/additional_dependencies/azure_blob_storage" 
+    to="/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
     label="Google Cloud Storage"
     description="Install and set up support for Google Cloud Storage and GX"
-    to="/core/installation_and_setup/additional_dependencies/google_cloud_storage" 
+    to="/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs" 
     icon="/img/expectation_icon.svg" 
   />
 <LinkCard 
     topIcon 
     label="SQL Data Sources"
     description="Install and set up support for SQL Data Sources and GX"
-    to="/core/installation_and_setup/additional_dependencies/sql_data_sources" 
+    to="/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql" 
     icon="/img/expectation_icon.svg" 
   />
 </LinkCardGrid>
