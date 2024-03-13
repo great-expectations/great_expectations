@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING, Any, List, Sequence
+from typing import TYPE_CHECKING, List, Sequence
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.experimental.metric_repository.metric_retriever import (
@@ -10,16 +10,13 @@ from great_expectations.experimental.metric_repository.metric_retriever import (
 from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     Metric,
-    TableMetric,
 )
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.validator.metrics_calculator import (
-        _AbortedMetricsInfoDict,
         _MetricKey,
-        _MetricsDict,
     )
 
 
@@ -69,94 +66,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return bundled_list
 
     def _calculate_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
-        table_metric_configs = self._generate_table_metric_configurations(
-            table_metric_names
-        )
-        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
-            batch_request, table_metric_configs
-        )
-
         metrics = [
-            self._get_table_row_count(batch_id, computed_metrics, aborted_metrics),
-            self._get_table_columns(batch_id, computed_metrics, aborted_metrics),
-            self._get_table_column_types(batch_id, computed_metrics, aborted_metrics),
+            self._get_table_row_count(batch_request),
+            self._get_table_columns(batch_request),
+            self._get_table_column_types(batch_request),
         ]
-
         return metrics
-
-    def _get_table_row_count(
-        self,
-        batch_id: str,
-        computed_metrics: _MetricsDict,
-        aborted_metrics: _AbortedMetricsInfoDict,
-    ) -> Metric:
-        metric_name = "table.row_count"
-        value, exception = self._get_metric_from_computed_metrics(
-            metric_name=metric_name,
-            computed_metrics=computed_metrics,
-            aborted_metrics=aborted_metrics,
-        )
-        return TableMetric[int](
-            batch_id=batch_id,
-            metric_name=metric_name,
-            value=value,
-            exception=exception,
-        )
-
-    def _get_table_columns(
-        self,
-        batch_id: str,
-        computed_metrics: _MetricsDict,
-        aborted_metrics: _AbortedMetricsInfoDict,
-    ) -> Metric:
-        metric_name = "table.columns"
-        value, exception = self._get_metric_from_computed_metrics(
-            metric_name=metric_name,
-            computed_metrics=computed_metrics,
-            aborted_metrics=aborted_metrics,
-        )
-        return TableMetric[List[str]](
-            batch_id=batch_id,
-            metric_name=metric_name,
-            value=value,
-            exception=exception,
-        )
-
-    def _get_table_column_types(
-        self,
-        batch_id: str,
-        computed_metrics: _MetricsDict,
-        aborted_metrics: _AbortedMetricsInfoDict,
-    ) -> Metric:
-        metric_name = "table.column_types"
-        metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
-        value, exception = self._get_metric_from_computed_metrics(
-            metric_name=metric_name,
-            metric_lookup_key=metric_lookup_key,
-            computed_metrics=computed_metrics,
-            aborted_metrics=aborted_metrics,
-        )
-        raw_column_types: list[dict[str, Any]] = value
-        # If type is not found, don't add empty type field. This can happen if our db introspection fails.
-        column_types_converted_to_str: list[dict[str, str]] = []
-        for raw_column_type in raw_column_types:
-            if raw_column_type.get("type"):
-                column_types_converted_to_str.append(
-                    {
-                        "name": raw_column_type["name"],
-                        "type": str(raw_column_type["type"]),
-                    }
-                )
-            else:
-                column_types_converted_to_str.append({"name": raw_column_type["name"]})
-
-        return TableMetric[List[str]](
-            batch_id=batch_id,
-            metric_name=metric_name,
-            value=column_types_converted_to_str,
-            exception=exception,
-        )
 
     def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]

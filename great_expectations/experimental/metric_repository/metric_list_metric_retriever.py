@@ -11,7 +11,6 @@ from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     Metric,
     MetricTypes,
-    TableMetric,
 )
 
 if TYPE_CHECKING:
@@ -217,51 +216,6 @@ class MetricListMetricRetriever(MetricRetriever):
         if MetricTypes.TABLE_COLUMN_TYPES in metric_list:
             metrics.append(self._get_table_column_types(batch_request=batch_request))
         return metrics
-
-    def _get_table_row_count(self, batch_request: BatchRequest) -> Metric:
-        """Return row_count for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Row count for the table.
-        """
-        return self._get_table_metrics(
-            batch_request=batch_request,
-            metric_name=MetricTypes.TABLE_ROW_COUNT,
-            metric_type=TableMetric[int],
-        )
-
-    def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
-        """Return column names for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Column names for the table.
-        """
-        return self._get_table_metrics(
-            batch_request=batch_request,
-            metric_name=MetricTypes.TABLE_COLUMNS,
-            metric_type=TableMetric[List[str]],
-        )
-
-    def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
-        """Return column types for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Column types for the table.
-        """
-        return self._get_table_metrics_column_types(
-            batch_request=batch_request,
-            metric_name=MetricTypes.TABLE_COLUMN_TYPES,
-            metric_type=TableMetric[List[str]],
-        )
 
     def _check_valid_metric_types(self, metric_list: List[MetricTypes]) -> bool:
         """Check whether all the metric types in the list are valid.
