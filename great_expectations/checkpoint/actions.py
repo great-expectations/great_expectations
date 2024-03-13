@@ -833,8 +833,8 @@ class EmailAction(ValidationAction):
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 
-            receiver_emails_list = map(
-                lambda x: x.strip(), self.receiver_emails.split(",")
+            receiver_emails_list = list(
+                map(lambda x: x.strip(), self.receiver_emails.split(","))
             )
 
             # this will actually send the email
