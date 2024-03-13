@@ -256,14 +256,6 @@ class MetricRetriever(abc.ABC):
         return column_list
 
     def _get_table_row_count(self, batch_request: BatchRequest) -> Metric:
-        """Return row_count for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Row count for the table.
-        """
         return self._get_table_metrics(
             batch_request=batch_request,
             metric_name=MetricTypes.TABLE_ROW_COUNT,
@@ -271,14 +263,6 @@ class MetricRetriever(abc.ABC):
         )
 
     def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
-        """Return column names for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Column names for the table.
-        """
         return self._get_table_metrics(
             batch_request=batch_request,
             metric_name=MetricTypes.TABLE_COLUMNS,
@@ -286,14 +270,6 @@ class MetricRetriever(abc.ABC):
         )
 
     def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
-        """Return column types for the table.
-
-        Args:
-            batch_request (BatchRequest): For current batch.
-
-        Returns:
-            Metric: Column types for the table.
-        """
         metric_name = MetricTypes.TABLE_COLUMN_TYPES
 
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
