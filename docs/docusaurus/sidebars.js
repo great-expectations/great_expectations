@@ -47,7 +47,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'SQL Databases',
+              label: 'SQL databases',
               href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
             },
           ]
