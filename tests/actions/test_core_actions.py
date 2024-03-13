@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Type
 from unittest import mock
 
 import pytest
@@ -11,6 +12,7 @@ from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
     SNSNotificationAction,
+    ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.compatibility.pydantic import ValidationError
@@ -668,3 +670,47 @@ def test_cloud_sns_notification_action(
         validation_result_suite_identifier=validation_result_suite_id,
         data_asset=None,
     ).endswith("Subject")
+
+
+@pytest.mark.parametrize(
+    "action_class, init_params, expected",
+    [
+        pytest.param(
+            SlackNotificationAction,
+            {"slack_webhook": "test"},
+            {
+                "notify_on": "all",
+                "notify_with": None,
+                "renderer": {
+                    "class_name": "SlackRenderer",
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                },
+                "show_failed_expectations": False,
+                "slack_channel": None,
+                "slack_token": None,
+                "slack_webhook": "test",
+                "type": "slack",
+            },
+            id="slack_action",
+        ),
+        # PagerdutyAlertAction,
+        # MicrosoftTeamsNotificationAction,
+        # OpsgenieAlertAction,
+        # EmailAction,
+        # StoreValidationResultAction,
+        # UpdateDataDocsAction,
+        # SNSNotificationAction,
+        # APINotificationAction,
+    ],
+)
+def test_action_serialization(
+    mock_context,
+    action_class: Type[ValidationAction],
+    init_params: dict,
+    expected: dict,
+):
+    action = action_class(**init_params)
+    json_dict = action.json()
+    actual = json.loads(json_dict)
+
+    assert actual == expected

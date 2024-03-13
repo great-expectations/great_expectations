@@ -84,6 +84,8 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """
 
+    type: str
+
     _using_cloud_context: bool = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
@@ -226,6 +228,8 @@ class SlackNotificationAction(DataDocsAction):
         notify_with: List of DataDocs site names to display  in Slack messages. Defaults to all.
         show_failed_expectations: Shows a list of failed expectation types.
     """
+
+    type: Literal["slack"] = "slack"
 
     slack_webhook: Optional[str] = None
     slack_token: Optional[str] = None
@@ -396,6 +400,8 @@ class PagerdutyAlertAction(ValidationAction):
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
+    type: Literal["pagerduty"] = "pagerduty"
+
     api_key: str
     routing_key: str
     notify_on: Literal["all", "failure", "success"] = "failure"
@@ -498,6 +504,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
+    type: Literal["microsoft"] = "microsoft"
+
     teams_webhook: str
     notify_on: Literal["all", "failure", "success"] = "all"
     renderer: dict = {
@@ -594,6 +602,8 @@ class OpsgenieAlertAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         tags: Tags to include in the alert
     """
+
+    type: Literal["opsgenie"] = "opsgenie"
 
     api_key: str
     region: Optional[str] = None
@@ -720,6 +730,8 @@ class EmailAction(ValidationAction):
         notify_on: "Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
+
+    type: Literal["email"] = "email"
 
     smtp_address: str
     smtp_port: str
@@ -849,6 +861,8 @@ class StoreValidationResultAction(ValidationAction):
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
+    type: Literal["store_validation_result"] = "store_validation_result"
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -974,6 +988,8 @@ class UpdateDataDocsAction(DataDocsAction):
         site_names: Optional. A list of the names of sites to update.
     """
 
+    type: Literal["update_data_docs"] = "update_data_docs"
+
     site_names: List[str] = []
 
     @override
@@ -1051,6 +1067,8 @@ class SNSNotificationAction(ValidationAction):
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
+    type: Literal["sns"] = "sns"
+
     sns_topic_arn: str
     sns_message_subject: Optional[str]
 
@@ -1092,6 +1110,8 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
+    type: Literal["api"] = "api"
+
     url: str
 
     @override
