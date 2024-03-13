@@ -924,7 +924,7 @@ def store_validation_results(
         and isinstance(run_return_value, GXCloudResourceRef)
         and isinstance(suite_validation_result_identifier, GXCloudIdentifier)
     ):
-        new_id = suite_validation_result_identifier.id
+        new_id = run_return_value.id
         assert new_id is not None
         suite_validation_result_identifier.id = new_id
     return run_return_value
