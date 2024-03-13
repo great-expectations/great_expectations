@@ -778,6 +778,7 @@ def test_cloud_sns_notification_action(
         ),
     ],
 )
+@pytest.mark.unit
 def test_action_serialization(
     mock_context,
     action_class: Type[ValidationAction],
