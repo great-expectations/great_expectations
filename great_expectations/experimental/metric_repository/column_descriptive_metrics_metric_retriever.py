@@ -31,7 +31,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metrics = self._get_table_metrics(batch_request)
+        table_metrics = self._calculate_table_metrics(batch_request)
 
         # We need to skip columns that do not report a type, because the metric computation
         # to determine semantic type will fail.
@@ -68,7 +68,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
         return bundled_list
 
-    def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
+    def _calculate_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names
