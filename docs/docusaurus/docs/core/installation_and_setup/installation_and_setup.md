@@ -1,5 +1,5 @@
 ---
-title: 'Installation and setup'
+title: 'Install and configure GX 1.0'
 hide_feedback_survey: true
 hide_title: true
 ---
@@ -13,28 +13,16 @@ import GxData from '../../components/_data.jsx';
 
 <OverviewCard title={frontMatter.title}>
 
-  Set up your deployment environment with Python, the Great Expectations (GX) Python library, and any additional dependencies or credentials you will need to work in a given deployment environment or with a particular data source format.
+  To use GX 1.0, you'll install Python, the GX Python library, and additional dependencies for your deployment environment or preferred Data Source.
 
 </OverviewCard>
-
-
-## Basic installation
-
-<p>At a minimum, using Great Expectations in Python scripts requires an installation of Python (version {GxData.min_python} to {GxData.max_python}) that includes the Great Expectations library.</p>
 
 <LinkCardGrid>
 
   <LinkCard 
     topIcon 
-    label="Set up a Python environment"
-    description="Install Python and set up a virtual environment for your GX project."
-    to="/core/installation_and_setup/set_up_a_python_environment" 
-    icon="/img/expectation_icon.svg" 
-  />
-  <LinkCard 
-    topIcon 
-    label="Install Great Expectations"
-    description="Install the GX Python library locally or in a hosted environment such as an EMR Spark cluster or Databricks cluster."
+    label="Install GX 1.0"
+    description="Install Python and the GX 1.0 Python library."
     to="/core/installation_and_setup/install_gx" 
     icon="/img/expectation_icon.svg" 
   />

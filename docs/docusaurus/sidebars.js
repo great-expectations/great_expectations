@@ -12,14 +12,9 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Installation and setup',
+      label: 'Install and configure GX 1.0',
       link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
       items: [
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/set_up_a_python_environment',
-          label: 'Set up a Python environment'
-        },
         {
           type: 'doc',
           id: 'core/installation_and_setup/install_gx',
