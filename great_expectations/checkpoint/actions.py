@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
 import requests
 
@@ -72,6 +72,8 @@ class ValidationAction(BaseModel):
     Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
     and other actions to take place after the validation result is produced.
     """
+
+    _using_cloud_context: bool = PrivateAttr()
 
     def __init__(self, **data: Any) -> None:
         from great_expectations import project_manager
@@ -164,6 +166,9 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
+    _build_data_docs: Callable = PrivateAttr()
+    _get_docs_sites_urls: Callable = PrivateAttr()
+
     def __init__(self, **data: Any) -> None:
         from great_expectations import project_manager
 
