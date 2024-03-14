@@ -24,11 +24,11 @@ from great_expectations.exceptions import DataContextError
 
 @pytest.fixture
 def validation_config(mocker: MockerFixture) -> ValidationConfig:
-    data = mocker.Mock(spec=BatchConfig)
+    batch_definition = mocker.Mock(spec=BatchConfig)
     suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationConfig(
         name="test-validation",
-        data=data,
+        batch_definition=batch_definition,
         suite=suite,
     )
 

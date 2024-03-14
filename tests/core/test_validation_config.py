@@ -42,14 +42,14 @@ def ephemeral_context():
 @pytest.fixture
 def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConfig:
     context = ephemeral_context
-    batch_config = (
+    batch_definition = (
         context.sources.add_pandas("my_datasource")
         .add_csv_asset("csv_asset", "taxi.csv")  # type: ignore
         .add_batch_config("my_batch_config")
     )
     return ValidationConfig(
         name="my_validation",
-        data=batch_config,
+        batch_definition=batch_definition,
         suite=ExpectationSuite(name="my_suite"),
     )
 
@@ -175,7 +175,7 @@ class TestValidationConfigSerialization:
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "ds_id, asset_id, batch_config_id",
+        "ds_id, asset_id, batch_definition_id",
         [
             (
                 "9a88975e-6426-481e-8248-7ce90fad51c4",
@@ -210,22 +210,22 @@ class TestValidationConfigSerialization:
         self,
         ds_id: str | None,
         asset_id: str | None,
-        batch_config_id: str | None,
+        batch_definition_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
         validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
         validation_config_suite: ExpectationSuite,
     ):
-        pandas_ds, csv_asset, batch_config = validation_config_data
+        pandas_ds, csv_asset, batch_definition = validation_config_data
 
         pandas_ds.id = ds_id
         csv_asset.id = asset_id
-        batch_config.id = batch_config_id
+        batch_definition.id = batch_definition_id
         validation_config_suite.id = suite_id
 
         validation_config = ValidationConfig(
             name=self.validation_config_name,
-            data=batch_config,
+            batch_definition=batch_definition,
             suite=validation_config_suite,
             id=validation_id,
         )
@@ -243,8 +243,8 @@ class TestValidationConfigSerialization:
                     "id": asset_id,
                 },
                 "batch_config": {
-                    "name": batch_config.name,
-                    "id": batch_config_id,
+                    "name": batch_definition.name,
+                    "id": batch_definition_id,
                 },
             },
             "suite": {
