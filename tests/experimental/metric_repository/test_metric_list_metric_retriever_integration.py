@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Dict, List
 
 import pandas as pd
 import pytest
@@ -209,7 +209,7 @@ def test_get_metrics_full_cdm(
             value=3.5,
             exception=None,
         ),
-        TableMetric[List[str]](
+        TableMetric[List[Dict[str, str]]](
             batch_id=batch_id,
             metric_name="table.column_types",
             value=[
