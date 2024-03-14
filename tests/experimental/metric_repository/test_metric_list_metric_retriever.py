@@ -127,17 +127,18 @@ def test_get_metrics_full_list(mocker: MockerFixture):
 
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mocker.patch(
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mocker.patch(
+    )
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
-    ):
-        metrics = metric_retriever.get_metrics(
-            batch_request=mock_batch_request,
-            metric_list=cdm_metrics_list,
-        )
+    )
+    metrics = metric_retriever.get_metrics(
+        batch_request=mock_batch_request,
+        metric_list=cdm_metrics_list,
+    )
 
     assert metrics == [
         TableMetric[int](
@@ -266,59 +267,60 @@ def test_get_metrics_metrics_missing(mocker: MockerFixture):
 
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mocker.patch(
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mocker.patch(
+    )
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
-    ):
-        metrics = metric_retriever.get_metrics(
-            batch_request=mock_batch_request, metric_list=cdm_metrics_list
-        )
-        assert metrics == [
-            TableMetric[int](
-                batch_id="batch_id",
-                metric_name="table.row_count",
-                value=None,
-                exception=MetricException(
-                    type="Not found",
-                    message="Metric was not successfully computed but exception was not found.",
-                ),
+    )
+    metrics = metric_retriever.get_metrics(
+        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+    )
+    assert metrics == [
+        TableMetric[int](
+            batch_id="batch_id",
+            metric_name="table.row_count",
+            value=None,
+            exception=MetricException(
+                type="Not found",
+                message="Metric was not successfully computed but exception was not found.",
             ),
-            TableMetric[List[str]](
-                batch_id="batch_id",
-                metric_name="table.columns",
-                value=["col1", "col2"],
-                exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.columns",
+            value=["col1", "col2"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=[
+                {"name": "col1", "type": "float"},
+                {"name": "col2", "type": "float"},
+            ],
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            value=None,
+            exception=MetricException(
+                type="Not found",
+                message="Metric was not successfully computed but exception was not found.",
             ),
-            TableMetric[List[str]](
-                batch_id="batch_id",
-                metric_name="table.column_types",
-                value=[
-                    {"name": "col1", "type": "float"},
-                    {"name": "col2", "type": "float"},
-                ],
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.min",
-                value=None,
-                exception=MetricException(
-                    type="Not found",
-                    message="Metric was not successfully computed but exception was not found.",
-                ),
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.min",
-                value=2.7,
-                exception=None,
-                column="col2",
-            ),
-        ]
+            column="col1",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            value=2.7,
+            exception=None,
+            column="col2",
+        ),
+    ]
 
 
 def test_get_metrics_with_exception(mocker: MockerFixture):
@@ -455,16 +457,17 @@ def test_get_metrics_with_column_type_missing(mocker: MockerFixture):
 
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mocker.patch(
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mocker.patch(
+    )
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
-    ):
-        metrics = metric_retriever.get_metrics(
-            batch_request=mock_batch_request, metric_list=cdm_metrics_list
-        )
+    )
+    metrics = metric_retriever.get_metrics(
+        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+    )
     assert metrics == [
         TableMetric[int](
             batch_id="batch_id",
@@ -541,16 +544,17 @@ def test_get_metrics_with_timestamp_columns(mocker: MockerFixture):
 
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mocker.patch(
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=[],
-    ), mocker.patch(
+    )
+    mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=["timestamp_col"],
-    ):
-        metrics = metric_retriever.get_metrics(
-            batch_request=mock_batch_request, metric_list=cdm_metrics_list
-        )
+    )
+    metrics = metric_retriever.get_metrics(
+        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+    )
 
     assert metrics == [
         TableMetric[int](
@@ -627,13 +631,13 @@ def test_get_metrics_only_gets_a_validator_once(mocker: MockerFixture):
 
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mocker.patch(
+    mocker.patch(
         f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
         return_value=["col1", "col2"],
-    ):
-        metric_retriever.get_metrics(
-            batch_request=mock_batch_request, metric_list=cdm_metrics_list
-        )
+    )
+    metric_retriever.get_metrics(
+        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+    )
 
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
 
