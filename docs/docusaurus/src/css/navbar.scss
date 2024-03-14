@@ -31,6 +31,15 @@
       visibility: hidden;
     }
   }
+
+  .navbar-sidebar__items:not(.navbar-sidebar__items--show-secondary) .menu > .menu__list{
+    display: flex;
+    flex-direction: column;
+
+    .menu__list-item:has(.version-dropdown) {
+      order: 1;
+    }
+  }
 }
 
 .navbar__item {
@@ -115,3 +124,5 @@
   color: #FFF;
   background-color: #DE550A;
 }
+
+

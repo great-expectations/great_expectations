@@ -107,6 +107,7 @@ module.exports = {
             },
           ],
           dropdownActiveClassDisabled: true,
+          className: 'version-dropdown',
         },
         {
           type: 'search',
