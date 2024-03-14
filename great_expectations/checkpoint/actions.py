@@ -10,6 +10,7 @@ import json
 import logging
 from typing import (
     TYPE_CHECKING,
+    Any,
     Dict,
     List,
     Literal,
@@ -190,12 +191,12 @@ class DataDocsAction(ValidationAction):
     def _get_docs_sites_urls(
         self,
         site_names: list[str] | None = None,
-        resource_identifiers: list | None = None,
+        resource_identifier: Any | None = None,
     ):
         from great_expectations import project_manager
 
         return project_manager.get_docs_sites_urls(
-            site_names=site_names, resource_identifiers=resource_identifiers
+            site_names=site_names, resource_identifier=resource_identifier
         )
 
 
@@ -256,11 +257,12 @@ class SlackNotificationAction(DataDocsAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
-        if not isinstance(renderer, SlackRenderer):
-            raise ValueError(
-                "renderer must be a SlackRenderer or a valid configuration for one."
-            )
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, SlackRenderer):
+                raise ValueError(
+                    "renderer must be a SlackRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
         return renderer
 
     @root_validator
@@ -535,11 +537,12 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         cls, renderer: dict | MicrosoftTeamsRenderer
     ) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
-        if not isinstance(renderer, MicrosoftTeamsRenderer):
-            raise ValueError(
-                "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
-            )
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, MicrosoftTeamsRenderer):
+                raise ValueError(
+                    "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
         return renderer
 
     @override
@@ -641,11 +644,12 @@ class OpsgenieAlertAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
-        if not isinstance(renderer, OpsgenieRenderer):
-            raise ValueError(
-                "renderer must be a OpsgenieRenderer or a valid configuration for one."
-            )
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, OpsgenieRenderer):
+                raise ValueError(
+                    "renderer must be a OpsgenieRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
         return renderer
 
     @override
@@ -778,11 +782,12 @@ class EmailAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
         if isinstance(renderer, dict):
-            renderer = _build_renderer(config=renderer)
-        if not isinstance(renderer, EmailRenderer):
-            raise ValueError(
-                "renderer must be a EmailRenderer or a valid configuration for one."
-            )
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, EmailRenderer):
+                raise ValueError(
+                    "renderer must be a EmailRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
         return renderer
 
     @root_validator
