@@ -185,8 +185,6 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
-    type: Literal["data_docs"] = "data_docs"
-
     def _build_data_docs(
         self,
         site_names: list[str] | None = None,
