@@ -31,16 +31,10 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.render.renderer.email_renderer import (
+from great_expectations.render.renderer import (
     EmailRenderer,
-)
-from great_expectations.render.renderer.microsoft_teams_renderer import (
     MicrosoftTeamsRenderer,
-)
-from great_expectations.render.renderer.opsgenie_renderer import (
     OpsgenieRenderer,
-)
-from great_expectations.render.renderer.slack_renderer import (
     SlackRenderer,
 )
 
