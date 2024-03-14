@@ -15,6 +15,10 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.datasource.new_datasource import (
+    BaseDatasource as LegacyDatasource,
+)
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
 if TYPE_CHECKING:
@@ -22,11 +26,7 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
-
-from great_expectations.data_context.data_context.context_factory import project_manager
-from great_expectations.datasource.new_datasource import (
-    BaseDatasource as LegacyDatasource,
-)
+    from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
 class _IdentifierBundle(BaseModel):
@@ -74,7 +74,7 @@ class ValidationConfig(BaseModel):
 
     Args:
         name: The name of the validation.
-        data: A batch config to validate.
+        batch_defintiion: A batch definition to validate.
         suite: A grouping of expectations to validate against the data.
         id: A unique identifier for the validation; added when persisted with a store.
 
@@ -119,9 +119,17 @@ class ValidationConfig(BaseModel):
         }
 
     name: str = Field(..., allow_mutation=False)
-    data: BatchConfig = Field(..., allow_mutation=False)
+    batch_definition: BatchConfig = Field(..., allow_mutation=False)
     suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
+
+    @property
+    def asset(self) -> DataAsset:
+        return self.batch_definition.data_asset
+
+    @property
+    def datasource(self) -> Datasource:
+        return self.asset.datasource
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
