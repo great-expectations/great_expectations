@@ -16,6 +16,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context.context_factory import (
     ProjectManager,
 )
@@ -24,6 +27,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 )
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
@@ -61,6 +65,22 @@ def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConf
     context = ephemeral_context
     batch_definition = (
         context.sources.add_pandas(DATA_SOURCE_NAME)
+        .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
+        .add_batch_config(BATCH_DEFINITION_NAME)
+    )
+    return ValidationConfig(
+        name="my_validation",
+        data=batch_definition,
+        suite=ExpectationSuite(name="my_suite"),
+    )
+
+
+@pytest.fixture
+def cloud_validation_config(
+    empty_cloud_data_context: CloudDataContext,
+) -> ValidationConfig:
+    batch_definition = (
+        empty_cloud_data_context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_config(BATCH_DEFINITION_NAME)
     )
@@ -177,7 +197,7 @@ class TestValidationRun:
 
     @mock.patch.object(ValidationsStore, "set")
     @pytest.mark.unit
-    def test_persists_validation_results(
+    def test_persists_validation_results_for_non_cloud(
         self,
         mock_validations_store_set: MagicMock,
         mock_validator: MagicMock,
@@ -208,6 +228,31 @@ class TestValidationRun:
         value = kwargs["value"]
         assert isinstance(key, ValidationResultIdentifier)
         assert key.batch_identifier == BATCH_ID
+        assert value.success is True
+
+    @mock.patch.object(ValidationsStore, "set")
+    @pytest.mark.unit
+    def test_persists_validation_results_for_cloud(
+        self,
+        mock_validations_store_set: MagicMock,
+        mock_validator: MagicMock,
+        cloud_validation_config: ValidationConfig,
+    ):
+        cloud_validation_config.suite.add_expectation(
+            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        )
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True)
+        ]
+
+        cloud_validation_config.run()
+
+        # validate we are calling set on the store with data that's roughly the right shape
+        [(_, kwargs)] = mock_validations_store_set.call_args_list
+        key = kwargs["key"]
+        value = kwargs["value"]
+        assert isinstance(key, GXCloudIdentifier)
+        # assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
 

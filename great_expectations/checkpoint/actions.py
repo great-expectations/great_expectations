@@ -879,6 +879,11 @@ class StoreValidationResultAction(ValidationAction):
             self._using_cloud_context,
         )
 
+        if isinstance(output, GXCloudResourceRef) and isinstance(
+            validation_result_suite_identifier, GXCloudIdentifier
+        ):
+            validation_result_suite_identifier.id = output.id
+
         if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
             return output
 
@@ -904,18 +909,12 @@ def store_validation_results(  # noqa: PLR0913
     if isinstance(expectation_suite_identifier, GXCloudIdentifier):
         expectation_suite_id = expectation_suite_identifier.id
 
-    run_return_value = validation_result_store.set(
+    return validation_result_store.set(
         key=suite_validation_result_identifier,
         value=suite_validation_result,
         checkpoint_id=checkpoint_id,
         expectation_suite_id=expectation_suite_id,
     )
-
-    if isinstance(run_return_value, GXCloudResourceRef) and isinstance(
-        suite_validation_result_identifier, GXCloudIdentifier
-    ):
-        suite_validation_result_identifier.id = run_return_value.id
-    return run_return_value
 
 
 @public_api
