@@ -909,7 +909,7 @@ class StoreValidationResultAction(ValidationAction):
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(type=StoreValidationResultAction.type)
         if target_store_name is None:
             self._target_store = data_context.stores[
                 data_context.validations_store_name
