@@ -252,7 +252,6 @@ class TestValidationRun:
         key = kwargs["key"]
         value = kwargs["value"]
         assert isinstance(key, GXCloudIdentifier)
-        # assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
 
