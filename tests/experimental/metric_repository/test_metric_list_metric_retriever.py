@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List
+from typing import Dict, List
 
 import pytest
 
@@ -20,8 +20,7 @@ from great_expectations.validator.validator import Validator
 
 pytestmark = pytest.mark.unit
 
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+from pytest_mock import MockerFixture
 
 
 def test_get_metrics_table_metrics_only(mocker: MockerFixture):
