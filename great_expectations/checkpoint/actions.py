@@ -90,6 +90,7 @@ class ValidationAction(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
@@ -102,6 +103,11 @@ class ValidationAction(BaseModel):
 
     @classmethod
     def get_subclasses(cls) -> tuple[Type[ValidationAction], ...]:
+        """
+        Helper to get all subclasses of ValidationAction.
+
+        Includes grandchildren and lower.
+        """
         subclasses = set()
         stack = [cls]
         while stack:

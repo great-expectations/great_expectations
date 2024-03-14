@@ -37,6 +37,8 @@ class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
 
     def serialize(self) -> dict:
+        # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)
+        # TODO: Renderers should be ported over to Pydantic to prevent this fork in logic
         return {
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,

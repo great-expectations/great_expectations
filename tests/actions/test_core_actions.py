@@ -802,8 +802,21 @@ class TestActionSerialization:
     def test_action_deserialization_within_parent_class(
         self, action_class: ValidationAction, init_params: dict
     ):
+        """
+        The matter of deserializing an Action into the relevant subclass is the responsibility of
+        the Checkpoint in production code.
+
+        In order to test Actions alone, we utilize a dummy class with a single field to ensure
+        properly implementation of Pydantic discriminated unions.
+
+        Ref: https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
+        """
+
+        # This somewhat feels like we're testing Pydantic code but it's the only way to ensure that
+        # we've properly implemented the Pydantic discriminated union feature.
         class DummyClassWithActionChild(BaseModel):
             class Config:
+                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy
                 json_encoders = {Renderer: lambda r: r.serialize()}
 
             action: Union[ValidationAction.get_subclasses()] = Field(
@@ -813,7 +826,7 @@ class TestActionSerialization:
         action = action_class(**init_params)
         instance = DummyClassWithActionChild(action=action)
 
-        json_dict = instance.json(models_as_dict=False)
+        json_dict = instance.json()
         parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
 
         assert isinstance(parsed_action.action, action_class)
