@@ -15,6 +15,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     MetricException,
     MetricTypes,
+    TableMetric,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.exception_info import ExceptionInfo
@@ -174,6 +175,25 @@ class MetricRetriever(abc.ABC):
         )
         return column_names
 
+    def _get_table_metrics(
+        self,
+        batch_request: BatchRequest,
+        metric_name: MetricTypes | str,
+        metric_type: type[Metric],
+    ) -> Metric:
+        metric_configs = self._generate_table_metric_configurations([metric_name])
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
+            batch_request, metric_configs
+        )
+        value, exception = self._get_metric_from_computed_metrics(
+            metric_name=metric_name,
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        return metric_type(
+            batch_id=batch_id, metric_name=metric_name, value=value, exception=exception
+        )
+
     def _get_column_metrics(
         self,
         batch_request: BatchRequest,
@@ -189,6 +209,7 @@ class MetricRetriever(abc.ABC):
         )
 
         # Convert computed_metrics
+        ColumnMetric.update_forward_refs()
         metrics: list[Metric] = []
         metric_lookup_key: _MetricKey
 
@@ -233,3 +254,54 @@ class MetricRetriever(abc.ABC):
             if metric.metric_name == MetricTypes.TABLE_COLUMNS:
                 column_list = metric.value
         return column_list
+
+    def _get_table_row_count(self, batch_request: BatchRequest) -> Metric:
+        return self._get_table_metrics(
+            batch_request=batch_request,
+            metric_name=MetricTypes.TABLE_ROW_COUNT,
+            metric_type=TableMetric[int],
+        )
+
+    def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
+        return self._get_table_metrics(
+            batch_request=batch_request,
+            metric_name=MetricTypes.TABLE_COLUMNS,
+            metric_type=TableMetric[List[str]],
+        )
+
+    def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
+        metric_name = MetricTypes.TABLE_COLUMN_TYPES
+
+        metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
+        table_metric_configs = self._generate_table_metric_configurations(
+            table_metric_names=[metric_name]
+        )
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
+            batch_request, table_metric_configs
+        )
+        value, exception = self._get_metric_from_computed_metrics(
+            metric_name=metric_name,
+            metric_lookup_key=metric_lookup_key,
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        raw_column_types: list[dict[str, Any]] = value
+        # If type is not found, don't add empty type field. This can happen if our db introspection fails.
+        column_types_converted_to_str: list[dict[str, str]] = []
+        for raw_column_type in raw_column_types:
+            if raw_column_type.get("type"):
+                column_types_converted_to_str.append(
+                    {
+                        "name": raw_column_type["name"],
+                        "type": str(raw_column_type["type"]),
+                    }
+                )
+            else:
+                column_types_converted_to_str.append({"name": raw_column_type["name"]})
+
+        return TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name=metric_name,
+            value=column_types_converted_to_str,  # type: ignore[arg-type]
+            exception=exception,
+        )
