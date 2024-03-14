@@ -28,7 +28,7 @@ def validation_config(mocker: MockerFixture) -> ValidationConfig:
     suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationConfig(
         name="test-validation",
-        batch_definition=batch_definition,
+        data=batch_definition,
         suite=suite,
     )
 
