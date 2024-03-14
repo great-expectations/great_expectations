@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type
+from typing import Type, Union
 from unittest import mock
 
 import pytest
@@ -11,12 +11,18 @@ from requests import Session
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     APINotificationAction,
+    EmailAction,
+    MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
     SNSNotificationAction,
+    StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
-from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.compatibility.pydantic import BaseModel, Field, ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -31,14 +37,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.util import is_library_loadable
-from great_expectations.validation_operators import (
-    EmailAction,
-    MicrosoftTeamsNotificationAction,
-    OpsgenieAlertAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    StoreValidationResultAction,
-)
 from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
@@ -684,6 +682,20 @@ class TestActionSerialization:
     EXAMPLE_SNS_TOPIC_ARN = "my_test_arn"
     EXAMPLE_URL = "http://www.example.com"
 
+    ACTION_INIT_PARAMS = {
+        SlackNotificationAction: {"slack_webhook": EXAMPLE_SLACK_WEBHOOK},
+        MicrosoftTeamsNotificationAction: {"teams_webhook": EXAMPLE_TEAMS_WEBHOOK},
+        OpsgenieAlertAction: {"api_key": EXAMPLE_API_KEY},
+        EmailAction: {
+            "smtp_address": EXAMPLE_SMTP_ADDRESS,
+            "smtp_port": EXAMPLE_SMTP_PORT,
+            "receiver_emails": EXAMPLE_EMAILS,
+        },
+        UpdateDataDocsAction: {"site_names": EXAMPLE_SITE_NAMES},
+        SNSNotificationAction: {"sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN},
+        APINotificationAction: {"url": EXAMPLE_URL},
+    }
+
     SERIALIZED_ACTIONS = {
         SlackNotificationAction: {
             "notify_on": "all",
@@ -750,47 +762,8 @@ class TestActionSerialization:
 
     @pytest.mark.parametrize(
         "action_class, init_params",
-        [
-            pytest.param(
-                SlackNotificationAction,
-                {"slack_webhook": EXAMPLE_SLACK_WEBHOOK},
-                id="slack",
-            ),
-            pytest.param(
-                MicrosoftTeamsNotificationAction,
-                {"teams_webhook": EXAMPLE_TEAMS_WEBHOOK},
-                id="microsoft",
-            ),
-            pytest.param(
-                OpsgenieAlertAction,
-                {"api_key": EXAMPLE_API_KEY},
-                id="opsgenie",
-            ),
-            pytest.param(
-                EmailAction,
-                {
-                    "smtp_address": EXAMPLE_SMTP_ADDRESS,
-                    "smtp_port": EXAMPLE_SMTP_PORT,
-                    "receiver_emails": EXAMPLE_EMAILS,
-                },
-                id="email",
-            ),
-            pytest.param(
-                UpdateDataDocsAction,
-                {"site_names": EXAMPLE_SITE_NAMES},
-                id="update_data_docs",
-            ),
-            pytest.param(
-                SNSNotificationAction,
-                {"sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN},
-                id="sns",
-            ),
-            pytest.param(
-                APINotificationAction,
-                {"url": EXAMPLE_URL},
-                id="api",
-            ),
-        ],
+        [(k, v) for k, v in ACTION_INIT_PARAMS.items()],
+        ids=[k.__name__ for k in ACTION_INIT_PARAMS],
     )
     @pytest.mark.unit
     def test_action_serialization_and_deserialization(
@@ -799,11 +772,11 @@ class TestActionSerialization:
         action_class: Type[ValidationAction],
         init_params: dict,
     ):
-        action = action_class(**init_params)
+        expected = self.SERIALIZED_ACTIONS[action_class]
 
+        action = action_class(**init_params)
         json_dict = action.json()
         actual = json.loads(json_dict)
-        expected = self.SERIALIZED_ACTIONS[action_class]
 
         assert actual == expected
 
@@ -818,3 +791,25 @@ class TestActionSerialization:
     ):
         actual = action_class.parse_obj(serialized_action)
         assert isinstance(actual, action_class)
+
+    @pytest.mark.parametrize(
+        "action_class, init_params",
+        [(k, v) for k, v in ACTION_INIT_PARAMS.items()],
+        ids=[k.__name__ for k in ACTION_INIT_PARAMS],
+    )
+    @pytest.mark.unit
+    def test_action_deserialization_within_parent_class(
+        self, action_class: ValidationAction, init_params: dict
+    ):
+        class DummyClassWithActionChild(BaseModel):
+            action: Union[ValidationAction.get_subclasses()] = Field(
+                ..., discriminator="type"
+            )
+
+        action = action_class(**init_params)
+        instance = DummyClassWithActionChild(action=action)
+
+        json_dict = instance.json(models_as_dict=False)
+        parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
+
+        assert isinstance(parsed_action.action, action_class)

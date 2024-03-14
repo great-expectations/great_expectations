@@ -16,6 +16,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Type,
     Union,
 )
 
@@ -94,13 +95,25 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """
 
-    type: str
+    type: Literal["str"] = "base"
 
     @property
     def _using_cloud_context(self) -> bool:
         from great_expectations import project_manager
 
         return project_manager.is_using_cloud()
+
+    @classmethod
+    def get_subclasses(cls) -> tuple[Type[ValidationAction], ...]:
+        subclasses = set()
+        stack = [cls]
+        while stack:
+            action_class = stack.pop()
+            children = action_class.__subclasses__()
+            subclasses.update(children)
+            stack.extend(children)
+
+        return tuple(subclasses)
 
     @public_api
     def run(  # noqa: PLR0913
@@ -172,7 +185,7 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
-    type: str = "data_docs"
+    type: Literal["data_docs"] = "data_docs"
 
     def _build_data_docs(
         self,
@@ -199,7 +212,7 @@ class DataDocsAction(ValidationAction):
 
 @public_api
 class SlackNotificationAction(DataDocsAction):
-    """Sends a Slack notification to a given webhook.
+    r"""Sends a Slack notification to a given webhook.
 
     ```yaml
     - name: send_slack_notification_on_validation_result
@@ -208,7 +221,7 @@ class SlackNotificationAction(DataDocsAction):
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       # or pass in as environment variable
       # use slack_webhook when not using slack bot token
-      slack_webhook: ${validation_notification_slack_webhook}
+      slack_webhook: $\{validation_notification_slack_webhook\}
       slack_token:
       slack_channel:
       notify_on: all
@@ -225,10 +238,10 @@ class SlackNotificationAction(DataDocsAction):
     Args:
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
            ```python
-           {
+           \{
             "module_name": "great_expectations.render.renderer.slack_renderer",
             "class_name": "SlackRenderer",
-           }
+           \}
            ```
         slack_webhook: The incoming Slack webhook to which to send notification.
         slack_token: Token from Slack app. Used when not using slack_webhook.
