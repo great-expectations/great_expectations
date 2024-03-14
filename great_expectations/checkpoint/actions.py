@@ -883,7 +883,7 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
-        return store_validation_results(
+        store_validation_results(
             self.target_store,
             validation_result_suite,
             validation_result_suite_identifier,
