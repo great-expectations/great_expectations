@@ -33,6 +33,10 @@ from great_expectations.validator.v1_validator import (
     ResultFormat,
 )
 
+DATA_SOURCE_NAME = "my_datasource"
+ASSET_NAME = "csv_asset"
+BATCH_DEFINITION_NAME = "my_batch_definition"
+
 
 @pytest.fixture
 def ephemeral_context():
@@ -42,16 +46,24 @@ def ephemeral_context():
 @pytest.fixture
 def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConfig:
     context = ephemeral_context
-    batch_config = (
-        context.sources.add_pandas("my_datasource")
-        .add_csv_asset("csv_asset", "taxi.csv")  # type: ignore
-        .add_batch_config("my_batch_config")
+    batch_definition = (
+        context.sources.add_pandas(DATA_SOURCE_NAME)
+        .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
+        .add_batch_config(BATCH_DEFINITION_NAME)
     )
     return ValidationConfig(
         name="my_validation",
-        data=batch_config,
+        data=batch_definition,
         suite=ExpectationSuite(name="my_suite"),
     )
+
+
+@pytest.mark.unit
+def test_validation_config_data_properties(validation_config: ValidationConfig):
+    assert validation_config.data.name == BATCH_DEFINITION_NAME
+    assert validation_config.batch_definition.name == BATCH_DEFINITION_NAME
+    assert validation_config.asset.name == ASSET_NAME
+    assert validation_config.data_source.name == DATA_SOURCE_NAME
 
 
 class TestValidationRun:
@@ -111,7 +123,7 @@ class TestValidationRun:
         ]
 
         validation_config.run(
-            batch_config_options={"year": 2024},
+            batch_definition_options={"year": 2024},
             evaluation_parameters={"max_value": 9000},
             result_format=ResultFormat.COMPLETE,
         )
@@ -152,7 +164,7 @@ class TestValidationRun:
 class TestValidationConfigSerialization:
     ds_name = "my_ds"
     asset_name = "my_asset"
-    batch_config_name = "my_batch_config"
+    batch_definition_name = "my_batch_definition"
     suite_name = "my_suite"
     validation_config_name = "my_validation"
 
@@ -165,9 +177,9 @@ class TestValidationConfigSerialization:
 
         ds = context.sources.add_pandas(self.ds_name)
         asset = ds.add_csv_asset(self.asset_name, "data.csv")
-        batch_config = asset.add_batch_config(self.batch_config_name)
+        batch_definition = asset.add_batch_config(self.batch_definition_name)
 
-        return ds, asset, batch_config
+        return ds, asset, batch_definition
 
     @pytest.fixture
     def validation_config_suite(self) -> ExpectationSuite:
@@ -175,7 +187,7 @@ class TestValidationConfigSerialization:
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "ds_id, asset_id, batch_config_id",
+        "ds_id, asset_id, batch_definition_id",
         [
             (
                 "9a88975e-6426-481e-8248-7ce90fad51c4",
@@ -210,22 +222,22 @@ class TestValidationConfigSerialization:
         self,
         ds_id: str | None,
         asset_id: str | None,
-        batch_config_id: str | None,
+        batch_definition_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
         validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
         validation_config_suite: ExpectationSuite,
     ):
-        pandas_ds, csv_asset, batch_config = validation_config_data
+        pandas_ds, csv_asset, batch_definition = validation_config_data
 
         pandas_ds.id = ds_id
         csv_asset.id = asset_id
-        batch_config.id = batch_config_id
+        batch_definition.id = batch_definition_id
         validation_config_suite.id = suite_id
 
         validation_config = ValidationConfig(
             name=self.validation_config_name,
-            data=batch_config,
+            data=batch_definition,
             suite=validation_config_suite,
             id=validation_id,
         )
@@ -242,16 +254,16 @@ class TestValidationConfigSerialization:
                     "name": csv_asset.name,
                     "id": asset_id,
                 },
-                "batch_config": {
-                    "name": batch_config.name,
-                    "id": batch_config_id,
+                "batch_definition": {
+                    "name": batch_definition.name,
+                    "id": batch_definition_id,
                 },
             },
             "suite": {
                 "name": validation_config_suite.name,
                 "id": suite_id,
             },
-            "id": validation_id,  # TODO: Test to ensure ValidationConfigStore adds a top-level id as well
+            "id": validation_id,
         }
 
         # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
@@ -276,7 +288,7 @@ class TestValidationConfigSerialization:
         validation_config_suite: ExpectationSuite,
     ):
         context = in_memory_runtime_context
-        _, _, batch_config = validation_config_data
+        _, _, batch_definition = validation_config_data
 
         validation_config_suite = context.suites.add(validation_config_suite)
 
@@ -291,8 +303,8 @@ class TestValidationConfigSerialization:
                     "name": self.asset_name,
                     "id": None,
                 },
-                "batch_config": {
-                    "name": self.batch_config_name,
+                "batch_definition": {
+                    "name": self.batch_definition_name,
                     "id": None,
                 },
             },
@@ -305,7 +317,7 @@ class TestValidationConfigSerialization:
 
         validation_config = ValidationConfig.parse_obj(serialized_config)
         assert validation_config.name == self.validation_config_name
-        assert validation_config.data == batch_config
+        assert validation_config.data == batch_definition
         assert validation_config.suite == validation_config_suite
 
     @pytest.mark.unit
@@ -320,8 +332,8 @@ class TestValidationConfigSerialization:
                             "name": asset_name,
                             "id": None,
                         },
-                        "batch_config": {
-                            "name": batch_config_name,
+                        "batch_definition": {
+                            "name": batch_definition_name,
                             "id": None,
                         },
                     },
@@ -359,8 +371,8 @@ class TestValidationConfigSerialization:
                             "name": asset_name,
                             "id": None,
                         },
-                        "batch_config": {
-                            "name": batch_config_name,
+                        "batch_definition": {
+                            "name": batch_definition_name,
                             "id": None,
                         },
                     },
@@ -394,8 +406,8 @@ class TestValidationConfigSerialization:
                             "name": asset_name,
                             "id": None,
                         },
-                        "batch_config": {
-                            "name": batch_config_name,
+                        "batch_definition": {
+                            "name": batch_definition_name,
                             "id": None,
                         },
                     },
@@ -420,8 +432,8 @@ class TestValidationConfigSerialization:
                             "name": asset_name,
                             "id": None,
                         },
-                        "batch_config": {
-                            "name": batch_config_name,
+                        "batch_definition": {
+                            "name": batch_definition_name,
                             "id": None,
                         },
                     },
@@ -446,8 +458,8 @@ class TestValidationConfigSerialization:
                             "name": "i_do_not_exist",
                             "id": None,
                         },
-                        "batch_config": {
-                            "name": batch_config_name,
+                        "batch_definition": {
+                            "name": batch_definition_name,
                             "id": None,
                         },
                     },
@@ -472,7 +484,7 @@ class TestValidationConfigSerialization:
                             "name": asset_name,
                             "id": None,
                         },
-                        "batch_config": {
+                        "batch_definition": {
                             "name": "i_do_not_exist",
                             "id": None,
                         },
@@ -483,8 +495,8 @@ class TestValidationConfigSerialization:
                     },
                     "id": None,
                 },
-                "Could not find batch config",
-                id="non_existant_batch_config",
+                "Could not find batch definition",
+                id="non_existant_batch_definition",
             ),
         ],
     )
