@@ -274,6 +274,7 @@ class ValidationConfig(BaseModel):
             suite_validation_result=results,
             suite_validation_result_identifier=validation_result_id,
             expectation_suite_identifier=ExpectationSuiteIdentifier(self.suite.name),
+            _using_cloud_context=self._validation_results_store.cloud_mode,
         )
 
         return results

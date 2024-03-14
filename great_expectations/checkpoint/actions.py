@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
 
@@ -883,13 +883,17 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
-        store_validation_results(
+        output = store_validation_results(
             self.target_store,
             validation_result_suite,
             validation_result_suite_identifier,
             expectation_suite_identifier,
             checkpoint_identifier,
+            self._using_cloud_context,
         )
+
+        if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
+            return output
 
 
 def store_validation_results(
@@ -900,32 +904,30 @@ def store_validation_results(
         ExpectationSuiteIdentifier | GXCloudIdentifier
     ] = None,
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-) -> Any:
+    _using_cloud_context: bool = False,
+) -> bool | GXCloudResourceRef:
     """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
     This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
     """
-    using_cloud_context = validation_result_store.cloud_mode
     checkpoint_id = None
-    if using_cloud_context and checkpoint_identifier:
+    if _using_cloud_context and checkpoint_identifier:
         checkpoint_id = checkpoint_identifier.id
 
-    expectation_suite_id: Optional[str] = None
+    expectation_suite_id = None
     if isinstance(expectation_suite_identifier, GXCloudIdentifier):
         expectation_suite_id = expectation_suite_identifier.id
 
     run_return_value = validation_result_store.set(
-        key=suite_validation_result_identifier,
-        value=suite_validation_result,
+        suite_validation_result_identifier,
+        suite_validation_result,
         checkpoint_id=checkpoint_id,
         expectation_suite_id=expectation_suite_id,
     )
-    if (
-        using_cloud_context
-        and isinstance(run_return_value, GXCloudResourceRef)
-        and isinstance(suite_validation_result_identifier, GXCloudIdentifier)
+
+    if isinstance(run_return_value, GXCloudResourceRef) and isinstance(
+        suite_validation_result_identifier, GXCloudIdentifier
     ):
-        new_id = run_return_value.id
-        suite_validation_result_identifier.id = new_id
+        suite_validation_result_identifier.id = run_return_value.id
     return run_return_value
 
 
