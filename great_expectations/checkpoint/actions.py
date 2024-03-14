@@ -53,13 +53,13 @@ from great_expectations.render.renderer import (
     OpsgenieRenderer,
     SlackRenderer,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -79,13 +79,6 @@ def _build_renderer(config: dict) -> Renderer:
     return renderer
 
 
-def _encode_renderer(renderer: Renderer) -> dict:
-    return {
-        "module_name": renderer.__class__.__module__,
-        "class_name": renderer.__class__.__name__,
-    }
-
-
 @public_api
 class ValidationAction(BaseModel):
     """
@@ -94,6 +87,10 @@ class ValidationAction(BaseModel):
     Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
     and other actions to take place after the validation result is produced.
     """
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
 
@@ -185,6 +182,8 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
+    type: Literal["data_docs"] = "data_docs"
+
     def _build_data_docs(
         self,
         site_names: list[str] | None = None,
@@ -249,11 +248,6 @@ class SlackNotificationAction(DataDocsAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
-    class Config:
-        arbitrary_types_allowed = True
-        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
-        json_encoders = {SlackRenderer: lambda s: _encode_renderer(s)}
-
     type: Literal["slack"] = "slack"
 
     slack_webhook: Optional[str] = None
@@ -263,6 +257,10 @@ class SlackNotificationAction(DataDocsAction):
     notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
     renderer: SlackRenderer = SlackRenderer()
+
+    def json(self, **kwargs) -> str:
+        print("JSON WAS CALLED")
+        return super().json(**kwargs)
 
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
@@ -534,11 +532,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    class Config:
-        arbitrary_types_allowed = True
-        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
-        json_encoders = {MicrosoftTeamsRenderer: lambda m: _encode_renderer(m)}
-
     type: Literal["microsoft"] = "microsoft"
 
     teams_webhook: str
@@ -639,11 +632,6 @@ class OpsgenieAlertAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         tags: Tags to include in the alert
     """
-
-    class Config:
-        arbitrary_types_allowed = True
-        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
-        json_encoders = {OpsgenieRenderer: lambda o: _encode_renderer(o)}
 
     type: Literal["opsgenie"] = "opsgenie"
 
@@ -772,11 +760,6 @@ class EmailAction(ValidationAction):
         notify_on: "Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
-
-    class Config:
-        arbitrary_types_allowed = True
-        # Serialize as class_name/module_name to support legacy instantiate_class_from_config pattern
-        json_encoders = {EmailRenderer: lambda e: _encode_renderer(e)}
 
     type: Literal["email"] = "email"
 

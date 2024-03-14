@@ -36,6 +36,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import is_library_loadable
 from tests.test_ge_utils import file_data_asset
 
@@ -802,6 +803,9 @@ class TestActionSerialization:
         self, action_class: ValidationAction, init_params: dict
     ):
         class DummyClassWithActionChild(BaseModel):
+            class Config:
+                json_encoders = {Renderer: lambda r: r.serialize()}
+
             action: Union[ValidationAction.get_subclasses()] = Field(
                 ..., discriminator="type"
             )

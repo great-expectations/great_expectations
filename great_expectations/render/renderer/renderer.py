@@ -36,10 +36,11 @@ def renderer(
 class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
 
-    def __init__(self) -> None:
-        # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
-        # used to be composed exclusively of classmethods
-        pass
+    def serialize(self) -> dict:
+        return {
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
