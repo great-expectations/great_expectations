@@ -10,14 +10,11 @@ import json
 import logging
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Callable,
     Dict,
     List,
     Literal,
     Optional,
     Union,
-    cast,
 )
 
 import requests
@@ -103,13 +100,11 @@ class ValidationAction(BaseModel):
 
     type: str
 
-    _using_cloud_context: bool = PrivateAttr()
-
-    def __init__(self, **data: Any) -> None:
+    @property
+    def _using_cloud_context(self) -> bool:
         from great_expectations import project_manager
 
-        super().__init__(**data)
-        self._using_cloud_context = project_manager.is_using_cloud()
+        return project_manager.is_using_cloud()
 
     @public_api
     def run(  # noqa: PLR0913
@@ -181,15 +176,27 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
-    _build_data_docs: Callable = PrivateAttr()
-    _get_docs_sites_urls: Callable = PrivateAttr()
-
-    def __init__(self, **data: Any) -> None:
+    def _build_data_docs(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+    ) -> dict:
         from great_expectations import project_manager
 
-        super().__init__(**data)
-        self._build_data_docs = project_manager.build_data_docs
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+        return project_manager.build_data_docs(
+            site_names=site_names, resource_identifiers=resource_identifiers
+        )
+
+    def _get_docs_sites_urls(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+    ):
+        from great_expectations import project_manager
+
+        return project_manager.get_docs_sites_urls(
+            site_names=site_names, resource_identifiers=resource_identifiers
+        )
 
 
 @public_api
@@ -249,7 +256,11 @@ class SlackNotificationAction(DataDocsAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
         if isinstance(renderer, dict):
-            renderer = cast(SlackRenderer, _build_renderer(config=renderer))
+            renderer = _build_renderer(config=renderer)
+        if not isinstance(renderer, SlackRenderer):
+            raise ValueError(
+                "renderer must be a SlackRenderer or a valid configuration for one."
+            )
         return renderer
 
     @root_validator
@@ -524,7 +535,11 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         cls, renderer: dict | MicrosoftTeamsRenderer
     ) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
-            renderer = cast(MicrosoftTeamsRenderer, _build_renderer(config=renderer))
+            renderer = _build_renderer(config=renderer)
+        if not isinstance(renderer, MicrosoftTeamsRenderer):
+            raise ValueError(
+                "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
+            )
         return renderer
 
     @override
@@ -626,7 +641,11 @@ class OpsgenieAlertAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
         if isinstance(renderer, dict):
-            renderer = cast(OpsgenieRenderer, _build_renderer(config=renderer))
+            renderer = _build_renderer(config=renderer)
+        if not isinstance(renderer, OpsgenieRenderer):
+            raise ValueError(
+                "renderer must be a OpsgenieRenderer or a valid configuration for one."
+            )
         return renderer
 
     @override
@@ -759,7 +778,11 @@ class EmailAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
         if isinstance(renderer, dict):
-            renderer = cast(EmailRenderer, _build_renderer(config=renderer))
+            renderer = _build_renderer(config=renderer)
+        if not isinstance(renderer, EmailRenderer):
+            raise ValueError(
+                "renderer must be a EmailRenderer or a valid configuration for one."
+            )
         return renderer
 
     @root_validator
