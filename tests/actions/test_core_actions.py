@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type, Union
+from typing import Type
 from unittest import mock
 
 import pytest
@@ -16,7 +16,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
-from great_expectations.compatibility.pydantic import ValidationError, parse_obj_as
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -807,15 +807,6 @@ class TestActionSerialization:
 
         assert actual == expected
 
-    def _verify_deserialization_to_appropriate_action_subclass(
-        self, serialized_action: dict, expected_class: Type[ValidationAction]
-    ):
-        parsed_obj = parse_obj_as(
-            Union[tuple(ValidationAction.__subclasses__())],
-            serialized_action,
-        )
-        assert isinstance(parsed_obj, expected_class)
-
     @pytest.mark.parametrize(
         "action_class, serialized_action",
         [(k, v) for k, v in SERIALIZED_ACTIONS.items()],
@@ -825,6 +816,5 @@ class TestActionSerialization:
     def test_action_deserialization(
         self, action_class: Type[ValidationAction], serialized_action: dict
     ):
-        self._verify_deserialization_to_appropriate_action_subclass(
-            serialized_action=serialized_action, expected_class=action_class
-        )
+        actual = action_class.parse_obj(serialized_action)
+        assert isinstance(actual, action_class)
