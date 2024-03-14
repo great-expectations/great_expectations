@@ -748,23 +748,6 @@ class TestActionSerialization:
         APINotificationAction: {"type": "api", "url": EXAMPLE_URL},
     }
 
-    def _verify_deserialization_to_appropriate_action_subclass(
-        self, action: ValidationAction, expected_class: Type[ValidationAction]
-    ):
-        parsed_obj = parse_obj_as(
-            Union[
-                SlackNotificationAction,
-                MicrosoftTeamsNotificationAction,
-                OpsgenieAlertAction,
-                EmailAction,
-                UpdateDataDocsAction,
-                SNSNotificationAction,
-                APINotificationAction,
-            ],
-            action,
-        )
-        assert isinstance(parsed_obj, expected_class)
-
     @pytest.mark.parametrize(
         "action_class, init_params",
         [
@@ -818,13 +801,38 @@ class TestActionSerialization:
     ):
         action = action_class(**init_params)
 
-        # Test serialization
         json_dict = action.json()
         actual = json.loads(json_dict)
         expected = self.SERIALIZED_ACTIONS[action_class]
+
         assert actual == expected
 
-        # Test deserialization
+    def _verify_deserialization_to_appropriate_action_subclass(
+        self, serialized_action: dict, expected_class: Type[ValidationAction]
+    ):
+        parsed_obj = parse_obj_as(
+            Union[
+                SlackNotificationAction,
+                MicrosoftTeamsNotificationAction,
+                OpsgenieAlertAction,
+                EmailAction,
+                UpdateDataDocsAction,
+                SNSNotificationAction,
+                APINotificationAction,
+            ],
+            serialized_action,
+        )
+        assert isinstance(parsed_obj, expected_class)
+
+    @pytest.mark.parametrize(
+        "action_class, serialized_action",
+        [(k, v) for k, v in SERIALIZED_ACTIONS.items()],
+        ids=[k.__name__ for k in SERIALIZED_ACTIONS],
+    )
+    @pytest.mark.unit
+    def test_action_deserialization(
+        self, action_class: Type[ValidationAction], serialized_action: dict
+    ):
         self._verify_deserialization_to_appropriate_action_subclass(
-            action=actual, expected_class=action_class
+            serialized_action=serialized_action, expected_class=action_class
         )
