@@ -6,7 +6,7 @@ To help us improve the tool, by default we track event data when certain Data Co
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the following to your data context configuration:
 
-```YAML title="YAML"
+```yaml
     anonymous_usage_statistics:
       data_context_id: <randomly-generated-uuid>
       enabled: false
