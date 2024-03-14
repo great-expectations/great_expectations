@@ -9,6 +9,8 @@ import S3DataSourcePandas from './_amazon_s3/_add_data_source_pandas.md'
 import S3DataSourceSpark from './_amazon_s3/_add_data_source_spark.md'
 import S3DataAssetPandas from './_amazon_s3/_add_data_asset_pandas.md'
 import S3DataAssetSpark from './_amazon_s3/_add_data_asset_spark.md'
+import S3ExampleCodePandas from './_amazon_s3/_full_example_code_pandas.md'
+import S3ExampleCodeSpark from './_amazon_s3/_full_example_code_spark.md'
 import S3NextSteps from './_amazon_s3/_next_steps.md'
 
 import AzurePrerequisites from './_azure_blob_storage/_prerequisites.md'
@@ -16,6 +18,8 @@ import AzureDataSourcePandas from './_azure_blob_storage/_add_data_source_pandas
 import AzureDataSourceSpark from './_azure_blob_storage/_add_data_source_spark.md'
 import AzureDataAssetPandas from './_azure_blob_storage/_add_data_asset_pandas.md'
 import AzureDataAssetSpark from './_azure_blob_storage/_add_data_asset_spark.md'
+import AzureExampleCodePandas from './_azure_blob_storage/_full_example_code_pandas.md'
+import AzureExampleCodeSpark from './_azure_blob_storage/_full_example_code_spark.md'
 import AzureNextSteps from './_azure_blob_storage/_next_steps.md'
 
 import FilesystemPrerequisites from './_filesystem/_prerequisites.md'
@@ -23,6 +27,8 @@ import FilesystemDataSourcePandas from './_filesystem/_add_data_source_pandas.md
 import FilesystemDataSourceSpark from './_filesystem/_add_data_source_spark.md'
 import FilesystemDataAssetPandas from './_filesystem/_add_data_asset_pandas.md'
 import FilesystemDataAssetSpark from './_filesystem/_add_data_asset_spark.md'
+import FilesystemExampleCodePandas from './_filesystem/_full_example_code_pandas.md'
+import FilesystemExampleCodeSpark from './_filesystem/_full_example_code_spark.md'
 import FilesystemNextSteps from './_filesystem/_next_steps.md'
 
 import GcsPrerequisites from './_google_cloud_storage/_prerequisites.md'
@@ -30,6 +36,8 @@ import GcsDataSourcePandas from './_google_cloud_storage/_add_data_source_pandas
 import GcsDataSourceSpark from './_google_cloud_storage/_add_data_source_spark.md'
 import GcsDataAssetPandas from './_google_cloud_storage/_add_data_asset_pandas.md'
 import GcsDataAssetSpark from './_google_cloud_storage/_add_data_asset_spark.md'
+import GcsExampleCodePandas from './_google_cloud_storage/_full_example_code_pandas.md'
+import GcsExampleCodeSpark from './_google_cloud_storage/_full_example_code_spark.md'
 import GcsNextSteps from './_google_cloud_storage/_next_steps.md'
 
 Use the information provided here to connect to Data Assets stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems.
@@ -184,6 +192,55 @@ A Data Asset tells GX what set of records to make available from a Data Source.
       </TabItem>
       <TabItem value="spark" label="Using Spark">
         <FilesystemDataAssetSpark/>
+      </TabItem>
+    </Tabs>
+  </TabItem>
+
+</Tabs>
+
+## Full example code
+
+<Tabs className="hidden" groupId="connect-filesystem-source-data" defaultValue='amazon'>
+  <TabItem value="amazon">
+    <Tabs className="hidden" queryString="data-connector" groupId="data-connector" defaultValue='pandas'>
+      <TabItem value="pandas" label="Using pandas">
+        <S3ExampleCodePandas/>
+      </TabItem>
+      <TabItem value="spark" label="Using Spark">
+        <S3ExampleCodeSpark/>
+      </TabItem>
+    </Tabs>
+  </TabItem>
+
+  <TabItem value="azure">
+    <Tabs className="hidden" queryString="data-connector" groupId="data-connector" defaultValue='pandas'>
+      <TabItem value="pandas" label="Using pandas">
+        <AzureExampleCodePandas/>
+      </TabItem>
+      <TabItem value="spark" label="Using Spark">
+        <AzureExampleCodeSpark/>
+      </TabItem>
+    </Tabs>
+  </TabItem>
+
+  <TabItem value="gcs">
+    <Tabs className="hidden" queryString="data-connector" groupId="data-connector" defaultValue='pandas'>
+      <TabItem value="pandas" label="Using pandas">
+        <GcsExampleCodePandas/>
+      </TabItem>
+      <TabItem value="spark" label="Using Spark">
+        <GcsExampleCodeSpark/>
+      </TabItem>
+    </Tabs>
+  </TabItem>
+
+  <TabItem value="filesystem">
+    <Tabs className="hidden" queryString="data-connector" groupId="data-connector" defaultValue='pandas'>
+      <TabItem value="pandas" label="Using pandas">
+        <FilesystemExampleCodePandas/>
+      </TabItem>
+      <TabItem value="spark" label="Using Spark">
+        <FilesystemExampleCodeSpark/>
       </TabItem>
     </Tabs>
   </TabItem>
