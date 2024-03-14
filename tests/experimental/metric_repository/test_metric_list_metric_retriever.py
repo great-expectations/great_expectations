@@ -1,6 +1,4 @@
-from typing import List
-from unittest import mock
-from unittest.mock import Mock
+from typing import Dict, List
 
 import pytest
 
@@ -22,10 +20,12 @@ from great_expectations.validator.validator import Validator
 
 pytestmark = pytest.mark.unit
 
+from pytest_mock import MockerFixture
 
-def test_get_metrics_table_metrics_only():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+
+def test_get_metrics_table_metrics_only(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -40,18 +40,18 @@ def test_get_metrics_table_metrics_only():
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
     ]
-    aborted_metrics = {}
+    aborted_metrics: Dict[str, str] = {}
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request,
@@ -82,9 +82,9 @@ def test_get_metrics_table_metrics_only():
     ]
 
 
-def test_get_metrics_full_list():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_metrics_full_list(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -114,23 +114,23 @@ def test_get_metrics_full_list():
         MetricTypes.COLUMN_MEDIAN,
         MetricTypes.COLUMN_NULL_COUNT,
     ]
-    aborted_metrics = {}
+    aborted_metrics: Dict[str, str] = {}
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mock.patch(
+    with mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mock.patch(
+    ), mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
     ):
@@ -231,10 +231,10 @@ def test_get_metrics_full_list():
     ]
 
 
-def test_get_metrics_metrics_missing():
+def test_get_metrics_metrics_missing(mocker: MockerFixture):
     """This test is meant to simulate metrics missing from the computed metrics."""
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
     mock_computed_metrics = {
         # ("table.row_count", (), ()): 2, # Missing table.row_count metric
@@ -258,18 +258,18 @@ def test_get_metrics_metrics_missing():
         mock_computed_metrics,
         mock_aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mock.patch(
+    with mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mock.patch(
+    ), mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
     ):
@@ -321,10 +321,10 @@ def test_get_metrics_metrics_missing():
         ]
 
 
-def test_get_metrics_with_exception():
+def test_get_metrics_with_exception(mocker: MockerFixture):
     """This test is meant to simulate failed metrics in the computed metrics."""
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
 
     exception_info = ExceptionInfo(
@@ -356,7 +356,7 @@ def test_get_metrics_with_exception():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
@@ -368,7 +368,7 @@ def test_get_metrics_with_exception():
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=cdm_metrics_list
@@ -399,11 +399,10 @@ def test_get_metrics_with_exception():
     ]
 
 
-def test_get_metrics_with_column_type_missing():
+def test_get_metrics_with_column_type_missing(mocker: MockerFixture):
     """This test is meant to simulate failed metrics in the computed metrics."""
-    """This test is meant to simulate failed metrics in the computed metrics."""
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
 
     exception_info = ExceptionInfo(
@@ -441,7 +440,7 @@ def test_get_metrics_with_column_type_missing():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
@@ -454,12 +453,12 @@ def test_get_metrics_with_column_type_missing():
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mock.patch(
+    with mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=["col1", "col2"],
-    ), mock.patch(
+    ), mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=[],
     ):
@@ -507,9 +506,9 @@ def test_get_metrics_with_column_type_missing():
     ]
 
 
-def test_get_metrics_with_timestamp_columns():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_metrics_with_timestamp_columns(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
     computed_metrics = {
         ("table.row_count", (), ()): 2,
@@ -534,18 +533,18 @@ def test_get_metrics_with_timestamp_columns():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mock.patch(
+    with mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
         return_value=[],
-    ), mock.patch(
+    ), mocker.patch(
         f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
         return_value=["timestamp_col"],
     ):
@@ -596,9 +595,9 @@ def test_get_metrics_with_timestamp_columns():
     ]
 
 
-def test_get_metrics_only_gets_a_validator_once():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_metrics_only_gets_a_validator_once(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
 
     aborted_metrics = {}
@@ -620,15 +619,15 @@ def test_get_metrics_only_gets_a_validator_once():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
-    with mock.patch(
+    with mocker.patch(
         f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
         return_value=["col1", "col2"],
     ):
@@ -639,9 +638,9 @@ def test_get_metrics_only_gets_a_validator_once():
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
 
 
-def test_get_metrics_with_no_metrics():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_metrics_with_no_metrics(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
     computed_metrics = {}
     cdm_metrics_list: List[MetricTypes] = []
@@ -650,13 +649,13 @@ def test_get_metrics_with_no_metrics():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
 
     with pytest.raises(ValueError):
         metric_retriever.get_metrics(
@@ -664,8 +663,8 @@ def test_get_metrics_with_no_metrics():
         )
 
 
-def test_valid_metric_types_true():
-    mock_context = Mock(spec=CloudDataContext)
+def test_valid_metric_types_true(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
     valid_metric_types = [
@@ -681,16 +680,16 @@ def test_valid_metric_types_true():
     assert metric_retriever._check_valid_metric_types(valid_metric_types) is True
 
 
-def test_valid_metric_types_false():
-    mock_context = Mock(spec=CloudDataContext)
+def test_valid_metric_types_false(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
     metric_retriever = MetricListMetricRetriever(context=mock_context)
 
     invalid_metric_type = ["I_am_invalid"]
     assert metric_retriever._check_valid_metric_types(invalid_metric_type) is False
 
 
-def test_column_metrics_in_metrics_list_only_table_metrics():
-    mock_context = Mock(spec=CloudDataContext)
+def test_column_metrics_in_metrics_list_only_table_metrics(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
     metric_retriever = MetricListMetricRetriever(context=mock_context)
     table_metrics_only = [
         MetricTypes.TABLE_ROW_COUNT,
@@ -700,8 +699,8 @@ def test_column_metrics_in_metrics_list_only_table_metrics():
     assert metric_retriever._column_metrics_in_metric_list(table_metrics_only) is False
 
 
-def test_column_metrics_in_metrics_list_with_column_metrics():
-    mock_context = Mock(spec=CloudDataContext)
+def test_column_metrics_in_metrics_list_with_column_metrics(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
     metric_retriever = MetricListMetricRetriever(context=mock_context)
     metrics_list_with_column_metrics = [
         MetricTypes.TABLE_ROW_COUNT,
@@ -717,11 +716,11 @@ def test_column_metrics_in_metrics_list_with_column_metrics():
     )
 
 
-def test_get_table_column_types():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_table_column_types(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
     computed_metrics = {
         ("table.column_types", (), "include_nested=True"): [
             {"name": "col1", "type": "float"},
@@ -733,7 +732,7 @@ def test_get_table_column_types():
         computed_metrics,
         aborted_metrics,
     )
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
@@ -742,17 +741,17 @@ def test_get_table_column_types():
     print(ret)
 
 
-def test_get_table_columns():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_table_columns(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
     computed_metrics = {
         ("table.columns", (), ()): ["col1", "col2"],
     }
     aborted_metrics = {}
     mock_validator.compute_metrics.return_value = (computed_metrics, aborted_metrics)
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 
@@ -766,15 +765,15 @@ def test_get_table_columns():
     )
 
 
-def test_get_table_row_count():
-    mock_context = Mock(spec=CloudDataContext)
-    mock_validator = Mock(spec=Validator)
+def test_get_table_row_count(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
-    mock_batch_request = Mock(spec=BatchRequest)
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
     computed_metrics = {("table.row_count", (), ()): 2}
     aborted_metrics = {}
     mock_validator.compute_metrics.return_value = (computed_metrics, aborted_metrics)
-    mock_batch = Mock(spec=Batch)
+    mock_batch = mocker.Mock(spec=Batch)
     mock_batch.id = "batch_id"
     mock_validator.active_batch = mock_batch
 

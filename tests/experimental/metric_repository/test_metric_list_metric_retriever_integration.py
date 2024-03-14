@@ -1,4 +1,5 @@
 """Test using actual sample data."""
+
 from __future__ import annotations
 
 from typing import List
