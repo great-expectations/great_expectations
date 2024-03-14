@@ -20,10 +20,14 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
     ValidationResultIdentifier,
+)
+from great_expectations.datasource.new_datasource import (
+    BaseDatasource as LegacyDatasource,
 )
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
@@ -33,11 +37,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
-
-from great_expectations.data_context.data_context.context_factory import project_manager
-from great_expectations.datasource.new_datasource import (
-    BaseDatasource as LegacyDatasource,
-)
+    from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
 class _IdentifierBundle(BaseModel):
@@ -48,7 +48,7 @@ class _IdentifierBundle(BaseModel):
 class _EncodedValidationData(BaseModel):
     datasource: _IdentifierBundle
     asset: _IdentifierBundle
-    batch_config: _IdentifierBundle
+    batch_definition: _IdentifierBundle
 
 
 def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
@@ -72,7 +72,7 @@ def _encode_data(data: BatchConfig) -> _EncodedValidationData:
             name=asset.name,
             id=str(asset.id) if asset.id else None,
         ),
-        batch_config=_IdentifierBundle(
+        batch_definition=_IdentifierBundle(
             name=data.name,
             id=data.id,
         ),
@@ -86,7 +86,7 @@ class ValidationConfig(BaseModel):
 
     Args:
         name: The name of the validation.
-        data: A batch config to validate.
+        data: A batch definition to validate.
         suite: A grouping of expectations to validate against the data.
         id: A unique identifier for the validation; added when persisted with a store.
 
@@ -113,8 +113,8 @@ class ValidationConfig(BaseModel):
                     "name": "my_asset",
                     "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67"
                 },
-                "batch_config": {
-                    "name": "my_batch_config",
+                "batch_definition": {
+                    "name": "my_batch_definition",
                     "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"
                 }
             },
@@ -141,6 +141,18 @@ class ValidationConfig(BaseModel):
 
         # TODO: Migrate this to model_post_init when we get to pydantic 2
         self._validation_results_store = project_manager.get_validations_store()
+
+    @property
+    def batch_definition(self) -> BatchConfig:
+        return self.data
+
+    @property
+    def asset(self) -> DataAsset:
+        return self.data.data_asset
+
+    @property
+    def data_source(self) -> Datasource:
+        return self.asset.datasource
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -201,7 +213,7 @@ class ValidationConfig(BaseModel):
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
-        batch_config_name = data_identifiers.batch_config.name
+        batch_definition_name = data_identifiers.batch_definition.name
 
         datasource_dict = project_manager.get_datasources()
         try:
@@ -221,26 +233,26 @@ class ValidationConfig(BaseModel):
             ) from e
 
         try:
-            batch_config = asset.get_batch_config(batch_config_name)
+            batch_definition = asset.get_batch_config(batch_definition_name)
         except KeyError as e:
             raise ValueError(
-                f"Could not find batch config named '{batch_config_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."
             ) from e
 
-        return batch_config
+        return batch_definition
 
     @public_api
     def run(
         self,
         *,
-        batch_config_options: Optional[BatchRequestOptions] = None,
+        batch_definition_options: Optional[BatchRequestOptions] = None,
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         run_time = datetime.datetime.now(tz=datetime.timezone.utc)
         validator = Validator(
-            batch_config=self.data,
-            batch_request_options=batch_config_options,
+            batch_config=self.batch_definition,
+            batch_request_options=batch_definition_options,
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(

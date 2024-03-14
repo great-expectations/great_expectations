@@ -49,25 +49,17 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class ValidationAction:
-    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
+    """
+    ValidationActions define a set of steps to be run after a validation result is produced.
 
-    Args:
-        data_context: Data Context that is used by the Action.
+    Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
+    and other actions to take place after the validation result is produced.
     """
 
-    def __init__(self, data_context: AbstractDataContext) -> None:
-        """Create a ValidationAction"""
-        self.data_context = data_context
+    def __init__(self) -> None:
+        from great_expectations import project_manager
 
-    @property
-    def _using_cloud_context(self) -> bool:
-        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
-        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
-        from great_expectations.data_context.data_context.cloud_data_context import (
-            CloudDataContext,
-        )
-
-        return isinstance(self.data_context, CloudDataContext)
+        self._using_cloud_context = project_manager.is_using_cloud()
 
     @public_api
     def run(  # noqa: PLR0913
@@ -138,8 +130,17 @@ class ValidationAction:
         return NotImplementedError
 
 
+class DataDocsAction(ValidationAction):
+    def __init__(self) -> None:
+        from great_expectations import project_manager
+
+        super().__init__()
+        self._build_data_docs = project_manager.build_data_docs
+        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+
+
 @public_api
-class SlackNotificationAction(ValidationAction):
+class SlackNotificationAction(DataDocsAction):
     """Sends a Slack notification to a given webhook.
 
     ```yaml
@@ -164,7 +165,6 @@ class SlackNotificationAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
             ```python
             {
@@ -182,7 +182,6 @@ class SlackNotificationAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -192,7 +191,7 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: bool = False,
     ) -> None:
         """Create a SlackNotificationAction"""
-        super().__init__(data_context)
+        super().__init__()
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -256,7 +255,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[dict[str, str]] = self.data_context.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -345,23 +344,20 @@ class PagerdutyAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Events API v2 key for pagerduty.
         routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
         severity: str = "critical",
     ) -> None:
         """Create a PagerdutyAlertAction"""
-        super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
         self.api_key = api_key
@@ -451,7 +447,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
             ```python
             {
@@ -465,13 +460,11 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
     ) -> None:
         """Create a MicrosoftTeamsNotificationAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -565,7 +558,6 @@ class OpsgenieAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Opsgenie API key.
         region: Specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set.
         priority: Specifies the priority of the alert (P1 - P5).
@@ -575,7 +567,6 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -584,7 +575,6 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Optional[list[str]] = None,
     ) -> None:
         """Create an OpsgenieAlertAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -694,7 +684,6 @@ class EmailAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate an email, for example:
             ```python
             {
@@ -716,7 +705,6 @@ class EmailAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -730,7 +718,6 @@ class EmailAction(ValidationAction):
         notify_with: Optional[list[str]] = None,
     ) -> None:
         """Create an EmailAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -864,7 +851,7 @@ class StoreValidationResultAction(ValidationAction):
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__(data_context)
+        super().__init__()
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
@@ -932,7 +919,7 @@ def store_validation_results(
 
 
 @public_api
-class UpdateDataDocsAction(ValidationAction):
+class UpdateDataDocsAction(DataDocsAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
     YAML configuration example:
@@ -955,20 +942,17 @@ class UpdateDataDocsAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         site_names: Optional. A list of the names of sites to update.
     """
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
-        site_names: list[str] | str | None = None,
+        site_names: list[str] | None = None,
     ) -> None:
         """
-        :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
-        super().__init__(data_context)
+        super().__init__()
         self._site_names = site_names
 
     @override
@@ -1003,7 +987,7 @@ class UpdateDataDocsAction(ValidationAction):
 
         # TODO Update for RenderedDataDocs
         # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
-        self.data_context.build_data_docs(
+        self._build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
@@ -1015,9 +999,9 @@ class UpdateDataDocsAction(ValidationAction):
             return data_docs_validation_results
 
         # get the URL for the validation result
-        docs_site_urls_list = self.data_context.get_docs_sites_urls(
+        docs_site_urls_list = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
+            site_names=self._site_names,
         )
         # process payload
         for sites in docs_site_urls_list:
@@ -1037,25 +1021,21 @@ class SNSNotificationAction(ValidationAction):
           class_name: SNSNotificationAction
           # put the actual SNS Arn in the uncommitted/config_variables.yml file
           # or pass in as environment variable
-          data_context:
           sns_topic_arn:
           sns_subject:
         ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         sns_topic_arn: The SNS Arn to publish messages to.
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
         """Inits SNSNotificationAction."""
-        super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
@@ -1097,8 +1077,7 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, data_context, url) -> None:
-        super().__init__(data_context)
+    def __init__(self, url) -> None:
         self.url = url
 
     @override
