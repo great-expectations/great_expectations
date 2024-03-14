@@ -14,7 +14,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:
@@ -229,7 +228,6 @@ def _add_response_key(res, key, value):
     return res
 
 
-@public_api
 def register_metric(  # noqa: PLR0913
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
