@@ -40,35 +40,29 @@ import GcsExampleCodePandas from './_google_cloud_storage/_full_example_code_pan
 import GcsExampleCodeSpark from './_google_cloud_storage/_full_example_code_spark.md'
 import GcsNextSteps from './_google_cloud_storage/_next_steps.md'
 
-Use the information provided here to connect to Data Assets stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems.
+Use the information provided here to connect to data stored as CSV or similar file formats.
+
+Select the storage location of your data files from the following:
 
 <Tabs queryString="data-source" groupId="connect-filesystem-source-data" defaultValue='amazon'>
   <TabItem value="amazon" label="Amazon S3">
 
-<h2>Amazon S3 Data Source</h2>
-
-Connect to an Amazon S3 Data Source.
+Create a Data Source that tells GX how to connect to your Amazon S3 bucket and a Data Asset that tells GX which files contain the data to make available.
 
   </TabItem>
   <TabItem value="azure" label="Microsoft Azure Blob Storage">
 
-<h2>Microsoft Azure Blob Storage</h2>
-
-Connect to a Microsoft Azure Blob Storage Data Source.
+Create a Data Source that tells GX how to connect to your Microsoft Azure Blob Storage account and a Data Asset that tells GX which files contain the data to make available.
 
   </TabItem>
   <TabItem value="gcs" label="Google Cloud Storage">
 
-<h2>GCS Data Source</h2>
-
-Connect to a GCS Data Source.
+Create a Data Source that tells GX how to connect to your GCS bucket and a Data Asset that tells GX which files contain the data to make available.
 
   </TabItem>
   <TabItem value="filesystem" label="Filesystem">
 
-<h2>Filesystem Data Source</h2>
-
-Connect to a data stored in a filesystem.
+Create a Data Source that tells GX where to find your local or networked data files and a Data Asset that tells GX which files contain the data to make available.
 
   </TabItem>
 

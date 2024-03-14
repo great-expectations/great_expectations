@@ -1,3 +1,1 @@
-import InProgress from '../../../../_core_components/_in_progress.md';
-
-<InProgress/>
+- [Request data](/core/manage_and_access_data/request_data.md)
