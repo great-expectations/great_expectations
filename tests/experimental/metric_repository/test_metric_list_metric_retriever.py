@@ -466,7 +466,6 @@ def test_get_metrics_with_column_type_missing():
         metrics = metric_retriever.get_metrics(
             batch_request=mock_batch_request, metric_list=cdm_metrics_list
         )
-    # why is this not sorted?
     assert metrics == [
         TableMetric[int](
             batch_id="batch_id",
