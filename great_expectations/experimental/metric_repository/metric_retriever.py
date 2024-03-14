@@ -302,6 +302,6 @@ class MetricRetriever(abc.ABC):
         return TableMetric[List[str]](
             batch_id=batch_id,
             metric_name=metric_name,
-            value=column_types_converted_to_str,  # type: ignore[arg-type]
+            value=column_types_converted_to_str,
             exception=exception,
         )
