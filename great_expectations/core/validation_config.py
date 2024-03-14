@@ -79,7 +79,6 @@ def _encode_data(data: BatchConfig) -> _EncodedValidationData:
     )
 
 
-# @dataclass_transform
 class ValidationConfig(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
@@ -261,7 +260,7 @@ class ValidationConfig(BaseModel):
         (
             expectation_suite_identifier,
             validation_result_id,
-        ) = self._get_expectation_suite_and_validation_result_ids()
+        ) = self._get_expectation_suite_and_validation_result_ids(validator)
 
         store_validation_results(
             validation_result_store=self._validation_results_store,
@@ -275,10 +274,13 @@ class ValidationConfig(BaseModel):
 
     def _get_expectation_suite_and_validation_result_ids(
         self,
+        validator: Validator,
     ) -> (
         tuple[GXCloudIdentifier, GXCloudIdentifier]
         | tuple[ExpectationSuiteIdentifier, ValidationResultIdentifier]
     ):
+        expectation_suite_identifier: GXCloudIdentifier | ExpectationSuiteIdentifier
+        validation_result_id: GXCloudIdentifier | ValidationResultIdentifier
         if self._validation_results_store.cloud_mode:
             expectation_suite_identifier = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
