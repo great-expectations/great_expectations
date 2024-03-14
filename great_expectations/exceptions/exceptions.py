@@ -4,7 +4,8 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from enum import Enum
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import ValidationError
 
@@ -480,3 +481,72 @@ class DatabaseConnectionError(GreatExpectationsError):
 
 class MigrationError(GreatExpectationsError):
     """Error when using the migration tool."""
+
+
+class GXCoreErrorCodeRegistry:
+    """A registry for GXCoreErrorCodes and their associated exceptions that we can use in an enum to validate
+    error codes."""
+
+    def __init__(self):
+        self._registry: Dict[GXCoreErrorCode, Exception] = {}
+
+    # TODO: Should register be a classmethod?:
+    def register(
+        self, error_cls: Type[GXCoreError], error_code: GXCoreErrorCode
+    ) -> None:
+        self._registry[error_code] = error_cls
+
+    @classmethod
+    def get_all_codes(cls) -> List[GXCoreErrorCode]:
+        return list(cls._registry.keys())
+
+
+# TODO: How does this work with import order etc? Should this be in a top level or higher level __init__.py?:
+error_code_registry = GXCoreErrorCodeRegistry()
+
+
+class GXCoreErrorCode(Enum):
+    GENERIC_UNHANDLED_ERROR = "generic-unhandled-error"
+    WRONG_USERNAME_OR_PASSWORD = (
+        "wrong-username-or-password"  # Not a hardcoded password
+    )
+    CHECKPOINT_MISSING_BATCH_REQUEST = "checkpoint-missing-batch-request"
+
+
+def register(error_cls: Exception, error_code: GXCoreErrorCode) -> None:
+    GXCoreErrorCodeRegistry.register(error_cls, error_code)
+
+
+class GXCoreError(Exception):
+    """Base class for all exceptions, adds error codes"""
+
+    # TODO: Class var or instance var?
+    error_code: GXCoreErrorCode
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+    def __init_subclass__(cls, **kwargs):
+        # https://stackoverflow.com/questions/5189232/how-to-auto-register-a-class-when-its-defined
+        super().__init_subclass__(**kwargs)
+        error_code_registry.register(cls, cls.error_code)
+
+
+class CheckpointMissingBatchRequestEXAMPLEONLYDONOTUSE(
+    GXCoreError
+):  # GXCoreError enforces the interface (ABC or protocol).
+    error_code = GXCoreErrorCode.CHECKPOINT_MISSING_BATCH_REQUEST
+
+    def __init__(
+        self,
+        name: str,
+    ) -> None:
+        """CheckpointMissingBatchRequest error is raised when a checkpoint is missing a batch request.
+        Args:
+            name (str): The name of the checkpoint.
+        """
+        self.name = name
+        super().__init__(message=str(self))
+
+    def __str__(self) -> str:  # or __repr__?
+        return f"Error running checkpoint {self.name}, missing batch request."
