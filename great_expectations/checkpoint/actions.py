@@ -883,7 +883,7 @@ class StoreValidationResultAction(ValidationAction):
             return output
 
 
-def store_validation_results(
+def store_validation_results(  # noqa: PLR0913
     validation_result_store: ValidationsStore,
     suite_validation_result: ExpectationSuiteValidationResult,
     suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
@@ -891,13 +891,13 @@ def store_validation_results(
         ExpectationSuiteIdentifier | GXCloudIdentifier
     ] = None,
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-    _using_cloud_context: bool = False,
+    cloud_mode: bool = False,
 ) -> bool | GXCloudResourceRef:
     """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
     This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
     """
     checkpoint_id = None
-    if _using_cloud_context and checkpoint_identifier:
+    if cloud_mode and checkpoint_identifier:
         checkpoint_id = checkpoint_identifier.id
 
     expectation_suite_id = None

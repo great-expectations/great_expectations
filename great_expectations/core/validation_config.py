@@ -249,7 +249,6 @@ class ValidationConfig(BaseModel):
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
-        run_time = datetime.datetime.now(tz=datetime.timezone.utc)
         validator = Validator(
             batch_config=self.batch_definition,
             batch_request_options=batch_definition_options,
@@ -259,9 +258,27 @@ class ValidationConfig(BaseModel):
             self.suite, evaluation_parameters
         )
 
-        expectation_suite_identifier: GXCloudIdentifier | ExpectationSuiteIdentifier
-        validation_result_id: GXCloudIdentifier | ValidationResultIdentifier
+        (
+            expectation_suite_identifier,
+            validation_result_id,
+        ) = self._get_expectation_suite_and_validation_result_ids()
 
+        store_validation_results(
+            validation_result_store=self._validation_results_store,
+            suite_validation_result=results,
+            suite_validation_result_identifier=validation_result_id,
+            expectation_suite_identifier=expectation_suite_identifier,
+            cloud_mode=self._validation_results_store.cloud_mode,
+        )
+
+        return results
+
+    def _get_expectation_suite_and_validation_result_ids(
+        self,
+    ) -> (
+        tuple[GXCloudIdentifier, GXCloudIdentifier]
+        | tuple[ExpectationSuiteIdentifier, ValidationResultIdentifier]
+    ):
         if self._validation_results_store.cloud_mode:
             expectation_suite_identifier = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
@@ -270,7 +287,9 @@ class ValidationConfig(BaseModel):
             validation_result_id = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.VALIDATION_RESULT
             )
+            return expectation_suite_identifier, validation_result_id
         else:
+            run_time = datetime.datetime.now(tz=datetime.timezone.utc)
             run_id = RunIdentifier(run_time=run_time)
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 name=self.suite.name
@@ -280,13 +299,4 @@ class ValidationConfig(BaseModel):
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
-
-        store_validation_results(
-            validation_result_store=self._validation_results_store,
-            suite_validation_result=results,
-            suite_validation_result_identifier=validation_result_id,
-            expectation_suite_identifier=expectation_suite_identifier,
-            _using_cloud_context=self._validation_results_store.cloud_mode,
-        )
-
-        return results
+            return expectation_suite_identifier, validation_result_id
