@@ -811,15 +811,7 @@ class TestActionSerialization:
         self, serialized_action: dict, expected_class: Type[ValidationAction]
     ):
         parsed_obj = parse_obj_as(
-            Union[
-                SlackNotificationAction,
-                MicrosoftTeamsNotificationAction,
-                OpsgenieAlertAction,
-                EmailAction,
-                UpdateDataDocsAction,
-                SNSNotificationAction,
-                APINotificationAction,
-            ],
+            Union[tuple(ValidationAction.__subclasses__())],
             serialized_action,
         )
         assert isinstance(parsed_obj, expected_class)
