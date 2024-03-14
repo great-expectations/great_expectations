@@ -673,136 +673,155 @@ def test_cloud_sns_notification_action(
     ).endswith("Subject")
 
 
-@pytest.mark.parametrize(
-    "action_class, init_params, expected",
-    [
-        pytest.param(
-            SlackNotificationAction,
-            {"slack_webhook": "test"},
-            {
-                "notify_on": "all",
-                "notify_with": None,
-                "renderer": {
-                    "class_name": "SlackRenderer",
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                },
-                "show_failed_expectations": False,
-                "slack_channel": None,
-                "slack_token": None,
-                "slack_webhook": "test",
-                "type": "slack",
-            },
-            id="slack",
-        ),
-        pytest.param(
-            MicrosoftTeamsNotificationAction,
-            {"teams_webhook": "test"},
-            {
-                "notify_on": "all",
-                "renderer": {
-                    "class_name": "MicrosoftTeamsRenderer",
-                    "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-                },
-                "teams_webhook": "test",
-                "type": "microsoft",
-            },
-            id="microsoft",
-        ),
-        pytest.param(
-            OpsgenieAlertAction,
-            {"api_key": "abc123"},
-            {
-                "api_key": "abc123",
-                "notify_on": "failure",
-                "priority": "P3",
-                "region": None,
-                "renderer": {
-                    "class_name": "OpsgenieRenderer",
-                    "module_name": "great_expectations.render.renderer.opsgenie_renderer",
-                },
-                "tags": None,
-                "type": "opsgenie",
-            },
-            id="opsgenie",
-        ),
-        pytest.param(
-            EmailAction,
-            {
-                "smtp_address": "smtp.test.com",
-                "smtp_port": 587,
-                "receiver_emails": "bob@gmail.com, jim@hotmail.com",
-            },
-            {
-                "notify_on": "all",
-                "notify_with": None,
-                "receiver_emails": "bob@gmail.com, jim@hotmail.com",
-                "renderer": {
-                    "class_name": "EmailRenderer",
-                    "module_name": "great_expectations.render.renderer.email_renderer",
-                },
-                "sender_alias": None,
-                "sender_login": None,
-                "sender_password": None,
-                "smtp_address": "smtp.test.com",
-                "smtp_port": "587",
-                "type": "email",
-                "use_ssl": None,
-                "use_tls": None,
-            },
-            id="email",
-        ),
-        pytest.param(
-            UpdateDataDocsAction,
-            {"site_names": ["foo", "bar"]},
-            {
-                "site_names": ["foo", "bar"],
-                "type": "update_data_docs",
-            },
-            id="update_data_docs",
-        ),
-        pytest.param(
-            SNSNotificationAction,
-            {"sns_topic_arn": "my_test_arn"},
-            {
-                "sns_message_subject": None,
-                "sns_topic_arn": "my_test_arn",
-                "type": "sns",
-            },
-            id="sns",
-        ),
-        pytest.param(
-            APINotificationAction,
-            {"url": "http://www.example.com"},
-            {"type": "api", "url": "http://www.example.com"},
-            id="api",
-        ),
-    ],
-)
-@pytest.mark.unit
-def test_action_serialization_and_deserialization(
-    mock_context,
-    action_class: Type[ValidationAction],
-    init_params: dict,
-    expected: dict,
-):
-    action = action_class(**init_params)
+class TestActionSerialization:
+    EXAMPLE_SLACK_WEBHOOK = "https://hooks.slack.com/services/test/slack/webhook"
+    EXAMPLE_TEAMS_WEBHOOK = "https://hooks.microsoft.com/services/test/teams/webhook"
+    EXAMPLE_API_KEY = "testapikey"
+    EXAMPLE_SMTP_ADDRESS = "smtp.test.com"
+    EXAMPLE_SMTP_PORT = 587
+    EXAMPLE_EMAILS = "bob@gmail.com, jim@hotmail.com"
+    EXAMPLE_SITE_NAMES = ["one_site", "two_site", "red_site", "blue_site"]
+    EXAMPLE_SNS_TOPIC_ARN = "my_test_arn"
+    EXAMPLE_URL = "http://www.example.com"
 
-    # Test serialization
-    json_dict = action.json()
-    actual = json.loads(json_dict)
-    assert actual == expected
+    def _verify_deserialization_to_appropriate_action_subclass(
+        self, action: ValidationAction, expected_class: Type[ValidationAction]
+    ):
+        parsed_obj = parse_obj_as(
+            Union[
+                SlackNotificationAction,
+                MicrosoftTeamsNotificationAction,
+                OpsgenieAlertAction,
+                EmailAction,
+                UpdateDataDocsAction,
+                SNSNotificationAction,
+                APINotificationAction,
+            ],
+            action,
+        )
+        assert isinstance(parsed_obj, expected_class)
 
-    # Test deserialization
-    parsed_obj = parse_obj_as(
-        Union[
-            SlackNotificationAction,
-            MicrosoftTeamsNotificationAction,
-            OpsgenieAlertAction,
-            EmailAction,
-            UpdateDataDocsAction,
-            SNSNotificationAction,
-            APINotificationAction,
+    @pytest.mark.parametrize(
+        "action_class, init_params, expected",
+        [
+            pytest.param(
+                SlackNotificationAction,
+                {"slack_webhook": EXAMPLE_SLACK_WEBHOOK},
+                {
+                    "notify_on": "all",
+                    "notify_with": None,
+                    "renderer": {
+                        "class_name": "SlackRenderer",
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
+                    },
+                    "show_failed_expectations": False,
+                    "slack_channel": None,
+                    "slack_token": None,
+                    "slack_webhook": EXAMPLE_SLACK_WEBHOOK,
+                    "type": "slack",
+                },
+                id="slack",
+            ),
+            pytest.param(
+                MicrosoftTeamsNotificationAction,
+                {"teams_webhook": EXAMPLE_TEAMS_WEBHOOK},
+                {
+                    "notify_on": "all",
+                    "renderer": {
+                        "class_name": "MicrosoftTeamsRenderer",
+                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                    },
+                    "teams_webhook": EXAMPLE_TEAMS_WEBHOOK,
+                    "type": "microsoft",
+                },
+                id="microsoft",
+            ),
+            pytest.param(
+                OpsgenieAlertAction,
+                {"api_key": EXAMPLE_API_KEY},
+                {
+                    "api_key": EXAMPLE_API_KEY,
+                    "notify_on": "failure",
+                    "priority": "P3",
+                    "region": None,
+                    "renderer": {
+                        "class_name": "OpsgenieRenderer",
+                        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+                    },
+                    "tags": None,
+                    "type": "opsgenie",
+                },
+                id="opsgenie",
+            ),
+            pytest.param(
+                EmailAction,
+                {
+                    "smtp_address": EXAMPLE_SMTP_ADDRESS,
+                    "smtp_port": EXAMPLE_SMTP_PORT,
+                    "receiver_emails": EXAMPLE_EMAILS,
+                },
+                {
+                    "notify_on": "all",
+                    "notify_with": None,
+                    "receiver_emails": EXAMPLE_EMAILS,
+                    "renderer": {
+                        "class_name": "EmailRenderer",
+                        "module_name": "great_expectations.render.renderer.email_renderer",
+                    },
+                    "sender_alias": None,
+                    "sender_login": None,
+                    "sender_password": None,
+                    "smtp_address": EXAMPLE_SMTP_ADDRESS,
+                    "smtp_port": str(EXAMPLE_SMTP_PORT),
+                    "type": "email",
+                    "use_ssl": None,
+                    "use_tls": None,
+                },
+                id="email",
+            ),
+            pytest.param(
+                UpdateDataDocsAction,
+                {"site_names": EXAMPLE_SITE_NAMES},
+                {
+                    "site_names": EXAMPLE_SITE_NAMES,
+                    "type": "update_data_docs",
+                },
+                id="update_data_docs",
+            ),
+            pytest.param(
+                SNSNotificationAction,
+                {"sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN},
+                {
+                    "sns_message_subject": None,
+                    "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
+                    "type": "sns",
+                },
+                id="sns",
+            ),
+            pytest.param(
+                APINotificationAction,
+                {"url": EXAMPLE_URL},
+                {"type": "api", "url": EXAMPLE_URL},
+                id="api",
+            ),
         ],
-        actual,
     )
-    assert isinstance(parsed_obj, action_class)
+    @pytest.mark.unit
+    def test_action_serialization_and_deserialization(
+        self,
+        mock_context,
+        action_class: Type[ValidationAction],
+        init_params: dict,
+        expected: dict,
+    ):
+        action = action_class(**init_params)
+
+        # Test serialization
+        json_dict = action.json()
+        actual = json.loads(json_dict)
+        assert actual == expected
+
+        # Test deserialization
+        self._verify_deserialization_to_appropriate_action_subclass(
+            action=actual, expected_class=action_class
+        )
