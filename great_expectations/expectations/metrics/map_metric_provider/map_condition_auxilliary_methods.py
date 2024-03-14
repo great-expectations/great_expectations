@@ -414,7 +414,7 @@ def _sqlalchemy_map_condition_rows(
         )
 
 
-def _sqlalchemy_map_condition_query(
+def _sqlalchemy_map_condition_query(  # noqa: C901
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
@@ -504,7 +504,7 @@ def _sqlalchemy_map_condition_query(
     return query_as_string
 
 
-def _sqlalchemy_map_condition_index(
+def _sqlalchemy_map_condition_index(  # noqa: C901
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
@@ -681,7 +681,7 @@ def _spark_map_condition_rows(
     return filtered.limit(result_format["partial_unexpected_count"]).collect()
 
 
-def _spark_map_condition_index(
+def _spark_map_condition_index(  # noqa: C901
     cls,
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,

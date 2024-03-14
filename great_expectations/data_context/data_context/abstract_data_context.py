@@ -1665,7 +1665,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return keys  # type: ignore[return-value]
 
     @public_api
-    def get_validator(  # noqa: PLR0913
+    def get_validator(  # noqa: C901, PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,

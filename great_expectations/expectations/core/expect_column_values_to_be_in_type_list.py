@@ -337,7 +337,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             "result": {"observed_value": actual_column_type.type.__name__},
         }
 
-    def _validate_sqlalchemy(
+    def _validate_sqlalchemy(  # noqa: C901
         self, actual_column_type, expected_types_list, execution_engine
     ):
         # Our goal is to be as explicit as possible. We will match the dialect

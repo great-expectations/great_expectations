@@ -632,7 +632,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3.Object(self.bucket, source_filepath).delete()
 
     @override
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:  # noqa: C901
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3r = self._create_resource()
         bucket = s3r.Bucket(self.bucket)

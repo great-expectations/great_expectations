@@ -512,7 +512,7 @@ class ExpectationDoctor:
             }
         )
 
-    def _get_expectation_configuration_from_examples(
+    def _get_expectation_configuration_from_examples(  # noqa: C901
         self,
         examples: List[ExpectationTestDataCases],
     ) -> Optional[ExpectationConfiguration]:

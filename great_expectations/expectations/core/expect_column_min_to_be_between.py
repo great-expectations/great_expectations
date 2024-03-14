@@ -117,7 +117,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
 
     @classmethod
     @override
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: C901
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:

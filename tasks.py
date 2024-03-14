@@ -483,7 +483,7 @@ def docker(
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(
+def type_schema(  # noqa: C901
     ctx: Context,
     sync: bool = False,
     clean: bool = False,

@@ -125,7 +125,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         return temp_column.map(is_between)
 
     @classmethod
-    def _pandas_vectorized(  # noqa: PLR0911, PLR0913
+    def _pandas_vectorized(  # noqa: C901, PLR0911, PLR0913
         cls,
         column: pd.Series,
         min_value: Optional[Union[int, float, datetime.datetime]],
@@ -158,7 +158,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             return (min_value <= column) & (column <= max_value)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0911, PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0911, PLR0913
         cls,
         column,
         min_value=None,
@@ -210,7 +210,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0911, PLR0913
+    def _spark(  # noqa: C901, PLR0911, PLR0913
         cls,
         column,
         min_value=None,

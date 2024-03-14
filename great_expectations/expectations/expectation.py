@@ -123,7 +123,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params: list = []
         app_template_str = (
@@ -549,7 +549,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES)
-    def _diagnostic_meta_properties_renderer(
+    def _diagnostic_meta_properties_renderer(  # noqa: C901
         cls,
         result: Optional[ExpectationValidationResult] = None,
     ) -> Union[list, List[str], List[list]]:

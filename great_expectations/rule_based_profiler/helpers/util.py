@@ -1010,7 +1010,7 @@ def get_validator_with_expectation_suite(  # noqa: PLR0913
     return validator
 
 
-def get_or_create_expectation_suite(
+def get_or_create_expectation_suite(  # noqa: C901
     data_context: Optional[AbstractDataContext],
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,

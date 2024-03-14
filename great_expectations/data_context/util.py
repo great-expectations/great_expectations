@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(  # noqa: PLR0912
+def instantiate_class_from_config(  # noqa: C901, PLR0912
     config, runtime_environment, config_defaults=None
 ):
     """Build a GX class from configuration dictionaries."""
@@ -253,7 +253,7 @@ class PasswordMasker:
         return masked_url
 
     @classmethod
-    def sanitize_config(cls, config: dict) -> dict:
+    def sanitize_config(cls, config: dict) -> dict:  # noqa: C901
         """
         Mask sensitive fields in a Dict.
         """

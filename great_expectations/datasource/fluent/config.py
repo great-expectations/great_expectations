@@ -189,7 +189,7 @@ class GxConfig(FluentBaseModel):
     # noinspection PyNestedDecorators
     @validator(_FLUENT_DATASOURCES_KEY, pre=True)
     @classmethod
-    def _load_datasource_subtype(cls, v: List[dict]):
+    def _load_datasource_subtype(cls, v: List[dict]):  # noqa: C901
         logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: List[Datasource] = []
 

@@ -74,7 +74,7 @@ BatchSlice: TypeAlias = Union[
 ]
 
 
-def build_batch_filter(
+def build_batch_filter(  # noqa: C901
     data_connector_query_dict: Optional[
         Dict[
             str,

@@ -94,7 +94,7 @@ class DictDot:
             return self.__getitem__(item=key)
         return self.__dict__.get(key, default_value)
 
-    def to_raw_dict(self) -> dict:
+    def to_raw_dict(self) -> dict:  # noqa: C901
         """Convert this object into a standard dictionary, recursively.
 
         This is often convenient for serialization, and in cases where an untyped version of the object is required.
@@ -130,7 +130,7 @@ class DictDot:
 
         return new_dict
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict:  # noqa: C901
         new_dict = {
             key: self[key]
             for key in self.property_names(
@@ -162,7 +162,7 @@ class DictDot:
 
         return new_dict
 
-    def property_names(
+    def property_names(  # noqa: C901
         self,
         include_keys: Optional[Set[str]] = None,
         exclude_keys: Optional[Set[str]] = None,

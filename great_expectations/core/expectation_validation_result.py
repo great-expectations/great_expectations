@@ -600,7 +600,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
-    def get_metric(self, metric_name, **kwargs):
+    def get_metric(self, metric_name, **kwargs):  # noqa: C901
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 

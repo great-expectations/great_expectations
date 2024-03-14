@@ -174,7 +174,7 @@ def run_checkpoint_and_data_doc(
     assert "ge-failed-icon" not in data_doc_index
 
 
-def run_batch_head(  # noqa: PLR0915
+def run_batch_head(  # noqa: C901, PLR0915
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],

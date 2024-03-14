@@ -285,7 +285,7 @@ def uninstall_requirements(requirements):
         execute_shell_command(f'pip uninstall -y "{req}"')
 
 
-def get_expectation_instances(expectations_info):
+def get_expectation_instances(expectations_info):  # noqa: C901
     """Return a dict of Expectation instances
 
     Any contrib Expectations must be imported so they appear in the Expectation registry
@@ -383,7 +383,7 @@ def get_success_test_case(tests: list[dict]) -> dict:
         raise ValueError("Error: Expectation test case is malformed.")
 
 
-def combine_backend_results(
+def combine_backend_results(  # noqa: C901
     expectations_info, expectation_instances, diagnostic_objects, outfile_name
 ):
     expected_full_backend_files = [

@@ -68,7 +68,7 @@ def register_vcs_handler(vcs, method):  # decorator
     return decorate
 
 
-def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):  # noqa: C901
     """Call the given command(s)."""
     assert isinstance(commands, list)
 
@@ -138,7 +138,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
 
 
 @register_vcs_handler("git", "get_keywords")
-def git_get_keywords(versionfile_abs):
+def git_get_keywords(versionfile_abs):  # noqa: C901
     """Extract version information from the given file."""
     # the code embedded in _version.py can just fetch the value of these
     # keywords. When used from setup.py, we don't want to import _version.py,
@@ -467,7 +467,7 @@ def render_git_describe_long(pieces):
     return rendered
 
 
-def render(pieces, style):
+def render(pieces, style):  # noqa: C901
     """Render the given version pieces into the requested style."""
     if pieces["error"]:
         return {

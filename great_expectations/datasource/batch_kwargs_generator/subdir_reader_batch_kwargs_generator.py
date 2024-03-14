@@ -123,7 +123,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
         ]
 
-    def _build_batch_kwargs(self, batch_parameters):
+    def _build_batch_kwargs(self, batch_parameters):  # noqa: C901
         """
 
         Args:
