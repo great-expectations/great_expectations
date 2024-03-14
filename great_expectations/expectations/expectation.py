@@ -252,6 +252,8 @@ class MetaExpectation(ModelMetaclass):
 class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
 
+    For a list of all available expectation types, see the `Expectation Gallery <https://greatexpectations.io/expectations/>`_.
+
     Expectation classes *must* have the following attributes set:
         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
            expectation
