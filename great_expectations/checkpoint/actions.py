@@ -6,6 +6,7 @@ The only requirement from an action is for it to have a take_action method.
 
 from __future__ import annotations
 
+import importlib
 import json
 import logging
 from typing import (
@@ -20,27 +21,6 @@ from typing import (
 
 import requests
 
-from great_expectations.compatibility.pydantic import (
-    BaseModel,
-    PrivateAttr,
-    root_validator,
-    validator,
-)
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.data_context.store import Store  # noqa: TCH001
-from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.render.renderer import (
-    EmailRenderer,
-    MicrosoftTeamsRenderer,
-    OpsgenieRenderer,
-    SlackRenderer,
-)
-
-try:
-    import pypd
-except ImportError:
-    pypd = None
-
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.util import (
     send_email,
@@ -49,7 +29,16 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    PrivateAttr,
+    root_validator,
+    validator,
+)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.store import Store  # noqa: TCH001
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -57,6 +46,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.render.renderer import (
+    EmailRenderer,
+    MicrosoftTeamsRenderer,
+    OpsgenieRenderer,
+    SlackRenderer,
+)
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
@@ -272,11 +267,10 @@ class SlackNotificationAction(DataDocsAction):
         slack_webhook = values["slack_webhook"]
 
         try:
-            if not slack_token and slack_channel:
-                assert slack_webhook
-            if not slack_webhook:
+            if slack_webhook:
+                assert not slack_token and not slack_channel
+            else:
                 assert slack_token and slack_channel
-            assert not (slack_webhook and slack_channel and slack_token)
         except AssertionError:
             raise ValueError(
                 "Please provide either slack_webhook or slack_token and slack_channel"
@@ -426,8 +420,11 @@ class PagerdutyAlertAction(ValidationAction):
 
     @root_validator
     def _root_validate_deps(cls, values: dict) -> dict:
-        if not pypd:
-            raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
+        if not importlib.util.find_spec("pypd"):
+            raise DataContextError(
+                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'
+            )
+
         return values
 
     @override
@@ -442,8 +439,9 @@ class PagerdutyAlertAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("PagerdutyAlertAction.run")
+        import pypd
 
+        logger.debug("PagerdutyAlertAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
@@ -879,6 +877,7 @@ class EmailAction(ValidationAction):
             return {"email_result": ""}
 
 
+# TODO: This action is slated for deletion in favor of using ValidationResult.run()
 @public_api
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
