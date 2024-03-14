@@ -95,7 +95,7 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """
 
-    type: Literal["str"] = "base"
+    type: str
 
     @property
     def _using_cloud_context(self) -> bool:
