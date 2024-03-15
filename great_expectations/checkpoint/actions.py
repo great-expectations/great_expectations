@@ -204,7 +204,7 @@ class SlackNotificationAction(DataDocsAction):
       # put the actual webhook URL in the uncommitted/config_variables.yml file
       # or pass in as environment variable
       # use slack_webhook when not using slack bot token
-      slack_webhook: $\{validation_notification_slack_webhook\}
+      slack_webhook: $validation_notification_slack_webhook
       slack_token:
       slack_channel:
       notify_on: all
@@ -219,13 +219,7 @@ class SlackNotificationAction(DataDocsAction):
     ```
 
     Args:
-        renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
-           ```python
-           \{
-            "module_name": "great_expectations.render.renderer.slack_renderer",
-            "class_name": "SlackRenderer",
-           \}
-           ```
+        renderer: Specifies the Renderer used to generate a query consumable by Slack API
         slack_webhook: The incoming Slack webhook to which to send notification.
         slack_token: Token from Slack app. Used when not using slack_webhook.
         slack_channel: Slack channel to receive notification. Used when not using slack_webhook.
