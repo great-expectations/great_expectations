@@ -5,16 +5,12 @@ title: Manage Data Contexts
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-import InProgress from '../_core_components/_in_progress.md'
+[A valid Python environment]()
 
-import GxImport from '../../../../../components/setup/python_environment/_gx_import.md'
-import DataContextVerifyContents from '../../../../../components/setup/data_context/_data_context_verify_contents.md'
-import Prerequisites from '../../../../../components/_prerequisites.jsx'
-import AdmonitionConvertToFileContext from '../../../../../components/setup/data_context/_admonition_convert_to_file_context.md'
-
-import IfYouStillNeedToSetupGx from '../../../../components/prerequisites/_if_you_still_need_to_setup_gx.md'
-import ConnectingToDataFluently from '../../../../components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
-import SetupConfigurations from '../../../../components/setup/link_lists/_setup_configurations.md'
+import GxImport from '../../components/setup/python_environment/_gx_import.md'
+import DataContextVerifyContents from '../../components/setup/data_context/_data_context_verify_contents.md'
+import Prerequisites from '../../components/_prerequisites.jsx'
+import AdmonitionConvertToFileContext from '../../components/setup/data_context/_admonition_convert_to_file_context.md'
 
 
 A Data Context is your entry point to Great Expectations (GX). It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs.  It contains your Validation Results and the metrics associated with them.  The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
