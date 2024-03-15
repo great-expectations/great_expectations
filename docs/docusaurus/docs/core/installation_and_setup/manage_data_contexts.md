@@ -117,7 +117,7 @@ If a Data Context already exists in `project_root_dir`, the `FileDataContext.cre
 
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
-An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/oss/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md).
+An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [Convert an Ephemeral Data Context to a Filesystem Data Context](#convert-the-ephemeral-data-context-into-a-filesystem-data-context).
 
 ### Prerequisites
 
