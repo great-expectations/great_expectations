@@ -123,7 +123,7 @@ An Ephemeral Data Context does not persist beyond the current Python session. To
 
 <Prerequisites>
 
-- A Great Expectations instance. See [Setup: Overview](../../setup_overview.md).
+- A Great Expectations instance.
 
 </Prerequisites> 
 
