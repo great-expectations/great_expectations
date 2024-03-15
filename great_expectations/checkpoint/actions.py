@@ -31,6 +31,7 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Field,
     PrivateAttr,
     root_validator,
     validator,
@@ -242,7 +243,7 @@ class SlackNotificationAction(DataDocsAction):
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
-    renderer: SlackRenderer = SlackRenderer()
+    renderer: SlackRenderer = Field(default_factory=SlackRenderer)
 
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
@@ -518,7 +519,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     teams_webhook: str
     notify_on: Literal["all", "failure", "success"] = "all"
-    renderer: MicrosoftTeamsRenderer = MicrosoftTeamsRenderer()
+    renderer: MicrosoftTeamsRenderer = Field(default_factory=MicrosoftTeamsRenderer)
 
     @validator("renderer", pre=True)
     def _validate_renderer(
@@ -622,7 +623,7 @@ class OpsgenieAlertAction(ValidationAction):
     priority: Literal["P1", "P2", "P3", "P4", "P5"] = "P3"
     notify_on: Literal["all", "failure", "success"] = "failure"
     tags: Optional[List[str]] = None
-    renderer: OpsgenieRenderer = OpsgenieRenderer()
+    renderer: OpsgenieRenderer = Field(default_factory=OpsgenieRenderer)
 
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
@@ -755,7 +756,7 @@ class EmailAction(ValidationAction):
     use_ssl: Optional[bool] = None
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
-    renderer: EmailRenderer = EmailRenderer()
+    renderer: EmailRenderer = Field(default_factory=EmailRenderer)
 
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
