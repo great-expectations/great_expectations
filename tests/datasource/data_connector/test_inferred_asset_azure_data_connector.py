@@ -6,9 +6,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -38,7 +38,7 @@ def expected_batch_definitions_unsorted():
     Input and output should maintain the same order (henced "unsorted")
     """
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -46,7 +46,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -54,7 +54,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -62,7 +62,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -70,7 +70,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -78,7 +78,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -86,7 +86,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -94,7 +94,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -102,7 +102,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -110,7 +110,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -130,7 +130,7 @@ def expected_batch_definitions_sorted():
     between input and output.
     """
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -138,7 +138,7 @@ def expected_batch_definitions_sorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -146,7 +146,7 @@ def expected_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -154,7 +154,7 @@ def expected_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -162,7 +162,7 @@ def expected_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -170,7 +170,7 @@ def expected_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -178,7 +178,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -186,7 +186,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -194,7 +194,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -202,7 +202,7 @@ def expected_batch_definitions_sorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -834,7 +834,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_azure_data_connector",
         data_asset_name="DEFAULT_ASSET_NAME",

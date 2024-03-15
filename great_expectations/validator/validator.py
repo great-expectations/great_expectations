@@ -93,8 +93,8 @@ if TYPE_CHECKING:
         AnyBatch,
         Batch,
         BatchDataUnion,
-        BatchDefinition,
         BatchMarkers,
+        LegacyBatchDefinition,
     )
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
@@ -283,7 +283,7 @@ class Validator:
         return self._execution_engine.batch_manager.active_batch_markers
 
     @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
+    def active_batch_definition(self) -> Optional[LegacyBatchDefinition]:
         """Getter for batch_definition of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_definition
 

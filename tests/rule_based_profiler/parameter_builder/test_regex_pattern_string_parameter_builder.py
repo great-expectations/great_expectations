@@ -7,9 +7,9 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import BatchSpec, IDDict
@@ -46,7 +46,7 @@ def batch_fixture() -> Batch:
         data_connector_name="my_data_connector",
         data_asset_name="my_data_asset_name",
     )
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_data_connector",
         data_asset_name="my_data_asset_name",
