@@ -3,7 +3,7 @@ import random
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import Batch, BatchDefinition
+from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import Datasource
@@ -100,7 +100,7 @@ def test_get_batch_data_and_metadata_without_partitions(
         data_asset_name_suffix="__suffix",
     )
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="FAKE_Datasource_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="prefix__db_test.tb_titanic_without_partitions__suffix",
@@ -154,7 +154,7 @@ def test_get_batch_data_and_metadata_with_partitions(
         "FAKE_Datasource_NAME"
     ].data_connectors["my_data_connector"]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="prefix__db_test.tb_titanic_with_partitions__suffix",

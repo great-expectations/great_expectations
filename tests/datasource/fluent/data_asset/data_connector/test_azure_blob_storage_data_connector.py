@@ -7,7 +7,7 @@ import pytest
 
 from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -157,7 +157,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -166,8 +166,8 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
             )
         )
     )
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -180,7 +180,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -193,7 +193,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -206,7 +206,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -219,7 +219,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -232,7 +232,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -245,7 +245,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -258,7 +258,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -271,7 +271,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -284,7 +284,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -502,14 +502,14 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         "B/file_2.csv",
     ]
 
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_azure_blob_storage_data_asset",
@@ -528,7 +528,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -580,8 +580,8 @@ def test_alpha(mock_list_keys):
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     my_batch_request: BatchRequest
 
@@ -742,7 +742,7 @@ def test_foxtrot(mock_list_keys):
         data_asset_name="my_azure_blob_storage_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     )
     assert len(my_batch_definition_list) == 3

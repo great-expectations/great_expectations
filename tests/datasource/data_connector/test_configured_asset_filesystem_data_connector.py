@@ -4,10 +4,10 @@ import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -140,7 +140,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         )
     )
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -148,7 +148,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -156,7 +156,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -164,7 +164,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -172,7 +172,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -180,7 +180,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -188,7 +188,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -196,7 +196,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -204,7 +204,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -212,7 +212,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -309,7 +309,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -317,7 +317,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -325,7 +325,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -333,7 +333,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -341,7 +341,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -349,7 +349,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -357,7 +357,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -365,7 +365,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -373,7 +373,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -381,7 +381,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -409,8 +409,8 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         ),
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # TEST 2: Should only return the specified partition
     my_batch_definition_list = (
@@ -421,7 +421,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
@@ -494,13 +494,13 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict({"name": "A"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
@@ -574,8 +574,8 @@ def test_alpha(tmp_path_factory):
         )
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
@@ -675,7 +675,7 @@ def test_foxtrot(tmp_path_factory):
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=my_batch_request
         )
@@ -746,7 +746,7 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=my_batch_request
         )
@@ -815,8 +815,8 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",

@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core.batch import BatchDefinition, IDDict
+from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -202,7 +202,7 @@ def test_SlackRenderer_validation_results_with_datadocs(
 
 
 def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="test_datasource",
         data_connector_name="test_dataconnector",
         data_asset_name="test_data_asset",

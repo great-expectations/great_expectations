@@ -8,9 +8,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -86,7 +86,7 @@ class BaseDatasource:
 
     def get_batch_from_batch_definition(
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         batch_data: Any = None,
     ) -> Batch:
         """
@@ -129,7 +129,7 @@ class BaseDatasource:
 
     def get_batch_definition_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Validates batch request and utilizes the classes'
         Data Connectors' property to get a list of batch definition given a batch request
@@ -162,7 +162,7 @@ class BaseDatasource:
             batch_request.data_connector_name
         ]
 
-        batch_definition_list: List[BatchDefinition] = (
+        batch_definition_list: List[LegacyBatchDefinition] = (
             data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=batch_request
             )
@@ -330,7 +330,7 @@ class BaseDatasource:
 
     def get_available_batch_definitions(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[

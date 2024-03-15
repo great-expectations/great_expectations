@@ -8,10 +8,10 @@ from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -157,7 +157,7 @@ def test_return_all_batch_definitions_unsorted():
         )
     )
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -165,7 +165,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -173,7 +173,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -181,7 +181,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -189,7 +189,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -197,7 +197,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -205,7 +205,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -213,7 +213,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -221,7 +221,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -229,7 +229,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -329,7 +329,7 @@ def test_return_all_batch_definitions_sorted():
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -337,7 +337,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -345,7 +345,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -353,7 +353,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -361,7 +361,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -369,7 +369,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -377,7 +377,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -385,7 +385,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -393,7 +393,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -401,7 +401,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -429,8 +429,8 @@ def test_return_all_batch_definitions_sorted():
         ),
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # TEST 2: Should only return the specified partition
     my_batch_definition_list = (
@@ -441,7 +441,7 @@ def test_return_all_batch_definitions_sorted():
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
@@ -517,8 +517,8 @@ def test_alpha():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
@@ -616,8 +616,8 @@ def test_foxtrot():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",

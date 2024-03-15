@@ -8,7 +8,7 @@ import boto3
 import botocore
 import pytest
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchRequest, LegacyBatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.data_connector import InferredAssetDBFSDataConnector
@@ -74,7 +74,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_DATASOURCE_NAME",
@@ -85,7 +85,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     )
     assert len(my_batch_definition_list) == 2
 
-    my_batch_definition: BatchDefinition = my_batch_definition_list[0]
+    my_batch_definition: LegacyBatchDefinition = my_batch_definition_list[0]
     batch_spec: BatchSpec = my_data_connector.build_batch_spec(
         batch_definition=my_batch_definition
     )
@@ -137,7 +137,7 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_DATASOURCE_NAME",
@@ -148,7 +148,7 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     )
     assert len(my_batch_definition_list) == 2
 
-    my_batch_definition: BatchDefinition = my_batch_definition_list[0]
+    my_batch_definition: LegacyBatchDefinition = my_batch_definition_list[0]
     batch_spec: BatchSpec = my_data_connector.build_batch_spec(
         batch_definition=my_batch_definition
     )
