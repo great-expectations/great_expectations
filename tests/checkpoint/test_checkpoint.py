@@ -1017,7 +1017,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1180,7 +1180,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1267,7 +1267,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1602,7 +1602,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1697,7 +1697,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -2580,7 +2580,7 @@ def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack)
 
 
 ### SparkDF Tests
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_running_spark_checkpoint(
     context_with_single_csv_spark_and_suite,
     common_action_list,
@@ -2612,7 +2612,7 @@ def test_running_spark_checkpoint(
     assert results.success is True
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_run_spark_checkpoint_with_schema(
     context_with_single_csv_spark_and_suite,
     common_action_list,
