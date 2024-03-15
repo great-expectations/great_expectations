@@ -193,10 +193,9 @@ class DataDocsAction(ValidationAction):
         )
 
 
-# Currently breaks the build if enabled (something around curly braces in the docstring)
-# @public_api
+@public_api
 class SlackNotificationAction(DataDocsAction):
-    r"""Sends a Slack notification to a given webhook.
+    """Sends a Slack notification to a given webhook.
 
     ```yaml
     - name: send_slack_notification_on_validation_result
@@ -221,10 +220,10 @@ class SlackNotificationAction(DataDocsAction):
 
     Args:
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
-           ```python
-           {
-            "module_name": "great_expectations.render.renderer.slack_renderer",
-            "class_name": "SlackRenderer",
+            ```python
+            {
+               "module_name": "great_expectations.render.renderer.slack_renderer",
+               "class_name": "SlackRenderer",
            }
            ```
         slack_webhook: The incoming Slack webhook to which to send notification.
