@@ -36,10 +36,13 @@ def renderer(
 class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
 
-    def __init__(self) -> None:
-        # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
-        # used to be composed exclusively of classmethods
-        pass
+    def serialize(self) -> dict:
+        # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)
+        # TODO: Renderers should be ported over to Pydantic to prevent this fork in logic
+        return {
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
