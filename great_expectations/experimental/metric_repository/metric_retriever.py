@@ -6,6 +6,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     List,
+    Optional,
     Sequence,
 )
 
@@ -50,7 +51,11 @@ class MetricRetriever(abc.ABC):
         return self._validator
 
     @abc.abstractmethod
-    def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
+    def get_metrics(
+        self,
+        batch_request: BatchRequest,
+        metrics_list: Optional[List[MetricTypes]] = None,
+    ) -> Sequence[Metric]:
         raise NotImplementedError
 
     def _generate_metric_id(self) -> uuid.UUID:
