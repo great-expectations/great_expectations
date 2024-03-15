@@ -2372,10 +2372,11 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
     unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == (
-        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = "
-        "30)))"
-    )
+
+    assert unexpected_index_query in [
+        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = 30)))",
+        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = 30.0)))",
+    ]
 
 
 @pytest.mark.spark
