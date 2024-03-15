@@ -16,7 +16,6 @@ from typing import (
     List,
     Literal,
     Optional,
-    Type,
     Union,
 )
 
@@ -38,7 +37,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.store import Store  # noqa: TCH001
+from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -60,7 +59,6 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.data_context.store.validations_store import ValidationsStore
 
 logger = logging.getLogger(__name__)
 
@@ -101,23 +99,6 @@ class ValidationAction(BaseModel):
         from great_expectations import project_manager
 
         return project_manager.is_using_cloud()
-
-    @classmethod
-    def get_subclasses(cls) -> tuple[Type[ValidationAction], ...]:
-        """
-        Helper to get all subclasses of ValidationAction.
-
-        Includes grandchildren and lower.
-        """
-        subclasses = set()
-        stack = [cls]
-        while stack:
-            action_class = stack.pop()
-            children = action_class.__subclasses__()
-            subclasses.update(children)
-            stack.extend(children)
-
-        return tuple(subclasses)
 
     @public_api
     def run(  # noqa: PLR0913
@@ -189,8 +170,6 @@ class ValidationAction(BaseModel):
 
 
 class DataDocsAction(ValidationAction):
-    type: Literal["data_docs"] = "data_docs"
-
     def _build_data_docs(
         self,
         site_names: list[str] | None = None,
@@ -903,7 +882,7 @@ class StoreValidationResultAction(ValidationAction):
     class Config:
         arbitrary_types_allowed = True
 
-    _target_store: Store = PrivateAttr()
+    _target_store: ValidationsStore = PrivateAttr()
 
     def __init__(
         self,
@@ -912,11 +891,14 @@ class StoreValidationResultAction(ValidationAction):
     ) -> None:
         super().__init__(type="store_validation_result")
         if target_store_name is None:
-            self._target_store = data_context.stores[
-                data_context.validations_store_name
-            ]
+            target_store = data_context.stores[data_context.validations_store_name]
         else:
-            self._target_store = data_context.stores[target_store_name]
+            target_store = data_context.stores[target_store_name]
+
+        if not isinstance(target_store, ValidationsStore):
+            raise ValueError("target_store must be a ValidationsStore")
+
+        self._target_store = target_store
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913

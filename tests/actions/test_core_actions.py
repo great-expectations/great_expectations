@@ -819,9 +819,17 @@ class TestActionSerialization:
                 # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy
                 json_encoders = {Renderer: lambda r: r.serialize()}
 
-            action: Union[ValidationAction.get_subclasses()] = Field(
-                ..., discriminator="type"
-            )
+            action: Union[
+                APINotificationAction,
+                EmailAction,
+                MicrosoftTeamsNotificationAction,
+                OpsgenieAlertAction,
+                PagerdutyAlertAction,
+                SlackNotificationAction,
+                SNSNotificationAction,
+                StoreValidationResultAction,
+                UpdateDataDocsAction,
+            ] = Field(..., discriminator="type")
 
         action = action_class(**init_params)
         instance = DummyClassWithActionChild(action=action)
