@@ -13,6 +13,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_config import ValidationConfig
@@ -131,7 +132,7 @@ class TestCheckpointSerialization:
         ],
     )
     @pytest.mark.unit
-    def test_checkpoint_serialization_success(
+    def test_checkpoint_serialization(
         self,
         validation_configs: list[ValidationConfig],
         action_fixture_name: str | None,
@@ -166,11 +167,45 @@ class TestCheckpointSerialization:
 
         assert actual == expected
 
-    def test_checkpoint_serialization_failure(self):
-        pass
-
+    @pytest.mark.unit
     def test_checkpoint_deserialization_success(self):
         pass
 
-    def test_checkpoint_deserialization_failure(self):
-        pass
+    @pytest.mark.parametrize(
+        "serialized_checkpoint, expected_error",
+        [
+            pytest.param(
+                {
+                    "name": "my_checkpoint",
+                    "validations": [],
+                    "actions": [],
+                    "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
+                },
+                "Checkpoint must contain at least one validation",
+                id="missing_validations",
+            ),
+            pytest.param(
+                {
+                    "name": "my_checkpoint",
+                    "validations": [
+                        {
+                            "name": "i_do_not_exist",
+                            "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+                        }
+                    ],
+                    "actions": [],
+                    "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
+                },
+                "TBD",
+                id="nonexistent_validation",
+            ),
+        ],
+    )
+    @pytest.mark.unit
+    def test_checkpoint_deserialization_failure(
+        self, serialized_checkpoint: str, expected_error: str
+    ):
+        with pytest.raises(ValidationError) as e:
+            Checkpoint.parse_obj(serialized_checkpoint)
+
+        assert expected_error in str(e.value)

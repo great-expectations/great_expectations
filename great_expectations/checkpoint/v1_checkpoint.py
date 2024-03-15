@@ -12,6 +12,9 @@ from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.data_context.store.validation_config_store import (
+        ValidationConfigStore,
+    )
 
 
 def _encode_validation_config(validation: ValidationConfig) -> dict:
@@ -80,10 +83,36 @@ class Checkpoint(BaseModel):
 
     @validator("validations")
     def _validate_validations(
-        cls, validations: list[ValidationConfig]
+        cls, validations: list[ValidationConfig] | list[_IdentifierBundle]
     ) -> list[ValidationConfig]:
+        from great_expectations import project_manager
+
         if len(validations) == 0:
             raise ValueError("Checkpoint must contain at least one validation")
+
+        if isinstance(validations[0], _IdentifierBundle):
+            validation_config_store = project_manager.get_validation_config_store()
+            return cls._deserialize_identifier_bundles_to_validation_configs(
+                validations=validations, store=validation_config_store
+            )
+
+        return validations
+
+    def _deserialize_identifier_bundles(
+        self, identifier_bundles: list[_IdentifierBundle], store: ValidationConfigStore
+    ) -> list[ValidationConfig]:
+        validations: list[ValidationConfig] = []
+        for id_bundle in identifier_bundles:
+            key = store.get_key(name=id_bundle.name, id=id_bundle.id)
+
+            try:
+                validation_config = store.get(key=key)
+            except KeyError:
+                raise ValueError(
+                    f"Unable to retrieve validation config {id_bundle} from store"
+                )
+
+            validations.append(validation_config)
 
         return validations
 
