@@ -5,8 +5,6 @@ title: Manage Data Contexts
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-[A valid Python environment]()
-
 import GxImport from '../../components/setup/python_environment/_gx_import.md'
 import DataContextVerifyContents from '../../components/setup/data_context/_data_context_verify_contents.md'
 import Prerequisites from '../../components/_prerequisites.jsx'
