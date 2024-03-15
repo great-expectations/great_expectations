@@ -1017,51 +1017,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a query
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    checkpoint: Checkpoint = Checkpoint(
-        name="my_checkpoint",
-        data_context=context,
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-        batch_request=runtime_batch_request,
-    )
-
-    result = checkpoint.run()
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
     data_context_with_datasource_sqlalchemy_engine,
@@ -1180,100 +1135,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a query
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    checkpoint: Checkpoint = Checkpoint(
-        name="my_checkpoint",
-        data_context=context,
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-    )
-
-    result = checkpoint.run(batch_request=runtime_batch_request)
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a query
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    checkpoint: Checkpoint = Checkpoint(
-        name="my_checkpoint",
-        data_context=context,
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-    )
-
-    result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -1602,108 +1469,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a query
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    # add checkpoint config
-    checkpoint_config: dict = {
-        "name": "my_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-
-    checkpoint = context.checkpoints.get("my_checkpoint")
-    result = checkpoint.run(batch_request=runtime_batch_request)
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a query
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    # add checkpoint config
-    checkpoint_config: dict = {
-        "name": "my_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-
-    checkpoint = context.checkpoints.get("my_checkpoint")
-    result = checkpoint.run(
-        validations=[{"batch_request": runtime_batch_request}],
-    )
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-
     data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
