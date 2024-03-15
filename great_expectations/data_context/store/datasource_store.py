@@ -238,7 +238,7 @@ class DatasourceStore(Store):
             raise ValueError("Datasource is not a FluentDatasource")
         return datasource
 
-    @overload  # type: ignore[override]
+    @overload
     def set(
         self,
         key: Union[DataContextKey, None],
