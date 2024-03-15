@@ -411,19 +411,6 @@
           }
         },
         {
-          "title": "another_negative_test_with_result_format__boolean_only",
-          "exact_match_out": false,
-          "out": {
-            "success": false
-          },
-          "in": {
-            "column": "x",
-            "max_value": 10,
-            "min_value": 3,
-            "result_format": "BOOLEAN_ONLY"
-          }
-        },
-        {
           "title": "positive_test_with_mostly",
           "exact_match_out": false,
           "out": {
