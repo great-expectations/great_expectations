@@ -94,7 +94,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert batch_spec.path == f"{base_directory}/path/A-100.csv"
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?
