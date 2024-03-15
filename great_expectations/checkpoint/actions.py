@@ -6,19 +6,20 @@ The only requirement from an action is for it to have a take_action method.
 
 from __future__ import annotations
 
+import importlib
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+)
 
 import requests
-
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.data_context.types.refs import GXCloudResourceRef
-
-try:
-    import pypd
-except ImportError:
-    pypd = None
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.util import (
@@ -28,7 +29,17 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.compatibility.pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    root_validator,
+    validator,
+)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -36,19 +47,40 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.render.renderer import (
+    EmailRenderer,
+    MicrosoftTeamsRenderer,
+    OpsgenieRenderer,
+    SlackRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.data_context.store.validations_store import ValidationsStore
 
 logger = logging.getLogger(__name__)
 
 
+def _build_renderer(config: dict) -> Renderer:
+    renderer = instantiate_class_from_config(
+        config=config,
+        runtime_environment={},
+        config_defaults={},
+    )
+    if not renderer:
+        raise ClassInstantiationError(
+            module_name=config.get("module_name"),
+            package_name=None,
+            class_name=config.get("class_name"),
+        )
+    return renderer
+
+
 @public_api
-class ValidationAction:
+class ValidationAction(BaseModel):
     """
     ValidationActions define a set of steps to be run after a validation result is produced.
 
@@ -56,10 +88,18 @@ class ValidationAction:
     and other actions to take place after the validation result is produced.
     """
 
-    def __init__(self) -> None:
+    class Config:
+        arbitrary_types_allowed = True
+        # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
+        json_encoders = {Renderer: lambda r: r.serialize()}
+
+    type: str
+
+    @property
+    def _using_cloud_context(self) -> bool:
         from great_expectations import project_manager
 
-        self._using_cloud_context = project_manager.is_using_cloud()
+        return project_manager.is_using_cloud()
 
     @public_api
     def run(  # noqa: PLR0913
@@ -131,12 +171,27 @@ class ValidationAction:
 
 
 class DataDocsAction(ValidationAction):
-    def __init__(self) -> None:
+    def _build_data_docs(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+    ) -> dict:
         from great_expectations import project_manager
 
-        super().__init__()
-        self._build_data_docs = project_manager.build_data_docs
-        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
+        return project_manager.build_data_docs(
+            site_names=site_names, resource_identifiers=resource_identifiers
+        )
+
+    def _get_docs_sites_urls(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifier: Any | None = None,
+    ):
+        from great_expectations import project_manager
+
+        return project_manager.get_docs_sites_urls(
+            site_names=site_names, resource_identifier=resource_identifier
+        )
 
 
 @public_api
@@ -180,42 +235,44 @@ class SlackNotificationAction(DataDocsAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        slack_webhook: Optional[str] = None,
-        slack_token: Optional[str] = None,
-        slack_channel: Optional[str] = None,
-        notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
-        show_failed_expectations: bool = False,
-    ) -> None:
-        """Create a SlackNotificationAction"""
-        super().__init__()
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        if not slack_token and slack_channel:
-            assert slack_webhook
-        if not slack_webhook:
-            assert slack_token and slack_channel
-        assert not (slack_webhook and slack_channel and slack_token)
+    type: Literal["slack"] = "slack"
 
-        self.slack_webhook = slack_webhook
-        self.slack_token = slack_token
-        self.slack_channel = slack_channel
-        self.notify_on = notify_on
-        self.notify_with = notify_with
-        self.show_failed_expectations = show_failed_expectations
+    slack_webhook: Optional[str] = None
+    slack_token: Optional[str] = None
+    slack_channel: Optional[str] = None
+    notify_on: Literal["all", "failure", "success"] = "all"
+    notify_with: Optional[List[str]] = None
+    show_failed_expectations: bool = False
+    renderer: SlackRenderer = Field(default_factory=SlackRenderer)
+
+    @validator("renderer", pre=True)
+    def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
+        if isinstance(renderer, dict):
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, SlackRenderer):
+                raise ValueError(
+                    "renderer must be a SlackRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
+        return renderer
+
+    @root_validator
+    def _root_validate_slack_params(cls, values: dict) -> dict:
+        slack_token = values["slack_token"]
+        slack_channel = values["slack_channel"]
+        slack_webhook = values["slack_webhook"]
+
+        try:
+            if slack_webhook:
+                assert not slack_token and not slack_channel
+            else:
+                assert slack_token and slack_channel
+        except AssertionError:
+            raise ValueError(
+                "Please provide either slack_webhook or slack_token and slack_channel"
+            )
+
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
@@ -350,22 +407,21 @@ class PagerdutyAlertAction(ValidationAction):
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(
-        self,
-        api_key: str,
-        routing_key: str,
-        notify_on: str = "failure",
-        severity: str = "critical",
-    ) -> None:
-        """Create a PagerdutyAlertAction"""
-        if not pypd:
-            raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
-        self.api_key = api_key
-        assert api_key, "No Pagerduty api_key found in action config."
-        self.routing_key = routing_key
-        assert routing_key, "No Pagerduty routing_key found in action config."
-        self.notify_on = notify_on
-        self.severity = severity
+    type: Literal["pagerduty"] = "pagerduty"
+
+    api_key: str
+    routing_key: str
+    notify_on: Literal["all", "failure", "success"] = "failure"
+    severity: Literal["critical", "error", "warning", "info"] = "critical"
+
+    @root_validator
+    def _root_validate_deps(cls, values: dict) -> dict:
+        if not importlib.util.find_spec("pypd"):
+            raise DataContextError(
+                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'
+            )
+
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -379,8 +435,9 @@ class PagerdutyAlertAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("PagerdutyAlertAction.run")
+        import pypd
 
+        logger.debug("PagerdutyAlertAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
@@ -458,30 +515,24 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
-    def __init__(
-        self,
-        renderer: dict,
-        microsoft_teams_webhook: str,
-        notify_on: str = "all",
-    ) -> None:
-        """Create a MicrosoftTeamsNotificationAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        self.teams_webhook = microsoft_teams_webhook
-        assert (
-            microsoft_teams_webhook
-        ), "No Microsoft teams webhook found in action config."
-        self.notify_on = notify_on
+    type: Literal["microsoft"] = "microsoft"
+
+    teams_webhook: str
+    notify_on: Literal["all", "failure", "success"] = "all"
+    renderer: MicrosoftTeamsRenderer = Field(default_factory=MicrosoftTeamsRenderer)
+
+    @validator("renderer", pre=True)
+    def _validate_renderer(
+        cls, renderer: dict | MicrosoftTeamsRenderer
+    ) -> MicrosoftTeamsRenderer:
+        if isinstance(renderer, dict):
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, MicrosoftTeamsRenderer):
+                raise ValueError(
+                    "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
+        return renderer
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -565,35 +616,25 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Tags to include in the alert
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        api_key: str,
-        region: Optional[str] = None,
-        priority: str = "P3",
-        notify_on: str = "failure",
-        tags: Optional[list[str]] = None,
-    ) -> None:
-        """Create an OpsgenieAlertAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
+    type: Literal["opsgenie"] = "opsgenie"
 
-        self.api_key = api_key
-        assert api_key, "opsgenie_api_key missing in config_variables.yml"
-        self.region = region
-        self.priority = priority
-        self.notify_on = notify_on
-        self.tags = tags
+    api_key: str
+    region: Optional[str] = None
+    priority: Literal["P1", "P2", "P3", "P4", "P5"] = "P3"
+    notify_on: Literal["all", "failure", "success"] = "failure"
+    tags: Optional[List[str]] = None
+    renderer: OpsgenieRenderer = Field(default_factory=OpsgenieRenderer)
+
+    @validator("renderer", pre=True)
+    def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
+        if isinstance(renderer, dict):
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, OpsgenieRenderer):
+                raise ValueError(
+                    "renderer must be a OpsgenieRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
+        return renderer
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -703,63 +744,48 @@ class EmailAction(ValidationAction):
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        renderer: dict,
-        smtp_address: str,
-        smtp_port: str,
-        receiver_emails: str,
-        sender_login: Optional[str] = None,
-        sender_password: Optional[str] = None,
-        sender_alias: Optional[str] = None,
-        use_tls: Optional[bool] = None,
-        use_ssl: Optional[bool] = None,
-        notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
-    ) -> None:
-        """Create an EmailAction"""
-        self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
-        )
-        module_name = renderer["module_name"]
-        if not self.renderer:
-            raise ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=renderer["class_name"],
-            )
-        self.smtp_address = smtp_address
-        self.smtp_port = smtp_port
-        self.sender_login = sender_login
-        self.sender_password = sender_password
-        if not sender_alias:
-            self.sender_alias = sender_login
-        else:
-            self.sender_alias = sender_alias
-        self.receiver_emails_list = list(
-            map(lambda x: x.strip(), receiver_emails.split(","))
-        )
-        self.use_tls = use_tls
-        self.use_ssl = use_ssl
-        assert smtp_address, "No SMTP server address found in action config."
-        assert smtp_port, "No SMTP server port found in action config."
-        assert (
-            receiver_emails
-        ), "No email addresses to send the email to in action config."
-        if not sender_login:
+    type: Literal["email"] = "email"
+
+    smtp_address: str
+    smtp_port: str
+    receiver_emails: str
+    sender_login: Optional[str] = None
+    sender_password: Optional[str] = None
+    sender_alias: Optional[str] = None
+    use_tls: Optional[bool] = None
+    use_ssl: Optional[bool] = None
+    notify_on: Literal["all", "failure", "success"] = "all"
+    notify_with: Optional[List[str]] = None
+    renderer: EmailRenderer = Field(default_factory=EmailRenderer)
+
+    @validator("renderer", pre=True)
+    def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
+        if isinstance(renderer, dict):
+            _renderer = _build_renderer(config=renderer)
+            if not isinstance(_renderer, EmailRenderer):
+                raise ValueError(
+                    "renderer must be a EmailRenderer or a valid configuration for one."
+                )
+            renderer = _renderer
+        return renderer
+
+    @root_validator
+    def _root_validate_email_params(cls, values: dict) -> dict:
+        if not values["sender_alias"]:
+            values["sender_alias"] = values["sender_login"]
+
+        if not values["sender_login"]:
             logger.warning(
                 "No login found for sending the email in action config. "
                 "This will only work for email server that does not require authentication."
             )
-        if not sender_password:
+        if not values["sender_password"]:
             logger.warning(
                 "No password found for sending the email in action config."
                 "This will only work for email server that does not require authentication."
             )
-        self.notify_on = notify_on
-        self.notify_with = notify_with
+
+        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -807,6 +833,11 @@ class EmailAction(ValidationAction):
             title, html = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
+
+            receiver_emails_list = list(
+                map(lambda x: x.strip(), self.receiver_emails.split(","))
+            )
+
             # this will actually send the email
             email_result = send_email(
                 title,
@@ -816,7 +847,7 @@ class EmailAction(ValidationAction):
                 self.sender_login,
                 self.sender_password,
                 self.sender_alias,
-                self.receiver_emails_list,
+                receiver_emails_list,
                 self.use_tls,
                 self.use_ssl,
             )
@@ -827,6 +858,7 @@ class EmailAction(ValidationAction):
             return {"email_result": ""}
 
 
+# TODO: This action is slated for deletion in favor of using ValidationResult.run()
 @public_api
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
@@ -846,16 +878,28 @@ class StoreValidationResultAction(ValidationAction):
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
+    type: Literal["store_validation_result"] = "store_validation_result"
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    _target_store: ValidationsStore = PrivateAttr()
+
     def __init__(
         self,
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__()
+        super().__init__(type="store_validation_result")
         if target_store_name is None:
-            self.target_store = data_context.stores[data_context.validations_store_name]
+            target_store = data_context.stores[data_context.validations_store_name]
         else:
-            self.target_store = data_context.stores[target_store_name]
+            target_store = data_context.stores[target_store_name]
+
+        if not isinstance(target_store, ValidationsStore):
+            raise ValueError("target_store must be a ValidationsStore")
+
+        self._target_store = target_store
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -871,7 +915,7 @@ class StoreValidationResultAction(ValidationAction):
     ):
         logger.debug("StoreValidationResultAction.run")
         output = store_validation_results(
-            self.target_store,
+            self._target_store,
             validation_result_suite,
             validation_result_suite_identifier,
             expectation_suite_identifier,
@@ -944,15 +988,9 @@ class UpdateDataDocsAction(DataDocsAction):
         site_names: Optional. A list of the names of sites to update.
     """
 
-    def __init__(
-        self,
-        site_names: list[str] | None = None,
-    ) -> None:
-        """
-        :param site_names: *optional* List of site names for building data docs
-        """
-        super().__init__()
-        self._site_names = site_names
+    type: Literal["update_data_docs"] = "update_data_docs"
+
+    site_names: List[str] = []
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -987,7 +1025,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # TODO Update for RenderedDataDocs
         # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
         self._build_data_docs(
-            site_names=self._site_names,
+            site_names=self.site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
                 expectation_suite_identifier,
@@ -1000,7 +1038,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # get the URL for the validation result
         docs_site_urls_list = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,
+            site_names=self.site_names,
         )
         # process payload
         for sites in docs_site_urls_list:
@@ -1029,14 +1067,10 @@ class SNSNotificationAction(ValidationAction):
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
-    def __init__(
-        self,
-        sns_topic_arn: str,
-        sns_message_subject: Optional[str],
-    ) -> None:
-        """Inits SNSNotificationAction."""
-        self.sns_topic_arn = sns_topic_arn
-        self.sns_message_subject = sns_message_subject
+    type: Literal["sns"] = "sns"
+
+    sns_topic_arn: str
+    sns_message_subject: Optional[str]
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -1076,8 +1110,9 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, url) -> None:
-        self.url = url
+    type: Literal["api"] = "api"
+
+    url: str
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
