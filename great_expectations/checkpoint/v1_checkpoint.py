@@ -8,6 +8,7 @@ from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH0
 from great_expectations.compatibility.pydantic import BaseModel, validator
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -74,6 +75,7 @@ class Checkpoint(BaseModel):
         """
         json_encoders = {
             ValidationConfig: lambda v: _encode_validation_config(v),
+            Renderer: lambda r: r.serialize(),
         }
 
     @validator("validations")
