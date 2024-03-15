@@ -48,7 +48,7 @@ Replace `expectation_suite_name` with the name of your Expectation Suite.
 
 ## View the Expectations in the Expectation Suite
 
-Run the following code to print the Suite to console or Jupyter Notebook the `show_expectations_by_expectation_type()` method:
+Run the following code to print the Suite to console or in a Python interpreter the `show_expectations_by_expectation_type()` method:
 
 ```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/guides/expectations/how_to_edit_an_expectation_suite.py show_suite"
 ```

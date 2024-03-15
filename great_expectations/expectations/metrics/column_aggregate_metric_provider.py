@@ -4,7 +4,6 @@ import logging
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -38,7 +37,6 @@ if TYPE_CHECKING:
     )
 
 
-@public_api
 def column_aggregate_value(
     engine: Type[ExecutionEngine],
     **kwargs,
@@ -108,7 +106,6 @@ def column_aggregate_value(
         )
 
 
-@public_api
 def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -260,7 +257,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
-@public_api
 class ColumnAggregateMetricProvider(TableMetricProvider):
     """Base class for all Column Aggregate Metrics,
     which define metrics to be calculated in aggregate from a given column.

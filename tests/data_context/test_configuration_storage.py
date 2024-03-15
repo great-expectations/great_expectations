@@ -185,10 +185,6 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
 anonymous_usage_statistics:
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   enabled: false

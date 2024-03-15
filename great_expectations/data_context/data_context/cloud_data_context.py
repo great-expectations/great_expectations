@@ -613,7 +613,7 @@ class CloudDataContext(SerializableDataContext):
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
             key, expectation_suite, **kwargs
-        )  # type: ignore[func-returns-value]
+        )
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.id = response.id
 
@@ -738,7 +738,7 @@ class CloudDataContext(SerializableDataContext):
         if include_rendered_content:
             expectation_suite.render()
 
-        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.id = response.id
 

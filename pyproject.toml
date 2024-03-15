@@ -367,6 +367,12 @@ filterwarnings = [
     # PendingDeprecationWarning: these relate to the use of methods that are not even deprecated yet.
     # We want to see the warnings in the logs, but not have them cause CI to fail.
     "once::PendingDeprecationWarning",
+    # Generally we shouldn't need to use a context manger with `mocker` but it can be useful
+    # if we want the patch/mock to end before the test finishes.
+    # Example: Mocks returned by pytest-mock do not need to be used as context managers.
+    # The mocker fixture automatically undoes mocking at the end of a test. This warning can be ignored if it was triggered by mocking a context manager.
+    # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
+    "default::pytest_mock.plugin.PytestMockWarning",
 
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation

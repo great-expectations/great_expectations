@@ -6,7 +6,7 @@ description: Create and manage Checkpoints in GX Cloud.
 
 A Checkpoint validates Expectation Suite data. After you create a Checkpoint to validate data, you can save and reuse the Checkpoint. 
 
-To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpoint.md).
+<!-- [//]: # (TODO: To learn more about Checkpoints, see Checkpoint.) -->
 
 ## Prerequisites
 
@@ -18,27 +18,27 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 
 ## Add a Checkpoint
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. Run the following code to import the `great_expectations` module and the existing Data Context:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     import great_expectations as gx
     context = gx.get_context()
     ```
 2. Run the following code to retrieve the Expectation Suite:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     expectation_suite = context.suites.get(name=<expectation_name>)
     ```
 
 3. Run the following code to assign a name to the Checkpoint:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint_name = <checkpoint_name> 
     ```
 
 4. Run the following code to define the Checkpoint configuration.
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint_config = {
         "name": checkpoint_name,
         "validations": [{
@@ -55,19 +55,19 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 
 5. Run the following code to add the Checkpoint:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 
 6. Optional. Run the following code to confirm the Checkpoint name:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     print(checkpoint) 
     ```
 
 7. Optional. Run the following code to run the Checkpoint:
     
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     result = checkpoint.run() 
     ```
 
@@ -84,7 +84,7 @@ To learn more about Checkpoints, see [Checkpoint](/reference/learn/terms/checkpo
 
 ## Add a Validation to a Checkpoint
 
-Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Add Validation data or Expectation Suites to a Checkpoint](../../oss/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md) in the GX OSS documentaion.
+Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Manage Checkpoints](/core/validate_data/manage_checkpoints.md) in the GX 1.0 documentaion.
 
 1. In GX Cloud, click **Checkpoints**.
 
@@ -92,9 +92,9 @@ Add Validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 3. Copy the code snippet and then close the **Edit Checkpoint** dialog.
 
-4. Paste the the code snippet into Jupyter Notebook and then add the following code block:
+4. Paste the code snippet into a Python interpreter and then add the following code block:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
         validations = [
         {
             "batch_request": {
@@ -111,7 +111,7 @@ Add Validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 6. Run the following code to update the Checkpoint configuration:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 
@@ -127,9 +127,9 @@ Add Validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 ## Edit a Checkpoint configuration
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. Run the following code to import the `great_expectations` module and the existing Data Context:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     import great_expectations as gx
     context = gx.get_context()
     ```
@@ -139,17 +139,19 @@ Add Validation data to a Checkpoint to aggregate individual Expectation Suite or
 
 4. Copy the code snippet and then close the **Edit checkpoint** dialog.
 
-5. Paste the the code snippet into Jupyter Notebook and then edit the Checkpoint configuration.
+5. Paste the the code snippet into a Python interpreter and then edit the Checkpoint configuration.
 
 6. Run the following code to update the Checkpoint configuration:
 
-    ```python title="Jupyter Notebook"
+    ```python title="Python"
     checkpoint = context.add_or_update_checkpoint(**checkpoint_config) 
     ```
 
 ## Configure the Checkpoint result format parameter 
 
-You can use the `result_format` parameter to define the level of detail you want returned with your Validation Results. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. For more information, see [Result format](../../reference/learn/expectations/result_format.md).
+You can use the `result_format` parameter to define the level of detail you want returned with your Validation Results. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. 
+
+<!-- [//]: # (TODO: For more information, see Result format.) -->
 
 Run the following code to apply `result_format` to every Expectation in a Suite:
 

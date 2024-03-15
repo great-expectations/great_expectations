@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import requests
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 try:
     import pypd
@@ -28,8 +29,6 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.store.metric_store import MetricStore
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -43,31 +42,24 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.store.validations_store import ValidationsStore
 
 logger = logging.getLogger(__name__)
 
 
 @public_api
 class ValidationAction:
-    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
+    """
+    ValidationActions define a set of steps to be run after a validation result is produced.
 
-    Args:
-        data_context: Data Context that is used by the Action.
+    Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
+    and other actions to take place after the validation result is produced.
     """
 
-    def __init__(self, data_context: AbstractDataContext) -> None:
-        """Create a ValidationAction"""
-        self.data_context = data_context
+    def __init__(self) -> None:
+        from great_expectations import project_manager
 
-    @property
-    def _using_cloud_context(self) -> bool:
-        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
-        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
-        from great_expectations.data_context.data_context.cloud_data_context import (
-            CloudDataContext,
-        )
-
-        return isinstance(self.data_context, CloudDataContext)
+        self._using_cloud_context = project_manager.is_using_cloud()
 
     @public_api
     def run(  # noqa: PLR0913
@@ -138,29 +130,17 @@ class ValidationAction:
         return NotImplementedError
 
 
-class NoOpAction(ValidationAction):
-    def __init__(
-        self,
-        data_context,
-    ) -> None:
-        super().__init__(data_context)
+class DataDocsAction(ValidationAction):
+    def __init__(self) -> None:
+        from great_expectations import project_manager
 
-    @override
-    def _run(  # noqa: PLR0913
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
-        data_asset,
-        expectation_suite_identifier=None,
-        checkpoint_identifier=None,
-    ) -> None:
-        print("Happily doing nothing")
+        super().__init__()
+        self._build_data_docs = project_manager.build_data_docs
+        self._get_docs_sites_urls = project_manager.get_docs_sites_urls
 
 
 @public_api
-class SlackNotificationAction(ValidationAction):
+class SlackNotificationAction(DataDocsAction):
     """Sends a Slack notification to a given webhook.
 
     ```yaml
@@ -185,7 +165,6 @@ class SlackNotificationAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
             ```python
             {
@@ -203,7 +182,6 @@ class SlackNotificationAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -213,7 +191,7 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: bool = False,
     ) -> None:
         """Create a SlackNotificationAction"""
-        super().__init__(data_context)
+        super().__init__()
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -277,7 +255,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[dict[str, str]] = self.data_context.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -366,23 +344,20 @@ class PagerdutyAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Events API v2 key for pagerduty.
         routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
         severity: str = "critical",
     ) -> None:
         """Create a PagerdutyAlertAction"""
-        super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
         self.api_key = api_key
@@ -472,7 +447,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
             ```python
             {
@@ -486,13 +460,11 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
     ) -> None:
         """Create a MicrosoftTeamsNotificationAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -586,7 +558,6 @@ class OpsgenieAlertAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         api_key: Opsgenie API key.
         region: Specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set.
         priority: Specifies the priority of the alert (P1 - P5).
@@ -596,7 +567,6 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -605,7 +575,6 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Optional[list[str]] = None,
     ) -> None:
         """Create an OpsgenieAlertAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -715,7 +684,6 @@ class EmailAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate an email, for example:
             ```python
             {
@@ -737,7 +705,6 @@ class EmailAction(ValidationAction):
 
     def __init__(  # noqa: PLR0913
         self,
-        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -751,7 +718,6 @@ class EmailAction(ValidationAction):
         notify_with: Optional[list[str]] = None,
     ) -> None:
         """Create an EmailAction"""
-        super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
             runtime_environment={},
@@ -864,10 +830,7 @@ class EmailAction(ValidationAction):
 @public_api
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
-
     Typical usage example:
-
-
         ```yaml
         - name: store_validation_result
         action:
@@ -876,12 +839,9 @@ class StoreValidationResultAction(ValidationAction):
           # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: validations_store
         ```
-
-
     Args:
         data_context: GX Data Context.
         target_store_name: The name of the store where the actions will store the validation result.
-
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
@@ -891,7 +851,7 @@ class StoreValidationResultAction(ValidationAction):
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
     ) -> None:
-        super().__init__(data_context)
+        super().__init__()
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
@@ -910,233 +870,55 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
-        run_return_value = self._basic_run(
+        output = store_validation_results(
+            self.target_store,
             validation_result_suite,
             validation_result_suite_identifier,
             expectation_suite_identifier,
             checkpoint_identifier,
-        )
-        if self._using_cloud_context and isinstance(
-            run_return_value, GXCloudResourceRef
-        ):
-            return self._run_cloud_post_process_resource_ref(
-                run_return_value, validation_result_suite_identifier
-            )
-
-    def _basic_run(
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
-        expectation_suite_identifier,
-        checkpoint_identifier: Optional[GXCloudIdentifier],
-    ) -> Union[bool, GXCloudResourceRef]:
-        if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
-            return
-
-        if not isinstance(
-            validation_result_suite_identifier,
-            (ValidationResultIdentifier, GXCloudIdentifier),
-        ):
-            raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
-            )
-
-        checkpoint_id = None
-        if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_id = checkpoint_identifier.id
-
-        expectation_suite_id = None
-        if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_id = expectation_suite_identifier.id
-
-        return self.target_store.set(
-            validation_result_suite_identifier,
-            validation_result_suite,
-            checkpoint_id=checkpoint_id,
-            expectation_suite_id=expectation_suite_id,
+            self._using_cloud_context,
         )
 
-    def _run_cloud_post_process_resource_ref(
-        self,
-        gx_cloud_resource_ref: GXCloudResourceRef,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
-    ):
-        store_set_return_value: GXCloudResourceRef
-        new_id = gx_cloud_resource_ref.id
-        # ValidationResultIdentifier has no `.id`
-        validation_result_suite_identifier.id = new_id  # type: ignore[union-attr]
-        return gx_cloud_resource_ref
+        if isinstance(output, GXCloudResourceRef) and isinstance(
+            validation_result_suite_identifier, GXCloudIdentifier
+        ):
+            validation_result_suite_identifier.id = output.id
+
+        if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
+            return output
 
 
-@public_api
-class StoreEvaluationParametersAction(ValidationAction):
-    """Store evaluation parameters from a validation result.
-
-    Evaluation parameters allow expectations to refer to statistics/metrics computed
-    in the process of validating other prior expectations.
-
-    Typical usage example:
-        ```yaml
-        - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
-        ```
-
-    Args:
-        data_context: GX Data Context.
-        target_store_name: The name of the store in the Data Context to store the evaluation parameters.
-
-    Raises:
-        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
+def store_validation_results(  # noqa: PLR0913
+    validation_result_store: ValidationsStore,
+    suite_validation_result: ExpectationSuiteValidationResult,
+    suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
+    expectation_suite_identifier: Optional[
+        ExpectationSuiteIdentifier | GXCloudIdentifier
+    ] = None,
+    checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+    cloud_mode: bool = False,
+) -> bool | GXCloudResourceRef:
+    """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
+    This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
     """
+    checkpoint_id = None
+    if cloud_mode and checkpoint_identifier:
+        checkpoint_id = checkpoint_identifier.id
 
-    def __init__(
-        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
-    ) -> None:
-        super().__init__(data_context)
+    expectation_suite_id = None
+    if isinstance(expectation_suite_identifier, GXCloudIdentifier):
+        expectation_suite_id = expectation_suite_identifier.id
 
-        if target_store_name is None:
-            self.target_store = data_context.evaluation_parameter_store
-        else:
-            self.target_store = data_context.stores[target_store_name]
-
-    @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
-        data_asset,
-        payload=None,
-        expectation_suite_identifier=None,
-        checkpoint_identifier=None,
-    ):
-        logger.debug("StoreEvaluationParametersAction.run")
-
-        if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
-            return
-
-        if not isinstance(
-            validation_result_suite_identifier,
-            (ValidationResultIdentifier, GXCloudIdentifier),
-        ):
-            raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
-            )
-
-        self.data_context.store_evaluation_parameters(validation_result_suite)
+    return validation_result_store.set(
+        key=suite_validation_result_identifier,
+        value=suite_validation_result,
+        checkpoint_id=checkpoint_id,
+        expectation_suite_id=expectation_suite_id,
+    )
 
 
 @public_api
-class StoreMetricsAction(ValidationAction):
-    """Extract metrics from a Validation Result and store them in a metrics store.
-
-    Typical usage example:
-        ```yaml
-        - name: store_evaluation_params
-        action:
-         class_name: StoreMetricsAction
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: my_metrics_store
-        ```
-
-    Args:
-        data_context: GX Data Context.
-        requested_metrics: Dictionary of metrics to store.
-
-            Dictionary should have the following structure:
-                    ```yaml
-                    expectation_suite_name:
-                        metric_name:
-                            - metric_kwargs_id
-                    ```
-            You may use "*" to denote that any expectation suite should match.
-
-        target_store_name: The name of the store where the action will store the metrics.
-
-    Raises:
-        DataContextError: Unable to find store {} in your DataContext configuration.
-        DataContextError: StoreMetricsAction must have a valid MetricsStore for its target store.
-        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
-    """
-
-    def __init__(
-        self,
-        data_context: AbstractDataContext,
-        requested_metrics: dict,
-        target_store_name: Optional[str] = "metrics_store",
-    ) -> None:
-        super().__init__(data_context)
-        self._requested_metrics = requested_metrics
-        self._target_store_name = target_store_name
-        try:
-            store = data_context.stores[target_store_name]
-        except KeyError:
-            raise DataContextError(
-                "Unable to find store {} in your DataContext configuration.".format(
-                    target_store_name
-                )
-            )
-        if not isinstance(store, MetricStore):
-            raise DataContextError(
-                "StoreMetricsAction must have a valid MetricsStore for its target store."
-            )
-
-    @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
-        data_asset,
-        payload=None,
-        expectation_suite_identifier=None,
-        checkpoint_identifier=None,
-    ):
-        logger.debug("StoreMetricsAction.run")
-
-        if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
-            )
-            return
-
-        if not isinstance(
-            validation_result_suite_identifier,
-            (ValidationResultIdentifier, GXCloudIdentifier),
-        ):
-            raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
-            )
-
-        self.data_context.store_validation_result_metrics(
-            requested_metrics=self._requested_metrics,
-            validation_results=validation_result_suite,
-            target_store_name=self._target_store_name,
-        )
-
-
-@public_api
-class UpdateDataDocsAction(ValidationAction):
+class UpdateDataDocsAction(DataDocsAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
     YAML configuration example:
@@ -1159,20 +941,17 @@ class UpdateDataDocsAction(ValidationAction):
     ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         site_names: Optional. A list of the names of sites to update.
     """
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
-        site_names: list[str] | str | None = None,
+        site_names: list[str] | None = None,
     ) -> None:
         """
-        :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
-        super().__init__(data_context)
+        super().__init__()
         self._site_names = site_names
 
     @override
@@ -1207,7 +986,7 @@ class UpdateDataDocsAction(ValidationAction):
 
         # TODO Update for RenderedDataDocs
         # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
-        self.data_context.build_data_docs(
+        self._build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
@@ -1219,9 +998,9 @@ class UpdateDataDocsAction(ValidationAction):
             return data_docs_validation_results
 
         # get the URL for the validation result
-        docs_site_urls_list = self.data_context.get_docs_sites_urls(
+        docs_site_urls_list = self._get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
+            site_names=self._site_names,
         )
         # process payload
         for sites in docs_site_urls_list:
@@ -1241,25 +1020,21 @@ class SNSNotificationAction(ValidationAction):
           class_name: SNSNotificationAction
           # put the actual SNS Arn in the uncommitted/config_variables.yml file
           # or pass in as environment variable
-          data_context:
           sns_topic_arn:
           sns_subject:
         ```
 
     Args:
-        data_context: Data Context that is used by the Action.
         sns_topic_arn: The SNS Arn to publish messages to.
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
     """
 
     def __init__(
         self,
-        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
         """Inits SNSNotificationAction."""
-        super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
@@ -1301,8 +1076,7 @@ class SNSNotificationAction(ValidationAction):
 
 
 class APINotificationAction(ValidationAction):
-    def __init__(self, data_context, url) -> None:
-        super().__init__(data_context)
+    def __init__(self, url) -> None:
         self.url = url
 
     @override

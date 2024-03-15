@@ -12,7 +12,6 @@ from typing import (
     Union,
 )
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -39,7 +38,6 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
 
 
-@public_api
 def column_condition_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[MetricPartialFunctionTypes] = None,

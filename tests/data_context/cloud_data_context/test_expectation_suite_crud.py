@@ -216,7 +216,7 @@ def mocked_get_by_name_response(
 
 
 @pytest.fixture
-def mock_list_expectation_suite_names() -> mock.MagicMock:
+def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -227,7 +227,7 @@ def mock_list_expectation_suite_names() -> mock.MagicMock:
 
 
 @pytest.fixture
-def mock_list_expectation_suites() -> mock.MagicMock:
+def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -238,7 +238,7 @@ def mock_list_expectation_suites() -> mock.MagicMock:
 
 
 @pytest.fixture
-def mock_expectations_store_has_key() -> mock.MagicMock:
+def mock_expectations_store_has_key() -> mock.MagicMock:  # noqa: TID251
     """
     Expects a return value to be set within the test function.
     """
@@ -268,7 +268,7 @@ def test_list_expectation_suites(
     )
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
+        mock_get.return_value = mock.Mock(  # noqa: TID251
             status_code=200, json=lambda: mock_get_all_suites_json
         )
         suites = context.list_expectation_suites()
@@ -291,7 +291,7 @@ def test_list_expectation_suites(
 def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -310,8 +310,8 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,
-    mock_list_expectation_suites: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suites: mock.MagicMock,  # noqa: TID251
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -341,7 +341,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -483,7 +483,9 @@ def test_save_expectation_suite_overwrites_existing_suite(
     suite = ExpectationSuite(suite_name, id=suite_id)
 
     with mock.patch(
-        "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
+        "requests.Session.put",
+        autospec=True,
+        return_value=mock.Mock(status_code=405),  # noqa: TID251
     ) as mock_put, mock.patch(
         "requests.Session.patch", autospec=True
     ) as mock_patch, pytest.deprecated_call():
@@ -509,8 +511,8 @@ def test_save_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_expectations_store_has_key: mock.MagicMock,
-    mock_list_expectation_suite_names: mock.MagicMock,
+    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -534,7 +536,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,
+    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 

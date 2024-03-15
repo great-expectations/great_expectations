@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
+from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
+    Field,
     PrivateAttr,
     ValidationError,
     validator,
@@ -15,9 +18,17 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.data_context.store.validation_config_store import (
-    ValidationConfigStore,  # noqa: TCH001
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
+    ValidationResultIdentifier,
+)
+from great_expectations.datasource.new_datasource import (
+    BaseDatasource as LegacyDatasource,
 )
 from great_expectations.validator.v1_validator import ResultFormat, Validator
 
@@ -25,18 +36,15 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
-
-from great_expectations.data_context.data_context.context_factory import project_manager
-from great_expectations.datasource.new_datasource import (
-    BaseDatasource as LegacyDatasource,
-)
+    from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
 class _EncodedValidationData(BaseModel):
     datasource: _IdentifierBundle
     asset: _IdentifierBundle
-    batch_config: _IdentifierBundle
+    batch_definition: _IdentifierBundle
 
 
 def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
@@ -60,7 +68,7 @@ def _encode_data(data: BatchConfig) -> _EncodedValidationData:
             name=asset.name,
             id=str(asset.id) if asset.id else None,
         ),
-        batch_config=_IdentifierBundle(
+        batch_definition=_IdentifierBundle(
             name=data.name,
             id=data.id,
         ),
@@ -73,7 +81,7 @@ class ValidationConfig(BaseModel):
 
     Args:
         name: The name of the validation.
-        data: A batch config to validate.
+        data: A batch definition to validate.
         suite: A grouping of expectations to validate against the data.
         id: A unique identifier for the validation; added when persisted with a store.
 
@@ -83,6 +91,7 @@ class ValidationConfig(BaseModel):
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with suite's Marshmallow dep
         )
+        validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
         These will be used as foreign keys to retrieve the actual objects from the appropriate stores.
@@ -99,8 +108,8 @@ class ValidationConfig(BaseModel):
                     "name": "my_asset",
                     "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67"
                 },
-                "batch_config": {
-                    "name": "my_batch_config",
+                "batch_definition": {
+                    "name": "my_batch_definition",
                     "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"
                 }
             },
@@ -116,17 +125,29 @@ class ValidationConfig(BaseModel):
             BatchConfig: lambda b: _encode_data(b),
         }
 
-    name: str
-    data: BatchConfig  # TODO: Should support a union of Asset | BatchConfig
-    suite: ExpectationSuite
+    name: str = Field(..., allow_mutation=False)
+    data: BatchConfig = Field(..., allow_mutation=False)
+    suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
-
-    # private attributes that must be set immediately after instantiation
-    _store: ValidationConfigStore = PrivateAttr()
+    _validation_results_store: ValidationsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)
-        self._store = project_manager.get_validation_config_store()
+
+        # TODO: Migrate this to model_post_init when we get to pydantic 2
+        self._validation_results_store = project_manager.get_validations_store()
+
+    @property
+    def batch_definition(self) -> BatchConfig:
+        return self.data
+
+    @property
+    def asset(self) -> DataAsset:
+        return self.data.data_asset
+
+    @property
+    def data_source(self) -> Datasource:
+        return self.asset.datasource
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
@@ -187,7 +208,7 @@ class ValidationConfig(BaseModel):
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
-        batch_config_name = data_identifiers.batch_config.name
+        batch_definition_name = data_identifiers.batch_definition.name
 
         datasource_dict = project_manager.get_datasources()
         try:
@@ -207,34 +228,73 @@ class ValidationConfig(BaseModel):
             ) from e
 
         try:
-            batch_config = asset.get_batch_config(batch_config_name)
+            batch_definition = asset.get_batch_config(batch_definition_name)
         except KeyError as e:
             raise ValueError(
-                f"Could not find batch config named '{batch_config_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."
             ) from e
 
-        return batch_config
+        return batch_definition
 
     @public_api
     def run(
         self,
         *,
-        batch_config_options: Optional[BatchRequestOptions] = None,
+        batch_definition_options: Optional[BatchRequestOptions] = None,
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
-            batch_config=self.data,
-            batch_request_options=batch_config_options,
+            batch_config=self.batch_definition,
+            batch_request_options=batch_definition_options,
             result_format=result_format,
         )
-        return validator.validate_expectation_suite(self.suite, evaluation_parameters)
+        results = validator.validate_expectation_suite(
+            self.suite, evaluation_parameters
+        )
 
-    @public_api
-    def save(self) -> None:
-        key = self._store.get_key(name=self.name, id=self.id)
+        (
+            expectation_suite_identifier,
+            validation_result_id,
+        ) = self._get_expectation_suite_and_validation_result_ids(validator)
 
-        try:
-            self._store.update(key=key, value=self)
-        except gx_exceptions.StoreBackendError:
-            raise ValueError("ValidationConfig must be added to a store before saving.")
+        store_validation_results(
+            validation_result_store=self._validation_results_store,
+            suite_validation_result=results,
+            suite_validation_result_identifier=validation_result_id,
+            expectation_suite_identifier=expectation_suite_identifier,
+            cloud_mode=self._validation_results_store.cloud_mode,
+        )
+
+        return results
+
+    def _get_expectation_suite_and_validation_result_ids(
+        self,
+        validator: Validator,
+    ) -> (
+        tuple[GXCloudIdentifier, GXCloudIdentifier]
+        | tuple[ExpectationSuiteIdentifier, ValidationResultIdentifier]
+    ):
+        expectation_suite_identifier: GXCloudIdentifier | ExpectationSuiteIdentifier
+        validation_result_id: GXCloudIdentifier | ValidationResultIdentifier
+        if self._validation_results_store.cloud_mode:
+            expectation_suite_identifier = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                id=self.suite.id,
+            )
+            validation_result_id = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.VALIDATION_RESULT
+            )
+            return expectation_suite_identifier, validation_result_id
+        else:
+            run_time = datetime.datetime.now(tz=datetime.timezone.utc)
+            run_id = RunIdentifier(run_time=run_time)
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                name=self.suite.name
+            )
+            validation_result_id = ValidationResultIdentifier(
+                batch_identifier=validator.active_batch_id,
+                expectation_suite_identifier=expectation_suite_identifier,
+                run_id=run_id,
+            )
+            return expectation_suite_identifier, validation_result_id

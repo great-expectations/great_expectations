@@ -38,7 +38,7 @@ To complete this how-to, you'll complete the following tasks:
 
     It can take several minutes for the installation to complete. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
 
-2. Open Jupyter Notebook, a command line, or a terminal and then run the following command to import the `great_expectations` module:
+2. Open a Python interpreter, a command line, or a terminal and then run the following command to import the `great_expectations` module:
 
     ```python title="Python" name="tutorials/quickstart/quickstart.py import_gx"
     ```

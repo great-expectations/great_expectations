@@ -4,10 +4,6 @@ title: 'Connect to GX Cloud with Python'
 id: connect_python
 description: Connect to a GX Cloud account and validate data from a Python script.
 ---
-import Prerequisites from '../../components/_prerequisites.jsx'
-import PrereqPython from '../../components/prerequisites/_python_version.md'
-import SetupAndInstallGx from '../../components/setup/link_lists/_setup_and_install_gx.md'
-import DataContextInitializeInstantiateSave from '../../components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
 In this quickstart, you'll learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter Notebook. You'll install Great Expectations, configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
@@ -115,12 +111,3 @@ Environment variables securely store your GX Cloud access credentials.
 
     ```python title="Python" name="tutorials/quickstart/quickstart.py view_results"
     ```
-
-## Related documentation
-
-
-- [Install GX in a specific environment with a specific Data Source](/oss/guides/setup/installation/install_gx.md)
-- [Initialize, instantiate, and save a Data Context](/oss/guides/setup/configure_data_contexts_lp.md)
-- [Connect to Data Sources](/oss/guides/connecting_to_your_data/connect_to_data_lp.md)
-- [Create and manage Expectations and Expectation Suites](/oss/guides/expectations/expectations_lp.md)
-- [Create, manage, and run Checkpoints](/oss/guides/validation/checkpoints/checkpoint_lp.md)

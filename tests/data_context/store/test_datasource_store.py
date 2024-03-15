@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import copy
 import pathlib
-from typing import Callable, List, Optional, cast
-from unittest import mock
+from typing import TYPE_CHECKING, Callable, List, Optional, cast
+from unittest.mock import ANY as MOCK_ANY
 
 import pytest
 
@@ -37,6 +37,9 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 
@@ -243,6 +246,7 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
+    mocker: MockerFixture,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": GXCloudStoreBackend.__name__,
@@ -261,43 +265,42 @@ def test_datasource_store_set_cloud_mode(
         serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
 
-    with mock.patch(
+    mock_post = mocker.patch(
         "requests.Session.post",
         autospec=True,
         side_effect=mocked_datasource_post_response,
-    ) as mock_post, mock.patch(
+    )
+    _ = mocker.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_datasource_get_response,
-    ):
-        retrieved_datasource_config = store.set(
-            key=None, value=block_config_datasource_config
-        )
+    )
+    retrieved_datasource_config = store.set(
+        key=None, value=block_config_datasource_config
+    )
 
-        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
-        expected_datasource_config = serializer.serialize(
-            block_config_datasource_config
-        )
+    serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+    expected_datasource_config = serializer.serialize(block_config_datasource_config)
 
-        mock_post.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
-            json={
-                "data": {
-                    "type": "datasource",
-                    "attributes": {
-                        "datasource_config": expected_datasource_config,
-                        "organization_id": ge_cloud_organization_id,
-                    },
-                }
-            },
-        )
+    mock_post.assert_called_with(
+        MOCK_ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+        json={
+            "data": {
+                "type": "datasource",
+                "attributes": {
+                    "datasource_config": expected_datasource_config,
+                    "organization_id": ge_cloud_organization_id,
+                },
+            }
+        },
+    )
 
-        json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+    json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
 
-        assert json_serializer.serialize(
-            retrieved_datasource_config
-        ) == json_serializer.serialize(datasource_config_with_names_and_ids)
+    assert json_serializer.serialize(
+        retrieved_datasource_config
+    ) == json_serializer.serialize(datasource_config_with_names_and_ids)
 
 
 @pytest.mark.filesystem

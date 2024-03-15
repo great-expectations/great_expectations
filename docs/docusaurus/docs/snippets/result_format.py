@@ -226,10 +226,6 @@ checkpoint: Checkpoint = Checkpoint(
             "name": "store_validation_result",
             "action": {"class_name": "StoreValidationResultAction"},
         },
-        {
-            "name": "store_evaluation_params",
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-        },
         {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
     ],
     runtime_configuration={
