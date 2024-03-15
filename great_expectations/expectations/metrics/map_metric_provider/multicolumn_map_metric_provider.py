@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional, Tuple
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.metrics.map_metric_provider import (
     MapMetricProvider,
@@ -19,7 +18,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class MulticolumnMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a set of columns. All multi-column metrics require the
     domain key `column_list`.
