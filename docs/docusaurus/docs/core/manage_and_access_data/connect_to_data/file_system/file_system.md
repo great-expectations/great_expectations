@@ -192,6 +192,10 @@ A Data Asset tells GX what set of records to make available from a Data Source.
 
 </Tabs>
 
+## (Optional) Add additional Data Assets
+
+A Data Source can contain multiple Data Assets.  If you have additional files to connect to, you can provide different `name` and `batching_regex` parameters to create additional Data Assets for those files in your Data Source.  You can even include the same files in multiple Data Assets: If a given file matches the `batching_regex` of more than one Data Asset it will be included in each Data Asset it matches with.
+
 ## Full example code
 
 <Tabs className="hidden" groupId="connect-filesystem-source-data" defaultValue='amazon'>
