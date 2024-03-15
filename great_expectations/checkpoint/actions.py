@@ -265,10 +265,6 @@ class SlackNotificationAction(DataDocsAction):
     show_failed_expectations: bool = False
     renderer: SlackRenderer = SlackRenderer()
 
-    def json(self, **kwargs) -> str:
-        print("JSON WAS CALLED")
-        return super().json(**kwargs)
-
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
         if isinstance(renderer, dict):
@@ -936,7 +932,7 @@ class StoreValidationResultAction(ValidationAction):
     ):
         logger.debug("StoreValidationResultAction.run")
         output = store_validation_results(
-            self.target_store,
+            self._target_store,
             validation_result_suite,
             validation_result_suite_identifier,
             expectation_suite_identifier,
