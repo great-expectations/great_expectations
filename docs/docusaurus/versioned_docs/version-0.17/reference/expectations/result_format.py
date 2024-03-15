@@ -9,7 +9,7 @@ from great_expectations.core import (
     IDDict,
 )
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import Batch, LegacyBatchDefinition
+from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import Validator
