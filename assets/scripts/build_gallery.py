@@ -113,7 +113,7 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
-def get_expectations_info_dict(  # noqa: C901
+def get_expectations_info_dict(  # noqa: C901 - too complex
     include_core: bool = True,
     include_contrib: bool = True,
     only_these_expectations: list[str] | None = None,
@@ -285,7 +285,7 @@ def uninstall_requirements(requirements):
         execute_shell_command(f'pip uninstall -y "{req}"')
 
 
-def get_expectation_instances(expectations_info):  # noqa: C901
+def get_expectation_instances(expectations_info):  # noqa: C901 - too complex
     """Return a dict of Expectation instances
 
     Any contrib Expectations must be imported so they appear in the Expectation registry
@@ -383,7 +383,7 @@ def get_success_test_case(tests: list[dict]) -> dict:
         raise ValueError("Error: Expectation test case is malformed.")
 
 
-def combine_backend_results(  # noqa: C901
+def combine_backend_results(  # noqa: C901 - too complex
     expectations_info, expectation_instances, diagnostic_objects, outfile_name
 ):
     expected_full_backend_files = [
@@ -660,7 +660,7 @@ def build_gallery(  # noqa: C901 - 17
         )
 
 
-def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
+def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901 - too complex
     """
     Add markdown formatting to a provided docstring
 

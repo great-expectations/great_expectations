@@ -253,7 +253,7 @@ class PasswordMasker:
         return masked_url
 
     @classmethod
-    def sanitize_config(cls, config: dict) -> dict:  # noqa: C901
+    def sanitize_config(cls, config: dict) -> dict:  # noqa: C901 - too complex
         """
         Mask sensitive fields in a Dict.
         """

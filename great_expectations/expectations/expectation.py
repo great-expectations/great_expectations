@@ -123,7 +123,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901 - too complex
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params: list = []
         app_template_str = (

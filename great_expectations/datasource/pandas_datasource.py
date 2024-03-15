@@ -148,7 +148,7 @@ class PandasDatasource(LegacyDatasource):
         self._limit = configuration_with_defaults.get("limit", None)
 
     # TODO: move to data connector
-    def process_batch_parameters(  # noqa: C901
+    def process_batch_parameters(  # noqa: C901 - too complex
         self,
         reader_method=None,
         reader_options=None,

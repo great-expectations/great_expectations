@@ -14,7 +14,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_private_ip_address_in_class(addr: str, ip_class) -> bool:  # noqa: C901
+def is_private_ip_address_in_class(addr: str, ip_class) -> bool:  # noqa: C901 - too complex
     try:
         for ic in ip_class:
             if ic == "A":

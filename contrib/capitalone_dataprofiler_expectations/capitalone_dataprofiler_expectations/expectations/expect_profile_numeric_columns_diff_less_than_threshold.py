@@ -35,7 +35,7 @@ class DataProfilerProfileNumericColumnsDiffLessThanThreshold(
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: C901
+    def _pandas(  # noqa: C901 - too complex
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,

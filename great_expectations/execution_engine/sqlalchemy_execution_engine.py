@@ -1014,7 +1014,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @override
-    def resolve_metric_bundle(  # noqa: C901
+    def resolve_metric_bundle(  # noqa: C901 - too complex
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
     ) -> Dict[Tuple[str, str, str], MetricValue]:

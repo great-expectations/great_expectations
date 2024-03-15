@@ -193,7 +193,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(  # noqa: C901
+    def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,

@@ -116,7 +116,7 @@ def _get_sqlalchemy_column_metadata(
     )
 
 
-def _get_spark_column_metadata(field, parent_name="", include_nested=True):  # noqa: C901
+def _get_spark_column_metadata(field, parent_name="", include_nested=True):  # noqa: C901 - too complex
     cols = []
     if parent_name != "":
         parent_name = f"{parent_name}."

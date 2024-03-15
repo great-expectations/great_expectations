@@ -141,7 +141,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
     default_kwarg_values: dict = {}
 
     @classmethod
-    def _register_metric_functions(cls) -> None:  # noqa: C901
+    def _register_metric_functions(cls) -> None:  # noqa: C901 - too complex
         metric_name = getattr(cls, "metric_name", None)
         if not metric_name:
             # No metric name has been defined

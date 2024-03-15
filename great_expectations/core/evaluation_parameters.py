@@ -496,7 +496,7 @@ def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> boo
     )
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
     deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

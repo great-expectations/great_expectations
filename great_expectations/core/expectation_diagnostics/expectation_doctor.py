@@ -408,7 +408,7 @@ class ExpectationDoctor:
             results = data["datasets"]
         return results
 
-    def _get_examples(  # noqa: C901
+    def _get_examples(  # noqa: C901 - too complex
         self, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
         """
@@ -512,7 +512,7 @@ class ExpectationDoctor:
             }
         )
 
-    def _get_expectation_configuration_from_examples(  # noqa: C901
+    def _get_expectation_configuration_from_examples(  # noqa: C901 - too complex
         self,
         examples: List[ExpectationTestDataCases],
     ) -> Optional[ExpectationConfiguration]:
