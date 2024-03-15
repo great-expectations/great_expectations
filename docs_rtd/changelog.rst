@@ -4,6 +4,14 @@
 Changelog
 #########
 
+0.18.11
+-----------------
+* [FEATURE] (0.18.x) Don't break context for invalid datasource configs ([#9596](https://github.com/great-expectations/great_expectations/pull/9596))
+* [MAINTENANCE] Update incorrect contract tests ([#9543](https://github.com/great-expectations/great_expectations/pull/9543))
+* [MAINTENANCE] Update referential integrity test so DB is only created once - `0.18` ([#9545](https://github.com/great-expectations/great_expectations/pull/9545))
+* [MAINTENANCE] CDMs - Metrics as ENUM - 0.18 ([#9572](https://github.com/great-expectations/great_expectations/pull/9572))
+* [MAINTENANCE] Refactor `ColumnDescriptiveMetricsMetricRetriever` to parent class (0.18.x) ([#9612](https://github.com/great-expectations/great_expectations/pull/9612))
+
 0.18.10
 -----------------
 * [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
