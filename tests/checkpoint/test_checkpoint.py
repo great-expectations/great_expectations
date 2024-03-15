@@ -630,7 +630,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
     data_context_with_datasource_spark_engine,
     common_action_list,
@@ -732,7 +732,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
     data_context_with_datasource_spark_engine,
     common_action_list,
@@ -935,7 +935,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_sparkdf(
     data_context_with_datasource_spark_engine,
     common_action_list,
@@ -1389,7 +1389,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_sparkdf(
     data_context_with_datasource_spark_engine,
     common_action_list,
@@ -1512,7 +1512,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_sparkdf(
     data_context_with_datasource_spark_engine,
     common_action_list,
