@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,  # noqa: TCH001
     BatchMarkers,  # noqa: TCH001
     BatchRequestBase,  # noqa: TCH001
+    LegacyBatchDefinition,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
 
@@ -103,14 +103,14 @@ class DataConnector:
 
     def get_batch_data_and_metadata(
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
     ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
 
         Args:
-            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+            batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
 
         """
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
@@ -124,12 +124,12 @@ class DataConnector:
             batch_markers,
         )
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
 
         Args:
-            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+            batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
         Returns:
             BatchSpec object built from BatchDefinition
 
@@ -204,21 +204,21 @@ class DataConnector:
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         raise NotImplementedError
 
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> Any:
         raise NotImplementedError
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         raise NotImplementedError
 

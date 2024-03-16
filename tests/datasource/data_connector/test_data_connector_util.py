@@ -4,7 +4,7 @@ import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.compatibility import google
-from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 
 # noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.util import (
@@ -21,7 +21,7 @@ from great_expectations.datasource.data_connector.util import (
 
 @pytest.mark.unit
 def test_batch_definition_matches_batch_request():
-    my_batch_definition = BatchDefinition(
+    my_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
@@ -136,7 +136,7 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
         )
     )
     assert returned_batch_def_list == [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_datasource",
             data_connector_name="test_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
@@ -162,7 +162,7 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
         )
     )
     assert returned_batch_def_list == [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_datasource",
             data_connector_name="test_data_connector",
             data_asset_name="test_data_asset",
@@ -286,7 +286,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         )
 
     # group names do not match
-    my_batch_definition = BatchDefinition(
+    my_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
@@ -305,7 +305,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         )
 
     # success
-    my_batch_definition = BatchDefinition(
+    my_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",

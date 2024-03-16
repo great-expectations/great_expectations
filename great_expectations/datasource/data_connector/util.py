@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, U
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import azure
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch import BatchRequestBase, LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -30,10 +30,10 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
-    batch_definition: BatchDefinition,
+    batch_definition: LegacyBatchDefinition,
     batch_request: BatchRequestBase,
 ) -> bool:
-    assert isinstance(batch_definition, BatchDefinition)
+    assert isinstance(batch_definition, LegacyBatchDefinition)
     assert isinstance(batch_request, BatchRequestBase)
 
     if (
@@ -92,7 +92,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
+) -> Optional[List[LegacyBatchDefinition]]:
     processed_data_reference: Optional[Tuple[str, IDDict]] = (
         convert_data_reference_string_to_batch_identifiers_using_regex(
             data_reference=data_reference,
@@ -110,7 +110,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
         data_asset_name = data_asset_name_from_batch_identifiers
 
     return [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -165,11 +165,11 @@ def _determine_batch_identifiers_using_named_groups(
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition,
+    batch_definition: LegacyBatchDefinition,
     regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
-    if not isinstance(batch_definition, BatchDefinition):
+    if not isinstance(batch_definition, LegacyBatchDefinition):
         raise TypeError(
             "batch_definition is not of an instance of type BatchDefinition"
         )

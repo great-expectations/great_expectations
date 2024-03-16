@@ -15,7 +15,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.file_path_da
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         super().__init__(
@@ -87,7 +87,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.

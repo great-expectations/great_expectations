@@ -8,7 +8,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,8 @@ class Sorter:
         self._reverse = reverse
 
     def get_sorted_batch_definitions(
-        self, batch_definitions: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
+        self, batch_definitions: List[LegacyBatchDefinition]
+    ) -> List[LegacyBatchDefinition]:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
@@ -49,10 +49,10 @@ class Sorter:
             else:
                 value_batches.append(idx)
 
-        none_batch_definitions: List[BatchDefinition] = [
+        none_batch_definitions: List[LegacyBatchDefinition] = [
             batch_definitions[idx] for idx in none_batches
         ]
-        value_batch_definitions: List[BatchDefinition] = sorted(
+        value_batch_definitions: List[LegacyBatchDefinition] = sorted(
             [batch_definitions[idx] for idx in value_batches],
             key=self.get_batch_key,
             reverse=self.reverse,
@@ -64,7 +64,7 @@ class Sorter:
             return value_batch_definitions + none_batch_definitions
         return none_batch_definitions + value_batch_definitions
 
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         raise NotImplementedError
 
     @property

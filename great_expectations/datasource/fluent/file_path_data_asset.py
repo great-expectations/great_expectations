@@ -65,7 +65,7 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition, BatchMarkers
+    from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -337,7 +337,7 @@ class _FilePathDataAsset(DataAsset):
 
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
-    ) -> list[BatchDefinition]:
+    ) -> list[LegacyBatchDefinition]:
         """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
@@ -434,7 +434,7 @@ class _FilePathDataAsset(DataAsset):
 
     def get_unfiltered_batch_definition_list_fn(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
         """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
         return file_get_unfiltered_batch_definition_list_fn
 

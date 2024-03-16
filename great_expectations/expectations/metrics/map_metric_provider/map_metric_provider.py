@@ -6,7 +6,6 @@ import warnings
 from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -82,7 +81,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class MapMetricProvider(MetricProvider):
     """The base class for defining metrics that are evaluated for every row. An example of a map metric is
     `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).

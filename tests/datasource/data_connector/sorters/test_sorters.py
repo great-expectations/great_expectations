@@ -1,7 +1,7 @@
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
@@ -110,7 +110,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
     # noinspection PyProtectedMember
     assert my_custom_sorter._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
-    test_batch_def = BatchDefinition(
+    test_batch_def = LegacyBatchDefinition(
         datasource_name="test",
         data_connector_name="fake",
         data_asset_name="nowhere",
@@ -120,7 +120,7 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
-    test_batch_def = BatchDefinition(
+    test_batch_def = LegacyBatchDefinition(
         datasource_name="test",
         data_connector_name="fake",
         data_asset_name="nowhere",

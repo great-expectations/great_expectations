@@ -52,7 +52,7 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
@@ -541,7 +541,7 @@ def _get_test_validator_with_data_pandas(
         # noinspection PyUnusedLocal
         table_name = generate_test_table_name()
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -698,7 +698,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         columns = list(data.keys())
         spark_df = spark.createDataFrame(data_reshaped, columns)
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -715,7 +715,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type]
@@ -740,7 +740,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     caching=True,
     sqlite_db_path=None,
     extra_debug_info="",
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
     pk_column: bool = False,
@@ -1018,7 +1018,7 @@ def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
 def build_spark_validator_with_data(
     df: Union[pd.DataFrame, pyspark.DataFrame],
     spark: pyspark.SparkSession,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
@@ -1106,7 +1106,7 @@ def build_spark_engine(
     df: Union[pd.DataFrame, pyspark.DataFrame],
     schema: Optional[pyspark.types.StructType] = None,
     batch_id: Optional[str] = None,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
     if (
         sum(
@@ -1123,7 +1123,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = cast(BatchDefinition, batch_definition).id
+        batch_id = cast(LegacyBatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         if schema is None:

@@ -9,9 +9,6 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class SlackRenderer(Renderer):
-    def __init__(self) -> None:
-        super().__init__()
-
     def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         validation_result=None,
