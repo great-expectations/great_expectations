@@ -1948,7 +1948,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         create_expectation_suite_with_name: str | None = None,
         expectation_suite_id: str | None = None,
         include_rendered_content: bool | None = None,
-    ) -> ExpectationSuite:
+    ) -> ExpectationSuite | None:
         """Get an expectation suite from optional inputs. Also validates inputs.
 
         Args:
@@ -1998,9 +1998,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=create_expectation_suite_with_name,
             )
 
-        # mypy can't validate the above sum checks and conditionals above guarantee that
-        # expectation suite will be non-None here so we make an assert.
-        assert expectation_suite is not None
         return expectation_suite
 
     # noinspection PyUnusedLocal
