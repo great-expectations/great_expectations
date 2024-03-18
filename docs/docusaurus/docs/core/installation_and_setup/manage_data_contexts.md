@@ -7,7 +7,7 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-A Data Context tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It contains your Validation Results and the metrics associated with them. The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
+A Data Context defines the storage location for metadata, such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It also contains your Validation Results and the metrics associated with them, and it provides access to those objects in Python, along with other helper functions for the GX Python API. 
 
 The following are the available Data Context types:
 
