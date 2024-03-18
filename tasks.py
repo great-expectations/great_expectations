@@ -606,12 +606,13 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(
+def docs(  # noqa: PLR0913
     ctx: Context,
     build: bool = False,
     start: bool = False,
     lint: bool = False,
     version: str | None = None,
+    clear: bool = False,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
     from packaging.version import parse as parse_version
@@ -634,20 +635,21 @@ def docs(
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
         docs_builder.create_version(version=parse_version(version))
-    else:  # noqa: PLR5501
-        if start:
-            ctx.run(" ".join(["yarn start"]), echo=True)
-        else:
-            docs_builder = DocsBuilder(ctx, docusaurus_dir)
-            print("Making sure docusaurus dependencies are installed.")
-            ctx.run(" ".join(["yarn install"]), echo=True)
+    elif start:
+        ctx.run(" ".join(["yarn start"]), echo=True)
+    elif clear:
+        ctx.run(" ".join(["yarn", "clear"]), echo=True)
+    else:
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        print("Making sure docusaurus dependencies are installed.")
+        ctx.run(" ".join(["yarn install"]), echo=True)
 
-            if build:
-                print("Running build_docs from:", docusaurus_dir)
-                docs_builder.build_docs()
-            else:
-                print("Running build_docs_locally from:", docusaurus_dir)
-                docs_builder.build_docs_locally()
+        if build:
+            print("Running build_docs from:", docusaurus_dir)
+            docs_builder.build_docs()
+        else:
+            print("Running build_docs_locally from:", docusaurus_dir)
+            docs_builder.build_docs_locally()
 
     os.chdir(old_cwd)
 
