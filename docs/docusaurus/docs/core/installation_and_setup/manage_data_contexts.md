@@ -1,5 +1,7 @@
 ---
 title: Manage Data Contexts
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
@@ -18,9 +20,9 @@ You will almost always instantiate a Data Context as the first step when using G
 ## Prerequisites
 
 - [A valid Python environment](/core/installation_and_setup/set_up_a_python_environment.mdx).
-- [The Great Expectations Python library installed](/core/installation_and_setup/install_gx.md).
+- [The GX Python library](/core/installation_and_setup/install_gx.md).
 
-## Quickstart with a Data Context
+## Request a Data Context
 
 1. Run the following code to request a Data Context:
 
@@ -60,13 +62,7 @@ You will almost always instantiate a Data Context as the first step when using G
 
 <TabItem value="file" label="Local (File)">
 
-A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost for all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
-
-### Prerequisites
-
-<Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-</Prerequisites>
+A Data Context is required in almost for all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ### Import GX
 
@@ -82,7 +78,7 @@ Run the following code to initialize your Filesystem Data Context in an empty fo
 ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
-### Create a context
+### Create a Data Context
 
 You provide the path for your empty folder to the GX library's `FileDataContext.create(...)` method as the `project_root_dir` parameter.  Because you are providing a path to an empty folder, `FileDataContext.create(...)` initializes a Filesystem Data Context in that location.
 
@@ -113,14 +109,6 @@ The Data Context configuration formatted as a Python dictionary appears.
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
 An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [Convert an Ephemeral Data Context to a Filesystem Data Context](#convert-the-ephemeral-data-context-into-a-filesystem-data-context).
-
-### Prerequisites
-
-<Prerequisites>
-
-- A Great Expectations instance.
-
-</Prerequisites> 
 
 ### Import classes
 
@@ -219,7 +207,7 @@ You provide the path for your empty folder to the GX library's `get_context(...)
 :::info Project root vs context root
 Note that there is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
 
-Your context root is the directory that contains all your GX config while your project root refers to your actual working directory (and therefore contains the context root).
+Your context root is the directory that contains your GX config while your project root refers to your actual working directory (and therefore contains the context root).
 
 ```bash
 # The overall directory is your project root
@@ -252,9 +240,9 @@ The Data Context configuration formatted as a Python dictionary appears.
 
 <TabItem value="ephemeral" label="In memory (Ephemeral)">
 
-Ephemeral Data Contexts are temporary.  They will not persist from one Python session to the next, and thus you cannot reconnect to an Ephemeral Data Context from a previous Python session.
+Ephemeral Data Contexts are temporary. They don't persist from one Python session to the next, and you can't reconnect to an Ephemeral Data Context from a previous Python session.
 
-When you [create an Ephemeral Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=ephemeral#initialize-a-new-data-context), you should make certain that you store the Ephemeral Data Context instance in a Python variable so that you can continue to reference and use it throughout your current session.
+When you [create an Ephemeral Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=ephemeral#initialize-a-new-data-context), store it in a Python variable so that you can continue to reference and use it in your current session.
 
 </TabItem>
 
@@ -262,12 +250,11 @@ When you [create an Ephemeral Data Context](/core/installation_and_setup/manage_
 
 Use a Python script or interpreter, such as a Jupyter Notebook to interact with GX Cloud. You'll configure your GX Cloud environment variables, connect to sample data, build your first Expectation, validate data, and review the validation results through Python code.
 
-## Prerequisites
+### Prerequisites
 
-- You have internet access and download permissions.
-- You have a [GX Cloud account](https://greatexpectations.io/cloud).
+- You have a [GX Cloud account](https://greatexpectations.io/cloud) and Admin or Editor permissions.
 
-## Get your user access token and organization ID
+### Get your user access token and organization ID
 
 You'll need your user access token and organization ID to set your environment variables. Don't commit your access tokens to your version control software.
 
@@ -287,7 +274,7 @@ You'll need your user access token and organization ID to set your environment v
 
     GX recommends deleting the temporary file after you set the environment variables.
 
-## Set the GX Cloud Organization ID and user access token as environment variables
+### Set the GX Cloud Organization ID and user access token as environment variables
 
 Environment variables securely store your GX Cloud access credentials.
 
@@ -304,14 +291,14 @@ Environment variables securely store your GX Cloud access credentials.
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
-## Create a Data Context
+### Create a Data Context
 
-- Run the following Python code to create a Data Context object:
+Run the following Python code to create a Data Context object:
 
-    ```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
-    ```
+```python title="Python" name="tutorials/quickstart/quickstart.py get_context"
+```
   
-  The Data Context will detect the previously set environment variables and connect to your GX Cloud account.
+The Data Context detects the previously set environment variables and connects to your GX Cloud account.
 
 </TabItem>
 
@@ -319,34 +306,28 @@ Environment variables securely store your GX Cloud access credentials.
 
 ## Export an Ephemeral Data Context to a new File Data Context
 
-An Ephemeral Data Context is a temporary, in-memory Data Context that will not persist beyond the current Python session.  However, if you decide you would like to save the contents of an Ephemeral Data Context for future use you can do so by converting it to a Filesystem Data Context.
+An Ephemeral Data Context is a temporary, in-memory Data Context that doesn't persist beyond the current Python session. To save the contents of an Ephemeral Data Context for future use you can convert it to a Filesystem Data Context.
 
-## Prerequisites
+### Prerequisites
 
-<Prerequisites>
+- An Ephemeral Data Context
 
-- A working installation of Great Expectations
-- An Ephemeral Data Context instance
-
-</Prerequisites> 
-
-
-## Confirm your Data Context is Ephemeral
+### Confirm your Data Context is Ephemeral
 
 To confirm that you're working with an Ephemeral Data Context, run the following code:
 
 ```python title="Python" name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
 ```
 
-In the example code, it is assumed that your Data Context is stored in the variable `context`.
+The example code assumes that your Data Context is stored in the variable `context`.
 
-## Verify that your current working directory does not already contain a GX Filesystem Data Context
+### Verify that a Filesystem Data Context doesn't exist
 
 The method for converting an Ephemeral Data Context to a Filesystem Data Context initializes the new Filesystem Data Context in the current working directory of the Python process that is being executed.  If a Filesystem Data Context already exists at that location, the process will fail.
 
 You can determine if your current working directory already has a Filesystem Data Context by looking for a `great_expectations.yml` file.  The presence of that file indicates that a Filesystem Data Context has already been initialized in the corresponding directory.
 
-## Convert the Ephemeral Data Context into a Filesystem Data Context
+### Convert the Ephemeral Data Context into a Filesystem Data Context
 
 Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
 
@@ -359,25 +340,25 @@ The `convert_to_file_context()` method does not change the Ephemeral Data Contex
 
 If you do this, it is important to note that changes to the Ephemeral Data Context **will not be reflected** in the Filesystem Data Context.  Moreover, `convert_to_file_context()` does not support merge operations. This means you will not be able to save any additional changes you have made to the content of the Ephemeral Data Context.  Neither will you be able to use `convert_to_file_context()` to replace the Filesystem Data Context you had previously created: `convert_to_file_context()` will fail if a Filesystem Data Context already exists in the current working directory.
 
-For these reasons, it is strongly advised that once you have converted your Ephemeral Data Context to a Filesystem Data Context you cease working with the Ephemeral Data Context instance and begin working with the Filesystem Data Context instance instead.
+GX recommends that you stop using the Ephemeral Data Context instance after you convert your Ephemeral Data Context to a Filesystem Data Context.
 
 :::
 
-## View a Data Context configuration
+### View a Data Context configuration
 
 Run the following code to view Data Context configuration information:
 
-  ```python title="Python"
+```python title="Python"
   from great_expectations.data_context import EphemeralDataContext, CloudDataContext, FileDataContext
   
   print("Cloud:", isinstance(context, CloudDataContext))
   print("File:", isinstance(context, FileDataContext))
   print("Ephemeral:", isinstance(context, EphemeralDataContext))
-  ```
+```
 
 ## Next steps
 - [Configure credentials](/core/installation_and_setup/manage_credentials.md)
 - [(Optional) Configure Stores](/core/installation_and_setup//manage_metadata_stores.md)
 - [(Optional) Configure Data Docs](/core/installation_and_setup//manage_metadata_stores.md)
 - [Manage and access data](/core/manage_and_access_data/manage_and_access_data.md)
-- Connect to a Data Source
+- [Manage Data Sources](/core/manage_and_access_data/manage_data_sources.md)
