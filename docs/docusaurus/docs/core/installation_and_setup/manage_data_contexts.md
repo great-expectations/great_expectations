@@ -5,8 +5,6 @@ title: Manage Data Contexts
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-import Prerequisites from '../../components/_prerequisites.jsx'
-
 A Data Context is your entry point to Great Expectations (GX). It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs.  It contains your Validation Results and the metrics associated with them.  The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
 
 There are three types of Data Context:
