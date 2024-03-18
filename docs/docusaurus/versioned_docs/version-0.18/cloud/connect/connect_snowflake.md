@@ -69,26 +69,6 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 9. Select **Run All** to allow the user with the `gx_role` role to access data on the Snowflake database and schema.
 
-## Get your GX Cloud access token and organization ID
-
-You'll need your access token and organization ID to set your access credentials. Don't commit your access credentials to your version control software.
-
-1. In GX Cloud, click **Settings** > **Tokens**.
-
-2. In the **User access tokens** pane, click **Create user access token**.
-
-3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
-
-4. Click **Create**.
-
-5. Copy and then paste the user access token into a temporary file. The token can't be retrieved after you close the dialog.
-
-6. Click **Close**.
-
-7. Copy the value in the **Organization ID** field into the temporary file with your access token and then save the file. 
-
-   GX recommends deleting the temporary file after you set the environment variables.
-
 ## Next steps
 
 - [Deploy the GX Agent](../deploy_gx_agent.md)
