@@ -13,8 +13,6 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have a PostgreSQL database, schema, and table.
 
 - To improve data security, GX recommends creating a separate PostgreSQL user for your GX Cloud connection.
@@ -65,7 +63,7 @@ You'll need your access token and organization ID to set your access credentials
 
 ## Deploy the GX Agent
 
-See 
+See [Deploy the GX Agent](../deploy_gx_agent.md). 
 
 ## Next steps
 

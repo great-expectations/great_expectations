@@ -13,8 +13,6 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
-- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 - You have a Snowflake database, schema, and table.
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you have SELECT privileges on the table you are validating. To improve data security, GX recommends using a separate Snowflake user service account to connect to GX Cloud.
@@ -93,7 +91,7 @@ You'll need your access token and organization ID to set your access credentials
 
 ## Deploy the GX Agent
 
-See
+See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 ## Next steps
 

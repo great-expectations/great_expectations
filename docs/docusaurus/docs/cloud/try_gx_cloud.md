@@ -170,4 +170,4 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 ## Next steps
 
-- [Connect GX Cloud](../connect/connect_lp.md)
+- [Connect GX Cloud](/cloud/connect/connect_lp.md)
