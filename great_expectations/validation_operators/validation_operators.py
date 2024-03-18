@@ -282,37 +282,6 @@ class ActionListValidationOperator(ValidationOperator):
             }
         return self._validation_operator_config
 
-    def _build_batch_from_item(self, item):
-        """Internal helper method to take an asset to validate, which can be either:
-          (1) a DataAsset; or
-          (2) a tuple of data_asset_name, expectation_suite_name, and batch_kwargs (suitable for passing to get_batch)
-
-        Args:
-            item: The item to convert to a batch (see above)
-
-        Returns:
-            A batch of data
-
-        """
-        # BDIRKS - delete conditional
-        # if not isinstance(item, (DataAsset, Validator)):
-        if isinstance(item, tuple):
-            if not (
-                len(item) == 2  # noqa: PLR2004
-                and isinstance(item[0], dict)
-                and isinstance(item[1], str)
-            ):
-                raise ValueError(
-                    "BDIRKS does this ever appear in tests - previoulsy Unable-to-build-batch-from-item."
-                )
-            else:
-                raise ValueError(
-                    "BDIRKS if this is raised in tests, this is an error. We no longer support DataSets"
-                )
-
-        batch = item
-        return batch
-
     def run(  # noqa: PLR0913
         self,
         assets_to_validate,
@@ -335,9 +304,7 @@ class ActionListValidationOperator(ValidationOperator):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         batch_and_validation_result_tuples = []
-        for item in assets_to_validate:
-            batch = self._build_batch_from_item(item)
-
+        for batch in assets_to_validate:
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
             else:
@@ -790,11 +757,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         run_results = {}
 
-        for item in assets_to_validate:
-            batch = self._build_batch_from_item(item)
-
+        for batch in assets_to_validate:
             batch_id = batch.batch_id
-
             assert batch_id is not None
             assert run_id is not None
 
