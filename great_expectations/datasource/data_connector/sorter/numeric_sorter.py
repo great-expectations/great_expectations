@@ -10,14 +10,14 @@ from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.util import is_int, is_numeric
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
 
 class NumericSorter(Sorter):
     @override
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
         if not is_numeric(value=batch_value):

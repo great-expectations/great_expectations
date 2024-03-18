@@ -231,7 +231,7 @@ class CheckpointStore(ConfigurationStore):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(
             key, checkpoint_config
-        )  # type: ignore[func-returns-value]
+        )
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 

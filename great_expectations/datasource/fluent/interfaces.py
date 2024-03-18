@@ -69,8 +69,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.batch import (
         BatchData,
-        BatchDefinition,
         BatchMarkers,
+        LegacyBatchDefinition,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.core.id_dict import BatchSpec
@@ -889,7 +889,7 @@ class Batch:
         data: BatchData,
         batch_markers: BatchMarkers,
         batch_spec: BatchSpec,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         metadata: Dict[str, Any] | None = None,
     ):
         # Immutable attributes
@@ -944,7 +944,7 @@ class Batch:
         return self._batch_spec
 
     @property
-    def batch_definition(self) -> BatchDefinition:
+    def batch_definition(self) -> LegacyBatchDefinition:
         return self._batch_definition
 
     @property

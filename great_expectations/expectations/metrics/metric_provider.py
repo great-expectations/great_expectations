@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple, Type, TypeVar
 from typing_extensions import ParamSpec
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -34,7 +33,6 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-@public_api
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
@@ -69,7 +67,6 @@ def metric_value(
     return wrapper
 
 
-@public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: MetricPartialFunctionTypes,
@@ -112,7 +109,6 @@ def metric_partial(
     return wrapper
 
 
-@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 

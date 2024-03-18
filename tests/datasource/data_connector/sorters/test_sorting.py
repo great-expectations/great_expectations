@@ -3,7 +3,7 @@ from typing import Iterator
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition, IDDict
+from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture()
 def example_batch_def_list():
-    a = BatchDefinition(
+    a = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="james_20200810_1003",
@@ -27,7 +27,7 @@ def example_batch_def_list():
             {"name": "james", "timestamp": "20200810", "price": "1003"}
         ),
     )
-    b = BatchDefinition(
+    b = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="b",
         data_asset_name="abe_20200809_1040",
@@ -35,7 +35,7 @@ def example_batch_def_list():
             {"name": "abe", "timestamp": "20200809", "price": "1040"}
         ),
     )
-    c = BatchDefinition(
+    c = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="c",
         data_asset_name="eugene_20200809_1500",
@@ -43,7 +43,7 @@ def example_batch_def_list():
             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
         ),
     )
-    d = BatchDefinition(
+    d = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="d",
         data_asset_name="alex_20200819_1300",
@@ -51,7 +51,7 @@ def example_batch_def_list():
             {"name": "alex", "timestamp": "20200819", "price": "1300"}
         ),
     )
-    e = BatchDefinition(
+    e = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="e",
         data_asset_name="alex_20200809_1000",
@@ -59,7 +59,7 @@ def example_batch_def_list():
             {"name": "alex", "timestamp": "20200809", "price": "1000"}
         ),
     )
-    f = BatchDefinition(
+    f = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="f",
         data_asset_name="will_20200810_1001",
@@ -67,7 +67,7 @@ def example_batch_def_list():
             {"name": "will", "timestamp": "20200810", "price": "1001"}
         ),
     )
-    g = BatchDefinition(
+    g = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="g",
         data_asset_name="eugene_20201129_1900",
@@ -75,7 +75,7 @@ def example_batch_def_list():
             {"name": "eugene", "timestamp": "20201129", "price": "1900"}
         ),
     )
-    h = BatchDefinition(
+    h = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="h",
         data_asset_name="will_20200809_1002",
@@ -83,7 +83,7 @@ def example_batch_def_list():
             {"name": "will", "timestamp": "20200809", "price": "1002"}
         ),
     )
-    i = BatchDefinition(
+    i = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="i",
         data_asset_name="james_20200811_1009",
@@ -91,7 +91,7 @@ def example_batch_def_list():
             {"name": "james", "timestamp": "20200811", "price": "1009"}
         ),
     )
-    j = BatchDefinition(
+    j = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="j",
         data_asset_name="james_20200713_1567",
@@ -104,61 +104,61 @@ def example_batch_def_list():
 
 @pytest.fixture()
 def example_hierarchical_batch_def_list():
-    a = BatchDefinition(
+    a = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="alex_20220913_1000",
         batch_identifiers=IDDict({"date": {"month": 1, "year": 2022}}),
     )
-    b = BatchDefinition(
+    b = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="b",
         data_asset_name="will_20220913_1002",
         batch_identifiers=IDDict({"date": {"year": 2022, "month": 4}}),
     )
-    c = BatchDefinition(
+    c = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="c",
         data_asset_name="anthony_20220913_1003",
         batch_identifiers=IDDict({"date": {"month": 1, "year": 2021}}),
     )
-    d = BatchDefinition(
+    d = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="d",
         data_asset_name="chetan_20220913_1567",
         batch_identifiers=IDDict({"date": {"month": 6, "year": 2022}}),
     )
-    e = BatchDefinition(
+    e = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="e",
         data_asset_name="nathan_20220913_1500",
         batch_identifiers=IDDict({"date": {"year": 2021, "month": 3}}),
     )
-    f = BatchDefinition(
+    f = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="f",
         data_asset_name="gabriel_20220913_1040",
         batch_identifiers=IDDict({"date": {"month": 2, "year": 2021}}),
     )
-    g = BatchDefinition(
+    g = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="g",
         data_asset_name="bill_20220913_1300",
         batch_identifiers=IDDict({"date": {"year": 2021, "month": 4}}),
     )
-    h = BatchDefinition(
+    h = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="h",
         data_asset_name="tal_20220913_1009",
         batch_identifiers=IDDict({"date": {"month": 5, "year": 2022}}),
     )
-    i = BatchDefinition(
+    i = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="i",
         data_asset_name="don_20220913_1900",
         batch_identifiers=IDDict({"date": {"year": 2022, "month": 3}}),
     )
-    j = BatchDefinition(
+    j = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="j",
         data_asset_name="ken_20220913_1001",
@@ -168,19 +168,19 @@ def example_hierarchical_batch_def_list():
 
 
 def test_create_three_batch_definitions_sort_lexicographically():
-    a = BatchDefinition(
+    a = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
         batch_identifiers=IDDict({"id": "A"}),
     )
-    b = BatchDefinition(
+    b = LegacyBatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
         batch_identifiers=IDDict({"id": "B"}),
     )
-    c = BatchDefinition(
+    c = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
@@ -205,19 +205,19 @@ def test_create_three_batch_definitions_sort_lexicographically():
 
 
 def test_create_three_batch_definitions_sort_numerically():
-    one = BatchDefinition(
+    one = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
         batch_identifiers=IDDict({"id": 1}),
     )
-    two = BatchDefinition(
+    two = LegacyBatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
         batch_identifiers=IDDict({"id": 2}),
     )
-    three = BatchDefinition(
+    three = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
@@ -234,7 +234,7 @@ def test_create_three_batch_definitions_sort_numerically():
     assert sorted_batch_list == [one, two, three]
 
     # testing a non-numeric, which should throw an error
-    i_should_not_work = BatchDefinition(
+    i_should_not_work = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
@@ -247,19 +247,19 @@ def test_create_three_batch_definitions_sort_numerically():
 
 
 def test_date_time():
-    first = BatchDefinition(
+    first = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
         batch_identifiers=IDDict({"date": "20210101"}),
     )
-    second = BatchDefinition(
+    second = LegacyBatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
         batch_identifiers=IDDict({"date": "20210102"}),
     )
-    third = BatchDefinition(
+    third = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
@@ -281,7 +281,7 @@ def test_date_time():
             name="date", datetime_format=12345, orderby="desc"
         )
 
-    my_date_is_not_a_string = BatchDefinition(
+    my_date_is_not_a_string = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
@@ -296,19 +296,19 @@ def test_date_time():
 
 
 def test_custom_list(periodic_table_of_elements):
-    Hydrogen = BatchDefinition(
+    Hydrogen = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
         batch_identifiers=IDDict({"element": "Hydrogen"}),
     )
-    Helium = BatchDefinition(
+    Helium = LegacyBatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
         batch_identifiers=IDDict({"element": "Helium"}),
     )
-    Lithium = BatchDefinition(
+    Lithium = LegacyBatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",

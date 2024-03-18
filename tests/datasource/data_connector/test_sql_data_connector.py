@@ -3,7 +3,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    IDDict,
+    LegacyBatchDefinition,
+)
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
@@ -190,7 +195,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
         )
     )
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="my_test_datasource",
         data_connector_name="my_sql_data_connector",
         data_asset_name="my_asset",
@@ -1548,7 +1553,7 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_test_datasource",
             data_connector_name="my_sql_data_connector",
             data_asset_name="table_partitioned_by_date_column__A",

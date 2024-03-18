@@ -13,9 +13,9 @@ import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
@@ -452,7 +452,7 @@ def test_validator_with_bad_batchrequest(
 def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):
-    total_batch_definition_list: List[BatchDefinition] = [
+    total_batch_definition_list: List[LegacyBatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
 
@@ -460,7 +460,7 @@ def test_validator_batch_filter(
         data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
     )
 
-    jan_batch_definition_list: List[BatchDefinition] = (
+    jan_batch_definition_list: List[LegacyBatchDefinition] = (
         jan_batch_filter.select_from_data_connector_query(
             batch_definition_list=total_batch_definition_list
         )
@@ -474,7 +474,7 @@ def test_validator_batch_filter(
         data_connector_query_dict={"index": slice(-1, 0, -1)}
     )
 
-    feb_march_batch_definition_list: List[BatchDefinition] = (
+    feb_march_batch_definition_list: List[LegacyBatchDefinition] = (
         feb_march_batch_filter.select_from_data_connector_query(
             batch_definition_list=total_batch_definition_list
         )
@@ -499,7 +499,7 @@ def test_validator_batch_filter(
         }
     )
 
-    jan_march_batch_definition_list: List[BatchDefinition] = (
+    jan_march_batch_definition_list: List[LegacyBatchDefinition] = (
         jan_march_batch_filter.select_from_data_connector_query(
             batch_definition_list=total_batch_definition_list
         )
@@ -519,7 +519,7 @@ def test_validator_batch_filter(
         data_connector_query_dict={"limit": 2}
     )
 
-    limit_batch_filter_definition_list: List[BatchDefinition] = (
+    limit_batch_filter_definition_list: List[LegacyBatchDefinition] = (
         limit_batch_filter.select_from_data_connector_query(
             batch_definition_list=total_batch_definition_list
         )
@@ -542,7 +542,7 @@ def test_validator_batch_filter(
 def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
-    total_batch_definition_list: List[BatchDefinition] = [
+    total_batch_definition_list: List[LegacyBatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
     assert len(total_batch_definition_list) == 3

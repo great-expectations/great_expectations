@@ -8,7 +8,7 @@ import boto3
 import botocore
 import pytest
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchRequest, LegacyBatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -100,8 +100,8 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
@@ -189,8 +189,8 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
         == f"{base_directory_colon}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",

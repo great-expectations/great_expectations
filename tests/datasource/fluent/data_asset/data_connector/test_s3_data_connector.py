@@ -10,7 +10,7 @@ from moto import mock_s3
 import great_expectations as gx
 from great_expectations import set_context
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.util import S3Url
 from great_expectations.data_context.store.tuple_store_backend import (
     TupleS3StoreBackend,
@@ -174,7 +174,7 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -183,8 +183,8 @@ def test_return_all_batch_definitions_unsorted():
             )
         )
     )
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -197,7 +197,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -210,7 +210,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -223,7 +223,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -236,7 +236,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -249,7 +249,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -262,7 +262,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -275,7 +275,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -288,7 +288,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -301,7 +301,7 @@ def test_return_all_batch_definitions_unsorted():
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -577,14 +577,14 @@ def test_return_only_unique_batch_definitions():
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
@@ -602,7 +602,7 @@ def test_return_only_unique_batch_definitions():
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -660,8 +660,8 @@ def test_alpha():
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     my_batch_request: BatchRequest
 
@@ -812,7 +812,7 @@ def test_foxtrot():
         data_asset_name="my_s3_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     )
     assert len(my_batch_definition_list) == 3

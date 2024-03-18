@@ -110,7 +110,6 @@ P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
-@public_api
 def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
@@ -252,6 +251,8 @@ class MetaExpectation(ModelMetaclass):
 @public_api
 class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
+
+    For a list of all available expectation types, see the `Expectation Gallery <https://greatexpectations.io/expectations/>`_.
 
     Expectation classes *must* have the following attributes set:
         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
@@ -1492,7 +1493,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
 
 
-@public_api
 class BatchExpectation(Expectation, ABC):
     """Base class for BatchExpectations.
 
@@ -1683,7 +1683,6 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
         }
 
 
-@public_api
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
@@ -1782,7 +1781,6 @@ class QueryExpectation(BatchExpectation, ABC):
             warnings.warn(str(e), UserWarning)
 
 
-@public_api
 class ColumnAggregateExpectation(BatchExpectation, ABC):
     """Base class for column aggregate Expectations.
 
@@ -1810,7 +1808,6 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_type = MetricDomainTypes.COLUMN
 
 
-@public_api
 class ColumnMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnMapExpectations.
 
@@ -2065,7 +2062,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         )
 
 
-@public_api
 class ColumnPairMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnPairMapExpectations.
 
@@ -2308,7 +2304,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         )
 
 
-@public_api
 class MulticolumnMapExpectation(BatchExpectation, ABC):
     """Base class for MulticolumnMapExpectations.
 

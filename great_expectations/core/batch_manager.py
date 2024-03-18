@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 from great_expectations.core.batch import (
     Batch,
     BatchDataUnion,
-    BatchDefinition,
     BatchMarkers,
+    LegacyBatchDefinition,
     _get_fluent_batch_class,
 )
 
@@ -131,7 +131,7 @@ class BatchManager:
         return self.active_batch.batch_markers
 
     @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
+    def active_batch_definition(self) -> Optional[LegacyBatchDefinition]:
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None

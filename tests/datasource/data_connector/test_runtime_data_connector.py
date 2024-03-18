@@ -7,8 +7,8 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchSpec,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
@@ -148,7 +148,7 @@ def test_error_checking_unknown_datasource(basic_datasource):
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name="non_existent_datasource",
@@ -172,7 +172,7 @@ def test_error_checking_unknown_data_connector(basic_datasource):
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource.name,
@@ -194,7 +194,7 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal, PyArgumentList
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource.name,
@@ -215,7 +215,7 @@ def test_asset_is_name_batch_identifier_correctly_used(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    res: List[BatchDefinition] = (
+    res: List[LegacyBatchDefinition] = (
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -227,7 +227,7 @@ def test_asset_is_name_batch_identifier_correctly_used(
         )
     )
     assert len(res) == 1
-    assert res[0] == BatchDefinition(
+    assert res[0] == LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="runtime",
         data_asset_name="asset_a",
@@ -367,7 +367,7 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
     with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource.name,
@@ -407,7 +407,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    batch_definition_list: List[BatchDefinition] = (
+    batch_definition_list: List[LegacyBatchDefinition] = (
         test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -448,7 +448,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
-        batch_definition_list: List[BatchDefinition] = (
+        batch_definition_list: List[LegacyBatchDefinition] = (
             test_runtime_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=batch_request
             )
@@ -482,7 +482,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -626,7 +626,7 @@ def test_data_references_cache_updating_after_batch_request(
     assert test_runtime_data_connector._data_references_cache == {
         "my_data_asset_1": {
             "1234567890": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
@@ -661,7 +661,7 @@ def test_data_references_cache_updating_after_batch_request(
     assert test_runtime_data_connector._data_references_cache == {
         "my_data_asset_1": {
             "1234567890": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
@@ -669,7 +669,7 @@ def test_data_references_cache_updating_after_batch_request(
                 )
             ],
             "987654321": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
@@ -706,7 +706,7 @@ def test_data_references_cache_updating_after_batch_request(
     assert test_runtime_data_connector._data_references_cache == {
         "my_data_asset_1": {
             "1234567890": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
@@ -714,7 +714,7 @@ def test_data_references_cache_updating_after_batch_request(
                 )
             ],
             "987654321": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
@@ -724,7 +724,7 @@ def test_data_references_cache_updating_after_batch_request(
         },
         "my_data_asset_2": {
             "5555555": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_2",
@@ -772,13 +772,13 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # run with my_data_asset_1
-    batch_definitions: List[BatchDefinition] = (
+    batch_definitions: List[LegacyBatchDefinition] = (
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
     )
     assert batch_definitions == [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="runtime",
             data_asset_name="asset_a",
@@ -788,7 +788,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     assert runtime_data_connector._data_references_cache == {
         "asset_a": {
             "1-1": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="runtime",
                     data_asset_name="asset_a",
@@ -810,13 +810,13 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # run with another batch under asset_a
-    batch_definitions: List[BatchDefinition] = (
+    batch_definitions: List[LegacyBatchDefinition] = (
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
     )
     assert batch_definitions == [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="runtime",
             data_asset_name="asset_a",
@@ -826,7 +826,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     assert runtime_data_connector._data_references_cache == {
         "asset_a": {
             "1-1": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="runtime",
                     data_asset_name="asset_a",
@@ -834,7 +834,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
                 )
             ],
             "1-2": [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name="my_datasource",
                     data_connector_name="runtime",
                     data_asset_name="asset_a",
@@ -868,8 +868,8 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    expected_batch_definition_list: List[BatchDefinition] = [
-        BatchDefinition(
+    expected_batch_definition_list: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
@@ -877,7 +877,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
         )
     ]
 
-    batch_definition_list: List[BatchDefinition] = (
+    batch_definition_list: List[LegacyBatchDefinition] = (
         test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -924,7 +924,7 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_definition_list: List[BatchDefinition] = (
+    batch_definition_list: List[LegacyBatchDefinition] = (
         test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -975,7 +975,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
 
     # noinspection PyProtectedMember
     batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
@@ -997,7 +997,7 @@ def test__build_batch_spec(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="test_runtime_data_connector",
         data_asset_name="my_data_asset",
@@ -1131,7 +1131,7 @@ def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="test_runtime_data_connector",
         data_asset_name="my_data_asset",

@@ -13,7 +13,7 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.data_connector.asset import Asset
     from great_expectations.execution_engine import ExecutionEngine
 
@@ -108,12 +108,12 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
