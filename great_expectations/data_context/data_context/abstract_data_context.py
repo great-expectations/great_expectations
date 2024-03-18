@@ -2003,7 +2003,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
-        expectation_suite: ExpectationSuite,
+        expectation_suite: ExpectationSuite | None,
         batch_list: Sequence[Union[Batch, FluentBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
