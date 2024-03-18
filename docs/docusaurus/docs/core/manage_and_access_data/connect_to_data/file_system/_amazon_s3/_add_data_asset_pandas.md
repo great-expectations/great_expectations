@@ -7,13 +7,16 @@ import InfoHowBatchingRegexGroupsRecords from '../_components/_how_batching_rege
     - `s3_prefix`: The folder containing your CSV files.
     - `batching_regex`: A regular expression.  Your Data Asset will make available the data in all files that match the regex your provide.
     
-    ```python title="Python"
-    asset_name = "my_taxi_data_asset"
-    s3_prefix = "data/taxi_yellow_tripdata_samples/"
-    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    ```
+   ```python title="Python"
+   asset_name = "my_taxi_data_asset"
+   s3_prefix = "data/taxi_yellow_tripdata_samples/"
+   batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+   ```
    
-    <InfoHowBatchingRegexGroupsRecords/>
+   ```python title="Python code" name="docs/docusaurus/docs/core/manage_and_access_data/connect_to_data/file_system/_amazon_s3/example_connect_using_pandas.py Data Asset args"
+   ```
+   
+   <InfoHowBatchingRegexGroupsRecords/>
 
 3. Run the following code to create your Data Asset:
 
@@ -24,5 +27,8 @@ import InfoHowBatchingRegexGroupsRecords from '../_components/_how_batching_rege
         s3_prefix=s3_prefix
     )
     ```
+   
+    ```python title="Python code" name="docs/docusaurus/docs/core/manage_and_access_data/connect_to_data/file_system/_amazon_s3/example_connect_using_pandas.py Add Data Asset"
+   ```
    
    <InfoUsingPandasToConnectToDifferentFileTypes/>
