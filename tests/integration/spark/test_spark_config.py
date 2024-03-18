@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 try:
     from great_expectations.execution_engine import SparkDFExecutionEngine
 except ImportError:
-    SparkDFDatasource = None
     SparkDFExecutionEngine = None
     # TODO: review logging more detail here
     logger.debug(
