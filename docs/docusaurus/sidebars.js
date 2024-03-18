@@ -55,7 +55,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Request a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#quickstart-with-a-data-context',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
             },
             {
               type: 'link',
