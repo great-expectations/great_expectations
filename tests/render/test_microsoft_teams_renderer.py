@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
@@ -6,7 +6,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     RunIdentifier,
 )
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
@@ -37,7 +37,7 @@ pytestmark = pytest.mark.big
                 "expectation_suite_name": "asset.default",
                 "run_id": "test_100",
                 "active_batch_definition": Mock(
-                    BatchDefinition, data_asset_name="expected_asset_name"
+                    LegacyBatchDefinition, data_asset_name="expected_asset_name"
                 ),
             },
             "1234",

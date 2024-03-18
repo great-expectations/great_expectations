@@ -19,7 +19,6 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
-from great_expectations._docs_decorators import new_argument, public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -108,22 +107,6 @@ class KWargDetailsDict(TypedDict):
     default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
-@public_api
-@new_argument(
-    argument_name="rendered_content",
-    version="0.15.14",
-    message="Used to include rendered content dictionary in expectation configuration.",
-)
-@new_argument(
-    argument_name="ge_cloud_id",
-    version="0.13.36",
-    message="Used in GX Cloud deployments.",
-)
-@new_argument(
-    argument_name="expectation_context",
-    version="0.13.44",
-    message="Used to support column descriptions in GX Cloud.",
-)
 class ExpectationConfiguration(SerializableDictDot):
     """Defines the parameters and name of a specific Expectation.
 
@@ -132,7 +115,7 @@ class ExpectationConfiguration(SerializableDictDot):
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
         success_on_last_run: Whether the expectation succeeded on the last run.
-        ge_cloud_id: The corresponding GX Cloud ID for the expectation.
+        id: The corresponding GX Cloud ID for the expectation.
         expectation_context: The context for the expectation.
         rendered_content: Rendered content for the expectation.
     Raises:
@@ -152,8 +135,9 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_type: str,
         kwargs: dict,
         meta: Optional[dict] = None,
+        notes: str | list[str] | None = None,
         success_on_last_run: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
@@ -174,8 +158,9 @@ class ExpectationConfiguration(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+        self._id = id
         self._expectation_context = expectation_context
         self._rendered_content = rendered_content
 
@@ -210,12 +195,12 @@ class ExpectationConfiguration(SerializableDictDot):
         return raw_config
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
-        return self._ge_cloud_id
+    def id(self) -> Optional[str]:
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str) -> None:
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
 
     @property
     def expectation_context(self) -> Optional[ExpectationContext]:
@@ -308,7 +293,6 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return domain_kwargs
 
-    @public_api
     def get_success_kwargs(self) -> dict:
         """Gets the success and domain kwargs for this ExpectationConfiguration.
 
@@ -463,7 +447,6 @@ class ExpectationConfiguration(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationConfiguration.
@@ -543,7 +526,13 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def to_domain_obj(self) -> Expectation:
         expectation_impl = self._get_expectation_impl()
-        return expectation_impl(id=self.ge_cloud_id, meta=self.meta, **self.kwargs)
+        return expectation_impl(
+            id=self.id,
+            meta=self.meta,
+            notes=self.notes,
+            rendered_content=self.rendered_content,
+            **self.kwargs,
+        )
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
@@ -586,7 +575,11 @@ class ExpectationConfigurationSchema(Schema):
         required=False,
         allow_none=True,
     )
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    notes = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
+    id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema,
         required=False,
@@ -600,7 +593,12 @@ class ExpectationConfigurationSchema(Schema):
         )
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
+    REMOVE_KEYS_IF_NONE = [
+        "id",
+        "expectation_context",
+        "rendered_content",
+        "notes",
+    ]
 
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
@@ -622,7 +620,7 @@ class ExpectationConfigurationSchema(Schema):
         """
         Utilize UUID for data validation but convert to string before usage in business logic
         """
-        attr = "ge_cloud_id"
+        attr = "id"
         uuid_val = data.get(attr)
         if uuid_val:
             data[attr] = str(uuid_val)

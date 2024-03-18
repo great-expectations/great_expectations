@@ -70,7 +70,7 @@ class OrderedProfilerCardinality(OrderedEnum):
         Returns:
             The column cardinality
         """
-        if pct_unique == 1.0:  # noqa: PLR2004
+        if pct_unique == 1.0:
             cardinality = cls.UNIQUE
         elif num_unique == 1:
             cardinality = cls.ONE
@@ -210,9 +210,7 @@ class DatasetProfiler(DataAssetProfiler):
             for exp in expectation_suite.expectation_configurations
         ]
         expectation_suite.expectations = []
-        expectation_suite.add_expectation_configurations(
-            new_expectations, send_usage_event=False
-        )
+        expectation_suite.add_expectation_configurations(new_expectations)
 
         if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {

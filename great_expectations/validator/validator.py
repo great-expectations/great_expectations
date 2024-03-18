@@ -9,7 +9,6 @@ import logging
 import traceback
 import warnings
 from collections import defaultdict
-from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -74,7 +73,6 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _AbortedMetricsInfoDict,
-    _MetricKey,
     _MetricsDict,
 )
 from great_expectations.validator.validation_graph import (
@@ -95,8 +93,8 @@ if TYPE_CHECKING:
         AnyBatch,
         Batch,
         BatchDataUnion,
-        BatchDefinition,
         BatchMarkers,
+        LegacyBatchDefinition,
     )
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
@@ -285,7 +283,7 @@ class Validator:
         return self._execution_engine.batch_manager.active_batch_markers
 
     @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
+    def active_batch_definition(self) -> Optional[LegacyBatchDefinition]:
         """Getter for batch_definition of active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch_definition
 
@@ -297,18 +295,18 @@ class Validator:
     def expectation_suite(self, value: ExpectationSuite) -> None:
         self._initialize_expectations(
             expectation_suite=value,
-            expectation_suite_name=value.expectation_suite_name,
+            expectation_suite_name=value.name,
         )
 
     @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self._expectation_suite.name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name: str) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self._expectation_suite.name = expectation_suite_name
 
     def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
@@ -421,8 +419,7 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs
-            | class_expectation_impls
+            validator_attrs | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
@@ -461,7 +458,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:  # noqa: PLR0915
+    def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -474,7 +471,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args: dict, **kwargs):  # noqa: PLR0912
+        def inst_expectation(*args: dict, **kwargs):  # noqa: C901, PLR0912
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
@@ -496,9 +493,9 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[
-                str, ...
-            ] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[str, ...] = (
+                expectation_impl.get_allowed_config_keys()
+            )
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -556,7 +553,6 @@ class Validator:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=configuration.get_raw_configuration(),
-                        send_usage_event=False,
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
@@ -636,11 +632,11 @@ class Validator:
         override_variables: Dict[str, Any] = override_profiler_config_dict.get(
             "variables", {}
         )
-        effective_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(
-            variables=override_variables,
-            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        effective_variables: Optional[ParameterContainer] = (
+            profiler.reconcile_profiler_variables(
+                variables=override_variables,
+                reconciliation_strategy=ReconciliationStrategy.UPDATE,
+            )
         )
         profiler.variables = effective_variables
 
@@ -990,10 +986,7 @@ class Validator:
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
             aborted_metrics_info,
@@ -1006,21 +999,20 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Set[
-                ExceptionInfo
+            metric_exception_info: Dict[
+                str, Union[MetricConfiguration, ExceptionInfo, int]
             ] = expectation_validation_graph.get_exception_info(
                 metric_info=aborted_metrics_info
             )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:
                 configuration = expectation_validation_graph.configuration
-                for exception_info in metric_exception_info:
-                    result = ExpectationValidationResult(
-                        success=False,
-                        exception_info=exception_info,
-                        expectation_config=configuration,
-                    )
-                    evrs.append(result)
+                result = ExpectationValidationResult(
+                    success=False,
+                    exception_info=metric_exception_info,
+                    expectation_config=configuration,
+                )
+                evrs.append(result)
 
                 if configuration not in rejected_configurations:
                     rejected_configurations.append(configuration)
@@ -1073,7 +1065,7 @@ class Validator:
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """Remove an ExpectationConfiguration from the ExpectationSuite associated with the Validator.
 
@@ -1084,13 +1076,13 @@ class Validator:
                 - 'success' to match based on all configuration parameters that influence whether an expectation succeeds on a given batch of data
                 - 'runtime' to match based on all configuration parameters.
             remove_multiple_matches: If True, will remove multiple matching expectations.
-            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+            id: Great Expectations Cloud id for an Expectation.
 
         Returns:
             The list of deleted ExpectationConfigurations.
 
         Raises:
-            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            TypeError: Must provide either expectation_configuration or id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
 
@@ -1098,7 +1090,7 @@ class Validator:
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
     def discard_failing_expectations(self) -> None:
@@ -1258,7 +1250,7 @@ class Validator:
 
         expectation_suite.expectations = []
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=expectations, send_usage_event=False
+            expectation_configurations=expectations
         )
         if not suppress_logging:
             logger.info(message + settings_message)
@@ -1302,7 +1294,7 @@ class Validator:
             )
             if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
-                    ge_cloud_id=expectation_suite.ge_cloud_id
+                    id=expectation_suite.id
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
@@ -1409,12 +1401,6 @@ class Validator:
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if handler := getattr(data_context, "_usage_statistics_handler", None):
-                    handler.send_usage_message(
-                        event="data_asset.validate",
-                        event_payload=handler.anonymizer.anonymize(obj=self),
-                        success=False,
-                    )
                 return ExpectationValidationResult(success=False)
 
             # Evaluation parameter priority is
@@ -1446,29 +1432,10 @@ class Validator:
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
 
-            # Group expectations by column
-            columns: dict[Any, list[ExpectationConfiguration]] = {}
-
-            for expectation in expectation_suite.expectation_configurations:
-                expectation.process_evaluation_parameters(
-                    evaluation_parameters=runtime_evaluation_parameters,
-                    interactive_evaluation=self.interactive_evaluation,
-                    data_context=self._data_context,
-                )
-                if "column" in expectation.kwargs and isinstance(
-                    expectation.kwargs["column"], Hashable
-                ):
-                    column = expectation.kwargs["column"]
-                else:
-                    # noinspection SpellCheckingInspection
-                    column = "_nocolumn"
-                if column not in columns:
-                    columns[column] = []
-                columns[column].append(expectation)
-
-            expectations_to_evaluate = []
-            for col in columns:
-                expectations_to_evaluate.extend(columns[col])
+            expectations_to_evaluate = self.process_expectations_for_validation(
+                expectation_suite.expectation_configurations,
+                runtime_evaluation_parameters,
+            )
 
             runtime_configuration = self._get_runtime_configuration(
                 catch_exceptions=catch_exceptions, result_format=result_format
@@ -1491,7 +1458,7 @@ class Validator:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            expectation_suite_name = expectation_suite.expectation_suite_name
+            expectation_suite_name = expectation_suite.name
 
             result = ExpectationSuiteValidationResult(
                 results=results,
@@ -1517,23 +1484,44 @@ class Validator:
 
             self._data_context = validation_data_context
         except Exception:
-            if handler := getattr(data_context, "_usage_statistics_handler", None):
-                handler.send_usage_message(
-                    event="data_asset.validate",
-                    event_payload=handler.anonymizer.anonymize(obj=self),
-                    success=False,
-                )
             raise
         finally:
             self._active_validation = False
 
-        if handler := getattr(data_context, "_usage_statistics_handler", None):
-            handler.send_usage_message(
-                event="data_asset.validate",
-                event_payload=handler.anonymizer.anonymize(obj=self),
-                success=True,
-            )
         return result
+
+    def process_expectations_for_validation(
+        self,
+        expectation_configurations: list[ExpectationConfiguration],
+        evaluation_parameters: Optional[dict[str, Any]] = None,
+    ) -> list[ExpectationConfiguration]:
+        """Substitute evaluation parameters into the provided expectations and sort by column."""
+        NO_COLUMN = (
+            "_nocolumn"  # just used to group expectations that don't specify a column
+        )
+        columns: dict[str, list[ExpectationConfiguration]] = {}
+
+        for expectation in expectation_configurations:
+            expectation.process_evaluation_parameters(
+                evaluation_parameters=evaluation_parameters,
+                interactive_evaluation=self.interactive_evaluation,
+                data_context=self._data_context,
+            )
+            if "column" in expectation.kwargs and isinstance(
+                expectation.kwargs["column"], str
+            ):
+                column = expectation.kwargs["column"]
+            else:
+                column = NO_COLUMN
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(expectation)
+
+        expectations_to_evaluate = []
+        for col in columns:
+            expectations_to_evaluate.extend(columns[col])
+
+        return expectations_to_evaluate
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
         """
@@ -1662,7 +1650,7 @@ class Validator:
                 key value `data_asset_name` as `data_asset_name`.
 
             expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
+                The name to assign to the `expectation_suite.name`
 
         Returns:
             None
@@ -1680,33 +1668,25 @@ class Validator:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite: ExpectationSuite = expectation_suite
 
             if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
+                if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
+                            n1=self._expectation_suite.name,
                             n2=expectation_suite_name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self._expectation_suite.name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
-            self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
-            )
+            self._expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
         self._expectation_suite.execution_engine_type = type(self._execution_engine)
 
@@ -1747,7 +1727,7 @@ class Validator:
         for batch in self.batch_cache.values():
             validation = CheckpointValidationConfig(
                 expectation_suite_name=self.expectation_suite_name,
-                expectation_suite_ge_cloud_id=self.expectation_suite.ge_cloud_id,
+                expectation_suite_id=self.expectation_suite.id,
                 batch_request=batch.batch_request,
             )
             validations.append(validation)

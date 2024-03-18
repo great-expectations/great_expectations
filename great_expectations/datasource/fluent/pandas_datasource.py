@@ -18,6 +18,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -62,6 +63,8 @@ if TYPE_CHECKING:
     import os
 
     from typing_extensions import TypeAlias
+
+    from great_expectations.core.partitioners import Partitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
@@ -109,12 +112,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
-    @property
     @override
-    def batch_request_options(self) -> tuple[str, ...]:
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner] = None
+    ) -> Tuple[str, ...]:
         return tuple()
 
     @override
@@ -143,9 +146,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -177,12 +180,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -196,6 +201,11 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         if batch_slice is not None:
             raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
+        if partitioner is not None:
+            raise ValueError(
+                "partitioner is not currently supported and must be None for this DataAsset."
             )
 
         return BatchRequest(
@@ -398,6 +408,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -405,6 +416,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -418,6 +430,11 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if batch_slice is not None:
             raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
+        if partitioner is not None:
+            raise ValueError(
+                "partitioner is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:
@@ -451,9 +468,9 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -644,8 +661,7 @@ class PandasDatasource(_PandasDatasource):
         return ds_dict
 
     @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
+    def test_connection(self, test_assets: bool = True) -> None: ...
 
     @staticmethod
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:
@@ -1762,17 +1778,35 @@ class PandasDatasource(_PandasDatasource):
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
-    add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_clipboard.__signature__ = _merge_signatures(read_clipboard, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_clipboard_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_clipboard_asset, ClipboardAsset, exclude={"type"}
+    )
+    read_clipboard.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_clipboard, ClipboardAsset, exclude={"type"}
+    )
+    add_csv_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_csv_asset, CSVAsset, exclude={"type"}
+    )
     read_csv.__signature__ = _merge_signatures(read_csv, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_excel.__signature__ = _merge_signatures(read_excel, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
-    read_feather.__signature__ = _merge_signatures(read_feather, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_fwf_asset.__signature__ = _merge_signatures(add_fwf_asset, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_excel_asset, ExcelAsset, exclude={"type"}
+    )
+    read_excel.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_excel, ExcelAsset, exclude={"type"}
+    )
+    add_feather_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_feather_asset, FeatherAsset, exclude={"type"}
+    )
+    read_feather.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_feather, FeatherAsset, exclude={"type"}
+    )
+    add_fwf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_fwf_asset, FWFAsset, exclude={"type"}
+    )
     read_fwf.__signature__ = _merge_signatures(read_fwf, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_gbq_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_gbq_asset, GBQAsset, exclude={"type"}
+    )
     read_gbq.__signature__ = _merge_signatures(read_gbq, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_hdf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_hdf_asset, HDFAsset, exclude={"type"}

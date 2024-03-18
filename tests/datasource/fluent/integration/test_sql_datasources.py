@@ -21,7 +21,6 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
-from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -60,9 +59,9 @@ if TYPE_CHECKING:
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
-PYTHON_VERSION: Final[
-    Literal["py38", "py39", "py310", "py311"]
-] = f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
+PYTHON_VERSION: Final[Literal["py38", "py39", "py310", "py311"]] = (
+    f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
+)
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
@@ -142,13 +141,6 @@ QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
 QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
 
 
-@pytest.fixture
-def context() -> EphemeralDataContext:
-    ctx = get_context(cloud_mode=False)
-    assert isinstance(ctx, EphemeralDataContext)
-    return ctx
-
-
 def get_random_identifier_name() -> str:
     guid = uuid.uuid4()
     return f"i{guid.hex}"
@@ -221,8 +213,7 @@ class TableFactory(Protocol):
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(
@@ -586,7 +577,7 @@ class TestTableIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
@@ -886,7 +877,7 @@ class TestColumnIdentifiers:
             "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
-                    "expectation_suite_name": suite.expectation_suite_name,
+                    "expectation_suite_name": suite.name,
                     "batch_request": {
                         "datasource_name": datasource.name,
                         "data_asset_name": asset.name,

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
+from great_expectations.core.batch import LegacyBatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchMarkers,
@@ -76,7 +76,8 @@ class RuntimeDataConnector(DataConnector):
 
         # add batch_identifiers defined at the DataConnector level.
         self._add_batch_identifiers(
-            batch_identifiers=batch_identifiers, data_asset_name=None  # type: ignore[arg-type]
+            batch_identifiers=batch_identifiers,  # type: ignore[arg-type]
+            data_asset_name=None,
         )
         self._refresh_data_references_cache()
 
@@ -213,7 +214,7 @@ class RuntimeDataConnector(DataConnector):
     @override
     def get_batch_data_and_metadata(  # type: ignore[override]
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(  # type: ignore[assignment]
@@ -234,7 +235,7 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BatchRequestBase
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -242,7 +243,7 @@ class RuntimeDataConnector(DataConnector):
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
         other data_connectors, including variations of FilePathDataConnector. When BatchRequest contains batch_data
@@ -268,8 +269,8 @@ class RuntimeDataConnector(DataConnector):
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
-        batch_definition_list: List[BatchDefinition]
-        batch_definition = BatchDefinition(
+        batch_definition_list: List[LegacyBatchDefinition]
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
@@ -298,9 +299,9 @@ class RuntimeDataConnector(DataConnector):
             }
             # or replace
         else:
-            self._data_references_cache[data_asset_name][
-                data_reference
-            ] = batch_definition_list
+            self._data_references_cache[data_asset_name][data_reference] = (
+                batch_definition_list
+            )
 
     def _self_check_fetch_batch(
         self,
@@ -312,7 +313,7 @@ class RuntimeDataConnector(DataConnector):
 
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         data_asset_name: str = batch_definition.data_asset_name
         return {"data_asset_name": data_asset_name}
@@ -322,7 +323,7 @@ class RuntimeDataConnector(DataConnector):
     @override
     def build_batch_spec(  # type: ignore[return,override]
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         runtime_parameters: dict,
     ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
         self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
@@ -463,64 +464,3 @@ class RuntimeDataConnector(DataConnector):
                 It was invoked with : {batch_identifiers_keys}
                 """
             )
-
-    def self_check(self, pretty_print=True, max_examples=3):
-        """
-        Overrides the self_check method for RuntimeDataConnector. This method currently supports 2 modes of usage:
-            1. user has configured Assets at the RuntimeDataConnector-level (preferred).
-            2. user has not configured Assets and will pass in `data_asset_name` with the RuntimeBatchRequest.
-
-        In the case of #1, the get_available_data_asset_names() will return the list of configured Assets and base
-        self_check() will be called.
-
-        In the case of #2  there are no example data_asset_names until the data is passed in through the
-        RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that RuntimeDataConnector
-        will not have data_asset_names until they are passed in through RuntimeBatchRequest.
-
-        Args:
-            pretty_print (bool): should the output be printed?
-            max_examples (int): how many data_references should be printed?
-        Returns:
-            report_obj (dict): dictionary containing self_check output
-        """
-        if len(self._data_references_cache) == 0:
-            self._refresh_data_references_cache()
-
-        if pretty_print:
-            print(f"\t{self.name}:{self.__class__.__name__}\n")
-        asset_names: List[str] = self.get_available_data_asset_names()
-        len_asset_names: int = len(asset_names)
-
-        if len_asset_names > 0:
-            return super().self_check()
-        else:
-            report_obj: dict = {
-                "class_name": self.__class__.__name__,
-                "data_asset_count": len_asset_names,
-                "example_data_asset_names": asset_names[:max_examples],
-                "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
-            }
-            if pretty_print:
-                print(
-                    f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
-                )
-                print(
-                    "\t\t"
-                    + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-                )
-
-            unmatched_data_references: List[str] = self.get_unmatched_data_references()
-            len_unmatched_data_references: int = len(unmatched_data_references)
-
-            if pretty_print:
-                if pretty_print:
-                    print(
-                        f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
-                    )
-
-            report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-            report_obj["example_unmatched_data_references"] = unmatched_data_references[
-                :max_examples
-            ]
-            return report_obj

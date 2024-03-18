@@ -3,7 +3,7 @@ from typing import Final
 import pandas as pd
 import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import (
-    ExpectColumnValuesToBePresentInAnotherTable,  # needed for expectation registration
+    ExpectColumnValuesToBePresentInOtherTable,  # needed for expectation registration
 )
 
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -19,6 +19,7 @@ DB_PATH: Final[str] = file_relative_path(
 
 @pytest.fixture
 def referential_integrity_db(sa):
+    """Create a sqlite database with 3 tables: order_table_1, order_table_2, and customer_table. We only run this once to create the database."""
     sqlite_engine = sa.create_engine(f"sqlite:///{DB_PATH}")
     order_table_1 = pd.DataFrame(
         {
@@ -63,9 +64,7 @@ def referential_integrity_db(sa):
 
 
 @pytest.fixture()
-def sqlite_datasource(
-    in_memory_runtime_context, referential_integrity_db
-) -> SqliteDatasource:
+def sqlite_datasource(in_memory_runtime_context) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
     return context.sources.add_sqlite(
@@ -80,7 +79,7 @@ def test_successful_expectation_run(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_1")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -96,7 +95,7 @@ def test_failed_expectation_run(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="CUSTOMER_ID",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -122,7 +121,7 @@ def test_configuration_invalid_column_name(sqlite_datasource):
     asset = datasource.add_table_asset(name=asset_name, table_name="order_table_2")
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     res = batch.validate(
-        ExpectColumnValuesToBePresentInAnotherTable(
+        ExpectColumnValuesToBePresentInOtherTable(
             foreign_key_column="I_DONT_EXIST",
             foreign_table="customer_table",
             foreign_table_key_column="CUSTOMER_ID",
@@ -130,15 +129,14 @@ def test_configuration_invalid_column_name(sqlite_datasource):
     )
 
     assert res.success is False
-    assert res["exception_info"]["raised_exception"] is True
-    assert (
-        "no such column: a.I_DONT_EXIST" in res["exception_info"]["exception_message"]
-    )
+    for k, v in res["exception_info"].items():
+        assert v["raised_exception"] is True
+        assert "no such column: a.I_DONT_EXIST" in v["exception_message"]
 
 
 @pytest.mark.unit
 def test_template_dict_creation():
-    expectation = ExpectColumnValuesToBePresentInAnotherTable(
+    expectation = ExpectColumnValuesToBePresentInOtherTable(
         foreign_key_column="CUSTOMER_ID",
         foreign_table="customer_table",
         foreign_table_key_column="CUSTOMER_ID",

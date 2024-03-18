@@ -64,6 +64,7 @@ def test_migrate_scaffolds_filesystem(
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.UNCOMMITTED.value,
+        DataContextConfigDefaults.VALIDATION_CONFIGS_BASE_DIRECTORY.value,
     ]
 
 

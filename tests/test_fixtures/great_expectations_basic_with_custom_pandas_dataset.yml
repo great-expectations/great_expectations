@@ -34,7 +34,6 @@ datasources:
 
 config_variables_file_path: uncommitted/config_variables.yml
 
-
 plugins_directory: plugins/
 evaluation_parameter_store_name: evaluation_parameter_store
 expectations_store_name: expectations_store
@@ -81,7 +80,3 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store

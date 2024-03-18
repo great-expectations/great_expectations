@@ -38,9 +38,9 @@ class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
 @public_api
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[AzureBlobStorageDataConnector]
-    ] = AzureBlobStorageDataConnector
+    data_connector_type: ClassVar[Type[AzureBlobStorageDataConnector]] = (
+        AzureBlobStorageDataConnector
+    )
 
     # instance attributes
     type: Literal["spark_abs"] = "spark_abs"
@@ -80,9 +80,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r".*?AccountName=(.+?);.*?", conn_str
-                        ).group(
-                            1
-                        )
+                        ).group(1)
                         azure_client = azure.BlobServiceClient.from_connection_string(
                             **azure_options
                         )
@@ -90,9 +88,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r"(?:https?://)?(.+?).blob.core.windows.net",
                             account_url,
-                        ).group(
-                            1
-                        )
+                        ).group(1)
                         azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
@@ -124,12 +120,16 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         try:
+            # tests Azure connection
             _ = self._get_azure_client()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
+
+        # tests Spark connection, raising TestConnectionError
+        super().test_connection()
 
         if self.assets and test_assets:
             for asset in self.assets:

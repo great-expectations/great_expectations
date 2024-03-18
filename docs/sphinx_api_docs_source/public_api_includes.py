@@ -61,16 +61,6 @@ DEFAULT_INCLUDES: list[IncludeExcludeDefinition] = [
     ),
     IncludeExcludeDefinition(
         reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
-        name="StoreEvaluationParametersAction",
-        filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
-        name="StoreMetricsAction",
-        filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
         name="UpdateDataDocsAction",
         filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
     ),

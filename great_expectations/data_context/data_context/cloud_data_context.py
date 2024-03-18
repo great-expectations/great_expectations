@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 import warnings
 from typing import (
     TYPE_CHECKING,
@@ -12,13 +13,16 @@ from typing import (
     Optional,
     Sequence,
     Union,
-    cast,
     overload,
 )
+
+from requests import HTTPError, Response
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import init as init_analytics
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -48,7 +52,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
-    DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
     CheckpointValidationConfig,
     DataContextConfig,
@@ -68,9 +71,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
-    )
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
@@ -146,12 +146,32 @@ class CloudDataContext(SerializableDataContext):
         checker.check_if_using_latest_gx()
 
     @override
+    def _init_analytics(self) -> None:
+        init_analytics(
+            user_id=self._get_cloud_user_id(),
+            data_context_id=uuid.UUID(self._data_context_id),
+            oss_id=self._get_oss_id(),
+            cloud_mode=True,
+        )
+
+    def _get_cloud_user_id(self) -> uuid.UUID | None:
+        if not ENV_CONFIG.gx_analytics_enabled:
+            return None
+
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, uri="accounts/me"
+        )
+        data = response.json()
+        user_id = data["user_id"]
+        return uuid.UUID(user_id)
+
+    @override
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
-                cloud_config=self._cloud_config,
+                cloud_config=self.ge_cloud_config,
             )
 
         project_data_context_config = (
@@ -159,13 +179,6 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._apply_global_config_overrides(config=project_data_context_config)
-
-    @override
-    def _initialize_usage_statistics(
-        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        # Usage statistics are always disabled within Cloud-backed environments.
-        self._usage_statistics_handler = None
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -177,7 +190,7 @@ class CloudDataContext(SerializableDataContext):
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(
-            _CloudConfigurationProvider(self._cloud_config)
+            _CloudConfigurationProvider(self.ge_cloud_config)
         )
 
     @classmethod
@@ -247,22 +260,41 @@ class CloudDataContext(SerializableDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
+        response = cls._request_cloud_backend(
+            cloud_config=cloud_config, uri="data-context-configuration"
+        )
+        config = cls._prepare_v1_config(config=response.json())
+        return DataContextConfig(**config)
+
+    @classmethod
+    def _prepare_v1_config(cls, config: dict) -> dict:
+        # Both notebooks and concurrency are no longer top-level keys in V1
+        config.pop("notebooks", None)
+        config.pop("concurrency", None)
+
+        # FluentDatasources are nested under the "datasources" key and need to be separated
+        # to prevent downstream issues
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+
+        return config
+
+    @classmethod
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+        access_token = cloud_config.access_token
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
-        cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
 
-        session = create_session(access_token=cloud_config.access_token)
+        session = create_session(access_token=access_token)
+        response = session.get(f"{base_url}/organizations/{organization_id}/{uri}")
 
-        response = session.get(cloud_url)
-        if response.status_code != 200:  # noqa: PLR2004
+        try:
+            response.raise_for_status()
+        except HTTPError:
             raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}", response=response
             )
-        config = response.json()
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
-        return DataContextConfig(**config)
+
+        return response
 
     @classmethod
     def get_cloud_config(
@@ -402,9 +434,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
         datasource_store = DatasourceStore(
@@ -422,9 +454,9 @@ class CloudDataContext(SerializableDataContext):
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
         data_asset_store = DataAssetStore(
@@ -450,17 +482,21 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
+        return [
+            suite_key.resource_name  # type: ignore[union-attr]
+            for suite_key in self.list_expectation_suites()  # type: ignore[union-attr]
+            if suite_key.resource_name  # type: ignore[union-attr]
+        ]
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def ge_cloud_config(self) -> GXCloudConfig:
         return self._cloud_config
 
     @override
     def _init_variables(self) -> CloudDataContextVariables:
-        ge_cloud_base_url: str = self._cloud_config.base_url
-        ge_cloud_organization_id: str = self._cloud_config.organization_id  # type: ignore[assignment]
-        ge_cloud_access_token: str = self._cloud_config.access_token
+        ge_cloud_base_url: str = self.ge_cloud_config.base_url
+        ge_cloud_organization_id: str = self.ge_cloud_config.organization_id  # type: ignore[assignment]
+        ge_cloud_access_token: str = self.ge_cloud_config.access_token
 
         variables = CloudDataContextVariables(
             config=self._project_config,
@@ -479,7 +515,7 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             UUID to use as the data_context_id
         """
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
+        return self.ge_cloud_config.organization_id  # type: ignore[return-value]
 
     @override
     def get_config_with_variables_substituted(
@@ -487,7 +523,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        in order of precedence: cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
         be optional in GX Cloud mode).
         """
@@ -500,7 +536,6 @@ class CloudDataContext(SerializableDataContext):
             "plugins_directory": self._normalize_absolute_or_relative_path(
                 path=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             ),
-            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
         missing_config_vars_and_subs: list[tuple[str, str]] = []
         for config_variable, value in cloud_config_variable_defaults.items():
@@ -548,9 +583,7 @@ class CloudDataContext(SerializableDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("overwrite_existing must be of type bool.")
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
+        expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
         existing_suite_names = self.list_expectation_suite_names()
         cloud_id: Optional[str] = None
@@ -560,9 +593,9 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[
-                Union[List[str], List[GXCloudIdentifier]]
-            ] = self.list_expectation_suites()
+            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = (
+                self.list_expectation_suites()
+            )
             if identifiers:
                 for cloud_identifier in identifiers:
                     if isinstance(cloud_identifier, GXCloudIdentifier):
@@ -570,7 +603,7 @@ class CloudDataContext(SerializableDataContext):
                         name: str = cloud_identifier_tuple[2]
                         if name == expectation_suite_name:
                             cloud_id = cloud_identifier_tuple[1]
-                            expectation_suite.ge_cloud_id = cloud_id
+                            expectation_suite.id = cloud_id
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
@@ -578,9 +611,11 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
+            key, expectation_suite, **kwargs
+        )
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
         return expectation_suite
 
@@ -588,35 +623,28 @@ class CloudDataContext(SerializableDataContext):
     def delete_expectation_suite(
         self,
         expectation_suite_name: str = ...,
-        ge_cloud_id: None = ...,
         id: None = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def delete_expectation_suite(
         self,
         expectation_suite_name: None = ...,
-        ge_cloud_id: str = ...,
-        id: None = ...,
-    ) -> bool:
-        ...
-
-    @overload
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        ge_cloud_id: None = ...,
         id: str = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: None = ...,
+    ) -> bool: ...
 
     @public_api
     @override
     def delete_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
-        ge_cloud_id: str | None = None,
         id: str | None = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
@@ -627,10 +655,6 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             True for Success and False for Failure.
         """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        del ge_cloud_id
-
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
@@ -644,14 +668,14 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: Optional[str] = None,
         include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
+            id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
             An existing ExpectationSuite
@@ -659,21 +683,17 @@ class CloudDataContext(SerializableDataContext):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
-        if ge_cloud_id is None and expectation_suite_name is None:
-            raise ValueError(
-                "ge_cloud_id and expectation_suite_name cannot both be None"
-            )
+        if id is None and expectation_suite_name is None:
+            raise ValueError("id and expectation_suite_name cannot both be None")
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=ge_cloud_id,
+            id=id,
             resource_name=expectation_suite_name,
         )
 
         try:
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
+            expectations_schema_dict: dict = self.expectations_store.get(key)
         except StoreBackendError:
             raise DataContextError(
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
@@ -685,9 +705,7 @@ class CloudDataContext(SerializableDataContext):
             )
 
         # create the ExpectationSuite from constructor
-        expectation_suite = ExpectationSuite(
-            **expectations_schema_dict, data_context=self
-        )
+        expectation_suite = ExpectationSuite(**expectations_schema_dict)
         if include_rendered_content:
             expectation_suite.render()
         return expectation_suite
@@ -701,11 +719,11 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        id = expectation_suite.ge_cloud_id
+        id = expectation_suite.id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
-            resource_name=expectation_suite.expectation_suite_name,
+            resource_name=expectation_suite.name,
         )
 
         if not overwrite_existing:
@@ -720,18 +738,18 @@ class CloudDataContext(SerializableDataContext):
         if include_rendered_content:
             expectation_suite.render()
 
-        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.id
-        if ge_cloud_id:
+        id = key.id
+        if id:
             if self.expectations_store.has_key(key):
                 raise gx_exceptions.DataContextError(
-                    f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
+                    f"expectation_suite with GX Cloud ID {id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
 
@@ -747,52 +765,30 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: float = 1.0,
-        template_name: str | None = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
-        run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] | None = None,
-        ge_cloud_id: str | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
-        default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
         validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
-            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
-        )
-        del ge_cloud_id
-        del expectation_suite_ge_cloud_id
-
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
-            config_version=config_version,
-            template_name=template_name,
-            module_name=module_name,
-            class_name=class_name,
-            run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
-            profilers=profilers,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -894,14 +890,14 @@ class CloudDataContext(SerializableDataContext):
         **kwargs,
     ) -> ExpectationSuite:
         cloud_id: str | None
-        if expectation_suite.ge_cloud_id:
-            cloud_id = expectation_suite.ge_cloud_id
+        if expectation_suite.id:
+            cloud_id = expectation_suite.id
         else:
             cloud_id = None
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            resource_name=expectation_suite.expectation_suite_name,
+            resource_name=expectation_suite.name,
             id=cloud_id,
         )
 
@@ -913,7 +909,7 @@ class CloudDataContext(SerializableDataContext):
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.id
+            expectation_suite.id = response.id
 
         return expectation_suite
 
@@ -932,9 +928,7 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
         url = result.validation_result_url
-        assert (
-            url
-        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
 
     @override

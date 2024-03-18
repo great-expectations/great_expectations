@@ -13,10 +13,7 @@ from great_expectations.render.renderer.renderer import Renderer
 class MicrosoftTeamsRenderer(Renderer):
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    def render(
+    def render(  # noqa: C901
         self,
         validation_result=None,
         validation_result_suite_identifier=None,
@@ -118,7 +115,7 @@ class MicrosoftTeamsRenderer(Renderer):
                 validation_result_elements.append(data_asset_name_element)
 
                 expectation_suite_name = (
-                    validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name
+                    validation_result_suite_identifier.expectation_suite_identifier.name
                 )
                 expectation_suite_name_element = self._render_validation_result_element(
                     key="Expectation suite name", value=expectation_suite_name
@@ -165,9 +162,9 @@ class MicrosoftTeamsRenderer(Renderer):
             )
             validation_result_elements.append(check_details_text_element)
 
-            query["attachments"][0]["content"]["body"][1][
-                "items"
-            ] = validation_result_elements
+            query["attachments"][0]["content"]["body"][1]["items"] = (
+                validation_result_elements
+            )
 
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():

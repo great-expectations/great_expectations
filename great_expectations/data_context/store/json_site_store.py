@@ -59,7 +59,7 @@ class JsonSiteStore(Store):
         """
         ge_cloud_json_site_id = response_json["data"]["id"]
         json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]
-        json_site_dict["ge_cloud_id"] = ge_cloud_json_site_id
+        json_site_dict["id"] = ge_cloud_json_site_id
 
         return json_site_dict
 
@@ -68,12 +68,6 @@ class JsonSiteStore(Store):
 
     def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
-
-    @override
-    def self_check(self, pretty_print) -> None:
-        NotImplementedError(
-            f"The test method is not implemented for Store class {self.__class__.__name__}."
-        )
 
     @property
     @override

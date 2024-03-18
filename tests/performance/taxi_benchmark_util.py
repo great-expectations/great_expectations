@@ -3,6 +3,7 @@ Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow
     found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 """
+
 from __future__ import annotations
 
 import os
@@ -12,7 +13,6 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
-    ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -61,10 +61,6 @@ def create_checkpoint(
         checkpoint_name,
         suite_and_asset_names,
     )
-
-
-def concurrency_config() -> ConcurrencyConfig:
-    return ConcurrencyConfig(enabled=True)
 
 
 def expected_validation_results() -> List[dict]:
@@ -268,7 +264,6 @@ def _create_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
-        concurrency=concurrency_config(),
     )
 
     context = get_context(project_config=data_context_config)
@@ -337,15 +332,10 @@ def _add_checkpoint(
             name=checkpoint_name,
             class_name="Checkpoint",
             validations=validations,
-            run_name_template="my_run_name",
             action_list=[
                 ActionDict(
                     name="store_validation_result",
                     action=ActionDetails(class_name="StoreValidationResultAction"),
-                ),
-                ActionDict(
-                    name="store_evaluation_params",
-                    action=ActionDetails(class_name="StoreEvaluationParametersAction"),
                 ),
                 ActionDict(
                     name="update_data_docs",
@@ -449,5 +439,5 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
     )
 
     # Save the expectation suite or else it doesn't show up in the data docs.
-    suite.expectation_suite_name = suite_name
+    suite.name = suite_name
     context.add_or_update_expectation_suite(expectation_suite=suite)

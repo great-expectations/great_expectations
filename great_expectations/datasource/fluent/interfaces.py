@@ -58,6 +58,8 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import Self, TypeAlias, TypeGuard
 
+    from great_expectations.core.partitioners import Partitioner
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     from great_expectations.core import (
@@ -67,8 +69,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.batch import (
         BatchData,
-        BatchDefinition,
         BatchMarkers,
+        LegacyBatchDefinition,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.core.id_dict import BatchSpec
@@ -206,39 +208,28 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    # Abstract Methods
-    @property
-    def batch_request_options(self) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner] = None
+    ) -> tuple[str, ...]:
         raise NotImplementedError(
-            """One needs to implement "batch_request_options" on a DataAsset subclass."""
+            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
         )
 
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -266,7 +257,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(self, name: str) -> BatchConfig:
+    def add_batch_config(
+        self, name: str, partitioner: Optional[Partitioner] = None
+    ) -> BatchConfig:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
 
@@ -274,6 +267,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Args:
             name (str): Name of the new batch config.
+            partitioner: Optional Partitioner to partition this BatchConfig
 
         Returns:
             BatchConfig: The new batch config.
@@ -287,14 +281,16 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)
         assert isinstance(self.datasource, Datasource)
 
-        batch_config = BatchConfig(name=name)
+        batch_config = BatchConfig(name=name, partitioner=partitioner)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
+        self.update_batch_config_field_set()
         if self.datasource.data_context:
             try:
                 batch_config = self.datasource.add_batch_config(batch_config)
             except Exception:
                 self.batch_configs.remove(batch_config)
+                self.update_batch_config_field_set()
                 raise
         self.update_batch_config_field_set()
         return batch_config
@@ -346,8 +342,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
+    def _batch_request_options_are_valid(
+        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+    ) -> bool:
+        valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
+        return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(
         self, batch_request: BatchRequest
@@ -423,10 +422,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
-
-
-# Now that BatchAsset is defined, we need to update BatchConfig
-BatchConfig.update_forward_refs(DataAsset=DataAsset)
 
 
 def _sort_batches_with_none_metadata_values(
@@ -768,7 +763,7 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[Sorter, str, dict]]] = None
+        order_by: Optional[List[Union[Sorter, str, dict]]] = None,
     ) -> List[Sorter]:
         order_by_sorters: list[Sorter] = []
         if order_by:
@@ -894,7 +889,7 @@ class Batch:
         data: BatchData,
         batch_markers: BatchMarkers,
         batch_spec: BatchSpec,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         metadata: Dict[str, Any] | None = None,
     ):
         # Immutable attributes
@@ -949,7 +944,7 @@ class Batch:
         return self._batch_spec
 
     @property
-    def batch_definition(self) -> BatchDefinition:
+    def batch_definition(self) -> LegacyBatchDefinition:
         return self._batch_definition
 
     @property
@@ -1020,12 +1015,12 @@ class Batch:
         self._validator.result_format = ResultFormat(result_format)
 
     @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult:
-        ...
+    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
-        ...
+    def validate(
+        self, expect: ExpectationSuite
+    ) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(
@@ -1068,7 +1063,6 @@ class Batch:
             )
         )
         return V1Validator(
-            context=context,
             batch_config=batch_config,
             batch_request_options=self.batch_request.options,
         )

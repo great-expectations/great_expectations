@@ -18,7 +18,6 @@ from great_expectations.util import (
     filter_properties_dict,
     hyphen,
     is_ndarray_datetime_dtype,
-    lint_code,
 )
 
 if TYPE_CHECKING:
@@ -134,31 +133,13 @@ def test_nested_update_lists():
 
 
 @pytest.mark.unit
-def test_linter_raises_error_on_non_string_input():
-    with pytest.raises(TypeError):
-        lint_code(99)
-
-
-@pytest.mark.unit
-def test_linter_changes_dirty_code():
-    code = "foo = [1,2,3]"
-    assert lint_code(code) == "foo = [1, 2, 3]\n"
-
-
-@pytest.mark.unit
-def test_linter_leaves_clean_code():
-    code = "foo = [1, 2, 3]\n"
-    assert lint_code(code) == "foo = [1, 2, 3]\n"
-
-
-@pytest.mark.unit
 def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
     text = """
-    "ge_cloud_id": null,
+    "id": null,
     "expectation_context": {"description": null},
     """
     expected = """
-    "ge_cloud_id": None,
+    "id": None,
     "expectation_context": {"description": None},
     """
 
@@ -166,10 +147,7 @@ def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
         res = convert_json_string_to_be_python_compliant(text)
 
     assert res == expected
-    assert (
-        "Replaced 'ge_cloud_id: null' with 'ge_cloud_id: None' before writing to file"
-        in caplog.text
-    )
+    assert "Replaced 'id: null' with 'id: None' before writing to file" in caplog.text
     assert (
         "Replaced 'description: null' with 'description: None' before writing to file"
         in caplog.text

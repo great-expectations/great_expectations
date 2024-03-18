@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Optional
 from uuid import UUID
 
 from great_expectations.compatibility.pydantic import (
@@ -43,8 +44,8 @@ class _EnvConfig(BaseSettings):
 
 
 class Config(GenericModel):
-    organization_id: UUID = DUMMY_UUID
-    user_id: UUID = DUMMY_UUID
+    organization_id: Optional[UUID] = None
+    user_id: Optional[UUID] = None
     data_context_id: UUID = DUMMY_UUID
     oss_id: UUID = DUMMY_UUID
     cloud_mode: bool = False

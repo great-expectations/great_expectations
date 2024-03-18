@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
 import pytest
-from moto import mock_s3
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.compatibility import aws
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -30,31 +27,8 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture()
-def aws_region_name() -> str:
-    return "us-east-1"
-
-
-@pytest.fixture()
 def aws_s3_bucket_name() -> str:
     return "test_bucket"
-
-
-@pytest.fixture(scope="function")
-def aws_credentials() -> None:
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    os.environ["AWS_DEFAULT_REGION"] = "testing"
-
-
-@pytest.mark.skipif(not aws.boto3)
-@pytest.fixture
-def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
-    with mock_s3():
-        client = aws.boto3.client("s3", region_name=aws_region_name)
-        yield client
 
 
 @pytest.fixture
@@ -163,7 +137,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -182,7 +156,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "timestamp",
@@ -201,7 +175,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "batch_request_param_2",
@@ -274,8 +248,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_test_connection_failures(
+    spark_session,
     s3_mock,
     spark_s3_datasource: SparkS3Datasource,
     bad_regex_config: tuple[re.Pattern, str],

@@ -29,7 +29,7 @@ POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
         "type": "expectation_suite",
         "attributes": {
             "suite": {
-                "ge_cloud_id": None,
+                "id": None,
                 "meta": {"great_expectations_version": "0.13.23"},
                 "expectations": [
                     {
@@ -39,7 +39,6 @@ POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
                     },
                 ],
                 "expectation_suite_name": "brand new suite",
-                "data_asset_type": "pandas",
             },
             "organization_id": EXISTING_ORGANIZATION_ID,
         },
@@ -56,12 +55,12 @@ POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "expectations": [
                     {
                         "expectation_type": "expect_table_row_count_to_be_between",
-                        "ge_cloud_id": pact.Format().uuid,
+                        "id": pact.Format().uuid,
                         "kwargs": {"max_value": 3, "min_value": 1},
                         "meta": {},
                     }
                 ],
-                "ge_cloud_id": pact.Format().uuid,
+                "id": pact.Format().uuid,
                 "meta": {"great_expectations_version": "0.13.23"},
             },
         },
@@ -76,12 +75,11 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "created_by_id": pact.Format().uuid,
             "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             "suite": {
-                "data_asset_type": None,
                 "expectation_suite_name": pact.Like("no_checkpoint_suite"),
                 "expectations": [
                     {
                         "expectation_type": "expect_column_values_to_be_between",
-                        "ge_cloud_id": pact.Format().uuid,
+                        "id": pact.Format().uuid,
                         "kwargs": {
                             "column": "passenger_count",
                             "max_value": 5,
@@ -91,7 +89,7 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
                         "meta": {},
                     }
                 ],
-                "ge_cloud_id": GET_EXPECTATION_SUITE_ID,
+                "id": GET_EXPECTATION_SUITE_ID,
                 "meta": {"great_expectations_version": "0.18.3"},
             },
         },
@@ -107,8 +105,11 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "created_by_id": pact.Format().uuid,
                 "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                 "suite": {
+                    # TODO(bdirks): s/expectation_suite_name/name/
+                    # This is the new 1.0.0 API. I'm leaving this as is so we still have
+                    # coverage until we update mercury.
                     "expectation_suite_name": pact.Like("raw_health.critical_1a"),
-                    "ge_cloud_id": pact.Format().uuid,
+                    "id": pact.Format().uuid,
                     "meta": {"great_expectations_version": pact.Like("0.13.23")},
                 },
             },
@@ -120,6 +121,11 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
 }
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name",
+    strict=True,
+)
 @pytest.mark.cloud
 def test_get_expectation_suite(
     pact_test: pact.Pact,
@@ -148,9 +154,14 @@ def test_get_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(ge_cloud_id=GET_EXPECTATION_SUITE_ID)
+        cloud_data_context.get_expectation_suite(id=GET_EXPECTATION_SUITE_ID)
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name",
+    # strict=True, # TODO: GG (kilo59) temporarily disabled strict mode
+)
 @pytest.mark.cloud
 def test_get_non_existent_expectation_suite(
     pact_test: pact.Pact,
@@ -179,10 +190,13 @@ def test_get_non_existent_expectation_suite(
     with pact_test:
         with pytest.raises(DataContextError):
             cloud_data_context.get_expectation_suite(
-                ge_cloud_id=NON_EXISTENT_EXPECTATION_SUITE_ID
+                id=NON_EXISTENT_EXPECTATION_SUITE_ID
             )
 
 
+# This test only passes now because GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
+# uses "expectation_suite_name" which is the 0.*  API. We will need to update that
+# once we start hitting the v1.0.0 mercury endpoints.
 @pytest.mark.cloud
 def test_get_expectation_suites(
     pact_test: pact.Pact,
@@ -241,6 +255,9 @@ def test_get_expectation_suites(
                                     "expectation_type": "expect_table_row_count_to_be_between",
                                 },
                             ],
+                            # TODO(bdirks): s/expectation_suite_name/name/
+                            # This is the new 1.0.0 API. I'm leaving this as is so we still have
+                            # coverage until we update mercury.
                             "expectation_suite_name": "brand new suite",
                         }
                     },

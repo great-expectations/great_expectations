@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
 import pytest
-from moto import mock_s3
 from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
@@ -47,31 +45,8 @@ pytestmark = [
 
 
 @pytest.fixture()
-def aws_region_name() -> str:
-    return "us-east-1"
-
-
-@pytest.fixture()
 def aws_s3_bucket_name() -> str:
     return "test_bucket"
-
-
-@pytest.fixture(scope="function")
-def aws_credentials() -> None:
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    os.environ["AWS_DEFAULT_REGION"] = "testing"
-
-
-@pytest.mark.skipif(not aws.boto3)
-@pytest.fixture
-def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
-    with mock_s3():
-        client = aws.boto3.client("s3", region_name=aws_region_name)
-        yield client
 
 
 @pytest.fixture
@@ -286,7 +261,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -303,7 +278,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "timestamp",
@@ -320,7 +295,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "batch_request_param_2",

@@ -217,15 +217,10 @@ def test_set(
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDict(
                 name="store_validation_result",
                 action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="store_evaluation_params",
-                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
             ),
             ActionDict(
                 name="update_data_docs",
@@ -254,11 +249,6 @@ def test_set(
                         "checkpoint_config": OrderedDict(
                             [
                                 ("name", "my_minimal_simple_checkpoint"),
-                                ("config_version", 1.0),
-                                ("template_name", None),
-                                ("module_name", "great_expectations.checkpoint"),
-                                ("class_name", "Checkpoint"),
-                                ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
                                 (
@@ -268,12 +258,6 @@ def test_set(
                                             "name": "store_validation_result",
                                             "action": {
                                                 "class_name": "StoreValidationResultAction",
-                                            },
-                                        },
-                                        {
-                                            "name": "store_evaluation_params",
-                                            "action": {
-                                                "class_name": "StoreEvaluationParametersAction",
                                             },
                                         },
                                         {
@@ -287,9 +271,8 @@ def test_set(
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),
-                                ("profilers", []),
-                                ("ge_cloud_id", None),
-                                ("expectation_suite_ge_cloud_id", None),
+                                ("id", None),
+                                ("expectation_suite_id", None),
                             ]
                         ),
                     },

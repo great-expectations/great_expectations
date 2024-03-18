@@ -8,9 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
-from docs.docs_build import DocsBuilder
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
@@ -71,6 +70,7 @@ def sort(  # noqa: PLR0913
     if not isort:
         cmds = [
             "ruff",
+            "check",
             path,
             "--select I",
             "--diff" if check else "--fix",
@@ -109,7 +109,7 @@ def fmt(  # noqa: PLR0913
     if sort_:
         sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
-    cmds = ["black", path]
+    cmds = ["ruff", "format", path]
     if check:
         cmds.append("--check")
     if exclude:
@@ -134,12 +134,12 @@ def lint(  # noqa: PLR0913
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run formatter (black) and linter (ruff)"""
+    """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
@@ -238,7 +238,7 @@ def marker_coverage(
         " Default to version set in pyproject.toml",
     },
 )
-def type_check(  # noqa: PLR0913, PLR0912
+def type_check(  # noqa: C901, PLR0912, PLR0913
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -322,50 +322,6 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
-
-
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
 
 
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
@@ -646,7 +602,6 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned docs and code. Default False.",
         "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
         "lint": "Run the linter",
     },
@@ -654,11 +609,14 @@ def api_docs(ctx: Context):
 def docs(
     ctx: Context,
     build: bool = False,
-    clean: bool = False,
     start: bool = False,
     lint: bool = False,
+    version: str | None = None,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    from packaging.version import parse as parse_version
+
+    from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -670,36 +628,17 @@ def docs(
     old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
-    # set by netlify: https://docs.netlify.com/configure-builds/environment-variables/#git-metadata
-    pull_request = os.environ.get(  # noqa: TID251 # os.environ allowed in config files
-        "PULL_REQUEST"
-    )
-    is_pull_request = pull_request == "true"
-    is_local = not pull_request
-    docs_builder = DocsBuilder(
-        ctx,
-        docusaurus_dir,
-        is_pull_request=is_pull_request,
-        is_local=is_local,
-    )
 
-    if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
-        ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = [
-            "rm",
-            "-rf",
-            "versioned_code",
-            "versioned_docs",
-            "versioned_sidebars",
-        ]
-        ctx.run(" ".join(rm_rf_cmds), echo=True)
-    elif lint:
+    if lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
+    elif version:
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        docs_builder.create_version(version=parse_version(version))
     else:  # noqa: PLR5501
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
+            docs_builder = DocsBuilder(ctx, docusaurus_dir)
             print("Making sure docusaurus dependencies are installed.")
             ctx.run(" ".join(["yarn install"]), echo=True)
 
@@ -1160,8 +1099,7 @@ def service(
             cmds = []
 
             if (
-                service_name == "mercury"
-                and os.environ.get("CI") != "true"  # noqa: TID251
+                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [

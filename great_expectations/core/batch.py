@@ -78,7 +78,7 @@ def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
 
 
 @public_api
-class BatchDefinition(SerializableDictDot):
+class LegacyBatchDefinition(SerializableDictDot):
     """Precisely identifies a set of data from a data source.
 
     More concretely, a BatchDefinition includes all the information required to precisely
@@ -739,7 +739,7 @@ class Batch(SerializableDictDot):
         self,
         data: BatchDataType | None = None,
         batch_request: BatchRequestBase | dict | None = None,
-        batch_definition: BatchDefinition | None = None,
+        batch_definition: LegacyBatchDefinition | None = None,
         batch_spec: BatchSpec | None = None,
         batch_markers: BatchMarkers | None = None,
         # The remaining parameters are for backward compatibility.
@@ -838,7 +838,7 @@ class Batch(SerializableDictDot):
             "data": str(self.data),
             "batch_request": self.batch_request.to_dict(),
             "batch_definition": self.batch_definition.to_json_dict()
-            if isinstance(self.batch_definition, BatchDefinition)
+            if isinstance(self.batch_definition, LegacyBatchDefinition)
             else {},
             "batch_spec": self.batch_spec,
             "batch_markers": self.batch_markers,
@@ -863,7 +863,7 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        if isinstance(batch_definition, BatchDefinition):
+        if isinstance(batch_definition, LegacyBatchDefinition):
             return batch_definition.id
 
         if isinstance(batch_definition, IDDict):
@@ -911,7 +911,7 @@ def materialize_batch_request(
     batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
-        args: dict[str, Any] | BlockConfigBatchRequestTypedDict
+        args: dict[str, Any] | BlockConfigBatchRequestTypedDict,
     ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -975,15 +975,13 @@ def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with
     | FluentBatchRequest
     | dict
     | BlockConfigBatchRequestTypedDict = ...,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
 def get_batch_request_as_dict(
     batch_request: None = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
 def get_batch_request_as_dict(
@@ -1019,8 +1017,8 @@ def _get_block_batch_request(  # noqa: PLR0913
     custom_filter_function: Callable | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     **kwargs,
 ):
     """Returns a block-config batch request based on the provided parameters
@@ -1068,13 +1066,13 @@ def _get_block_batch_request(  # noqa: PLR0913
             if sampling_kwargs is not None:
                 sampling_params["sampling_kwargs"] = sampling_kwargs
             batch_spec_passthrough.update(sampling_params)
-        if splitter_method is not None:
-            splitter_params: dict = {
-                "splitter_method": splitter_method,
+        if partitioner_method is not None:
+            partitioner_params: dict = {
+                "partitioner_method": partitioner_method,
             }
-            if splitter_kwargs is not None:
-                splitter_params["splitter_kwargs"] = splitter_kwargs
-            batch_spec_passthrough.update(splitter_params)
+            if partitioner_kwargs is not None:
+                partitioner_params["partitioner_kwargs"] = partitioner_kwargs
+            batch_spec_passthrough.update(partitioner_params)
 
     batch_request_as_dict: dict = {
         "datasource_name": datasource_name,
@@ -1180,8 +1178,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     batch_spec_passthrough: dict | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     runtime_parameters: dict | None = None,
     query: str | None = None,
     path: str | None = None,
@@ -1213,8 +1211,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         sampling_method
         sampling_kwargs
 
-        splitter_method
-        splitter_kwargs
+        partitioner_method
+        partitioner_kwargs
 
         batch_spec_passthrough
 
@@ -1240,8 +1238,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         "custom_filter_function": custom_filter_function,
         "sampling_method": sampling_method,
         "sampling_kwargs": sampling_kwargs,
-        "splitter_method": splitter_method,
-        "splitter_kwargs": splitter_kwargs,
+        "partitioner_method": partitioner_method,
+        "partitioner_kwargs": partitioner_kwargs,
         "batch_spec_passthrough": batch_spec_passthrough,
     }
 
@@ -1315,8 +1313,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         custom_filter_function=custom_filter_function,
         sampling_method=sampling_method,
         sampling_kwargs=sampling_kwargs,
-        splitter_method=splitter_method,
-        splitter_kwargs=splitter_kwargs,
+        partitioner_method=partitioner_method,
+        partitioner_kwargs=partitioner_kwargs,
         **kwargs,
     )
 
@@ -1385,6 +1383,4 @@ if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     ]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
-    BatchDataUnion = Union[  # type: ignore[misc] # Cannot assign multiple types
-        BatchData, pd.DataFrame
-    ]
+    BatchDataUnion = Union[BatchData, pd.DataFrame]  # type: ignore[misc] # Cannot assign multiple types

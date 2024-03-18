@@ -28,7 +28,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -267,7 +266,6 @@ class DataAsset:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=expectation_config,
-                        send_usage_event=False,
                     )
 
                 if include_config:
@@ -322,7 +320,7 @@ class DataAsset:
                 key value `data_asset_name` as `data_asset_name`.
 
             expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
+                The name to assign to the `expectation_suite.name`
 
         Returns:
             None
@@ -332,36 +330,29 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
 
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
+                if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
+                            n1=self._expectation_suite.name,
                             n2=expectation_suite_name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self._expectation_suite.name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
+                name=expectation_suite_name,
             )
 
-        self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
             "include_config": True,
             "catch_exceptions": False,
@@ -534,9 +525,7 @@ class DataAsset:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.add_expectation_configurations(
-            expectations, send_usage_event=False
-        )
+        expectation_suite.add_expectation_configurations(expectations)
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -716,9 +705,7 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite = ExpectationSuite(
-                            **expectation_suite_dict, data_context=self._data_context
-                        )
+                        expectation_suite = ExpectationSuite(**expectation_suite_dict)
                 except ValidationError:
                     raise
                 except OSError:
@@ -727,21 +714,12 @@ class DataAsset:
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=None
-                )
+                expectation_suite = ExpectationSuite(**expectation_suite_dict)
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if getattr(data_context, "_usage_statistics_handler", None):
-                    handler = data_context._usage_statistics_handler
-                    handler.send_usage_message(
-                        event=UsageStatsEvents.DATA_ASSET_VALIDATE,
-                        event_payload=handler.anonymizer.anonymize(obj=self),
-                        success=False,
-                    )
                 return ExpectationValidationResult(success=False)
             # Evaluation parameter priority is
             # 1. from provided parameters
@@ -809,7 +787,7 @@ class DataAsset:
                     # A missing parameter will raise an EvaluationParameterError
                     (
                         evaluation_args,
-                        substituted_parameters,
+                        _substituted_parameters,
                     ) = build_evaluation_parameters(
                         expectation.kwargs,
                         runtime_evaluation_parameters,
@@ -862,7 +840,7 @@ class DataAsset:
                         abbrev_results.append(exp)
                 results = abbrev_results
 
-            expectation_suite_name = expectation_suite.expectation_suite_name
+            expectation_suite_name = expectation_suite.name
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
@@ -891,22 +869,10 @@ class DataAsset:
 
             self._data_context = validate__data_context
         except Exception:
-            if handler := getattr(data_context, "_usage_statistics_handler", None):
-                handler.send_usage_message(
-                    event=UsageStatsEvents.DATA_ASSET_VALIDATE,
-                    event_payload=handler.anonymizer.anonymize(obj=self),
-                    success=False,
-                )
             raise
         finally:
             self._active_validation = False
 
-        if handler := getattr(data_context, "_usage_statistics_handler", None):
-            handler.send_usage_message(
-                event=UsageStatsEvents.DATA_ASSET_VALIDATE,
-                event_payload=handler.anonymizer.anonymize(obj=self),
-                success=True,
-            )
         return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
@@ -961,12 +927,12 @@ class DataAsset:
     @property
     def expectation_suite_name(self):
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self._expectation_suite.name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self._expectation_suite.name = expectation_suite_name
 
     ###
     #
@@ -974,7 +940,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: PLR0912, PLR0913
+    def _format_map_output(  # noqa: C901, PLR0912, PLR0913
         self,
         result_format,
         success,
@@ -1068,9 +1034,9 @@ class DataAsset:
                 partial_unexpected_counts = []
                 if "details" not in return_obj["result"]:
                     return_obj["result"]["details"] = {}
-                return_obj["result"]["details"][
-                    "partial_unexpected_counts_error"
-                ] = "partial_unexpected_counts requested, but requires a hashable type"
+                return_obj["result"]["details"]["partial_unexpected_counts_error"] = (
+                    "partial_unexpected_counts requested, but requires a hashable type"
+                )
             finally:
                 return_obj["result"].update(
                     {

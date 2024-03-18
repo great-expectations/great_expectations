@@ -16,14 +16,17 @@ from typing import (
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    PartitionerConvertedDatetime,
+)
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    Splitter,
     SQLDatasource,
-    _SplitterOneColumnOneParam,
+    SqlitePartitionerConvertedDateTime,
+    _PartitionerOneColumnOneParam,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
@@ -31,7 +34,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    from typing_extensions import Self
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -48,45 +50,12 @@ if TYPE_CHECKING:
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
 
-class SplitterHashedColumn(_SplitterOneColumnOneParam):
-    """Split on hash value of a column.
-
-    Args:
-        hash_digits: The number of digits to truncate the hash to.
-        method_name: Literal["split_on_hashed_column"]
-    """
-
-    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
-    hash_digits: int
-    column_name: str
-    method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
-
-    @property
-    @override
-    def param_names(self) -> List[str]:
-        return ["hash"]
-
-    @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
-        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
-
-    @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        if "hash" not in options:
-            raise ValueError(
-                "'hash' must be specified in the batch request options to create a batch identifier"
-            )
-        return {self.column_name: options["hash"]}
-
-
-class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
-    """A splitter than can be used for sql engines that represents datetimes as strings.
+class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
+    """A partitioner than can be used for sql engines that represents datetimes as strings.
 
     The SQL engine that this currently supports is SQLite since it stores its datetimes as
     strings.
-    The DatetimeSplitter will also work for SQLite and may be more intuitive.
+    The DatetimePartitioner will also work for SQLite and may be more intuitive.
     """
 
     # date_format_strings syntax is documented here:
@@ -94,7 +63,9 @@ class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
+    method_name: Literal["partition_on_converted_datetime"] = (
+        "partition_on_converted_datetime"
+    )
 
     @property
     @override
@@ -104,7 +75,7 @@ class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
         return ["datetime"]
 
     @override
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {
             "column_name": self.column_name,
             "date_format_string": self.date_format_string,
@@ -131,57 +102,26 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqliteSplitter = Union[Splitter, SplitterHashedColumn, SplitterConvertedDateTime]
-
-
-class _SQLiteAssetMixin:
-    @public_api
-    def add_splitter_hashed_column(
-        self: Self, column_name: str, hash_digits: int
-    ) -> Self:
-        """Associates a hashed column splitter with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            SplitterHashedColumn(
-                method_name="split_on_hashed_column",
-                column_name=column_name,
-                hash_digits=hash_digits,
-            )
+class SqliteTableAsset(SqlTableAsset):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the Sqlite specific partitioner
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
+            SqlitePartitionerConvertedDateTime
         )
 
-    @public_api
-    def add_splitter_converted_datetime(
-        self: Self, column_name: str, date_format_string: str
-    ) -> Self:
-        """Associates a converted datetime splitter with this sqlite data asset.
-        Args:
-            column_name: The column name of the date column where year and month will be parsed out.
-            date_format_string: Format for converting string representation of datetime to actual datetime object.
-        Returns:
-            This sql asset so we can use this method fluently.
-        """
-        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            SplitterConvertedDateTime(
-                method_name="split_on_converted_datetime",
-                column_name=column_name,
-                date_format_string=date_format_string,
-            )
-        )
-
-
-class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     type: Literal["table"] = "table"
-    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
-class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+class SqliteQueryAsset(SqlQueryAsset):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # update the partitioner map with the  Sqlite specific partitioner
+        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
+            SqlitePartitionerConvertedDateTime
+        )
+
     type: Literal["query"] = "query"
-    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 @public_api

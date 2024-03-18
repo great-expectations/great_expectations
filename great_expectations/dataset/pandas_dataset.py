@@ -493,6 +493,7 @@ Notes:
             except TypeError:
                 # Having values of multiple types in a object dtype column (e.g., strings and floats)
                 # raises a TypeError when the sorting method performs comparisons.
+                # Related to the noqa E721 below: numpy / pandas implements equality, see https://github.com/astral-sh/ruff/issues/9570
                 if self[column].dtype == object:
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
@@ -761,9 +762,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
         else:
             res = self._expect_column_values_to_be_of_type__map(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
@@ -803,9 +804,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
 
         return res
 
@@ -995,9 +996,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
                 column, type_list, **kwargs
@@ -1039,9 +1040,9 @@ Notes:
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectation_configurations[
-                new_expectations[0]
-            ] = new_config
+            self._expectation_suite.expectation_configurations[new_expectations[0]] = (
+                new_config
+            )
 
         return res
 
@@ -1695,7 +1696,8 @@ Notes:
 
         results = [
             stats.kstest(
-                np.random.choice(column, size=bootstrap_sample_size), estimated_cdf
+                np.random.choice(column, size=bootstrap_sample_size),  # noqa: NPY002
+                estimated_cdf,
             )[1]
             for _ in range(bootstrap_samples)
         ]

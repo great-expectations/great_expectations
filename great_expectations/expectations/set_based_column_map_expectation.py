@@ -4,7 +4,6 @@ import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -46,7 +45,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all SetColumnMapMetrics.
 
@@ -88,7 +86,6 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.isin(cls.set_)
 
 
-@public_api
 class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for SetBasedColumnMapExpectations.
 
@@ -249,7 +246,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -265,7 +262,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

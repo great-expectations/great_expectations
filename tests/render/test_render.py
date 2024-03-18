@@ -47,8 +47,7 @@ def titanic_profiler_evrs_with_exception():
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
-    context = empty_data_context_module_scoped
+def titanic_dataset_profiler_expectations():
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
@@ -57,14 +56,11 @@ def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
         expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
-        return ExpectationSuite(**expectations_dict, data_context=context)
+        return ExpectationSuite(**expectations_dict)
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations_with_distribution(
-    empty_data_context_module_scoped,
-):
-    context = empty_data_context_module_scoped
+def titanic_dataset_profiler_expectations_with_distribution():
     with open(
         file_relative_path(
             __file__,
@@ -74,19 +70,18 @@ def titanic_dataset_profiler_expectations_with_distribution(
         expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
-        return ExpectationSuite(**expectations_dict, data_context=context)
+        return ExpectationSuite(**expectations_dict)
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def titanic_profiled_expectations_1():
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
         expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
-        return ExpectationSuite(**expectation_suite_dict, data_context=context)
+        return ExpectationSuite(**expectation_suite_dict)
 
 
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
@@ -407,9 +402,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -442,9 +435,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

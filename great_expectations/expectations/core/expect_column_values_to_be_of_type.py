@@ -244,7 +244,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -285,7 +285,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, no_scientific=True
             )
@@ -581,7 +581,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
@@ -654,7 +654,7 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     return execution_engine.dialect_module
 
 
-def _native_type_type_map(type_):  # noqa: PLR0911
+def _native_type_type_map(type_):  # noqa: C901, PLR0911
     # We allow native python types in cases where the underlying type is "object":
     if type_.lower() == "none":
         return (type(None),)

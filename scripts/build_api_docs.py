@@ -1,14 +1,15 @@
 """A script for generating API documents through introspection of class objects and docstring parsing.
 
-    Usage:
-    1. Run the script.
-        1a. The files will be generated automatically.
-    2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
-     updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
-    3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
-     API documentation category under Reference, replacing the existing content of this list.
-        3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
+Usage:
+1. Run the script.
+    1a. The files will be generated automatically.
+2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
+ updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
+3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
+ API documentation category under Reference, replacing the existing content of this list.
+    3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
+
 import importlib
 import inspect
 import pydoc
@@ -168,9 +169,9 @@ def _get_dictionary_from_block_in_docstring(
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
-                block_dict[
-                    key
-                ] = f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                block_dict[key] = (
+                    f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                )
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:
@@ -364,7 +365,7 @@ def get_whitelisted_methods(
     """
     methods = dict(inspect.getmembers(imported_class, inspect.isroutine))
     for method_name, class_method in methods.items():
-        synopsis, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
+        _synopsis, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
         if is_included_in_public_api(desc):
             yield method_name, class_method
 
@@ -419,8 +420,8 @@ def get_title(file_path: Path) -> str:
     with open(file_path) as f:
         data = f.read()
     if "---" in data:
-        prefix, title_block = data.split("---", 1)
-        title_block, suffix = title_block.split("---", 1)
+        _prefix, title_block = data.split("---", 1)
+        title_block, _suffix = title_block.split("---", 1)
         for line in title_block.split("\n"):
             if line.strip().startswith("title:"):
                 title = line.split(":", 1)[1]
@@ -448,7 +449,7 @@ def build_relevant_documentation_block(docstring: str) -> List[str]:
     return relevant_documentation_block
 
 
-def build_method_document(
+def build_method_document(  # noqa: C901
     method_name: str, method: Any, qualified_path: str, github_path: str
 ) -> Tuple[str, Set[str], str]:
     """Create API documentation for a given method.
@@ -794,7 +795,7 @@ def gather_classes_to_document(
     module = importlib.import_module(import_path)
     imported_classes = dict(inspect.getmembers(module, inspect.isclass))
     for class_name, imported_class in imported_classes.items():
-        synopsis, desc = pydoc.splitdoc(pydoc.getdoc(imported_class))
+        _synopsis, desc = pydoc.splitdoc(pydoc.getdoc(imported_class))
         if is_included_in_public_api(desc):
             yield class_name, imported_class
 

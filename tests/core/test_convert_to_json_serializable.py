@@ -50,7 +50,7 @@ def test_serialization_of_shapely_linestring():
 
 @pytest.mark.unit
 def test_serialization_of_bytes():
-    data = b"\xC0\xA8\x00\x01"
+    data = b"\xc0\xa8\x00\x01"
     assert convert_to_json_serializable(data) == "b'\\xc0\\xa8\\x00\\x01'"
 
 

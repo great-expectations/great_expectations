@@ -98,7 +98,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -135,7 +135,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, no_scientific=True
             )

@@ -3,13 +3,11 @@
 # root linter settings are defined in the file below
 extend = "../pyproject.toml"
 
-extend-ignore = [
+lint.extend-ignore = [
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
     # This is likely to be a high-touch rule. Doing this in `tests` doesn't help circular imports.
     # Let's differ this for tests until there are auto-fixes
     "TCH001",
-    # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
-    "TID251",  # banned-api - is used to prevent opaque attribute errors caused by missing optional dependencies
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "B011", # assert-false - common pattern in pytest
     # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
@@ -19,5 +17,13 @@ extend-ignore = [
     "RUF015", # element index slice is common test pattern
 ]
 
-[isort]
+[lint.isort]
 known-first-party = ["great_expectations", "tests"]
+
+[lint.flake8-tidy-imports.banned-api]
+# https://pytest-mock.readthedocs.io/en/latest/index.html
+# standard library mock doesn't clean up after itself which can affect unrelated tests
+"unittest.mock.MagicMock".msg = "Do not use `unittest.mock.MagicMock` directly, use the pytest-mock `mocker` fixture or pytest.monkeypatch instead."
+"unittest.mock.Mock".msg = "Do not use `unittest.mock.Mock` directly, use the pytest-mock `mocker` fixture or pytest `monkeypatch` instead."
+# TODO: ban patch too
+# "unittest.mock.patch".msg = "Do not use `unittest.mock.patch` directly, use the pytest-mock `mocker` fixture or pytest `monkeypatch` instead."

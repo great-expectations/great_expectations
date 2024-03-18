@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 import responses
+from requests import Response
 
 from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
@@ -46,9 +47,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
             cloud_organization_id=ge_cloud_runtime_organization_id,
             cloud_access_token=ge_cloud_access_token,
         )
-    except (
-        Exception
-    ):  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
+    except Exception:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
     # Only ever called once with the endpoint URL and auth token as args
@@ -65,7 +64,9 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     ge_cloud_access_token,
 ):
     # Ensure that the request fails
-    mock_request.return_value.status_code = 401
+    mock_response = Response()
+    mock_response.status_code = 401
+    mock_request.return_value = mock_response
 
     with pytest.raises(GXCloudError):
         get_context(

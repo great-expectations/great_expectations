@@ -238,7 +238,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -289,7 +289,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True
                 )
@@ -342,7 +342,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(  # noqa: PLR0912
+    def _validate_pandas(  # noqa: C901, PLR0912
         self,
         actual_column_type,
         expected_types_list,

@@ -65,15 +65,15 @@ def test_get_expectation_suite_should_use_default_name_if_none():
 
     # Should not raise an error
     expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=None, send_usage_event=False
+        expectation_suite_name=None
     )
     assert expectation_suite
     assert isinstance(expectation_suite, ExpectationSuite)
-    assert expectation_suite.expectation_suite_name
+    assert expectation_suite.name
 
     expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=None, send_usage_event=True
+        expectation_suite_name=None
     )
     assert expectation_suite
     assert isinstance(expectation_suite, ExpectationSuite)
-    assert expectation_suite.expectation_suite_name
+    assert expectation_suite.name

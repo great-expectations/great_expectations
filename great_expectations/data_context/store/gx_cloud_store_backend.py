@@ -133,6 +133,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.PROFILER: "profiler",
         GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GXCloudRESTResource.VALIDATION_RESULT: "result",
+        GXCloudRESTResource.VALIDATION_CONFIG: "validation_config",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
@@ -157,6 +158,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GXCloudRESTResource.PROFILER: "profilers",
             GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
             GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
+            GXCloudRESTResource.VALIDATION_CONFIG: "validation_configs",
         }
     )
 
@@ -224,7 +226,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @override
-    def _get(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> ResponsePayload:  # type: ignore[override]
+    def _get(  # type: ignore[override]
+        self, key: Tuple[GXCloudRESTResource, str | None, str | None]
+    ) -> ResponsePayload:
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
@@ -486,14 +490,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             response_json = self._send_get_request_to_api(url=url)
 
-            # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
-            # Once 'expectation_suite_name' is renamed, this can be removed.
-            name_attr: str
-            if resource_type is GXCloudRESTResource.EXPECTATION_SUITE:
-                name_attr = "expectation_suite_name"
-            else:
-                name_attr = "name"
-
             keys = []
             for resource in response_json["data"]:
                 id: str = resource["id"]
@@ -501,7 +497,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 resource_dict: dict = resource.get("attributes", {}).get(
                     attributes_key, {}
                 )
-                resource_name: str = resource_dict.get(name_attr, "")
+                resource_name: str = resource_dict.get("name", "")
 
                 key = (resource_type, id, resource_name)
                 keys.append(key)
@@ -689,7 +685,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
             )
 
-        resource_type, id, resource_name = key
+        resource_type, _id, _resource_name = key
         try:
             GXCloudRESTResource(resource_type)
         except ValueError:

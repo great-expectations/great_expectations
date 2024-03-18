@@ -9,7 +9,6 @@ from typing import (
     Type,
 )
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -31,7 +30,6 @@ from great_expectations.expectations.metrics.util import (
 logger = logging.getLogger(__name__)
 
 
-@public_api
 def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: MetricPartialFunctionTypes | None = None,
@@ -150,7 +148,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 )
 
                 (
-                    selectable,
+                    _selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(

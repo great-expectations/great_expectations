@@ -106,9 +106,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
         """
-        diagnostics = (
-            GreatExpectationsContribPackageManifest.retrieve_package_expectations_diagnostics()
-        )
+        diagnostics = GreatExpectationsContribPackageManifest.retrieve_package_expectations_diagnostics()
         self._update_attrs_with_diagnostics(diagnostics)
 
     def _update_attrs_with_diagnostics(
@@ -119,7 +117,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         self._update_dependencies("requirements.txt")
         self._update_contributors(diagnostics)
 
-    def _update_from_package_info(self, path: str) -> None:
+    def _update_from_package_info(self, path: str) -> None:  # noqa: C901
         if not os.path.exists(path):  # noqa: PTH110
             logger.warning(f"Could not find package info file {path}")
             return

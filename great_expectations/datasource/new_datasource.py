@@ -8,16 +8,15 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 
 if TYPE_CHECKING:
     from great_expectations.core.batch_spec import PathBatchSpec
-    from great_expectations.data_context.types.base import ConcurrencyConfig
     from great_expectations.datasource.data_connector import DataConnector
     from great_expectations.execution_engine import ExecutionEngine
 
@@ -33,18 +32,16 @@ class BaseDatasource:
         name: the name for the datasource
         execution_engine: the type of compute engine to produce
         data_context_root_directory: Installation directory path (if installed on a filesystem).
-        concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.
     """
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         name: str,
         execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
-        concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -54,7 +51,6 @@ class BaseDatasource:
             name: the name for the datasource
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
-            concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
         """
         self._name = name
@@ -69,7 +65,7 @@ class BaseDatasource:
         try:
             self._execution_engine = instantiate_class_from_config(
                 config=execution_engine,
-                runtime_environment={"concurrency": concurrency},
+                runtime_environment={},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
         except Exception as e:
@@ -90,7 +86,7 @@ class BaseDatasource:
 
     def get_batch_from_batch_definition(
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         batch_data: Any = None,
     ) -> Batch:
         """
@@ -133,7 +129,7 @@ class BaseDatasource:
 
     def get_batch_definition_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Validates batch request and utilizes the classes'
         Data Connectors' property to get a list of batch definition given a batch request
@@ -166,10 +162,10 @@ class BaseDatasource:
             batch_request.data_connector_name
         ]
 
-        batch_definition_list: List[
-            BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
+        batch_definition_list: List[LegacyBatchDefinition] = (
+            data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
         if isinstance(batch_request, RuntimeBatchRequest):
@@ -287,9 +283,9 @@ class BaseDatasource:
 
         for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
-            available_data_asset_names[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names()
+            available_data_asset_names[data_connector_name] = (
+                data_connector.get_available_data_asset_names()
+            )
 
         return available_data_asset_names
 
@@ -326,15 +322,15 @@ class BaseDatasource:
 
         for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
-            available_data_asset_names_and_types[
-                data_connector_name
-            ] = data_connector.get_available_data_asset_names_and_types()
+            available_data_asset_names_and_types[data_connector_name] = (
+                data_connector.get_available_data_asset_names_and_types()
+            )
 
         return available_data_asset_names_and_types
 
     def get_available_batch_definitions(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[
@@ -347,35 +343,6 @@ class BaseDatasource:
         )
 
         return batch_definition_list
-
-    def self_check(self, pretty_print=True, max_examples=3):
-        # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        report_object: dict = {"execution_engine": self.execution_engine.config}
-
-        if pretty_print:
-            print(
-                f"\nExecutionEngine class name: {self.execution_engine.__class__.__name__}"
-            )
-
-        if pretty_print:
-            print("Data Connectors:")
-
-        data_connector_list = list(self.data_connectors.keys())
-        data_connector_list.sort()
-        report_object["data_connectors"] = {"count": len(data_connector_list)}
-
-        for data_connector_name in data_connector_list:
-            data_connector_obj: DataConnector = self.data_connectors[
-                data_connector_name
-            ]
-            data_connector_return_obj = data_connector_obj.self_check(
-                pretty_print=pretty_print, max_examples=max_examples
-            )
-            report_object["data_connectors"][
-                data_connector_name
-            ] = data_connector_return_obj
-
-        return report_object
 
     def _validate_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
@@ -438,7 +405,6 @@ class Datasource(BaseDatasource):
         execution_engine: the type of compute engine to produce
         data_connectors: DataConnectors to add to the datasource
         data_context_root_directory: Installation directory path (if installed on a filesystem).
-        concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.
     """
 
@@ -450,7 +416,6 @@ class Datasource(BaseDatasource):
         execution_engine: Optional[dict] = None,
         data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
-        concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -461,7 +426,6 @@ class Datasource(BaseDatasource):
             execution_engine (ClassConfig): the type of compute engine to produce
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
-            concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
         """
         self._name = name
@@ -470,7 +434,6 @@ class Datasource(BaseDatasource):
             name=name,
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
-            concurrency=concurrency,
             id=id,
         )
 

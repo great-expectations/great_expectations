@@ -14,7 +14,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:
@@ -229,7 +228,6 @@ def _add_response_key(res, key, value):
     return res
 
 
-@public_api
 def register_metric(  # noqa: PLR0913
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
@@ -287,7 +285,9 @@ def register_metric(  # noqa: PLR0913
 
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
-            current_provider_cls, current_provider_fn = providers[execution_engine_name]
+            _current_provider_cls, current_provider_fn = providers[
+                execution_engine_name
+            ]
             if current_provider_fn != metric_provider:
                 logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
@@ -340,7 +340,7 @@ def get_metric_function_type(
 ) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
     try:
         metric_definition = _registered_metrics[metric_name]
-        provider_fn, provider_class = metric_definition["providers"][
+        provider_fn, _provider_class = metric_definition["providers"][
             type(execution_engine).__name__
         ]
         return getattr(provider_fn, "metric_fn_type", None)
@@ -367,10 +367,10 @@ def get_metric_kwargs(
             "metric_value_keys": metric_definition["metric_value_keys"],
         }
         if configuration:
-            expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl(
-                **configuration.kwargs
-            )._get_runtime_kwargs(runtime_configuration=runtime_configuration)
+            expectation = configuration.to_domain_obj()
+            configuration_kwargs = expectation._get_runtime_kwargs(
+                runtime_configuration=runtime_configuration
+            )
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {

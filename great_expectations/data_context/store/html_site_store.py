@@ -106,7 +106,9 @@ class HtmlSiteStore:
 
     _key_class = SiteSectionIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None) -> None:
+    def __init__(  # noqa: C901 - 11
+        self, store_backend=None, runtime_environment=None
+    ) -> None:
         store_backend_module_name = store_backend.get(
             "module_name", "great_expectations.data_context.store"
         )
@@ -379,7 +381,9 @@ class HtmlSiteStore:
             for key in keys:
                 target_store_backend.remove_key(key)
 
-    def copy_static_assets(self, static_assets_source_dir: str | None = None):
+    def copy_static_assets(  # noqa: C901 - 11
+        self, static_assets_source_dir: str | None = None
+    ):
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
@@ -488,11 +492,3 @@ class HtmlSiteStore:
     @property
     def config(self) -> dict:
         return self._config
-
-    def self_check(self, pretty_print: bool = True) -> dict:
-        report_object = self._config
-
-        # Chetan - 20200126 - The actual pretty printing and self check mechanism is
-        # open to implement. This is simply added to adhere to `test_test_yaml_config_supported_types_have_self_check`
-
-        return report_object

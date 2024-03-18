@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Un
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 def file_get_unfiltered_batch_definition_list_fn(
     data_connector: FilePathDataConnector, batch_request: BatchRequest
-) -> list[BatchDefinition]:
+) -> list[LegacyBatchDefinition]:
     """Get all batch definitions for all files from a data connector using the supplied batch request.
 
     Args:
@@ -51,7 +51,7 @@ def file_get_unfiltered_batch_definition_list_fn(
     """
 
     # Use a combination of a list and set to preserve iteration order
-    batch_definition_list: list[BatchDefinition] = list()
+    batch_definition_list: list[LegacyBatchDefinition] = list()
     batch_definition_set = set()
     for (
         batch_definition
@@ -70,11 +70,11 @@ def file_get_unfiltered_batch_definition_list_fn(
 
 def make_directory_get_unfiltered_batch_definition_list_fn(
     data_directory: PathStr,
-) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
     def directory_get_unfiltered_batch_definition_list_fn(
         data_connector: FilePathDataConnector,
         batch_request: BatchRequest,
-    ) -> list[BatchDefinition]:
+    ) -> list[LegacyBatchDefinition]:
         """Get a single batch definition for the directory supplied in data_directory.
 
         Args:
@@ -85,7 +85,7 @@ def make_directory_get_unfiltered_batch_definition_list_fn(
         Returns:
             List containing a single batch definition referencing the directory of interest.
         """
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=data_connector.datasource_name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=data_connector.data_asset_name,
@@ -134,7 +134,7 @@ class FilePathDataConnector(DataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         super().__init__(
@@ -158,7 +158,7 @@ class FilePathDataConnector(DataConnector):
         )
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
+        self._data_references_cache: Dict[str, List[LegacyBatchDefinition] | None] = {}
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -171,7 +171,7 @@ class FilePathDataConnector(DataConnector):
     @override
     def get_batch_definition_list(
         self, batch_request: BatchRequest
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -189,9 +189,9 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        batch_definition_list: List[
-            BatchDefinition
-        ] = self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+        batch_definition_list: List[LegacyBatchDefinition] = (
+            self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+        )
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -225,12 +225,14 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+    def build_batch_spec(
+        self, batch_definition: LegacyBatchDefinition
+    ) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -308,7 +310,7 @@ class FilePathDataConnector(DataConnector):
         """
 
         def _matching_criterion(
-            batch_definition_list: Union[List[BatchDefinition], None]
+            batch_definition_list: Union[List[LegacyBatchDefinition], None],
         ) -> bool:
             return (
                 (batch_definition_list is not None)
@@ -316,7 +318,9 @@ class FilePathDataConnector(DataConnector):
                 else (batch_definition_list is None)
             )
 
-        data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
+        data_reference_mapped_element: Tuple[
+            str, Union[List[LegacyBatchDefinition], None]
+        ]
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -333,7 +337,7 @@ class FilePathDataConnector(DataConnector):
     # Interface Method
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         """
         This interface method examines "BatchDefinition" object and converts it to exactly one "data_reference" handle,
@@ -387,7 +391,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return regex
 
-    def _get_data_references_cache(self) -> Dict[str, List[BatchDefinition] | None]:
+    def _get_data_references_cache(
+        self,
+    ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
         objects.  Subsequently, "BatchDefinition" objects generated are amenable to flexible querying and sorting.
@@ -399,14 +405,14 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         if len(self._data_references_cache) == 0:
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
-                mapped_batch_definition_list: List[
-                    BatchDefinition
-                ] | None = self._map_data_reference_string_to_batch_definition_list_using_regex(
-                    data_reference=data_reference
+                mapped_batch_definition_list: List[LegacyBatchDefinition] | None = (
+                    self._map_data_reference_string_to_batch_definition_list_using_regex(
+                        data_reference=data_reference
+                    )
                 )
-                self._data_references_cache[
-                    data_reference
-                ] = mapped_batch_definition_list
+                self._data_references_cache[data_reference] = (
+                    mapped_batch_definition_list
+                )
 
         return self._data_references_cache
 
@@ -436,8 +442,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
     def _get_batch_definition_list_from_data_references_cache(
         self,
-    ) -> List[BatchDefinition]:
-        batch_definition_list: List[BatchDefinition] = [
+    ) -> List[LegacyBatchDefinition]:
+        batch_definition_list: List[LegacyBatchDefinition] = [
             batch_definitions[0]
             for batch_definitions in self._get_data_references_cache().values()
             if batch_definitions is not None
@@ -446,20 +452,20 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
     def _map_data_reference_string_to_batch_definition_list_using_regex(
         self, data_reference: str
-    ) -> List[BatchDefinition] | None:
-        batch_identifiers: Optional[
-            IDDict
-        ] = self._convert_data_reference_string_to_batch_identifiers_using_regex(
-            data_reference=data_reference
+    ) -> List[LegacyBatchDefinition] | None:
+        batch_identifiers: Optional[IDDict] = (
+            self._convert_data_reference_string_to_batch_identifiers_using_regex(
+                data_reference=data_reference
+            )
         )
         if batch_identifiers is None:
             return None
 
         # Importing at module level causes circular dependencies.
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
         return [
-            BatchDefinition(
+            LegacyBatchDefinition(
                 datasource_name=self._datasource_name,
                 data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_asset_name,
@@ -482,9 +488,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         )
 
         # Check for `(?P<name>)` named group syntax
-        defined_group_name_to_group_index_mapping: Dict[
-            str, int
-        ] = self._regex_parser.get_named_group_name_to_group_index_mapping()
+        defined_group_name_to_group_index_mapping: Dict[str, int] = (
+            self._regex_parser.get_named_group_name_to_group_index_mapping()
+        )
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()
         )

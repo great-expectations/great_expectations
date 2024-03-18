@@ -131,7 +131,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return converted_string
 
-    def _convert_filepath_to_key(self, filepath):  # noqa: PLR0912
+    def _convert_filepath_to_key(self, filepath):  # noqa: C901, PLR0912
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
             return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
@@ -180,7 +180,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             ]
             intermediate_filepath_regex = re.sub(
                 r"{\d+}",
-                lambda m, r=iter(  # noqa: B008 # function-call-in-default-argument
+                lambda m,
+                r=iter(  # noqa: B008 # function-call-in-default-argument
                     tuple_index_list
                 ): next(r),
                 filepath_template,
@@ -336,7 +337,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         filepath = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
-        path, filename = os.path.split(filepath)
+        path, _filename = os.path.split(filepath)
 
         os.makedirs(str(path), exist_ok=True)  # noqa: PTH103
         with open(filepath, "wb") as outfile:
@@ -354,7 +355,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         dest_path = os.path.join(  # noqa: PTH118
             self.full_base_directory, self._convert_key_to_filepath(dest_key)
         )
-        dest_dir, dest_filename = os.path.split(dest_path)
+        dest_dir, _dest_filename = os.path.split(dest_path)
 
         if os.path.exists(source_path):  # noqa: PTH110
             os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103

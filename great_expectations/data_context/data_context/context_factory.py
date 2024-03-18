@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Literal,
     Mapping,
@@ -16,12 +17,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
-
-try:
-    import black
-except ImportError:
-    black = None  # type: ignore[assignment]
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +38,13 @@ if TYPE_CHECKING:
         ExpectationsStore,
         ValidationsStore,
     )
+    from great_expectations.data_context.store.validation_config_store import (
+        ValidationConfigStore,
+    )
     from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.validator.validator import Validator
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
@@ -51,10 +52,10 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 class ProjectManager:
     """Singleton class to manage projects in the global namespace."""
 
-    _project: AbstractDataContext | None
+    __project: AbstractDataContext | None
 
     def __init__(self):
-        self._project = None
+        self.__project = None
 
     def get_project(  # noqa: PLR0913
         self,
@@ -68,7 +69,7 @@ class ProjectManager:
         cloud_mode: bool | None = None,
         mode: ContextModes | None = None,
     ) -> AbstractDataContext:
-        self._project = self._build_context(
+        self.__project = self._build_context(
             project_config=project_config,
             context_root_dir=context_root_dir,
             project_root_dir=project_root_dir,
@@ -79,42 +80,73 @@ class ProjectManager:
             cloud_mode=cloud_mode,
             mode=mode,
         )
-        return self._project
+        return self.__project
 
     def set_project(self, project: AbstractDataContext) -> None:
-        self._project = project
+        self.__project = project
 
-    def get_expectations_store(self) -> ExpectationsStore:
-        if not self._project:
+    @property
+    def _project(self) -> AbstractDataContext:
+        if not self.__project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."
             )
+        return self.__project
+
+    def get_expectations_store(self) -> ExpectationsStore:
         return self._project.expectations_store
 
     def get_checkpoints_store(self) -> CheckpointStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
         return self._project.checkpoint_store
 
     def get_validations_store(self) -> ValidationsStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
         return self._project.validations_store
 
+    def get_validation_config_store(self) -> ValidationConfigStore:
+        return self._project.validation_config_store
+
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
         return self._project.evaluation_parameter_store
+
+    def get_datasources(self) -> DatasourceDict:
+        return self._project.datasources
+
+    def get_validator(self, batch_request: BatchRequest) -> Validator:
+        return self._project.get_validator(batch_request=batch_request)
+
+    def is_using_cloud(self) -> bool:
+        from great_expectations.data_context import CloudDataContext
+
+        return isinstance(self._project, CloudDataContext)
+
+    def build_data_docs(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifiers: list | None = None,
+        dry_run: bool = False,
+        build_index: bool = True,
+    ) -> dict:
+        return self._project.build_data_docs(
+            site_names=site_names,
+            resource_identifiers=resource_identifiers,
+            dry_run=dry_run,
+            build_index=build_index,
+        )
+
+    def get_docs_sites_urls(
+        self,
+        resource_identifier: Any | None = None,
+        site_name: str | None = None,
+        only_if_exists: bool = True,
+        site_names: list[str] | None = None,
+    ) -> list[dict[str, str]]:
+        return self._project.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+            site_names=site_names,
+        )
 
     def _build_context(  # noqa: PLR0913
         self,
@@ -185,7 +217,7 @@ class ProjectManager:
             "ephemeral": EphemeralDataContext,
             "file": FileDataContext,
             "cloud": CloudDataContext,
-            None: AbstractDataContext,
+            None: AbstractDataContext,  # type: ignore[type-abstract]
         }
 
         context_fn_map: dict[ContextModes | None, Callable] = {
@@ -366,8 +398,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
     mode: Literal["ephemeral"] = ...,
-) -> EphemeralDataContext:
-    ...
+) -> EphemeralDataContext: ...
 
 
 @overload
@@ -380,8 +411,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
-) -> FileDataContext:
-    ...
+) -> FileDataContext: ...
 
 
 @overload
@@ -395,8 +425,7 @@ def get_context(  # type: ignore[overload-overlap]
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
     mode: Literal["file"] | None = ...,
-) -> FileDataContext:
-    ...
+) -> FileDataContext: ...
 
 
 @overload
@@ -410,8 +439,7 @@ def get_context(
     cloud_organization_id: str | None = ...,
     cloud_mode: Literal[True] = ...,
     mode: Literal["cloud"] | None = ...,
-) -> CloudDataContext:
-    ...
+) -> CloudDataContext: ...
 
 
 @overload
@@ -425,8 +453,7 @@ def get_context(
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
     mode: None = ...,
-) -> EphemeralDataContext | FileDataContext | CloudDataContext:
-    ...
+) -> EphemeralDataContext | FileDataContext | CloudDataContext: ...
 
 
 @public_api
@@ -478,7 +505,7 @@ def get_context(  # noqa: PLR0913
 
     **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
 
-    Cloud configuration can be set up by passing `cloud_*` parameters to `get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
+    Cloud configuration can be set up by passing `cloud_*` parameters to `gx.get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
 
     Relevant parameters
 

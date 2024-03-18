@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
@@ -172,7 +172,7 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+    (query_to_create_temp_table, _temp_table_name) = batch_data._create_temporary_table(
         dialect=GXSqlDialect.SQLITE,
         query="test_query",
         temp_table_schema_name="test_schema",
@@ -190,7 +190,7 @@ def test_instantiation_with_temp_table_schema():
         )
         (
             query_to_create_temp_table,
-            temp_table_name,
+            _temp_table_name,
         ) = batch_data._create_temporary_table(
             dialect=GXSqlDialect.SQLITE,
             query="test_query",

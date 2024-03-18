@@ -9,7 +9,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 context = gx.get_context()
-suite = context.get_expectation_suite("yellow_tripdata_validations")
+suite = context.suites.get("yellow_tripdata_validations")
 
 # This BatchRequest will retrieve all twelve batches from 2019
 multi_batch_request = BatchRequest(
@@ -50,7 +50,7 @@ pre_dec_batch_definition_list: list = (
 
 # Get the highest max and lowest min before December
 cumulative_max = 0
-cumulative_min = np.Inf
+cumulative_min = np.inf
 for batch_definition in pre_dec_batch_definition_list:
     batch_id: str = batch_definition.id
     current_max = validator_multi_batch.get_metric(

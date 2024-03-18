@@ -12,7 +12,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 context = gx.get_context()
-suite = context.get_expectation_suite("yellow_tripdata_validations")
+suite = context.suites.get("yellow_tripdata_validations")
 
 # Create three BatchRequests for Jan, Feb, and March 2019 data and instantiate a Validator with all three BatchRequests
 jan_batch_request: BatchRequest = BatchRequest(
@@ -65,7 +65,7 @@ jan_feb_batch_definition_list: list = (
 
 # Get the highest max and lowest min between January and February
 cumulative_max = 0
-cumulative_min = np.Inf
+cumulative_min = np.inf
 for batch_definition in jan_feb_batch_definition_list:
     batch_id: str = batch_definition.id
     current_max = validator.get_metric(

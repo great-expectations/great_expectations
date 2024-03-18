@@ -18,7 +18,6 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 )
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
@@ -49,6 +48,7 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.VALIDATION_CONFIGS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
     GX_DIR: ClassVar[str] = "gx"
@@ -127,12 +127,12 @@ class SerializableDataContext(AbstractDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = project_config.anonymous_usage_statistics
-        context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = self.config.anonymous_usage_statistics
+        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            project_config.anonymous_usage_statistics
+        )
+        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            self.config.anonymous_usage_statistics
+        )
 
         if (
             project_config_usage_stats.enabled is False  # type: ignore[union-attr]
@@ -175,7 +175,6 @@ class SerializableDataContext(AbstractDataContext):
     def create(
         cls,
         project_root_dir: Optional[PathStr] = None,
-        usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
     ) -> SerializableDataContext:
         """
@@ -200,7 +199,6 @@ class SerializableDataContext(AbstractDataContext):
         """
         gx_dir = cls._scaffold(
             project_root_dir=project_root_dir,
-            usage_statistics_enabled=usage_statistics_enabled,
         )
         return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
@@ -208,7 +206,6 @@ class SerializableDataContext(AbstractDataContext):
     def _scaffold(
         cls,
         project_root_dir: Optional[PathStr] = None,
-        usage_statistics_enabled: bool = True,
     ) -> pathlib.Path:
         if not project_root_dir:
             project_root_dir = pathlib.Path.cwd()
@@ -224,14 +221,12 @@ class SerializableDataContext(AbstractDataContext):
     - No action was taken."""
             warnings.warn(message)
         else:
-            cls._write_project_template_to_disk(gx_dir, usage_statistics_enabled)
+            cls._write_project_template_to_disk(gx_dir)
 
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(
-                uncommitted_dir
-            )
+    - No action was taken.""".format(uncommitted_dir)
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
@@ -275,16 +270,11 @@ class SerializableDataContext(AbstractDataContext):
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
-    def _write_project_template_to_disk(
-        cls, gx_dir: PathStr, usage_statistics_enabled: bool = True
-    ) -> None:
+    def _write_project_template_to_disk(cls, gx_dir: PathStr) -> None:
         gx_dir = pathlib.Path(gx_dir)
         file_path = gx_dir / cls.GX_YML
         with file_path.open("w") as template:
-            if usage_statistics_enabled:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
-            else:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
+            template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
 
     @classmethod
     def _scaffold_directories(cls, base_dir: pathlib.Path) -> None:

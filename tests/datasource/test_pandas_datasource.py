@@ -331,10 +331,7 @@ def test_process_batch_parameters():
 
 
 @pytest.mark.filesystem
-def test_pandas_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, empty_data_context
-):
-    context = empty_data_context
+def test_pandas_datasource_processes_dataset_options(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
@@ -349,9 +346,7 @@ def test_pandas_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(
-        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
-    )
+    validator = BridgeValidator(batch, ExpectationSuite(name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
 

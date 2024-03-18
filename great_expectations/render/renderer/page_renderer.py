@@ -186,7 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
         columns = defaultdict(list)
         try:
             suite_meta = (
-                self._data_context.get_expectation_suite(expectation_suite_name).meta
+                self._data_context.suites.get(expectation_suite_name).meta
                 if self._data_context is not None
                 else None
             )
@@ -195,9 +195,9 @@ class ValidationResultsPageRenderer(Renderer):
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
             if meta_properties_to_render is not None:
-                evr.expectation_config.kwargs[
-                    "meta_properties_to_render"
-                ] = meta_properties_to_render
+                evr.expectation_config.kwargs["meta_properties_to_render"] = (
+                    meta_properties_to_render
+                )
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:
@@ -679,7 +679,7 @@ class ExpectationSuitePageRenderer(Renderer):
             columns,
             ordered_columns,
         ) = expectations.get_grouped_and_ordered_expectations_by_column()
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
 
         overview_content_blocks = [
             self._render_expectation_suite_header(),
@@ -764,7 +764,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     @classmethod
     def _render_expectation_suite_info(cls, expectations):
-        expectation_suite_name = expectations.expectation_suite_name
+        expectation_suite_name = expectations.name
         # TODO: Deprecate "great_expectations.__version__"
         ge_version = expectations.meta.get(
             "great_expectations_version"
@@ -802,7 +802,9 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(cls, expectations):  # noqa: PLR0912
+    def _render_expectation_suite_notes(
+        cls, expectations: ExpectationSuite
+    ) -> TextContent:
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -819,58 +821,31 @@ class ExpectationSuitePageRenderer(Renderer):
             f"This Expectation suite currently contains {total_expectations} total Expectations across {total_columns} columns.",
         ]
 
-        if "notes" in expectations.meta:
-            notes = expectations.meta["notes"]
-            note_content = None
-
+        notes = expectations.notes
+        if notes:
             if isinstance(notes, str):
-                note_content = [notes]
-
-            elif isinstance(notes, list):
-                note_content = notes
-
-            elif isinstance(notes, dict):
-                if "format" in notes:
-                    if notes["format"] == "string":
-                        if isinstance(notes["content"], str):
-                            note_content = [notes["content"]]
-                        elif isinstance(notes["content"], list):
-                            note_content = notes["content"]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-
-                    elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], str):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": notes["content"],
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                            ]
-                        elif isinstance(notes["content"], list):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": note,
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                                for note in notes["content"]
-                            ]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-                else:
-                    logger.warning(
-                        "Unrecognized Expectation suite notes format. Skipping rendering."
+                note_content = [
+                    RenderedMarkdownContent(
+                        **{
+                            "content_block_type": "markdown",
+                            "markdown": notes,
+                            "styling": {"parent": {}},
+                        }
                     )
+                ]
+            elif isinstance(notes, list):
+                note_content = [
+                    RenderedMarkdownContent(
+                        **{
+                            "content_block_type": "markdown",
+                            "markdown": note,
+                            "styling": {"parent": {}},
+                        }
+                    )
+                    for note in notes
+                ]
+            else:
+                note_content = None
 
             if note_content is not None:
                 content += note_content
@@ -939,7 +914,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):  # noqa: PLR0912
+    def render(self, validation_results):  # noqa: C901, PLR0912
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:

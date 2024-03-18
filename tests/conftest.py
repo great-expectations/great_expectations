@@ -21,6 +21,7 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import project_manager, set_context
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.checkpoint.configurator import (
     ActionDetails,
     ActionDict,
@@ -40,10 +41,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -88,6 +85,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -126,6 +124,10 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251 # type-checking only
+
+    from pytest_mock import MockerFixture
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import Engine
 
@@ -180,10 +182,8 @@ def spark_warehouse_session(tmp_path_factory):
     pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: pyspark.SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = SparkDFExecutionEngine.get_or_create_spark_session(
         spark_config={
-            "spark.sql.catalogImplementation": "in-memory",
-            "spark.executor.memory": "450m",
             "spark.sql.warehouse.dir": spark_warehouse_path,
         }
     )
@@ -290,11 +290,6 @@ def pytest_addoption(parser):
         "--clickhouse",
         action="store_true",
         help="If set, execute tests against clickhouse",
-    )
-    parser.addoption(
-        "--aws-integration",
-        action="store_true",
-        help="If set, run aws integration tests for usage_statistics",
     )
     parser.addoption(
         "--docs-tests",
@@ -468,11 +463,6 @@ def pytest_collection_modifyitems(config, items):
 
     categories = (
         Category(
-            mark="aws_integration",
-            flag="--aws-integration",
-            reason="need --aws-integration option to run",
-        ),
-        Category(
             mark="docs",
             flag="--docs-tests",
             reason="need --docs-tests option to run",
@@ -496,7 +486,8 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    monkeypatch.setenv("GE_USAGE_STATS", "False")  # v0.18 and before
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)  # v1.0 and after
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -554,13 +545,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -656,22 +641,15 @@ def spark_session_v012(test_backends):
         import pyspark  # noqa: F401
         from pyspark.sql import SparkSession  # noqa: F401
 
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
-def basic_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def basic_expectation_suite():
     expectation_suite = ExpectationSuite(
-        expectation_suite_name="default",
+        name="default",
         meta={},
         expectations=[
             ExpectationConfiguration(
@@ -689,7 +667,6 @@ def basic_expectation_suite(empty_data_context_stats_enabled):
                 kwargs={"column": "naturals"},
             ),
         ],
-        data_context=context,
     )
     return expectation_suite
 
@@ -1031,10 +1008,8 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1053,10 +1028,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         file_relative_path(
@@ -1088,7 +1065,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1098,7 +1076,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1108,7 +1087,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1118,7 +1098,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1183,10 +1164,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1304,19 +1283,11 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1352,20 +1323,12 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1410,20 +1373,11 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
                 },
             },
             {
@@ -1460,20 +1414,11 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
                 },
             },
             {
@@ -1513,10 +1458,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1530,10 +1473,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1554,10 +1495,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1576,10 +1515,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -1616,7 +1553,8 @@ def deterministic_asset_data_connector_context(
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -1679,10 +1617,8 @@ def deterministic_asset_data_connector_context(
                     users: {{}}
         """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1701,7 +1637,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -1718,7 +1655,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         file_relative_path(
@@ -1736,7 +1674,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1746,7 +1685,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1756,7 +1696,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1766,7 +1707,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -1914,19 +1856,11 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -1962,20 +1896,12 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
@@ -2020,20 +1946,11 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
                 },
             },
             {
@@ -2070,20 +1987,11 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
             {
                 "name": "store_validation_result",
                 "action": {
                     "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
                 },
             },
             {
@@ -2122,10 +2030,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -2139,10 +2045,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -2163,10 +2067,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -2185,10 +2087,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        config_version=1,
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.STORE_EVALUATION_PARAMS,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -2335,10 +2235,12 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2364,10 +2266,12 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2393,10 +2297,12 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2424,10 +2330,12 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2455,10 +2363,12 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2486,10 +2396,12 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -2589,9 +2501,8 @@ def titanic_sqlite_db_connection_string(sa):
 def titanic_expectation_suite(empty_data_context_stats_enabled):
     data_context = empty_data_context_stats_enabled
     return ExpectationSuite(
-        expectation_suite_name="Titanic.warning",
+        name="Titanic.warning",
         meta={},
-        data_asset_type="Dataset",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}
@@ -2674,7 +2585,8 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2721,7 +2633,8 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2739,7 +2652,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
             )
         ),
     )
-    return get_context(context_root_dir=context_path)
+    return get_context(context_root_dir=context_path, cloud_mode=False)
 
 
 @pytest.fixture
@@ -2768,7 +2681,8 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         os.path.join(asset_config_path, "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -2892,11 +2806,13 @@ def filesystem_csv(tmp_path_factory):
 
     os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)  # noqa: PTH118, PTH103
     with open(
-        os.path.join(base_dir, "f3", "f3_20190101.csv"), "w"  # noqa: PTH118
+        os.path.join(base_dir, "f3", "f3_20190101.csv"),  # noqa: PTH118
+        "w",
     ) as outfile:
         outfile.writelines(["a,b,c\n"])
     with open(
-        os.path.join(base_dir, "f3", "f3_20190102.csv"), "w"  # noqa: PTH118
+        os.path.join(base_dir, "f3", "f3_20190102.csv"),  # noqa: PTH118
+        "w",
     ) as outfile:
         outfile.writelines(["a,b,c\n"])
 
@@ -3180,10 +3096,9 @@ def fds_data_context(
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
     datasource.add_query_asset(
-        name="trip_asset_split_by_event_type",
+        name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
-    ).add_splitter_column_value("event_type")
-
+    )
     return context
 
 
@@ -3200,20 +3115,20 @@ introspection:
     whole_table: {{}}
 
     daily:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%m-%d"
 
     weekly:
-        splitter_method: _split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: _partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: date
             date_format_string: "%Y-%W"
 
     by_id_dozens:
-        splitter_method: _split_on_divided_integer
-        splitter_kwargs:
+        partitioner_method: _partition_on_divided_integer
+        partitioner_kwargs:
             column_name: id
             divisor: 12
 """
@@ -3543,7 +3458,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode(
-    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_list_keys: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3595,9 +3510,7 @@ def empty_data_context_in_cloud_mode(
             context_root_dir=project_path_name,
         )
 
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    context._datasources = {}  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -3660,7 +3573,7 @@ def empty_cloud_context_fluent(
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode_custom_base_url(
-    mock_get_all: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    mock_get_all: MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3725,7 +3638,7 @@ def profiler_rules() -> dict:
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -3806,7 +3719,7 @@ def populated_profiler_store(
 
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
-def alice_columnar_table_single_batch(empty_data_context):
+def alice_columnar_table_single_batch():
     """
     About the "Alice" User Workflow Fixture
 
@@ -4060,16 +3973,14 @@ def alice_columnar_table_single_batch(empty_data_context):
     )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
-    )
+    expected_expectation_suite = ExpectationSuite(name=expectation_suite_name)
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
@@ -4425,15 +4336,6 @@ def alice_columnar_table_single_batch_context(
     alice_columnar_table_single_batch,
 ):
     context = empty_data_context_stats_enabled
-    # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
-    # (ie. adjusted to be context._usage_statistics_handler)
-    context._usage_statistics_handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id="00000000-0000-0000-0000-00000000a004",
-        usage_statistics_url="N/A",
-        oss_id=None,
-    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(  # noqa: PTH118
@@ -5412,15 +5314,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "bobby_columnar_table_multi_batch_quantiles_estimator"
     )
     expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name_quantiles_estimator,
-        data_context=empty_data_context,
+        name=expectation_suite_name_quantiles_estimator,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
         expected_expectation_suite_quantiles_estimator._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     expected_effective_profiler_config: dict = {
@@ -7391,7 +7292,8 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7472,7 +7374,8 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7584,15 +7487,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         "bobster_columnar_table_multi_batch_bootstrap_estimator"
     )
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
-        5000
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        1.0e3
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        3.00
-    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = 5000
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = 1.0e3
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = 3.00
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
         float(
@@ -7643,7 +7540,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -7831,7 +7729,8 @@ def quentin_columnar_table_multi_batch_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -8313,8 +8212,8 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
 
 
 @pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
+def validator_with_mock_execution_engine(mocker: MockerFixture) -> Validator:
+    execution_engine = mocker.MagicMock()
     validator = Validator(execution_engine=execution_engine)
     return validator
 

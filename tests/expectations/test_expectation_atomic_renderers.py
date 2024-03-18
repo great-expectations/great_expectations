@@ -16,7 +16,7 @@ from great_expectations.render import RenderedAtomicContent
 def expectation_configuration_kwargs():
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "ge_cloud_id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
+        "id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
         "expectation_type": "",
         "kwargs": {},
         "meta": {},
@@ -25,7 +25,7 @@ def expectation_configuration_kwargs():
 
 @pytest.fixture
 def get_prescriptive_rendered_content(
-    expectation_configuration_kwargs: Dict[str, Union[str, dict]]
+    expectation_configuration_kwargs: Dict[str, Union[str, dict]],
 ) -> Callable:
     def _get_prescriptive_rendered_content(
         update_dict: Dict[str, Union[str, dict]],
@@ -62,7 +62,7 @@ def evr_kwargs(expectation_configuration_kwargs):
 
 @pytest.fixture
 def get_diagnostic_rendered_content(
-    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]]
+    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]],
 ) -> Callable:
     def _get_diagnostic_rendered_content(
         update_dict: Dict[str, Union[dict, ExpectationConfiguration]],
@@ -213,7 +213,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
             "threshold": 0.1,
         },
         "meta": {},
-        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+        "id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -260,7 +260,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
             "threshold": 0.1,
         },
         "meta": {},
-        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+        "id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -517,7 +517,7 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
 
@@ -549,7 +549,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),

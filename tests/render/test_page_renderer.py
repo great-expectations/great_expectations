@@ -15,67 +15,55 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
 pytestmark = pytest.mark.filesystem
 
 
-def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
-    empty_data_context,
-):
-    context = empty_data_context
+def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
+        ExpectationSuite(name="test", notes="*hi*")
+    )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(result.text) == [
+        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*hi*",
+            "styling": {"parent": {}},
+        },
+    ]
+
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
+            name="test",
+            notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*hi*",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*alpha*",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "_bravo_",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "charlie",
+            "styling": {"parent": {}},
+        },
     ]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
-            data_context=context,
-        )
-    )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
-    assert RenderedContent.rendered_content_list_to_json(result.text) == [
-        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
-    ]
-
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.STRING,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
-        )
-    )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
-    assert RenderedContent.rendered_content_list_to_json(result.text) == [
-        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
-    ]
-
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
-            data_context=context,
+            name="test",
+            notes="*alpha*",
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -98,14 +86,8 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.MARKDOWN,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
+            name="test",
+            notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -139,16 +121,12 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
         ]
 
 
-def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes(
-    empty_data_context,
-):
-    context: ExpectationSuite = empty_data_context
+def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=None,
-            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -158,9 +136,8 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
-            data_context=context,
+            name="test",
+            notes=["hi"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -183,7 +160,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=[
                 ExpectationConfiguration(
@@ -197,7 +174,6 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
                     expectation_type="expect_column_to_exist", kwargs={"column": "y"}
                 ),
             ],
-            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text)[0])

@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 from uuid import UUID
 
 import numpy
@@ -25,7 +25,7 @@ class TestCloudDataStore:
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
-        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
 
     def test_add_expectation_suite_name_collision_failure(
@@ -33,7 +33,7 @@ class TestCloudDataStore:
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
-        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
         with pytest.raises(ExpectationSuiteError):
             context.add_expectation_suite("test_suite")

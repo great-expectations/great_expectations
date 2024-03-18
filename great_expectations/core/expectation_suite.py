@@ -16,6 +16,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -25,16 +26,20 @@ import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import (
-    deprecated_argument,
-    new_argument,
     public_api,
+)
+from great_expectations.analytics.anonymizer import anonymize
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ExpectationSuiteExpectationCreatedEvent,
+    ExpectationSuiteExpectationDeletedEvent,
+    ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -50,80 +55,54 @@ from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
-    from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
     )
 
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
+
 logger = logging.getLogger(__name__)
 
 
 @public_api
-@deprecated_argument(argument_name="data_asset_type", version="0.14.0")
-@new_argument(
-    argument_name="ge_cloud_id",
-    version="0.13.33",
-    message="Used in GX Cloud deployments.",
-)
 class ExpectationSuite(SerializableDictDot):
     """Set-like collection of Expectations.
 
     Args:
         name: Name of the Expectation Suite
-        expectation_suite_name (deprecated): Name of the Expectation Suite.
-        data_context: Data Context associated with this Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
         evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
-        data_asset_type: Type of data asset to associate with this suite.
         execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
-        ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
+        id: Great Expectations Cloud id for this Expectation Suite.
     """
 
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
+        expectations: Optional[
+            Sequence[Union[dict, ExpectationConfiguration, Expectation]]
+        ] = None,
         evaluation_parameters: Optional[dict] = None,
-        data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_name: Optional[
-            str
-        ] = None,  # for backwards compatibility - remove
+        notes: str | list[str] | None = None,
+        id: Optional[str] = None,
     ) -> None:
-        from great_expectations.expectations.expectation_configuration import (
-            ExpectationConfiguration,
-        )
+        if not name or not isinstance(name, str):
+            raise ValueError("name must be provided as a non-empty string")
+        self.name = name
+        self.id = id
 
-        if name:
-            assert isinstance(name, str), "Name is a required field."
-            self.expectation_suite_name = name
-        else:
-            assert isinstance(expectation_suite_name, str), "Name is a required field."
-            self.expectation_suite_name = expectation_suite_name
-        self.ge_cloud_id = ge_cloud_id
-        self._data_context = data_context
+        self.expectations = [
+            self._process_expectation(exp) for exp in expectations or []
+        ]
 
-        if expectations is None:
-            expectations = []
-        expectation_configurations = [
-            ExpectationConfiguration(**expectation)
-            if isinstance(expectation, dict)
-            else expectation
-            for expectation in expectations
-        ]
-        self.expectations: list[Expectation] = [
-            self._build_expectation(config) for config in expectation_configurations
-        ]
         if evaluation_parameters is None:
             evaluation_parameters = {}
         self.evaluation_parameters = evaluation_parameters
-        self.data_asset_type = data_asset_type
         self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
@@ -135,17 +114,26 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self.notes = notes
 
         from great_expectations import project_manager
 
         self._store = project_manager.get_expectations_store()
 
     @property
-    def name(self) -> str:
-        return self.expectation_suite_name
+    def evaluation_parameter_options(self) -> tuple[str, ...]:
+        """EvaluationParameter options for this ExpectationSuite.
+
+        Returns:
+            tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.
+        """
+        output: set[str] = set()
+        for expectation in self.expectations:
+            output.update(expectation.evaluation_parameter_options)
+        return tuple(sorted(output))
 
     @public_api
-    def add_expectation(self, expectation: Expectation) -> Expectation:
+    def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
         if expectation.id:
             raise RuntimeError(
@@ -174,7 +162,62 @@ class ExpectationSuite(SerializableDictDot):
                     raise exc
 
         expectation.register_save_callback(save_callback=self._save_expectation)
+
+        self._submit_expectation_created_event(expectation=expectation)
+
         return expectation
+
+    def _submit_expectation_created_event(self, expectation: Expectation) -> None:
+        if expectation.__module__.startswith("great_expectations."):
+            custom_exp_type = False
+            expectation_type = expectation.expectation_type
+        else:
+            custom_exp_type = True
+            expectation_type = anonymize(expectation.expectation_type)
+
+        submit_event(
+            event=ExpectationSuiteExpectationCreatedEvent(
+                expectation_id=expectation.id,
+                expectation_suite_id=self.id,
+                expectation_type=expectation_type,
+                custom_exp_type=custom_exp_type,
+            )
+        )
+
+    def _process_expectation(
+        self, expectation_like: Union[Expectation, ExpectationConfiguration, dict]
+    ) -> Expectation:
+        """Transform an Expectation from one of its various serialized forms to the Expectation type,
+        and bind it to this ExpectationSuite.
+
+        Raises:
+            ValueError: If expectation_like is of type Expectation and expectation_like.id is not None.
+        """
+        from great_expectations.expectations.expectation import Expectation
+        from great_expectations.expectations.expectation_configuration import (
+            ExpectationConfiguration,
+        )
+
+        if isinstance(expectation_like, Expectation):
+            if expectation_like.id:
+                raise ValueError(
+                    "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "
+                    "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."
+                )
+            expectation_like.register_save_callback(
+                save_callback=self._save_expectation
+            )
+            return expectation_like
+        elif isinstance(expectation_like, ExpectationConfiguration):
+            return self._build_expectation(expectation_configuration=expectation_like)
+        elif isinstance(expectation_like, dict):
+            return self._build_expectation(
+                expectation_configuration=ExpectationConfiguration(**expectation_like)
+            )
+        else:
+            raise TypeError(
+                f"Expected Expectation, ExpectationConfiguration, or dict, but received type {type(expectation_like)}."
+            )
 
     @public_api
     def delete_expectation(self, expectation: Expectation) -> Expectation:
@@ -202,22 +245,38 @@ class ExpectationSuite(SerializableDictDot):
                 self.expectations.append(expectation)
                 raise exc
 
+        submit_event(
+            event=ExpectationSuiteExpectationDeletedEvent(
+                expectation_id=expectation.id,
+                expectation_suite_id=self.id,
+            )
+        )
+
         return expectation
 
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
+        # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now
+        key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
     def _has_been_saved(self) -> bool:
         """Has this ExpectationSuite been persisted to a Store?"""
         # todo: this should only check local keys instead of potentially querying the remote backend
-        key = self._store.get_key(name=self.name, id=self.ge_cloud_id)
+        key = self._store.get_key(name=self.name, id=self.id)
         return self._store.has_key(key=key)
 
     def _save_expectation(self, expectation) -> Expectation:
-        return self._store.update_expectation(suite=self, expectation=expectation)
+        expectation = self._store.update_expectation(
+            suite=self, expectation=expectation
+        )
+        submit_event(
+            event=ExpectationSuiteExpectationUpdatedEvent(
+                expectation_id=expectation.id, expectation_suite_id=self.id
+            )
+        )
+        return expectation
 
     @property
     def expectation_configurations(self) -> list[ExpectationConfiguration]:
@@ -282,18 +341,15 @@ class ExpectationSuite(SerializableDictDot):
         """
         ExpectationSuite equivalence relies only on expectations and evaluation parameters. It does not include:
         - data_asset_name
-        - expectation_suite_name
+        - name
         - meta
-        - data_asset_type
         """
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
                     # noinspection PyNoneFunctionAssignment,PyTypeChecker
                     other_dict: dict = expectationSuiteSchema.load(other)
-                    other = ExpectationSuite(
-                        **other_dict, data_context=self._data_context
-                    )
+                    other = ExpectationSuite(**other_dict)
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -322,10 +378,9 @@ class ExpectationSuite(SerializableDictDot):
             return NotImplemented
         return all(
             (
-                self.expectation_suite_name == other.expectation_suite_name,
+                self.name == other.name,
                 self.expectations == other.expectations,
                 self.evaluation_parameters == other.evaluation_parameters,
-                self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
             )
         )
@@ -349,8 +404,6 @@ class ExpectationSuite(SerializableDictDot):
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key), memo))
-
-        result._data_context = self._data_context
 
         return result
 
@@ -427,17 +480,12 @@ class ExpectationSuite(SerializableDictDot):
         return sorted(citations, key=lambda x: x["citation_date"])
 
     @public_api
-    @new_argument(
-        argument_name="ge_cloud_id",
-        version="0.13.33",
-        message="Used in cloud deployments.",
-    )
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
+        id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[ExpectationConfiguration]:
         """Remove an ExpectationConfiguration from the ExpectationSuite.
 
@@ -448,25 +496,23 @@ class ExpectationSuite(SerializableDictDot):
                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
                 based on all configuration parameters.
             remove_multiple_matches: If True, will remove multiple matching expectations.
-            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+            id: Great Expectations Cloud id for an Expectation.
 
         Returns:
             The list of deleted ExpectationConfigurations.
 
         Raises:
-            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            TypeError: Must provide either expectation_configuration or id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
         expectation_configurations = [exp.configuration for exp in self.expectations]
-        if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError(
-                "Must provide either expectation_configuration or ge_cloud_id"
-            )
+        if expectation_configuration is None and id is None:
+            raise TypeError("Must provide either expectation_configuration or id")
 
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
-            ge_cloud_id=ge_cloud_id,  # type: ignore[arg-type]
+            id=id,  # type: ignore[arg-type]
         )
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
@@ -517,12 +563,12 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.
-        If a ge_cloud_id is provided, match_type is ignored and only indexes of Expectations
-        with matching ge_cloud_id are returned.
+        If a id is provided, match_type is ignored and only indexes of Expectations
+        with matching id are returned.
 
         Args:
             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
@@ -531,7 +577,7 @@ class ExpectationSuite(SerializableDictDot):
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
                  that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
                  based on all configuration parameters
-            ge_cloud_id: Great Expectations Cloud id
+            id: Great Expectations Cloud id
 
         Returns: A list of indexes of matching ExpectationConfiguration
 
@@ -543,10 +589,8 @@ class ExpectationSuite(SerializableDictDot):
             ExpectationConfiguration,
         )
 
-        if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError(
-                "Must provide either expectation_configuration or ge_cloud_id"
-            )
+        if expectation_configuration is None and id is None:
+            raise TypeError("Must provide either expectation_configuration or id")
 
         if expectation_configuration and not isinstance(
             expectation_configuration, ExpectationConfiguration
@@ -557,12 +601,13 @@ class ExpectationSuite(SerializableDictDot):
 
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
-            if ge_cloud_id is not None:
-                if expectation.id == ge_cloud_id:
+            if id is not None:
+                if expectation.id == id:
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.configuration.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
+                    other=expectation_configuration,  # type: ignore[arg-type]
+                    match_type=match_type,
                 ):
                     match_indexes.append(idx)
 
@@ -573,12 +618,12 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
-        If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
-        ge_cloud_id are returned.
+        If a id is provided, match_type is ignored and only Expectations with matching
+        id are returned.
 
         Args:
             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
@@ -587,18 +632,16 @@ class ExpectationSuite(SerializableDictDot):
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
                  that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
                  based on all configuration parameters
-            ge_cloud_id: Great Expectations Cloud id
+            id: Great Expectations Cloud id
 
         Returns: A list of matching ExpectationConfigurations
         """
 
-        if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError(
-                "Must provide either expectation_configuration or ge_cloud_id"
-            )
+        if expectation_configuration is None and id is None:
+            raise TypeError("Must provide either expectation_configuration or id")
 
         found_expectation_indexes: List[int] = self.find_expectation_indexes(
-            expectation_configuration, match_type, ge_cloud_id
+            expectation_configuration, match_type, id
         )
 
         if len(found_expectation_indexes) > 0:
@@ -612,19 +655,14 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
-        This is a private method for adding expectations that allows for usage_events to be suppressed when
-        Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
-        takes in send_usage_event boolean.  If successful, upserts ExpectationConfiguration into this ExpectationSuite.
+        If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
@@ -643,8 +681,6 @@ class ExpectationSuite(SerializableDictDot):
         )
 
         if len(found_expectation_indexes) > 1:
-            if send_usage_event:
-                self.send_usage_event(success=False)
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -656,24 +692,19 @@ class ExpectationSuite(SerializableDictDot):
             #   .kwargs, expectation_configuration.kwargs)
             # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
             if overwrite_existing:
-                # if existing Expectation has a ge_cloud_id, add it back to the new Expectation Configuration
-                existing_expectation_ge_cloud_id = self.expectations[
+                # if existing Expectation has a id, add it back to the new Expectation Configuration
+                existing_expectation_id = self.expectations[
                     found_expectation_indexes[0]
                 ].id
-                if existing_expectation_ge_cloud_id is not None:
-                    expectation_configuration.ge_cloud_id = (
-                        existing_expectation_ge_cloud_id
-                    )
+                if existing_expectation_id is not None:
+                    expectation_configuration.id = existing_expectation_id
 
-                self.expectations[
-                    found_expectation_indexes[0]
-                ] = self._build_expectation(
-                    expectation_configuration=expectation_configuration
+                self.expectations[found_expectation_indexes[0]] = (
+                    self._build_expectation(
+                        expectation_configuration=expectation_configuration
+                    )
                 )
             else:
-                if send_usage_event:
-                    self.send_usage_event(success=False)
-
                 raise gx_exceptions.DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
@@ -685,24 +716,11 @@ class ExpectationSuite(SerializableDictDot):
                 )
             )
 
-        if send_usage_event:
-            self.send_usage_event(success=True)
-
         return expectation_configuration
-
-    def send_usage_event(self, success: bool) -> None:
-        usage_stats_event_payload: dict = {}
-        if self._data_context is not None:
-            self._data_context.send_usage_message(
-                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
-                event_payload=usage_stats_event_payload,
-                success=success,
-            )
 
     def add_expectation_configurations(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> List[ExpectationConfiguration]:
@@ -710,8 +728,6 @@ class ExpectationSuite(SerializableDictDot):
 
         Args:
             expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an "ExpectationConfiguration"
                 object, matching the specified criteria, and thus whether we should add or replace (i.e., "upsert").
             overwrite_existing: If "ExpectationConfiguration" already exists, this will cause it to be overwritten if
@@ -731,7 +747,6 @@ class ExpectationSuite(SerializableDictDot):
         ] = [
             self.add_expectation_configuration(
                 expectation_configuration=expectation_configuration,
-                send_usage_event=send_usage_event,
                 match_type=match_type,
                 overwrite_existing=overwrite_existing,
             )
@@ -743,7 +758,6 @@ class ExpectationSuite(SerializableDictDot):
     def add_expectation_configuration(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
@@ -751,8 +765,6 @@ class ExpectationSuite(SerializableDictDot):
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update.
-            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
-                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
@@ -770,7 +782,6 @@ class ExpectationSuite(SerializableDictDot):
         self._build_expectation(expectation_configuration)
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
-            send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )
@@ -1069,9 +1080,9 @@ class ExpectationSuite(SerializableDictDot):
             )
             if expectation_configurations is None:
                 expectation_configurations = []
-                expectation_configurations_by_domain[
-                    domain_type
-                ] = expectation_configurations
+                expectation_configurations_by_domain[domain_type] = (
+                    expectation_configurations
+                )
 
             expectation_configurations.append(expectation_configuration)
 
@@ -1087,9 +1098,9 @@ class ExpectationSuite(SerializableDictDot):
         for expectation in self.expectations:
             inline_renderer = InlineRenderer(render_object=expectation.configuration)
 
-            rendered_content: List[
-                RenderedAtomicContent
-            ] = inline_renderer.get_rendered_content()
+            rendered_content: List[RenderedAtomicContent] = (
+                inline_renderer.get_rendered_content()
+            )
 
             expectation.rendered_content = (
                 inline_renderer.replace_or_keep_existing_rendered_content(
@@ -1101,17 +1112,17 @@ class ExpectationSuite(SerializableDictDot):
 
 
 class ExpectationSuiteSchema(Schema):
-    expectation_suite_name = fields.Str()
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    name = fields.Str()
+    id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
     evaluation_parameters = fields.Dict(allow_none=True)
-    data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
+    notes = fields.Raw(required=False, allow_none=True)
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
-    def clean_empty(self, data):
+    def clean_empty(self, data):  # noqa: C901
         if isinstance(data, ExpectationSuite):
             if not hasattr(data, "evaluation_parameters"):
                 pass
@@ -1132,10 +1143,12 @@ class ExpectationSuiteSchema(Schema):
 
             if not data.get("meta"):
                 pass
-            elif data.get("meta") is None or data.get("meta") == []:
-                pass
             elif len(data.get("meta")) == 0:
                 data.pop("meta")
+
+            if "notes" in data and not data.get("notes"):
+                data.pop("notes")
+
         return data
 
     # noinspection PyUnusedLocal
@@ -1164,11 +1177,11 @@ class ExpectationSuiteSchema(Schema):
         """
         Utilize UUID for data validation but convert to string before usage in business logic
         """
-        attr = "ge_cloud_id"
+        attr = "id"
         uuid_val = data.get(attr)
         if uuid_val:
             data[attr] = str(uuid_val)
         return data
 
 
-expectationSuiteSchema = ExpectationSuiteSchema()
+expectationSuiteSchema: ExpectationSuiteSchema = ExpectationSuiteSchema()

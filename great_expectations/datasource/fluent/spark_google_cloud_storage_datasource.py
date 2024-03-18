@@ -35,9 +35,9 @@ class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
 @public_api
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[GoogleCloudStorageDataConnector]
-    ] = GoogleCloudStorageDataConnector
+    data_connector_type: ClassVar[Type[GoogleCloudStorageDataConnector]] = (
+        GoogleCloudStorageDataConnector
+    )
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "bucket_or_name",
@@ -61,9 +61,9 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
             if google.service_account and google.storage:
                 try:
-                    credentials: Union[
-                        google.Client, None
-                    ] = None  # If configured with gcloud CLI / env vars
+                    credentials: Union[google.Client, None] = (
+                        None  # If configured with gcloud CLI / env vars
+                    )
                     _check_config_substitutions_needed(
                         self,
                         self.gcs_options,
@@ -114,12 +114,16 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         try:
+            # tests GCS connection
             _ = self._get_gcs_client()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
+
+        # tests Spark connection, raising TestConnectionError
+        super().test_connection()
 
         if self.assets and test_assets:
             for asset in self.assets:

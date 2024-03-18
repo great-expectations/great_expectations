@@ -4,7 +4,7 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
 
 import pandas as pd
 import pytest
@@ -13,12 +13,13 @@ import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.data_context import get_context
@@ -36,6 +37,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -59,7 +61,8 @@ def yellow_trip_pandas_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -289,7 +292,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     actual = validator.convert_to_checkpoint_validations_list()
     expected_config = CheckpointValidationConfig(
         expectation_suite_name="validating_taxi_data",
-        expectation_suite_ge_cloud_id=ANY,
+        expectation_suite_id=ANY,
         batch_request={
             "datasource_name": "taxi_pandas",
             "data_connector_name": "monthly",
@@ -312,7 +315,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     context._cloud_mode = True
 
     suite = ExpectationSuite(
-        expectation_suite_name="validating_taxi_data",
+        name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
@@ -323,10 +326,9 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
-        data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
 
@@ -352,21 +354,16 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
     mock_expectation_store_update,
-    mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
     unset_gx_env_variables,
     multi_batch_taxi_validator_ge_cloud_mode,
-    empty_data_context_stats_enabled,
 ):
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
@@ -374,25 +371,22 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
     """
-    context = empty_data_context_stats_enabled
-
     mock_suite = ExpectationSuite(
-        expectation_suite_name="validating_taxi_data",
+        name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
+                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
+                id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
             ),
         ],
-        data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
     mock_context_get_suite.return_value = mock_suite
@@ -458,7 +452,7 @@ def test_validator_with_bad_batchrequest(
 def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):
-    total_batch_definition_list: List[BatchDefinition] = [
+    total_batch_definition_list: List[LegacyBatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
 
@@ -466,10 +460,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
     )
 
-    jan_batch_definition_list: List[
-        BatchDefinition
-    ] = jan_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    jan_batch_definition_list: List[LegacyBatchDefinition] = (
+        jan_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     assert len(jan_batch_definition_list) == 1
@@ -480,10 +474,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"index": slice(-1, 0, -1)}
     )
 
-    feb_march_batch_definition_list: List[
-        BatchDefinition
-    ] = feb_march_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    feb_march_batch_definition_list: List[LegacyBatchDefinition] = (
+        feb_march_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     for i in feb_march_batch_definition_list:
@@ -505,10 +499,10 @@ def test_validator_batch_filter(
         }
     )
 
-    jan_march_batch_definition_list: List[
-        BatchDefinition
-    ] = jan_march_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    jan_march_batch_definition_list: List[LegacyBatchDefinition] = (
+        jan_march_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     for i in jan_march_batch_definition_list:
@@ -525,10 +519,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"limit": 2}
     )
 
-    limit_batch_filter_definition_list: List[
-        BatchDefinition
-    ] = limit_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    limit_batch_filter_definition_list: List[LegacyBatchDefinition] = (
+        limit_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     assert len(limit_batch_filter_definition_list) == 2
@@ -548,7 +542,7 @@ def test_validator_batch_filter(
 def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
-    total_batch_definition_list: List[BatchDefinition] = [
+    total_batch_definition_list: List[LegacyBatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
     assert len(total_batch_definition_list) == 3
@@ -572,28 +566,6 @@ def test_custom_filter_function(
         v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
     }
     assert batch_definitions_months_set == {"01", "02"}
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.big
-def test_adding_expectation_to_validator_not_send_usage_message(
-    mock_emit, multi_batch_taxi_validator
-):
-    """
-    What does this test and why?
-
-    When an Expectation is called using a Validator, it validates the dataset using the implementation of
-    the Expectation. As part of the process, it also adds the Expectation to the active
-    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
-    (ie not calling add_expectations() directly) does not emit a usage_stats event.
-    """
-    multi_batch_taxi_validator.expect_column_values_to_be_between(
-        column="trip_distance", min_value=11, max_value=22
-    )
-    assert mock_emit.call_count == 0
-    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.big
@@ -1105,6 +1077,54 @@ def test_validator_include_rendered_content_diagnostic(
         expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
+
+
+@pytest.mark.parametrize(
+    "value_set, expected",
+    [
+        (list(range(2)), False),  # value set won't pass for the actual data
+        (list(range(5)), True),  # value set will pass for the actual data
+    ],
+)
+@pytest.mark.big
+def test_validator_validate_substitutes_evaluation_parameters(
+    value_set: list[int],
+    expected: bool,
+):
+    """Integration test to ensure evaluation parameters are respected when validating.
+    The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
+    just checking for result.success as a proxy for the evaluation_parameter being respected.
+    """
+
+    # Arrange
+    context = get_context(mode="ephemeral")
+    suite_name = "my_suite"
+    column_name = "my_column"
+    datasource = context.sources.add_pandas(name="my_datasource")
+    asset = datasource.add_dataframe_asset(
+        "my_asset", dataframe=pd.DataFrame({column_name: [0, 1, 2, 3, 4]})
+    )
+    suite = context.suites.add(ExpectationSuite(suite_name))
+    suite.add_expectation(
+        gxe.ExpectColumnDistinctValuesToBeInSet(
+            column=column_name, value_set={"$PARAMETER": "value_set"}
+        )
+    )
+    validator = context.get_validator(
+        batch_request=asset.build_batch_request(),
+        expectation_suite_name=suite_name,
+    )
+
+    # Act
+    result = validator.validate(evaluation_parameters={"value_set": value_set})
+    assert isinstance(result, ExpectationSuiteValidationResult)
+    evaluation_parameters_used = result.results[0]["expectation_config"]["kwargs"][
+        "value_set"
+    ]
+
+    # Assert
+    assert evaluation_parameters_used == value_set
+    assert result.success == expected
 
 
 @pytest.mark.unit
@@ -1620,3 +1640,69 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
             exception_info=None,
         ),
     ]
+
+
+@pytest.mark.unit
+def test_validator_with_exception_info_in_result():
+    get_context()
+    validator = Validator(execution_engine=PandasExecutionEngine())
+
+    mock_resolved_metrics = []
+
+    metric_id = (
+        "table.column_types",
+        "a351bbf72b281f0b7a62dbbf3599ce5c",
+        "include_nested=True",
+    )
+    exception_message = "Danger Will Robinson! Danger!"
+    exception_traceback = 'Traceback (most recent call last):\n File "lostinspace.py", line 42, in <module>\n    raise Exception("Danger Will Robinson! Danger!")\nException: Danger Will Robinson! Danger!'
+
+    mock_aborted_metrics_info = {
+        metric_id: {
+            "exception_info": ExceptionInfo(
+                exception_traceback=exception_traceback,
+                exception_message=exception_message,
+            ),
+        }
+    }
+
+    with patch.object(
+        validator._metrics_calculator,
+        "resolve_validation_graph",
+        return_value=(mock_resolved_metrics, mock_aborted_metrics_info),
+    ):
+        result = validator.graph_validate(
+            configurations=[
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_unique",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_set",
+                    kwargs={
+                        "column": "animals",
+                        "value_set": ["cat", "fish", "dog"],
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_not_be_null",
+                    kwargs={
+                        "column": "animals",
+                    },
+                ),
+            ],
+            runtime_configuration={"result_format": "COMPLETE"},
+        )
+        assert len(result) == 3  # One to one mapping of Expectations to results
+        for evr in result:
+            assert evr.exception_info is not None
+            assert (
+                evr.exception_info[str(metric_id)].exception_traceback
+                == exception_traceback
+            )
+            assert (
+                evr.exception_info[str(metric_id)].exception_message
+                == exception_message
+            )

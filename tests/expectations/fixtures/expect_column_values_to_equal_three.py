@@ -16,6 +16,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
@@ -136,7 +137,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 return f'Not all of the values in column "{column}" equal 3.'
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

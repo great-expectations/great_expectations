@@ -5,7 +5,7 @@ from typing import List
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -39,12 +39,15 @@ def create_db_and_instantiate_simple_sql_datasource():
                 "partitioners": {
                     "whole_table": {},
                     "by_vendor_id": {
-                        "splitter_method": "split_on_divided_integer",
-                        "splitter_kwargs": {"column_name": "vendor_id", "divisor": 1},
+                        "partitioner_method": "partition_on_divided_integer",
+                        "partitioner_kwargs": {
+                            "column_name": "vendor_id",
+                            "divisor": 1,
+                        },
                     },
                     "by_pickup_date_time": {
-                        "splitter_method": "split_on_converted_datetime",
-                        "splitter_kwargs": {
+                        "partitioner_method": "partition_on_converted_datetime",
+                        "partitioner_kwargs": {
                             "column_name": "pickup_datetime",
                             "date_format_string": "%Y-%m-%d %H",
                         },
@@ -131,26 +134,26 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     )
 
     # no limit
-    batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"limit": None},
+    batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={"limit": None},
+            )
         )
     )
     assert len(batch_definition_list) == 3
     # proper limit
-    batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"limit": 2},
+    batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={"limit": 2},
+            )
         )
     )
     assert len(batch_definition_list) == 2
@@ -158,14 +161,14 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     # illegal limit
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
-            BatchDefinition
-        ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="taxi_multi_batch_sql_datasource",
-                data_connector_name="by_vendor_id",
-                data_asset_name="yellow_tripdata_sample_2020_01",
-                data_connector_query={"limit": "apples"},
+        batch_definition_list: List[LegacyBatchDefinition] = (
+            my_sql_datasource.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="taxi_multi_batch_sql_datasource",
+                    data_connector_name="by_vendor_id",
+                    data_asset_name="yellow_tripdata_sample_2020_01",
+                    data_connector_query={"limit": "apples"},
+                )
             )
         )
 
@@ -179,7 +182,7 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
-            BatchDefinition
+            LegacyBatchDefinition
         ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="taxi_multi_batch_sql_datasource",
@@ -206,18 +209,20 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"custom_filter_function": my_custom_batch_selector},
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 24
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
@@ -242,22 +247,22 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "custom_filter_function": my_custom_batch_selector,
-                "index": "-1",
-            },
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "-1",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
 
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
@@ -282,28 +287,28 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "custom_filter_function": my_custom_batch_selector,
-                "index": "0:4:3",
-            },
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "0:4:3",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 2
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
             batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 00"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
@@ -320,21 +325,21 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "batch_filter_parameters": {"vendor_id": 1},
-            },
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "batch_filter_parameters": {"vendor_id": 1},
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_vendor_id",
             data_asset_name="yellow_tripdata_sample_2020_01",
@@ -351,23 +356,23 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "batch_filter_parameters": {"vendor_id": 2},
-                "index": 0,
-            },
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "batch_filter_parameters": {"vendor_id": 2},
+                    "index": 0,
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
 
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_vendor_id",
             data_asset_name="yellow_tripdata_sample_2020_01",
@@ -384,13 +389,13 @@ def test_data_connector_query_for_data_asset_name(
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
+    returned_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+            )
         )
     )
     assert len(returned_batch_definition_list) == 3

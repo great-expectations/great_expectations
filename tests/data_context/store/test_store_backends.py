@@ -72,13 +72,6 @@ def basic_data_context_config_for_validation_operator():
                             "target_store_name": "validation_result_store",
                         },
                     },
-                    {
-                        "name": "extract_and_store_eval_parameters",
-                        "action": {
-                            "class_name": "StoreEvaluationParametersAction",
-                            "target_store_name": "evaluation_parameter_store",
-                        },
-                    },
                 ],
             },
             "errors_and_warnings_validation_operator": {
@@ -89,13 +82,6 @@ def basic_data_context_config_for_validation_operator():
                         "action": {
                             "class_name": "StoreValidationResultAction",
                             "target_store_name": "validation_result_store",
-                        },
-                    },
-                    {
-                        "name": "extract_and_store_eval_parameters",
-                        "action": {
-                            "class_name": "StoreEvaluationParametersAction",
-                            "target_store_name": "evaluation_parameter_store",
                         },
                     },
                 ],
@@ -134,9 +120,9 @@ def validation_operators_data_context(
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    failure_expectations.expectation_suite_name = "f1.failure"
+    failure_expectations.name = "f1.failure"
     data_context.add_expectation_suite(expectation_suite=failure_expectations)
-    warning_expectations.expectation_suite_name = "f1.warning"
+    warning_expectations.name = "f1.warning"
     data_context.add_expectation_suite(expectation_suite=warning_expectations)
 
     return data_context
@@ -984,7 +970,7 @@ def test_TupleGCSStoreBackend_base_public_path():
 
     run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
     key = ValidationResultIdentifier(
-        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
         "my_batch_id",
     )
@@ -1107,7 +1093,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
     run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
     key = ValidationResultIdentifier(
-        ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
+        ExpectationSuiteIdentifier(name="my_suite_name"),
         run_id,
         "my_batch_id",
     )
@@ -1347,9 +1333,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     )
     assert sorted(inline_store_backend.list_keys()) == [
         ("anonymous_usage_statistics",),
-        ("batch_configs",),
         ("checkpoint_store_name",),
-        ("concurrency",),
         ("config_variables_file_path",),
         ("config_version",),
         ("data_docs_sites",),
@@ -1359,8 +1343,10 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("fluent_datasources",),
         ("include_rendered_content",),
         ("plugins_directory",),
+        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
+        ("validation_operators",),
         ("validations_store_name",),
     ]
 

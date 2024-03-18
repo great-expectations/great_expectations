@@ -3,8 +3,11 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+import os
+import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -19,8 +22,8 @@ from typing import (
 
 from dateutil.parser import parse
 
-from great_expectations._docs_decorators import public_api
-from great_expectations.compatibility import pyspark
+from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations.compatibility import py4j, pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
@@ -40,7 +43,6 @@ from great_expectations.core.metric_domain_types import (
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
-    get_or_create_spark_application,
 )
 from great_expectations.exceptions import (
     BatchSpecError,
@@ -52,15 +54,15 @@ from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,  # noqa: TCH001
-    SplitDomainKwargs,  # noqa: TCH001
+    PartitionDomainKwargs,  # noqa: TCH001
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
+from great_expectations.execution_engine.partition_and_sample.sparkdf_data_partitioner import (
+    SparkDataPartitioner,
+)
+from great_expectations.execution_engine.partition_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
 )
-from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
-    SparkDataSplitter,
-)
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -71,10 +73,12 @@ from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
 
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.spark_datasource import SparkConfig
+
 logger = logging.getLogger(__name__)
 
 
-# noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
     col_name = column.columns[0]
@@ -82,6 +86,13 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+@deprecated_argument(
+    argument_name="force_reuse_spark_context",
+    version="1.0",
+    message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "
+    "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "
+    "the existing config, the context will be stopped and restarted in local environments only.",
+)
 @public_api
 class SparkDFExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
@@ -93,7 +104,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
     Args:
         *args: Positional arguments for configuring SparkDFExecutionEngine
         persist: If True (default), then creation of the Spark DataFrame is done outside this class
-        spark_config: Dictionary of Spark configuration options
+        spark_config: Dictionary of Spark configuration options. If there is an existing Spark context,
+          the spark_config will be used to update that context in environments that allow it. In local
+          environments the Spark context will be stopped and restarted with the new spark_config.
+        spark: A PySpark Session used to set the SparkDFExecutionEngine being configured. Will override
+          spark_config if provided.
         force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
         **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
 
@@ -188,28 +203,35 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def __init__(
         self,
         *args,
-        persist=True,
-        spark_config=None,
-        force_reuse_spark_context=True,
+        persist: bool = True,
+        spark_config: Optional[dict] = None,
+        spark: Optional[pyspark.SparkSession] = None,
+        force_reuse_spark_context: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
 
-        if spark_config is None:
-            spark_config = {}
-
-        spark: pyspark.SparkSession = get_or_create_spark_application(
-            spark_config=spark_config,
-            force_reuse_spark_context=force_reuse_spark_context,
-        )
-
-        spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
-
-        self.spark = spark
+        spark_config = spark_config or {}
+        self.spark: pyspark.SparkSession
+        if spark:
+            self.spark = spark
+        else:
+            self.spark = SparkDFExecutionEngine.get_or_create_spark_session(
+                spark_config=spark_config,
+            )
 
         azure_options: dict = kwargs.pop("azure_options", {})
         self._azure_options = azure_options
 
+        if force_reuse_spark_context is not None:
+            # deprecated-v1.0.0
+            warnings.warn(
+                "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+                "In environments that allow it, the existing Spark context will be reused, adding the "
+                "spark_config options that have been passed. If the Spark context cannot be updated with "
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",
+                category=DeprecationWarning,
+            )
         super().__init__(*args, **kwargs)
 
         self._config.update(
@@ -220,7 +242,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
-        self._data_splitter = SparkDataSplitter()
+        self._data_partitioner = SparkDataPartitioner()
         self._data_sampler = SparkDataSampler()
 
     @property
@@ -232,6 +254,159 @@ class SparkDFExecutionEngine(ExecutionEngine):
             )
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
+
+    @staticmethod
+    def get_or_create_spark_session(
+        spark_config: Optional[SparkConfig] = None,
+    ) -> pyspark.SparkSession:
+        """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
+
+        Args:
+            spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+
+        Returns:
+            SparkSession
+        """
+        spark_config = spark_config or {}
+
+        spark_session: pyspark.SparkSession
+        try:
+            spark_session = pyspark.SparkConnectSession.builder.getOrCreate()
+        except (ModuleNotFoundError, ValueError):
+            spark_session = pyspark.SparkSession.builder.getOrCreate()
+
+        return SparkDFExecutionEngine._get_session_with_spark_config(
+            spark_config=spark_config,
+            spark_session=spark_session,
+        )
+
+    @staticmethod
+    def _get_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        """Attempts to apply spark_config to a SparkSession by either:
+             1. Updating the existing SparkSession with spark_config values
+             2. Restarting the existing SparkSession and applying only spark_config
+
+          If a spark_config option is unable to be set, a warning is raised.
+
+        Args:
+            spark_session: An existing pyspark.SparkSession.
+            spark_config: A dictionary of SparkSession.Builder.config objects.
+
+        Returns:
+            SparkSession
+        """
+        stopped: bool
+        (
+            spark_session,
+            stopped,
+        ) = SparkDFExecutionEngine._try_update_or_stop_misconfigured_spark_session(
+            spark_session=spark_session,
+            spark_config=spark_config,
+        )
+
+        if stopped:
+            spark_session = (
+                SparkDFExecutionEngine._start_spark_session_with_spark_config(
+                    spark_session=spark_session,
+                    spark_config=spark_config,
+                )
+            )
+
+        return spark_session
+
+    @staticmethod
+    def _start_spark_session_with_spark_config(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> pyspark.SparkSession:
+        builder = spark_session.builder
+        for key, value in spark_config.items():
+            if key == "spark.app.name":
+                builder.appName(value)
+            else:
+                builder.config(key, value)
+
+        return builder.getOrCreate()
+
+    @staticmethod
+    def _session_is_not_stoppable(
+        spark_session: pyspark.SparkSession,
+    ) -> bool:
+        return (
+            pyspark.SparkConnectSession  # type: ignore[truthy-function]  # returns false if module is not installed
+            and isinstance(spark_session, pyspark.SparkConnectSession)
+        ) or (
+            os.environ.get("DATABRICKS_RUNTIME_VERSION") is not None  # noqa: TID251
+        )
+
+    @staticmethod
+    def _try_update_or_stop_misconfigured_spark_session(
+        spark_session: pyspark.SparkSession,
+        spark_config: dict,
+    ) -> tuple[pyspark.SparkSession, bool]:
+        """Tries to update the SparkSession if it doesn't have the options specified in spark_config set.
+        If updates fail, and the SparkSession can be stopped, it will be stopped.
+        If the SparkSession cannot be stopped, it will be returned unaltered.
+
+        Warns if the SparkSession was stopped or a config option could not be set.
+
+        Returns:
+            SparkSession, Boolean specifying if SparkSession is stopped
+        """
+        stopped = False
+        warning_messages = []
+        for key, value in spark_config.items():
+            # if the user set a spark_config option that doesn't match the existing session
+            # try to update it, otherwise stop the spark session
+            try:
+                # conf.get will look first at the runtime conf and then at the sparkContext conf
+                try:
+                    current_value = spark_session.conf.get(key)
+                # Py4J Java Error can be raised if the option has not been set on the context at all
+                except py4j.protocol.Py4JJavaError:
+                    current_value = None
+                if key != "spark.app.name" and (
+                    current_value != value or current_value is None
+                ):
+                    # attempts to update the runtime config
+                    spark_session.conf.set(key, value)
+                elif (
+                    key == "spark.app.name"
+                    and spark_session.sparkContext.appName != value
+                ):
+                    spark_session.sparkContext.appName = value
+            # attribute error can be raised for connect sessions that haven't implemented a conf for sparkContext method
+            # analysis exception can be raised in environments that don't allow updating config of that option
+            except (
+                pyspark.PySparkAttributeError,
+                pyspark.AnalysisException,
+            ):
+                if SparkDFExecutionEngine._session_is_not_stoppable(
+                    spark_session=spark_session
+                ):
+                    warning_messages.append(
+                        f"Passing spark_config option `{key}` had no effect, because in this environment "
+                        "it is not modifiable and the Spark Session cannot be restarted."
+                    )
+                else:
+                    spark_session.stop()
+                    stopped = True
+                    warning_messages.append(
+                        f"Spark Session was restarted, because `{key}` "
+                        "is not modifiable in this environment."
+                    )
+                    break
+
+        for message in warning_messages:
+            warnings.warn(
+                message=message,
+                category=RuntimeWarning,
+            )
+
+        return spark_session, stopped
 
     @override
     def load_batch_data(  # type: ignore[override]
@@ -250,7 +425,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     @override
-    def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
+    def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -370,28 +545,30 @@ illegal.  Please check your config."""
                 """
             )
 
-        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
+        batch_data = self._apply_partitioning_and_sampling_methods(
+            batch_spec, batch_data
+        )
         typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
 
-    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+    def _apply_partitioning_and_sampling_methods(self, batch_spec, batch_data):
         # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
         partitions: Optional[List[str]] = batch_spec.get("partitions")
         if partitions:
-            batch_data = self._data_splitter.split_on_multi_column_values(
+            batch_data = self._data_partitioner.partition_on_multi_column_values(
                 df=batch_data,
                 column_names=partitions,
                 batch_identifiers=batch_spec.get("batch_identifiers"),
             )
 
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
-        if splitter_method_name:
-            splitter_fn: Callable = self._data_splitter.get_splitter_method(
-                splitter_method_name
+        partitioner_method_name: Optional[str] = batch_spec.get("partitioner_method")
+        if partitioner_method_name:
+            partitioner_fn: Callable = self._data_partitioner.get_partitioner_method(
+                partitioner_method_name
             )
-            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+            partitioner_kwargs: dict = batch_spec.get("partitioner_kwargs") or {}
+            batch_data = partitioner_fn(batch_data, **partitioner_kwargs)
 
         sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
         if sampler_method_name:
@@ -431,14 +608,12 @@ illegal.  Please check your config."""
     @overload
     def _get_reader_fn(
         self, reader, reader_method: str = ..., path: Optional[str] = ...
-    ) -> Callable:
-        ...
+    ) -> Callable: ...
 
     @overload
     def _get_reader_fn(
         self, reader, reader_method: None = ..., path: str = ...
-    ) -> Callable:
-        ...
+    ) -> Callable: ...
 
     def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
@@ -662,11 +837,15 @@ illegal.  Please check your config."""
 
         data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
+        partitioned_domain_kwargs: PartitionDomainKwargs = (
+            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
         )
 
-        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return (
+            data,
+            partitioned_domain_kwargs.compute,
+            partitioned_domain_kwargs.accessor,
+        )
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False

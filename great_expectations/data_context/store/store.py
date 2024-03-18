@@ -218,7 +218,7 @@ class Store:
 
         return list(map(self.deserialize, objs))
 
-    def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
+    def set(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
 
@@ -283,17 +283,12 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
-    def self_check(self, pretty_print: bool) -> None:
-        NotImplementedError(
-            f"The test method is not implemented for Store class {self.__class__.__name__}."
-        )
+    def remove_key(self, key):
+        return self.store_backend.remove_key(key)
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
         # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
-        # Will be removed as part of the effort to rename `ge_cloud_id` to `id` across the codebase.
-        if hasattr(config, "ge_cloud_id"):
-            id = config.ge_cloud_id
         if hasattr(config, "id"):
             id = config.id
 

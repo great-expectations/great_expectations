@@ -138,14 +138,14 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        unexpected_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.unexpected_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        unexpected_count_parameter_builder_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.unexpected_count_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         fully_qualified_unexpected_count_parameter_builder_name: str = (
@@ -277,7 +277,7 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     Applies business logic to standardize "mostly" value for single-Batch case.
     """
     if expectation_type == "expect_column_values_to_be_null":
-        if mostly >= 1.0:  # noqa: PLR2004
+        if mostly >= 1.0:
             return np.float64(1.0)
 
         if mostly >= 0.99:  # noqa: PLR2004
@@ -289,7 +289,7 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
         return mostly
 
     if expectation_type == "expect_column_values_to_not_be_null":
-        if mostly >= 1.0:  # noqa: PLR2004
+        if mostly >= 1.0:
             return np.float64(1.0)
 
         if mostly >= 0.99:  # noqa: PLR2004

@@ -2,6 +2,7 @@
 Purpose: To ensure that no docs snippets use the file and line number convention,
 only the named snippets convention.
 """
+
 import pathlib
 import re
 import shutil
@@ -11,7 +12,6 @@ from typing import List
 
 ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
     "docs/prepare_to_build_docs.sh",
-    "docs/prepare_prior_versions.py",
 }
 EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 

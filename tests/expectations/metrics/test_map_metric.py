@@ -11,7 +11,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -144,7 +144,7 @@ def _expecation_configuration_to_validation_result_pandas(
 
     """
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -228,7 +228,7 @@ def _expecation_configuration_to_validation_result_sql(
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=batch_spec
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
@@ -795,7 +795,7 @@ def test_spark_single_column_complete_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -852,7 +852,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -923,7 +923,7 @@ def test_spark_single_column_summary_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -976,7 +976,7 @@ def test_spark_single_column_basic_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",

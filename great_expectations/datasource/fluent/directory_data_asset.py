@@ -5,7 +5,7 @@ import pathlib
 from typing import TYPE_CHECKING, Callable
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -32,8 +32,8 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     @override
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
-    ) -> list[BatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+    ) -> list[LegacyBatchDefinition]:
+        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
@@ -41,14 +41,14 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         Returns:
             List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
         """
-        if self.splitter:
-            # Currently non-sql asset splitters do not introspect the datasource for available
+        if batch_request.partitioner:
+            # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
             batch_identifiers = batch_request.options
             if not batch_identifiers.get("path"):
                 batch_identifiers["path"] = self.data_directory
 
-            batch_definition = BatchDefinition(
+            batch_definition = LegacyBatchDefinition(
                 datasource_name=self._data_connector.datasource_name,
                 data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_connector.data_asset_name,
@@ -64,7 +64,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     @override
     def get_unfiltered_batch_definition_list_fn(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
         """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
         return make_directory_get_unfiltered_batch_definition_list_fn(
             self.data_directory

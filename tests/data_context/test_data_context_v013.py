@@ -20,7 +20,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.validator.validator import Validator
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
+from tests.data_context.conftest import (
     USAGE_STATISTICS_QA_URL,
 )
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
@@ -100,8 +100,8 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
                     - airflow_run_id
     """
 
-    context.test_yaml_config(
-        name="my_runtime_sql_datasource", yaml_config=datasource_config
+    context.add_datasource(
+        name="my_runtime_sql_datasource", **yaml.load(datasource_config)
     )
 
     # noinspection PyProtectedMember
@@ -172,10 +172,12 @@ def test_load_config_variables_file(
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
-        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        os.path.join(base_path, "uncommitted"),  # noqa: PTH118
+        exist_ok=True,
     )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
@@ -183,9 +185,9 @@ def test_load_config_variables_file(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_v013_config[
-        "config_variables_file_path"
-    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    basic_data_context_v013_config["config_variables_file_path"] = (
+        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    )
 
     try:
         # We should be able to load different files based on an environment variable
@@ -213,8 +215,8 @@ def test_get_config(empty_data_context):
     context = empty_data_context
 
     # We can call get_config in several different modes
-    assert type(context.get_config()) == DataContextConfig
-    assert type(context.get_config(mode=ConfigOutputModes.TYPED)) == DataContextConfig
+    assert type(context.get_config()) is DataContextConfig
+    assert type(context.get_config(mode=ConfigOutputModes.TYPED)) is DataContextConfig
     assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict  # noqa: E721
     assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str  # noqa: E721
     assert type(context.get_config(mode="yaml")) == str  # noqa: E721
@@ -225,7 +227,6 @@ def test_get_config(empty_data_context):
     print(context.get_config(mode=ConfigOutputModes.DICT).keys())
 
     assert set(context.get_config(mode=ConfigOutputModes.DICT).keys()) == {
-        "batch_configs",
         "config_version",
         "datasources",
         "config_variables_file_path",
@@ -253,12 +254,12 @@ def test_config_variables(empty_data_context):
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
-def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
+def test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine(
     empty_data_context, test_df, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine"
+            "test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine"
         )
     )
 
@@ -295,7 +296,6 @@ data_connectors:
     context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
-        return_mode="report_object",
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
@@ -335,8 +335,8 @@ data_connectors:
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
         batch_spec_passthrough={
-            "splitter_method": "_split_on_multi_column_values",
-            "splitter_kwargs": {
+            "partitioner_method": "_partition_on_multi_column_values",
+            "partitioner_kwargs": {
                 "column_names": ["y", "m", "d"],
                 "batch_identifiers": {"y": 2020, "m": 1, "d": 5},
             },
@@ -349,11 +349,11 @@ data_connectors:
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
     )
-    df_data["belongs_in_split"] = df_data.apply(
+    df_data["belongs_in_partition"] = df_data.apply(
         lambda row: row["date"] == datetime.date(2020, 1, 5), axis=1
     )
-    df_data = df_data[df_data["belongs_in_split"]]
-    assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
+    df_data = df_data[df_data["belongs_in_partition"]]
+    assert df_data.drop("belongs_in_partition", axis=1).shape == (4, 10)
 
 
 @pytest.mark.filesystem
@@ -448,10 +448,6 @@ def test_in_memory_data_context_configuration(
                 {
                     "name": "store_validation_result",
                     "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
                 },
                 {
                     "name": "update_data_docs",

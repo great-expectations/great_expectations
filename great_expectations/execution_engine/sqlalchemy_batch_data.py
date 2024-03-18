@@ -36,8 +36,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: None = ...,
         source_table_name: None = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -55,8 +54,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: None = ...,
         source_table_name: None = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -74,8 +72,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: Optional[str] = ...,
         source_table_name: str = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(  # noqa: PLR0913
         self,
@@ -252,7 +249,7 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GXSqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
-            # Split is case-sensitive so detect case.
+            # Partition is case-sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
             # noinspection PyUnresolvedReferences
@@ -350,8 +347,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: Literal[True],
         temp_table_schema_name: Optional[str] = ...,
-    ) -> sqlalchemy.Table:
-        ...
+    ) -> sqlalchemy.Table: ...
 
     @overload
     def _generate_selectable_from_query(
@@ -360,8 +356,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: Literal[False],
         temp_table_schema_name: Optional[str] = ...,
-    ) -> sqlalchemy.TextClause:
-        ...
+    ) -> sqlalchemy.TextClause: ...
 
     def _generate_selectable_from_query(
         self,
@@ -406,7 +401,7 @@ class SqlAlchemyBatchData(BatchData):
         This method is needed to either turn the passed-in Selectable as an alias, or to create a temp_table that refers to it.
 
         Args:
-            selectable: selectable that is passed into SqlAlchemyBatchData's init method. It may contain sampling and splitting directives.
+            selectable: selectable that is passed into SqlAlchemyBatchData's init method. It may contain sampling and partitioning directives.
             dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently.
             create_temp_table (bool): Should we create a temp_table?
             temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema. Defaults to None.

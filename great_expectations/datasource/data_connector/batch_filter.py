@@ -12,7 +12,7 @@ from great_expectations.core.id_dict import IDDict
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ def build_batch_filter(
                 ]
             ],
         ]
-    ] = None
+    ] = None,
 ):
     if not data_connector_query_dict:
         return BatchFilter(
@@ -115,10 +115,10 @@ def build_batch_filter(
 "{type(custom_filter_function)!s}", which is illegal.
             """
         )
-    batch_filter_parameters: Optional[
-        Union[dict, IDDict]
-    ] = data_connector_query_dict.get(  # type: ignore[assignment]
-        "batch_filter_parameters"
+    batch_filter_parameters: Optional[Union[dict, IDDict]] = (
+        data_connector_query_dict.get(  # type: ignore[assignment]
+            "batch_filter_parameters"
+        )
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
@@ -299,8 +299,8 @@ class BatchFilter:
         return str(doc_fields_dict)
 
     def select_from_data_connector_query(
-        self, batch_definition_list: Optional[List[BatchDefinition]] = None
-    ) -> List[BatchDefinition]:
+        self, batch_definition_list: Optional[List[LegacyBatchDefinition]] = None
+    ) -> List[LegacyBatchDefinition]:
         if batch_definition_list is None:
             return []
         filter_function: Callable
@@ -308,7 +308,7 @@ class BatchFilter:
             filter_function = self.custom_filter_function
         else:
             filter_function = self.best_effort_batch_definition_matcher()
-        selected_batch_definitions: List[BatchDefinition]
+        selected_batch_definitions: List[LegacyBatchDefinition]
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(

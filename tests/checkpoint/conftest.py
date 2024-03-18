@@ -25,14 +25,6 @@ def update_data_docs_action():
 
 
 @pytest.fixture
-def store_eval_parameter_action():
-    return {
-        "name": "store_evaluation_params",
-        "action": {"class_name": "StoreEvaluationParametersAction"},
-    }
-
-
-@pytest.fixture
 def store_validation_result_action():
     return {
         "name": "store_validation_result",
@@ -65,12 +57,10 @@ def slack_notification_action(webhook):
 @pytest.fixture
 def common_action_list(
     store_validation_result_action: dict,
-    store_eval_parameter_action: dict,
     update_data_docs_action: dict,
 ) -> List[dict]:
     return [
         store_validation_result_action,
-        store_eval_parameter_action,
         update_data_docs_action,
     ]
 
@@ -192,7 +182,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
@@ -209,7 +200,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -219,7 +211,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -229,7 +222,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -239,7 +233,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -252,8 +247,6 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
-        class_name: Datasource
-
         execution_engine:
             class_name: SparkDFExecutionEngine
 
@@ -304,9 +297,9 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
                     - airflow_run_id
     """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
+    yaml = YAMLHandler()
+    config = yaml.load(datasource_config)
+    context.add_datasource(**config)
 
     # noinspection PyProtectedMember
     context._save_project_config()

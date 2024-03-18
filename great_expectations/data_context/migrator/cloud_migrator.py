@@ -17,6 +17,7 @@ migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 migrator.retry_migrate_validation_results()
 ```
 """
+
 from __future__ import annotations
 
 import logging
@@ -27,8 +28,6 @@ import requests
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.http import create_session
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -118,8 +117,6 @@ class CloudMigrator:
         Returns:
             CloudMigrator instance
         """
-        event = UsageStatsEvents.CLOUD_MIGRATE
-        event_payload = {"organization_id": cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
                 context=context,
@@ -128,23 +125,8 @@ class CloudMigrator:
                 cloud_organization_id=cloud_organization_id,
             )
             cloud_migrator._migrate_to_cloud(test_migrate)
-            if not test_migrate:  # Only send an event if this is not a test run.
-                send_usage_message(
-                    data_context=context,
-                    event=event,
-                    event_payload=event_payload,
-                    success=True,
-                )
             return cloud_migrator
         except Exception as e:
-            # Note we send an event on any exception here
-            if not test_migrate:
-                send_usage_message(
-                    data_context=context,
-                    event=event,
-                    event_payload=event_payload,
-                    success=False,
-                )
             raise gx_exceptions.MigrationError(
                 "Migration failed. Please check the error message for more details."
             ) from e

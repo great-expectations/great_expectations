@@ -1,7 +1,4 @@
 name: my_v1_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
@@ -11,15 +8,12 @@ validations:
         index: -1
     expectation_suite_name: users.delivery
     action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
     evaluation_parameters:
       param1: "$MY_PARAM"
       param2: 1 + "$OLD_PARAM"

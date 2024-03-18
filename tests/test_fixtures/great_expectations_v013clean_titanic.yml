@@ -7,35 +7,35 @@ datasources:
     class_name: Datasource
 
     execution_engine:
-        class_name: PandasExecutionEngine
+      class_name: PandasExecutionEngine
 
     data_connectors:
-        my_basic_data_connector:
-            class_name: InferredAssetFilesystemDataConnector
-            base_directory: ../data
-            default_regex:
-                pattern: (.*).csv
-                group_names:
-                    - data_asset_name
+      my_basic_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: ../data
+        default_regex:
+          pattern: (.*).csv
+          group_names:
+            - data_asset_name
 
-        my_other_data_connector:
-            class_name: ConfiguredAssetFilesystemDataConnector
-            base_directory: ../data
-            glob_directive: "*.csv"
+      my_other_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: ../data
+        glob_directive: "*.csv"
 
-            default_regex:
-                pattern: (.+).csv
-                group_names:
-                    - name
-            assets:
-                users:
+        default_regex:
+          pattern: (.+).csv
+          group_names:
+            - name
+        assets:
+          users:
 
-        my_runtime_data_connector:
-            module_name: great_expectations.datasource.data_connector  # optional
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - pipeline_stage_name
-                - airflow_run_id
+      my_runtime_data_connector:
+        module_name: great_expectations.datasource.data_connector # optional
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - pipeline_stage_name
+          - airflow_run_id
 
 plugins_directory: plugins/
 
@@ -58,17 +58,17 @@ stores:
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
-      module_name: great_expectations.data_context.store  # optional
-      class_name: EvaluationParameterStore
+    module_name: great_expectations.data_context.store # optional
+    class_name: EvaluationParameterStore
 
   checkpoint_store:
-      class_name: CheckpointStore
-      store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: checkpoints/
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
 
 data_docs_sites:
-  local_site:  # this is a user-selected name - you may select your own
+  local_site: # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleFilesystemStoreBackend

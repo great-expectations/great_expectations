@@ -174,9 +174,9 @@ class FileDataContext(SerializableDataContext):
                     logger.info(
                         f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
                     )
-                    fluent_json_dict: dict[
-                        str, JSONValues
-                    ] = self.fluent_config._json_dict()
+                    fluent_json_dict: dict[str, JSONValues] = (
+                        self.fluent_config._json_dict()
+                    )
                     fluent_json_dict = (
                         self.fluent_config._exclude_name_fields_from_fluent_datasources(
                             config=fluent_json_dict

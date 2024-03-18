@@ -22,6 +22,16 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    PartitionerColumnValue,
+    PartitionerDatetimePart,
+    PartitionerDividedInteger,
+    PartitionerModInteger,
+    PartitionerMultiColumnValue,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -42,23 +52,22 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.spark_generic_splitters import (
-    Splitter,
-    SplitterColumnValue,
-    SplitterDatetimePart,
-    SplitterDividedInteger,
-    SplitterModInteger,
-    SplitterMultiColumnValue,
-    SplitterYear,
-    SplitterYearAndMonth,
-    SplitterYearAndMonthAndDay,
+from great_expectations.datasource.fluent.spark_generic_partitioners import (
+    SparkPartitioner,
+    SparkPartitionerColumnValue,
+    SparkPartitionerDatetimePart,
+    SparkPartitionerDividedInteger,
+    SparkPartitionerModInteger,
+    SparkPartitionerMultiColumnValue,
+    SparkPartitionerYear,
+    SparkPartitionerYearAndMonth,
+    SparkPartitionerYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-    from great_expectations.core.batch import BatchDefinition, BatchMarkers
+    from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -95,7 +104,6 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
-    splitter: Optional[Splitter] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -111,6 +119,20 @@ class _FilePathDataAsset(DataAsset):
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr(
         "Could not connect to your asset"
+    )
+    _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
+        pydantic.PrivateAttr(
+            default={
+                PartitionerYear: SparkPartitionerYear,
+                PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
+                PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
+                PartitionerColumnValue: SparkPartitionerColumnValue,
+                PartitionerDatetimePart: SparkPartitionerDatetimePart,
+                PartitionerDividedInteger: SparkPartitionerDividedInteger,
+                PartitionerModInteger: SparkPartitionerModInteger,
+                PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
+            }
+        )
     )
 
     class Config:
@@ -139,32 +161,30 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    @property
-    @override
-    def batch_request_options(
-        self,
-    ) -> tuple[str, ...]:
-        """The potential keys for BatchRequestOptions.
-
-        Example:
-        ```python
-        >>> print(asset.batch_request_options)
-        ("day", "month", "year", "path")
-        >>> options = {"year": "2023"}
-        >>> batch_request = asset.build_batch_request(options=options)
-        ```
-
-        Returns:
-            A tuple of keys that can be used in a BatchRequestOptions dictionary.
-        """
-        splitter_options: tuple[str, ...] = tuple()
-        if self.splitter:
-            splitter_options = tuple(self.splitter.param_names)
-        return (
-            tuple(self._all_group_names)
-            + (FILE_PATH_BATCH_SPEC_KEY,)
-            + splitter_options
+    def get_partitioner_implementation(
+        self, abstract_partitioner: Partitioner
+    ) -> SparkPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(
+            type(abstract_partitioner)
         )
+        if PartitionerClass is None:
+            raise ValueError(
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+            )
+        return PartitionerClass(**abstract_partitioner.dict())
+
+    @override
+    def get_batch_request_options_keys(
+        self,
+        partitioner: Optional[Partitioner] = None,
+    ) -> tuple[str, ...]:
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (
+            FILE_PATH_BATCH_SPEC_KEY,
+        )
+        if partitioner:
+            spark_partitioner = self.get_partitioner_implementation(partitioner)
+            option_keys += tuple(spark_partitioner.param_names)
+        return option_keys
 
     @public_api
     @override
@@ -172,15 +192,17 @@ class _FilePathDataAsset(DataAsset):
         self,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling get_batch_request_options_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -203,8 +225,13 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options)
+        if options is not None and not self._batch_request_options_are_valid(
+            options=options,
+            partitioner=partitioner,
+        ):
+            allowed_keys = set(
+                self.get_batch_request_options_keys(partitioner=partitioner)
+            )
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -217,6 +244,7 @@ class _FilePathDataAsset(DataAsset):
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
+            partitioner=partitioner,
         )
 
     @override
@@ -229,9 +257,14 @@ class _FilePathDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
+            and self._batch_request_options_are_valid(
+                options=batch_request.options, partitioner=batch_request.partitioner
+            )
         ):
-            options = {option: None for option in self.batch_request_options}
+            valid_options = self.get_batch_request_options_keys(
+                partitioner=batch_request.partitioner
+            )
+            options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
@@ -304,8 +337,8 @@ class _FilePathDataAsset(DataAsset):
 
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
-    ) -> list[BatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+    ) -> list[LegacyBatchDefinition]:
+        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
@@ -313,20 +346,28 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             List of batch definitions.
         """
-        if self.splitter:
-            # Remove the splitter kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
-            batch_request_options_counts = Counter(self.batch_request_options)
-            batch_request_copy_without_splitter_kwargs = copy.deepcopy(batch_request)
-            for param_name in self.splitter.param_names:
-                # If the option appears twice (e.g. from asset regex and from splitter) then don't remove.
+        if batch_request.partitioner:
+            spark_partitioner = self.get_partitioner_implementation(
+                batch_request.partitioner
+            )
+            # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
+            valid_options = self.get_batch_request_options_keys(
+                partitioner=batch_request.partitioner
+            )
+            batch_request_options_counts = Counter(valid_options)
+            batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
+            for param_name in spark_partitioner.param_names:
+                # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.
                 if batch_request_options_counts[param_name] == 1:
-                    batch_request_copy_without_splitter_kwargs.options.pop(param_name)
+                    batch_request_copy_without_partitioner_kwargs.options.pop(
+                        param_name
+                    )
                 else:
                     warnings.warn(
-                        f"The same option name is applied for your batch regex and splitter config: {param_name}"
+                        f"The same option name is applied for your batch regex and partitioner config: {param_name}"
                     )
             batch_definition_list = self._data_connector.get_batch_definition_list(
-                batch_request=batch_request_copy_without_splitter_kwargs
+                batch_request=batch_request_copy_without_partitioner_kwargs
             )
         else:
             batch_definition_list = self._data_connector.get_batch_definition_list(
@@ -360,15 +401,18 @@ class _FilePathDataAsset(DataAsset):
             ),
         }
 
-        if self.splitter:
-            batch_spec_options["splitter_method"] = self.splitter.method_name
-            splitter_kwargs = self.splitter.splitter_method_kwargs()
-            splitter_kwargs[
-                "batch_identifiers"
-            ] = self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
-                batch_request.options
+        if batch_request.partitioner:
+            spark_partitioner = self.get_partitioner_implementation(
+                batch_request.partitioner
             )
-            batch_spec_options["splitter_kwargs"] = splitter_kwargs
+            batch_spec_options["partitioner_method"] = spark_partitioner.method_name
+            partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
+            partitioner_kwargs["batch_identifiers"] = (
+                spark_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    batch_request.options
+                )
+            )
+            batch_spec_options["partitioner_kwargs"] = partitioner_kwargs
 
         return batch_spec_options
 
@@ -390,7 +434,7 @@ class _FilePathDataAsset(DataAsset):
 
     def get_unfiltered_batch_definition_list_fn(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
         """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
         return file_get_unfiltered_batch_definition_list_fn
 
@@ -404,141 +448,4 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
-        )
-
-    def _add_splitter(self: Self, splitter: Splitter) -> Self:
-        self.splitter = splitter
-        return self
-
-    @public_api
-    def add_splitter_year(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year splitter with this data asset.
-        Args:
-            column_name: A column name of the date column where year will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterYear(method_name="split_on_year", column_name=column_name)
-        )
-
-    @public_api
-    def add_splitter_year_and_month(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month splitter with this asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterYearAndMonth(
-                method_name="split_on_year_and_month", column_name=column_name
-            )
-        )
-
-    @public_api
-    def add_splitter_year_and_month_and_day(
-        self: Self,
-        column_name: str,
-    ) -> Self:
-        """Associates a year, month, day splitter with this asset.
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterYearAndMonthAndDay(
-                method_name="split_on_year_and_month_and_day", column_name=column_name
-            )
-        )
-
-    @public_api
-    def add_splitter_datetime_part(
-        self: Self, column_name: str, datetime_parts: List[str]
-    ) -> Self:
-        """Associates a datetime part splitter with this asset.
-        Args:
-            column_name: Name of the date column where parts will be parsed out.
-            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterDatetimePart(
-                method_name="split_on_date_parts",
-                column_name=column_name,
-                datetime_parts=datetime_parts,
-            )
-        )
-
-    @public_api
-    def add_splitter_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value splitter with this asset.
-        Args:
-            column_name: A column name of the column to split on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterColumnValue(
-                method_name="split_on_column_value",
-                column_name=column_name,
-            )
-        )
-
-    @public_api
-    def add_splitter_divided_integer(
-        self: Self, column_name: str, divisor: int
-    ) -> Self:
-        """Associates a divided integer splitter with this asset.
-        Args:
-            column_name: A column name of the column to split on.
-            divisor: The divisor to use when splitting.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterDividedInteger(
-                method_name="split_on_divided_integer",
-                column_name=column_name,
-                divisor=divisor,
-            )
-        )
-
-    @public_api
-    def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
-        """Associates a mod integer splitter with this asset.
-        Args:
-            column_name: A column name of the column to split on.
-            mod: The mod to use when splitting.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterModInteger(
-                method_name="split_on_mod_integer",
-                column_name=column_name,
-                mod=mod,
-            )
-        )
-
-    @public_api
-    def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
-        """Associates a multi-column value splitter with this asset.
-        Args:
-            column_names: A list of column names to split on.
-        Returns:
-            This asset so we can use this method fluently.
-        """
-        return self._add_splitter(
-            SplitterMultiColumnValue(
-                column_names=column_names, method_name="split_on_multi_column_values"
-            )
         )

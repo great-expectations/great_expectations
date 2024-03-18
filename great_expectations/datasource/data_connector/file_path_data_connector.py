@@ -8,10 +8,10 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     BatchSpec,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -110,9 +110,7 @@ class DataConnectorStorageDataReferenceResolver:
         ]
         return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
             (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
+        ](template_arguments)
 
 
 @public_api
@@ -209,7 +207,7 @@ class FilePathDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
         batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -232,7 +230,7 @@ class FilePathDataConnector(DataConnector):
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions that match batch_request.
 
@@ -253,7 +251,7 @@ class FilePathDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         # Use a combination of a list and set to preserve iteration order
-        batch_definition_list: List[BatchDefinition] = list()
+        batch_definition_list: List[LegacyBatchDefinition] = list()
         batch_definition_set = set()
         for batch_definition in self._get_batch_definition_list_from_cache():
             if (
@@ -288,8 +286,8 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
+        self, batch_definition_list: List[LegacyBatchDefinition]
+    ) -> List[LegacyBatchDefinition]:
         """
         Use configured sorters to sort batch_definition
 
@@ -311,7 +309,7 @@ class FilePathDataConnector(DataConnector):
     @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
@@ -326,7 +324,7 @@ class FilePathDataConnector(DataConnector):
 
     @override
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> str:
         data_asset_name: str = batch_definition.data_asset_name
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
@@ -339,12 +337,14 @@ class FilePathDataConnector(DataConnector):
         )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+    def build_batch_spec(
+        self, batch_definition: LegacyBatchDefinition
+    ) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -364,7 +364,7 @@ class FilePathDataConnector(DataConnector):
 
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         path: str = self._map_batch_definition_to_data_reference(
             batch_definition=batch_definition
@@ -412,7 +412,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """
                 )
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+    def _get_batch_definition_list_from_cache(self) -> List[LegacyBatchDefinition]:
         raise NotImplementedError
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -39,12 +40,15 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    TestConnectionError,
     _DataAssetT,
 )
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.compatibility.pyspark import SparkSession
+    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
@@ -70,10 +74,34 @@ class _SparkDatasource(Datasource):
     force_reuse_spark_context: bool = True
     persist: bool = True
 
+    # private attrs
+    _spark: Union[SparkSession, None] = pydantic.PrivateAttr(None)
+
+    @pydantic.validator("force_reuse_spark_context")
+    @classmethod
+    def _force_reuse_spark_context_deprecation_warning(cls, v: bool) -> bool:
+        if v is not None:
+            # deprecated-v1.0.0
+            warnings.warn(
+                "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+                "In environments that allow it, the existing Spark context will be reused, adding the "
+                "spark_config options that have been passed. If the Spark context cannot be updated with "
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",
+                category=DeprecationWarning,
+            )
+        return v
+
+    @classmethod
+    @override
+    def update_forward_refs(cls) -> None:  # type: ignore[override]
+        from great_expectations.compatibility.pyspark import SparkSession
+
+        super().update_forward_refs(SparkSession=SparkSession)
+
     @staticmethod
     @override
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
-        # Only update forward refs if pyspark types are available.
+        # Only update forward refs if pyspark types are available
         if pyspark:
             asset_type.update_forward_refs()
 
@@ -88,6 +116,41 @@ class _SparkDatasource(Datasource):
 
         return SparkDFExecutionEngine
 
+    def get_spark(self) -> SparkSession:
+        # circular imports require us to import SparkSession and update_forward_refs
+        # only when assigning to self._spark for SparkSession isinstance check
+        self.update_forward_refs()
+        self._spark: SparkSession = (
+            self.execution_engine_type.get_or_create_spark_session(
+                spark_config=self.spark_config,
+            )
+        )
+        return self._spark
+
+    @override
+    def get_execution_engine(self) -> SparkDFExecutionEngine:
+        # Method override is required because PrivateAttr _spark won't be passed into Execution Engine
+        # unless it is passed explicitly.
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            if self._spark:
+                self._execution_engine = self._execution_engine_type()(
+                    spark=self._spark, **current_execution_engine_kwargs
+                )
+            else:
+                self._execution_engine = self._execution_engine_type()(
+                    **current_execution_engine_kwargs
+                )
+
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+        return self._execution_engine
+
     @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the _SparkDatasource.
@@ -99,9 +162,10 @@ class _SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _SparkDatasource subclass."""
-        )
+        try:
+            self.get_spark()
+        except Exception as e:
+            raise TestConnectionError(e) from e
 
     # End Abstract Methods
 
@@ -109,7 +173,6 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
     dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
         default=None, exclude=True, repr=False
     )
@@ -125,12 +188,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         return dataframe
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
-    @property
     @override
-    def batch_request_options(self) -> tuple[str, ...]:
+    def get_batch_request_options_keys(
+        self, partitioner: Optional[Partitioner] = None
+    ) -> tuple[str, ...]:
         return tuple()
 
     def _get_reader_method(self) -> str:
@@ -144,7 +207,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>
     @new_argument(
         argument_name="dataframe",
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
@@ -156,6 +218,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -163,6 +226,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
+            partitioner: This is not currently supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -176,6 +240,11 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if batch_slice is not None:
             raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
+            )
+
+        if partitioner is not None:
+            raise ValueError(
+                "partitioner is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:
@@ -239,9 +308,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -276,10 +345,6 @@ class SparkDatasource(_SparkDatasource):
     type: Literal["spark"] = "spark"
 
     assets: List[DataFrameAsset] = []
-
-    @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
 
     @public_api
     @deprecated_argument(

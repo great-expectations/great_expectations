@@ -1,6 +1,5 @@
 import boto3
 
-import great_expectations as gx
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -9,13 +8,14 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 # </snippet>
 
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
-    sc = gx.core.util.get_or_create_spark_application()
+    sc = SparkDFExecutionEngine.get_or_create_spark_session()
     spark = pyspark.SQLContext(sc)
 
     spark_file = "pyspark_df.parquet"
@@ -71,17 +71,10 @@ if __name__ == "__main__":
     my_checkpoint_name = "in_memory_checkpoint"
     python_config = {
         "name": my_checkpoint_name,
-        "class_name": "Checkpoint",
-        "config_version": 1,
-        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
             },
         ],
         "validations": [
@@ -95,10 +88,9 @@ if __name__ == "__main__":
             }
         ],
     }
-    context_gx.add_or_update_checkpoint(**python_config)
+    checkpoint = context_gx.add_or_update_checkpoint(**python_config)
 
-    results = context_gx.run_checkpoint(
-        checkpoint_name=my_checkpoint_name,
+    results = checkpoint.run(
         run_name="run_name",
         batch_request={
             "runtime_parameters": {"batch_data": df_spark},

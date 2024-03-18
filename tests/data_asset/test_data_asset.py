@@ -54,15 +54,12 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
 
 
 @pytest.mark.filesystem
-def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
+def test_data_asset_expectation_suite():
     asset = DataAsset()
     default_suite = ExpectationSuite(
-        expectation_suite_name="default",
-        data_asset_type="DataAsset",
+        name="default",
         meta={"great_expectations_version": ge_version},
         expectations=[],
-        data_context=context,
     )
 
     # We should have a default-initialized suite stored internally and available for getting

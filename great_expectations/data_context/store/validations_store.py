@@ -1,23 +1,17 @@
 from __future__ import annotations
 
-import random
-import uuid
 from typing import ClassVar, Dict, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -163,9 +157,7 @@ class ValidationsStore(Store):
         """
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
         suite_validation_result_dict = response_json["data"]["attributes"]["result"]
-        suite_validation_result_dict[
-            "ge_cloud_id"
-        ] = ge_cloud_suite_validation_result_id
+        suite_validation_result_dict["id"] = ge_cloud_suite_validation_result_id
 
         return suite_validation_result_dict
 
@@ -181,67 +173,6 @@ class ValidationsStore(Store):
             return self._expectationSuiteValidationResultSchema.load(value)
         else:
             return self._expectationSuiteValidationResultSchema.loads(value)
-
-    def self_check(self, pretty_print):
-        return_obj = {}
-
-        if pretty_print:
-            print("Checking for existing keys...")
-
-        return_obj["keys"] = self.list_keys()
-        return_obj["len_keys"] = len(return_obj["keys"])
-        len_keys = return_obj["len_keys"]
-
-        if pretty_print:
-            if return_obj["len_keys"] == 0:
-                print(f"\t{len_keys} keys found")
-            else:
-                print(f"\t{len_keys} keys found:")
-                for key in return_obj["keys"][:10]:
-                    print(f"		{key!s}")
-            if len_keys > 10:  # noqa: PLR2004
-                print("\t\t...")
-            print()
-
-        test_key_name = "test-key-" + "".join(
-            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
-        )
-
-        if self.cloud_mode:
-            test_key: GXCloudIdentifier = self.key_class(
-                resource_type=GXCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
-            )
-
-        else:
-            test_key: ValidationResultIdentifier = self.key_class(
-                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    expectation_suite_name="temporary_test_suite",
-                ),
-                run_id="temporary_test_run_id",
-                batch_identifier=test_key_name,
-            )
-        test_value = ExpectationSuiteValidationResult(success=True)
-
-        if pretty_print:
-            print(f"Attempting to add a new test key: {test_key}...")
-        self.set(key=test_key, value=test_value)
-        if pretty_print:
-            print("\tTest key successfully added.")
-            print()
-
-        if pretty_print:
-            print(
-                f"Attempting to retrieve the test value associated with key: {test_key}..."
-            )
-        test_value = self.get(
-            key=test_key,
-        )
-        if pretty_print:
-            print("\tTest value successfully retrieved.")
-            print()
-
-        return return_obj
 
     @property
     @override

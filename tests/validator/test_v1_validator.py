@@ -7,6 +7,7 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.partitioners import PartitionerColumnValue
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -53,13 +54,13 @@ def fds_data_asset(
 
 
 @pytest.fixture
-def fds_data_asset_with_event_type_splitter(
+def fds_data_asset_with_event_type_partitioner(
     fds_data_context: AbstractDataContext,
     fds_data_context_datasource_name: str,
 ) -> DataAsset:
     datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
-    return datasource.get_asset("trip_asset_split_by_event_type")
+    return datasource.get_asset("trip_asset_partition_by_event_type")
 
 
 @pytest.fixture
@@ -72,11 +73,12 @@ def batch_config(
 
 
 @pytest.fixture
-def batch_config_with_event_type_splitter(
-    fds_data_asset_with_event_type_splitter: DataAsset,
+def batch_config_with_event_type_partitioner(
+    fds_data_asset_with_event_type_partitioner: DataAsset,
 ) -> BatchConfig:
-    batch_config = BatchConfig(name="test_batch_config")
-    batch_config.set_data_asset(fds_data_asset_with_event_type_splitter)
+    partitioner = PartitionerColumnValue(column_name="event_type")
+    batch_config = BatchConfig(name="test_batch_config", partitioner=partitioner)
+    batch_config.set_data_asset(fds_data_asset_with_event_type_partitioner)
     return batch_config
 
 
@@ -85,7 +87,6 @@ def validator(
     fds_data_context: AbstractDataContext, batch_config: BatchConfig
 ) -> Validator:
     return Validator(
-        context=fds_data_context,
         batch_config=batch_config,
         batch_request_options=None,
         result_format=ResultFormat.SUMMARY,
@@ -160,12 +161,11 @@ def test_validate_expectation_failure(
 @pytest.mark.unit
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
-    batch_config_with_event_type_splitter: BatchConfig,
+    batch_config_with_event_type_partitioner: BatchConfig,
 ):
     desired_event_type = "start"
     validator = Validator(
-        context=fds_data_context,
-        batch_config=batch_config_with_event_type_splitter,
+        batch_config=batch_config_with_event_type_partitioner,
         batch_request_options={"event_type": desired_event_type},
     )
 
@@ -194,3 +194,27 @@ def test_validate_expectation_suite(
         "unsuccessful_expectations": 1,
         "success_percent": 50.0,
     }
+
+
+@pytest.mark.parametrize(
+    ["parameter", "expected"],
+    [
+        (["start", "stop", "continue"], True),
+        (["start", "stop"], False),
+    ],
+)
+@pytest.mark.unit
+def test_validate_expectation_suite_evaluation_parameters(
+    validator: Validator,
+    parameter: list[str],
+    expected: bool,
+):
+    suite = ExpectationSuite("test_suite")
+    expectation = gxe.ExpectColumnValuesToBeInSet(
+        column="event_type",
+        value_set={"$PARAMETER": "my_parameter"},
+    )
+    suite.add_expectation_configuration(expectation.configuration)
+    result = validator.validate_expectation_suite(suite, {"my_parameter": parameter})
+
+    assert result.success == expected

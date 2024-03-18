@@ -18,7 +18,6 @@ from great_expectations.validator.validator import BridgeValidator
 yaml = YAMLHandler()
 
 
-@pytest.mark.filesystem
 @pytest.fixture(scope="module")
 def test_parquet_folder_connection_path(tmp_path_factory):
     pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
@@ -98,14 +97,15 @@ def test_spark_kwargs_are_passed_through(
         dataset_name,
         class_name="SparkDFDatasource",
         spark_config=spark_config,
-        force_reuse_spark_context=False,
         persist=False,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+    datasource = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
-    ).config
+    )
+    old_app_id = datasource.spark.sparkContext.applicationId
+    datasource_config = datasource.config
 
     actual_spark_config = datasource_config["spark_config"]
     expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
@@ -117,7 +117,6 @@ def test_spark_kwargs_are_passed_through(
         config.pop("spark.sql.warehouse.dir", None)
 
     assert datasource_config["spark_config"] == expected_spark_config
-    assert datasource_config["force_reuse_spark_context"] is False
     assert datasource_config["persist"] is False
 
     dataset_name = "test_spark_dataset_2"
@@ -125,17 +124,18 @@ def test_spark_kwargs_are_passed_through(
         dataset_name,
         class_name="SparkDFDatasource",
         spark_config={},
-        force_reuse_spark_context=True,
         persist=True,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+    datasource = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
-    ).config
+    )
+    new_app_id = datasource.spark.sparkContext.applicationId
+    datasource_config = datasource.config
     assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] == True  # noqa: E712
     assert datasource_config["persist"] is True
+    assert old_app_id == new_app_id
 
 
 @pytest.mark.spark
@@ -354,9 +354,8 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 @pytest.mark.spark
 def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, test_backends, empty_data_context
+    test_folder_connection_path_csv, test_backends
 ):
-    context = empty_data_context
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -373,9 +372,7 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(
-        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
-    )
+    validator = BridgeValidator(batch, ExpectationSuite(name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False

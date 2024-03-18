@@ -40,7 +40,6 @@ yaml: YAMLHandler = YAMLHandler()
 @pytest.fixture()
 def bobby_statistics_data_assistant_result(
     monkeypatch,
-    no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> StatisticsDataAssistantResult:
@@ -114,9 +113,9 @@ def test_statistics_data_assistant_metrics_count(
 def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_statistics_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_statistics_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -167,7 +166,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
             ) = convert_metric_values_to_float_dtype_best_effort(
                 metric_values=parameter_value
@@ -194,7 +193,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
             ) = convert_metric_values_to_float_dtype_best_effort(
                 metric_values=parameter_value

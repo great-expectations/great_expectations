@@ -14,7 +14,10 @@ from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
+from great_expectations.core.batch import (  # noqa: TCH001
+    BatchMarkers,
+    LegacyBatchDefinition,
+)
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
@@ -255,9 +258,9 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        rendered_content: List[
-            RenderedAtomicContent
-        ] = inline_renderer.get_rendered_content()
+        rendered_content: List[RenderedAtomicContent] = (
+            inline_renderer.get_rendered_content()
+        )
 
         diagnostic_rendered_content: List[RenderedAtomicContent] = [
             content_block
@@ -279,10 +282,12 @@ class ExpectationValidationResult(SerializableDictDot):
             if content_block.name.startswith(AtomicRendererType.PRESCRIPTIVE)
         ]
 
-        self.expectation_config.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(  # type: ignore[union-attr] # config could be None
-            existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
-            new_rendered_content=prescriptive_rendered_content,
-            failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+        self.expectation_config.rendered_content = (  # type: ignore[union-attr] # config could be None
+            inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=self.expectation_config.rendered_content,  # type: ignore[union-attr] # config could be None
+                new_rendered_content=prescriptive_rendered_content,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
+            )
         )
 
     @staticmethod
@@ -290,13 +295,11 @@ class ExpectationValidationResult(SerializableDictDot):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0
-            or result["unexpected_percent"] > 100  # noqa: PLR2004
+            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0
-            or result["missing_percent"] > 100  # noqa: PLR2004
+            result["missing_percent"] < 0 or result["missing_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
@@ -337,7 +340,7 @@ class ExpectationValidationResult(SerializableDictDot):
             )
         return myself
 
-    def get_metric(self, metric_name, **kwargs):
+    def get_metric(self, metric_name, **kwargs):  # noqa: C901
         if not self.expectation_config:
             raise gx_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
@@ -385,11 +388,35 @@ class ExpectationValidationResult(SerializableDictDot):
             f"Unrecognized metric name {metric_name}"
         )
 
+    def describe_dict(self) -> dict:
+        if self.expectation_config:
+            expectation_type = self.expectation_config.expectation_type
+            kwargs = self.expectation_config.kwargs
+        else:
+            expectation_type = None
+            kwargs = None
+        describe_dict = {
+            "expectation_type": expectation_type,
+            "success": self.success,
+            "kwargs": kwargs,
+            "result": self.result,
+        }
+        if self.exception_info.get("raised_exception"):
+            describe_dict["exception_info"] = self.exception_info
+        return describe_dict
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this ExpectationValidationResult"""
+        return json.dumps(self.describe_dict(), indent=4)
+
 
 class ExpectationValidationResultSchema(Schema):
     success = fields.Bool(required=False, allow_none=True)
     expectation_config = fields.Nested(
-        lambda: "ExpectationConfigurationSchema", required=False, allow_none=True  # type: ignore[arg-type,return-value]
+        lambda: "ExpectationConfigurationSchema",  # type: ignore[arg-type,return-value]
+        required=False,
+        allow_none=True,
     )
     result = fields.Dict(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
@@ -433,7 +460,7 @@ class ExpectationValidationResultSchema(Schema):
 
 
 class ExpectationSuiteValidationResultMeta(TypedDict):
-    active_batch_definition: BatchDefinition
+    active_batch_definition: LegacyBatchDefinition
     batch_markers: BatchMarkers
     batch_spec: BatchSpec
     checkpoint_id: Optional[str]
@@ -511,7 +538,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResult | dict] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:
@@ -567,6 +594,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )
         myself["statistics"] = convert_to_json_serializable(myself["statistics"])
         myself["meta"] = convert_to_json_serializable(myself["meta"])
+        myself["results"] = [
+            convert_to_json_serializable(result) for result in myself["results"]
+        ]
         myself = expectationSuiteValidationResultSchema.dump(myself)
         return myself
 
@@ -639,6 +669,20 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             meta=self.meta,
         )
 
+    def describe_dict(self) -> dict:
+        return {
+            "success": self.success,
+            "statistics": self.statistics,
+            "expectations": [
+                expectation.describe_dict() for expectation in self.results
+            ],
+        }
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this ExpectationSuiteValidationResult"""
+        return json.dumps(self.describe_dict(), indent=4)
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
@@ -646,7 +690,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     evaluation_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id = fields.UUID(required=False, allow_none=True)
     checkpoint_name = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
@@ -667,7 +711,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
         """
         Utilize UUID for data validation but convert to string before usage in business logic
         """
-        attr = "ge_cloud_id"
+        attr = "id"
         uuid_val = data.get(attr)
         if uuid_val:
             data[attr] = str(uuid_val)

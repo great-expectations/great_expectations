@@ -25,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:
+def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:  # noqa: TID251
     spy = mocker.spy(sa, "create_engine")
     yield spy
     if not spy.call_count:
@@ -35,7 +35,7 @@ def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, 
 @pytest.fixture
 def gx_sqlalchemy_execution_engine_spy(
     mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
-) -> Generator[mock.MagicMock, None, None]:
+) -> Generator[mock.MagicMock, None, None]:  # noqa: TID251
     """
     Mock the SQLDatasource.execution_engine_type property to return a spy so that what would be passed to
     the GX SqlAlchemyExecutionEngine constructor can be inspected.
@@ -104,7 +104,7 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 class TestConfigPasstrough:
     def test_kwargs_passed_to_create_engine(
         self,
-        create_engine_spy: mock.MagicMock,
+        create_engine_spy: mock.MagicMock,  # noqa: TID251
         monkeypatch: pytest.MonkeyPatch,
         ephemeral_context_with_defaults: EphemeralDataContext,
         ds_kwargs: dict,
@@ -127,7 +127,7 @@ class TestConfigPasstrough:
 
     def test_ds_config_passed_to_gx_sqlalchemy_execution_engine(
         self,
-        gx_sqlalchemy_execution_engine_spy: mock.MagicMock,
+        gx_sqlalchemy_execution_engine_spy: mock.MagicMock,  # noqa: TID251
         monkeypatch: pytest.MonkeyPatch,
         ephemeral_context_with_defaults: EphemeralDataContext,
         ds_kwargs: dict,

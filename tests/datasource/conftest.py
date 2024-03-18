@@ -61,7 +61,6 @@ def test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine(
 ):
     return SparkDFExecutionEngine(
         name="test_spark_execution_engine",
-        force_reuse_spark_context=True,
     )
 
 
@@ -74,9 +73,9 @@ def glue_titanic_catalog():
             "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
         )
 
-    os.environ[
-        "AWS_DEFAULT_REGION"
-    ] = "testing"  # required when connecting to the glue client, even when mocked
+    os.environ["AWS_DEFAULT_REGION"] = (
+        "testing"  # required when connecting to the glue client, even when mocked
+    )
 
     with mock_glue():
         client = boto3.client("glue")

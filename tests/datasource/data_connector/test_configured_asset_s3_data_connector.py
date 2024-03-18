@@ -1,7 +1,5 @@
-import json
 import os
 from typing import List
-from unittest import mock
 
 import boto3
 import pandas as pd
@@ -10,10 +8,10 @@ from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -63,28 +61,6 @@ def test_basic_instantiation():
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -101,180 +77,6 @@ def test_basic_instantiation():
                 )
             )
         )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock_s3
-def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
-
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-    report_object = context.test_yaml_config(
-        f"""
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetS3DataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket: {bucket}
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetS3DataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(
-    mock_emit, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    keys: List[str] = [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetS3DataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-
-bucket: {bucket}
-prefix: ""
-
-default_regex:
-    pattern: beta-(.*)\\.csv
-    group_names:
-        - index
-
-assets:
-    alpha:
-
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-    assert mock_emit.call_count == 1
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetS3DataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock_s3
@@ -355,7 +157,7 @@ def test_return_all_batch_definitions_unsorted():
         )
     )
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -363,7 +165,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -371,7 +173,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -379,7 +181,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -387,7 +189,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -395,7 +197,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -403,7 +205,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -411,7 +213,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -419,7 +221,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -427,7 +229,7 @@ def test_return_all_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -516,13 +318,6 @@ def test_return_all_batch_definitions_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -534,7 +329,7 @@ def test_return_all_batch_definitions_sorted():
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -542,7 +337,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -550,7 +345,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -558,7 +353,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -566,7 +361,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -574,7 +369,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -582,7 +377,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -590,7 +385,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -598,7 +393,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -606,7 +401,7 @@ def test_return_all_batch_definitions_sorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
@@ -634,8 +429,8 @@ def test_return_all_batch_definitions_sorted():
         ),
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # TEST 2: Should only return the specified partition
     my_batch_definition_list = (
@@ -646,7 +441,7 @@ def test_return_all_batch_definitions_sorted():
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
@@ -721,16 +516,9 @@ def test_alpha():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    self_check_report = my_data_connector.self_check()
-    print(json.dumps(self_check_report, indent=2))
 
-    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
@@ -828,44 +616,8 @@ def test_foxtrot():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    self_check_report = my_data_connector.self_check()
-    assert self_check_report == {
-        "class_name": "ConfiguredAssetS3DataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["A", "B", "C"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/A/A-1.csv",
-                    "test_dir_foxtrot/A/A-2.csv",
-                    "test_dir_foxtrot/A/A-3.csv",
-                ],
-            },
-            "B": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/B/B-1.txt",
-                    "test_dir_foxtrot/B/B-2.txt",
-                    "test_dir_foxtrot/B/B-3.txt",
-                ],
-            },
-            "C": {
-                "batch_definition_count": 3,
-                "example_data_references": [
-                    "test_dir_foxtrot/C/C-2017.csv",
-                    "test_dir_foxtrot/C/C-2018.csv",
-                    "test_dir_foxtrot/C/C-2019.csv",
-                ],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-        # "example_data_reference": {},
-    }
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",

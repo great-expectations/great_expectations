@@ -6,9 +6,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import google
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -60,7 +60,7 @@ def expected_batch_definitions_unsorted():
     Input and output should maintain the same order (henced "unsorted")
     """
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -68,7 +68,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -76,7 +76,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -84,7 +84,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -92,7 +92,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -100,7 +100,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -108,7 +108,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -116,7 +116,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -124,7 +124,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -132,7 +132,7 @@ def expected_batch_definitions_unsorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -152,7 +152,7 @@ def expected_batch_definitions_sorted():
     between input and output.
     """
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -160,7 +160,7 @@ def expected_batch_definitions_sorted():
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -168,7 +168,7 @@ def expected_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -176,7 +176,7 @@ def expected_batch_definitions_sorted():
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -184,7 +184,7 @@ def expected_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -192,7 +192,7 @@ def expected_batch_definitions_sorted():
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -200,7 +200,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -208,7 +208,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -216,7 +216,7 @@ def expected_batch_definitions_sorted():
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -224,7 +224,7 @@ def expected_batch_definitions_sorted():
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
@@ -259,7 +259,6 @@ def test_instantiation_without_args(
         prefix="",
         assets={"alpha": {}},
     )
-    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
@@ -296,8 +295,6 @@ def test_instantiation_with_filename_arg(
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == expected_config_dict
-
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
@@ -333,172 +330,11 @@ def test_instantiation_with_info_arg(
         assets={"alpha": {}},
     )
 
-    assert my_data_connector.self_check() == expected_config_dict
-
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_with_test_yaml_config(
-    mock_gcs_conn,
-    mock_list_keys,
-    mock_emit,
-    empty_data_context_stats_enabled,
-    expected_config_dict,
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == expected_config_dict
-
-
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_with_test_yaml_config_emits_proper_payload(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-    assert mock_emit.call_count == 1
-
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetGCSDataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-
-
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
-)
-def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
-):
-    context = empty_data_context_stats_enabled
-
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: beta-(.*)\\.csv
-            group_names:
-                - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
-
-    assert report_object == {
-        "class_name": "ConfiguredAssetGCSDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-    }
-
-
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -507,7 +343,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
@@ -533,10 +369,6 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
@@ -545,7 +377,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 )
 @pytest.mark.slow  # 1.65s
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         """
@@ -596,16 +428,13 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         """
@@ -644,10 +473,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
@@ -657,7 +482,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     mock_gcs_conn,
     mock_list_keys,
-    mock_emit,
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
@@ -719,10 +543,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
@@ -732,7 +552,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     mock_gcs_conn,
     mock_list_keys,
-    mock_emit,
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
@@ -794,10 +613,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
@@ -807,7 +622,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
 def test_return_all_batch_definitions_basic_sorted(
     mock_gcs_conn,
     mock_list_keys,
-    mock_emit,
     empty_data_context_stats_enabled,
     expected_batch_definitions_sorted,
 ):
@@ -861,13 +675,6 @@ def test_return_all_batch_definitions_basic_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -880,10 +687,6 @@ def test_return_all_batch_definitions_basic_sorted(
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
-# noinspection PyUnusedLocal
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
@@ -891,7 +694,7 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         """
@@ -942,13 +745,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
@@ -973,7 +769,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_gcs_data_connector",
         data_asset_name="TestFiles",
@@ -995,13 +791,9 @@ def test_return_all_batch_definitions_returns_specified_partition(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_return_all_batch_definitions_sorted_without_data_connector_query(
     mock_gcs_conn,
     mock_list_keys,
-    mock_emit,
     empty_data_context_stats_enabled,
     expected_batch_definitions_sorted,
 ):
@@ -1055,13 +847,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    self_check_report = my_data_connector.self_check()
-
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
-    assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-    assert self_check_report["unmatched_data_reference_count"] == 0
-
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -1081,11 +866,8 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         """
@@ -1151,11 +933,8 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_return_all_batch_definitions_too_many_sorters(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         """
@@ -1217,11 +996,8 @@ def test_return_all_batch_definitions_too_many_sorters(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_example_with_explicit_data_asset_names(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     yaml_string = """
 class_name: ConfiguredAssetGCSDataConnector
@@ -1349,11 +1125,8 @@ assets:
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
 ):
     yaml_string = """
 class_name: ConfiguredAssetGCSDataConnector

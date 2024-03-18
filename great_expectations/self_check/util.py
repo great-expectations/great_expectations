@@ -53,9 +53,8 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
 from great_expectations.core.util import (
-    get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.dataset import PandasDataset
@@ -514,11 +513,10 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             "DataType": pyspark.types.DataType,
             "NullType": pyspark.types.NullType,
         }
-        spark = get_or_create_spark_application(
+        spark = SparkDFExecutionEngine.get_or_create_spark_session(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -700,7 +698,7 @@ def _get_test_validator_with_data_pandas(
         # noinspection PyUnusedLocal
         table_name = generate_test_table_name()
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -768,13 +766,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
-    spark = get_or_create_spark_application(
-        spark_config={
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "450m",
-            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-        }
-    )
+    spark = SparkDFExecutionEngine.get_or_create_spark_session()
     # We need to allow null values in some column types that do not support them natively, so we skip
     # use of df in this case.
     data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
@@ -863,7 +855,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         columns = list(data.keys())
         spark_df = spark.createDataFrame(data_reshaped, columns)
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -880,7 +872,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type]
@@ -905,7 +897,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     caching=True,
     sqlite_db_path=None,
     extra_debug_info="",
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
     pk_column: bool = False,
@@ -1183,7 +1175,7 @@ def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
 def build_spark_validator_with_data(
     df: Union[pd.DataFrame, pyspark.DataFrame],
     spark: pyspark.SparkSession,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
@@ -1271,7 +1263,7 @@ def build_spark_engine(
     df: Union[pd.DataFrame, pyspark.DataFrame],
     schema: Optional[pyspark.types.StructType] = None,
     batch_id: Optional[str] = None,
-    batch_definition: Optional[BatchDefinition] = None,
+    batch_definition: Optional[LegacyBatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
     if (
         sum(
@@ -1288,7 +1280,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = cast(BatchDefinition, batch_definition).id
+        batch_id = cast(LegacyBatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         if schema is None:
@@ -1312,7 +1304,6 @@ def build_spark_engine(
         batch_data_dict={
             batch_id: df,
         },
-        force_reuse_spark_context=True,
     )
     return execution_engine
 
@@ -1342,7 +1333,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_a_to_be_greater_than_b",
             "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
@@ -1429,7 +1420,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
         "expect_column_values_to_not_match_like_pattern_list",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
-        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_a_to_be_greater_than_b",
         "expect_column_pair_values_to_be_equal",
         "expect_column_pair_values_to_be_in_set",
         "expect_compound_columns_to_be_unique",
@@ -1453,7 +1444,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
         # "expect_column_max_to_be_between",
         # "expect_column_min_to_be_between",
         # "expect_column_sum_to_be_between",
-        # "expect_column_pair_values_A_to_be_greater_than_B",
+        # "expect_column_pair_values_a_to_be_greater_than_b",
         # "expect_column_pair_values_to_be_equal",
         # "expect_column_pair_values_to_be_in_set",
         # "expect_multicolumn_sum_to_equal",
@@ -1561,7 +1552,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if include_spark:
         from great_expectations.compatibility import pyspark
 
-        if not pyspark.SparkSession:  # type: ignore[truthy-function]
+        if not pyspark.pyspark:
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
@@ -1878,15 +1869,15 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include[
-            "pandas"
-        ] = execution_engine_diagnostics.PandasExecutionEngine
-        engines_to_include[
-            "spark"
-        ] = execution_engine_diagnostics.SparkDFExecutionEngine
-        engines_to_include[
-            "sqlalchemy"
-        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        engines_to_include["pandas"] = (
+            execution_engine_diagnostics.PandasExecutionEngine
+        )
+        engines_to_include["spark"] = (
+            execution_engine_diagnostics.SparkDFExecutionEngine
+        )
+        engines_to_include["sqlalchemy"] = (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        )
         if (
             engines_to_include.get("sqlalchemy") is True
             and raise_exceptions_for_backends is False
@@ -2123,7 +2114,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     return parametrized_tests
 
 
-def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
+def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2219,7 +2210,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
                 key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
             )
         # if python built-in class has __lt__ then sorting can always work this way
-        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+        elif type(test_value_list[0].__lt__(test_value_list[0])) is not type(
             NotImplemented
         ):
             test_value_list = sorted(test_value_list, key=lambda x: str(x))
@@ -2228,7 +2219,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2268,9 +2259,7 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     else:
         _debug = lambda x: x  # noqa: E731
 
-    expectation_suite = ExpectationSuite(
-        "json_test_suite", data_context=validator._data_context
-    )
+    expectation_suite = ExpectationSuite("json_test_suite")
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
@@ -2422,8 +2411,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     atol=ATOL,
                 ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
             else:
-                assert result == expectationValidationResultSchema.load(
-                    test["output"]
+                assert (
+                    result == expectationValidationResultSchema.load(test["output"])
                 ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
         else:
             assert result == expectationValidationResultSchema.load(
@@ -2454,8 +2443,9 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(result["result"]["observed_value"].keys()) == set(
-                            value.keys()
+                        assert (
+                            set(result["result"]["observed_value"].keys())
+                            == set(value.keys())
                         ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(
@@ -2574,15 +2564,27 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
 
             elif key == "traceback_substring":
-                assert result["exception_info"][
-                    "raised_exception"
-                ], f"{result['exception_info']['raised_exception']}"
-                assert value in result["exception_info"]["exception_traceback"], (
-                    "expected to find "
-                    + value
-                    + " in "
-                    + result["exception_info"]["exception_traceback"]
-                )
+                if "raised_exception" not in result["exception_info"]:
+                    # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                    #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                    for k, v in result["exception_info"].items():
+                        assert v["raised_exception"], f"{v['raised_exception']}"
+                        assert value in v["exception_traceback"], (
+                            "expected to find "
+                            + value
+                            + " in "
+                            + value["exception_traceback"]
+                        )
+                else:
+                    assert result["exception_info"][
+                        "raised_exception"
+                    ], f"{result['exception_info']['raised_exception']}"
+                    assert value in result["exception_info"]["exception_traceback"], (
+                        "expected to find "
+                        + value
+                        + " in "
+                        + result["exception_info"]["exception_traceback"]
+                    )
 
             elif key == "expected_partition":
                 assert np.allclose(

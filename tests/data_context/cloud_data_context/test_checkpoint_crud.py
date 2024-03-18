@@ -209,7 +209,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
     ) as mock_get:
-        checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
+        checkpoint = context.checkpoints.get(name=checkpoint_config["name"])
 
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -217,24 +217,14 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
             params={"name": checkpoint_config["name"]},
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-@pytest.mark.cloud
-def test_get_checkpoint_no_identifier_raises_error(
-    empty_cloud_data_context: CloudDataContext,
-) -> None:
-    context = empty_cloud_data_context
-
-    with pytest.raises(ValueError):
-        context.get_checkpoint()
 
 
 @pytest.mark.cloud
@@ -284,8 +274,8 @@ def test_cloud_backed_data_context_add_checkpoint(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -341,8 +331,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -399,8 +389,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -438,11 +428,11 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
 
         # Round trip through schema to mimic updates made during store serialization process
-        ge_cloud_id = checkpoint_config_with_ids.pop("id")
+        id = checkpoint_config_with_ids.pop("id")
         expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(ge_cloud_id=ge_cloud_id, **checkpoint_config_with_ids)
+            CheckpointConfig(id=id, **checkpoint_config_with_ids)
         )
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+        expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -459,8 +449,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -551,11 +541,11 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
         autospec=True,
         side_effect=mocked_get_response,
     ):
-        ge_cloud_id = checkpoint_config_with_ids.pop("id")
+        id = checkpoint_config_with_ids.pop("id")
         checkpoint = context.update_checkpoint(
             Checkpoint.instantiate_from_config_with_runtime_args(
                 checkpoint_config=CheckpointConfig(
-                    ge_cloud_id=ge_cloud_id,
+                    id=id,
                     **checkpoint_config_with_ids,
                 ),
                 data_context=context,
@@ -565,9 +555,9 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
         # Round trip through schema to mimic updates made during store serialization process
         expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(ge_cloud_id=ge_cloud_id, **checkpoint_config_with_ids)
+            CheckpointConfig(id=id, **checkpoint_config_with_ids)
         )
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+        expected_checkpoint_config["id"] = checkpoint_id
 
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -584,8 +574,8 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
             },
         )
 
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
+    assert checkpoint.id == checkpoint_id
+    assert checkpoint.config.id == checkpoint_id
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
@@ -702,7 +692,7 @@ def checkpoint_names_and_ids() -> Tuple[Tuple[str, str], Tuple[str, str]]:
 
 @pytest.fixture
 def mock_get_all_checkpoints_json(
-    checkpoint_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]]
+    checkpoint_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
 ) -> dict:
     checkpoint_1, checkpoint_2 = checkpoint_names_and_ids
     checkpoint_name_1, checkpoint_id_1 = checkpoint_1
@@ -715,15 +705,9 @@ def mock_get_all_checkpoints_json(
                     "checkpoint_config": {
                         "action_list": [],
                         "batch_request": {},
-                        "class_name": "Checkpoint",
-                        "config_version": 1.0,
                         "evaluation_parameters": {},
-                        "module_name": "great_expectations.checkpoint",
                         "name": checkpoint_name_1,
-                        "profilers": [],
-                        "run_name_template": None,
                         "runtime_configuration": {},
-                        "template_name": None,
                         "validations": [
                             {
                                 "batch_request": {
@@ -751,15 +735,10 @@ def mock_get_all_checkpoints_json(
                     "checkpoint_config": {
                         "action_list": [],
                         "batch_request": {},
-                        "class_name": "Checkpoint",
-                        "config_version": 1.0,
                         "evaluation_parameters": {},
                         "module_name": "great_expectations.checkpoint",
                         "name": checkpoint_name_2,
-                        "profilers": [],
-                        "run_name_template": None,
                         "runtime_configuration": {},
-                        "template_name": None,
                         "validations": [
                             {
                                 "batch_request": {
@@ -772,7 +751,6 @@ def mock_get_all_checkpoints_json(
                             }
                         ],
                     },
-                    "class_name": "Checkpoint",
                     "created_by_id": "329eb0a6-6559-4221-8b27-131a9185118d",
                     "default_validation_id": None,
                     "id": checkpoint_id_2,
@@ -810,7 +788,7 @@ def test_list_checkpoints(
     checkpoint_name_2, checkpoint_id_2 = checkpoint_2
 
     with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
+        mock_get.return_value = mock.Mock(  # noqa: TID251
             status_code=200, json=lambda: mock_get_all_checkpoints_json
         )
         checkpoints = context.list_checkpoints()

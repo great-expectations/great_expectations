@@ -70,10 +70,6 @@ class SampleConfigSchema(Schema):
 class SampleConfigurationStore(ConfigurationStore):
     _configuration_class = SampleConfig
 
-    def serialization_self_check(self, pretty_print: bool) -> None:
-        # Required to fulfill contract set by parent
-        pass
-
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
         return [
@@ -272,36 +268,6 @@ def test_config_property_and_defaults() -> None:
     }
 
 
-@pytest.mark.unit
-def test_self_check(capsys) -> None:
-    store = SampleConfigurationStore(store_name="my_configuration_store")
-
-    report_obj = store.self_check(pretty_print=True)
-
-    keys = [f"key{char}" for char in string.ascii_uppercase]
-
-    assert report_obj == {
-        "config": {
-            "class_name": "SampleConfigurationStore",
-            "module_name": "tests.data_context.store.test_configuration_store",
-            "overwrite_existing": False,
-            "store_name": "my_configuration_store",
-        },
-        "keys": keys,
-        "len_keys": len(keys),
-    }
-
-    stdout = capsys.readouterr().out
-
-    messages = [
-        "Checking for existing keys...",
-        f"{len(keys)} keys found",
-    ]
-
-    for message in messages:
-        assert message in stdout
-
-
 @pytest.mark.parametrize(
     "name,id,expected_key",
     [
@@ -322,10 +288,10 @@ def test_self_check(capsys) -> None:
     ],
 )
 @pytest.mark.unit
-def test_determine_key_constructs_key(
+def test_get_key_constructs_key(
     name: Optional[str], id: Optional[str], expected_key: DataContextKey
 ) -> None:
-    actual_key = ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+    actual_key = ConfigurationStore(store_name="test").get_key(name=name, id=id)
     assert actual_key == expected_key
 
 
@@ -341,11 +307,11 @@ def test_determine_key_constructs_key(
     ],
 )
 @pytest.mark.unit
-def test_determine_key_raises_error_with_conflicting_args(
+def test_get_key_raises_error_with_conflicting_args(
     name: Optional[str], id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
-        ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+        ConfigurationStore(store_name="test").get_key(name=name, id=id)
 
     assert "Must provide either name or id" in str(e.value)
 

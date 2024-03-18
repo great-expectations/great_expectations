@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch import BatchRequestBase, LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
@@ -64,10 +64,10 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[
-                BatchDefinition
-            ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-                data_reference=data_reference, data_asset_name=None
+            mapped_batch_definition_list: List[LegacyBatchDefinition] = (
+                self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                    data_reference=data_reference, data_asset_name=None
+                )
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -105,13 +105,13 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
-        batch_definition_list: List[
-            BatchDefinition
-        ] = self._get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequestBase(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
-                data_asset_name="",
+        batch_definition_list: List[LegacyBatchDefinition] = (
+            self._get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequestBase(
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name="",
+                )
             )
         )
 
@@ -123,12 +123,14 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return list(set(data_asset_names))
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+    def build_batch_spec(
+        self, batch_definition: LegacyBatchDefinition
+    ) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -140,8 +142,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return PathBatchSpec(batch_spec)
 
     @override
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
-        batch_definition_list: List[BatchDefinition] = [
+    def _get_batch_definition_list_from_cache(self) -> List[LegacyBatchDefinition]:
+        batch_definition_list: List[LegacyBatchDefinition] = [
             batch_definitions[0]
             for batch_definitions in self._data_references_cache.values()
             if batch_definitions is not None

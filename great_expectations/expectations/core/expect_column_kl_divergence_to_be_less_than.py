@@ -46,10 +46,6 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import (
-    MetricsCalculator,
-    _MetricsDict,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core import (
@@ -68,7 +64,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
+class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
     KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \
@@ -345,11 +341,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
+                from great_expectations.validator.metrics_calculator import (
+                    MetricsCalculator,
+                )
+
                 metrics_calculator = MetricsCalculator(
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: _MetricsDict
                 resolved_metrics, _ = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
@@ -834,7 +833,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(cls, partition_object, header=None):  # noqa: PLR0912
+    def _get_kl_divergence_chart(  # noqa: PLR0912,C901 - 13
+        cls, partition_object, header=None
+    ):
         weights = partition_object["weights"]
 
         if len(weights) > 60:  # noqa: PLR2004
@@ -1395,7 +1396,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             header_template_str,
             header_params_with_json_schema,
             chart,
-            chart_container_col_width,
+            _chart_container_col_width,
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(

@@ -19,11 +19,17 @@ def submit(event: Event) -> None:
     """
 
     try:
+        groups = {
+            "data_context": event.data_context_id,
+        }
+        if event.organization_id:
+            groups.update({"organization": event.organization_id})
+
         posthog.capture(
-            str(event.user_id),
+            str(event.distinct_id),
             str(event.action),
             event.properties(),
-            groups={"organization": event.organization_id},
+            groups=groups,
         )
     except Exception as _:
         # failure to send an analytics event should not be propagated to user

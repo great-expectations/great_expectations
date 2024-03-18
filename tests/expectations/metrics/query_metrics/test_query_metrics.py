@@ -13,7 +13,7 @@ def test_query_template_get_query_function_with_int():
     """Simple test to ensure that the `get_query()` method for QueryTemplateValue can handle integer value"""
     query: str = """
             SELECT {column_to_check}
-            FROM {active_batch}
+            FROM {batch}
             WHERE {condition}
             GROUP BY {column_to_check}
             """
@@ -37,7 +37,7 @@ def test_query_template_get_query_function_with_float():
     """Simple test to ensure that the `get_query()` method for QueryTemplateValue can handle float value"""
     query: str = """
             SELECT {column_to_check}
-            FROM {active_batch}
+            FROM {batch}
             WHERE {condition}
             GROUP BY {column_to_check}
             """

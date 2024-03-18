@@ -1,6 +1,5 @@
 import logging
-from typing import List
-from unittest import mock
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -13,15 +12,44 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+
+def assert_exception_info(
+    result: ExpectationValidationResult, expected_exception_message: Union[str, None]
+):
+    if result.success:
+        if "raised_exception" in result["exception_info"]:
+            assert (
+                "exception_traceback" not in result.exception_info
+            ) or not result.exception_info["exception_traceback"]
+            assert (
+                "exception_message" not in result.exception_info
+            ) or not result.exception_info["exception_message"]
+        else:
+            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+            #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+            for k, v in result["exception_info"].items():
+                assert ("exception_traceback" not in v) or not v["exception_traceback"]
+                assert ("exception_traceback" not in v) or not v["exception_traceback"]
+    elif "raised_exception" in result["exception_info"]:
+        assert result.exception_info.get("exception_traceback")
+        assert result.exception_info.get("exception_message")
+        if expected_exception_message:
+            assert result["exception_message"] == expected_exception_message
+    else:
+        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+        #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+        for k, v in result["exception_info"].items():
+            assert v.get("exception_traceback")
+            assert v.get("exception_message")
+            if expected_exception_message:
+                assert v["exception_message"] == expected_exception_message
 
 
 @pytest.fixture
@@ -38,13 +66,8 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
-def test_catch_exceptions_no_exceptions(
-    mock_emit, in_memory_runtime_context, test_spark_df
-):
+def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
         "result_format": "SUMMARY",
@@ -122,12 +145,7 @@ def test_catch_exceptions_no_exceptions(
 
     for result in results:
         assert result.success
-        assert (
-            "exception_traceback" not in result.exception_info
-        ) or not result.exception_info["exception_traceback"]
-        assert (
-            "exception_message" not in result.exception_info
-        ) or not result.exception_info["exception_message"]
+        assert_exception_info(result=result, expected_exception_message=None)
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -151,16 +169,10 @@ def test_catch_exceptions_no_exceptions(
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
@@ -269,16 +281,10 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
     assert result.success
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
     result_format: dict = {
@@ -371,9 +377,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         == "expect_column_values_to_not_be_null"
     )
     assert not result.success
-    assert "exception_traceback" in result.exception_info
-    assert "exception_message" in result.exception_info
-    assert result.exception_info["exception_message"] == expected_exception_message
+    assert_exception_info(
+        result=result, expected_exception_message=expected_exception_message
+    )
 
     result = results[1]
     assert (
@@ -381,12 +387,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         == "expect_table_row_count_to_equal"
     )
     assert result.success
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
+    assert_exception_info(result=result, expected_exception_message=None)
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -400,9 +401,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert not result.success
-    assert "exception_traceback" in result.exception_info
-    assert "exception_message" in result.exception_info
-    assert result.exception_info["exception_message"] == expected_exception_message
+    assert_exception_info(
+        result=result, expected_exception_message=expected_exception_message
+    )
 
     # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
 
@@ -414,23 +415,12 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     )
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
-
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
+    assert_exception_info(result=result, expected_exception_message=None)
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -443,15 +433,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite
-
     suite = in_memory_runtime_context.add_expectation_suite("test_suite")
-
-    expectation_configuration: ExpectationConfiguration
-
-    expectation_meta: dict = {"notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
         "column": "Name",  # use correct column to avoid error
@@ -462,7 +444,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -526,7 +507,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -568,7 +548,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
     )
 
     suite.add_expectation_configuration(
@@ -596,7 +575,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
             "expectation_type": "expect_column_values_to_not_be_null",
-            "meta": {"notes": "Some notes"},
+            "meta": {},
         },
         "meta": {},
         "exception_info": {
@@ -614,9 +593,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
 
     expectation_parameters: dict
 
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
     assert result.to_json_dict() == {
@@ -633,7 +610,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                     "partial_unexpected_count": 20,
                 },
                 "column": "Name",
-                "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
         },
@@ -647,16 +623,10 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.spark
 def test_result_format_configured_with_set_default_override(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -675,8 +645,6 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_configuration: ExpectationConfiguration
 
-    expectation_meta: dict = {"notes": "Some notes"}
-
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
@@ -688,7 +656,6 @@ def test_result_format_configured_with_set_default_override(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -738,7 +705,7 @@ def test_result_format_configured_with_set_default_override(
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
-            "meta": {"notes": "Some notes"},
+            "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
         },
         "success": True,
@@ -768,7 +735,6 @@ def test_result_format_configured_with_set_default_override(
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
     )
     suite.add_expectation_configuration(
         expectation_configuration=expectation_configuration
@@ -793,7 +759,7 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_parameters: dict
 
-    expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
+    expectation_parameters = dict(**expectation_arguments_column)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
     assert result.to_json_dict() == {
@@ -801,11 +767,10 @@ def test_result_format_configured_with_set_default_override(
         "expectation_config": {
             "kwargs": {
                 "column": "Name",
-                "notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
-            "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {},
         },
         "success": True,
         "meta": {},
@@ -817,71 +782,3 @@ def test_result_format_configured_with_set_default_override(
     }
     assert len(result.result.keys()) == 0
     assert result.result == {}
-
-    # In-Memory DataContext does not have UsageStatisticsHandler configured
-    assert mock_emit.call_count == 0
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_in_memory_runtime_context_configured_with_usage_stats_handler(
-    mock_emit, in_memory_runtime_context, test_pandas_df
-):
-    context = in_memory_runtime_context
-
-    # manually set usage statistics handler
-    handler = UsageStatisticsHandler(
-        data_context=context,
-        data_context_id=context._data_context_id,
-        oss_id=None,
-        usage_statistics_url="http://fakeendpoint.com",
-    )
-    context._usage_statistics_handler = handler
-
-    catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: dict = {
-        "result_format": "SUMMARY",
-    }
-    runtime_environment_arguments = {
-        "catch_exceptions": catch_exceptions,
-        "result_format": result_format,
-    }
-
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
-        "test_suite"
-    )
-
-    expectation_configuration: ExpectationConfiguration
-
-    expectation_meta: dict = {"notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict
-
-    expectation_arguments_column: dict = {
-        "column": "Name",  # use correct column to avoid error
-    }
-    expectation_arguments_without_meta = dict(
-        **runtime_environment_arguments, **expectation_arguments_column
-    )
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs=expectation_arguments_without_meta,
-        meta=expectation_meta,
-    )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
-
-    # emit 1 from add_expectation
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
-    ]

@@ -1,4 +1,5 @@
 """These tests ensure that CloudMigrator works as intended."""
+
 import logging
 from typing import Any, Callable, List
 from unittest import mock
@@ -8,7 +9,6 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
@@ -36,7 +36,7 @@ def migrator_factory(
 def migrator_with_mock_context(
     migrator_factory: Callable,
 ) -> CloudMigrator:
-    return migrator_factory(context=mock.MagicMock)
+    return migrator_factory(context=mock.MagicMock)  # noqa: TID251
 
 
 @pytest.fixture
@@ -53,8 +53,8 @@ def mock_successful_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,
@@ -83,8 +83,8 @@ def mock_failed_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,
@@ -189,55 +189,6 @@ def test__send_validation_results_sends_valid_http_request(
         },
     )
     assert mock_post.call_count == 5
-
-
-@pytest.mark.cloud
-class TestUsageStats:
-    def test_migrate_successful_event(
-        self, ge_cloud_organization_id: str, mock_successful_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=True,
-        )
-
-    def test_migrate_failed_event(
-        self, ge_cloud_organization_id: str, mock_failed_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=False,
-        )
-
-    def test_no_event_sent_for_migrate_test_run(
-        self, mock_successful_migration: Callable
-    ):
-        """No event should be sent for a successful test run."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
-
-    def test_no_event_sent_for_migrate_test_run_failure(
-        self, mock_failed_migration: Callable
-    ):
-        """No event should be sent for a failed test run."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
 
 
 @pytest.mark.cloud

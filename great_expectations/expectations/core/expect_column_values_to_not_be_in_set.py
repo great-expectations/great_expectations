@@ -200,7 +200,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must not belong to this set: {value_set_str}"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -252,7 +252,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         template_str = f"values must not belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, no_scientific=True
             )

@@ -1,5 +1,6 @@
 import functools
 import operator
+from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.execution_engine import (
@@ -87,7 +88,10 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
             A numeric value that is included in the calculation to equal the nth column. \
             The calculation becomes col_a + col_b + ... + col_n-1 + additional_value == col_n
     """
+
     # </snippet>
+
+    additional_value: Optional[float] = None
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

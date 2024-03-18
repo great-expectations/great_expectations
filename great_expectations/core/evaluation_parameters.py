@@ -32,7 +32,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.data_context import AbstractDataContext
 
@@ -41,6 +41,27 @@ _epsilon = 1e-12
 
 # NOTE: Temporary alias - to be converted to a rich type
 EvaluationParameterDict: TypeAlias = dict
+
+
+def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
+    """Typeguard to check if a value is an evaluation parameter."""
+    return isinstance(value, dict) and "$PARAMETER" in value.keys()
+
+
+def get_evaluation_parameter_key(evaluation_parameter: EvaluationParameterDict) -> str:
+    """Get the key of an evaluation parameter.
+
+    e.g. if the evaluation parameter is {"$PARAMETER": "foo"}, this function will return "foo".
+    When evaluating the runtime configuration of an expectation, we will look for
+    a runtime value for "foo".
+
+    Args:
+        evaluation_parameter: The evaluation parameter to get the key of
+
+    Returns:
+        The key of the evaluation parameter
+    """
+    return evaluation_parameter["$PARAMETER"]
 
 
 class EvaluationParameterParser:
@@ -169,7 +190,7 @@ class EvaluationParameterParser:
             self._parser = expr
         return self._parser
 
-    def evaluate_stack(self, s):  # noqa: PLR0911, PLR0912
+    def evaluate_stack(self, s):  # noqa: C901, PLR0911, PLR0912
         op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
             op, num_args, has_fn_kwargs = op

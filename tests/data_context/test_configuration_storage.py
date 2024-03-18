@@ -51,7 +51,8 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
@@ -184,10 +185,6 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
 anonymous_usage_statistics:
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   enabled: false

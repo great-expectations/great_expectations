@@ -112,8 +112,7 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
-    def _save_project_config(self) -> None:
-        ...
+    def _save_project_config(self) -> None: ...
 
 
 def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
@@ -208,9 +207,7 @@ class TestMetaDatasource:
             context_sources_cleanup, expected_method_name, None
         )
 
-        assert (
-            ds_factory_method_final
-        ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
+        assert ds_factory_method_final, f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test_registered_sources_factory_method_has_correct_signature(
         self, context_sources_cleanup: _SourceFactories
@@ -290,8 +287,7 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None:
-                    ...
+                def test_connection(self) -> None: ...
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -302,8 +298,7 @@ class TestMisconfiguredMetaDatasource:
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
-            def test_connection(self) -> None:
-                ...
+            def test_connection(self) -> None: ...
 
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
@@ -325,8 +320,7 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None:
-                    ...
+                def test_connection(self) -> None: ...
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -350,14 +344,12 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class RedAsset(DataAsset):
         type = "red"
 
-        def test_connection(self):
-            ...
+        def test_connection(self): ...
 
     class BlueAsset(DataAsset):
         type = "blue"
 
-        def test_connection(self):
-            ...
+        def test_connection(self): ...
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
@@ -367,8 +359,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
-        def test_connection(self):
-            ...
+        def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
@@ -415,7 +406,7 @@ def assert_fluent_datasource_content(
 
 @pytest.fixture
 def context_with_fluent_datasource(
-    context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]
+    context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path],
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
     assert 0 == len(context.datasources)
@@ -625,7 +616,7 @@ def test_add_or_update_datasource_using_update(
 )
 @pytest.mark.unit
 def test_delete_datasource(context_with_fluent_datasource):
-    context, config_file_path, data_dir = context_with_fluent_datasource
+    context, config_file_path, _data_dir = context_with_fluent_datasource
     context.sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(config_file_path, {})
 

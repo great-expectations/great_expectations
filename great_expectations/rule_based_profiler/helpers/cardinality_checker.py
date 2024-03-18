@@ -135,7 +135,8 @@ class CardinalityChecker:
         return self._cardinality_limit_mode
 
     def cardinality_within_limit(
-        self, metric_value: Union[int, float]  # noqa: PYI041
+        self,
+        metric_value: Union[int, float],  # noqa: PYI041
     ) -> bool:
         """Determine if the cardinality is within configured limit.
 
@@ -170,7 +171,7 @@ class CardinalityChecker:
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"
             )
 
-        if metric_value < 0.00:  # noqa: PLR2004
+        if metric_value < 0.00:
             raise ProfilerConfigurationError(
                 f"Value of cardinality (number of rows or percent unique) should be greater than 0.00, your value is {metric_value}"
             )

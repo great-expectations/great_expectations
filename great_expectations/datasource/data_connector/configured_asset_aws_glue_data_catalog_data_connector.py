@@ -8,10 +8,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequestBase,
     BatchSpec,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.batch_spec import GlueDataCatalogBatchSpec
 from great_expectations.datasource.data_connector import DataConnector
@@ -112,13 +112,13 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     @override
     def build_batch_spec(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> GlueDataCatalogBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -192,7 +192,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
+        batch_definition_list: List[LegacyBatchDefinition] = []
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
@@ -203,7 +203,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition = BatchDefinition(
+            batch_definition = LegacyBatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
@@ -327,10 +327,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         for data_asset_name in self.assets:
             data_asset_config: dict = self.assets[data_asset_name]
-            batch_identifiers_list: List[
-                dict
-            ] = self._get_batch_identifiers_list_from_data_asset_config(
-                data_asset_config=data_asset_config
+            batch_identifiers_list: List[dict] = (
+                self._get_batch_identifiers_list_from_data_asset_config(
+                    data_asset_config=data_asset_config
+                )
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
@@ -359,10 +359,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         # Note: data references *are* dictionaries, allowing us to invoke `IDDict(data_reference)`
         return [
-            BatchDefinition(
+            LegacyBatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,  # type: ignore[arg-type]
@@ -372,7 +372,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
@@ -381,7 +381,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             3. data_asset from data_connector
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             dict built from batch_definition

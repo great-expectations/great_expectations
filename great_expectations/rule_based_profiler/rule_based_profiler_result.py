@@ -9,12 +9,6 @@ from great_expectations.core import (
     ExpectationSuite,  # noqa: TCH001
 )
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -65,8 +59,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
     rule_execution_time: Dict[str, float]
     rule_exception_tracebacks: Dict[str, Optional[str]]
     catch_exceptions: bool = field(default=False)
-    # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
-    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @override
     def to_dict(self) -> dict:
@@ -80,7 +72,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration
         parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
-        ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
+        ] = self.parameter_values_for_fully_qualified_parameter_names_by_domain or {}
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {
@@ -121,10 +113,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         return self.to_dict()
 
     @public_api
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
-        args_payload_fn=get_expectation_suite_usage_statistics,
-    )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
         Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.
@@ -144,7 +132,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         )
         expectation_suite.add_expectation_configurations(
             expectation_configurations=self.expectation_configurations,
-            send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )

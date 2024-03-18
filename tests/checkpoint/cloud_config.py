@@ -100,7 +100,6 @@ def _cloud_config(data_dir):
             "enabled": True,
         },
         "checkpoint_store_name": "default_checkpoint_store",
-        "concurrency": {"enabled": False},
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
@@ -235,10 +234,6 @@ def _checkpoint_config(data_file_name, with_slack):
             "action": {"class_name": "StoreValidationResultAction"},
             "name": "store_validation_result",
         },
-        {
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-            "name": "store_evaluation_params",
-        },
     ]
     if with_slack:
         action_list.append(
@@ -262,20 +257,13 @@ def _checkpoint_config(data_file_name, with_slack):
                 "checkpoint_config": {
                     "action_list": action_list,
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
                     "evaluation_parameters": {},
-                    "expectation_suite_ge_cloud_id": None,
+                    "expectation_suite_id": None,
                     "expectation_suite_name": None,
-                    "ge_cloud_id": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
-                    "run_name_template": None,
                     "runtime_configuration": {},
-                    "template_name": None,
                     "validations": [
                         {
                             "batch_request": {
@@ -284,13 +272,12 @@ def _checkpoint_config(data_file_name, with_slack):
                                 "data_connector_query": {"index": -1},
                                 "datasource_name": "taxi_datasource",
                             },
-                            "expectation_suite_ge_cloud_id": "d1ff9854-ac5f-45ae-9c88-c3f4323432c1",
+                            "expectation_suite_id": "d1ff9854-ac5f-45ae-9c88-c3f4323432c1",
                             "expectation_suite_name": "taxi_demo_suite",
                             "id": "2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
                         }
                     ],
                 },
-                "class_name": "Checkpoint",
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
                 "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
                 "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",
@@ -310,17 +297,16 @@ def _expectation_suite():
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
                 "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
                 "suite": {
-                    "data_asset_type": None,
-                    "expectation_suite_name": "single-snippet-suite-2",
+                    "name": "single-snippet-suite-2",
                     "expectations": [
                         {
                             "expectation_type": "expect_column_to_exist",
-                            "ge_cloud_id": "0571b111-a1d0-4f1a-9c83-6704887de635",
+                            "id": "0571b111-a1d0-4f1a-9c83-6704887de635",
                             "kwargs": {"column": "passenger_count"},
                             "meta": {},
                         }
                     ],
-                    "ge_cloud_id": "1212e79d-f751-4c6e-921d-26de2b1db174",
+                    "id": "1212e79d-f751-4c6e-921d-26de2b1db174",
                     "meta": {"great_expectations_version": "0.15.43"},
                 },
             },

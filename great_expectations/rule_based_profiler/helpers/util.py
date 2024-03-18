@@ -14,6 +14,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Iterable,
     List,
     Optional,
@@ -92,6 +93,8 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
     "nearest",
     "linear",
 }
+
+NP_RANDOM_GENERATOR: Final = np.random.default_rng()
 
 
 def get_validator(  # noqa: PLR0913
@@ -207,18 +210,18 @@ def build_batch_request(
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    effective_batch_request: Optional[
-        Union[BatchRequestBase, dict]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=domain,
-        parameter_reference=batch_request,
-        expected_return_type=(BatchRequestBase, dict),
-        variables=variables,
-        parameters=parameters,
+    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=batch_request,
+            expected_return_type=(BatchRequestBase, dict),
+            variables=variables,
+            parameters=parameters,
+        )
     )
-    materialized_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest]
-    ] = materialize_batch_request(batch_request=effective_batch_request)
+    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
+        materialize_batch_request(batch_request=effective_batch_request)
+    )
 
     return materialized_batch_request
 
@@ -473,14 +476,14 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[
-        Union[ParameterNode, Dict[str, Any]]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=None,
-        parameter_reference=VARIABLES_PREFIX,
-        expected_return_type=None,
-        variables=variables,
-        parameters=None,
+    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=VARIABLES_PREFIX,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()
@@ -569,7 +572,7 @@ def get_false_positive_rate_from_rule_state(
         variables=variables,
         parameters=parameters,
     )
-    if not (0.0 <= false_positive_rate <= 1.0):  # noqa: PLR2004
+    if not (0.0 <= false_positive_rate <= 1.0):
         raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
@@ -707,19 +710,19 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
-        metric_values_gaussian_sample,
-        q=lower_quantile_pct,
-        method=quantile_statistic_interpolation_method,
+    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
+        numpy.numpy_quantile(
+            metric_values_gaussian_sample,
+            q=lower_quantile_pct,
+            method=quantile_statistic_interpolation_method,
+        )
     )
-    upper_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
-        metric_values_gaussian_sample,
-        q=upper_quantile_pct,
-        method=quantile_statistic_interpolation_method,
+    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
+        numpy.numpy_quantile(
+            metric_values_gaussian_sample,
+            q=upper_quantile_pct,
+            method=quantile_statistic_interpolation_method,
+        )
     )
 
     return build_numeric_range_estimation_result(
@@ -815,7 +818,7 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps = np.random.choice(
+        bootstraps = NP_RANDOM_GENERATOR.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
@@ -922,7 +925,7 @@ def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
 
     if (
         not quantile_bias_correction
-        and bootstrap_quantile_standard_error > 0.0  # noqa: PLR2004
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
@@ -1022,7 +1025,7 @@ def get_or_create_expectation_suite(
     create_expectation_suite: bool
 
     if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
+        if expectation_suite.name != expectation_suite_name:
             raise ValueError(
                 'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
             )
@@ -1048,20 +1051,15 @@ def get_or_create_expectation_suite(
         if persist:
             try:
                 # noinspection PyUnusedLocal
-                expectation_suite = data_context.get_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
+                expectation_suite = data_context.suites.get(name=expectation_suite_name)
             except gx_exceptions.DataContextError:
                 expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-                logger.info(
-                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-                )
+                logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=data_context,
+                name=expectation_suite_name,
             )
 
     return expectation_suite
@@ -1096,8 +1094,7 @@ def sanitize_parameter_name(
 
 class _NumericIterableWithDtype(Iterable, Protocol):
     @property
-    def dtype(self) -> Any:
-        ...
+    def dtype(self) -> Any: ...
 
 
 def _is_iterable_of_numeric_dtypes(

@@ -1,7 +1,5 @@
 import os
-import unittest
-from typing import Dict, List, Optional, cast
-from unittest import mock
+from typing import Dict, Optional, cast
 
 import pytest
 from freezegun import freeze_time
@@ -18,7 +16,6 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -28,12 +25,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
-# noinspection PyUnresolvedReferences
-
 
 @pytest.fixture
 def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
-    no_usage_stats,
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> GrowthNumericDataAssistantResult:
     context = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -133,12 +127,8 @@ def test_growth_numeric_data_assistant_result_serialization(
 
 
 @pytest.mark.big
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 7.34s
 def test_growth_numeric_data_assistant_result_get_expectation_suite(
-    mock_emit,
     bobby_growth_numeric_data_assistant_result_usage_stats_enabled: GrowthNumericDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
@@ -148,15 +138,6 @@ def test_growth_numeric_data_assistant_result_get_expectation_suite(
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
-    )
 
 
 @pytest.mark.big
@@ -195,9 +176,9 @@ def test_growth_numeric_data_assistant_metrics_count(
 def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -395,12 +376,6 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -408,8 +383,8 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -516,12 +491,6 @@ def test_spark_happy_path_growth_numeric_data_assistant(
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -529,8 +498,8 @@ def test_spark_happy_path_growth_numeric_data_assistant(
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -633,12 +602,6 @@ def test_sql_happy_path_growth_numeric_data_assistant(
                 },
             },
             {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -646,6 +609,6 @@ def test_sql_happy_path_growth_numeric_data_assistant(
             },
         ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False

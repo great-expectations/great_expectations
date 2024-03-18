@@ -4,7 +4,6 @@ import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -48,7 +47,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all RegexColumnMapMetrics.
 
@@ -101,7 +99,6 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.rlike(cls.regex)
 
 
-@public_api
 class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for RegexBasedColumnMapExpectations.
 
@@ -157,7 +154,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         return map_metric
 
     @override
-    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -259,7 +255,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         else:
             template_str = "values must match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -276,7 +272,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     @override
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

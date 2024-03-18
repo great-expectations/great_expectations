@@ -94,6 +94,9 @@ class LinkChecker:
         )
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
+        absolute_file_regex = rf"(?!(\/{site_prefix}\/))\/\S+\.mdx?(#[^'\"]+)?"
+        self._absolute_file_pattern = re.compile(absolute_file_regex)
+
         # docroot links start without a . or a slash
         docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
         self._docroot_link_pattern = re.compile(docroot_link_regex)
@@ -248,6 +251,7 @@ class LinkChecker:
         - Relative links that begin with either . or .. and have a .md suffix
         - Relative images with an image suffix
         - Docroot links that begin with a character (neither . or /) are relative to the doc root (ex: /docs) and have a .md suffix
+        - Absolute file paths for markdown files
 
         Args:
             match: A positive match of a markdown link (ex: [...](...)) or image
@@ -284,6 +288,10 @@ class LinkChecker:
                     result = self._check_absolute_link(
                         link, file, match.group("path"), match.group("version")
                     )
+                elif match := self._absolute_file_pattern.match(link):  # type: ignore[assignment]
+                    # This could be more robust like the other checks, but the level of complexity will be high for versioned_docs,
+                    # and we should be able to just set onBrokenMarkdownLinks: 'error'
+                    result = None
                 else:
                     match = self._docroot_link_pattern.match(link)  # type: ignore[assignment]
                     if match:

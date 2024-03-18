@@ -171,7 +171,12 @@ def send_email(  # noqa: PLR0913
         else:
             logger.warning("Not using TLS or SSL to send an email is not secure")
             mailserver = smtplib.SMTP(smtp_address, smtp_port)
-        mailserver.login(sender_login, sender_password)
+        if sender_login is not None and sender_password is not None:
+            mailserver.login(sender_login, sender_password)
+        elif not (sender_login is None and sender_password is None):
+            logger.error(
+                "Please specify both sender_login and sender_password or specify both as None"
+            )
         mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:
@@ -196,10 +201,8 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.get("expectation_suite_name"),
-        "expectation_suite_ge_cloud_id": validation_dict.get(
-            "expectation_suite_ge_cloud_id"
-        )
-        or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
+        "expectation_suite_id": validation_dict.get("expectation_suite_id")
+        or substituted_runtime_config.get("expectation_suite_id"),
         "action_list": get_updated_action_list(
             base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
@@ -268,98 +271,19 @@ def get_substituted_batch_request(
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_template_config(  # noqa: PLR0912
-    source_config: dict, template_config: dict
+def substitute_runtime_config(  # noqa: C901 - 11
+    source_config: dict, runtime_kwargs: dict
 ) -> dict:
-    if not (template_config and any(template_config.values())):
-        return source_config
-
-    dest_config: dict = copy.deepcopy(template_config)
-
-    # replace
-    if source_config.get("name") is not None:
-        dest_config["name"] = source_config["name"]
-    if source_config.get("module_name") is not None:
-        dest_config["module_name"] = source_config["module_name"]
-    if source_config.get("class_name") is not None:
-        dest_config["class_name"] = source_config["class_name"]
-    if source_config.get("run_name_template") is not None:
-        dest_config["run_name_template"] = source_config["run_name_template"]
-    if source_config.get("expectation_suite_name") is not None:
-        dest_config["expectation_suite_name"] = source_config["expectation_suite_name"]
-    if source_config.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = source_config[
-            "expectation_suite_ge_cloud_id"
-        ]
-
-    # update
-    if source_config.get("batch_request") is not None:
-        batch_request = dest_config.get("batch_request") or {}
-        updated_batch_request = nested_update(
-            batch_request,
-            source_config["batch_request"],
-            dedup=True,
-        )
-        dest_config["batch_request"] = updated_batch_request
-    if source_config.get("action_list") is not None:
-        action_list = dest_config.get("action_list") or []
-        dest_config["action_list"] = get_updated_action_list(
-            base_action_list=action_list,
-            other_action_list=source_config["action_list"],
-        )
-    if source_config.get("evaluation_parameters") is not None:
-        evaluation_parameters = dest_config.get("evaluation_parameters") or {}
-        updated_evaluation_parameters = nested_update(
-            evaluation_parameters,
-            source_config["evaluation_parameters"],
-            dedup=True,
-        )
-        dest_config["evaluation_parameters"] = updated_evaluation_parameters
-    if source_config.get("runtime_configuration") is not None:
-        runtime_configuration = dest_config.get("runtime_configuration") or {}
-        updated_runtime_configuration = nested_update(
-            runtime_configuration,
-            source_config["runtime_configuration"],
-            dedup=True,
-        )
-        dest_config["runtime_configuration"] = updated_runtime_configuration
-    if source_config.get("validations") is not None:
-        validations = dest_config.get("validations") or []
-        existing_validations = template_config.get("validations") or []
-        validations.extend(
-            filter(
-                lambda v: v not in existing_validations, source_config["validations"]
-            )
-        )
-        dest_config["validations"] = validations
-    if source_config.get("profilers") is not None:
-        profilers = dest_config.get("profilers") or []
-        existing_profilers = template_config.get("profilers") or []
-        profilers.extend(
-            filter(lambda v: v not in existing_profilers, source_config["profilers"])
-        )
-        dest_config["profilers"] = profilers
-
-    return dest_config
-
-
-def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict:
     if not (runtime_kwargs and any(runtime_kwargs.values())):
         return source_config
 
     dest_config: dict = copy.deepcopy(source_config)
 
     # replace
-    if runtime_kwargs.get("template_name") is not None:
-        dest_config["template_name"] = runtime_kwargs["template_name"]
-    if runtime_kwargs.get("run_name_template") is not None:
-        dest_config["run_name_template"] = runtime_kwargs["run_name_template"]
     if runtime_kwargs.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = runtime_kwargs["expectation_suite_name"]
-    if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
-            "expectation_suite_ge_cloud_id"
-        ]
+    if runtime_kwargs.get("expectation_suite_id") is not None:
+        dest_config["expectation_suite_id"] = runtime_kwargs["expectation_suite_id"]
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
@@ -521,7 +445,7 @@ def send_sns_notification(
 
 
     :param sns_topic_arn:  The SNS Arn to publish messages to
-    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
     :return:  Message ID that was published or error message

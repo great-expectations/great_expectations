@@ -15,12 +15,6 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-    get_profiler_run_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -106,7 +100,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional[AbstractDataContext] = None,
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
         catch_exceptions: bool = False,
     ) -> None:
         """
@@ -147,8 +140,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         self.variables = _variables
 
-        self._usage_statistics_handler = usage_statistics_handler
-
         self._data_context = data_context
 
         self._rules = self._init_profiler_rules(rules=rules)
@@ -157,11 +148,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._catch_exceptions = catch_exceptions
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def id(self) -> Optional[str]:
         return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, id: str) -> None:
+    @id.setter
+    def id(self, id: str) -> None:
         self._id = id
 
     def _init_profiler_rules(
@@ -204,19 +195,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
             domain_builder_config=rule_config.get("domain_builder"),
             data_context=self._data_context,
         )
-        parameter_builders: Optional[
-            List[ParameterBuilder]
-        ] = init_rule_parameter_builders(
-            parameter_builder_configs=rule_config.get("parameter_builders"),
-            data_context=self._data_context,
+        parameter_builders: Optional[List[ParameterBuilder]] = (
+            init_rule_parameter_builders(
+                parameter_builder_configs=rule_config.get("parameter_builders"),
+                data_context=self._data_context,
+            )
         )
-        expectation_configuration_builders: List[
-            ExpectationConfigurationBuilder
-        ] = init_rule_expectation_configuration_builders(
-            expectation_configuration_builder_configs=rule_config.get(
-                "expectation_configuration_builders"
-            ),
-            data_context=self._data_context,
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+            init_rule_expectation_configuration_builders(
+                expectation_configuration_builder_configs=rule_config.get(
+                    "expectation_configuration_builders"
+                ),
+                data_context=self._data_context,
+            )
         )
 
         # Compile previous steps and package into a Rule object
@@ -243,10 +234,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
-        args_payload_fn=get_profiler_run_usage_statistics,
-    )
     def run(  # noqa: PLR0913
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -291,11 +278,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
 
-        effective_variables: Optional[
-            ParameterContainer
-        ] = self.reconcile_profiler_variables(
-            variables=variables,
-            reconciliation_strategy=reconciliation_directives.variables,
+        effective_variables: Optional[ParameterContainer] = (
+            self.reconcile_profiler_variables(
+                variables=variables,
+                reconciliation_strategy=reconciliation_directives.variables,
+            )
         )
 
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
@@ -387,7 +374,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 for rule_state in self.rule_states
                 if rule_state.exception_traceback
             },
-            _usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -668,23 +654,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
             parameter_builder_configs: List[dict] = rule_config.get(
                 "parameter_builders", []
             )
-            effective_parameter_builder_configs: Optional[
-                List[dict]
-            ] = cls._reconcile_rule_parameter_builder_configs(
-                rule=rule,
-                parameter_builder_configs=parameter_builder_configs,
-                reconciliation_strategy=reconciliation_directives.parameter_builder,
+            effective_parameter_builder_configs: Optional[List[dict]] = (
+                cls._reconcile_rule_parameter_builder_configs(
+                    rule=rule,
+                    parameter_builder_configs=parameter_builder_configs,
+                    reconciliation_strategy=reconciliation_directives.parameter_builder,
+                )
             )
 
             expectation_configuration_builder_configs: List[dict] = rule_config.get(
                 "expectation_configuration_builders", []
             )
-            effective_expectation_configuration_builder_configs: List[
-                dict
-            ] = cls._reconcile_rule_expectation_configuration_builder_configs(
-                rule=rule,
-                expectation_configuration_builder_configs=expectation_configuration_builder_configs,
-                reconciliation_strategy=reconciliation_directives.expectation_configuration_builder,
+            effective_expectation_configuration_builder_configs: List[dict] = (
+                cls._reconcile_rule_expectation_configuration_builder_configs(
+                    rule=rule,
+                    expectation_configuration_builder_configs=expectation_configuration_builder_configs,
+                    reconciliation_strategy=reconciliation_directives.expectation_configuration_builder,
+                )
             )
 
             effective_rule_config = {
@@ -770,9 +756,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
-        current_parameter_builders: Dict[
-            str, ParameterBuilder
-        ] = rule._get_parameter_builders_as_dict()
+        current_parameter_builders: Dict[str, ParameterBuilder] = (
+            rule._get_parameter_builders_as_dict()
+        )
 
         parameter_builder_name: str
         parameter_builder: ParameterBuilder
@@ -782,12 +768,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
             parameter_builder,
         ) in current_parameter_builders.items():
             parameter_builder_as_dict = parameter_builder.to_json_dict()
-            parameter_builder_as_dict[
-                "class_name"
-            ] = parameter_builder.__class__.__name__
-            parameter_builder_as_dict[
-                "module_name"
-            ] = parameter_builder.__class__.__module__
+            parameter_builder_as_dict["class_name"] = (
+                parameter_builder.__class__.__name__
+            )
+            parameter_builder_as_dict["module_name"] = (
+                parameter_builder.__class__.__module__
+            )
 
             # Roundtrip through schema validation to add/or restore any missing fields.
             deserialized_config: ParameterBuilderConfig = (
@@ -795,9 +781,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             serialized_config: dict = deserialized_config.to_dict()
 
-            effective_parameter_builder_configs[
-                parameter_builder_name
-            ] = serialized_config
+            effective_parameter_builder_configs[parameter_builder_name] = (
+                serialized_config
+            )
 
         parameter_builder_configs_override: Dict[str, dict] = {
             parameter_builder_config["name"]: parameter_builder_config
@@ -866,12 +852,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
             expectation_configuration_builder_as_dict = (
                 expectation_configuration_builder.to_json_dict()
             )
-            expectation_configuration_builder_as_dict[
-                "class_name"
-            ] = expectation_configuration_builder.__class__.__name__
-            expectation_configuration_builder_as_dict[
-                "module_name"
-            ] = expectation_configuration_builder.__class__.__module__
+            expectation_configuration_builder_as_dict["class_name"] = (
+                expectation_configuration_builder.__class__.__name__
+            )
+            expectation_configuration_builder_as_dict["module_name"] = (
+                expectation_configuration_builder.__class__.__module__
+            )
 
             # Roundtrip through schema validation to add/or restore any missing fields.
             deserialized_config: ExpectationConfigurationBuilderConfig = (
@@ -1287,7 +1273,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ) from e
 
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.id
+            new_profiler.id = response.id
 
         return new_profiler
 
@@ -1441,27 +1427,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return ConfigurationIdentifier(
             configuration_key=name,
         )
-
-    def self_check(self, pretty_print: bool = True) -> dict:
-        """
-        Necessary to enable integration with `AbstractDataContext.test_yaml_config`
-        Args:
-            pretty_print: flag to turn on verbose output
-        Returns:
-            Dictionary that contains RuleBasedProfiler state
-        """
-        report_object: dict = {"config": self.config.to_json_dict()}
-
-        if pretty_print:
-            print(f"\nRuleBasedProfiler class name: {self.name}")
-
-            if not self.variables:
-                print(
-                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
-                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
-                )
-
-        return report_object
 
     @property
     def config(self) -> RuleBasedProfilerConfig:
@@ -1632,14 +1597,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
-        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
-        if data_context:
-            usage_statistics_handler = data_context.usage_statistics_handler
-
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
-            usage_statistics_handler=usage_statistics_handler,
             catch_exceptions=catch_exceptions,
         )
 

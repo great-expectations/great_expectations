@@ -13,8 +13,8 @@ except ImportError:
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -65,46 +65,6 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 #########################################
 # Tests with data passed in as batch_data
 #########################################
-
-
-# Tests with PandasExecutionEngine : batch_data
-def test_pandas_execution_engine_self_check(
-    datasource_with_runtime_data_connector_and_pandas_execution_engine,
-):
-    report = (
-        datasource_with_runtime_data_connector_and_pandas_execution_engine.self_check()
-    )
-    assert report == {
-        "data_connectors": {
-            "count": 1,
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 2,
-                "data_assets": {
-                    "asset_a": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                    "asset_b": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    },
-                },
-                "example_data_asset_names": ["asset_a", "asset_b"],
-                "example_unmatched_data_references": [],
-                "unmatched_data_reference_count": 0,
-            },
-        },
-        "execution_engine": {
-            "boto3_options": {},
-            "azure_options": {},
-            "gcs_options": {},
-            "caching": True,
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-        },
-    }
 
 
 def test_batch_data_pandas_execution_engine_unknown_datasource(
@@ -220,10 +180,10 @@ def test_batch_data_pandas_execution_engine_all_keys_present_for_batch_identifie
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
 
@@ -310,10 +270,10 @@ def test_batch_data_pandas_execution_engine_set_data_asset_name_for_runtime_data
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert batch_list[0].batch_definition.data_asset_name == "my_runtime_data_asset"
 
@@ -324,9 +284,7 @@ def test_pandas_execution_engine_get_available_data_asset_names(
     expected_available_data_asset_names: Dict[str, List[str]] = {
         "test_runtime_data_connector": ["asset_a", "asset_b"]
     }
-    available_data_asset_names: Dict[
-        str, List[str]
-    ] = (
+    available_data_asset_names: Dict[str, List[str]] = (
         datasource_with_runtime_data_connector_and_pandas_execution_engine.get_available_data_asset_names()
     )
     assert available_data_asset_names == expected_available_data_asset_names
@@ -351,10 +309,10 @@ def test_batch_data_pandas_execution_engine_get_batch_definition_list_from_batch
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
@@ -404,7 +362,7 @@ def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",
@@ -431,10 +389,10 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset(
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     assert len(batch_list) == 1
@@ -466,10 +424,10 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     # batches are a little bit more difficult to test because of batch_markers
@@ -502,10 +460,10 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_2 = batch_list[0]
@@ -544,10 +502,10 @@ def test_file_path_pandas_execution_engine_batch_list_from_batch_request_success
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
@@ -575,10 +533,10 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
         "batch_spec_passthrough": {"reader_options": {"header": None}},
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
@@ -688,10 +646,10 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset(
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
@@ -722,10 +680,10 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
@@ -755,10 +713,10 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     # batches are a little bit more difficult to test because of batch_markers
@@ -789,10 +747,10 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_list) == 1
     my_batch_2 = batch_list[0]

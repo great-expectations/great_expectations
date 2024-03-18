@@ -1,7 +1,6 @@
-import json
 import os
 import shutil
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 import pytest
@@ -10,9 +9,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequest,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -24,7 +23,6 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.new_datasource import Datasource
-from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
@@ -94,8 +92,6 @@ execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
         spark.master: local[*]
-        spark.executor.memory: 450m
-        spark.driver.memory: 6g
         spark.sql.shuffle.partitions: 2
         spark.default.parallelism: 4
 data_connectors:
@@ -188,110 +184,6 @@ data_connectors:
 
 
 @pytest.mark.filesystem
-def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
-    report = basic_pandas_datasource_v013.self_check()
-    assert report == {
-        "execution_engine": {
-            "caching": True,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "boto3_options": {},
-            "azure_options": {},
-            "gcs_options": {},
-        },
-        "data_connectors": {
-            "count": 2,
-            "my_filesystem_data_connector": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["Titanic"],
-                "data_assets": {
-                    "Titanic": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 0,
-                "example_data_asset_names": [],
-                "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
-
-
-@pytest.mark.spark
-def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
-    """What does this test do and why?
-
-    We are testing that the spark application referenced in the datasource
-    is the same one as the global spark application.
-    """
-    report: dict = basic_spark_datasource.self_check()
-
-    # The structure of this config is dynamic based on PySpark version;
-    # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_config: Dict[str, Any] = {
-        "spark.app.name": "default_great_expectations_spark_application",
-        "spark.default.parallelism": 4,
-        "spark.driver.memory": "6g",
-        "spark.executor.memory": "450m",
-        "spark.master": "local[*]",
-    }
-    actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
-
-    assert is_candidate_subset_of_target(
-        candidate=expected_spark_config, target=actual_spark_config
-    )
-
-
-@pytest.mark.spark
-def test_basic_spark_datasource_self_check(basic_spark_datasource):
-    report: dict = basic_spark_datasource.self_check()
-
-    # Remove Spark-specific information so we can assert against the rest of the payload
-    report["execution_engine"].pop("spark_config")
-
-    assert report == {
-        "data_connectors": {
-            "count": 2,
-            "simple_filesystem_data_connector": {
-                "class_name": "InferredAssetFilesystemDataConnector",
-                "data_asset_count": 0,
-                "data_assets": {},
-                "example_data_asset_names": [],
-                "example_unmatched_data_references": [],
-                "unmatched_data_reference_count": 0,
-            },
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 0,
-                "example_data_asset_names": [],
-                "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-        "execution_engine": {
-            "caching": True,
-            "azure_options": {},
-            "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
-            "persist": True,
-        },
-    }
-
-
-@pytest.mark.filesystem
 def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013):
     my_data_connector: ConfiguredAssetFilesystemDataConnector = (
         basic_pandas_datasource_v013.data_connectors["my_filesystem_data_connector"]
@@ -315,7 +207,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     )
 
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
@@ -331,7 +223,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
     assert isinstance(batch.data.dataframe, pd.DataFrame)
-    assert batch.batch_definition == BatchDefinition(
+    assert batch.batch_definition == LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
@@ -343,36 +235,36 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         ),
     )
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="B1",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="B1",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 0
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="Titanic",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="Titanic",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 1
@@ -380,7 +272,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",
@@ -423,10 +315,10 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         # }
     }
     batch_request = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1
@@ -461,10 +353,10 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1
@@ -716,9 +608,9 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[  # noqa: F841
-        Batch
-    ] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(  # noqa: F841
+        batch_request=batch_request
+    )
 
     expected_data_asset_names: dict = {
         "test_runtime_data_connector": [data_asset_name],
@@ -830,7 +722,7 @@ x,y
 """
         )
 
-    my_datasource: Datasource = instantiate_class_from_config(
+    _: Datasource = instantiate_class_from_config(
         yaml.load(
             rf"""
 class_name: Datasource
@@ -875,25 +767,6 @@ data_connectors:
         config_defaults={"module_name": "great_expectations.datasource"},
     )
 
-    report_obj = my_datasource.self_check()
-
-    print(json.dumps(report_obj, indent=2))
-
-    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-    # assert (
-    #     report_obj["data_connectors"]["my_configured_data_connector"][
-    #         "example_data_reference"
-    #     ]["n_rows"]
-    #     == 10
-    # )
-    #
-    # assert (
-    #     report_obj["data_connectors"]["my_inferred_data_connector"][
-    #         "example_data_reference"
-    #     ]["n_rows"]
-    #     == 10
-    # )
-
 
 @pytest.mark.spark
 def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
@@ -915,8 +788,6 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 450m
-                spark.driver.memory: 6g
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:

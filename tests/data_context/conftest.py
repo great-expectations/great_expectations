@@ -9,7 +9,7 @@ import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch  # noqa: TID251
 
 import pytest
 import requests
@@ -39,11 +39,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
+
+# No longer used but keeping around for tests
+USAGE_STATISTICS_QA_URL = (
+    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+)
 
 
 @pytest.fixture()
@@ -91,7 +93,8 @@ def create_data_context_files(
     if config_variables_fixture_filename:
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         os.makedirs(  # noqa: PTH103
-            os.path.join(context_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+            os.path.join(context_path, "uncommitted"),  # noqa: PTH118
+            exist_ok=True,
         )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
@@ -129,7 +132,8 @@ def create_common_data_context_files(context_path, asset_config_path):
         ),
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",
@@ -163,6 +167,7 @@ def basic_data_context_config():
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
             "stores": {
@@ -171,6 +176,13 @@ def basic_data_context_config():
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -224,6 +236,7 @@ def data_context_config_with_datasources(conn_string_password):
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {
                 "Datasource 1: Redshift": {
@@ -323,6 +336,13 @@ def data_context_config_with_datasources(conn_string_password):
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -635,22 +655,20 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def checkpoint_config() -> dict:
     checkpoint_config = {
         "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
                 "name": None,
                 "id": None,
                 "expectation_suite_name": "taxi.demo_pass",
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": None,
             },
             {
                 "name": None,
                 "id": None,
                 "expectation_suite_name": None,
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": {
                     "datasource_name": "oss_test_datasource",
                     "data_connector_name": "oss_test_data_connector",
@@ -662,10 +680,6 @@ def checkpoint_config() -> dict:
             {
                 "action": {"class_name": "StoreValidationResultAction"},
                 "name": "store_validation_result",
-            },
-            {
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-                "name": "store_evaluation_params",
             },
         ],
     }
