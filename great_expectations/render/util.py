@@ -249,7 +249,7 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
     return at_least_str, at_most_str
 
 
-def build_count_table(  # noqa: C901
+def build_count_table(
     partial_unexpected_counts: list[dict], unexpected_count: int
 ) -> tuple[list[str], list[list[Any]]]:
     """
@@ -272,35 +272,27 @@ def build_count_table(  # noqa: C901
         if count:
             total_count += count
 
-    def _build_rows_without_count(value: Any) -> None:
-        # Since accurate counts are not available, we show Sampled Unexpected Values only.
+    def _get_value(value: Any) -> str:
         if value is not None and value != "":
-            table_rows.append([value])
-        elif value == "":
-            table_rows.append(["EMPTY"])
-        else:
-            table_rows.append(["null"])
+            return value
+        if value == "":
+            return "EMPTY"
+        return "null"
 
-    def _build_rows_with_count(value: Any, count: int) -> None:
-        if value is not None and value != "":
-            table_rows.append([value, count])
-        elif value == "":
-            table_rows.append(["EMPTY", count])
-        else:
-            table_rows.append(["null", count])
+    all_unexpected_in_samples: bool = total_count == unexpected_count
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: Any | None = unexpected_count_dict.get("value")
+        value: str = _get_value(unexpected_count_dict.get("value"))
         count: int | None = unexpected_count_dict.get("count")
-        if total_count == unexpected_count:
-            _build_rows_with_count(value, count)
+        if all_unexpected_in_samples:
+            table_rows.append([value, count])
         else:
             # Since accurate counts are not available, we show Sampled Unexpected Values only.
-            _build_rows_without_count(value)
+            table_rows.append([value])
 
     # Check to see if we have *all* of the unexpected values accounted for. If so,
     # we show counts. If not then we show Sampled Unexpected Values only.
-    if total_count == unexpected_count:
+    if all_unexpected_in_samples:
         header_row = ["Unexpected Value", "Count"]
     else:
         header_row = ["Sampled Unexpected Values"]
