@@ -7,15 +7,15 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-A Data Context is your entry point to Great Expectations (GX). It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs.  It contains your Validation Results and the metrics associated with them.  The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
+A Data Context tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs. It contains your Validation Results and the metrics associated with them. The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
 
-There are three types of Data Context:
+The following are the available Data Context types:
 
-- File Data Context: A persistent Data Context that stores metadata and configuration information as YAML files.
-- Ephemeral Data Context: A temporary Data Context that stores metadata and configuration information in memory.  This Data Context will not persist beyond the current Python session.
-- GX Cloud Data Context: A Data Context that connects to a GX Cloud Account to retrieve and store metadata and configuration information from the cloud.
+- **File Data Context** - A persistent Data Context that stores metadata and configuration information as YAML files.
 
-You will almost always instantiate a Data Context as the first step when using GX in a Python environment.
+- **Ephemeral Data Context** - A temporary Data Context that stores metadata and configuration information in memory.  This Data Context will not persist beyond the current Python session.
+
+- **GX Cloud Data Context** - A Data Context that connects to a GX Cloud Account to retrieve and store metadata and configuration information from the cloud.
 
 ## Prerequisites
 
@@ -62,7 +62,7 @@ You will almost always instantiate a Data Context as the first step when using G
 
 <TabItem value="file" label="Local (File)">
 
-A Data Context is required in almost for all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
+A Data Context is required in almost all Python scripts using GX 1.0. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ### Import GX
 
@@ -88,14 +88,16 @@ For convenience, the `FileDataContext.create(...)` method instantiates and retur
 ```
 
 :::info What if the folder is not empty?
+
 If the `project_root_dir` provided to the `FileDataContext.create(...)` method points to a folder that does not already have a Data Context present, the `FileDataContext.create(...)` method initializes a Filesystem Data Context in that location even if other files and folders are present.  This allows you to initialize a Filesystem Data Context in a folder that contains your Data Assets or other project related contents.
 
 If a Data Context already exists in `project_root_dir`, the `FileDataContext.create(...)` method will not re-initialize it.  Instead, `FileDataContext.create(...)` instantiates and returns the existing Data Context.
+
 :::
 
 ### Verify the Data Context content 
 
-Run the following command to confirm the Data Context was instantiated correctly:
+Run the following code to confirm the Data Context was instantiated correctly:
 
 ```python title="Python"
   print(context)
@@ -139,6 +141,7 @@ Run the following code to initialize the `EphemeralDataContext` class while pass
 ```
 
 :::info Saving the contents of an Ephemeral Data Context for future use
+
 An Ephemeral Data Context is an in-memory Data Context that is not intended to persist beyond the current Python session. Run the following code to convert it to a Filesystem Data Context and save its contents for future use:
 
 ```python title="Python"
@@ -205,7 +208,8 @@ You provide the path for your empty folder to the GX library's `get_context(...)
 ```
 
 :::info Project root vs context root
-Note that there is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
+
+There is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
 
 Your context root is the directory that contains your GX config while your project root refers to your actual working directory (and therefore contains the context root).
 
@@ -222,14 +226,16 @@ Both are functionally equivalent for purposes of working with a file-backed proj
 :::
 
 :::info What if the folder does not contain a Data Context?
+
 If the root directory provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
 
 The `get_context(...)` method instantiates and returns the newly initialized Data Context.
+
 :::
 
 ### Verify the Data Context content 
 
-Run the following command to confirm the Data Context was instantiated correctly:
+Run the following code to confirm the Data Context was instantiated correctly:
 
 ```python title="Python"
   print(context)
@@ -278,16 +284,14 @@ You'll need your user access token and organization ID to set your environment v
 
 Environment variables securely store your GX Cloud access credentials.
 
-1. Save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZATION_ID** as environment variables by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
+1. Save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZATION_ID** as environment variables by entering `export ENV_VAR_NAME=env_var_value` in the terminal or add the code to your `~/.bashrc` or `~/.zshrc` file. For example:
 
     ```bash title="Terminal input"
     export GX_CLOUD_ACCESS_TOKEN=<user_access_token>
     export GX_CLOUD_ORGANIZATION_ID=<organization_id>
     ```
 
-    :::note
-   After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX OSS guides](/core/introduction/about_gx.md).
-    :::
+    After you save your **GX_CLOUD_ACCESS_TOKEN** and **GX_CLOUD_ORGANIZTION_ID**, you can use Python scripts to access GX Cloud and complete other tasks. See the [GX OSS guides](/core/introduction/about_gx.md).
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
@@ -344,7 +348,7 @@ GX recommends that you stop using the Ephemeral Data Context instance after you 
 
 :::
 
-### View a Data Context configuration
+## View a Data Context configuration
 
 Run the following code to view Data Context configuration information:
 

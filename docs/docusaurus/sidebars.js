@@ -54,28 +54,28 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Quickstart with a Data Context',
+              label: 'Request a Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#quickstart-with-a-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Initialize a new Data Context',
+              label: 'Initialize a new Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Connect to an existing Data Context',
+              label: 'Connect to an existing Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Export an Ephemeral Data Context to a new File Data Context',
+              label: 'Export an Ephemeral Data Context to a new File Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
             },
             {
               type: 'link',
-              label: '🚧 View the full configuration of a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-the-full-configuration-of-a-data-context',
+              label: 'View a Data Context configuration',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view_a_data_context_configuration',
             },
           ]
         },
