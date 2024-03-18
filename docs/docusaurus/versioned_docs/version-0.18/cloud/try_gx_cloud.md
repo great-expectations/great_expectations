@@ -16,60 +16,11 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 ## Prerequisites
 
-- You have a [GX Cloud account](https://greatexpectations.io/cloud).
+- You have deployed the GX Agent.
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 
 - You've reviewed the prerequisites for the Data Asset you'll create. See [Create a Data Asset](#create-a-data-asset).
-
-## Self-hosted deployment
-
-To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
-
-## Get your user access token and copy your organization ID
-
-You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
-
-1. In GX Cloud, click **Settings** > **Tokens**.
-
-2. In the **User access tokens** pane, click **Create user access token**.
-
-3. In the **Token name** field, enter a name for the token that will help you quickly identify it.
-
-4. Click **Create**.
-
-5. Copy and then paste the user access token into a temporary file. The token can't be retrieved after you close the dialog.
-
-6. Click **Close**.
-
-7. Copy the value in the **Organization ID** field into the temporary file with your user access token and then save the file. 
-
-    GX recommends deleting the temporary file after you set the environment variables.
-
-## Set the environment variables and start the GX Agent
-
-Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
-
-1. Start the Docker Engine.
-
-2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Agent:
-
-    ```bash title="Terminal input"
-    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
-    ```
-   Replace `user_access_token` and `organization_id` with the values you copied previously. 
-
-3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
-
-    ![GX Agent status](/img/gx_agent_status.png)
-
-4. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
-
-5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
-
-    If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
-
-    To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
 
 ## Create a Data Asset
 
@@ -110,7 +61,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Username**: Enter the username you use to access Snowflake.
 
-   - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
+    - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
     
         To locate your Snowflake organization name, account name, or legacy account locator values see [Finding the Organization and Account Name for an Account](https://docs.snowflake.com/en/user-guide/admin-account-identifier#finding-the-organization-and-account-name-for-an-account) or [Using an Account Locator as an Identifier](https://docs.snowflake.com/en/user-guide/admin-account-identifier#using-an-account-locator-as-an-identifier).
 
@@ -144,7 +95,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
+11. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created.
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -187,7 +138,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-10. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
+10. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created. 
 
 </TabItem>
 </Tabs>
@@ -216,3 +167,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 1. Click **Validate**.
 
 2. When the confirmation message appears, click **See results**, or click the **Validations** tab.
+
+## Next steps
+
+- [Connect GX Cloud](/cloud/connect/connect_lp.md)
