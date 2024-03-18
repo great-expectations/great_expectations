@@ -361,4 +361,4 @@ Run the following code to view Data Context configuration information:
 - [(Optional) Configure Stores](/core/installation_and_setup//manage_metadata_stores.md)
 - [(Optional) Configure Data Docs](/core/installation_and_setup//manage_metadata_stores.md)
 - [Manage and access data](/core/manage_and_access_data/manage_and_access_data.md)
-- [Manage Data Sources](/core/manage_and_access_data/manage_data_sources.md)
+- [Manage Data Sources](/core/manage_and_access_data/manage_data_sources/manage_data_sources.md)
