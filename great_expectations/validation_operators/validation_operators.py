@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import warnings
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
@@ -23,7 +23,6 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import Batch
-    from great_expectations.data_asset import DataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -379,7 +378,7 @@ class ActionListValidationOperator(ValidationOperator):
 
     def _run_actions(  # noqa: PLR0913
         self,
-        batch: Union[Batch, DataAsset],
+        batch: Batch,
         expectation_suite_identifier: ExpectationSuiteIdentifier,
         expectation_suite,
         batch_validation_result,
