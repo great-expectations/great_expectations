@@ -17,7 +17,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import google
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 
 logger = logging.getLogger(__name__)
@@ -193,12 +193,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition

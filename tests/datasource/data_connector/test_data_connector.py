@@ -2,10 +2,10 @@
 import pytest
 
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -52,7 +52,7 @@ assets:
 @pytest.mark.unit
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
-    A = BatchDefinition(
+    A = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
@@ -123,7 +123,7 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             **{
                 "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",

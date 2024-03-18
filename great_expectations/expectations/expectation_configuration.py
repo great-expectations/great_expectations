@@ -19,7 +19,6 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
-from great_expectations._docs_decorators import new_argument, public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -108,17 +107,6 @@ class KWargDetailsDict(TypedDict):
     default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
-@public_api
-@new_argument(
-    argument_name="rendered_content",
-    version="0.15.14",
-    message="Used to include rendered content dictionary in expectation configuration.",
-)
-@new_argument(
-    argument_name="expectation_context",
-    version="0.13.44",
-    message="Used to support column descriptions in GX Cloud.",
-)
 class ExpectationConfiguration(SerializableDictDot):
     """Defines the parameters and name of a specific Expectation.
 
@@ -305,7 +293,6 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return domain_kwargs
 
-    @public_api
     def get_success_kwargs(self) -> dict:
         """Gets the success and domain kwargs for this ExpectationConfiguration.
 
@@ -460,7 +447,6 @@ class ExpectationConfiguration(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
     @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationConfiguration.

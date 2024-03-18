@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, List, Type
 from great_expectations.core.id_dict import BatchSpec
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
 
@@ -63,7 +63,7 @@ class DataConnector(ABC):
     @abstractmethod
     def get_batch_definition_list(
         self, batch_request: BatchRequest
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         This interface method, implemented by subclasses, examines "BatchRequest" and converts it to one or more
         "BatchDefinition" objects, each of which can be later converted to ExecutionEngine-specific "BatchSpec" object
@@ -77,12 +77,12 @@ class DataConnector(ABC):
         """
         pass
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
 
         Args:
-            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+            batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
         Returns:
             BatchSpec object built from BatchDefinition
         """
@@ -163,7 +163,7 @@ class DataConnector(ABC):
 
     @abstractmethod
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         """
         This interface method, implemented by subclasses, examines "BatchDefinition" and converts it to
@@ -180,7 +180,7 @@ class DataConnector(ABC):
 
     @staticmethod
     def _batch_definition_matches_batch_request(
-        batch_definition: BatchDefinition, batch_request: BatchRequest
+        batch_definition: LegacyBatchDefinition, batch_request: BatchRequest
     ) -> bool:
         if not (
             batch_request.datasource_name == batch_definition.datasource_name

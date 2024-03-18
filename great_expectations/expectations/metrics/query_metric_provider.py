@@ -3,13 +3,11 @@ from __future__ import annotations
 import logging
 from typing import ClassVar
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class QueryMetricProvider(MetricProvider):
     """Base class for all Query Metrics, which define metrics to construct SQL queries.
 

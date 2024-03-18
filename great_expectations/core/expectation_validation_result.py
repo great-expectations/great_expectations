@@ -14,7 +14,10 @@ from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
+from great_expectations.core.batch import (  # noqa: TCH001
+    BatchMarkers,
+    LegacyBatchDefinition,
+)
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
@@ -457,7 +460,7 @@ class ExpectationValidationResultSchema(Schema):
 
 
 class ExpectationSuiteValidationResultMeta(TypedDict):
-    active_batch_definition: BatchDefinition
+    active_batch_definition: LegacyBatchDefinition
     batch_markers: BatchMarkers
     batch_spec: BatchSpec
     checkpoint_id: Optional[str]

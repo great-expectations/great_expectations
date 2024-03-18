@@ -24,8 +24,16 @@ if TYPE_CHECKING:
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 
-class MetricTypes(str, enum.Enum):
+class MetricTypesMeta(enum.EnumMeta):
+    """Metaclass definition for MetricTypes that allows for membership checking."""
+
+    def __contains__(cls, item):
+        return item in cls.__members__.values()
+
+
+class MetricTypes(str, enum.Enum, metaclass=MetricTypesMeta):
     """Represents Metric types in OSS that are used for ColumnDescriptiveMetrics and MetricRepository.
+
     More Metric types will be added in the future.
     """
 

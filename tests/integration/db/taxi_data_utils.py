@@ -5,7 +5,7 @@ import sqlalchemy as sa
 
 import great_expectations as gx
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchRequest, LegacyBatchDefinition
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
@@ -156,7 +156,7 @@ def _execute_taxi_partitioning_test_cases(
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
         )
-        batch_definition_list: List[BatchDefinition] = (
+        batch_definition_list: List[LegacyBatchDefinition] = (
             data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=batch_request
             )
@@ -165,10 +165,10 @@ def _execute_taxi_partitioning_test_cases(
         print(test_case.num_expected_batch_definitions, "expected batch definitions")
         assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
-        expected_batch_definition_list: List[BatchDefinition]
+        expected_batch_definition_list: List[LegacyBatchDefinition]
         if test_case.table_domain_test_case:
             expected_batch_definition_list = [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
                     data_asset_name=data_asset_name,
@@ -179,7 +179,7 @@ def _execute_taxi_partitioning_test_cases(
             column_value: Any
             if column_name:
                 expected_batch_definition_list = [
-                    BatchDefinition(
+                    LegacyBatchDefinition(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
                         data_asset_name=data_asset_name,
@@ -190,7 +190,7 @@ def _execute_taxi_partitioning_test_cases(
             elif column_names:
                 dictionary_element: dict
                 expected_batch_definition_list = [
-                    BatchDefinition(
+                    LegacyBatchDefinition(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
                         data_asset_name=data_asset_name,

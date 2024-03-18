@@ -1,7 +1,7 @@
 import pytest
 from moto import mock_glue
 
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -317,7 +317,7 @@ def test_instantiation_with_batch_spec_passthrough(
     )
 
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="FAKE_Datasource_NAME",
             data_connector_name="my_glue_catalog_data_connector",
             data_asset_name="titanic_asset",
@@ -418,7 +418,7 @@ def test_build_batch_spec_with_all_options(
             },
         },
     )
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="prefix__asset_titanic__suffix",
@@ -459,7 +459,7 @@ def test_build_batch_spec_with_minimal_options(glue_titanic_catalog):
             },
         },
     )
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -530,7 +530,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_asset_confi
     )
 
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="FAKE_Datasource_NAME",
             data_connector_name="my_glue_catalog_data_connector",
             data_asset_name="titanic_asset",
@@ -567,7 +567,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
     )
 
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="FAKE_Datasource_NAME",
             data_connector_name="my_glue_catalog_data_connector",
             data_asset_name="titanic_asset",
@@ -618,7 +618,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -673,7 +673,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -728,7 +728,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -787,7 +787,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -840,7 +840,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -898,7 +898,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -959,7 +959,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -1018,7 +1018,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -1077,7 +1077,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",
@@ -1135,7 +1135,7 @@ def test_get_batch_data_and_metadata_with_partitions(
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_glue_catalog_data_connector",
         data_asset_name="db_test.tb_titanic",

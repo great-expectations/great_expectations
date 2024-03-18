@@ -4,7 +4,6 @@ import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -46,7 +45,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all SetColumnMapMetrics.
 
@@ -88,7 +86,6 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.isin(cls.set_)
 
 
-@public_api
 class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for SetBasedColumnMapExpectations.
 

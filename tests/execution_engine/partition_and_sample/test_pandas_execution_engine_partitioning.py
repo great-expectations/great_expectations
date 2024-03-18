@@ -9,7 +9,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -362,7 +362,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
             "group_names": ["index"],
         },
     )
-    batch_def = BatchDefinition(
+    batch_def = LegacyBatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
@@ -378,7 +378,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
     assert test_df.dataframe.shape == expected_df.shape
 
     # if key does not exist
-    batch_def_no_key = BatchDefinition(
+    batch_def_no_key = LegacyBatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
