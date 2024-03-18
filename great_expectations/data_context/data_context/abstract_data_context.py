@@ -1856,7 +1856,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
         return self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,  # type: ignore[arg-type]
+            expectation_suite=expectation_suite,
             batch_list=batch_list,
             include_rendered_content=include_rendered_content,
         )
@@ -1909,10 +1909,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         if batch:
             return [batch]
 
-        batch_list: List[Batch] = []
-        batch_request_list = batch_request_list or [batch_request]
+        computed_batch_list: List[Batch] = []
+        if not batch_request_list:
+            # batch_request could actually be None here since we do explicit None checks in the
+            # sum check above while here we do a truthy check.
+            batch_request_list = [batch_request]  # type: ignore[list-item]
         for batch_request in batch_request_list:
-            batch_list.extend(
+            computed_batch_list.extend(
                 self.get_batch_list(
                     datasource_name=datasource_name,
                     data_connector_name=data_connector_name,
@@ -1936,7 +1939,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     **kwargs,
                 )
             )
-        return batch_list
+        return computed_batch_list
 
     def _get_expectation_suite_from_inputs(  # noqa: PLR0913
         self,
@@ -1994,6 +1997,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite = self.add_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name,
             )
+
+        # mypy can't validate the above sum checks and conditionals above guarantee that
+        # expectation suite will be non-None here so we make an assert.
+        assert expectation_suite is not None
         return expectation_suite
 
     # noinspection PyUnusedLocal

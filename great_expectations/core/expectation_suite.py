@@ -1122,7 +1122,9 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
-    def clean_empty(self, data) -> ExpectationSuite | dict:
+    T = TypeVar("T", ExpectationSuite, dict)
+
+    def clean_empty(self, data: T) -> T:
         if isinstance(data, ExpectationSuite):
             data = self._clean_empty_suite(data)
         elif isinstance(data, dict):
@@ -1146,16 +1148,10 @@ class ExpectationSuiteSchema(Schema):
 
     @staticmethod
     def _clean_empty_dict(data: dict) -> dict:
-        if not data.get("evaluation_parameters"):
-            pass
-        elif len(data.get("evaluation_parameters")) == 0:
+        if "evaluation_parameters" in data and len(data["evaluation_parameters"]) == 0:
             data.pop("evaluation_parameters")
-
-        if not data.get("meta"):
-            pass
-        elif len(data.get("meta")) == 0:
+        if "meta" in data and len(data["meta"]) == 0:
             data.pop("meta")
-
         if "notes" in data and not data.get("notes"):
             data.pop("notes")
         return data
