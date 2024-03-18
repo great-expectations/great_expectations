@@ -267,10 +267,20 @@ def build_count_table(
     total_count: int = 0
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: Any | None = unexpected_count_dict.get("value")
         count: int | None = unexpected_count_dict.get("count")
         if count:
             total_count += count
+
+    def _build_rows_without_count(value: Any) -> None:
+        # Since accurate counts are not available, we show Sampled Unexpected Values only.
+        if value is not None and value != "":
+            table_rows.append([value])
+        elif value == "":
+            table_rows.append(["EMPTY"])
+        else:
+            table_rows.append(["null"])
+
+    def _build_rows_with_count(value: Any, count: int) -> None:
         if value is not None and value != "":
             table_rows.append([value, count])
         elif value == "":
@@ -278,12 +288,21 @@ def build_count_table(
         else:
             table_rows.append(["null", count])
 
+    for unexpected_count_dict in partial_unexpected_counts:
+        value: Any | None = unexpected_count_dict.get("value")
+        count: int | None = unexpected_count_dict.get("count")
+        if total_count == unexpected_count:
+            _build_rows_with_count(value, count)
+        else:
+            # Since accurate counts are not available, we show Sampled Unexpected Values only.
+            _build_rows_without_count(value)
+
     # Check to see if we have *all* of the unexpected values accounted for. If so,
-    # we show counts. If not then we show Sampled Unexpected Values
+    # we show counts. If not then we show Sampled Unexpected Values only.
     if total_count == unexpected_count:
         header_row = ["Unexpected Value", "Count"]
     else:
-        header_row = ["Sampled Unexpected Values", "Count"]
+        header_row = ["Sampled Unexpected Values"]
     return header_row, table_rows
 
 
