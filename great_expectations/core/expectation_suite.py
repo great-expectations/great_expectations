@@ -1111,6 +1111,9 @@ class ExpectationSuite(SerializableDictDot):
             )
 
 
+_TExpectationSuite = TypeVar("_TExpectationSuite", ExpectationSuite, dict)
+
+
 class ExpectationSuiteSchema(Schema):
     name = fields.Str()
     id = fields.UUID(required=False, allow_none=True)
@@ -1122,11 +1125,10 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
-    T = TypeVar("T", ExpectationSuite, dict)
-
-    def clean_empty(self, data: T) -> T:
+    def clean_empty(self, data: _TExpectationSuite) -> _TExpectationSuite:
         if isinstance(data, ExpectationSuite):
-            data = self._clean_empty_suite(data)
+            # We are hitting this TypeVar narrowing mypy bug: https://github.com/python/mypy/issues/10817
+            data = self._clean_empty_suite(data)  # type: ignore[assignment]
         elif isinstance(data, dict):
             data = self._clean_empty_dict(data)
         return data
