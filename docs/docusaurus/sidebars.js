@@ -75,7 +75,7 @@ module.exports = {
             {
               type: 'link',
               label: 'View a Data Context configuration',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view_a_data_context_configuration',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
             },
           ]
         },
