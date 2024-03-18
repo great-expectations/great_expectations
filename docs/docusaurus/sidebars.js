@@ -380,6 +380,7 @@ module.exports = {
             },
           ]
         },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         { type: 'doc', id: 'cloud/try_gx_cloud' },
         {
           type: 'category',
