@@ -5,11 +5,7 @@ title: Manage Data Contexts
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-import GxImport from '../../components/setup/python_environment/_gx_import.md'
-import DataContextVerifyContents from '../../components/setup/data_context/_data_context_verify_contents.md'
 import Prerequisites from '../../components/_prerequisites.jsx'
-import AdmonitionConvertToFileContext from '../../components/setup/data_context/_admonition_convert_to_file_context.md'
-
 
 A Data Context is your entry point to Great Expectations (GX). It tells GX where to store metadata such as your configurations for Data Sources, Expectation Suites, Checkpoints, and Data Docs.  It contains your Validation Results and the metrics associated with them.  The Data Context also provides access to those objects in Python, along with other helper functions for the GX Python API. 
 
@@ -30,7 +26,7 @@ You will almost always instantiate a Data Context as the first step when using G
 
 1. Run the following code to request a Data Context:
 
-  ```python title='Python code'
+  ```python title='Python'
   import great_expectations as gxe
 
   context = gxe.get_context()
@@ -44,7 +40,7 @@ You will almost always instantiate a Data Context as the first step when using G
 
 2. Optional. Run the following code to verify the type of Data Context you received:
 
-  ```python title="Python code"
+  ```python title="Python"
   from great_expectations.data_context import EphemeralDataContext, CloudDataContext, FileDataContext
   
   print("Cloud:", isinstance(context, CloudDataContext))
@@ -76,8 +72,11 @@ A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost 
 
 ### Import GX
 
-<GxImport />
+Run the following code to import the GX module:
 
+```python title="Python"
+import great_expectations as gx
+```
 ### Determine the folder to initialize the Data Context in
 
 Run the following code to initialize your Filesystem Data Context in an empty folder:
@@ -102,8 +101,12 @@ If a Data Context already exists in `project_root_dir`, the `FileDataContext.cre
 
 ### Verify the Data Context content 
 
-<DataContextVerifyContents />
+Run the following command to confirm the Data Context was instantiated correctly:
 
+```python title="Python"
+  print(context)
+```
+The Data Context configuration formatted as a Python dictionary appears.
 
 </TabItem>
 
@@ -150,8 +153,13 @@ Run the following code to initialize the `EphemeralDataContext` class while pass
 ```
 
 :::info Saving the contents of an Ephemeral Data Context for future use
+An Ephemeral Data Context is an in-memory Data Context that is not intended to persist beyond the current Python session. Run the following code to convert it to a Filesystem Data Context and save its contents for future use:
 
-<AdmonitionConvertToFileContext />
+```python title="Python"
+  print(context)
+```
+
+This method initializes a Filesystem Data Context in the current working directory containing the Ephemeral Data Context. For more information, see [Convert an Ephemeral Data Context to a Filesystem Data Context](#convert-the-ephemeral-data-context-into-a-filesystem-data-context).
 
 :::
 
@@ -192,7 +200,9 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 ### Import GX
 
-<GxImport />
+```python title="Python"
+import great_expectations as gx
+```
 
 ### Initialize a Filesystem Data Context
 
@@ -233,7 +243,12 @@ The `get_context(...)` method instantiates and returns the newly initialized Dat
 
 ### Verify the Data Context content 
 
-<DataContextVerifyContents />
+Run the following command to confirm the Data Context was instantiated correctly:
+
+```python title="Python"
+  print(context)
+```
+The Data Context configuration formatted as a Python dictionary appears.
 
 </TabItem>
 
@@ -354,7 +369,7 @@ For these reasons, it is strongly advised that once you have converted your Ephe
 
 Run the following code to view Data Context configuration information:
 
-  ```python title="Python code"
+  ```python title="Python"
   from great_expectations.data_context import EphemeralDataContext, CloudDataContext, FileDataContext
   
   print("Cloud:", isinstance(context, CloudDataContext))
