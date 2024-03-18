@@ -561,8 +561,8 @@ def test_build_count_table_sampled():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
-    assert table_rows == [["giraffe", 3], ["lion", 2], ["zebra", 1]]
+    assert header_row == ["Sampled Unexpected Values"]
+    assert table_rows == [["giraffe"], ["lion"], ["zebra"]]
 
 
 def test_build_count_table_with_empty_string():
@@ -575,9 +575,9 @@ def test_build_count_table_with_empty_string():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert header_row == ["Sampled Unexpected Values"]
     assert table_rows == [
-        ["EMPTY", 1],
+        ["EMPTY"],
     ]
 
 
@@ -591,5 +591,5 @@ def test_build_count_table_with_null():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
-    assert table_rows == [["null", 1]]
+    assert header_row == ["Sampled Unexpected Values"]
+    assert table_rows == [["null"]]
