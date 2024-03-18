@@ -16,7 +16,7 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 ## Prerequisites
 
-- You have deployed the GX Agent.
+- You have deployed the GX Agent. See [Deploy the GX Agent](/cloud/deploy_gx_agent.md).
 
 - You have a [Docker instance](https://docs.docker.com/get-docker/).
 

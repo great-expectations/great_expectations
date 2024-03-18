@@ -89,11 +89,9 @@ You'll need your access token and organization ID to set your access credentials
 
    GX recommends deleting the temporary file after you set the environment variables.
 
-## Deploy the GX Agent
-
-See [Deploy the GX Agent](../deploy_gx_agent.md).
-
 ## Next steps
+
+- [Deploy the GX Agent](../deploy_gx_agent.md)
 
 - [Create a Data Asset](../data_assets/manage_data_assets.md#create-a-data-asset)
 
