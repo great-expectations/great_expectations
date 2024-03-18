@@ -13,8 +13,8 @@ except ImportError:
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -362,7 +362,7 @@ def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",

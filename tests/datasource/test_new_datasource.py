@@ -9,9 +9,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequest,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -207,7 +207,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     )
 
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
@@ -223,7 +223,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
     assert isinstance(batch.data.dataframe, pd.DataFrame)
-    assert batch.batch_definition == BatchDefinition(
+    assert batch.batch_definition == LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
@@ -272,7 +272,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",

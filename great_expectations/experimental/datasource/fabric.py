@@ -108,9 +108,9 @@ class _PowerBIAsset(DataAsset):
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,

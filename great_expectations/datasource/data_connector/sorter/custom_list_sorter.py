@@ -9,7 +9,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class CustomListSorter(Sorter):
         return reference_list
 
     @override
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
         if batch_value in self._reference_list:

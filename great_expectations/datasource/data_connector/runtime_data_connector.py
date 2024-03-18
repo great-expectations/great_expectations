@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
+from great_expectations.core.batch import LegacyBatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchMarkers,
@@ -214,7 +214,7 @@ class RuntimeDataConnector(DataConnector):
     @override
     def get_batch_data_and_metadata(  # type: ignore[override]
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(  # type: ignore[assignment]
@@ -235,7 +235,7 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BatchRequestBase
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -243,7 +243,7 @@ class RuntimeDataConnector(DataConnector):
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: RuntimeBatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
         other data_connectors, including variations of FilePathDataConnector. When BatchRequest contains batch_data
@@ -269,8 +269,8 @@ class RuntimeDataConnector(DataConnector):
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
-        batch_definition_list: List[BatchDefinition]
-        batch_definition = BatchDefinition(
+        batch_definition_list: List[LegacyBatchDefinition]
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
@@ -313,7 +313,7 @@ class RuntimeDataConnector(DataConnector):
 
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         data_asset_name: str = batch_definition.data_asset_name
         return {"data_asset_name": data_asset_name}
@@ -323,7 +323,7 @@ class RuntimeDataConnector(DataConnector):
     @override
     def build_batch_spec(  # type: ignore[return,override]
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
         runtime_parameters: dict,
     ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
         self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
