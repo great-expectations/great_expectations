@@ -18,8 +18,6 @@ If you've tested GX Cloud features and functionality and discovered it's a great
 
 - You have deployed the GX Agent. See [Deploy the GX Agent](/cloud/deploy_gx_agent.md).
 
-- You have a [Docker instance](https://docs.docker.com/get-docker/).
-
 - You've reviewed the prerequisites for the Data Asset you'll create. See [Create a Data Asset](#create-a-data-asset).
 
 ## Create a Data Asset
