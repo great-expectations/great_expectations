@@ -493,7 +493,18 @@ failed_rows_tests = [
     # ),
 ]
 
+## GX Core revised tests
+filesystem_connect_to_data_tests = [
+    IntegrationTestFixture(
+        name="connect_to_data/filesystem/_amazon_s3/example_connect_using_pandas",
+        user_flow_script="docs/docusaurus/docs/core/manage_and_access_data/connect_to_data/file_system/_amazon_s3/example_connect_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+]
 
+# populate docs test matrix with GX Core revised examples lists
+docs_test_matrix += filesystem_connect_to_data_tests
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += core_tests
 docs_test_matrix += local_tests
