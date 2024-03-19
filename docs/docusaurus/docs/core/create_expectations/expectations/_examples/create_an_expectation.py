@@ -7,13 +7,11 @@ The <snippet> tags are used to insert the corresponding code into the
  reviewing this script.
 """
 # <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code">
-# <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py imports">
 import great_expectations.expectations as gxe
 
-# </snippet>
-# <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py initialize Expectations">
+# highlight-start
 expectation = gxe.ExpectColumnValuesToBeInSet(
     column="passenger_count", value_set=[1, 2, 3, 4, 5]
 )
-# </snippet>
+# highlight-end
 # </snippet>

@@ -45,6 +45,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
     column="passenger_count", value_set=[1, 2, 3, 4, 5]
   )
   
+  # highlight-next-line
   validation_result = batch.validate(expectation)
   ```
 
@@ -52,11 +53,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
 
-3. Validate the Expectation against the Batch:
-
-  ```python
-  validation_result = batch.validate(expectation)
-  ```
+3. Validate the Expectation against the Batch.
 
 4. Optional. [Modify the Expectation](#modify-an-expectation) and test it again.
  
@@ -77,27 +74,17 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   This example uses an Expectation that was newly created in an Expectation Suite.
 
-2. Modify the Expectation's attributes:
-
-  ```python name="core/expectations/_examples/edit_an_expectation.py modify attributes"
-  ```
+2. Modify the Expectation's attributes.
 
   The specific attributes that can be modified correspond to the parameters used to initialize the Expectation.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-3. Optional. If the Expectation belongs to an Expectation Suite, save the changes to the Expectation Suite:
-
-  ```python name="core/expectations/_examples/edit_an_expectation.py save the Expectation"
-  ```
-
-  :::info
+3. Optional. If the Expectation belongs to an Expectation Suite, save the changes to the Expectation Suite.
 
   `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.
   
   Although you can [test your modified Expectation](#test-an-expectation) without saving any changes to its Expectation Suite, the Expectation Suite will continue to use the Expectation's original values unless you use `expectation.save()` to persist your changes.
   
   If the Expectation is not part of an Expectation Suite, `expectation.save()` will fail.
-
-  :::
 
 ## Customize an Expectation Class
 
@@ -106,45 +93,28 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 ```python title="Python example code"
 from great_expectations.expectations import ExpectColumnValueToBeBetween
 
+# highlight-start
 class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
     column: str = "passenger_count"
     min_value: int = 0
     max_value: int = 6
     render_text: str = "There should be between **0** and **6** passengers."
+# highlight-end
 ```
 
-
-1. Choose and import a base Expectation class:
-
-  ```python
-  from great_expectations.expectations import ExpectColumnValueToBeBetween
-  ```
+1. Choose and import a base Expectation class.
 
   Any of the core Expectation classes in GX can be customized. You can view the available Expectations and their functionality in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 2. Create a new Expectation class that inherits the base Expectation class.
   
-  The core Expectations in GX have names descriptive of their functionality.  When creating your customized class you can provide a class name that is more indicative of your specific use case:
+  The core Expectations in GX have names descriptive of their functionality.  When creating your customized class you can provide a class name that is more indicative of your specific use case.
 
-  ```python
-  class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
-  ```
-
-3. Override the Expectation's attributes with new default values:
-
-  ```python
-    column: str = "passenger_count"
-    min_value: int = 0
-    max_value: int = 6
-  ```
+3. Override the Expectation's attributes with new default values.
 
   The attributes that can be overriden correspond to the parameters required by the base Expectation.  These can be referenced from the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-4. Customize the rendering of the new Expectation when displayed in Data Docs:
-
-  ```python
-    render_text: str = "There should be between **0** and **6** passengers."
-  ```
+4. Customize the rendering of the new Expectation when displayed in Data Docs.
 
   The `render_text` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  This text can be formatted with Markdown syntax.
 

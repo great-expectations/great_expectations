@@ -6,7 +6,6 @@ The <snippet> tags are used to insert the corresponding code into the
  reviewing this script.
 """
 # <snippet name="core/expectations/_examples/edit_an_expectation.py full example code">
-# <snippet name="core/expectations/_examples/edit_an_expectation.py get expectation">
 import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -16,13 +15,9 @@ suite = context.suites.add(ExpectationSuite(name="my_expectation_suite"))
 expectation = suite.add_expectation(
     gxe.ExpectColumnValuesToBeInSet(column="passenger_count", value_set=[1, 2])
 )
-# </snippet>
 
-# <snippet name="core/expectations/_examples/edit_an_expectation.py modify attributes">
+# highlight-start
 expectation.value_set = [1, 2, 3, 4, 5]
-# </snippet>
-
-# <snippet name="core/expectations/_examples/edit_an_expectation.py save the Expectation">
 expectation.save()
-# </snippet>
+# highlight-end
 # </snippet>
