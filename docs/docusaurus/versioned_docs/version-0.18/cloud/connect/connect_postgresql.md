@@ -13,6 +13,8 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
+- You have [Deployed the GX Agent](../deploy_gx_agent.md).
+
 - You have a PostgreSQL database, schema, and table.
 
 - To improve data security, GX recommends creating a separate PostgreSQL user for your GX Cloud connection.
@@ -42,8 +44,6 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 4. Click **Execute/Refresh**.
 
 ## Next steps
-
-- [Deploy the GX Agent](../deploy_gx_agent.md)
 
 - [Create a Data Asset](../data_assets/manage_data_assets.md#create-a-data-asset)
 

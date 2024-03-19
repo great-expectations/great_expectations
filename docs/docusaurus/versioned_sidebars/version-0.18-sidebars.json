@@ -46,10 +46,6 @@
     },
     {
       "type": "doc",
-      "id": "cloud/deploy_gx_agent"
-    },
-    {
-      "type": "doc",
       "id": "cloud/try_gx_cloud"
     },
     {
@@ -60,6 +56,7 @@
         "id": "cloud/connect/connect_lp"
       },
       "items": [
+        "cloud/connect/deploy_gx_agent",
         "cloud/connect/connect_postgresql",
         "cloud/connect/connect_snowflake",
         "cloud/connect/connect_airflow",
