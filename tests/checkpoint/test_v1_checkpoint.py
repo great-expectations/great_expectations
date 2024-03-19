@@ -25,11 +25,11 @@ from tests.test_utils import working_directory
 
 
 @pytest.mark.unit
-def test_checkpoint_no_validations_raises_error():
+def test_checkpoint_no_validation_definitions_raises_error():
     with pytest.raises(ValueError) as e:
-        Checkpoint(name="my_checkpoint", validations=[], actions=[])
+        Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
 
-    assert "Checkpoint must contain at least one validation" in str(e.value)
+    assert "Checkpoint must contain at least one validation definition" in str(e.value)
 
 
 class TestCheckpointSerialization:
@@ -146,14 +146,14 @@ class TestCheckpointSerialization:
         )
         cp = Checkpoint(
             name="my_checkpoint",
-            validations=validation_configs,
+            validation_definitions=validation_configs,
             actions=actions,
         )
 
         actual = json.loads(cp.json(models_as_dict=False))
         expected = {
             "name": cp.name,
-            "validations": [
+            "validation_definitions": [
                 {
                     "id": mock.ANY,
                     "name": "my_first_validation",
@@ -170,8 +170,8 @@ class TestCheckpointSerialization:
         assert actual == expected
 
         # Validation definitions should be persisted and obtain IDs before serialization
-        self._assert_valid_uuid(actual["validations"][0]["id"])
-        self._assert_valid_uuid(actual["validations"][1]["id"])
+        self._assert_valid_uuid(actual["validation_definitions"][0]["id"])
+        self._assert_valid_uuid(actual["validation_definitions"][1]["id"])
 
     @pytest.mark.filesystem
     def test_checkpoint_filesystem_round_trip_adds_ids(
@@ -201,15 +201,17 @@ class TestCheckpointSerialization:
         suite2 = ExpectationSuite(suite_name_2)
         vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
 
-        validations = [vc1, vc2]
-        cp = Checkpoint(name=cp_name, validations=validations, actions=actions)
+        validation_definitions = [vc1, vc2]
+        cp = Checkpoint(
+            name=cp_name, validation_definitions=validation_definitions, actions=actions
+        )
 
         serialized_checkpoint = cp.json(models_as_dict=False)
         serialized_checkpoint_dict = json.loads(serialized_checkpoint)
 
         assert serialized_checkpoint_dict == {
             "name": cp_name,
-            "validations": [
+            "validation_definitions": [
                 {
                     "id": mock.ANY,
                     "name": validation_config_name_1,
@@ -250,22 +252,22 @@ class TestCheckpointSerialization:
 
         # Check that all nested objects have been built properly with their appropriate names
         assert cp.name == cp_name
-        assert cp.validations[0].data_source.name == ds_name
-        assert cp.validations[0].asset.name == asset_name
+        assert cp.validation_definitions[0].data_source.name == ds_name
+        assert cp.validation_definitions[0].asset.name == asset_name
 
-        assert cp.validations[0].name == validation_config_name_1
-        assert cp.validations[0].batch_definition.name == batch_config_name_1
-        assert cp.validations[0].suite.name == suite_name_1
+        assert cp.validation_definitions[0].name == validation_config_name_1
+        assert cp.validation_definitions[0].batch_definition.name == batch_config_name_1
+        assert cp.validation_definitions[0].suite.name == suite_name_1
 
-        assert cp.validations[1].name == validation_config_name_2
-        assert cp.validations[1].batch_definition.name == batch_config_name_2
-        assert cp.validations[1].suite.name == suite_name_2
+        assert cp.validation_definitions[1].name == validation_config_name_2
+        assert cp.validation_definitions[1].batch_definition.name == batch_config_name_2
+        assert cp.validation_definitions[1].suite.name == suite_name_2
 
-        # Check that all validations and nested suites have been assigned IDs during serialization
-        self._assert_valid_uuid(id=cp.validations[0].id)
-        self._assert_valid_uuid(id=cp.validations[1].id)
-        self._assert_valid_uuid(id=cp.validations[0].suite.id)
-        self._assert_valid_uuid(id=cp.validations[1].suite.id)
+        # Check that all validation_definitions and nested suites have been assigned IDs during serialization
+        self._assert_valid_uuid(id=cp.validation_definitions[0].id)
+        self._assert_valid_uuid(id=cp.validation_definitions[1].id)
+        self._assert_valid_uuid(id=cp.validation_definitions[0].suite.id)
+        self._assert_valid_uuid(id=cp.validation_definitions[1].suite.id)
 
     def _assert_valid_uuid(self, id: str | None) -> None:
         if not id:
@@ -284,17 +286,17 @@ class TestCheckpointSerialization:
             pytest.param(
                 {
                     "name": "my_checkpoint",
-                    "validations": [],
+                    "validation_definitions": [],
                     "actions": [],
                     "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
                 },
-                "Checkpoint must contain at least one validation",
+                "Checkpoint must contain at least one validation definition",
                 id="missing_validations",
             ),
             pytest.param(
                 {
                     "name": "my_checkpoint",
-                    "validations": [
+                    "validation_definitions": [
                         {
                             "name": "i_do_not_exist",
                             "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
@@ -303,13 +305,13 @@ class TestCheckpointSerialization:
                     "actions": [],
                     "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
                 },
-                "Unable to retrieve validation config",
+                "Unable to retrieve validation definition",
                 id="nonexistent_validation",
             ),
             pytest.param(
                 {
                     "name": "my_checkpoint",
-                    "validations": [
+                    "validation_definitions": [
                         {
                             "other_key": "i_do_not_exist",
                             "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
@@ -318,7 +320,7 @@ class TestCheckpointSerialization:
                     "actions": [],
                     "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
                 },
-                "validations -> name\n  field required",
+                "validation_definitions -> name\n  field required",
                 id="invalid_validation",
             ),
         ],

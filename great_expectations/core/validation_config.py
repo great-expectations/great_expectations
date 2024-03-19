@@ -88,7 +88,7 @@ class ValidationConfig(BaseModel):
         """
         json_encoders = {
             ExpectationSuite: lambda e: e.serialize(),
-            BatchConfig: lambda b: b.serialize(),
+            BatchConfig: lambda b: b.serialize_validation_definition(),
         }
 
     name: str = Field(..., allow_mutation=False)
@@ -273,7 +273,7 @@ class ValidationConfig(BaseModel):
             validation_config_store.add(key=key, value=self)
 
         # Nested batch definition and suite should be persisted with their respective stores
-        self.data.serialize()
+        self.data.serialize_validation_definition()
         self.suite.serialize()
 
         return _IdentifierBundle(name=self.name, id=self.id)
