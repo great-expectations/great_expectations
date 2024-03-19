@@ -149,7 +149,7 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
 
-def _get_dialect_type_module(dialect):
+def _get_dialect_type_module(dialect):  # noqa: C901
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects
     """
@@ -1014,7 +1014,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return PartitionDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @override
-    def resolve_metric_bundle(
+    def resolve_metric_bundle(  # noqa: C901 - too complex
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
     ) -> Dict[Tuple[str, str, str], MetricValue]:

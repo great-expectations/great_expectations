@@ -141,7 +141,7 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 
 # noinspection SpellCheckingInspection
-def send_email(  # noqa: PLR0913
+def send_email(  # noqa: C901, PLR0913
     title,
     html,
     smtp_address,

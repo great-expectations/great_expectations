@@ -18,7 +18,7 @@ class ColumnValuesGeometryWithinShape(ColumnMapMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
+    def _pandas(cls, column, **kwargs):  # noqa: C901 - too complex
         shape = kwargs.get("shape")
         shape_format = kwargs.get("shape_format")
         column_shape_format = kwargs.get("column_shape_format")

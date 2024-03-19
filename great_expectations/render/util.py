@@ -24,7 +24,7 @@ ctx.prec = DEFAULT_PRECISION
 
 
 @public_api
-def num_to_str(
+def num_to_str(  # noqa: C901
     f: float,
     precision: int = DEFAULT_PRECISION,
     use_locale: bool = False,

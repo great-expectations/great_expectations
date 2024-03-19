@@ -231,7 +231,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913
+    def _spark(  # noqa: C901, PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

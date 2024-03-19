@@ -107,7 +107,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         return F.length(column)
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(  # noqa: C901, PLR0913
         cls,
         column,
         _metrics,

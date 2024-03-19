@@ -22,7 +22,7 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: C901
+    def _pandas(  # noqa: C901 - too complex
         cls,
         column,
         min_length,
@@ -34,7 +34,7 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
         max_consec_letters,
         **kwargs,
     ):
-        def matches_password_requirements(x):  # noqa: C901
+        def matches_password_requirements(x):  # noqa: C901 - too complex
             x = str(x)
             if len(x) < min_length:
                 return False

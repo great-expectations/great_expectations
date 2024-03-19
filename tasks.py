@@ -341,7 +341,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(
+def tests(  # noqa: C901
     ctx: Context,
     unit: bool = True,
     ignore_markers: bool = False,
@@ -483,7 +483,7 @@ def docker(
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(
+def type_schema(  # noqa: C901 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,

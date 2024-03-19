@@ -803,7 +803,7 @@ def verify_column_names_exist(
     )
 
 
-def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
+def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noqa: C901
     column_names: List[str] | str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
@@ -1251,7 +1251,7 @@ def get_sqlalchemy_source_table_and_schema(
         return engine.batch_manager.active_batch_data.selectable
 
 
-def get_unexpected_indices_for_multiple_pandas_named_indices(
+def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
@@ -1373,7 +1373,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     return unexpected_index_list
 
 
-def compute_unexpected_pandas_indices(
+def compute_unexpected_pandas_indices(  # noqa: C901
     domain_records_df: pd.DataFrame,
     expectation_domain_column_list: List[str],
     result_format: Dict[str, Any],

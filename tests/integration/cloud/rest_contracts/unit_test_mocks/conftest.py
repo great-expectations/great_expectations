@@ -23,7 +23,7 @@ def _convert_matcher_to_value(matcher: pact.matchers.Matcher) -> JsonData:
     return matcher.generate()["contents"]
 
 
-def _reify_pact_body(
+def _reify_pact_body(  # noqa: C901
     body: PactBody,
 ) -> JsonData:
     if isinstance(body, list):

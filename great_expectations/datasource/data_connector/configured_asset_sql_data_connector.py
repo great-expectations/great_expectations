@@ -163,7 +163,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
         self._assets[name] = config
 
-    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
+    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):  # noqa: C901
         """
         Retrieve batch_definitions that match batch_request
 

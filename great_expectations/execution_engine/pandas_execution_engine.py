@@ -418,7 +418,7 @@ not {batch_spec.__class__.__name__}"""
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
+    def guess_reader_method_from_path(path: str):  # noqa: C901, PLR0911
         """Helper method for deciding which reader to use to read in a certain path.
 
         Args:

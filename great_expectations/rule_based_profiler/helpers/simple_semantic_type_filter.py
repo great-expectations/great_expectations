@@ -135,7 +135,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         }
 
     @staticmethod
-    def _infer_semantic_domain_type_from_table_column_type(
+    def _infer_semantic_domain_type_from_table_column_type(  # noqa: C901
         column_types_dict_list: List[Dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:

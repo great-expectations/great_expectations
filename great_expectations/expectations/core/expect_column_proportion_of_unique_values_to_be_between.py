@@ -120,7 +120,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: C901 - too complex
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:

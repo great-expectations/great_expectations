@@ -822,7 +822,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return expected_distribution
 
     @classmethod
-    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:  # noqa: C901 - too complex
         weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
