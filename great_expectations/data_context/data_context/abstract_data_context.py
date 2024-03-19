@@ -71,7 +71,6 @@ from great_expectations.core.serializer import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
@@ -2600,9 +2599,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset, Validator)):
+            if not isinstance(batch, (tuple, Validator)):
                 raise gx_exceptions.DataContextError(
-                    "Batches are required to be of type DataAsset or Validator"
+                    "Batches are required to be of type tuple or Validator"
                 )
         try:
             validation_operator = self.validation_operators[validation_operator_name]

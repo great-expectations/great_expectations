@@ -38,7 +38,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import is_library_loadable
-from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
 
@@ -645,7 +644,7 @@ def test_api_action_run(
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(url="http://www.example.com")
     response = api_notification_action.run(
-        validation_result_suite, validation_result_suite_id, file_data_asset
+        validation_result_suite, validation_result_suite_id, data_asset=None
     )
     assert response == "Successfully Posted results to API, status code - 200"
 
