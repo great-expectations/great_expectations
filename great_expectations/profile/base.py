@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.data_asset import DataAsset
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_suite import ExpectationSuite
@@ -168,9 +167,3 @@ class Profiler(metaclass=abc.ABCMeta):
         self, item_to_profile: Any, suite_name: Optional[str] = None
     ) -> ExpectationSuite:
         pass
-
-
-class DataAssetProfiler:
-    @classmethod
-    def validate(cls, data_asset) -> bool:
-        return isinstance(data_asset, DataAsset)
