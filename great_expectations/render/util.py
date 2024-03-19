@@ -282,8 +282,8 @@ def build_count_table(
     all_unexpected_in_samples: bool = total_count == unexpected_count
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: str = _get_value(unexpected_count_dict.get("value"))
-        count: int | None = unexpected_count_dict.get("count")
+        value = _get_value(unexpected_count_dict.get("value"))
+        count = unexpected_count_dict.get("count")
         if all_unexpected_in_samples:
             table_rows.append([value, count])
         else:
