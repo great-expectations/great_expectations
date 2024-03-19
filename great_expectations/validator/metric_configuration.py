@@ -6,6 +6,7 @@ from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.experimental.metric_repository.metrics import MetricTypes
 
 
 @public_api
@@ -27,10 +28,12 @@ class MetricConfiguration:
 
     def __init__(
         self,
-        metric_name: str,
+        metric_name: str | MetricTypes,
         metric_domain_kwargs: dict,
         metric_value_kwargs: Optional[dict] = None,
     ) -> None:
+        if isinstance(metric_name, MetricTypes):
+            metric_name = metric_name.value
         self._metric_name = metric_name
 
         if not isinstance(metric_domain_kwargs, IDDict):

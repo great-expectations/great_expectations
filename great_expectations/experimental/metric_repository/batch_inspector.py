@@ -39,8 +39,6 @@ class BatchInspector:
 
         Called by GX Agent to compute a MetricRun as part of a RunMetricsEvent.
 
-        TODO: eventually we will keep this and retire `compute_metric_run`.
-
         Args:
             data_asset_id (uuid.UUID): current data asset id.
             batch_request (BatchRequest): BatchRequest for current batch.
@@ -49,6 +47,7 @@ class BatchInspector:
         Returns:
             MetricRun: _description_
         """
+        # TODO: eventually we will keep this and retire `compute_metric_run`.
         metrics: list[Metric] = []
         for metric_retriever in self._metric_retrievers:
             metrics.extend(
@@ -62,7 +61,6 @@ class BatchInspector:
         self, data_asset_id: uuid.UUID, batch_request: BatchRequest
     ) -> MetricRun:
         metrics: list[Metric] = []
-        # TODO: how do we know that hte metric
         for metric_retriever in self._metric_retrievers:
             metrics.extend(metric_retriever.get_metrics(batch_request=batch_request))
 
