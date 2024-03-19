@@ -339,7 +339,8 @@ runtime-evaluated-base-classes = [
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 10
+# https://docs.astral.sh/ruff/rules/complex-structure/
+max-complexity = 8
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

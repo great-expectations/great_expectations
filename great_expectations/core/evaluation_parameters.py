@@ -296,7 +296,7 @@ def build_evaluation_parameters(
 EXPR = EvaluationParameterParser()
 
 
-def find_evaluation_parameter_dependencies(parameter_expression):
+def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
     """Parse a parameter expression to identify dependencies including GX URNs.
 
     Args:
@@ -496,7 +496,7 @@ def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> boo
     )
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
     deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

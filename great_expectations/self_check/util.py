@@ -501,7 +501,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
         raise ValueError(f"Unknown dataset_type {execution_engine!s}")
 
 
-def _get_test_validator_with_data_pandas(
+def _get_test_validator_with_data_pandas(  # noqa: C901
     df: pd.DataFrame,
     schemas: dict | None,
     table_name: str | None,

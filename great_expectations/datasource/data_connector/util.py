@@ -212,7 +212,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 
 # noinspection PyUnresolvedReferences
-def _invert_regex_to_data_reference_template(
+def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
     regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
@@ -472,7 +472,7 @@ def list_gcs_keys(
     return keys
 
 
-def list_s3_keys(
+def list_s3_keys(  # noqa: C901 - too complex
     s3, query_options: dict, iterator_dict: dict, recursive: bool = False
 ) -> Generator[str, None, None]:
     """

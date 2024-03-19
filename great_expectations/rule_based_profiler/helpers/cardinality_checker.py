@@ -251,7 +251,7 @@ class CardinalityChecker:
             )
 
 
-def validate_input_parameters(
+def validate_input_parameters(  # noqa: C901
     cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
     max_unique_values: int | None = None,
     max_proportion_unique: float | None = None,

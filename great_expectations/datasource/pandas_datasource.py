@@ -40,7 +40,7 @@ class PandasDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(  # noqa: PLR0913
+    def build_configuration(  # noqa: C901, PLR0913
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,
@@ -148,7 +148,7 @@ class PandasDatasource(LegacyDatasource):
         self._limit = configuration_with_defaults.get("limit", None)
 
     # TODO: move to data connector
-    def process_batch_parameters(  # noqa: C901
+    def process_batch_parameters(  # noqa: C901 - too complex
         self,
         reader_method=None,
         reader_options=None,
@@ -269,7 +269,7 @@ class PandasDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
+    def guess_reader_method_from_path(path: str):  # noqa: C901, PLR0911
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}

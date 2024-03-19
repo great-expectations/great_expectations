@@ -235,7 +235,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         return self._table_column_names
 
-    def get_filtered_column_names(
+    def get_filtered_column_names(  # noqa: C901
         self,
         column_names: List[str],
         batch_ids: Optional[List[str]] = None,
