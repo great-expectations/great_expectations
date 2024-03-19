@@ -19,6 +19,7 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.context_factory import project_manager
 from great_expectations.data_context.types.resource_identifiers import (
@@ -38,45 +39,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
-
-
-class _IdentifierBundle(BaseModel):
-    name: str
-    id: Union[str, None]
-
-
-class _EncodedValidationData(BaseModel):
-    datasource: _IdentifierBundle
-    asset: _IdentifierBundle
-    batch_definition: _IdentifierBundle
-
-
-def _encode_suite(suite: ExpectationSuite) -> _IdentifierBundle:
-    if not suite.id:
-        expectation_store = project_manager.get_expectations_store()
-        key = expectation_store.get_key(name=suite.name, id=None)
-        expectation_store.add(key=key, value=suite)
-
-    return _IdentifierBundle(name=suite.name, id=suite.id)
-
-
-def _encode_data(data: BatchConfig) -> _EncodedValidationData:
-    asset = data.data_asset
-    ds = asset.datasource
-    return _EncodedValidationData(
-        datasource=_IdentifierBundle(
-            name=ds.name,
-            id=ds.id,
-        ),
-        asset=_IdentifierBundle(
-            name=asset.name,
-            id=str(asset.id) if asset.id else None,
-        ),
-        batch_definition=_IdentifierBundle(
-            name=data.name,
-            id=data.id,
-        ),
-    )
 
 
 class ValidationConfig(BaseModel):
@@ -125,8 +87,8 @@ class ValidationConfig(BaseModel):
         }
         """
         json_encoders = {
-            ExpectationSuite: lambda e: _encode_suite(e),
-            BatchConfig: lambda b: _encode_data(b),
+            ExpectationSuite: lambda e: e.identifier_bundle(),
+            BatchConfig: lambda b: b.identifier_bundle(),
         }
 
     name: str = Field(..., allow_mutation=False)
@@ -302,3 +264,16 @@ class ValidationConfig(BaseModel):
                 run_id=run_id,
             )
             return expectation_suite_identifier, validation_result_id
+
+    def identifier_bundle(self) -> _IdentifierBundle:
+        # Utilized as a custom json_encoder
+        if not self.id:
+            validation_config_store = project_manager.get_validation_config_store()
+            key = validation_config_store.get_key(name=self.name, id=None)
+            validation_config_store.add(key=key, value=self)
+
+        # Nested batch definition and suite should be persisted with their respective stores
+        self.data.identifier_bundle()
+        self.suite.identifier_bundle()
+
+        return _IdentifierBundle(name=self.name, id=self.id)

@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+import great_expectations as gx
 import great_expectations.exceptions.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations import __version__ as ge_version
@@ -23,6 +24,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -1614,3 +1616,24 @@ class TestExpectationSuiteAnalytics:
                 expectation_suite_id=mock.ANY,
             )
         )
+
+
+@pytest.mark.unit
+def test_identifier_bundle_with_existing_id():
+    suite = ExpectationSuite(name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0")
+
+    assert suite.identifier_bundle() == _IdentifierBundle(
+        name="my_suite", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
+    )
+
+
+@pytest.mark.unit
+def test_identifier_bundle_no_id():
+    _ = gx.get_context(mode="ephemeral")
+    suite = ExpectationSuite(name="my_suite", id=None)
+
+    actual = suite.identifier_bundle()
+    expected = {"name": "my_suite", "id": mock.ANY}
+
+    assert actual.dict() == expected
+    assert actual.id is not None
