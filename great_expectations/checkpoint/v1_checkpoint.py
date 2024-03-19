@@ -87,7 +87,7 @@ class Checkpoint(BaseModel):
                 identifier_bundles=identifier_bundles, store=validation_config_store
             )
 
-        return cast(list[ValidationConfig], validations)
+        return cast(List[ValidationConfig], validations)
 
     @classmethod
     def _deserialize_identifier_bundles_to_validation_configs(
