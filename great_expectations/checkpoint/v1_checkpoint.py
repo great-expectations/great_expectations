@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
@@ -82,12 +82,12 @@ class Checkpoint(BaseModel):
 
         if isinstance(validations[0], dict):
             validation_config_store = project_manager.get_validation_config_store()
-            identifier_bundles = [_IdentifierBundle(**v) for v in validations]
+            identifier_bundles = [_IdentifierBundle(**v) for v in validations]  # type: ignore[arg-type] # All validation configs are dicts if the first one is
             return cls._deserialize_identifier_bundles_to_validation_configs(
                 identifier_bundles=identifier_bundles, store=validation_config_store
             )
 
-        return validations
+        return cast(list[ValidationConfig], validations)
 
     @classmethod
     def _deserialize_identifier_bundles_to_validation_configs(
@@ -104,7 +104,8 @@ class Checkpoint(BaseModel):
                     f"Unable to retrieve validation config {id_bundle} from store"
                 )
 
-            validations.append(validation_config)
+            if validation_config:
+                validations.append(validation_config)
 
         return validations
 

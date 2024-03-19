@@ -265,7 +265,7 @@ class ValidationConfig(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
 
-    def serialize(self) -> dict:
+    def serialize(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         if not self.id:
             validation_config_store = project_manager.get_validation_config_store()
