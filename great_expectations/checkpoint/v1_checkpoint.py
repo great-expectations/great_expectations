@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
@@ -81,25 +82,27 @@ class Checkpoint(BaseModel):
             Renderer: lambda r: r.serialize(),
         }
 
-    @validator("validations")
+    @validator("validations", pre=True)
     def _validate_validations(
-        cls, validations: list[ValidationConfig] | list[_IdentifierBundle]
+        cls, validations: list[ValidationConfig] | list[dict]
     ) -> list[ValidationConfig]:
         from great_expectations import project_manager
 
         if len(validations) == 0:
             raise ValueError("Checkpoint must contain at least one validation")
 
-        if isinstance(validations[0], _IdentifierBundle):
+        if isinstance(validations[0], dict):
             validation_config_store = project_manager.get_validation_config_store()
+            identifier_bundles = [_IdentifierBundle(**v) for v in validations]
             return cls._deserialize_identifier_bundles_to_validation_configs(
-                validations=validations, store=validation_config_store
+                identifier_bundles=identifier_bundles, store=validation_config_store
             )
 
         return validations
 
-    def _deserialize_identifier_bundles(
-        self, identifier_bundles: list[_IdentifierBundle], store: ValidationConfigStore
+    @classmethod
+    def _deserialize_identifier_bundles_to_validation_configs(
+        cls, identifier_bundles: list[_IdentifierBundle], store: ValidationConfigStore
     ) -> list[ValidationConfig]:
         validations: list[ValidationConfig] = []
         for id_bundle in identifier_bundles:
@@ -107,7 +110,7 @@ class Checkpoint(BaseModel):
 
             try:
                 validation_config = store.get(key=key)
-            except KeyError:
+            except (KeyError, gx_exceptions.InvalidKeyError):
                 raise ValueError(
                     f"Unable to retrieve validation config {id_bundle} from store"
                 )

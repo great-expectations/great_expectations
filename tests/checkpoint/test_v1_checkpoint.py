@@ -196,8 +196,23 @@ class TestCheckpointSerialization:
                     "actions": [],
                     "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
                 },
-                "TBD",
+                "Unable to retrieve validation config",
                 id="nonexistent_validation",
+            ),
+            pytest.param(
+                {
+                    "name": "my_checkpoint",
+                    "validations": [
+                        {
+                            "other_key": "i_do_not_exist",
+                            "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+                        }
+                    ],
+                    "actions": [],
+                    "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
+                },
+                "validations -> name\n  field required",
+                id="invalid_validation",
             ),
         ],
     )
