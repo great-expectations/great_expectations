@@ -15,6 +15,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -603,3 +604,23 @@ class TestValidationConfigSerialization:
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationConfig.parse_obj(serialized_config)
+
+
+@pytest.mark.unit
+def test_identifier_bundle_with_existing_id(validation_config: ValidationConfig):
+    validation_config.id = "fa34fbb7-124d-42ff-9760-e410ee4584a0"
+
+    assert validation_config.identifier_bundle() == _IdentifierBundle(
+        name="my_validation", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
+    )
+
+
+@pytest.mark.unit
+def test_identifier_bundle_no_id(validation_config: ValidationConfig):
+    validation_config.id = None
+
+    actual = validation_config.identifier_bundle()
+    expected = {"name": "my_validation", "id": mock.ANY}
+
+    assert actual.dict() == expected
+    assert actual.id is not None

@@ -70,8 +70,8 @@ class Checkpoint(BaseModel):
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep
         )
         json_encoders = {
-            ValidationConfig: lambda v: v.serialize(),
-            Renderer: lambda r: r.serialize(),
+            ValidationConfig: lambda v: v.identifier_bundle(),
+            Renderer: lambda r: r.identifier_bundle(),
         }
 
     @validator("validation_definitions", pre=True)

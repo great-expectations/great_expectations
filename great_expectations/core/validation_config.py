@@ -87,8 +87,8 @@ class ValidationConfig(BaseModel):
         }
         """
         json_encoders = {
-            ExpectationSuite: lambda e: e.serialize(),
-            BatchConfig: lambda b: b.serialize_validation_definition(),
+            ExpectationSuite: lambda e: e.identifier_bundle(),
+            BatchConfig: lambda b: b.identifier_bundle(),
         }
 
     name: str = Field(..., allow_mutation=False)
@@ -265,7 +265,7 @@ class ValidationConfig(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
 
-    def serialize(self) -> _IdentifierBundle:
+    def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         if not self.id:
             validation_config_store = project_manager.get_validation_config_store()
@@ -273,7 +273,7 @@ class ValidationConfig(BaseModel):
             validation_config_store.add(key=key, value=self)
 
         # Nested batch definition and suite should be persisted with their respective stores
-        self.data.serialize_validation_definition()
-        self.suite.serialize()
+        self.data.identifier_bundle()
+        self.suite.identifier_bundle()
 
         return _IdentifierBundle(name=self.name, id=self.id)

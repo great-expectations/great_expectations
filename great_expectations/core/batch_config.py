@@ -49,7 +49,7 @@ class BatchConfig(pydantic.BaseModel):
     def save(self) -> None:
         self.data_asset._save_batch_config(self)
 
-    def serialize_validation_definition(self) -> _EncodedValidationData:
+    def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
         asset = self.data_asset
         ds = asset.datasource
