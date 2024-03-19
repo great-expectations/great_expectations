@@ -78,7 +78,7 @@ def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
 
 
 @public_api
-class BatchDefinition(SerializableDictDot):
+class LegacyBatchDefinition(SerializableDictDot):
     """Precisely identifies a set of data from a data source.
 
     More concretely, a BatchDefinition includes all the information required to precisely
@@ -739,7 +739,7 @@ class Batch(SerializableDictDot):
         self,
         data: BatchDataType | None = None,
         batch_request: BatchRequestBase | dict | None = None,
-        batch_definition: BatchDefinition | None = None,
+        batch_definition: LegacyBatchDefinition | None = None,
         batch_spec: BatchSpec | None = None,
         batch_markers: BatchMarkers | None = None,
         # The remaining parameters are for backward compatibility.
@@ -838,7 +838,7 @@ class Batch(SerializableDictDot):
             "data": str(self.data),
             "batch_request": self.batch_request.to_dict(),
             "batch_definition": self.batch_definition.to_json_dict()
-            if isinstance(self.batch_definition, BatchDefinition)
+            if isinstance(self.batch_definition, LegacyBatchDefinition)
             else {},
             "batch_spec": self.batch_spec,
             "batch_markers": self.batch_markers,
@@ -863,7 +863,7 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        if isinstance(batch_definition, BatchDefinition):
+        if isinstance(batch_definition, LegacyBatchDefinition):
             return batch_definition.id
 
         if isinstance(batch_definition, IDDict):

@@ -6,10 +6,8 @@ from great_expectations.expectations.row_conditions import (
     parse_condition_to_sqlalchemy,
 )
 
-# module level markers
-pytestmark = pytest.mark.unit
 
-
+@pytest.mark.unit
 def test_notnull_parser():
     res = _parse_great_expectations_condition('col("foo").notNull()')
     assert res["column"] == "foo"
@@ -20,6 +18,7 @@ def test_notnull_parser():
     assert "notnull" not in res
 
 
+@pytest.mark.unit
 def test_condition_parser():
     res = _parse_great_expectations_condition('col("foo") > 5')
     assert res["column"] == "foo"
@@ -27,6 +26,7 @@ def test_condition_parser():
     assert res["fnumber"] == "5"
 
 
+@pytest.mark.unit
 def test_condition_parser_with_underscore_in_column_name():
     res = _parse_great_expectations_condition('col("pk_2") == "Two"')
     assert res["column"] == "pk_2"
@@ -34,6 +34,7 @@ def test_condition_parser_with_underscore_in_column_name():
     assert res["condition_value"] == "Two"
 
 
+@pytest.mark.unit
 def test_condition_parser_with_dash_in_column_name():
     res = _parse_great_expectations_condition('col("pk-2") == "Two"')
     assert res["column"] == "pk-2"
@@ -41,6 +42,7 @@ def test_condition_parser_with_dash_in_column_name():
     assert res["condition_value"] == "Two"
 
 
+@pytest.mark.unit
 def test_condition_parser_with_space_in_condition_value():
     res = _parse_great_expectations_condition('col("pk_2") == "Two Two"')
     assert res["column"] == "pk_2"
@@ -48,6 +50,7 @@ def test_condition_parser_with_space_in_condition_value():
     assert res["condition_value"] == "Two Two"
 
 
+@pytest.mark.unit
 def test_condition_parser_with_tab_in_condition_value():
     res = _parse_great_expectations_condition('col("pk_2") == "Two  Two"')
     assert res["column"] == "pk_2"
@@ -55,6 +58,7 @@ def test_condition_parser_with_tab_in_condition_value():
     assert res["condition_value"] == "Two  Two"
 
 
+@pytest.mark.spark
 def test_parse_condition_to_spark(spark_session):
     res = parse_condition_to_spark('col("foo") > 5')
     # This is mostly a demonstrative test; it may be brittle. I do not know how to test
@@ -68,6 +72,7 @@ def test_parse_condition_to_spark(spark_session):
     assert str(res) in ["Column<b'(foo IS NOT NULL)'>", "Column<'(foo IS NOT NULL)'>"]
 
 
+@pytest.mark.unit
 def test_parse_condition_to_sqlalchemy(sa):
     res = parse_condition_to_sqlalchemy('col("foo") > 5')
     assert str(res) == "foo > :foo_1"

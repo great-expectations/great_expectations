@@ -7,10 +7,10 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchSpec,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -182,7 +182,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = []
+        batch_definition_list: List[LegacyBatchDefinition] = []
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
@@ -193,7 +193,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition = BatchDefinition(
+            batch_definition = LegacyBatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
@@ -277,13 +277,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
 
     def build_batch_spec(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> SqlAlchemyDatasourceBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -424,11 +424,11 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
     def _sort_batch_definition_list(
         self,
-        batch_definition_list: List[BatchDefinition],
+        batch_definition_list: List[LegacyBatchDefinition],
         partitioner_method_name: Optional[str],
         partitioner_kwargs: Optional[Dict[str, Union[str, dict, None]]],
         sorters: Optional[dict],
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """Sort a list of batch definitions given the partitioner method used to define them.
 
         Args:
@@ -550,7 +550,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             )
 
             batch_definition_list = [
-                BatchDefinition(
+                LegacyBatchDefinition(
                     batch_identifiers=IDDict(batch_identifiers),
                     datasource_name=self.datasource_name,
                     data_connector_name=self.name,
@@ -625,7 +625,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         return self._data_references_cache[data_asset_name]
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
@@ -634,7 +634,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             3. data_asset from data_connector
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             dict built from batch_definition
@@ -649,7 +649,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         }
 
     def _get_table_name_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> str:
         """
         Helper method called by _generate_batch_spec_parameters_from_batch_definition() to parse table_name from
@@ -675,11 +675,11 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         self,
         data_reference,
         data_asset_name: Optional[str] = None,  #: Any,
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `IDDict(data_reference)`
         return [
-            BatchDefinition(
+            LegacyBatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,

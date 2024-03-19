@@ -1695,7 +1695,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 
 
 # spark
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1743,7 +1743,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
     assert unexpected_index_query == expected_spark_query_output
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1797,7 +1797,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     assert unexpected_index_query == expected_spark_query_output
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1854,7 +1854,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     assert unexpected_index_query == expected_spark_query_output
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1906,7 +1906,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1944,7 +1944,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     )
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2012,7 +2012,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
     assert unexpected_index_query == expected_spark_query_output
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2062,7 +2062,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output_limit_1(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2119,7 +2119,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2168,7 +2168,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2223,7 +2223,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
     )
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2271,7 +2271,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
     assert unexpected_index_query is None
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2317,7 +2317,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
     assert not unexpected_index_query
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2372,13 +2372,14 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
     unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == (
-        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = "
-        "30)))"
-    )
+
+    assert unexpected_index_query in [
+        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = 30)))",
+        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = 30.0)))",
+    ]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2425,7 +2426,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
     ]
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2470,7 +2471,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
     assert not unexpected_index_query
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_spark_complete_output_no_id_pk_fallback(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
