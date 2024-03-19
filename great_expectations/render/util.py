@@ -272,10 +272,10 @@ def build_count_table(
         if count:
             total_count += count
 
-    def _get_value(value: Any) -> str:
-        if value is not None and value != "":
-            return value
-        if value == "":
+    def _get_value(value_: Any) -> Any:
+        if value_ is not None and value_ != "":
+            return value_
+        if value_ == "":
             return "EMPTY"
         return "null"
 
