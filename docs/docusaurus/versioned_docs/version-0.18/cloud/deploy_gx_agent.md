@@ -101,7 +101,7 @@ You can deploy the GX Agent in any deployment environment in which you create Ku
    ```bash title="Terminal input"
    docker build -t myorg/agent
    ```
-6. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
+6. Optional. Run `docker ps` or open Docker Desktop to confirm the GX Agent is running.
 
 </TabItem>
 <TabItem value="kubernetes">
@@ -148,7 +148,7 @@ You can deploy the GX Agent in any deployment environment in which you create Ku
    ```sh title="Terminal input"
    kubectl apply -f deployment.yaml
    ```
-6. Optional. Run the following command to confirm the agent is running:
+6. Optional. Run the following command to confirm the GX Agent is running:
 
    ```sh title="Terminal input"
    kubectl logs -l app=gx-agent
