@@ -65,7 +65,6 @@ from great_expectations.core.factory import (
     SuiteFactory,
     ValidationFactory,
 )
-from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
@@ -117,7 +116,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
     DataAssistantDispatcher,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -1026,72 +1025,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    # 2023-08-17 - Chetan - This method is only kept around to support profile_data_asset (a V2 method) and V2-specific tests
-    #                       We should delete this as soon as possible as it has been deprecated in v13.
-    def _get_batch_v2(
-        self,
-        batch_kwargs: Union[dict, BatchKwargs],
-        expectation_suite_name: Union[str, ExpectationSuite],
-        data_asset_type=None,
-        batch_parameters=None,
-    ) -> DataAsset:
-        """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
-        batch_parameters are included, they will be available as attributes of the batch.
-        Args:
-            batch_kwargs: the batch_kwargs to use; must include a datasource key
-            expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
-            data_asset_type: the type of data_asset to build, with associated expectation implementations. This can
-                generally be inferred from the datasource.
-            batch_parameters: optional parameters to store as the reference description of the batch. They should
-                reflect parameters that would provide the passed BatchKwargs.
-        Returns:
-            DataAsset
-        """
-        if isinstance(batch_kwargs, dict):
-            batch_kwargs = BatchKwargs(batch_kwargs)
-
-        if not isinstance(batch_kwargs, BatchKwargs):
-            raise gx_exceptions.BatchKwargsError(
-                "BatchKwargs must be a BatchKwargs object or dictionary."
-            )
-
-        if not isinstance(
-            expectation_suite_name, (ExpectationSuite, ExpectationSuiteIdentifier, str)
-        ):
-            raise gx_exceptions.DataContextError(
-                "expectation_suite_name must be an ExpectationSuite, "
-                "ExpectationSuiteIdentifier or string."
-            )
-
-        if isinstance(expectation_suite_name, ExpectationSuite):
-            expectation_suite = expectation_suite_name
-        elif isinstance(expectation_suite_name, ExpectationSuiteIdentifier):
-            expectation_suite = self.get_expectation_suite(expectation_suite_name.name)
-        else:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
-        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
-        datasource: LegacyDatasource | BaseDatasource | FluentDatasource
-        if isinstance(datasource_name, str):
-            datasource = self.get_datasource(datasource_name)
-        else:
-            datasource = self.get_datasource(None)  #  type: ignore[arg-type]
-        assert not isinstance(
-            datasource, FluentDatasource
-        ), "Fluent Datasource cannot be built from batch_kwargs"
-        batch = datasource.get_batch(  #  type: ignore[union-attr]
-            batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
-        )
-        if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")
-
-        validator = BridgeValidator(
-            batch=batch,
-            expectation_suite=expectation_suite,
-            expectation_engine=data_asset_type,
-        )
-        return validator.get_dataset()
-
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
         stores = []
@@ -1756,8 +1689,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_id: Optional[str] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_id: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
@@ -1823,40 +1756,70 @@ class AbstractDataContext(ConfigPeer, ABC):
                 include_rendered_content=include_rendered_content
             )
         )
+        expectation_suite = self._get_expectation_suite_from_inputs(
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            create_expectation_suite_with_name=create_expectation_suite_with_name,
+            expectation_suite_id=expectation_suite_id,
+            include_rendered_content=include_rendered_content,
+        )
+        batch_list = self._get_batch_list_from_inputs(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch=batch,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            batch_request_list=batch_request_list,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            partitioner_method=partitioner_method,
+            partitioner_kwargs=partitioner_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+        return self.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+            include_rendered_content=include_rendered_content,
+        )
 
-        if (
-            sum(
-                bool(x)
-                for x in [
-                    expectation_suite is not None,
-                    expectation_suite_name is not None,
-                    create_expectation_suite_with_name is not None,
-                    expectation_suite_id is not None,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError(
-                "No more than one of expectation_suite_name, "
-                f"{'expectation_suite_id, ' if expectation_suite_id else ''}"
-                "expectation_suite, or create_expectation_suite_with_name can be specified"
-            )
-
-        if expectation_suite_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                include_rendered_content=include_rendered_content,
-                id=expectation_suite_id,
-            )
-        if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(
-                expectation_suite_name,
-                include_rendered_content=include_rendered_content,
-            )
-        if create_expectation_suite_with_name is not None:
-            expectation_suite = self.add_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name,
-            )
-
+    def _get_batch_list_from_inputs(  # noqa: PLR0913
+        self,
+        datasource_name: str | None,
+        data_connector_name: str | None,
+        data_asset_name: str | None,
+        batch: Batch | None,
+        batch_list: List[Batch] | None,
+        batch_request: BatchRequestBase | FluentBatchRequest | None,
+        batch_request_list: List[BatchRequestBase] | None,
+        batch_data: Any,
+        data_connector_query: Union[IDDict, dict] | None,
+        batch_identifiers: dict | None,
+        limit: int | None,
+        index: int | list | tuple | slice | str | None,
+        custom_filter_function: Callable | None,
+        sampling_method: str | None,
+        sampling_kwargs: dict | None,
+        partitioner_method: str | None,
+        partitioner_kwargs: dict | None,
+        runtime_parameters: dict | None,
+        query: str | None,
+        path: str | None,
+        batch_filter_parameters: dict | None,
+        batch_spec_passthrough: dict | None,
+        **kwargs,
+    ) -> List[Batch]:
         if (
             sum(
                 bool(x)
@@ -1874,52 +1837,106 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if batch_list:
-            pass
+            return batch_list
 
-        elif batch:
-            batch_list = [batch]
+        if batch:
+            return [batch]
 
-        else:
-            batch_list = []
-            if not batch_request_list:
-                batch_request_list = [batch_request]  # type: ignore[list-item]
-
-            for batch_request in batch_request_list:
-                batch_list.extend(
-                    self.get_batch_list(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_request=batch_request,
-                        batch_data=batch_data,
-                        data_connector_query=data_connector_query,
-                        batch_identifiers=batch_identifiers,
-                        limit=limit,
-                        index=index,
-                        custom_filter_function=custom_filter_function,
-                        sampling_method=sampling_method,
-                        sampling_kwargs=sampling_kwargs,
-                        partitioner_method=partitioner_method,
-                        partitioner_kwargs=partitioner_kwargs,
-                        runtime_parameters=runtime_parameters,
-                        query=query,
-                        path=path,
-                        batch_filter_parameters=batch_filter_parameters,
-                        batch_spec_passthrough=batch_spec_passthrough,
-                        **kwargs,
-                    )
+        computed_batch_list: List[Batch] = []
+        if not batch_request_list:
+            # batch_request could actually be None here since we do explicit None checks in the
+            # sum check above while here we do a truthy check.
+            batch_request_list = [batch_request]  # type: ignore[list-item]
+        for batch_request in batch_request_list:
+            computed_batch_list.extend(
+                self.get_batch_list(
+                    datasource_name=datasource_name,
+                    data_connector_name=data_connector_name,
+                    data_asset_name=data_asset_name,
+                    batch_request=batch_request,
+                    batch_data=batch_data,
+                    data_connector_query=data_connector_query,
+                    batch_identifiers=batch_identifiers,
+                    limit=limit,
+                    index=index,
+                    custom_filter_function=custom_filter_function,
+                    sampling_method=sampling_method,
+                    sampling_kwargs=sampling_kwargs,
+                    partitioner_method=partitioner_method,
+                    partitioner_kwargs=partitioner_kwargs,
+                    runtime_parameters=runtime_parameters,
+                    query=query,
+                    path=path,
+                    batch_filter_parameters=batch_filter_parameters,
+                    batch_spec_passthrough=batch_spec_passthrough,
+                    **kwargs,
                 )
+            )
+        return computed_batch_list
 
-        return self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,  # type: ignore[arg-type]
-            batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
-        )
+    def _get_expectation_suite_from_inputs(  # noqa: PLR0913
+        self,
+        expectation_suite: ExpectationSuite | None = None,
+        expectation_suite_name: str | None = None,
+        create_expectation_suite_with_name: str | None = None,
+        expectation_suite_id: str | None = None,
+        include_rendered_content: bool | None = None,
+    ) -> ExpectationSuite | None:
+        """Get an expectation suite from optional inputs. Also validates inputs.
+
+        Args:
+            expectation_suite: An ExpectationSuite object
+            expectation_suite_name: The name of the ExpectationSuite to retrieve from the DataContext
+            create_expectation_suite_with_name: Creates a new ExpectationSuite with the provided name
+            expectation_suite_id: The identifier of the ExpectationSuite to retrieve from the DataContext
+                (can be used in place of `expectation_suite_name`)
+            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
+
+        Returns:
+            An ExpectationSuite instance
+
+        Raises:
+            ValueError if the inputs are not valid
+
+        """
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                    expectation_suite_id is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                "No more than one of expectation_suite_name, "
+                f"{'expectation_suite_id, ' if expectation_suite_id else ''}"
+                "expectation_suite, or create_expectation_suite_with_name can be specified"
+            )
+        if expectation_suite_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                include_rendered_content=include_rendered_content,
+                id=expectation_suite_id,
+            )
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(
+                expectation_suite_name,
+                include_rendered_content=include_rendered_content,
+            )
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.add_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name,
+            )
+
+        return expectation_suite
 
     # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
-        expectation_suite: ExpectationSuite,
+        expectation_suite: ExpectationSuite | None,
         batch_list: Sequence[Union[Batch, FluentBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],

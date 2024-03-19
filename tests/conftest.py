@@ -79,7 +79,6 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
-from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
@@ -103,7 +102,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
-    get_dataset,
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
@@ -313,19 +311,7 @@ def pytest_addoption(parser):
 
 def build_test_backends_list_v2_api(metafunc):
     test_backend_names: List[str] = build_test_backends_list_v3_api(metafunc)
-    backend_name_class_name_map: Dict[str, str] = {
-        "pandas": "PandasDataset",
-        "spark": "SparkDFDataset",
-    }
-    backend_name: str
-    """
-    In order to get the support for the "trino" SQLAlchemy dialect as well as receive the benefits of other latest
-    capabilities, users are encouraged to upgrade their Great Expectations installation to the latest version.
-    """
-    return [
-        (backend_name_class_name_map.get(backend_name) or backend_name)
-        for backend_name in test_backend_names
-    ]
+    return test_backend_names
 
 
 def build_test_backends_list_v3_api(metafunc):
@@ -539,9 +525,6 @@ def sa(test_backends):
 @pytest.mark.order(index=2)
 @pytest.fixture
 def spark_session(test_backends) -> pyspark.SparkSession:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:
@@ -634,9 +617,6 @@ def spark_df_taxi_data_schema(spark_session):
 @pytest.mark.order(index=3)
 @pytest.fixture
 def spark_session_v012(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     try:
         import pyspark  # noqa: F401
         from pyspark.sql import SparkSession  # noqa: F401
@@ -732,120 +712,6 @@ def numeric_high_card_dict():
     return data
 
 
-@pytest.fixture
-def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
-    schemas = {
-        "pandas": {
-            "norm_0_1": "float64",
-        },
-        "postgresql": {
-            # "norm_0_1": "DOUBLE_PRECISION",
-            "norm_0_1": "NUMERIC",
-        },
-        "sqlite": {
-            "norm_0_1": "FLOAT",
-        },
-        "mysql": {
-            "norm_0_1": "DOUBLE",
-        },
-        "mssql": {
-            "norm_0_1": "FLOAT",
-        },
-        "spark": {
-            "norm_0_1": "FloatType",
-        },
-    }
-    return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
-
-
-@pytest.fixture
-def non_numeric_high_card_dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-
-    # fmt: off
-    data = {
-        "highcardnonnum": [
-            "CZVYSnQhHhoti8mQ66XbDuIjE5FMeIHb", "cPWAg2MJjh8fkRRU1B9aD8vWq3P8KTxJ", "4tehKwWiCDpuOmTPRYYqTqM7TvEa8Zi7", "ZvlAnCGiGfkKgQoNrhnnyrjmU7sLsUZz", "AaqMhdYukVdexTk6LlWvzXYXTp5upPuf", "ZSKmXUB35K14khHGyjYtuCHuI8yeM7yR", "F1cwKp4HsCN2s2kXQGR5RUa3WAcibCq2", "coaX8bSHoVZ8FP8SuQ57SFbrvpRHcibq", "3IzmbSJF525qtn7O4AvfKONnz7eFgnyU", "gLCtw7435gaR532PNFVCtvk14lNJpZXv",
-            "hNyjMYZkVlOKRjhg8cKymU5Bvnh0MK5R", "IqKC2auGTNehP8y24HzDQOdt9oysgFyx", "TePy034aBKlNeAmcJmKJ4p1yF7EUYEOg", "cIfDv6ieTAobe84P84InzDKrJrccmqbq", "m1979gfI6lVF9ijJA245bchYFd1EaMap", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "7wcR161jyKYhFLEZkhFqSXLwXW46I5x8", "IpmNsUFgbbVnL0ljJZOBHnTV0FKARwSn", "hsA4btHJg6Gq1jwOuOc3pl2UPB5QUwZg", "vwZyG0jGUys3HQdUiOocIbzhUdUugwKX",
-            "rTc9h94WjOXN5Wg40DyatFEFfp9mgWj6", "p1f20s14ZJGUTIBUNeBmJEkWKlwoyqjA", "VzgAIYNKHA0APN0oZtzMAfmbCzJenswy", "IO7BqR3iS136YMlLCEo6W3jKNOVJIlLG", "eTEyhiRuyEcTnHThi1W6yi1mxUjq8TEp", "4OHPKQgk3sPPYpKWcEWUtNZ0jv00UuPU", "ZJCstyyUvTR2gwSM6FLgkXYDwG54qo8u", "nGQsvDAzuL5Yc2XpqoG5P7RhpiTpJp8H", "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "CP22IFHDX1maoSjTEdtBfrMHWQKACGDB",
-            "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hGwZQW7ao9HqNV2xAovuMBdyafNDE8q6", "OJmDHbqP1wzarsaSwCphsqvdy5SnTQMT", "JQbXIcgwUhttfPIGB7VGGfL2KiElabrO", "eTTNDggfPpRC22SEVNo9W0BPEWO4Cr57", "GW2JuUJmuCebia7RUiCNl2BTjukIzZWj", "oVFAvQEKmRTLBqdCuPoJNvzPvQ7UArWC", "zeMHFFKLr5j4DIFxRQ7jHWCMClrP3LmJ", "eECcArV5TZRftL6ZWaUDO6D2l3HiZj1Y", "xLNJXaCkOLrD6E0kgGaFOFwctNXjrd77",
-            "1f8KOCkOvehXYvN8PKv1Ch6dzOjRAr01", "uVF6HJgjVmoipK1sEpVOFJYuv2TXXsOG", "agIk8H2nFa0K27IFr0VM2RNp6saihYI3", "cAUnysbb8SBLSTr0H7cA1fmnpaL80e0N", "fM1IzD5USx4lMYi6bqPCEZjd2aP7G9vv", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "i65d8jqET5FsVw9t5BwAvBjkEJI6eUMj", "HbT1b7DQL7n7ZEt2FsKHIggycT1XIYd8", "938eC0iGMSqZNlqgDNG9YVE7t4izO2Ev", "PyZetp4izgE4ymPcUXyImF5mm7I6zbta",
-            "FaXA6YSUrvSnW7quAimLqQMNrU1Dxyjs", "PisVMvI9RsqQw21B7qYcKkRo5c8C2AKd", "eSQIxFqyYVf55UMzMEZrotPO74i3Sh03", "2b74DhJ6YFHrAkrjK4tvvKkYUKll44bR", "3svDRnrELyAsC69Phpnl2Os89856tFBJ", "ZcSGN9YYNHnHjUp0SktWoZI7JDmvRTTN", "m9eDkZ5oZEOFP3HUfaZEirecv2UhQ1B1", "wZTwJmMX5Q58DhDdmScdigTSyUUC04sO", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "KAuFgcmRKQPIIqGMAQQPfjyC1VXt40vs",
-            "0S4iueoqKNjvS55O57BdY3DbfwhIDwKc", "ywbQfOLkvXEUzZISZp1cpwCenrrNPjfF", "Mayxk8JkV3Z6aROtnsKyqwVK5exiJa8i", "pXqIRP5fQzbDtj1xFqgJey6dyFOJ1YiU", "6Ba6RSM56x4MIaJ2wChQ3trBVOw1SWGM", "puqzOpRJyNVAwH2vLjVCL3uuggxO5aoB", "jOI4E43wA3lYBWbV0nMxqix885Tye1Pf", "YgTTYpRDrxU1dMKZeVHYzYNovH2mWGB7", "24yYfUg1ATvfI1PW79ytsEqHWJHI69wQ", "mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ItvI4l02oAIZEd5cPtDf4OnyBazji0PL", "DW4oLNP49MNNENFoFf7jDTI04xdvCiWg", "vrOZrkAS9MCGOqzhCv4cmr5AGddVBShU", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "R74JT4EEhh3Xeu5tbx8bZFkXZRhx6HUn", "bd9yxS6b1QrKXuT4irY4kpjSyLmKZmx6", "UMdFQNSiJZtLK3jxBETZrINDKcRqRd0c", "He7xIY2BMNZ7vSO47KfKoYskVJeeedI7", "G8PqO0ADoKfDPsMT1K0uOrYf1AtwlTSR",
-            "hqfmEBNCA7qgntcQVqB7beBt0hB7eaxF", "mlYdlfei13P6JrT7ZbSZdsudhE24aPYr", "gUTUoH9LycaItbwLZkK9qf0xbRDgOMN4", "xw3AuIPyHYq59Qbo5QkQnECSqd2UCvLo", "kbfzRyRqGZ9WvmTdYKDjyds6EK4fYCyx", "7AOZ3o2egl6aU1zOrS8CVwXYZMI8NTPg", "Wkh43H7t95kRb9oOMjTSqC7163SrI4rU", "x586wCHsLsOaXl3F9cYeaROwdFc2pbU1", "oOd7GdoPn4qqfAeFj2Z3ddyFdmkuPznh", "suns0vGgaMzasYpwDEEof2Ktovy0o4os",
-            "of6W1csCTCBMBXli4a6cEmGZ9EFIOFRC", "mmTiWVje9SotwPgmRxrGrNeI9DssAaCj", "pIX0vhOzql5c6Z6NpLbzc8MvYiONyT54", "nvyCo3MkIK4tS6rkuL4Yw1RgGKwhm4c2", "prQGAOvQbB8fQIrp8xaLXmGwcxDcCnqt", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "mty9rQJBeTsBQ7ra8vWRbBaWulzhWRSG", "JL38Vw7yERPC4gBplBaixlbpDg8V7gC6", "MylTvGl5L1tzosEcgGCQPjIRN6bCUwtI", "hmr0LNyYObqe5sURs408IhRb50Lnek5K",
-            "CZVYSnQhHhoti8mQ66XbDuIjE5FMeIHb", "cPWAg2MJjh8fkRRU1B9aD8vWq3P8KTxJ", "4tehKwWiCDpuOmTPRYYqTqM7TvEa8Zi7", "ZvlAnCGiGfkKgQoNrhnnyrjmU7sLsUZz", "AaqMhdYukVdexTk6LlWvzXYXTp5upPuf", "ZSKmXUB35K14khHGyjYtuCHuI8yeM7yR", "F1cwKp4HsCN2s2kXQGR5RUa3WAcibCq2", "coaX8bSHoVZ8FP8SuQ57SFbrvpRHcibq", "3IzmbSJF525qtn7O4AvfKONnz7eFgnyU", "gLCtw7435gaR532PNFVCtvk14lNJpZXv",
-            "hNyjMYZkVlOKRjhg8cKymU5Bvnh0MK5R", "IqKC2auGTNehP8y24HzDQOdt9oysgFyx", "TePy034aBKlNeAmcJmKJ4p1yF7EUYEOg", "cIfDv6ieTAobe84P84InzDKrJrccmqbq", "m1979gfI6lVF9ijJA245bchYFd1EaMap", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "7wcR161jyKYhFLEZkhFqSXLwXW46I5x8", "IpmNsUFgbbVnL0ljJZOBHnTV0FKARwSn", "hsA4btHJg6Gq1jwOuOc3pl2UPB5QUwZg", "vwZyG0jGUys3HQdUiOocIbzhUdUugwKX",
-            "rTc9h94WjOXN5Wg40DyatFEFfp9mgWj6", "p1f20s14ZJGUTIBUNeBmJEkWKlwoyqjA", "VzgAIYNKHA0APN0oZtzMAfmbCzJenswy", "IO7BqR3iS136YMlLCEo6W3jKNOVJIlLG", "eTEyhiRuyEcTnHThi1W6yi1mxUjq8TEp", "4OHPKQgk3sPPYpKWcEWUtNZ0jv00UuPU", "ZJCstyyUvTR2gwSM6FLgkXYDwG54qo8u", "nGQsvDAzuL5Yc2XpqoG5P7RhpiTpJp8H", "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "CP22IFHDX1maoSjTEdtBfrMHWQKACGDB",
-            "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hGwZQW7ao9HqNV2xAovuMBdyafNDE8q6", "OJmDHbqP1wzarsaSwCphsqvdy5SnTQMT", "JQbXIcgwUhttfPIGB7VGGfL2KiElabrO", "eTTNDggfPpRC22SEVNo9W0BPEWO4Cr57", "GW2JuUJmuCebia7RUiCNl2BTjukIzZWj", "oVFAvQEKmRTLBqdCuPoJNvzPvQ7UArWC", "zeMHFFKLr5j4DIFxRQ7jHWCMClrP3LmJ", "eECcArV5TZRftL6ZWaUDO6D2l3HiZj1Y", "xLNJXaCkOLrD6E0kgGaFOFwctNXjrd77",
-            "1f8KOCkOvehXYvN8PKv1Ch6dzOjRAr01", "uVF6HJgjVmoipK1sEpVOFJYuv2TXXsOG", "agIk8H2nFa0K27IFr0VM2RNp6saihYI3", "cAUnysbb8SBLSTr0H7cA1fmnpaL80e0N", "fM1IzD5USx4lMYi6bqPCEZjd2aP7G9vv", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "i65d8jqET5FsVw9t5BwAvBjkEJI6eUMj", "HbT1b7DQL7n7ZEt2FsKHIggycT1XIYd8", "938eC0iGMSqZNlqgDNG9YVE7t4izO2Ev", "PyZetp4izgE4ymPcUXyImF5mm7I6zbta",
-            "FaXA6YSUrvSnW7quAimLqQMNrU1Dxyjs", "PisVMvI9RsqQw21B7qYcKkRo5c8C2AKd", "eSQIxFqyYVf55UMzMEZrotPO74i3Sh03", "2b74DhJ6YFHrAkrjK4tvvKkYUKll44bR", "3svDRnrELyAsC69Phpnl2Os89856tFBJ", "ZcSGN9YYNHnHjUp0SktWoZI7JDmvRTTN", "m9eDkZ5oZEOFP3HUfaZEirecv2UhQ1B1", "wZTwJmMX5Q58DhDdmScdigTSyUUC04sO", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "KAuFgcmRKQPIIqGMAQQPfjyC1VXt40vs",
-            "0S4iueoqKNjvS55O57BdY3DbfwhIDwKc", "ywbQfOLkvXEUzZISZp1cpwCenrrNPjfF", "Mayxk8JkV3Z6aROtnsKyqwVK5exiJa8i", "pXqIRP5fQzbDtj1xFqgJey6dyFOJ1YiU", "6Ba6RSM56x4MIaJ2wChQ3trBVOw1SWGM", "puqzOpRJyNVAwH2vLjVCL3uuggxO5aoB", "jOI4E43wA3lYBWbV0nMxqix885Tye1Pf", "YgTTYpRDrxU1dMKZeVHYzYNovH2mWGB7", "24yYfUg1ATvfI1PW79ytsEqHWJHI69wQ", "mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ItvI4l02oAIZEd5cPtDf4OnyBazji0PL", "DW4oLNP49MNNENFoFf7jDTI04xdvCiWg", "vrOZrkAS9MCGOqzhCv4cmr5AGddVBShU", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "R74JT4EEhh3Xeu5tbx8bZFkXZRhx6HUn", "bd9yxS6b1QrKXuT4irY4kpjSyLmKZmx6", "UMdFQNSiJZtLK3jxBETZrINDKcRqRd0c", "He7xIY2BMNZ7vSO47KfKoYskVJeeedI7", "G8PqO0ADoKfDPsMT1K0uOrYf1AtwlTSR",
-            "hqfmEBNCA7qgntcQVqB7beBt0hB7eaxF", "mlYdlfei13P6JrT7ZbSZdsudhE24aPYr", "gUTUoH9LycaItbwLZkK9qf0xbRDgOMN4", "xw3AuIPyHYq59Qbo5QkQnECSqd2UCvLo", "kbfzRyRqGZ9WvmTdYKDjyds6EK4fYCyx", "7AOZ3o2egl6aU1zOrS8CVwXYZMI8NTPg", "Wkh43H7t95kRb9oOMjTSqC7163SrI4rU", "x586wCHsLsOaXl3F9cYeaROwdFc2pbU1", "oOd7GdoPn4qqfAeFj2Z3ddyFdmkuPznh", "suns0vGgaMzasYpwDEEof2Ktovy0o4os",
-            "of6W1csCTCBMBXli4a6cEmGZ9EFIOFRC", "mmTiWVje9SotwPgmRxrGrNeI9DssAaCj", "pIX0vhOzql5c6Z6NpLbzc8MvYiONyT54", "nvyCo3MkIK4tS6rkuL4Yw1RgGKwhm4c2", "prQGAOvQbB8fQIrp8xaLXmGwcxDcCnqt", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "mty9rQJBeTsBQ7ra8vWRbBaWulzhWRSG", "JL38Vw7yERPC4gBplBaixlbpDg8V7gC6", "MylTvGl5L1tzosEcgGCQPjIRN6bCUwtI", "hmr0LNyYObqe5sURs408IhRb50Lnek5K",
-        ],
-        # Built from highcardnonnum using the following:
-        # vals = pd.Series(data["highcardnonnum"])
-        # sample_vals = vals.sample(n=10, random_state=42)
-        # weights = np.random.RandomState(42).rand(10)
-        # weights = weights / np.sum(weights)
-        # new_vals = sample_vals.sample(n=200, weights=weights, replace=True, random_state=11)
-        "medcardnonnum": [
-            "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NhTsracusfp5V6zVeWqLZnychDl7jjO4",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP",
-            "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ",
-            "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "NhTsracusfp5V6zVeWqLZnychDl7jjO4",
-            "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "NhTsracusfp5V6zVeWqLZnychDl7jjO4",
-            "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "mS2AVcLFp6i36sX7yAUrdfM0g0RB2X4D",
-            "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk",
-            "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer",
-            "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "NfX4KfEompMbbKloFq8NQpdXtk5PjaPe", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk",
-            "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J",
-            "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "NhTsracusfp5V6zVeWqLZnychDl7jjO4",
-            "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "NhTsracusfp5V6zVeWqLZnychDl7jjO4",
-            "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "hW0kFZ6ijfciJWN4vvgcFa6MWv8cTeVk", "T7EUE54HUhyJ9Hnxv1pKY0Bmg42qiggP", "NhTsracusfp5V6zVeWqLZnychDl7jjO4", "k8B9KCXhaQb6Q82zFbAzOESAtDxK174J", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "2K8njWnvuq1u6tkzreNhxTEyO8PTeWer", "ajcLVizD2vwZlmmGKyXYki03SWn7fnt3", "oRnY5jDWFw2KZRYLh6ihFd021ggy4UxJ",
-        ],
-    }
-    # fmt: on
-    schemas = {
-        "pandas": {
-            "highcardnonnum": "str",
-            "medcardnonnum": "str",
-        },
-        "postgresql": {
-            "highcardnonnum": "TEXT",
-            "medcardnonnum": "TEXT",
-        },
-        "sqlite": {
-            "highcardnonnum": "VARCHAR",
-            "medcardnonnum": "VARCHAR",
-        },
-        "mysql": {
-            "highcardnonnum": "TEXT",
-            "medcardnonnum": "TEXT",
-        },
-        "mssql": {
-            "highcardnonnum": "VARCHAR",
-            "medcardnonnum": "VARCHAR",
-        },
-        "spark": {
-            "highcardnonnum": "StringType",
-            "medcardnonnum": "StringType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)
-
-
 def dataset_sample_data(test_backend):
     # No infinities for mysql
     if test_backend == "mysql":
@@ -877,21 +743,6 @@ def dataset_sample_data(test_backend):
         },
     }
     return data, schemas
-
-
-@pytest.fixture
-def dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-    data, schemas = dataset_sample_data(test_backend)
-    return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.fixture
-def pandas_dataset():
-    test_backend = "PandasDataset"
-    data, schemas = dataset_sample_data(test_backend)
-    return get_dataset(test_backend, data, schemas=schemas)
 
 
 @pytest.fixture
@@ -2826,7 +2677,7 @@ def filesystem_csv_2(tmp_path):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    toy_dataset = pd.DataFrame({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
     assert os.path.isabs(base_dir)  # noqa: PTH117
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))  # noqa: PTH118, PTH113
@@ -2841,10 +2692,10 @@ def filesystem_csv_3(tmp_path):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset({"x": [1, 2, 3]})
+    toy_dataset = pd.DataFrame({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
 
-    toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
+    toy_dataset_2 = pd.DataFrame({"y": [1, 2, 3]})
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)  # noqa: PTH118
 
     return base_dir
@@ -2857,7 +2708,7 @@ def filesystem_csv_4(tmp_path):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset(
+    toy_dataset = pd.DataFrame(
         {
             "x": [1, 2, 3],
             "y": [1, 2, 3],

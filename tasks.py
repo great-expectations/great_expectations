@@ -55,7 +55,7 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(  # noqa: PLR0913
+def sort(
     ctx: Context,
     path: str = ".",
     check: bool = False,
@@ -95,7 +95,7 @@ def sort(  # noqa: PLR0913
         "pty": _PTY_HELP_DESC,
     }
 )
-def fmt(  # noqa: PLR0913
+def fmt(
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -126,7 +126,7 @@ def fmt(  # noqa: PLR0913
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(  # noqa: PLR0913
+def lint(
     ctx: Context,
     path: str = ".",
     fmt_: bool = True,
@@ -238,7 +238,7 @@ def marker_coverage(
         " Default to version set in pyproject.toml",
     },
 )
-def type_check(  # noqa: C901, PLR0912, PLR0913
+def type_check(  # noqa: C901, PLR0912
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -341,7 +341,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(  # noqa: PLR0913
+def tests(
     ctx: Context,
     unit: bool = True,
     ignore_markers: bool = False,
@@ -414,7 +414,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "target": "Set the target build stage to build.",
     }
 )
-def docker(  # noqa: PLR0913
+def docker(
     ctx: Context,
     name: str = "gx38local",
     tag: str = "latest",
@@ -604,6 +604,7 @@ def api_docs(ctx: Context):
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
         "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
         "lint": "Run the linter",
+        "clear": "Delete the docs' generated assets, caches, and build artifacts.",
     },
 )
 def docs(
@@ -612,6 +613,7 @@ def docs(
     start: bool = False,
     lint: bool = False,
     version: str | None = None,
+    clear: bool = False,
 ):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
     from packaging.version import parse as parse_version
@@ -634,20 +636,21 @@ def docs(
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
         docs_builder.create_version(version=parse_version(version))
-    else:  # noqa: PLR5501
-        if start:
-            ctx.run(" ".join(["yarn start"]), echo=True)
-        else:
-            docs_builder = DocsBuilder(ctx, docusaurus_dir)
-            print("Making sure docusaurus dependencies are installed.")
-            ctx.run(" ".join(["yarn install"]), echo=True)
+    elif start:
+        ctx.run(" ".join(["yarn start"]), echo=True)
+    elif clear:
+        ctx.run(" ".join(["yarn", "clear"]), echo=True)
+    else:
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        print("Making sure docusaurus dependencies are installed.")
+        ctx.run(" ".join(["yarn install"]), echo=True)
 
-            if build:
-                print("Running build_docs from:", docusaurus_dir)
-                docs_builder.build_docs()
-            else:
-                print("Running build_docs_locally from:", docusaurus_dir)
-                docs_builder.build_docs_locally()
+        if build:
+            print("Running build_docs from:", docusaurus_dir)
+            docs_builder.build_docs()
+        else:
+            print("Running build_docs_locally from:", docusaurus_dir)
+            docs_builder.build_docs_locally()
 
     os.chdir(old_cwd)
 
@@ -917,7 +920,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
-def deps(  # noqa: PLR0913
+def deps(
     ctx: Context,
     markers: list[str],
     requirements_dev: list[str],
@@ -1001,7 +1004,7 @@ def docs_snippet_tests(
     help={"pty": _PTY_HELP_DESC},
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(  # noqa: PLR0913
+def ci_tests(
     ctx: Context,
     marker: str,
     up_services: bool = False,

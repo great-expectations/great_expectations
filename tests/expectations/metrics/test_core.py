@@ -4529,7 +4529,7 @@ def test_value_counts_metric_sa(sa):
     ).equals(metrics[desired_metric_b.id])
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_value_counts_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -4569,7 +4569,7 @@ def test_value_counts_metric_spark(spark_session):
     assert pd.Series(index=[], data=[]).equals(metrics[desired_metric.id])
 
 
-@pytest.mark.big
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "dataframe",
     [
@@ -6209,7 +6209,7 @@ def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
     assert metrics[unexpected_values_metric.id] == [{"a": 1, "c": 2}, {"a": 1, "c": 2}]
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_map_compound_columns_unique_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,

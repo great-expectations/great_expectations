@@ -1111,6 +1111,9 @@ class ExpectationSuite(SerializableDictDot):
             )
 
 
+_TExpectationSuite = TypeVar("_TExpectationSuite", ExpectationSuite, dict)
+
+
 class ExpectationSuiteSchema(Schema):
     name = fields.Str()
     id = fields.UUID(required=False, allow_none=True)
@@ -1122,33 +1125,37 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
-    def clean_empty(self, data):  # noqa: C901
+    def clean_empty(self, data: _TExpectationSuite) -> _TExpectationSuite:
         if isinstance(data, ExpectationSuite):
-            if not hasattr(data, "evaluation_parameters"):
-                pass
-            elif len(data.evaluation_parameters) == 0:
-                del data.evaluation_parameters
-
-            if not hasattr(data, "meta"):
-                pass
-            elif data.meta is None or data.meta == []:
-                pass
-            elif len(data.meta) == 0:
-                del data.meta
+            # We are hitting this TypeVar narrowing mypy bug: https://github.com/python/mypy/issues/10817
+            data = self._clean_empty_suite(data)  # type: ignore[assignment]
         elif isinstance(data, dict):
-            if not data.get("evaluation_parameters"):
-                pass
-            elif len(data.get("evaluation_parameters")) == 0:
-                data.pop("evaluation_parameters")
+            data = self._clean_empty_dict(data)
+        return data
 
-            if not data.get("meta"):
-                pass
-            elif len(data.get("meta")) == 0:
-                data.pop("meta")
+    @staticmethod
+    def _clean_empty_suite(data: ExpectationSuite) -> ExpectationSuite:
+        if not hasattr(data, "evaluation_parameters"):
+            pass
+        elif len(data.evaluation_parameters) == 0:
+            del data.evaluation_parameters
 
-            if "notes" in data and not data.get("notes"):
-                data.pop("notes")
+        if not hasattr(data, "meta"):
+            pass
+        elif data.meta is None or data.meta == []:
+            pass
+        elif len(data.meta) == 0:
+            del data.meta
+        return data
 
+    @staticmethod
+    def _clean_empty_dict(data: dict) -> dict:
+        if "evaluation_parameters" in data and len(data["evaluation_parameters"]) == 0:
+            data.pop("evaluation_parameters")
+        if "meta" in data and len(data["meta"]) == 0:
+            data.pop("meta")
+        if "notes" in data and not data.get("notes"):
+            data.pop("notes")
         return data
 
     # noinspection PyUnusedLocal
