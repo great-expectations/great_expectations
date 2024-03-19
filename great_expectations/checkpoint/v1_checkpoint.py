@@ -86,8 +86,9 @@ class Checkpoint(BaseModel):
         if isinstance(validation_definitions[0], dict):
             validation_config_store = project_manager.get_validation_config_store()
             identifier_bundles = [
-                _IdentifierBundle(**v) for v in validation_definitions
-            ]  # type: ignore[arg-type] # All validation configs are dicts if the first one is
+                _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
+                for v in validation_definitions
+            ]
             return cls._deserialize_identifier_bundles_to_validation_configs(
                 identifier_bundles=identifier_bundles, store=validation_config_store
             )
