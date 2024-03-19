@@ -17,7 +17,11 @@ expectation = suite.add_expectation(
 )
 
 # highlight-start
+# <snippet name="core/create_expectations/expectations/_examples/edit_an_expectation.py modify the expectation">
 expectation.value_set = [1, 2, 3, 4, 5]
+# </snippet>
+# <snippet name="core/create_expectations/expectations/_examples/edit_an_expectation.py save the expectation">
 expectation.save()
+# </snippet>
 # highlight-end
 # </snippet>
