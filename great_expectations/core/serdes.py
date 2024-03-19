@@ -8,3 +8,9 @@ from great_expectations.compatibility.pydantic import (
 class _IdentifierBundle(BaseModel):
     name: str
     id: Union[str, None]
+
+
+class _EncodedValidationData(BaseModel):
+    datasource: _IdentifierBundle
+    asset: _IdentifierBundle
+    batch_definition: _IdentifierBundle

@@ -40,6 +40,7 @@ from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -1109,6 +1110,16 @@ class ExpectationSuite(SerializableDictDot):
                     failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
                 )
             )
+
+    def serialize(self) -> _IdentifierBundle:
+        from great_expectations import project_manager
+
+        if not self.id:
+            expectation_store = project_manager.get_expectations_store()
+            key = expectation_store.get_key(name=self.name, id=None)
+            expectation_store.add(key=key, value=self)
+
+        return _IdentifierBundle(name=self.name, id=self.id)
 
 
 _TExpectationSuite = TypeVar("_TExpectationSuite", ExpectationSuite, dict)

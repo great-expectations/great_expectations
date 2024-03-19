@@ -7,6 +7,8 @@ from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.render.renderer.renderer import Renderer
@@ -16,15 +18,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_config_store import (
         ValidationConfigStore,
     )
-
-
-def _encode_validation_config(validation: ValidationConfig) -> dict:
-    if not validation.id:
-        validation_config_store = project_manager.get_validation_config_store()
-        key = validation_config_store.get_key(name=validation.name, id=None)
-        validation_config_store.add(key=key, value=validation)
-
-    return _IdentifierBundle(name=validation.name, id=validation.id)
 
 
 class Checkpoint(BaseModel):
@@ -78,16 +71,16 @@ class Checkpoint(BaseModel):
                 }
         """
         json_encoders = {
-            ValidationConfig: lambda v: _encode_validation_config(v),
+            ValidationConfig: lambda v: v.serialize(),
             Renderer: lambda r: r.serialize(),
+            ExpectationSuite: lambda e: e.serialize(),
+            BatchConfig: lambda b: b.serialize(),
         }
 
     @validator("validations", pre=True)
     def _validate_validations(
         cls, validations: list[ValidationConfig] | list[dict]
     ) -> list[ValidationConfig]:
-        from great_expectations import project_manager
-
         if len(validations) == 0:
             raise ValueError("Checkpoint must contain at least one validation")
 
