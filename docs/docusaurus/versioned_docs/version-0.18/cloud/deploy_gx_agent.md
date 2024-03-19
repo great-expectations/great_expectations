@@ -10,7 +10,7 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To use GX cloud features and functionality, you need to deploy the GX Agent. 
+To use GX Cloud features and functionality in an org-hosted deployment, you need to deploy the GX Agent. If you're not ready to implement an org-hosted deployment, see [Try GX Cloud](../cloud/try_gx_cloud.md).
 
 ## Prerequisites
 
@@ -165,8 +165,6 @@ You can deploy the GX Agent in any deployment environment in which you create Ku
 </Tabs>
 
 ## Next steps
-
-- [Try GX Cloud](../cloud/try_gx_cloud.md)
 
 - [Connect GX Cloud](../cloud/connect/connect_lp.md)
 
