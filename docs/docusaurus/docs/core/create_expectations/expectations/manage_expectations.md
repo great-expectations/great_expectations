@@ -71,7 +71,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python showLineNumbers title="Python example code"
+```python showLineNumbers title="Python"
   import great_expectations as gx
   import great_expectations.expectations as gxe
   
@@ -117,7 +117,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python showLineNumbers title="Python example code" name="core/expectations/_examples/edit_an_expectation.py full example code"
+```python showLineNumbers title="Python" name="core/expectations/_examples/edit_an_expectation.py full example code"
 ```
 
 </TabItem>
@@ -152,7 +152,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python showLineNumbers title="Python example code"
+```python showLineNumbers title="Python"
 from great_expectations.expectations import ExpectColumnValueToBeBetween
 
 # highlight-start
