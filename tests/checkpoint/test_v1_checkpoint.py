@@ -50,7 +50,7 @@ class TestCheckpointSerialization:
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield vc
+            yield in_memory_context.validations.add(vc)
 
     @pytest.fixture
     def validation_config_2(
@@ -67,7 +67,7 @@ class TestCheckpointSerialization:
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield vc
+            yield in_memory_context.validations.add(vc)
 
     @pytest.fixture
     def validation_configs(
@@ -168,8 +168,52 @@ class TestCheckpointSerialization:
         assert actual == expected
 
     @pytest.mark.unit
-    def test_checkpoint_deserialization_success(self):
-        pass
+    def test_checkpoint_deserialization_success(
+        self,
+        in_memory_context: EphemeralDataContext,
+        validation_configs: list[ValidationConfig],
+        actions: list[ValidationAction],
+    ):
+        serialized_checkpoint = {
+            "name": "my_checkpoint",
+            "validations": [
+                {
+                    "name": validation_configs[0].name,
+                    "id": validation_configs[0].id,
+                },
+                {
+                    "name": validation_configs[1].name,
+                    "id": validation_configs[1].id,
+                },
+            ],
+            "actions": [
+                {
+                    "notify_on": "all",
+                    "notify_with": None,
+                    "renderer": {
+                        "class_name": actions[0].renderer.__class__.__name__,
+                        "module_name": actions[0].renderer.__class__.__module__,
+                    },
+                    "show_failed_expectations": False,
+                    "slack_channel": None,
+                    "slack_token": None,
+                    "slack_webhook": "slack_webhook",
+                    "type": "slack",
+                },
+                {
+                    "notify_on": "all",
+                    "renderer": {
+                        "class_name": actions[1].renderer.__class__.__name__,
+                        "module_name": actions[1].renderer.__class__.__module__,
+                    },
+                    "teams_webhook": "teams_webhook",
+                    "type": "microsoft",
+                },
+            ],
+            "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
+        }
+
+        _ = Checkpoint.parse_obj(serialized_checkpoint)
 
     @pytest.mark.parametrize(
         "serialized_checkpoint, expected_error",
