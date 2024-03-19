@@ -64,7 +64,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def build_renderer(config: dict) -> Renderer:
+def _build_renderer(config: dict) -> Renderer:
     renderer = instantiate_class_from_config(
         config=config,
         runtime_environment={},
@@ -248,7 +248,7 @@ class SlackNotificationAction(DataDocsAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
         if isinstance(renderer, dict):
-            _renderer = build_renderer(config=renderer)
+            _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, SlackRenderer):
                 raise ValueError(
                     "renderer must be a SlackRenderer or a valid configuration for one."
@@ -526,7 +526,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         cls, renderer: dict | MicrosoftTeamsRenderer
     ) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
-            _renderer = build_renderer(config=renderer)
+            _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, MicrosoftTeamsRenderer):
                 raise ValueError(
                     "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
@@ -628,7 +628,7 @@ class OpsgenieAlertAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
         if isinstance(renderer, dict):
-            _renderer = build_renderer(config=renderer)
+            _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, OpsgenieRenderer):
                 raise ValueError(
                     "renderer must be a OpsgenieRenderer or a valid configuration for one."
@@ -761,7 +761,7 @@ class EmailAction(ValidationAction):
     @validator("renderer", pre=True)
     def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
         if isinstance(renderer, dict):
-            _renderer = build_renderer(config=renderer)
+            _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, EmailRenderer):
                 raise ValueError(
                     "renderer must be a EmailRenderer or a valid configuration for one."
