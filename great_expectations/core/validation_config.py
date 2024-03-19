@@ -271,4 +271,7 @@ class ValidationConfig(BaseModel):
             key = validation_config_store.get_key(name=self.name, id=None)
             validation_config_store.add(key=key, value=self)
 
+        self.data.serialize()
+        self.suite.serialize()
+
         return _IdentifierBundle(name=self.name, id=self.id)

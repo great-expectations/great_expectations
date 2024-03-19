@@ -168,24 +168,53 @@ class TestCheckpointSerialization:
         }
 
         assert actual == expected
+        self._assert_valid_uuid(actual["validations"][0]["id"])
+        self._assert_valid_uuid(actual["validations"][1]["id"])
 
     @pytest.mark.unit
-    def test_checkpoint_deserialization_success(
-        self,
-        in_memory_context: EphemeralDataContext,
-        validation_configs: list[ValidationConfig],
-        actions: list[ValidationAction],
+    def test_checkpoint_round_trip_adds_ids(
+        self, tmp_path: pathlib.Path, actions: list[ValidationAction]
     ):
-        serialized_checkpoint = {
-            "name": "my_checkpoint",
+        with working_directory(tmp_path):
+            context = gx.get_context(mode="file")
+
+        ds_name = "my_datasource"
+        asset_name = "my_asset"
+        batch_config_name_1 = "my_batch1"
+        suite_name_1 = "my_suite1"
+        validation_config_name_1 = "my_validation1"
+        batch_config_name_2 = "my_batch2"
+        suite_name_2 = "my_suite2"
+        validation_config_name_2 = "my_validation2"
+        cp_name = "my_checkpoint"
+
+        ds = context.sources.add_pandas(ds_name)
+        asset = ds.add_csv_asset(asset_name, "my_file.csv")
+
+        bc1 = asset.add_batch_config(batch_config_name_1)
+        suite1 = ExpectationSuite(suite_name_1)
+        vc1 = ValidationConfig(name=validation_config_name_1, data=bc1, suite=suite1)
+
+        bc2 = asset.add_batch_config(batch_config_name_2)
+        suite2 = ExpectationSuite(suite_name_2)
+        vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
+
+        validations = [vc1, vc2]
+        cp = Checkpoint(name=cp_name, validations=validations, actions=actions)
+
+        serialized_checkpoint = cp.json(models_as_dict=False)
+        serialized_checkpoint_dict = json.loads(serialized_checkpoint)
+
+        assert serialized_checkpoint_dict == {
+            "name": cp_name,
             "validations": [
                 {
-                    "name": validation_configs[0].name,
-                    "id": validation_configs[0].id,
+                    "id": mock.ANY,
+                    "name": validation_config_name_1,
                 },
                 {
-                    "name": validation_configs[1].name,
-                    "id": validation_configs[1].id,
+                    "id": mock.ANY,
+                    "name": validation_config_name_2,
                 },
             ],
             "actions": [
@@ -193,8 +222,8 @@ class TestCheckpointSerialization:
                     "notify_on": "all",
                     "notify_with": None,
                     "renderer": {
-                        "class_name": actions[0].renderer.__class__.__name__,
-                        "module_name": actions[0].renderer.__class__.__module__,
+                        "class_name": "SlackRenderer",
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
                     },
                     "show_failed_expectations": False,
                     "slack_channel": None,
@@ -205,17 +234,32 @@ class TestCheckpointSerialization:
                 {
                     "notify_on": "all",
                     "renderer": {
-                        "class_name": actions[1].renderer.__class__.__name__,
-                        "module_name": actions[1].renderer.__class__.__module__,
+                        "class_name": "MicrosoftTeamsRenderer",
+                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
                     },
                     "teams_webhook": "teams_webhook",
                     "type": "microsoft",
                 },
             ],
-            "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
+            "id": None,
         }
 
-        _ = Checkpoint.parse_obj(serialized_checkpoint)
+        cp = Checkpoint.parse_raw(serialized_checkpoint)
+        assert cp.validations[0].id is not None
+        assert cp.validations[1].id is not None
+        assert cp.validations[0].suite.id is not None
+        assert cp.validations[1].suite.id is not None
+
+    def _assert_valid_uuid(self, id: str | None) -> None:
+        if not id:
+            pytest.fail(
+                "id is None when it should be a valid UUID generated from a Store."
+            )
+
+        try:
+            uuid.UUID(id)
+        except ValueError:
+            pytest.fail(f"{id} is not a valid UUID.")
 
     @pytest.mark.parametrize(
         "serialized_checkpoint, expected_error",
@@ -270,42 +314,3 @@ class TestCheckpointSerialization:
             Checkpoint.parse_obj(serialized_checkpoint)
 
         assert expected_error in str(e.value)
-
-    @pytest.mark.filesystem
-    def test_checkpoint_serialization_adds_ids(self, tmp_path: pathlib.Path):
-        with working_directory(tmp_path):
-            context = gx.get_context(mode="file")
-
-        ds = context.sources.add_pandas("my_datasource")
-        asset = ds.add_csv_asset("my_asset", "my_file.csv")
-
-        bc1 = asset.add_batch_config("my_batch1")
-        suite1 = ExpectationSuite("my_suite1")
-        vc1 = ValidationConfig(name="my_validation1", data=bc1, suite=suite1)
-
-        bc2 = asset.add_batch_config("my_batch2")
-        suite2 = ExpectationSuite("my_suite2")
-        vc2 = ValidationConfig(name="my_validation2", data=bc2, suite=suite2)
-
-        validations = [vc1, vc2]
-        actions = [
-            SlackNotificationAction(slack_webhook="my_slack_webhook"),
-            MicrosoftTeamsNotificationAction(teams_webhook="my_teams_webhook"),
-        ]
-
-        cp = Checkpoint(name="my_checkpoint", validations=validations, actions=actions)
-        serialized_checkpoint = cp.json()
-        serialized_checkpoint_dict = json.loads(serialized_checkpoint)
-
-        # If not previously persisted, any nested suites and validation configs should get IDs
-        validations = serialized_checkpoint_dict["validations"]
-        for id in (
-            validations[0]["id"],
-            validations[1]["id"],
-            validations[0]["suite"]["id"],
-            validations[1]["suite"]["id"],
-        ):
-            try:
-                uuid.UUID(id)
-            except (ValueError, TypeError):
-                pytest.fail(f"Expected {id} to be a valid UUID")

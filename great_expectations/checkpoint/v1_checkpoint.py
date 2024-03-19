@@ -7,8 +7,6 @@ from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, validator
-from great_expectations.core.batch_config import BatchConfig
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.render.renderer.renderer import Renderer
@@ -73,8 +71,8 @@ class Checkpoint(BaseModel):
         json_encoders = {
             ValidationConfig: lambda v: v.serialize(),
             Renderer: lambda r: r.serialize(),
-            ExpectationSuite: lambda e: e.serialize(),
-            BatchConfig: lambda b: b.serialize(),
+            # ExpectationSuite: lambda e: e.serialize(),
+            # BatchConfig: lambda b: b.serialize(),
         }
 
     @validator("validations", pre=True)
