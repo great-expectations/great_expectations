@@ -219,7 +219,7 @@ class TableFactory(Protocol):
 @pytest.fixture(
     scope="class",
 )
-def table_factory() -> Generator[TableFactory, None, None]:
+def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
     """
     Class scoped.
     Given a SQLALchemy engine, table_name and schema,

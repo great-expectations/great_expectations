@@ -57,7 +57,7 @@ class DomainKwargs(SerializableDotDict):
 
 class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
-    def __init__(  # noqa: C901
+    def __init__(  # noqa: C901 - too complex
         self,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,

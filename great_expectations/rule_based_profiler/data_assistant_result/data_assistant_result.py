@@ -407,7 +407,7 @@ class DataAssistantResult(SerializableDictDot):
             for metric_names, expectation_name in self.metric_expectation_map.items()
         }
 
-    def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
+    def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:  # noqa: C901
         auxiliary_info: dict = {
             "num_profiler_rules": len(self.profiler_config.rules)
             if self.profiler_config and self.profiler_config.rules
@@ -3387,7 +3387,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return filtered_attributed_metrics
 
-    def _chart_domain_values(  # noqa: PLR0913
+    def _chart_domain_values(  # noqa: C901, PLR0913
         self,
         expectation_type: str,
         df: pd.DataFrame,
@@ -3600,7 +3600,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return return_charts
 
-    def _chart_column_values(  # noqa: PLR0913
+    def _chart_column_values(  # noqa: C901, PLR0913
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
@@ -3888,7 +3888,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return column_dfs
 
-    def _create_chart_for_table_domain_expectation(  # noqa: PLR0913
+    def _create_chart_for_table_domain_expectation(  # noqa: C901, PLR0913
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],

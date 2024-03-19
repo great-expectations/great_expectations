@@ -339,7 +339,7 @@ class ParameterBuilder(ABC, Builder):
             parameters=parameters,
         )
 
-    def get_metrics(  # noqa: PLR0913
+    def get_metrics(  # noqa: C901, PLR0913
         self,
         metric_name: str,
         metric_domain_kwargs: Optional[

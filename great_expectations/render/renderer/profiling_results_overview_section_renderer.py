@@ -312,7 +312,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _get_column_types(cls, evrs):
+    def _get_column_types(cls, evrs):  # noqa: C901
         columns = cls._get_column_list_from_evrs(evrs)
 
         type_evrs = cls._find_all_evrs_by_type(

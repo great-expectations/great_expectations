@@ -113,7 +113,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             expectation_string_fn = cls._missing_content_block_fn
 
         # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
-        def row_generator_fn(
+        def row_generator_fn(  # noqa: C901
             configuration=None,
             result=None,
             runtime_configuration=None,
