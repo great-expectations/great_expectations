@@ -13,7 +13,7 @@ New to GX Cloud and not sure that it's the right solution for your organization?
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
 
-- You have [Deployed the GX Agent](../deploy_gx_agent.md).
+- You have [deployed the GX Agent](../deploy_gx_agent.md).
 
 - You have a Snowflake database, schema, and table.
 
