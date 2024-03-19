@@ -122,7 +122,11 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   The specific attributes that can be modified correspond to the parameters used to initialize the Expectation.  You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-3. Optional. If the Expectation belongs to an Expectation Suite, save the changes to the Expectation Suite:
+3. Optional. [Test the modified Expectation](#test-an-expectation) against a Batch of data.
+
+  Repeat this step until the results from testing the Expectation correspond to the desired results for your specific use case and data.
+
+4. Optional. If the Expectation belongs to an Expectation Suite, save the changes to the Expectation Suite:
 
   ```python title="Python" name="core/create_expectations/expectations/_examples/edit_an_expectation.py save the expectation"
   ```
