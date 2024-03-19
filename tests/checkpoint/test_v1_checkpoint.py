@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 import uuid
 from unittest import mock
 
@@ -20,6 +21,7 @@ from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
+from tests.test_utils import working_directory
 
 
 @pytest.mark.unit
@@ -268,3 +270,42 @@ class TestCheckpointSerialization:
             Checkpoint.parse_obj(serialized_checkpoint)
 
         assert expected_error in str(e.value)
+
+    @pytest.mark.filesystem
+    def test_checkpoint_serialization_adds_ids(self, tmp_path: pathlib.Path):
+        with working_directory(tmp_path):
+            context = gx.get_context(mode="file")
+
+        ds = context.sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "my_file.csv")
+
+        bc1 = asset.add_batch_config("my_batch1")
+        suite1 = ExpectationSuite("my_suite1")
+        vc1 = ValidationConfig(name="my_validation1", data=bc1, suite=suite1)
+
+        bc2 = asset.add_batch_config("my_batch2")
+        suite2 = ExpectationSuite("my_suite2")
+        vc2 = ValidationConfig(name="my_validation2", data=bc2, suite=suite2)
+
+        validations = [vc1, vc2]
+        actions = [
+            SlackNotificationAction(slack_webhook="my_slack_webhook"),
+            MicrosoftTeamsNotificationAction(teams_webhook="my_teams_webhook"),
+        ]
+
+        cp = Checkpoint(name="my_checkpoint", validations=validations, actions=actions)
+        serialized_checkpoint = cp.json()
+        serialized_checkpoint_dict = json.loads(serialized_checkpoint)
+
+        # If not previously persisted, any nested suites and validation configs should get IDs
+        validations = serialized_checkpoint_dict["validations"]
+        for id in (
+            validations[0]["id"],
+            validations[1]["id"],
+            validations[0]["suite"]["id"],
+            validations[1]["suite"]["id"],
+        ):
+            try:
+                uuid.UUID(id)
+            except (ValueError, TypeError):
+                pytest.fail(f"Expected {id} to be a valid UUID")
