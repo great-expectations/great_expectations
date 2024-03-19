@@ -5,6 +5,9 @@ description: Create and manage individual Expectations in Python with GX Core.
 ---
 import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
 import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installation.md';
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
+
 
 An Expectation is a verifiable assertion about your data. Expectations make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. 
 
@@ -17,8 +20,9 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 ## Create an Expectation
 
-  ```python title="Python example code" name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code"
-  ```
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
 
 1. Import the `expectations` module from the GX Core library.
 
@@ -28,26 +32,24 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
   
   You can view available Expectations and the parameters they take in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
+</TabItem>
+
+<TabItem value="example" label="Example code">
+
+  ```python title="Python" name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code"
+  ```
+
+</TabItem>
+
+</Tabs>
 
 ## Test an Expectation
 
 <!-- TODO: Replace the sample code with snippets from example scripts under test -->
 
-  ```python title="Python example code"
-  import great_expectations as gx
-  import great_expectations.expectations as gxe
-  
-  context = gx.get_context()
-  data_asset = context.get_datasource("my_datasource").get_asset("my_asset")
-  batch =
+<Tabs>
 
-  expectation = gxe.ExpectColumnValuesToBeInSet(
-    column="passenger_count", value_set=[1, 2, 3, 4, 5]
-  )
-  
-  # highlight-next-line
-  validation_result = batch.validate(expectation)
-  ```
+<TabItem value="procedure" label="Procedure">
 
 1. Retrieve a Batch of data to test the Expectation against.
 
@@ -65,10 +67,35 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   :::
 
+</TabItem>
+
+<TabItem value="example" label="Example code">
+
+```python title="Python example code"
+  import great_expectations as gx
+  import great_expectations.expectations as gxe
+  
+  context = gx.get_context()
+  data_asset = context.get_datasource("my_datasource").get_asset("my_asset")
+  batch =
+
+  expectation = gxe.ExpectColumnValuesToBeInSet(
+    column="passenger_count", value_set=[1, 2, 3, 4, 5]
+  )
+  
+  # highlight-next-line
+  validation_result = batch.validate(expectation)
+  ```
+
+</TabItem>
+
+</Tabs>
+
 ## Modify an Expectation
 
-```python title="Python example code" name="core/expectations/_examples/edit_an_expectation.py full example code"
-```
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
 
 1. Get the Expectation to modify.  This could be a [newly created](#create-an-expectation) Expectation that you wish to adjust, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.  
 
@@ -86,21 +113,24 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
   
   If the Expectation is not part of an Expectation Suite, `expectation.save()` will fail.
 
+</TabItem>
+
+<TabItem value="example" label="Example code">
+
+```python title="Python example code" name="core/expectations/_examples/edit_an_expectation.py full example code"
+```
+
+</TabItem>
+
+</Tabs>
+
 ## Customize an Expectation Class
 
 <!-- TODO: Replace code examples with snippets from scripts under test -->
 
-```python title="Python example code"
-from great_expectations.expectations import ExpectColumnValueToBeBetween
+<Tabs>
 
-# highlight-start
-class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
-    column: str = "passenger_count"
-    min_value: int = 0
-    max_value: int = 6
-    render_text: str = "There should be between **0** and **6** passengers."
-# highlight-end
-```
+<TabItem value="procedure" label="Procedure">
 
 1. Choose and import a base Expectation class.
 
@@ -117,6 +147,26 @@ class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
 4. Customize the rendering of the new Expectation when displayed in Data Docs.
 
   The `render_text` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  This text can be formatted with Markdown syntax.
+
+</TabItem>
+
+<TabItem value="example" label="Example code">
+
+```python title="Python example code"
+from great_expectations.expectations import ExpectColumnValueToBeBetween
+
+# highlight-start
+class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
+    column: str = "passenger_count"
+    min_value: int = 0
+    max_value: int = 6
+    render_text: str = "There should be between **0** and **6** passengers."
+# highlight-end
+```
+
+</TabItem>
+
+</Tabs>
 
 ## Next steps
 
