@@ -281,7 +281,7 @@ class ActionListValidationOperator(ValidationOperator):
             }
         return self._validation_operator_config
 
-    def run(  # noqa: PLR0913
+    def run(  # noqa: C901, PLR0913
         self,
         assets_to_validate,
         run_id=None,

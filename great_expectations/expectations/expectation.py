@@ -110,7 +110,7 @@ P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
-def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values

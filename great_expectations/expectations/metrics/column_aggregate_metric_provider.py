@@ -106,7 +106,7 @@ def column_aggregate_value(
         )
 
 
-def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
+def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: C901
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
     A column_aggregate_partial must provide an aggregate function; it will be executed with the specified engine

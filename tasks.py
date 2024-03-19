@@ -341,7 +341,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(
+def tests(  # noqa: C901
     ctx: Context,
     unit: bool = True,
     ignore_markers: bool = False,
