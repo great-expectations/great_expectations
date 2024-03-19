@@ -39,7 +39,10 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     expect_table_column_count_to_be_between is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
-    Keyword Args:
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
+    Args:
         min_value (int or None): \
             The minimum number of columns, inclusive.
         max_value (int or None): \
@@ -70,6 +73,61 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
 
     See Also:
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableColumnCountToBeBetween(
+                    min_value=1
+                    max_value=3
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 2
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectTableColumnCountToBeBetween(
+                    min_value=3
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 2
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     min_value: Union[float, EvaluationParameterDict, datetime, None]

@@ -34,13 +34,20 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     expect_compound_columns_to_be_unique is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
-    Args:
-        column_list (tuple or list): Set of columns to be checked
+    Multicolumn Map Expectations are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer.
+    If the percentage is high enough, the Expectation considers that data valid.
 
-    Keyword Args:
-        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+    Args:
+        column_list (tuple or list): Set of columns to be checked.
 
     Other Parameters:
+        ignore_row_if (str): \
+            "all_values_are_missing", "any_value_is_missing", "never" \
+            If specified, sets the condition on which a given row is to be ignored. Default "never".
+        mostly (None or a float between 0 and 1): \
+            Successful if at least `mostly` fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -55,6 +62,87 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Cardinality
+
+    Example Data:
+                test 	test2   test3   test4
+            0 	1       1       4       1
+            1 	2       1       7       1
+            2 	4   	1       -3      1
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectCompoundColumnsToBeUnique(
+                    column_list=["test", "test2", "test3"],
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectCompoundColumnsToBeUnique(
+                    column_list=["test2", "test4"],
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                      {
+                        "test2": 1,
+                        "test4": 1
+                      },
+                      {
+                        "test2": 1,
+                        "test4": 1
+                      },
+                      {
+                        "test2": 1,
+                        "test4": 1
+                      }
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     column_list: Union[tuple, list]

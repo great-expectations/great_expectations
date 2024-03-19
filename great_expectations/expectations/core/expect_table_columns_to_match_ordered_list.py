@@ -34,6 +34,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     expect_table_columns_to_match_ordered_list is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
         column_list (list of str): \
             The column names, in the correct order.
@@ -53,6 +56,86 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableColumnsToMatchOrderedList(
+                    column_list=["test", "test2"]
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      "test",
+                      "test2"
+                    ]
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectTableColumnsToMatchOrderedList(
+                    column_list=["test2", "test", "test3"]
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      "Unnamed: 0",
+                      "test",
+                      "test2"
+                    ],
+                    "details": {
+                      "mismatched": [
+                        {
+                          "Expected Column Position": 1,
+                          "Expected": "test2",
+                          "Found": "test"
+                        },
+                        {
+                          "Expected Column Position": 2,
+                          "Expected": "test",
+                          "Found": "test2"
+                        },
+                        {
+                          "Expected Column Position": 3,
+                          "Expected": "test3",
+                          "Found": null
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """
 
     column_list: Union[list, set, EvaluationParameterDict, None]
