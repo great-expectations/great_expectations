@@ -266,11 +266,13 @@ class ValidationConfig(BaseModel):
             return expectation_suite_identifier, validation_result_id
 
     def serialize(self) -> dict:
+        # Utilized as a custom json_encoder
         if not self.id:
             validation_config_store = project_manager.get_validation_config_store()
             key = validation_config_store.get_key(name=self.name, id=None)
             validation_config_store.add(key=key, value=self)
 
+        # Nested batch definition and suite should be persisted with their respective stores
         self.data.serialize()
         self.suite.serialize()
 

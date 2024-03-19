@@ -71,8 +71,6 @@ class Checkpoint(BaseModel):
         json_encoders = {
             ValidationConfig: lambda v: v.serialize(),
             Renderer: lambda r: r.serialize(),
-            # ExpectationSuite: lambda e: e.serialize(),
-            # BatchConfig: lambda b: b.serialize(),
         }
 
     @validator("validations", pre=True)

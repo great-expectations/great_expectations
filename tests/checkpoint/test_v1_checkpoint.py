@@ -245,10 +245,10 @@ class TestCheckpointSerialization:
         }
 
         cp = Checkpoint.parse_raw(serialized_checkpoint)
-        assert cp.validations[0].id is not None
-        assert cp.validations[1].id is not None
-        assert cp.validations[0].suite.id is not None
-        assert cp.validations[1].suite.id is not None
+        self._assert_valid_uuid(id=cp.validations[0].id)
+        self._assert_valid_uuid(id=cp.validations[1].id)
+        self._assert_valid_uuid(id=cp.validations[0].suite.id)
+        self._assert_valid_uuid(id=cp.validations[1].suite.id)
 
     def _assert_valid_uuid(self, id: str | None) -> None:
         if not id:

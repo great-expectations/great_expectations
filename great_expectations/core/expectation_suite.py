@@ -1112,6 +1112,7 @@ class ExpectationSuite(SerializableDictDot):
             )
 
     def serialize(self) -> _IdentifierBundle:
+        # Utilized as a custom json_encoder
         from great_expectations import project_manager
 
         if not self.id:

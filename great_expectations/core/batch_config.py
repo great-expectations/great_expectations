@@ -50,6 +50,8 @@ class BatchConfig(pydantic.BaseModel):
         self.data_asset._save_batch_config(self)
 
     def serialize(self) -> _EncodedValidationData:
+        # Utilized as a custom json_encoder
+        # TODO: This method should be removed in favor of a pydantic model that can be serialized directly
         asset = self.data_asset
         ds = asset.datasource
         return _EncodedValidationData(
