@@ -71,7 +71,7 @@ class Checkpoint(BaseModel):
         )
         json_encoders = {
             ValidationConfig: lambda v: v.identifier_bundle(),
-            Renderer: lambda r: r.identifier_bundle(),
+            Renderer: lambda r: r.serialize(),
         }
 
     @validator("validation_definitions", pre=True)
