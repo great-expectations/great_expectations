@@ -168,11 +168,13 @@ class TestCheckpointSerialization:
         }
 
         assert actual == expected
+
+        # Validation definitions should be persisted and obtain IDs before serialization
         self._assert_valid_uuid(actual["validations"][0]["id"])
         self._assert_valid_uuid(actual["validations"][1]["id"])
 
-    @pytest.mark.unit
-    def test_checkpoint_round_trip_adds_ids(
+    @pytest.mark.filesystem
+    def test_checkpoint_filesystem_round_trip_adds_ids(
         self, tmp_path: pathlib.Path, actions: list[ValidationAction]
     ):
         with working_directory(tmp_path):
@@ -245,6 +247,21 @@ class TestCheckpointSerialization:
         }
 
         cp = Checkpoint.parse_raw(serialized_checkpoint)
+
+        # Check that all nested objects have been built properly with their appropriate names
+        assert cp.name == cp_name
+        assert cp.validations[0].data_source.name == ds_name
+        assert cp.validations[0].asset.name == asset_name
+
+        assert cp.validations[0].name == validation_config_name_1
+        assert cp.validations[0].batch_definition.name == batch_config_name_1
+        assert cp.validations[0].suite.name == suite_name_1
+
+        assert cp.validations[1].name == validation_config_name_2
+        assert cp.validations[1].batch_definition.name == batch_config_name_2
+        assert cp.validations[1].suite.name == suite_name_2
+
+        # Check that all validations and nested suites have been assigned IDs during serialization
         self._assert_valid_uuid(id=cp.validations[0].id)
         self._assert_valid_uuid(id=cp.validations[1].id)
         self._assert_valid_uuid(id=cp.validations[0].suite.id)
