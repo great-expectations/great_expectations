@@ -36,7 +36,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-  ```python title="Python" name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code"
+  ```python showLineNumbers title="Python" name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code"
   ```
 
 </TabItem>
@@ -51,7 +51,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="procedure" label="Procedure">
 
-1. Retrieve a Batch of data to test the Expectation against.
+1. [Retrieve a Batch of data](/core/manage_and_access_data/request_data.md) to test the Expectation against.
 
 2. Get the Expectation to test.  This could be a [newly created](#create-an-expectation) Expectation, an Expectation [retrieved from an Expectation Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md#get-an-expectation-from-an-expectation-suite), or a pre-existing Expectation from your code.
 
@@ -71,7 +71,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python title="Python example code"
+```python showLineNumbers title="Python example code"
   import great_expectations as gx
   import great_expectations.expectations as gxe
   
@@ -117,7 +117,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python title="Python example code" name="core/expectations/_examples/edit_an_expectation.py full example code"
+```python showLineNumbers title="Python example code" name="core/expectations/_examples/edit_an_expectation.py full example code"
 ```
 
 </TabItem>
@@ -152,7 +152,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 <TabItem value="example" label="Example code">
 
-```python title="Python example code"
+```python showLineNumbers title="Python example code"
 from great_expectations.expectations import ExpectColumnValueToBeBetween
 
 # highlight-start
