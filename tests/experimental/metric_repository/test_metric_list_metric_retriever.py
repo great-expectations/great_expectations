@@ -720,6 +720,49 @@ def test_column_metrics_in_metrics_list_with_column_metrics(mocker: MockerFixtur
     )
 
 
+def test_table_metrics_in_metrics_list_all_metrics_present(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    metrics_list_with_column_metrics = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMN_TYPES,
+        MetricTypes.TABLE_COLUMNS,
+    ]
+    assert (
+        metric_retriever._all_table_metrics_in_metric_list(
+            metrics_list_with_column_metrics
+        )
+        is True
+    )
+
+
+def test_table_metrics_in_metrics_list_missing_table_metrics(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+    metrics_list_with_column_metrics = [
+        MetricTypes.TABLE_ROW_COUNT,
+    ]
+    # missing 2
+    assert (
+        metric_retriever._all_table_metrics_in_metric_list(
+            metrics_list_with_column_metrics
+        )
+        is False
+    )
+
+    # missing 1
+    metrics_list_with_column_metrics = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMN_TYPES,
+    ]
+    assert (
+        metric_retriever._all_table_metrics_in_metric_list(
+            metrics_list_with_column_metrics
+        )
+        is False
+    )
+
+
 def test_get_table_column_types(mocker: MockerFixture):
     mock_context = mocker.Mock(spec=CloudDataContext)
     mock_validator = mocker.Mock(spec=Validator)

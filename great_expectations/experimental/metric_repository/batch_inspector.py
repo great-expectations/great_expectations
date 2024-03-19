@@ -33,7 +33,7 @@ class BatchInspector:
         self,
         data_asset_id: uuid.UUID,
         batch_request: BatchRequest,
-        metrics_list: Optional[List[MetricTypes]],
+        metric_list: Optional[List[MetricTypes]],
     ) -> MetricRun:
         """Method that computes a MetricRun for a list of metrics.
 
@@ -53,7 +53,7 @@ class BatchInspector:
         for metric_retriever in self._metric_retrievers:
             metrics.extend(
                 metric_retriever.get_metrics(
-                    batch_request=batch_request, metrics_list=metrics_list
+                    batch_request=batch_request, metric_list=metric_list
                 )
             )
         return MetricRun(data_asset_id=data_asset_id, metrics=metrics)

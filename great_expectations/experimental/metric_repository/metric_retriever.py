@@ -186,6 +186,10 @@ class MetricRetriever(abc.ABC):
         metric_name: MetricTypes | str,
         metric_type: type[Metric],
     ) -> Metric:
+        # we have to do a conversion at some point
+        if isinstance(metric_name, MetricTypes):
+            metric_name = metric_name.value
+
         metric_configs = self._generate_table_metric_configurations([metric_name])
         batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
             batch_request, metric_configs
@@ -275,8 +279,7 @@ class MetricRetriever(abc.ABC):
         )
 
     def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
-        metric_name = MetricTypes.TABLE_COLUMN_TYPES
-
+        metric_name = MetricTypes.TABLE_COLUMN_TYPES.value
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names=[metric_name]
