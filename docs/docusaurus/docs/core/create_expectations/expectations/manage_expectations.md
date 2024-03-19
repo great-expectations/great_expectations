@@ -168,7 +168,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
   ```
 
-3. Override the Expectation's attributes with new default values.
+3. Override the Expectation's attributes with new default values:
 
   ```python title="Python"
   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
@@ -179,7 +179,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
   The attributes that can be overriden correspond to the parameters required by the base Expectation.  These can be referenced from the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-4. Customize the rendering of the new Expectation when displayed in Data Docs.
+4. Customize the rendering of the new Expectation when displayed in Data Docs:
 
   ```python title="Python"
   class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
