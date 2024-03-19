@@ -61,14 +61,14 @@ def build_in_code_data_context_project_config(
         plugins_directory=None,
         config_variables_file_path=None,
         datasources={
-            "my_spark_datasource": {
-                "data_asset_type": {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
+            "my_datasource_name": {
+                "class_name": "Datasource",
+                "data_connectors": {},
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
                 },
-                "class_name": "SparkDFDatasource",
                 "module_name": "great_expectations.datasource",
-                "batch_kwargs_generators": {},
             }
         },
         stores=stores,

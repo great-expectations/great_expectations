@@ -10,7 +10,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.self_check.util import get_dataset
 
 
 @pytest.fixture
@@ -85,48 +84,3 @@ def get_set_of_columns_and_expectations_from_suite(
     }
 
     return columns, expectations
-
-
-@pytest.fixture
-def non_numeric_low_card_dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-
-    # fmt: off
-    data = {
-        "lowcardnonnum": [
-            "a", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b",
-        ]
-    }
-    # fmt: on
-    schemas = {
-        "pandas": {
-            "lowcardnonnum": "str",
-        },
-        "postgresql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "sqlite": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "mysql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "mssql": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "spark": {
-            "lowcardnonnum": "StringType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)

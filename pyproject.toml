@@ -320,6 +320,9 @@ extend-exclude = [
 "great_expectations/compatibility/*.py" = [
     "TID251", # flake8-banned-api
 ]
+"tasks.py" = [
+    "PLR0913",
+]
 "tests/integration/docusaurus/*.py" = [
     "F841", # local variable is assigned to but never used - ignored for code used in snippets
 ]

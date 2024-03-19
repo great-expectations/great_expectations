@@ -93,7 +93,7 @@ def categorical_partition_data(data):
 
     # Compute weights using denominator only of nonnull values
     null_indexes = series.isnull()
-    nonnull_count = (null_indexes == False).sum()
+    nonnull_count = (null_indexes is False).sum()
 
     weights = value_counts.values / nonnull_count
     return {"values": value_counts.index.tolist(), "weights": weights}
@@ -256,7 +256,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):  # noqa: PLR0912
+def infer_distribution_parameters(data, distribution, params=None):  # noqa: C901, PLR0912
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -390,7 +390,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PLR0915
+def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR0912, PLR0915
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
