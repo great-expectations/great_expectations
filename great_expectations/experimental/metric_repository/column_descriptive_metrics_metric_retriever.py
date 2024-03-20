@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING, List, Sequence
+from typing import TYPE_CHECKING, List, Optional, Sequence
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.experimental.metric_repository.metric_retriever import (
@@ -10,6 +10,7 @@ from great_expectations.experimental.metric_repository.metric_retriever import (
 from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     Metric,
+    MetricTypes,
 )
 
 if TYPE_CHECKING:
@@ -27,7 +28,14 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         super().__init__(context=context)
 
     @override
-    def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
+    def get_metrics(
+        self,
+        batch_request: BatchRequest,
+        metric_list: Optional[List[MetricTypes]] = None,
+    ) -> Sequence[Metric]:
+        # Note: Signature includes metric_list for compatibility with the MetricRetriever interface.
+        # It is not used by ColumnDescriptiveMetricsMetricRetriever.
+
         table_metrics = self._calculate_table_metrics(batch_request)
 
         # We need to skip columns that do not report a type, because the metric computation
