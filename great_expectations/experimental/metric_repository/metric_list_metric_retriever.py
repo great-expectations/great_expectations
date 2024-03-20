@@ -57,6 +57,7 @@ class MetricListMetricRetriever(MetricRetriever):
                 "TABLE_COLUMN_TYPES metric is required to compute column metrics. \
                 Skipping column metrics."
             )
+            return metrics_result
 
         table_column_types = list(
             filter(lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics)
