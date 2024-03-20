@@ -29,7 +29,7 @@ def test_compute_metric_list_run_with_no_metric_retrievers(mocker):
     data_asset_id = uuid.uuid4()
 
     metric_run = batch_inspector.compute_metric_list_run(
-        data_asset_id=data_asset_id, batch_request=mock_batch_request, metrics_list=[]
+        data_asset_id=data_asset_id, batch_request=mock_batch_request, metric_list=[]
     )
     assert metric_run == MetricRun(data_asset_id=data_asset_id, metrics=[])
 
@@ -44,7 +44,7 @@ def test_compute_metric_list_run_calls_metric_retrievers():
 
     data_asset_id = uuid.uuid4()
 
-    metrics_list = [
+    metric_list = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -58,13 +58,13 @@ def test_compute_metric_list_run_calls_metric_retrievers():
     batch_inspector.compute_metric_list_run(
         data_asset_id=data_asset_id,
         batch_request=mock_batch_request,
-        metrics_list=metrics_list,
+        metric_list=metric_list,
     )
 
     assert mock_metric_retriever.get_metrics.call_count == 1
 
     mock_metric_retriever.get_metrics.assert_called_once_with(
-        batch_request=mock_batch_request, metrics_list=metrics_list
+        batch_request=mock_batch_request, metric_list=metric_list
     )
 
 
@@ -85,7 +85,7 @@ def test_compute_metric_list_run_returns_metric_run():
     metric_run = batch_inspector.compute_metric_list_run(
         data_asset_id=data_asset_id,
         batch_request=mock_batch_request,
-        metrics_list=[
+        metric_list=[
             MetricTypes.TABLE_ROW_COUNT,
             MetricTypes.TABLE_COLUMNS,
             MetricTypes.TABLE_COLUMN_TYPES,
