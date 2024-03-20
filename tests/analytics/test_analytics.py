@@ -84,7 +84,9 @@ def test_ephemeral_context_init(monkeypatch):
     ) as mock_init, mock.patch("posthog.capture") as mock_submit:
         _ = gx.get_context(mode="ephemeral")
 
-    mock_init.assert_called_once_with(data_context_id=mock.ANY, oss_id=mock.ANY)
+    mock_init.assert_called_once_with(
+        data_context_id=mock.ANY, organization_id=None, oss_id=mock.ANY, user_id=None
+    )
     mock_submit.assert_called_once_with(
         mock.ANY,
         "data_context.initialized",
