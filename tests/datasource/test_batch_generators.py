@@ -13,9 +13,7 @@ except ImportError:
 
 
 @pytest.mark.big
-def test_file_kwargs_generator(
-    data_context_parameterized_expectation_suite, filesystem_csv
-):
+def test_file_kwargs_generator(data_context_parameterized_expectation_suite, filesystem_csv):
     base_dir = filesystem_csv
 
     datasource = data_context_parameterized_expectation_suite.add_datasource(
@@ -41,8 +39,7 @@ def test_file_kwargs_generator(
     }
 
     f1_batches = [
-        batch_kwargs["path"]
-        for batch_kwargs in generator.get_iterator(data_asset_name="f1")
+        batch_kwargs["path"] for batch_kwargs in generator.get_iterator(data_asset_name="f1")
     ]
     assert len(f1_batches) == 1
     expected_batches = [{"path": os.path.join(base_dir, "f1.csv")}]  # noqa: PTH118
@@ -50,8 +47,7 @@ def test_file_kwargs_generator(
         assert batch["path"] in f1_batches
 
     f3_batches = [
-        batch_kwargs["path"]
-        for batch_kwargs in generator.get_iterator(data_asset_name="f3")
+        batch_kwargs["path"] for batch_kwargs in generator.get_iterator(data_asset_name="f3")
     ]
     assert len(f3_batches) == 2
     expected_batches = [

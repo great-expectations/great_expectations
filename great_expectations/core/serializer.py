@@ -13,7 +13,7 @@ Typical usage example:
 datasource_config = DatasourceConfig(...)
 serializer = DictConfigSerializer(schema=datasourceConfigSchema)
 serialized_value = serializer.serialize(datasource_config)
-"""
+"""  # noqa: E501
 
 import abc
 from typing import TYPE_CHECKING
@@ -30,7 +30,7 @@ class AbstractConfigSerializer(abc.ABC):
     """Serializer interface.
 
     Note: When mypy coverage is enhanced further, this Abstract class can be replaced with a Protocol.
-    """
+    """  # noqa: E501
 
     def __init__(self, schema: Schema) -> None:
         """

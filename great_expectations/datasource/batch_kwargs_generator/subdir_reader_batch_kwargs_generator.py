@@ -28,7 +28,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
-# 20230830 - Chetan - Is open for deletion but is used in a number of tests; once decoupled, we should remove this
+# 20230830 - Chetan - Is open for deletion but is used in a number of tests; once decoupled, we should remove this  # noqa: E501
 class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.
 
@@ -41,7 +41,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     SubdirReaderBatchKwargsGenerator can also include configured reader_options which will be added to batch_kwargs generated
     by this generator.
-    """
+    """  # noqa: E501
 
     _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
@@ -157,9 +157,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
             if path is None:
                 logger.warning(
-                    "Unable to find path with the provided partition; searching for asset-name partitions."
+                    "Unable to find path with the provided partition; searching for asset-name partitions."  # noqa: E501
                 )
-                # Fall through to this case in the event that there is not a subdir available, or if partition_id was
+                # Fall through to this case in the event that there is not a subdir available, or if partition_id was  # noqa: E501
                 # not provided
                 if os.path.isfile(  # noqa: PTH113
                     os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
@@ -186,9 +186,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             return self._build_batch_kwargs_from_path(path, **batch_parameters)
 
         else:
-            return self.yield_batch_kwargs(
-                data_asset_name=data_asset_name, **batch_parameters
-            )
+            return self.yield_batch_kwargs(data_asset_name=data_asset_name, **batch_parameters)
 
     def _get_valid_file_options(self, base_directory=None):
         valid_options = []
@@ -212,16 +210,13 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                             base_directory, file_option
                         )
                     )
-                    if (
-                        len(subdir_options) > 0
-                        and (file_option, "directory") not in valid_options
-                    ):
+                    if len(subdir_options) > 0 and (file_option, "directory") not in valid_options:
                         valid_options.append((file_option, "directory"))
         return valid_options
 
     def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
         logger.debug(
-            f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
+            f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"  # noqa: E501
         )
         # If the data asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
@@ -234,9 +229,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             batches = []
             for file_option in subdir_options:
                 for extension in self.known_extensions:
-                    if file_option.endswith(extension) and not file_option.startswith(
-                        "."
-                    ):
+                    if file_option.endswith(extension) and not file_option.startswith("."):
                         batches.append(
                             os.path.join(  # noqa: PTH118
                                 self.base_directory, data_asset_name, file_option

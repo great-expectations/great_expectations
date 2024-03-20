@@ -132,8 +132,7 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            camel_to_snake(t.__name__).split("_asset")[0]
-            for t in PandasDatasource.asset_types
+            camel_to_snake(t.__name__).split("_asset")[0] for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
@@ -141,9 +140,7 @@ class TestDynamicPandasAssets:
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
-    def test_add_asset_method_exists_and_is_functional(
-        self, asset_class: Type[_PandasDataAsset]
-    ):
+    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[_PandasDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -274,9 +271,7 @@ class TestDynamicPandasAssets:
         capture_reader_fn_params: tuple[list[list], list[dict]],
         extra_kwargs: dict,
     ):
-        extra_kwargs.update(
-            {"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"}
-        )
+        extra_kwargs.update({"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"})
         batch_request = (
             empty_data_context.sources.add_pandas(
                 "my_pandas",
@@ -314,9 +309,7 @@ class TestDynamicPandasAssets:
             param("read_sas", {"filepath_or_buffer": "valid_file_path"}),
             param("read_spss", {"path": "valid_file_path"}),
             param("read_sql", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}),
-            param(
-                "read_sql_query", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}
-            ),
+            param("read_sql_query", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}),
             param("read_sql_table", {"table_name": "my_table", "con": "sqlite://"}),
             param("read_stata", {"filepath_or_buffer": "valid_file_path"}),
             param("read_table", {"filepath_or_buffer": "valid_file_path"}),
@@ -346,9 +339,7 @@ class TestDynamicPandasAssets:
             }
 
         add_method_name = "add_" + read_method_name.split("read_")[1] + "_asset"
-        add_method: Callable = getattr(
-            empty_data_context.sources.pandas_default, add_method_name
-        )
+        add_method: Callable = getattr(empty_data_context.sources.pandas_default, add_method_name)
 
         asset: _PandasDataAsset = add_method(
             "my_asset",
@@ -357,21 +348,19 @@ class TestDynamicPandasAssets:
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
 
-        read_method: Callable = getattr(
-            empty_data_context.sources.pandas_default, read_method_name
-        )
+        read_method: Callable = getattr(empty_data_context.sources.pandas_default, read_method_name)
         # This is not a an ideal mock.
         # In this test we are validating that the read_method for a particular pandas datasource
         # has the correct positional arguments.
-        # We don't care about the actual data being read in and the batch that will be produced from that data.
-        # In fact, we call all our read methods on a path which might not be readable by the reader (eg calling
-        # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.
+        # We don't care about the actual data being read in and the batch that will be produced from that data.  # noqa: E501
+        # In fact, we call all our read methods on a path which might not be readable by the reader (eg calling  # noqa: E501
+        # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.  # noqa: E501
         # Ideally, we would rewrite this test so we wouldn't need to mock like this.
         mocker.patch(
             "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
-        # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.
-        # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.
+        # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.  # noqa: E501
+        # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.  # noqa: E501
         _ = read_method(*positional_args.values())
         default_asset = empty_data_context.sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
@@ -393,9 +382,7 @@ def test_default_pandas_datasource_get_and_set(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(batch, Batch)
-    csv_data_asset_1 = pandas_datasource.get_asset(
-        asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
-    )
+    csv_data_asset_1 = pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
@@ -417,9 +404,7 @@ def test_default_pandas_datasource_get_and_set(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_data_asset_2 = pandas_datasource.get_asset(
-        asset_name=expected_csv_data_asset_name
-    )
+    csv_data_asset_2 = pandas_datasource.get_asset(asset_name=expected_csv_data_asset_name)
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
@@ -450,9 +435,7 @@ def test_default_pandas_datasource_name_conflict(
 
 
 @pytest.mark.filesystem
-def test_read_dataframe(
-    empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
-):
+def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame):
     # validates that a dataframe object is passed
     with pytest.raises(ValueError) as exc_info:
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})  # type: ignore[arg-type]
@@ -526,9 +509,7 @@ def test_pandas_data_asset_batch_metadata(
     )
     assert csv_asset.batch_metadata == batch_metadata
 
-    batch_list = csv_asset.get_batch_list_from_batch_request(
-        csv_asset.build_batch_request()
-    )
+    batch_list = csv_asset.get_batch_list_from_batch_request(csv_asset.build_batch_request())
     assert len(batch_list) == 1
 
     # allow mutation of this attribute
@@ -556,6 +537,4 @@ def test_build_batch_request_raises_if_missing_dataframe(
     with pytest.raises(ValueError) as e:
         dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
-        e.value
-    )
+    assert "Cannot build batch request for dataframe asset without a dataframe" in str(e.value)

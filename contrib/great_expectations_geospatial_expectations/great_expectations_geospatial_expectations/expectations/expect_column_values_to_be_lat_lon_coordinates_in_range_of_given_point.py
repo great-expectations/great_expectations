@@ -53,16 +53,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
             if unit == "kilometers":
                 distances = column.apply(lambda x, y=center_point: fcc_projection(x, y))
             elif unit == "miles":
-                distances = column.apply(
-                    lambda x, y=center_point: fcc_projection(x, y) * 1.609344
-                )
+                distances = column.apply(lambda x, y=center_point: fcc_projection(x, y) * 1.609344)
                 range = range * 1.609344
 
         elif projection == "pythagorean":
             if unit == "kilometers":
-                distances = column.apply(
-                    lambda x, y=center_point: pythagorean_projection(x, y)
-                )
+                distances = column.apply(lambda x, y=center_point: pythagorean_projection(x, y))
             elif unit == "miles":
                 distances = column.apply(
                     lambda x, y=center_point: pythagorean_projection(x, y) * 1.609344
@@ -92,9 +88,7 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
                 )
                 range = range * 1.609344
 
-            return F.when(distances(column) < range, F.lit(True)).otherwise(
-                F.lit(False)
-            )
+            return F.when(distances(column) < range, F.lit(True)).otherwise(F.lit(False))
 
         elif projection == "pythagorean":
             if unit == "kilometers":
@@ -109,9 +103,7 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
                 )
                 range = range * 1.609344
 
-            return F.when(distances(column) < range, F.lit(True)).otherwise(
-                F.lit(False)
-            )
+            return F.when(distances(column) < range, F.lit(True)).otherwise(F.lit(False))
 
 
 def fcc_projection(loc1, loc2):
@@ -134,11 +126,7 @@ def fcc_projection(loc1, loc2):
     delta_lon = lon2 - lon1
 
     k1 = 111.13209 - (0.56605 * cos(2 * mean_lat)) + (0.0012 * cos(4 * mean_lat))
-    k2 = (
-        (111.41513 * cos(mean_lat))
-        - (0.09455 * cos(3 * mean_lat))
-        + (0.00012 * cos(5 * mean_lat))
-    )
+    k2 = (111.41513 * cos(mean_lat)) - (0.09455 * cos(3 * mean_lat)) + (0.00012 * cos(5 * mean_lat))
 
     distance = sqrt((k1 * delta_lat) ** 2 + (k2 * delta_lon) ** 2)
 
@@ -218,9 +206,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
           a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
-    def validate_configuration(
-        cls, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(cls, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -245,9 +231,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             assert (
                 center_point is not None and range is not None
             ), "center_point and range must be specified"
-            assert (
-                isinstance(center_point, tuple) or isinstance(center_point, list)
-            ) and all(
+            assert (isinstance(center_point, tuple) or isinstance(center_point, list)) and all(
                 isinstance(n, float) for n in center_point
             ), "center_point must be a tuple or list of lat/lon floats"
             assert (center_point[0] >= -90 and center_point[0] <= 90) and (
@@ -473,7 +457,9 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         )
 
         if params["mostly"] is None:
-            template_str = "values must be in $projection projection within $range $unit of $center_point"
+            template_str = (
+                "values must be in $projection projection within $range $unit of $center_point"
+            )
         else:
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(

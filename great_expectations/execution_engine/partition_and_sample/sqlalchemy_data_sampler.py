@@ -41,7 +41,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             A query as a string or sqlalchemy object.
-        """
+        """  # noqa: E501
 
         # Partition clause should be permissive of all values if not supplied.
         if where_clause is None:
@@ -57,12 +57,10 @@ class SqlAlchemyDataSampler(DataSampler):
         dialect_name: str = execution_engine.dialect_name
         if dialect_name == GXSqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
-            # limit doesn't compile properly for oracle so we will append rownum to query string later
+            # limit doesn't compile properly for oracle so we will append rownum to query string later  # noqa: E501
             raw_query: sqlalchemy.Selectable = (
                 sa.select("*")
-                .select_from(
-                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                )
+                .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
                 .where(where_clause)
             )
             query: str = str(
@@ -78,9 +76,7 @@ class SqlAlchemyDataSampler(DataSampler):
             # successfully in the resulting mssql query.
             selectable_query: sqlalchemy.Selectable = (
                 sa.select("*")
-                .select_from(
-                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                )
+                .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
                 .where(where_clause)
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
@@ -92,15 +88,13 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
             self._validate_mssql_limit_param(n)
-            # This string replacement is here because the limit parameter is not substituted during query.compile()
+            # This string replacement is here because the limit parameter is not substituted during query.compile()  # noqa: E501
             string_of_query = string_of_query.replace("?", str(n))
             return string_of_query
         else:
             return (
                 sa.select("*")
-                .select_from(
-                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                )
+                .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
                 .where(where_clause)
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
@@ -114,7 +108,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             None
-        """
+        """  # noqa: E501
         if not isinstance(n, (str, int)):
             raise gx_exceptions.InvalidConfigError(
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
@@ -144,7 +138,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             Sqlalchemy selectable.
-        """
+        """  # noqa: E501
         try:
             table_name: str = batch_spec["table_name"]
         except KeyError as e:
@@ -162,17 +156,13 @@ class SqlAlchemyDataSampler(DataSampler):
 
         num_rows: int = execution_engine.execute_query(
             sa.select(sa.func.count())
-            .select_from(
-                sa.table(table_name, schema=batch_spec.get("schema_name", None))
-            )
+            .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
             .where(where_clause)
         ).scalar()
         sample_size: int = round(p * num_rows)
         return (
             sa.select("*")
-            .select_from(
-                sa.table(table_name, schema=batch_spec.get("schema_name", None))
-            )
+            .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
             .where(where_clause)
             .order_by(sa.func.random())
             .limit(sample_size)
@@ -197,9 +187,7 @@ class SqlAlchemyDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
         value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
 
@@ -223,12 +211,8 @@ class SqlAlchemyDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
-        value_list: list = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "value_list"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
+        value_list: list = self.get_sampling_kwargs_value_or_default(batch_spec, "value_list")
         return sa.column(column_name).in_(value_list)
 
     def sample_using_md5(
@@ -246,12 +230,10 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Raises:
             SamplerError
-        """
+        """  # noqa: E501
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         hash_digits: int = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
         )
@@ -260,8 +242,6 @@ class SqlAlchemyDataSampler(DataSampler):
         )
 
         return (
-            sa.func.right(
-                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
-            )
+            sa.func.right(sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits)
             == hash_value
         )

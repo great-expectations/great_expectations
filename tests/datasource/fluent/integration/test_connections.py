@@ -49,7 +49,7 @@ class TestSnowflake:
         However, if we try to add an asset that is not queryable with the current datasource connection details,
         then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
-        """
+        """  # noqa: E501
         snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
             "my_ds", connection_string=connection_string
         )
@@ -65,9 +65,7 @@ class TestSnowflake:
                 # query the asset, if it fails then we should expect a TestConnectionError
                 # expect the sql ProgrammingError to be raised
                 # we are only testing the failure case here
-                snowflake_ds.get_engine().execute(
-                    f"SELECT * FROM {table_name} LIMIT 1;"
-                )
+                snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
                 print(f"{table_name} is queryable")
             except sa.exc.ProgrammingError:
                 print(f"{table_name} is not queryable")
@@ -112,9 +110,7 @@ class TestSnowflake:
         snowflake_ds.get_engine().execute(f"SELECT * FROM {table_name} LIMIT 1;")
 
         # the table is queryable so the `add_table_asset()` should pass the test_connection step
-        asset = snowflake_ds.add_table_asset(
-            name="reachable asset", table_name=table_name
-        )
+        asset = snowflake_ds.add_table_asset(name="reachable asset", table_name=table_name)
         print(f"\n  Yay, asset was created!\n{asset!r}")
 
 

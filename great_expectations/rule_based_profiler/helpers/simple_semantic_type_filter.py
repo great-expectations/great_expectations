@@ -39,7 +39,7 @@ def _is_sequence_of(sequence: Sequence, type_: Type[T]) -> TypeGuard[Sequence[T]
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
     """
     This class provides default implementation methods, any of which can be overwritten with different mechanisms.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -84,12 +84,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
             if _is_sequence_of(semantic_types, str):
                 return [
-                    SemanticDomainTypes(semantic_type.lower())
-                    for semantic_type in semantic_types
+                    SemanticDomainTypes(semantic_type.lower()) for semantic_type in semantic_types
                 ]
 
             raise ValueError(
-                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."  # noqa: E501
             )
 
         raise ValueError("Unrecognized semantic_types directive.")
@@ -139,7 +138,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_types_dict_list: List[Dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:
-        # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
+        # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.  # noqa: E501
         column_types_dict_list = list(
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]
@@ -154,7 +153,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
-    """
+    """  # noqa: E501
             )
 
         column_type: str = str(column_types_dict_list[0]["type"]).upper()
@@ -163,8 +162,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if any(
             map(
                 lambda type_name: column_type.startswith(type_name.upper()),
-                ProfilerTypeMapping.INT_TYPE_NAMES
-                + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
+                ProfilerTypeMapping.INT_TYPE_NAMES + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
             )
         ):
             semantic_column_type = SemanticDomainTypes.NUMERIC
@@ -196,10 +194,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         }:
             semantic_column_type = SemanticDomainTypes.IDENTIFIER
         elif column_type in (
-            {
-                type_name.upper()
-                for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES
-            }
+            {type_name.upper() for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES}
             | {type_name.upper() for type_name in ProfilerTypeMapping.RECORD_TYPE_NAMES}
         ):
             semantic_column_type = SemanticDomainTypes.MISCELLANEOUS

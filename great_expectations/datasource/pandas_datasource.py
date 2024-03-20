@@ -65,7 +65,7 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             A complete datasource configuration.
 
-        """
+        """  # noqa: E501
 
         if data_asset_type is None:
             data_asset_type = {
@@ -130,9 +130,7 @@ class PandasDatasource(LegacyDatasource):
         )
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop(
-            "batch_kwargs_generators", None
-        )
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super().__init__(
             name,
             data_context=data_context,
@@ -212,7 +210,7 @@ class PandasDatasource(LegacyDatasource):
         elif "s3" in batch_kwargs:
             # deprecated-v0.13.0
             warnings.warn(
-                "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
+                "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "  # noqa: E501
                 "Please use a path including the s3a:// protocol instead.",
                 DeprecationWarning,
             )
@@ -230,12 +228,8 @@ class PandasDatasource(LegacyDatasource):
             logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
-            default_reader_options = self._infer_default_options(
-                reader_fn, reader_options
-            )
-            if not reader_options.get("encoding") and default_reader_options.get(
-                "encoding"
-            ):
+            default_reader_options = self._infer_default_options(reader_fn, reader_options)
+            if not reader_options.get("encoding") and default_reader_options.get("encoding"):
                 reader_options["encoding"] = s3_object.get(
                     "ContentEncoding", default_reader_options.get("encoding")
                 )
@@ -273,9 +267,7 @@ class PandasDatasource(LegacyDatasource):
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return {"reader_method": "read_parquet"}
         elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}
@@ -331,7 +323,7 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             ReaderMethod to use for the filepath
 
-        """
+        """  # noqa: E501
         if reader_method is None and path is None:
             raise BatchKwargsError(
                 "Unable to determine pandas reader function without reader_method or path.",

@@ -55,16 +55,12 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={
-        "query": f"SELECT * from {sfSchema.lower()}.taxi_data LIMIT 10"
-    },
+    runtime_parameters={"query": f"SELECT * from {sfSchema.lower()}.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -78,9 +74,7 @@ batch_request = BatchRequest(
     data_asset_name=f"{sfSchema.lower()}.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 

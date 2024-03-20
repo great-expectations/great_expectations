@@ -48,9 +48,7 @@ def test_compute_metric_run_calls_metric_retrievers():
 
     assert mock_metric_retriever.get_metrics.call_count == 1
 
-    mock_metric_retriever.get_metrics.assert_called_once_with(
-        batch_request=mock_batch_request
-    )
+    mock_metric_retriever.get_metrics.assert_called_once_with(batch_request=mock_batch_request)
 
 
 def test_compute_metric_run_returns_metric_run():

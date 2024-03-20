@@ -291,7 +291,7 @@ class FluentBaseModel(pydantic.BaseModel):
             include_exclude: The include or exclude key passed to pydantic model export methods.
 
         Returns: A mutable dictionary that can be used for nested include/exclude.
-        """
+        """  # noqa: E501
         if isinstance(include_exclude, Mapping):
             include_exclude_dict = dict(include_exclude)
         elif isinstance(include_exclude, AbstractSet):
@@ -341,6 +341,4 @@ def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) 
         logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} added")
     else:
         model.__fields_set__.discard(field_name)
-        logger.debug(
-            f"{model.__class__.__name__}.__fields_set__ {field_name} discarded"
-        )
+        logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} discarded")

@@ -22,14 +22,14 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
-    ColumnMapMetricProvider
-):
+class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(ColumnMapMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.prediction_confidence_for_data_label_less_than_or_equal_to_threshold"
+    condition_metric_name = (
+        "column_values.prediction_confidence_for_data_label_less_than_or_equal_to_threshold"
+    )
 
     condition_value_keys = (
         "threshold",
@@ -68,9 +68,7 @@ class ColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
         return data_label_conf <= threshold
 
 
-class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
-    ColumnMapExpectation
-):
+class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(ColumnMapExpectation):
     """Expect the column values to have a DataProfiler confidence threshold less than or equal to the specified threshold for the data label.
 
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, is the confidence threshold provided by the DataProfiler model upper bounded by the user-specified threshold.
@@ -157,7 +155,9 @@ class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.prediction_confidence_for_data_label_less_than_or_equal_to_threshold"
+    map_metric = (
+        "column_values.prediction_confidence_for_data_label_less_than_or_equal_to_threshold"
+    )
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -187,5 +187,7 @@ class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold().run_diagnostics()
+    diagnostics_report = (
+        ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold().run_diagnostics()
+    )
     print(diagnostics_report.generate_checklist())

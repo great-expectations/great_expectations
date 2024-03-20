@@ -91,7 +91,7 @@ class ParameterBuilder(ABC, Builder):
             class_name: MetricMultiBatchParameterBuilder
             metric_name: column.mean
         ```
-    """
+    """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = Builder.exclude_field_names | {
         "evaluation_parameter_builders",
@@ -100,9 +100,7 @@ class ParameterBuilder(ABC, Builder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -116,14 +114,12 @@ class ParameterBuilder(ABC, Builder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(data_context=data_context)
 
         self._name = name
 
-        self._evaluation_parameter_builder_configs = (
-            evaluation_parameter_builder_configs
-        )
+        self._evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
         self._evaluation_parameter_builders = init_rule_parameter_builders(
             parameter_builder_configs=evaluation_parameter_builder_configs,
@@ -149,26 +145,23 @@ class ParameterBuilder(ABC, Builder):
             batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-        """
+        """  # noqa: E501
         runtime_configuration = runtime_configuration or {}
 
-        fully_qualified_parameter_names: List[str] = (
-            get_fully_qualified_parameter_names(
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
 
-        # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+        # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.  # noqa: E501
         recompute_existing_parameter_values: bool = runtime_configuration.get(
             "recompute_existing_parameter_values", False
         )
 
         if (
             recompute_existing_parameter_values
-            or self.raw_fully_qualified_parameter_name
-            not in fully_qualified_parameter_names
+            or self.raw_fully_qualified_parameter_name not in fully_qualified_parameter_names
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
@@ -218,19 +211,17 @@ class ParameterBuilder(ABC, Builder):
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
-        """
-        # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
-        evaluation_parameter_builders: List[ParameterBuilder] = (
-            self.evaluation_parameter_builders
-        )
+        """  # noqa: E501
+        # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.  # noqa: E501
+        evaluation_parameter_builders: List[ParameterBuilder] = self.evaluation_parameter_builders
 
         if not evaluation_parameter_builders:
             return
 
-        # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
-        # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-        # when "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
-        # this list contains "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
+        # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"  # noqa: E501
+        # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"  # noqa: E501
+        # when "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");  # noqa: E501
+        # this list contains "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.  # noqa: E501
         if fully_qualified_parameter_names is None:
             fully_qualified_parameter_names = get_fully_qualified_parameter_names(
                 domain=domain,
@@ -238,8 +229,8 @@ class ParameterBuilder(ABC, Builder):
                 parameters=parameters,
             )
 
-        # Step-3: Check presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
-        # over evaluation dependencies.  Execute "ParameterBuilder.build_parameters()" if not in "Domain" scoped list.
+        # Step-3: Check presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating  # noqa: E501
+        # over evaluation dependencies.  Execute "ParameterBuilder.build_parameters()" if not in "Domain" scoped list.  # noqa: E501
         evaluation_parameter_builder: ParameterBuilder
         for evaluation_parameter_builder in evaluation_parameter_builders:
             if (
@@ -273,7 +264,7 @@ class ParameterBuilder(ABC, Builder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
+        """  # noqa: E501
         pass
 
     @property
@@ -296,7 +287,7 @@ class ParameterBuilder(ABC, Builder):
     def raw_fully_qualified_parameter_name(self) -> str:
         """
         This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
-        """
+        """  # noqa: E501
         return f"{RAW_PARAMETER_KEY}{self.name}"
 
     @property
@@ -342,12 +333,8 @@ class ParameterBuilder(ABC, Builder):
     def get_metrics(  # noqa: C901, PLR0913
         self,
         metric_name: str,
-        metric_domain_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
-        metric_value_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
+        metric_domain_kwargs: Optional[Union[Union[str, dict], List[Union[str, dict]]]] = None,
+        metric_value_kwargs: Optional[Union[Union[str, dict], List[Union[str, dict]]]] = None,
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
@@ -374,11 +361,11 @@ class ParameterBuilder(ABC, Builder):
         :return: "MetricComputationResult" object, containing both: data samples in the format "N x R^m", where "N"
         (most significant dimension) is the number of measurements (e.g., one per "Batch" of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
-        """
+        """  # noqa: E501
         if not metric_name:
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
-specified (empty "metric_name" value detected)."""
+specified (empty "metric_name" value detected)."""  # noqa: E501
             )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
@@ -389,7 +376,7 @@ specified (empty "metric_name" value detected)."""
         )
         if not batch_ids:
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."  # noqa: E501
             )
 
         """
@@ -401,7 +388,7 @@ specified (empty "metric_name" value detected)."""
         All "MetricConfiguration" directives are generated by combining each metric_value_kwargs" with
         "metric_domain_kwargs" for all "batch_ids" (where every "metric_domain_kwargs" represents separate "batch_id").
         Then, all "MetricConfiguration" objects, collected into list as container, are resolved simultaneously.
-        """
+        """  # noqa: E501
 
         # Step-1: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
 
@@ -428,14 +415,14 @@ specified (empty "metric_name" value detected)."""
             for batch_id in batch_ids
         ]
 
-        # Step-2: Gather "metric_value_kwargs" (caller may require same metric computed for multiple arguments).
+        # Step-2: Gather "metric_value_kwargs" (caller may require same metric computed for multiple arguments).  # noqa: E501
 
         if not isinstance(metric_value_kwargs, list):
             metric_value_kwargs = [metric_value_kwargs]
 
         value_kwargs_cursor: dict
         metric_value_kwargs = [
-            # Obtain value kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            # Obtain value kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
             get_parameter_value_and_validate_return_type(
                 domain=domain,
                 parameter_reference=value_kwargs_cursor,
@@ -446,7 +433,7 @@ specified (empty "metric_name" value detected)."""
             for value_kwargs_cursor in metric_value_kwargs
         ]
 
-        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs"/"metric_value_kwargs" pairs.
+        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs"/"metric_value_kwargs" pairs.  # noqa: E501
 
         domain_kwargs_cursor: dict
         kwargs_combinations: List[List[dict]] = [
@@ -476,11 +463,9 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
-        graph: ValidationGraph = (
-            validator.metrics_calculator.build_metric_dependency_graph(
-                metric_configurations=metrics_to_resolve,
-                runtime_configuration=runtime_configuration,
-            )
+        graph: ValidationGraph = validator.metrics_calculator.build_metric_dependency_graph(
+            metric_configurations=metrics_to_resolve,
+            runtime_configuration=runtime_configuration,
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
@@ -497,7 +482,7 @@ specified (empty "metric_name" value detected)."""
             min_graph_edges_pbar_enable=0,
         )
 
-        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.  # noqa: E501
 
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
 
@@ -511,14 +496,12 @@ specified (empty "metric_name" value detected)."""
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
                     batch_ids=batch_ids,
-                    metric_attributes=Attributes(
-                        metric_configuration.metric_value_kwargs
-                    ),
+                    metric_attributes=Attributes(metric_configuration.metric_value_kwargs),
                     metric_values_by_batch_id=None,
                 )
-                attributed_resolved_metrics_map[
-                    metric_configuration.metric_value_kwargs_id
-                ] = attributed_resolved_metrics
+                attributed_resolved_metrics_map[metric_configuration.metric_value_kwargs_id] = (
+                    attributed_resolved_metrics
+                )
 
             if metric_configuration.id in resolved_metrics:
                 resolved_metric_value = resolved_metrics[metric_configuration.id]
@@ -528,11 +511,11 @@ specified (empty "metric_name" value detected)."""
                 )
             else:
                 logger.warning(
-                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."  # noqa: E501
                 )
                 continue
 
-        # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+        # Step-6: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.  # noqa: E501
 
         metric_attributes_id: str
         for (
@@ -548,13 +531,11 @@ specified (empty "metric_name" value detected)."""
             ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
-                    for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
+                    for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()  # noqa: E501
                 }
-                attributed_resolved_metrics_map[metric_attributes_id] = (
-                    attributed_resolved_metrics
-                )
+                attributed_resolved_metrics_map[metric_attributes_id] = attributed_resolved_metrics
 
-        # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-7: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.  # noqa: E501
 
         for (
             metric_attributes_id,
@@ -571,7 +552,7 @@ specified (empty "metric_name" value detected)."""
                 parameters=parameters,
             )
 
-        # Step-8: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-8: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").  # noqa: E501
 
         details: dict = {
             "metric_configuration": {
@@ -606,8 +587,8 @@ specified (empty "metric_name" value detected)."""
         1. If "enforce_numeric_metric" flag is set, raise an error if a non-numeric value is found in sample vectors.
         2. Further, if a NaN is encountered in a sample vectors and "replace_nan_with_zero" is True, then replace those
         NaN values with the 0.0 floating point number; if "replace_nan_with_zero" is False, then raise an error.
-        """
-        # Obtain enforce_numeric_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        """  # noqa: E501
+        # Obtain enforce_numeric_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         enforce_numeric_metric = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=enforce_numeric_metric,
@@ -616,7 +597,7 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
 
-        # Obtain replace_nan_with_zero from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain replace_nan_with_zero from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         replace_nan_with_zero = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=replace_nan_with_zero,
@@ -647,7 +628,7 @@ specified (empty "metric_name" value detected)."""
 
             metric_value_shape: tuple = metric_values.shape
 
-            # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+            # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.  # noqa: E501
             metric_value_shape_idx: int
             axes: List[np.ndarray] = [
                 np.indices(dimensions=(metric_value_shape_idx,))[0]
@@ -662,7 +643,7 @@ specified (empty "metric_name" value detected)."""
                     if pd.isnull(metric_value):
                         if not replace_nan_with_zero:
                             raise ValueError(
-                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value."""
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value."""  # noqa: E501
                             )
 
                         batch_metric_values.append(0.0)
@@ -679,7 +660,7 @@ specified (empty "metric_name" value detected)."""
                         raise gx_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
 numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(metric_value)!s}" was computed).
-"""
+"""  # noqa: E501
                         )
                     else:
                         batch_metric_values.append(metric_value)
@@ -688,9 +669,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(
 
             metric_values_by_batch_id[batch_id] = np.asarray(batch_metric_values)
 
-        attributed_resolved_metrics.metric_values_by_batch_id = (
-            metric_values_by_batch_id
-        )
+        attributed_resolved_metrics.metric_values_by_batch_id = metric_values_by_batch_id
 
     @staticmethod
     def _get_best_candidate_above_threshold(
@@ -700,7 +679,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(
         """
         Helper method to calculate which candidate strings or patterns are the best match (ie. highest ratio),
         provided they are also above the threshold.
-        """
+        """  # noqa: E501
         best_candidate: Optional[str] = None
         best_ratio: float = 0.0
 
@@ -721,7 +700,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(
         Helper method to sort all candidate strings or patterns by success ratio (how well they matched the domain).
 
         Returns sorted dict of candidate as key and ratio as value
-        """
+        """  # noqa: E501
         # noinspection PyTypeChecker
         return dict(
             sorted(
@@ -758,8 +737,6 @@ def init_parameter_builder(
     parameter_builder: ParameterBuilder = instantiate_class_from_config(
         config=parameter_builder_config,
         runtime_environment={"data_context": data_context},
-        config_defaults={
-            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-        },
+        config_defaults={"module_name": "great_expectations.rule_based_profiler.parameter_builder"},
     )
     return parameter_builder

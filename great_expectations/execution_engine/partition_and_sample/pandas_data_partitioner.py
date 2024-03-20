@@ -130,10 +130,8 @@ class PandasDataPartitioner(DataPartitioner):
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
-        date_parts_dict: dict = (
-            self._convert_datetime_batch_identifiers_to_date_parts_dict(
-                column_batch_identifiers, date_parts
-            )
+        date_parts_dict: dict = self._convert_datetime_batch_identifiers_to_date_parts_dict(
+            column_batch_identifiers, date_parts
         )
 
         for date_part, date_part_value in date_parts_dict.items():
@@ -156,9 +154,7 @@ class PandasDataPartitioner(DataPartitioner):
         return df
 
     @staticmethod
-    def partition_on_column_value(
-        df, column_name: str, batch_identifiers: dict
-    ) -> pd.DataFrame:
+    def partition_on_column_value(df, column_name: str, batch_identifiers: dict) -> pd.DataFrame:
         """Return a dataframe where rows are filtered based on the specified column value.
 
         Args:
@@ -168,7 +164,7 @@ class PandasDataPartitioner(DataPartitioner):
 
         Returns:
             Filtered spark DataFrame.
-        """
+        """  # noqa: E501
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -179,9 +175,7 @@ class PandasDataPartitioner(DataPartitioner):
         date_format_string: str = "%Y-%m-%d",
     ) -> pd.DataFrame:
         """Convert the values in the named column to the given date_format, and partition on that"""
-        stringified_datetime_series = df[column_name].map(
-            lambda x: x.strftime(date_format_string)
-        )
+        stringified_datetime_series = df[column_name].map(lambda x: x.strftime(date_format_string))
         matching_string = batch_identifiers[column_name]
         return df[stringified_datetime_series == matching_string]
 
@@ -192,9 +186,7 @@ class PandasDataPartitioner(DataPartitioner):
         """Divide the values in the named column by `divisor`, and partition on that"""
 
         matching_divisor = batch_identifiers[column_name]
-        matching_rows = df[column_name].map(
-            lambda x: int(x / divisor) == matching_divisor
-        )
+        matching_rows = df[column_name].map(lambda x: int(x / divisor) == matching_divisor)
 
         return df[matching_rows]
 
@@ -242,7 +234,7 @@ class PandasDataPartitioner(DataPartitioner):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                        Reference to {hash_function_name} cannot be found."""
+                        Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
         matching_rows = df[column_name].map(

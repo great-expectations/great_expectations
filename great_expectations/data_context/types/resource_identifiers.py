@@ -100,7 +100,7 @@ class BatchIdentifierSchema(Schema):
 
 @public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""  # noqa: E501
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
@@ -287,8 +287,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def to_evaluation_parameter_urn(self):
         if self._metric_kwargs_id is None:
             return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple())
-                + [self.metric_name]
+                list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]
             )
         else:
             return "urn:great_expectations:validations:" + ":".join(
@@ -310,9 +309,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
-                tuple_[3:-2]
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[3:-2]),
             metric_name=metric_id.metric_name,
             metric_kwargs_id=metric_id.metric_kwargs_id,
         )
@@ -321,8 +318,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
-                "ValidationMetricIdentifier fixed length tuple must have exactly six "
-                "components."
+                "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
         if tuple_[2] == "__":
             tuple_data_asset_name = None
@@ -408,9 +404,7 @@ class ValidationResultIdentifierSchema(Schema):
     run_id = fields.Nested(
         RunIdentifierSchema,
         required=True,
-        error_messages={
-            "required": "run_id is required for a " "ValidationResultIdentifier"
-        },
+        error_messages={"required": "run_id is required for a " "ValidationResultIdentifier"},
     )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
@@ -427,13 +421,9 @@ class SiteSectionIdentifier(DataContextKey):
             if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ValidationResultIdentifier(
-                    *resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(*resource_identifier)
             else:
-                self._resource_identifier = ValidationResultIdentifier(
-                    **resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(**resource_identifier)
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
                 self._resource_identifier = resource_identifier  # type: ignore[assignment]
@@ -447,7 +437,7 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
     @property
@@ -478,7 +468,7 @@ class SiteSectionIdentifier(DataContextKey):
             )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
 

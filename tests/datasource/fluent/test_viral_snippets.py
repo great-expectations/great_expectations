@@ -34,9 +34,7 @@ def test_load_an_existing_config(
     fluent_yaml_config_file: pathlib.Path,
     fluent_only_config: GxConfig,
 ):
-    context = get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
+    context = get_context(context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False)
 
     assert context.fluent_config == fluent_only_config
 
@@ -101,9 +99,7 @@ def test_save_datacontext_persists_fluent_config(
     for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name not in initial_yaml
 
-    context: FileDataContext = get_context(
-        context_root_dir=config_file.parent, cloud_mode=False
-    )
+    context: FileDataContext = get_context(context_root_dir=config_file.parent, cloud_mode=False)
 
     context.fluent_config = fluent_only_config
     context._save_project_config()
@@ -129,9 +125,7 @@ def test_file_context_add_and_save_fluent_datasource(
     initial_yaml = config_file.read_text()
     assert datasource_name not in initial_yaml
 
-    context: FileDataContext = get_context(
-        context_root_dir=config_file.parent, cloud_mode=False
-    )
+    context: FileDataContext = get_context(context_root_dir=config_file.parent, cloud_mode=False)
 
     ds = context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
@@ -296,7 +290,7 @@ def test_quickstart_workflow(
 
     In particular, this test covers the file-backend and cloud-backed usecases with this script.
     The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
-    """
+    """  # noqa: E501
     # Slight deviation from the Quickstart here:
     #   1. Using existing contexts instead of `get_context`
     #   2. Using `read_csv` on a local file instead of making a network request
@@ -315,9 +309,7 @@ def test_quickstart_workflow(
     suite = context.add_expectation_suite("my_suite")
     suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
     suite.add_expectation(
-        gxe.ExpectColumnValuesToBeBetween(
-            column="passenger_count", min_value=1, max_value=6
-        )
+        gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6)
     )
 
     # Validate data

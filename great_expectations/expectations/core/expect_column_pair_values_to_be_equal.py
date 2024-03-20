@@ -56,11 +56,11 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
-    ignore_row_if: Literal[
-        "both_values_are_missing", "either_value_is_missing", "neither"
-    ] = "both_values_are_missing"
+    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
+        "both_values_are_missing"
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -104,7 +104,9 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         template_str = ""
 
         if not params.column_A or not params.column_B:
-            template_str += "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
+            template_str += (
+                "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
+            )
 
         if not params.mostly or params.mostly.value == 1.0:
             template_str += "Values in $column_A and $column_B must always be equal."
@@ -112,7 +114,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."  # noqa: E501
 
         renderer_configuration.template_str = template_str
 
@@ -146,17 +148,17 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
 
         if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            template_str = (
+                " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            )
             params["row_condition"] = None
 
         if params["mostly"] is None or params["mostly"] == 1.0:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."  # noqa: E501
 
         if params["row_condition"] is not None:
             (
@@ -164,10 +166,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
 

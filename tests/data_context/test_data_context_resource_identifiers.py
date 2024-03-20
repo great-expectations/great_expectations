@@ -84,10 +84,8 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "__none__",
     )
 
-    validation_result_identifier_no_run_id_no_batch_identifier = (
-        ValidationResultIdentifier(
-            expectation_suite_identifier, RunIdentifier(None), None
-        )
+    validation_result_identifier_no_run_id_no_batch_identifier = ValidationResultIdentifier(
+        expectation_suite_identifier, RunIdentifier(None), None
     )
     assert validation_result_identifier_no_run_id_no_batch_identifier.to_tuple() == (
         "my",
@@ -98,12 +96,9 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "20190926T134241.000000Z",
         "__none__",
     )
-    assert (
-        validation_result_identifier_no_run_id_no_batch_identifier.to_fixed_length_tuple()
-        == (
-            "my.expectation.suite.name",
-            "__none__",
-            "20190926T134241.000000Z",
-            "__none__",
-        )
+    assert validation_result_identifier_no_run_id_no_batch_identifier.to_fixed_length_tuple() == (
+        "my.expectation.suite.name",
+        "__none__",
+        "20190926T134241.000000Z",
+        "__none__",
     )
