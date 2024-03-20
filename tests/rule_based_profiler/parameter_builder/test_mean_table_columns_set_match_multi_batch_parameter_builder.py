@@ -26,9 +26,7 @@ pytestmark = pytest.mark.big
 def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     _: ParameterBuilder = MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         name="my_name",
@@ -39,9 +37,7 @@ def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builde
 def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",

@@ -55,9 +55,7 @@ def mocked_get_response(
                         "organization_id": f"{organization_id}",
                         "updated_at": "2022-08-02T17:55:45.107550",
                     },
-                    "links": {
-                        "self": f"/organizations/{organization_id}/profilers/{profiler_id}"
-                    },
+                    "links": {"self": f"/organizations/{organization_id}/profilers/{profiler_id}"},
                     "type": "profiler",
                 },
             },
@@ -130,7 +128,7 @@ def mock_get_all_profilers_json(
                                 ],
                                 "parameter_builders": [
                                     {
-                                        "batch_request": "$variables.my_last_month_sales_batch_request",
+                                        "batch_request": "$variables.my_last_month_sales_batch_request",  # noqa: E501
                                         "class_name": "MetricParameterBuilder",
                                         "metric_domain_kwargs": "$domain.domain_kwargs",
                                         "metric_name": "column.min",
@@ -170,7 +168,7 @@ def mock_get_all_profilers_json(
                                 ],
                                 "parameter_builders": [
                                     {
-                                        "batch_request": "$variables.my_last_month_sales_batch_request",
+                                        "batch_request": "$variables.my_last_month_sales_batch_request",  # noqa: E501
                                         "class_name": "MetricParameterBuilder",
                                         "metric_domain_kwargs": "$domain.domain_kwargs",
                                         "metric_name": "column.min",

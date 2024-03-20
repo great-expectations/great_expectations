@@ -65,9 +65,7 @@ class InMemoryBatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "dataset" not in self:
-            raise InvalidBatchKwargsError(
-                "InMemoryBatchKwargs requires a 'dataset' element"
-            )
+            raise InvalidBatchKwargsError("InMemoryBatchKwargs requires a 'dataset' element")
 
     @property
     def dataset(self):

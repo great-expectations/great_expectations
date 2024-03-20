@@ -33,7 +33,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -79,7 +79,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             number of data_references known by this DataConnector
-        """
+        """  # noqa: E501
         return len(self._data_references_cache)
 
     @override
@@ -90,7 +90,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     @public_api
@@ -116,16 +116,13 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         )
 
         data_asset_names: List[str] = [
-            batch_definition.data_asset_name
-            for batch_definition in batch_definition_list
+            batch_definition.data_asset_name for batch_definition in batch_definition_list
         ]
 
         return list(set(data_asset_names))
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -135,9 +132,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return PathBatchSpec(batch_spec)
 

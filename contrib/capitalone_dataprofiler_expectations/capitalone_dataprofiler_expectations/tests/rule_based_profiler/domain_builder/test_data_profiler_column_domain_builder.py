@@ -43,9 +43,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     This test verifies that "Domain" objects corresponding to full list of columns in Profiler Report (same as in Batch)
     are emitted when path to "profile.pkl" is specified explicitly.
     """
-    data_context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     profile_path = os.path.join(  # noqa: PTH118
         test_root_path,
@@ -315,9 +313,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_default_refere
     This test verifies that "Domain" objects corresponding to full list of columns in Profiler Report (same as in Batch)
     are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
     """
-    data_context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     profile_path = os.path.join(  # noqa: PTH118
         test_root_path,
@@ -588,9 +584,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     This test verifies that "Domain" objects corresponding to full list of columns in Profiler Report (same as in Batch)
     are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
     """
-    data_context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     profile_path = os.path.join(  # noqa: PTH118
         test_root_path,
@@ -861,9 +855,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     This test verifies that "Domain" objects corresponding to partial list of columns in Profiler Report under exclusion
     directives (as subset of columns in Batch) are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
     """
-    data_context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     profile_path = os.path.join(  # noqa: PTH118
         test_root_path,
@@ -1070,9 +1062,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     This test verifies that "Domain" objects corresponding to partial list of columns in Profiler Report (as subset of
     columns in Batch) are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
     """
-    data_context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     profile_path = os.path.join(  # noqa: PTH118
         test_root_path,

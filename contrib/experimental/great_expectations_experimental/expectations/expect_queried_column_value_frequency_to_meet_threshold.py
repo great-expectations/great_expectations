@@ -93,17 +93,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
-            success = all(
-                query_result[value[i]] >= threshold[i] for i in range(len(value))
-            )
+            success = all(query_result[value[i]] >= threshold[i] for i in range(len(value)))
 
             return {
                 "success": success,
-                "result": {
-                    "observed_value": [
-                        query_result[value[i]] for i in range(len(value))
-                    ]
-                },
+                "result": {"observed_value": [query_result[value[i]] for i in range(len(value))]},
             }
 
         success = query_result[value] >= threshold

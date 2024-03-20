@@ -19,9 +19,7 @@ class _EnvConfig(BaseSettings):
     gx_posthog_host: HttpUrl = "https://posthog.greatexpectations.io"  # type: ignore[assignment] # default will be coerced
     gx_posthog_project_api_key: str = ""
 
-    _gx_cloud_dev_posthog_project_api_key: str = (
-        "phc_dq7deLClUIj5Sm9M40eAMthzkNtBOhF22ZDqPVxU14e"
-    )
+    _gx_cloud_dev_posthog_project_api_key: str = "phc_dq7deLClUIj5Sm9M40eAMthzkNtBOhF22ZDqPVxU14e"
 
     @property
     def posthog_enabled(self) -> bool:

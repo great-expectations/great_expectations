@@ -11,7 +11,7 @@ from typing import (
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
+from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (  # noqa: E501
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
@@ -41,7 +41,7 @@ def _pandas_multicolumn_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -56,7 +56,7 @@ def _pandas_multicolumn_map_condition_values(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -64,12 +64,10 @@ def _pandas_multicolumn_map_condition_values(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_pandas_multicolumn_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     domain_values = df[column_list]
 
@@ -93,7 +91,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -104,7 +102,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -112,7 +110,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_pandas_multicolumn_map_condition_filtered_row_count).
-"""
+"""  # noqa: E501
         )
 
     return df.shape[0]
@@ -126,7 +124,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -141,7 +139,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -149,12 +147,10 @@ def _sqlalchemy_multicolumn_map_condition_values(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_sqlalchemy_multicolumn_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     column_selector = [sa.column(column_name) for column_name in column_list]
     query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
@@ -177,7 +173,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -188,7 +184,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -196,7 +192,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_sqlalchemy_multicolumn_map_condition_filtered_row_count).
-"""
+"""  # noqa: E501
         )
 
     selectable = get_sqlalchemy_selectable(selectable)
@@ -214,7 +210,7 @@ def _spark_multicolumn_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         unexpected_condition,
         compute_domain_kwargs,
@@ -229,7 +225,7 @@ def _spark_multicolumn_map_condition_values(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -237,12 +233,10 @@ def _spark_multicolumn_map_condition_values(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_spark_multicolumn_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -250,9 +244,7 @@ def _spark_multicolumn_map_condition_values(
         F.col("__unexpected")
     )
 
-    column_selector = [
-        F.col(column_name).alias(column_name) for column_name in column_list
-    ]
+    column_selector = [F.col(column_name).alias(column_name) for column_name in column_list]
 
     domain_values = filtered.select(column_selector)
 
@@ -280,7 +272,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -291,7 +283,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
-    """
+    """  # noqa: E501
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
@@ -299,7 +291,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
         raise ValueError(
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_spark_multicolumn_map_condition_filtered_row_count).
-"""
+"""  # noqa: E501
         )
 
     return df.count()

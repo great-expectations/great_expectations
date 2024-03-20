@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 class MetricRetriever(abc.ABC):
     """A MetricRetriever is responsible for retrieving metrics for a batch of data. It is an ABC that contains base logic and
     methods share by both the ColumnDescriptiveMetricsMetricReceiver and MetricListMetricRetriver.
-    """
+    """  # noqa: E501
 
     def __init__(self, context: AbstractDataContext):
         self._context = context
@@ -76,12 +76,12 @@ class MetricRetriever(abc.ABC):
         elif metric_lookup_key in aborted_metrics:
             exception = aborted_metrics[metric_lookup_key]
             exception_info = exception["exception_info"]
-            exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            exception_type = (
+                "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            )
             if isinstance(exception_info, ExceptionInfo):
                 exception_message = exception_info.exception_message
-                metric_exception = MetricException(
-                    type=exception_type, message=exception_message
-                )
+                metric_exception = MetricException(type=exception_type, message=exception_message)
         else:
             metric_exception = MetricException(
                 type="Not found",
@@ -118,7 +118,7 @@ class MetricRetriever(abc.ABC):
         )
         assert isinstance(
             validator.active_batch, Batch
-        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"  # noqa: E501
         batch_id = validator.active_batch.id
         return batch_id, computed_metrics, aborted_metrics
 
@@ -167,7 +167,7 @@ class MetricRetriever(abc.ABC):
         )
         assert isinstance(
             validator.active_batch, Batch
-        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"  # noqa: E501
         batch_id = validator.active_batch.id
         column_names = domain_builder.get_effective_column_names(
             validator=validator,
@@ -286,7 +286,7 @@ class MetricRetriever(abc.ABC):
             aborted_metrics=aborted_metrics,
         )
         raw_column_types: list[dict[str, Any]] = value
-        # If type is not found, don't add empty type field. This can happen if our db introspection fails.
+        # If type is not found, don't add empty type field. This can happen if our db introspection fails.  # noqa: E501
         column_types_converted_to_str: list[dict[str, str]] = []
         for raw_column_type in raw_column_types:
             if raw_column_type.get("type"):

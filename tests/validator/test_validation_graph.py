@@ -40,19 +40,18 @@ def pandas_execution_engine_fake(
             appropriate exception to be raised, while its dependencies resolve to actual values ("my_value" is used here
             as placeholder).  This makes "ValidationGraph.resolve()" -- method under test -- evaluate every
             "MetricConfiguration" of parsed "ValidationGraph" successfully, except "failed" "MetricConfiguration".
-            """
+            """  # noqa: E501
             metric_configuration: MetricConfiguration
             if failed_metric_config.id in [
                 metric_configuration.id for metric_configuration in metrics_to_resolve
             ]:
                 raise gx_exceptions.MetricResolutionError(
-                    message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()}',  # Randomizing the message to assert that only one exception is kept
+                    message=f'Error: The column "not_in_table" in BatchData does not exist.{uuid.uuid4()}',  # Randomizing the message to assert that only one exception is kept  # noqa: E501
                     failed_metrics=[failed_metric_config],
                 )
 
             return {
-                metric_configuration.id: "my_value"
-                for metric_configuration in metrics_to_resolve
+                metric_configuration.id: "my_value" for metric_configuration in metrics_to_resolve
             }
 
     PandasExecutionEngineFake.__name__ = "PandasExecutionEngine"
@@ -64,9 +63,7 @@ def metric_edge(
     table_head_metric_config: MetricConfiguration,
     column_histogram_metric_config: MetricConfiguration,
 ) -> MetricEdge:
-    return MetricEdge(
-        left=table_head_metric_config, right=column_histogram_metric_config
-    )
+    return MetricEdge(left=table_head_metric_config, right=column_histogram_metric_config)
 
 
 @pytest.fixture
@@ -99,9 +96,7 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 
 
 @pytest.fixture
-def expect_column_value_z_scores_to_be_less_than_expectation_config() -> (
-    ExpectationConfiguration
-):
+def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -143,11 +138,9 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     )
 
     graph = ValidationGraph(execution_engine=execution_engine)
-    validation_dependencies: ValidationDependencies = (
-        gxe.ExpectColumnValueZScoresToBeLessThan(
-            **expectation_configuration.kwargs
-        ).get_validation_dependencies(execution_engine)
-    )
+    validation_dependencies: ValidationDependencies = gxe.ExpectColumnValueZScoresToBeLessThan(
+        **expectation_configuration.kwargs
+    ).get_validation_dependencies(execution_engine)
 
     metric_configuration: MetricConfiguration
     for metric_configuration in validation_dependencies.get_metric_configurations():
@@ -220,7 +213,7 @@ def test_ExpectationValidationGraph_constructor(
         )
 
     assert ve.value.args == (
-        'Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object.',
+        'Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object.',  # noqa: E501
     )
 
     with pytest.raises(ValueError) as ve:
@@ -246,19 +239,13 @@ def test_ExpectationValidationGraph_update(
     validation_graph_with_single_edge: ValidationGraph,
     expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
 ) -> None:
-    assert (
-        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
-        == 0
-    )
+    assert len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges) == 0
 
     expect_column_values_to_be_unique_expectation_validation_graph.update(
         validation_graph_with_single_edge
     )
 
-    assert (
-        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
-        == 1
-    )
+    assert len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges) == 1
 
 
 @pytest.mark.unit
@@ -288,8 +275,10 @@ def test_ExpectationValidationGraph_get_exception_info(
     expect_column_values_to_be_unique_expectation_validation_graph.update(
         validation_graph_with_single_edge
     )
-    exception_info = expect_column_values_to_be_unique_expectation_validation_graph.get_exception_info(
-        metric_info=metric_info
+    exception_info = (
+        expect_column_values_to_be_unique_expectation_validation_graph.get_exception_info(
+            metric_info=metric_info
+        )
     )
 
     for key, value in exception_info.items():
@@ -307,7 +296,7 @@ def test_parse_validation_graph(
 ):
     available_metrics: Dict[Tuple[str, str, str], MetricValue]
 
-    # Parse input "ValidationGraph" object and confirm the numbers of ready and still needed metrics.
+    # Parse input "ValidationGraph" object and confirm the numbers of ready and still needed metrics.  # noqa: E501
     available_metrics = {}
     (
         ready_metrics,
@@ -317,7 +306,7 @@ def test_parse_validation_graph(
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
-    # Show that including "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.
+    # Show that including "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.  # noqa: E501
     available_metrics = {("nonexistent", "nonexistent", "nonexistent"): "NONE"}
     (
         ready_metrics,
@@ -333,10 +322,7 @@ def test_populate_dependencies(
     expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
     assert (
-        len(
-            expect_column_value_z_scores_to_be_less_than_expectation_validation_graph.edges
-        )
-        == 33
+        len(expect_column_value_z_scores_to_be_less_than_expectation_validation_graph.edges) == 33
     )
 
 
@@ -441,7 +427,7 @@ def test_progress_bar_config(
     """
     This test creates mocked environment for progress bar tests; it then executes the method under test that utilizes
     the progress bar, "ValidationGraph.resolve()", with composed arguments, and verifies result.
-    """
+    """  # noqa: E501
 
     class DummyMetricConfiguration:
         pass

@@ -65,9 +65,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
@@ -231,9 +229,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
 
         days_ago_dict = get_days_ago_dict(run_date)
 
-        equivalent_previous_days: List[datetime] = [
-            days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
-        ]
+        equivalent_previous_days: List[datetime] = [days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS]
 
         assert min(equivalent_previous_days) > (
             datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)
@@ -246,9 +242,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
             metrics, run_date_str, equivalent_previous_days
         )
         run_date_count: int = day_counts_dict[run_date_str]
-        diff_fraction = get_diff_fraction(
-            run_date_count, day_counts_dict, equivalent_previous_days
-        )
+        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, equivalent_previous_days)
 
         if diff_fraction > threshold:
             msg = (

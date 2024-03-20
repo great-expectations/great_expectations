@@ -61,9 +61,7 @@ class DataConnector(ABC):
         return self._datasource_name
 
     @abstractmethod
-    def get_batch_definition_list(
-        self, batch_request: BatchRequest
-    ) -> List[LegacyBatchDefinition]:
+    def get_batch_definition_list(self, batch_request: BatchRequest) -> List[LegacyBatchDefinition]:
         """
         This interface method, implemented by subclasses, examines "BatchRequest" and converts it to one or more
         "BatchDefinition" objects, each of which can be later converted to ExecutionEngine-specific "BatchSpec" object
@@ -74,7 +72,7 @@ class DataConnector(ABC):
 
         Returns:
             List[BatchDefinition] -- list of "BatchDefinition" objects, each corresponding to "Batch" of data downstream
-        """
+        """  # noqa: E501
         pass
 
     def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> BatchSpec:
@@ -85,11 +83,9 @@ class DataConnector(ABC):
             batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
         Returns:
             BatchSpec object built from BatchDefinition
-        """
-        batch_spec_params: dict = (
-            self._generate_batch_spec_parameters_from_batch_definition(
-                batch_definition=batch_definition
-            )
+        """  # noqa: E501
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
@@ -100,15 +96,13 @@ class DataConnector(ABC):
         Raises:
             bool: True of connection test succeeds; False, otherwise.
         """
-        return (
-            self.get_unmatched_data_reference_count() < self.get_data_reference_count()
-        )
+        return self.get_unmatched_data_reference_count() < self.get_data_reference_count()
 
     @abstractmethod
     def get_data_references(self) -> List[Any]:
         """
         This interface method lists objects in the underlying data store used to create a list of data_references (type depends on cloud storage environment, SQL DBMS, etc.).
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -118,7 +112,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -128,7 +122,7 @@ class DataConnector(ABC):
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -138,7 +132,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -148,7 +142,7 @@ class DataConnector(ABC):
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -158,7 +152,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -175,7 +169,7 @@ class DataConnector(ABC):
 
         Returns:
             dict -- dictionary of "BatchSpec" properties
-        """
+        """  # noqa: E501
         pass
 
     @staticmethod
@@ -192,10 +186,7 @@ class DataConnector(ABC):
             for key, value in batch_request.options.items():
                 if value is not None and not (
                     (key in batch_definition.batch_identifiers)
-                    and (
-                        batch_definition.batch_identifiers[key]
-                        == batch_request.options[key]
-                    )
+                    and (batch_definition.batch_identifiers[key] == batch_request.options[key])
                 ):
                     return False
 

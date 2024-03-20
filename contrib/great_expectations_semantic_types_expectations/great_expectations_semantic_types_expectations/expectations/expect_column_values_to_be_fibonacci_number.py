@@ -20,9 +20,7 @@ def check_perfect_square(m):
 
 
 def check_fibonacci(m):
-    return (
-        check_perfect_square(5 * m * m + 4) or check_perfect_square(5 * m * m - 4)
-    ) and m >= 0
+    return (check_perfect_square(5 * m * m + 4) or check_perfect_square(5 * m * m - 4)) and m >= 0
 
 
 def is_valid_fibonacci_number(number: int) -> bool:

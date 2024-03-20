@@ -160,7 +160,7 @@ class BatchPlotComponent(PlotComponent):
 
         Returns:
             A list of instances of alt.Tooltip containing relevant information from the BatchPlotComponent class.
-        """
+        """  # noqa: E501
         tooltip: List = []
         for batch_identifier, title in zip(self.batch_identifiers, self.titles):
             tooltip.append(

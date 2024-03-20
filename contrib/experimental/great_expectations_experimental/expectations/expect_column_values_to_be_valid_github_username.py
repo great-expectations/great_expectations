@@ -24,11 +24,7 @@ class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
             if not isinstance(x, str):
                 return False
             try:
-                urlopen(
-                    Request(
-                        BASE_API_URL + x, headers={"User-Agent": "great_expectations"}
-                    )
-                )
+                urlopen(Request(BASE_API_URL + x, headers={"User-Agent": "great_expectations"}))
                 return True
             except (URLError, HTTPError):
                 return False

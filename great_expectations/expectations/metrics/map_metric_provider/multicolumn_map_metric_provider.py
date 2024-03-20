@@ -23,7 +23,7 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
     domain key `column_list`.
 
     `expect_compound_columns_to_be_unique` is an example of an Expectation that uses this metric.
-    """
+    """  # noqa: E501
 
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",

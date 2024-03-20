@@ -48,9 +48,7 @@ class CheckpointStore(ConfigurationStore):
         cp_data: Dict
         if isinstance(response_data, list):
             if len(response_data) == 0:
-                raise ValueError(
-                    f"Cannot parse empty data from GX Cloud payload: {response_json}"
-                )
+                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")
             cp_data = response_data[0]
         else:
             cp_data = response_data
@@ -85,14 +83,12 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.get_key(
-            name=name, id=id
-        )
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.get_key(name=name, id=id)
         try:
             self.remove_key(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
             raise gx_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]  # noqa: E501
             )
 
     def get_checkpoint(
@@ -111,7 +107,7 @@ class CheckpointStore(ConfigurationStore):
             ), "checkpoint_config retrieved was not of type CheckpointConfig"
         except gx_exceptions.InvalidKeyError as exc_ik:
             raise gx_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]  # noqa: E501
             )
         except ValidationError as exc_ve:
             raise gx_exceptions.InvalidCheckpointConfigError(
@@ -134,17 +130,13 @@ class CheckpointStore(ConfigurationStore):
         """
         key = self._construct_key_from_checkpoint(checkpoint)
         try:
-            return self._persist_checkpoint(
-                key=key, checkpoint=checkpoint, persistence_fn=self.add
-            )
+            return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.add)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.CheckpointError(
                 f"A Checkpoint named {checkpoint.name} already exists."
             )
 
-    def update_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> Checkpoint | CheckpointConfig:
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to update a persisted value.
 
         Args:
@@ -155,7 +147,7 @@ class CheckpointStore(ConfigurationStore):
 
         Raises:
             CheckpointNotFoundError: If a Checkpoint with the given name does not exist in the store.
-        """
+        """  # noqa: E501
         key = self._construct_key_from_checkpoint(checkpoint)
         try:
             return self._persist_checkpoint(
@@ -166,9 +158,7 @@ class CheckpointStore(ConfigurationStore):
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
 
-    def add_or_update_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> Checkpoint | CheckpointConfig:
+    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to either add or update a persisted value.
 
         Args:
@@ -199,15 +189,13 @@ class CheckpointStore(ConfigurationStore):
     ) -> Checkpoint | CheckpointConfig:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudResourceRef):
-            # return CheckpointConfig from cloud POST response to account for any defaults/new ids added in cloud
-            checkpoint_config = checkpoint_ref.response["data"]["attributes"][
-                "checkpoint_config"
-            ]
+            # return CheckpointConfig from cloud POST response to account for any defaults/new ids added in cloud  # noqa: E501
+            checkpoint_config = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"]
             checkpoint_config["id"] = checkpoint_config.pop("id")
             return self.deserialize(checkpoint_config)
         elif self.cloud_mode:
-            # if in cloud mode and checkpoint_ref is not a GXCloudResourceRef, a PUT operation occurred
-            # re-fetch and return CheckpointConfig from cloud to account for any defaults/new ids added in cloud
+            # if in cloud mode and checkpoint_ref is not a GXCloudResourceRef, a PUT operation occurred  # noqa: E501
+            # re-fetch and return CheckpointConfig from cloud to account for any defaults/new ids added in cloud  # noqa: E501
             return self.get_checkpoint(name=checkpoint.name, id=None)
 
         return checkpoint
@@ -222,16 +210,14 @@ class CheckpointStore(ConfigurationStore):
         Returns:
             None unless using GXCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
-        """
+        """  # noqa: E501
         # CheckpointConfig not an AbstractConfig??
         # mypy error: incompatible type "CheckpointConfig"; expected "AbstractConfig"
         key: DataContextKey = self._build_key_from_config(checkpoint_config)  # type: ignore[arg-type]
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(
-            key, checkpoint_config
-        )
+        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 

@@ -31,9 +31,7 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
         geocoder_config = kwargs.get("geocoder_config")
 
         if geocoder not in ["nominatim", "pickpoint", "openmapquest"]:
-            raise NotImplementedError(
-                "The geocoder is not implemented for this method."
-            )
+            raise NotImplementedError("The geocoder is not implemented for this method.")
 
         # find the reference shape with the geocoder.
         if geocoder is not None:

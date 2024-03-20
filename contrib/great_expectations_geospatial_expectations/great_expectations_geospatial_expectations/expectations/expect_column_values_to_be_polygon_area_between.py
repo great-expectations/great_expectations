@@ -235,14 +235,10 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
                 template_str += "and have area less than or equal $min_area and greater than or equal $max_area in square kilometers"
 
             elif params["min_value"] is None:
-                template_str += (
-                    "and have area greater than or equal $max_area in square kilometers"
-                )
+                template_str += "and have area greater than or equal $max_area in square kilometers"
 
             elif params["max_value"] is None:
-                template_str += (
-                    "and have area less than or equal $min_area in square kilometers"
-                )
+                template_str += "and have area less than or equal $min_area in square kilometers"
 
         if params["mostly"] is None:
             template_str += "."

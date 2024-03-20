@@ -46,9 +46,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
-        return _get_column_partition_using_metrics(
-            bins=bins, n_bins=n_bins, _metrics=metrics
-        )
+        return _get_column_partition_using_metrics(bins=bins, n_bins=n_bins, _metrics=metrics)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
@@ -61,9 +59,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
-        return _get_column_partition_using_metrics(
-            bins=bins, n_bins=n_bins, _metrics=metrics
-        )
+        return _get_column_partition_using_metrics(bins=bins, n_bins=n_bins, _metrics=metrics)
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913
@@ -76,9 +72,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     ):
         bins = metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
         n_bins = metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
-        return _get_column_partition_using_metrics(
-            bins=bins, n_bins=n_bins, _metrics=metrics
-        )
+        return _get_column_partition_using_metrics(bins=bins, n_bins=n_bins, _metrics=metrics)
 
     @classmethod
     @override
@@ -90,9 +84,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         bins = metric.metric_value_kwargs.get("bins", cls.default_kwarg_values["bins"])
-        n_bins = metric.metric_value_kwargs.get(
-            "n_bins", cls.default_kwarg_values["n_bins"]
-        )
+        n_bins = metric.metric_value_kwargs.get("n_bins", cls.default_kwarg_values["n_bins"])
         allow_relative_error = metric.metric_value_kwargs["allow_relative_error"]
 
         dependencies: dict = super()._get_evaluation_dependencies(
@@ -161,8 +153,7 @@ def _get_column_partition_using_metrics(
             parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type: bool = (
-            original_ndarray_is_datetime_type
-            or conversion_ndarray_to_datetime_type_performed
+            original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
         )
         min_ = min_max_values[0]
         max_ = min_max_values[1]
@@ -191,8 +182,7 @@ def _get_column_partition_using_metrics(
             parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type = (
-            original_ndarray_is_datetime_type
-            or conversion_ndarray_to_datetime_type_performed
+            original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
         )
         min_ = box_plot_values[0]
         _25 = box_plot_values[1]

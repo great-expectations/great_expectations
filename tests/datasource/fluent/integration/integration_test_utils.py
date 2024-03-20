@@ -33,9 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
@@ -52,19 +50,13 @@ def run_checkpoint_and_data_doc(
         expectation_suite_name=suite_name,
     )
     validator.expect_table_row_count_to_be_between(0, 10000)
-    validator.expect_column_max_to_be_between(
-        column="passenger_count", min_value=1, max_value=7
-    )
-    validator.expect_column_median_to_be_between(
-        column="passenger_count", min_value=1, max_value=4
-    )
+    validator.expect_column_max_to_be_between(column="passenger_count", min_value=1, max_value=7)
+    validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     # Configure and run a checkpoint
     checkpoint_config = {
-        "validations": [
-            {"batch_request": batch_request, "expectation_suite_name": suite_name}
-        ],
+        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
         "action_list": [
             ActionDict(
                 name="store_validation_result",
@@ -93,29 +85,25 @@ def run_checkpoint_and_data_doc(
     # Verify checkpoint runs successfully
     assert checkpoint_result._success, "Running expectation suite failed"
     number_of_runs = len(checkpoint_result.run_results)
-    assert (
-        number_of_runs == 1
-    ), f"{number_of_runs} runs were done when we only expected 1"
+    assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result["run_results"][
-        list(checkpoint_result["run_results"].keys())[0]
-    ]
+    result = checkpoint_result["run_results"][list(checkpoint_result["run_results"].keys())[0]]
     validation_result = result["validation_result"]
     assert validation_result.success
 
     expected_metric_values = {
         "expect_table_row_count_to_be_between": {
             "value": 10000,
-            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",
+            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",  # noqa: E501
         },
         "expect_column_max_to_be_between": {
             "value": 6,
-            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
         "expect_column_median_to_be_between": {
             "value": 1,
-            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
     }
     assert len(validation_result.results) == 3
@@ -148,13 +136,8 @@ def run_checkpoint_and_data_doc(
                 num_diagnostic_render == 1
             ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
             diagnostic_renderer = r.rendered_content[0]
-            assert (
-                diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
-            )
-            assert (
-                diagnostic_renderer.value.schema["type"]
-                == "com.superconductive.rendered.string"
-            )
+            assert diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
+            assert diagnostic_renderer.value.schema["type"] == "com.superconductive.rendered.string"
         else:
             assert r.rendered_content is None
             assert r.expectation_config.rendered_content is None
@@ -169,15 +152,13 @@ def run_checkpoint_and_data_doc(
     with open(path) as f:
         data_doc_index = f.read()
 
-    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.
+    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.  # noqa: E501
     assert "ge-success-icon" in data_doc_index
     assert "ge-failed-icon" not in data_doc_index
 
 
 def run_batch_head(  # noqa: C901, PLR0915
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     fetch_all: bool | str,
     n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
@@ -202,9 +183,7 @@ def run_batch_head(  # noqa: C901, PLR0915
         table_columns_metric: MetricConfiguration
         results: Dict[Tuple[str, str, str], MetricValue]
 
-        table_columns_metric, results = get_table_columns_metric(
-            execution_engine=execution_engine
-        )
+        table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
         metrics.update(results)
 
         metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
@@ -236,7 +215,7 @@ def run_batch_head(  # noqa: C901, PLR0915
             # if n_rows is greater than the total_row_count, we only expect total_row_count rows
             elif n_rows > total_row_count:
                 assert head_data_row_count == total_row_count
-            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
+            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows  # noqa: E501
             elif n_rows < 0 and abs(n_rows) > total_row_count:
                 assert head_data_row_count == 0
             # if n_rows is negative, we expect all but the final abs(n_rows)
@@ -271,6 +250,4 @@ def run_batch_head(  # noqa: C901, PLR0915
             "fetch_all\n"
             "  value is not a valid boolean (type=value_error.strictbool)"
         )
-        assert n_rows_validation_error in str(
-            e.value
-        ) or fetch_all_validation_error in str(e.value)
+        assert n_rows_validation_error in str(e.value) or fetch_all_validation_error in str(e.value)

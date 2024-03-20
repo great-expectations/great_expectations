@@ -16,28 +16,28 @@ connecting_to_your_data = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.AZURE],
     ),
-    # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
+    # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies = [BackendDependencies.AZURE]
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies = [BackendDependencies.AZURE]
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies = [BackendDependencies.AZURE]
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies = [BackendDependencies.AZURE]
     # ),

@@ -83,7 +83,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         params = renderer_configuration.params
 
         if not params.column_A or not params.column_B:
-            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501
         else:
             renderer_configuration.template_str = (
                 "Values in $column_A and $column_B must be independent."
@@ -104,11 +104,9 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["column_A", "column_B"])
         if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501
         else:
             template_str = "Values in $column_A and $column_B must be independent."
 

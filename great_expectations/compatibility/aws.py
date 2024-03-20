@@ -9,7 +9,7 @@ REDSHIFT_NOT_IMPORTED = NotImported(
     "AWS Redshift connection component is not installed, please 'pip install sqlalchemy_redshift'"
 )
 ATHENA_NOT_IMPORTED = NotImported(
-    "AWS Athena connection component is not installed, please 'pip install pyathena[SQLAlchemy]>=2.0.0,<3'"
+    "AWS Athena connection component is not installed, please 'pip install pyathena[SQLAlchemy]>=2.0.0,<3'"  # noqa: E501
 )
 
 try:

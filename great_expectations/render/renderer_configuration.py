@@ -69,7 +69,7 @@ class RendererSchema(TypedDict):
 class _RendererValueBase(BaseModel):
     """
     _RendererValueBase is the base for renderer classes that need to override the default pydantic dict behavior.
-    """
+    """  # noqa: E501
 
     class Config:
         validate_assignment = True
@@ -97,7 +97,7 @@ class _RendererValueBase(BaseModel):
 
         In practice this means the renderer implementer doesn't need to use .dict(by_alias=True, exclude_none=True)
         everywhere.
-        """
+        """  # noqa: E501
         return super().dict(
             include=include,
             exclude=exclude,
@@ -141,11 +141,9 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     """
     Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
-    """
+    """  # noqa: E501
 
-    configuration: Optional[ExpectationConfiguration] = Field(
-        None, allow_mutation=False
-    )
+    configuration: Optional[ExpectationConfiguration] = Field(None, allow_mutation=False)
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
@@ -182,13 +180,13 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         super().__init__(**values)
 
     class _RequiredRendererParamArgs(TypedDict):
-        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""
+        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""  # noqa: E501
 
         schema: RendererSchema
         value: Any
 
     class _RendererParamArgs(_RequiredRendererParamArgs, total=False):
-        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""
+        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""  # noqa: E501
 
         evaluation_parameter: Dict[str, Any]
 
@@ -196,7 +194,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         """
         _RendererParamBase is the base for a param that is added to RendererParams. It contains the validation logic,
             but it is dynamically renamed in order for the RendererParams attribute to have the same name as the param.
-        """
+        """  # noqa: E501
 
         renderer_schema: RendererSchema = Field(alias="schema")
         value: Any
@@ -306,10 +304,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                     for key, value in raw_configuration.kwargs.items()
                     if (key, value) not in values["kwargs"].items()
                 }
-                renderer_params_args: Dict[
-                    str, RendererConfiguration._RendererParamArgs
-                ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
-                    raw_kwargs=values["_raw_kwargs"]
+                renderer_params_args: Dict[str, RendererConfiguration._RendererParamArgs] = (
+                    RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
+                        raw_kwargs=values["_raw_kwargs"]
+                    )
                 )
                 values["_params"] = (
                     {**values["_params"], **renderer_params_args}
@@ -367,10 +365,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
-            renderer_params_args: Dict[
-                str, RendererConfiguration._RendererParamArgs
-            ] = RendererConfiguration._get_row_condition_params(
-                row_condition_str=values["_row_condition"],
+            renderer_params_args: Dict[str, RendererConfiguration._RendererParamArgs] = (
+                RendererConfiguration._get_row_condition_params(
+                    row_condition_str=values["_row_condition"],
+                )
             )
             values["_params"] = (
                 {**values["_params"], **renderer_params_args}
@@ -381,9 +379,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[
-            dict[str, Optional[dict[str, list[str] | tuple[str] | str]]]
-        ]
+        meta_notes: Optional[dict[str, Optional[dict[str, list[str] | tuple[str] | str]]]]
         if (
             "result" in values
             and values["result"] is not None
@@ -412,16 +408,14 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
         if not values["params"]:
-            _params: Optional[
-                Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]
-            ] = values.get("_params")
+            _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
+                values.get("_params")
+            )
             if _params:
                 renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
                     renderer_param_type: Type[BaseModel] = (
-                        RendererConfiguration._get_renderer_value_base_model_type(
-                            name=name
-                        )
+                        RendererConfiguration._get_renderer_value_base_model_type(name=name)
                     )
                     renderer_param_definitions[name] = (
                         Optional[renderer_param_type],
@@ -482,9 +476,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             )
         )
         for idx, condition in enumerate(row_conditions_list):
-            row_condition_str = row_condition_str.replace(
-                condition, f"$row_condition__{idx!s}"
-            )
+            row_condition_str = row_condition_str.replace(condition, f"$row_condition__{idx!s}")
         row_condition_str = row_condition_str.lower()
         return f"If {row_condition_str}, then "
 
@@ -505,9 +497,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         for param_type in param_types:
             try:
                 renderer_param: Type[BaseModel] = (
-                    RendererConfiguration._get_renderer_value_base_model_type(
-                        name="try_param"
-                    )
+                    RendererConfiguration._get_renderer_value_base_model_type(name="try_param")
                 )
                 renderer_param(schema=RendererSchema(type=param_type), value=value)
                 return param_type
@@ -515,7 +505,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                 pass
 
         raise RendererConfigurationError(
-            f"None of the param_types: {[param_type.value for param_type in param_types]} match the value: {value}"
+            f"None of the param_types: {[param_type.value for param_type in param_types]} match the value: {value}"  # noqa: E501
         )
 
     def add_param(
@@ -543,13 +533,11 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
         Returns:
             None
-        """
-        renderer_param: Type[BaseModel] = (
-            RendererConfiguration._get_renderer_value_base_model_type(name=name)
+        """  # noqa: E501
+        renderer_param: Type[BaseModel] = RendererConfiguration._get_renderer_value_base_model_type(
+            name=name
         )
-        renderer_param_definition: Dict[str, Any] = {
-            name: (Optional[renderer_param], ...)
-        }
+        renderer_param_definition: Dict[str, Any] = {name: (Optional[renderer_param], ...)}
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
@@ -581,16 +569,13 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             # if we already moved the evaluation parameter raw_kwargs to a param,
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
-                name in renderer_params_args
-                and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
+                name in renderer_params_args and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
             ):
                 new_args = {
                     name: renderer_param(
                         schema=RendererSchema(type=param_type),
                         value=value,
-                        evaluation_parameter=renderer_params_args[name][  # type: ignore[index]
-                            "evaluation_parameter"
-                        ],
+                        evaluation_parameter=renderer_params_args[name]["evaluation_parameter"],  # type: ignore[index]
                     )
                 }
             else:

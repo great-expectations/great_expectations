@@ -63,7 +63,7 @@ class BatchRequest(pydantic.BaseModel):
 
     Returns:
         BatchRequest
-    """
+    """  # noqa: E501
 
     datasource_name: StrictStr = Field(
         ...,
@@ -109,7 +109,7 @@ class BatchRequest(pydantic.BaseModel):
 
         Returns:
             None
-        """
+        """  # noqa: E501
         try:
             parse_batch_slice(batch_slice=value)
         except (TypeError, ValueError) as e:

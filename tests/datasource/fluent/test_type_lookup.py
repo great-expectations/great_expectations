@@ -36,9 +36,7 @@ param = pytest.param
         ),
     ],
 )
-def test_init(
-    positional_mapping_arg: Optional[Mapping], kwargs: dict, expected_data: dict
-):
+def test_init(positional_mapping_arg: Optional[Mapping], kwargs: dict, expected_data: dict):
     d = TypeLookup(positional_mapping_arg, **kwargs)
     assert expected_data == d
 
@@ -66,9 +64,7 @@ def test_ok_to_add_identical_key_value():
         (TypeLookup(my_list=list), ("my_list", dict)),
     ],
 )
-def test_no_key_or_value_overwrites(
-    initial: TypeLookup, kv_pair: Tuple[ValidTypes, ValidTypes]
-):
+def test_no_key_or_value_overwrites(initial: TypeLookup, kv_pair: Tuple[ValidTypes, ValidTypes]):
     key, value = kv_pair
     with pytest.raises(TypeLookupError, match=r"`.*` already set"):
         initial[key] = value

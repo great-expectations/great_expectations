@@ -191,9 +191,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         threshold: float = float(success_kwargs.get("threshold"))
         weeks_back = success_kwargs.get("weeks_back")
 
-        days_back_list = [
-            DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)
-        ]
+        days_back_list = [DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)]
 
         result_dict = get_results_dict(metrics)
 
@@ -220,9 +218,7 @@ def get_results_dict(metrics: dict) -> dict:
     metrics = convert_to_json_serializable(data=metrics)
     result_list = metrics.get("query.template_values")
     result_dict = {}
-    result_dict.update(
-        {i["date_column"]: i["column_sum_over_date"] for i in result_list}
-    )
+    result_dict.update({i["date_column"]: i["column_sum_over_date"] for i in result_list})
     return result_dict
 
 
@@ -231,9 +227,7 @@ def average_if_nonempty(list_: list):
 
 
 def get_diff_fraction(yesterday_sum: int, result_dict: dict, days_back_list: List[int]):
-    days_ago_dict = {
-        days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list
-    }
+    days_ago_dict = {days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list}
 
     equivalent_previous_days: List[date] = list(days_ago_dict.values())
     equivalent_previous_days_str: List[str] = [

@@ -28,7 +28,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
     """
     Parent class that incorporates the "get_numeric_range_estimate()" interface method, requiring all subclasses to
     implement the "_get_numeric_range_estimate()" method (for encapsulation reasons, the former calls the latter).
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -41,7 +41,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
             "bootstrap", "exact" (default - deterministic, incorporating entire observed value range), or "kde"
             (kernel density estimation).
             configuration: attributes needed for the estimation algorithm (subject of the inherited class) to operate.
-        """
+        """  # noqa: E501
         self._name = name
         self._configuration = configuration
 
@@ -74,7 +74,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
 
         Returns:
             "NumericRangeEstimationResult" object, containing computed "value_range" and "estimation_histogram" details.
-        """
+        """  # noqa: E501
         return self._get_numeric_range_estimate(
             metric_values=metric_values,
             domain=domain,

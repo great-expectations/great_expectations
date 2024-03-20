@@ -48,9 +48,7 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         query_result = [tuple(element.values()) for element in query_result]
 
         columns = configuration["kwargs"].get("columns")
-        duplicates = [
-            dict(zip(columns + ["no_occurrences"], row)) for row in query_result
-        ]
+        duplicates = [dict(zip(columns + ["no_occurrences"], row)) for row in query_result]
 
         return {
             "success": not query_result,

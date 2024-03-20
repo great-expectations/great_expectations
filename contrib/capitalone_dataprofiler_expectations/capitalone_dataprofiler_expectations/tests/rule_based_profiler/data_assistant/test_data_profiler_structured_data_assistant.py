@@ -36,9 +36,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -77,9 +75,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 def bobby_profile_data_profiler_structured_data_assistant_result(
     bobby_columnar_table_multi_batch_probabilistic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -131,10 +127,7 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         == profile_data_profiler_structured_data_assistant_result_as_dict
     )
     assert (
-        len(
-            bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
-        )
-        == 2
+        len(bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules) == 2
     )
 
 
