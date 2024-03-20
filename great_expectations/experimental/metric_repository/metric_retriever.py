@@ -69,6 +69,7 @@ class MetricRetriever(abc.ABC):
         metric_lookup_key: _MetricKey | None = None,
     ) -> tuple[Any, MetricException | None]:
         # look up is done by string
+        # TODO: update to be MetricTypes once MetricListMetricRetriever implementation is complete.
         if isinstance(metric_name, MetricTypes):
             metric_name = metric_name.value
 
