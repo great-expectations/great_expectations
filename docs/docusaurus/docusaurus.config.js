@@ -119,6 +119,7 @@ module.exports = {
           position: 'left',
           owner: 'great-expectations',
           repository: 'great_expectations',
+          className: 'github-badge',
         },
         {
           label: 'Home',

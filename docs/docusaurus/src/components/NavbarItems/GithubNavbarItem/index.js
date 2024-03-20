@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-export default function GithubNavbarItem({ owner, repository }) {
+export default function GithubNavbarItem({ owner, repository, className }) {
 
     const [starsCount, setStarsCount] = useState('0')
     const [forksCount, setForksCount] = useState('0')
@@ -36,7 +36,7 @@ export default function GithubNavbarItem({ owner, repository }) {
 
     return repository && (
         <a href={`https://github.com/${owner}/${repository}`} target="_blank"
-           className={styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
+           className={ className + ' ' + styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
             <img src={githubMarkImg} className={styles.githubMark}
                  alt="Github Invertocat Logo"/>
             { showGithubBadgeInfo && (<div className={styles.githubBadgeInfo}>
