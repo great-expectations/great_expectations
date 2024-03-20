@@ -39,13 +39,13 @@ class DotDict(dict):
         return DotDict([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()])
 
     # The following are required to support yaml serialization, since we do not raise
-    # AttributeError from __getattr__ in DotDict. We *do* raise that AttributeError when it is possible to know
+    # AttributeError from __getattr__ in DotDict. We *do* raise that AttributeError when it is possible to know  # noqa: E501
     # a given attribute is not allowed (because it's not in _allowed_keys)
     _yaml_merge: List = []
 
     @classmethod
     def yaml_anchor(cls):
-        # This is required since our dotdict allows *any* access via dotNotation, blocking the normal
+        # This is required since our dotdict allows *any* access via dotNotation, blocking the normal  # noqa: E501
         # behavior of raising an AttributeError when trying to access a nonexistent function
         return None
 
@@ -60,7 +60,7 @@ class SerializableDotDict(DotDict):
     Analogously to the way "SerializableDictDot" extends "DictDot" to provide JSON serialization, the present class,
     "SerializableDotDict" extends "DotDict" to provide JSON-serializable version of the "DotDict" class as well.
     Since "DotDict" is already YAML-serializable, "SerializableDotDict" is both YAML-serializable and JSON-serializable.
-    """
+    """  # noqa: E501
 
     def to_json_dict(self) -> dict:
         raise NotImplementedError

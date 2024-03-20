@@ -410,7 +410,7 @@ def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
 
     When explicit quoted identifiers are passed in, we should use them as-is.
     Explicit identifiers are used when the column contains a space or reserved word.
-    """
+    """  # noqa: E501
     engine = build_sa_execution_engine(
         pd.DataFrame(
             {
@@ -993,7 +993,7 @@ def test_column_partition_metric_pd():
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
-    """
+    """  # noqa: E501
     week_idx: int
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -1154,7 +1154,7 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
-    """
+    """  # noqa: E501
     week_idx: int
     engine = build_sa_execution_engine(
         pd.DataFrame(
@@ -1370,7 +1370,7 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
-    """
+    """  # noqa: E501
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2739,7 +2739,7 @@ def test_z_score_under_threshold_pd():
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
     column_values_z_score_under_threshold_condition_metric.metric_dependencies = {
-        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,  # noqa: E501
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2846,7 +2846,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
     condition_metric.metric_dependencies = {
-        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,  # noqa: E501
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(metrics_to_resolve=(condition_metric,), metrics=metrics)
@@ -5755,7 +5755,7 @@ def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
         metric_value_kwargs=None,
     )
     condition_metric.metric_dependencies = {
-        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,  # noqa: E501
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5848,7 +5848,7 @@ def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
         metric_value_kwargs=None,
     )
     condition_metric.metric_dependencies = {
-        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,  # noqa: E501
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(

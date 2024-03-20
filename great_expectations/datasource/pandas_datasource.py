@@ -65,7 +65,7 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             A complete datasource configuration.
 
-        """
+        """  # noqa: E501
 
         if data_asset_type is None:
             data_asset_type = {
@@ -210,7 +210,7 @@ class PandasDatasource(LegacyDatasource):
         elif "s3" in batch_kwargs:
             # deprecated-v0.13.0
             warnings.warn(
-                "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
+                "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "  # noqa: E501
                 "Please use a path including the s3a:// protocol instead.",
                 DeprecationWarning,
             )
@@ -323,7 +323,7 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             ReaderMethod to use for the filepath
 
-        """
+        """  # noqa: E501
         if reader_method is None and path is None:
             raise BatchKwargsError(
                 "Unable to determine pandas reader function without reader_method or path.",

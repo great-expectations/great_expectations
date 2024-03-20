@@ -72,7 +72,7 @@ class DataConnector(ABC):
 
         Returns:
             List[BatchDefinition] -- list of "BatchDefinition" objects, each corresponding to "Batch" of data downstream
-        """
+        """  # noqa: E501
         pass
 
     def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> BatchSpec:
@@ -83,7 +83,7 @@ class DataConnector(ABC):
             batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
         Returns:
             BatchSpec object built from BatchDefinition
-        """
+        """  # noqa: E501
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
@@ -102,7 +102,7 @@ class DataConnector(ABC):
     def get_data_references(self) -> List[Any]:
         """
         This interface method lists objects in the underlying data store used to create a list of data_references (type depends on cloud storage environment, SQL DBMS, etc.).
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -112,7 +112,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -122,7 +122,7 @@ class DataConnector(ABC):
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -132,7 +132,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -142,7 +142,7 @@ class DataConnector(ABC):
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -152,7 +152,7 @@ class DataConnector(ABC):
 
         Returns:
             int -- number of data references identified
-        """
+        """  # noqa: E501
         pass
 
     @abstractmethod
@@ -169,7 +169,7 @@ class DataConnector(ABC):
 
         Returns:
             dict -- dictionary of "BatchSpec" properties
-        """
+        """  # noqa: E501
         pass
 
     @staticmethod

@@ -5,7 +5,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -35,11 +35,11 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"]["ba
     "../data/"
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py add_datasource">  # noqa: E501
 context.add_datasource(**datasource_config)
 # </snippet>
 
@@ -47,7 +47,7 @@ context.add_datasource(**datasource_config)
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you  # noqa: E501
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )

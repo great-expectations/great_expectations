@@ -72,7 +72,7 @@ class DataSampler(abc.ABC):  # noqa: B024 # abstract-base-class-without-abstract
         """
         if batch_spec["sampling_kwargs"].get(key) is None:
             raise gx_exceptions.SamplerError(
-                f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."
+                f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."  # noqa: E501
             )
 
     @staticmethod

@@ -48,19 +48,19 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
     DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
         PartitionerMethod.PARTITION_ON_YEAR: "get_data_for_batch_identifiers_year",
-        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH: "get_data_for_batch_identifiers_year_and_month",
-        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH_AND_DAY: "get_data_for_batch_identifiers_year_and_month_and_day",
-        PartitionerMethod.PARTITION_ON_DATE_PARTS: "get_data_for_batch_identifiers_for_partition_on_date_parts",
+        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH: "get_data_for_batch_identifiers_year_and_month",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_YEAR_AND_MONTH_AND_DAY: "get_data_for_batch_identifiers_year_and_month_and_day",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_DATE_PARTS: "get_data_for_batch_identifiers_for_partition_on_date_parts",  # noqa: E501
     }
 
     PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        PartitionerMethod.PARTITION_ON_WHOLE_TABLE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_whole_table",
-        PartitionerMethod.PARTITION_ON_COLUMN_VALUE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_column_value",
-        PartitionerMethod.PARTITION_ON_CONVERTED_DATETIME: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_converted_datetime",
-        PartitionerMethod.PARTITION_ON_DIVIDED_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_divided_integer",
-        PartitionerMethod.PARTITION_ON_MOD_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_mod_integer",
-        PartitionerMethod.PARTITION_ON_MULTI_COLUMN_VALUES: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_multi_column_values",
-        PartitionerMethod.PARTITION_ON_HASHED_COLUMN: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_hashed_column",
+        PartitionerMethod.PARTITION_ON_WHOLE_TABLE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_whole_table",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_COLUMN_VALUE: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_column_value",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_CONVERTED_DATETIME: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_converted_datetime",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_DIVIDED_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_divided_integer",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_MOD_INTEGER: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_mod_integer",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_MULTI_COLUMN_VALUES: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_multi_column_values",  # noqa: E501
+        PartitionerMethod.PARTITION_ON_HASHED_COLUMN: "get_partition_query_for_data_for_batch_identifiers_for_partition_on_hashed_column",  # noqa: E501
     }
 
     def partition_on_year(
@@ -206,7 +206,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             )
 
         raise NotImplementedError(
-            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501
         )
 
     def partition_on_divided_integer(
@@ -305,7 +305,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             )
 
         raise NotImplementedError(
-            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501
         )
 
     def get_data_for_batch_identifiers(
@@ -327,7 +327,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
-        """
+        """  # noqa: E501
         processed_partitioner_method_name: str = self._get_partitioner_method_name(
             partitioner_method_name
         )
@@ -463,7 +463,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
-        """
+        """  # noqa: E501
         self._validate_date_parts(date_parts)
 
         date_parts = self._convert_date_parts(date_parts)
@@ -487,7 +487,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             """
             # NOTE: <Alex>6/29/2022</Alex>
             Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift, SQLite) allow only binary operators for "CONCAT".
-            """
+            """  # noqa: E501
             if self._dialect == GXSqlDialect.SQLITE:
                 concat_date_parts = sa.cast(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)),
@@ -586,7 +586,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             List of row results.
-        """
+        """  # noqa: E501
         return execution_engine.execute_partitioned_query(partitioned_query)
 
     def _get_params_for_batch_identifiers_from_date_part_partitioner(
@@ -605,7 +605,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
-        """
+        """  # noqa: E501
         date_parts = self._convert_date_parts(date_parts)
 
         data_for_batch_identifiers: List[dict] = [
@@ -648,7 +648,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
-        """
+        """  # noqa: E501
         get_partition_query_method_name: str = (
             self._get_method_name_for_get_data_for_batch_identifiers_method(partitioner_method_name)
         )
@@ -674,7 +674,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             Name of the corresponding method to get data for building batch identifiers.
-        """
+        """  # noqa: E501
         processed_partitioner_method_name: str = self._get_partitioner_method_name(
             partitioner_method_name
         )
@@ -684,7 +684,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             ]
         except ValueError:
             raise gx_exceptions.InvalidConfigError(
-                f"Please provide a supported partitioner method name, you provided: {partitioner_method_name}"
+                f"Please provide a supported partitioner method name, you provided: {partitioner_method_name}"  # noqa: E501
             )
 
     @staticmethod
@@ -700,7 +700,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         Returns:
             Dict of {column_name: row, column_name: row, ...}
-        """
+        """  # noqa: E501
         return [dict(zip(column_names, row)) for row in rows]
 
     @staticmethod
@@ -711,7 +711,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         'Partition' by returning the whole table
 
         Note: the selectable parameter is a required to keep the signature of this method consistent with other methods.
-        """
+        """  # noqa: E501
         return sa.select(sa.true())
 
     @staticmethod
@@ -744,7 +744,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             ).select_from(selectable)
 
         raise NotImplementedError(
-            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501
         )
 
     def get_partition_query_for_data_for_batch_identifiers_for_partition_on_divided_integer(
@@ -856,5 +856,5 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             ).select_from(selectable)
 
         raise NotImplementedError(
-            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
+            f'Partitioner method "partition_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'  # noqa: E501
         )

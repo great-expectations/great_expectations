@@ -130,7 +130,7 @@ def test_get_batch_data_and_metadata_with_partitions(
     execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_data_connector": {
@@ -141,7 +141,7 @@ def test_get_batch_data_and_metadata_with_partitions(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]

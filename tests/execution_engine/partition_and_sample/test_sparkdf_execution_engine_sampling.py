@@ -69,8 +69,8 @@ def test_sample_using_random(test_sparkdf, basic_spark_df_execution_engine):
     # The test dataframe contains 10 columns and 120 rows.
     assert len(sampled_df.columns) == 10
     assert 0 <= sampled_df.count() <= 120
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.1 (the equivalent of an
-    # unfair coin with the 10% chance of coming up as "heads").  Hence, we should never get as much as 20% of the rows.
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.1 (the equivalent of an  # noqa: E501
+    # unfair coin with the 10% chance of coming up as "heads").  Hence, we should never get as much as 20% of the rows.  # noqa: E501
     assert sampled_df.count() < 25
 
 

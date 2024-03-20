@@ -33,7 +33,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -79,7 +79,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             number of data_references known by this DataConnector
-        """
+        """  # noqa: E501
         return len(self._data_references_cache)
 
     @override
@@ -90,7 +90,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     @public_api

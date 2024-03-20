@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Iterator, List, Optional
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
+from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (  # noqa: E501
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
@@ -41,7 +41,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCat
         boto3_options: Options passed to the `boto3` library.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -59,7 +59,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCat
         id: Optional[str] = None,
     ):
         logger.warning(
-            "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
+            "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "  # noqa: E501
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
         super().__init__(
@@ -160,6 +160,6 @@ class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCat
                         )
             except self.glue_client.exceptions.EntityNotFoundException:
                 raise DataConnectorError(
-                    f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."
+                    f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."  # noqa: E501
                 )
         return tables

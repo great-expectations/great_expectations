@@ -53,7 +53,7 @@ def test_taxi_trips_benchmark(
     the expectations being used by this benchmark. Instead of changing this benchmark's data/expectations, please
     consider adding a new benchmark (or at least rename this benchmark to provide clarity that results are not directly
     comparable because of the data change).
-    """
+    """  # noqa: E501
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
 
     html_dir = (
@@ -148,7 +148,7 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
             E           assert True == False
             E             +True
             E             -False
-    """
+    """  # noqa: E501
     if isinstance(expected, Mapping):
         for expected_key in expected.keys():
             assert expected_key in actual.keys(), description_for_error_reporting
@@ -169,5 +169,5 @@ def _skip_if_bigquery_performance_tests_not_enabled(
 
 
 if __name__ == "__main__":
-    # For profiling, it can be useful to support running this script directly instead of using pytest to run.
+    # For profiling, it can be useful to support running this script directly instead of using pytest to run.  # noqa: E501
     sys.exit(pytest.main(sys.argv))

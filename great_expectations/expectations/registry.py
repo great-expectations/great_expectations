@@ -77,7 +77,7 @@ def register_renderer(
             renderer_fn,
         ):
             logger.info(
-                f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "
+                f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "  # noqa: E501
                 f"found."
             )
             return
@@ -105,7 +105,7 @@ def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
 
     Returns:
         A list of renderer names for the Expectation or Metric.
-    """
+    """  # noqa: E501
     return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
@@ -121,7 +121,7 @@ def get_renderer_names_with_renderer_types(
 
     Returns:
         A list of renderer names for the given prefixes and Expectation or Metric.
-    """
+    """  # noqa: E501
     return [
         renderer_name
         for renderer_name in get_renderer_names(
@@ -239,7 +239,7 @@ def register_metric(  # noqa: PLR0913
 
     Returns:
         A dictionary containing warnings thrown during registration if applicable, and the success status of registration.
-    """
+    """  # noqa: E501
     res: dict = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
@@ -250,23 +250,23 @@ def register_metric(  # noqa: PLR0913
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
         if set(current_domain_keys) != set(metric_domain_keys):
             logger.warning(
-                f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys"
+                f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys"  # noqa: E501
             )
             _add_response_key(
                 res,
                 "warning",
-                f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
+                f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",  # noqa: E501
             )
 
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
-                f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys"
+                f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys"  # noqa: E501
             )
             _add_response_key(
                 res,
                 "warning",
-                f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
+                f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",  # noqa: E501
             )
 
         providers = metric_definition.get("providers", {})
@@ -274,22 +274,22 @@ def register_metric(  # noqa: PLR0913
             _current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:
                 logger.warning(
-                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
+                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"  # noqa: E501
                 )
                 _add_response_key(
                     res,
                     "warning",
-                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",
+                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",  # noqa: E501
                 )
                 providers[execution_engine_name] = metric_class, metric_provider
             else:
                 logger.info(
-                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."
+                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."  # noqa: E501
                 )
                 _add_response_key(
                     res,
                     "info",
-                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}.",
+                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}.",  # noqa: E501
                 )
         else:
             providers[execution_engine_name] = metric_class, metric_provider

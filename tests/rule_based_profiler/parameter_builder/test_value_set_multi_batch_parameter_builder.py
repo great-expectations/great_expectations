@@ -9,7 +9,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (  # noqa: E501
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_nested_collection_of_sets,
 )
@@ -168,7 +168,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     )
 
     expected_value_set: List[str] = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",  # noqa: E501
     ]
     expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,

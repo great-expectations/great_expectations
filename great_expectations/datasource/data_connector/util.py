@@ -136,8 +136,8 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
         groups: list = list(matches.groups())
         batch_identifiers = IDDict(dict(zip(group_names, groups)))
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>  # noqa: E501
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>  # noqa: E501
     data_asset_name: str = batch_identifiers.pop("data_asset_name", DEFAULT_DATA_ASSET_NAME)
 
     return data_asset_name, batch_identifiers
@@ -177,7 +177,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
     return data_reference
 
 
-# TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
+# TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>  # noqa: E501
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
     regex_pattern: re.Pattern,
@@ -188,7 +188,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)
-    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
+    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>  # noqa: E501
     if data_asset_name is not None:
         template_arguments["data_asset_name"] = data_asset_name
 
@@ -228,7 +228,7 @@ def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
 
 
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
-    """
+    """  # noqa: E501
     data_reference_template: str = ""
     group_name_index: int = 0
 
@@ -336,7 +336,7 @@ def get_filesystem_one_level_directory_glob_path_list(
     :param base_directory_path -- base directory path, relative to which file paths will be collected
     :param glob_directive -- glob expansion directive
     :returns -- list of relative file paths
-    """
+    """  # noqa: E501
     if isinstance(base_directory_path, str):
         base_directory_path = pathlib.Path(base_directory_path)
 
@@ -372,7 +372,7 @@ def list_azure_keys(
 
     Returns:
         List of keys representing Azure file paths (as filtered by the query_options dict)
-    """
+    """  # noqa: E501
     container: str = query_options["container"]
     container_client: azure.ContainerClient = azure_client.get_container_client(container=container)
 
@@ -425,7 +425,7 @@ def list_gcs_keys(
 
     Returns:
         List of keys representing GCS file paths (as filtered by the `query_options` dict)
-    """
+    """  # noqa: E501
     # Delimiter determines whether or not traversal of bucket is recursive
     # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
@@ -434,7 +434,7 @@ def list_gcs_keys(
             'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
             or with a Fluent datasource without enabling recursive file discovery, \
             the delimiter that has been passed to gcs_options in your config cannot be empty; \
-            please note that the value is being set to the default "/" in order to work with the Google SDK.'
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'  # noqa: E501
         )
         query_options["delimiter"] = "/"
     elif delimiter is not None and recursive:
@@ -472,7 +472,7 @@ def list_s3_keys(  # noqa: C901 - too complex
     :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
     :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
     :return: string valued key representing file path on S3 (full prefix and leaf file name)
-    """
+    """  # noqa: E501
     if iterator_dict is None:
         iterator_dict = {}
 
@@ -519,9 +519,9 @@ def list_s3_keys(  # noqa: C901 - too complex
 
 
 # TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
-# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
-# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
-# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
+# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is  # noqa: E501
+# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this  # noqa: E501
+# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).  # noqa: E501
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
@@ -552,7 +552,7 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
 
 
 def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
-    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
+    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""  # noqa: E501
     runtime_environment_dict: Dict[str, DataConnector] = {"data_connector": runtime_environment}
     config = assetConfigSchema.load(config)
     config = assetConfigSchema.dump(config)

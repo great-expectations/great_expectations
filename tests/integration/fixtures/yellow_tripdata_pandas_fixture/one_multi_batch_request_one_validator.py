@@ -64,7 +64,7 @@ for batch_definition in pre_dec_batch_definition_list:
     )
     cumulative_min = current_min if current_min < cumulative_min else cumulative_min
 
-# Use the highest max and lowest min from before December to create an expectation which we validate against December
+# Use the highest max and lowest min from before December to create an expectation which we validate against December  # noqa: E501
 result = validator_multi_batch.expect_column_values_to_be_between(
     "fare_amount", min_value=cumulative_min, max_value=cumulative_max
 )

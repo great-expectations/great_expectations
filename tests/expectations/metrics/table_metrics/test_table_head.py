@@ -71,7 +71,7 @@ def sqlite_batch_with_selectable_without_temp_table(
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize(
-    "execution_engine, n_rows, fetch_all, expected_shape, expected_columns, expected_values, expected_temp_tables",
+    "execution_engine, n_rows, fetch_all, expected_shape, expected_columns, expected_values, expected_temp_tables",  # noqa: E501
     [
         (
             "sqlite_batch_with_table_name",

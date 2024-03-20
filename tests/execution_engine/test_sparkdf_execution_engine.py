@@ -531,12 +531,12 @@ def test_partition_on_multi_column_values_and_sample_using_random(
     assert len(returned_df.columns) == 10
     # The number of returned rows corresponding to the value of "batch_identifiers" above is 4.
     assert 0 <= returned_df.count() <= 4
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
-    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get 50% of the rows, which is
-    # 2; however, for such a small sample (of 4 rows), the number of rows returned by an individual run can deviate from
-    # this average.  Still, in the majority of trials, the number of rows should not be fewer than 2 or greater than 3.
-    # The assertion in the next line, supporting this reasoning, is commented out to insure zero failures.  Developers
-    # are encouraged to uncomment it, whenever the "_sample_using_random" feature is the main focus of a given effort.
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a  # noqa: E501
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get 50% of the rows, which is  # noqa: E501
+    # 2; however, for such a small sample (of 4 rows), the number of rows returned by an individual run can deviate from  # noqa: E501
+    # this average.  Still, in the majority of trials, the number of rows should not be fewer than 2 or greater than 3.  # noqa: E501
+    # The assertion in the next line, supporting this reasoning, is commented out to insure zero failures.  Developers  # noqa: E501
+    # are encouraged to uncomment it, whenever the "_sample_using_random" feature is the main focus of a given effort.  # noqa: E501
     # assert 2 <= returned_df.count() <= 3
 
     for val in returned_df.collect():
@@ -913,7 +913,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
         )
 
 
-# Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
+# Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain  # noqa: E501
 def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -984,7 +984,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
         )
 
 
-# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
+# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error  # noqa: E501
 def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1034,7 +1034,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
 ):
     """
     Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
-    """
+    """  # noqa: E501
     engine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1136,7 +1136,7 @@ def test_explicit_string_identifiers_should_work_with_validator(spark_session):
     Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
     Ensures that the expectations can be used with a string identifier, resolves to the correct column
     in SQL and a result is returned.
-    """
+    """  # noqa: E501
     metastore_dir = "/tmp/great_expectations_v3"
 
     data_context_config = DataContextConfig(

@@ -23,7 +23,7 @@ class DataAssistantDispatcher:
     """
     DataAssistantDispatcher intercepts requests for "DataAssistant" classes by their registered names and manages their
     associated "DataAssistantRunner" objects, which process invocations of calls to "DataAssistant" "run()" methods.
-    """
+    """  # noqa: E501
 
     _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
 
@@ -44,7 +44,7 @@ class DataAssistantDispatcher:
             DataAssistantDispatcher._get_data_assistant_impl(name=name)
         )
 
-        # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
+        # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".  # noqa: E501
         if data_assistant_cls is None:
             raise AttributeError(f'"{type(self).__name__}" object has no attribute "{name}".')
 
@@ -86,7 +86,7 @@ class DataAssistantDispatcher:
 
         Returns:
             Class inheriting "DataAssistant" if found; otherwise, None
-        """
+        """  # noqa: E501
         if name is None:
             return None
 
@@ -98,7 +98,7 @@ class DataAssistantDispatcher:
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
-        """
+        """  # noqa: E501
         data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
         data_assistant_registered_names: Set[str] = get_registered_data_assistant_names()
         combined_dir_attrs: Set[str] = (
@@ -110,5 +110,5 @@ class DataAssistantDispatcher:
 def get_registered_data_assistant_names() -> Set[str]:
     """
     This method returns names (registered data_assistant_type and alias name) of registered "DataAssistant" classes.
-    """
+    """  # noqa: E501
     return set(DataAssistantDispatcher._registered_data_assistants.keys())

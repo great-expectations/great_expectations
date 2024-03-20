@@ -133,7 +133,7 @@ class MetricsCalculator:
 
         Returns:
             Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
-        """
+        """  # noqa: E501
         resolved_metrics: _MetricsDict
         resolved_metrics, _ = self.compute_metrics(
             metric_configurations=list(metrics.values()),
@@ -162,7 +162,7 @@ class MetricsCalculator:
             Tuple of two elements, the first is a dictionary with requested metrics resolved,
             with unique metric ID as key and computed metric as value. The second is a dictionary of the
             aborted metrics information, with metric ID as key if any metrics were aborted.
-        """
+        """  # noqa: E501
         graph: ValidationGraph = self.build_metric_dependency_graph(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
@@ -194,7 +194,7 @@ class MetricsCalculator:
 
         Returns:
             Resulting "ValidationGraph" object.
-        """
+        """  # noqa: E501
         graph: ValidationGraph = ValidationGraph(execution_engine=self._execution_engine)
 
         metric_configuration: MetricConfiguration
@@ -222,7 +222,7 @@ class MetricsCalculator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
             Dictionary with aborted metrics information, with metric ID as key.
-        """
+        """  # noqa: E501
         resolved_metrics: _MetricsDict
         aborted_metrics_info: _AbortedMetricsInfoDict
         (
@@ -262,7 +262,7 @@ class MetricsCalculator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
             Dictionary with aborted metrics information, with metric ID as key.
-        """
+        """  # noqa: E501
         resolved_metrics: _MetricsDict
         aborted_metrics_info: _AbortedMetricsInfoDict
         resolved_metrics, aborted_metrics_info = graph.resolve(

@@ -101,7 +101,7 @@ class PandasExecutionEngine(ExecutionEngine):
             expectation_completeness: Complete
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     recognized_batch_spec_defaults = {
         "reader_method",
@@ -163,7 +163,7 @@ class PandasExecutionEngine(ExecutionEngine):
             2. passing in explicit credentials via gcs_options
             3. running Great Expectations from within a GCP container, at which you would be able to create a Client
                 without passing in an additional environment variable or explicit credentials
-        """
+        """  # noqa: E501
         gcs_options = self.config.get("gcs_options", {})
         try:
             credentials = None  # If configured with gcloud CLI / env vars
@@ -197,7 +197,7 @@ class PandasExecutionEngine(ExecutionEngine):
             batch_data = PandasBatchData(self, batch_data)
         elif not isinstance(batch_data, PandasBatchData):
             raise gx_exceptions.GreatExpectationsError(
-                "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
+                "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"  # noqa: E501
             )
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
@@ -222,7 +222,7 @@ class PandasExecutionEngine(ExecutionEngine):
             if isinstance(batch_data, str):
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.  Please check your config.
-"""
+"""  # noqa: E501
                 )
 
             if isinstance(batch_spec.batch_data, pd.DataFrame):
@@ -231,7 +231,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 df = batch_spec.batch_data.dataframe
             else:
                 raise ValueError(
-                    "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
+                    "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."  # noqa: E501
                 )
 
             batch_spec.batch_data = "PandasDataFrame"
@@ -256,7 +256,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 aws.exceptions.ClientError,
             ) as error:
                 raise gx_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""  # noqa: E501
                 )
             logger.debug(f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}")
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(reader_method, s3_url.key)
@@ -271,7 +271,7 @@ class PandasExecutionEngine(ExecutionEngine):
             if self._azure is None:
                 raise gx_exceptions.ExecutionEngineError(
                     """PandasExecutionEngine has been passed a AzureBatchSpec,
-                        but the ExecutionEngine does not have an Azure client configured. Please check your config."""
+                        but the ExecutionEngine does not have an Azure client configured. Please check your config."""  # noqa: E501
                 )
             azure_engine = self._azure
             reader_method = batch_spec.reader_method
@@ -297,7 +297,7 @@ class PandasExecutionEngine(ExecutionEngine):
             if self._gcs is None:
                 raise gx_exceptions.ExecutionEngineError(
                     """PandasExecutionEngine has been passed a GCSBatchSpec,
-                        but the ExecutionEngine does not have an GCS client configured. Please check your config."""
+                        but the ExecutionEngine does not have an GCS client configured. Please check your config."""  # noqa: E501
                 )
             gcs_engine = self._gcs
             gcs_url = GCSUrl(batch_spec.path)
@@ -310,7 +310,7 @@ class PandasExecutionEngine(ExecutionEngine):
             except google.GoogleAPIError as error:
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from GCS \
-Bucket: {error}"""
+Bucket: {error}"""  # noqa: E501
                 )
             reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
             buf = BytesIO(gcs_blob.download_as_bytes())
@@ -350,7 +350,7 @@ Bucket: {error}"""
         else:
             raise gx_exceptions.BatchSpecError(
                 f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, AzureBatchSpec or FabricBatchSpec \
-not {batch_spec.__class__.__name__}"""
+not {batch_spec.__class__.__name__}"""  # noqa: E501
             )
 
         df = self._apply_partitioning_and_sampling_methods(batch_spec, df)  # type: ignore[arg-type]
@@ -387,7 +387,7 @@ not {batch_spec.__class__.__name__}"""
     def dataframe(self) -> pd.DataFrame:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
-        """
+        """  # noqa: E501
         # Changed to is None because was breaking prior
         if self.batch_manager.active_batch_data is None:
             raise ValueError(
@@ -455,7 +455,7 @@ not {batch_spec.__class__.__name__}"""
         Returns:
             ReaderMethod to use for the filepath
 
-        """
+        """  # noqa: E501
         if reader_method is None and path is None:
             raise gx_exceptions.ExecutionEngineError(
                 "Unable to determine pandas reader function without reader_method or path."
@@ -481,8 +481,8 @@ not {batch_spec.__class__.__name__}"""
 
     @override
     def resolve_metric_bundle(self, metric_fn_bundle) -> Dict[Tuple[str, str, str], Any]:
-        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
-        return {}  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
+        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""  # noqa: E501
+        return {}  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).  # noqa: E501
 
     @public_api
     @override
@@ -497,7 +497,7 @@ not {batch_spec.__class__.__name__}"""
 
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Pandas DataFrame)
-        """
+        """  # noqa: E501
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -622,7 +622,7 @@ not {batch_spec.__class__.__name__}"""
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the Domain within the compute domain
-        """
+        """  # noqa: E501
         table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(

@@ -215,7 +215,7 @@ class TestDynamicPandasAssets:
         These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
-        """
+        """  # noqa: E501
         with pytest.raises(pydantic.ValidationError) as exc_info:
             asset_class(
                 name="test",

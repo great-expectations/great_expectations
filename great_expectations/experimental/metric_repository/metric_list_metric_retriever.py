@@ -100,7 +100,7 @@ class MetricListMetricRetriever(MetricRetriever):
         Returns:
             Sequence[Metric]: List of metrics for non-numeric columns.
         """
-        # currently only the null-count is supported. If more metrics are added, this set will need to be updated.
+        # currently only the null-count is supported. If more metrics are added, this set will need to be updated.  # noqa: E501
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
         metrics: list[Metric] = []
         metrics_list_as_set = set(metrics_list)
@@ -180,7 +180,7 @@ class MetricListMetricRetriever(MetricRetriever):
             return metrics
 
         # Note: Timestamps are returned as strings for Snowflake, this may need to be adjusted
-        # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().
+        # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().  # noqa: E501
         return self._get_column_metrics(
             batch_request=batch_request,
             column_list=column_list,
@@ -217,7 +217,7 @@ class MetricListMetricRetriever(MetricRetriever):
 
         Returns:
             bool: True if all the metric types in the list are valid, False otherwise.
-        """
+        """  # noqa: E501
         for metric in metric_list:
             if metric not in MetricTypes:
                 return False
@@ -231,7 +231,7 @@ class MetricListMetricRetriever(MetricRetriever):
 
         Returns:
             bool: True if any column metrics are present in the metric list, False otherwise.
-        """
+        """  # noqa: E501
         column_metrics: List[MetricTypes] = [
             MetricTypes.COLUMN_MIN,
             MetricTypes.COLUMN_MAX,

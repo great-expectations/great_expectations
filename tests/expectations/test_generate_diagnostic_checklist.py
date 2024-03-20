@@ -23,7 +23,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
    Has at least one positive and negative example case, and all test cases pass
    Has core logic and passes tests on at least one Execution Engine
-"""
+"""  # noqa: E501
     )
 
 
@@ -50,7 +50,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Mat
     ✔ All 3 tests for pandas are passing
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
-"""
+"""  # noqa: E501
     )
 
 
@@ -76,5 +76,5 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration ({Matu
     ✔ All 3 tests for pandas are passing
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
-"""
+"""  # noqa: E501
     )

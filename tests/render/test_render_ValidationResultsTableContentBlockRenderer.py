@@ -29,7 +29,7 @@ def evr_failed_with_exception():
         exception_info={
             "raised_exception": True,
             "exception_message": "Invalid partition object.",
-            "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+            "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',  # noqa: E501
         },
         expectation_config=ExpectationConfiguration(
             expectation_type="expect_column_kl_divergence_to_be_less_than",
@@ -84,7 +84,7 @@ def evr_id_pk_basic_sql() -> ExpectationValidationResult:
                 {"animals": "lion", "pk_1": 4, "pk_2": "four"},
                 {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
             ],
-            "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
+            "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",  # noqa: E501
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -133,7 +133,7 @@ def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
     )
 
 
-def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
+def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(  # noqa: E501
     evr_failed_with_exception,
 ):
     result = ValidationResultsTableContentBlockRenderer.render(
@@ -184,7 +184,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "\n\n$expectation_type raised an exception:\n$exception_message",
+                            "template": "\n\n$expectation_type raised an exception:\n$exception_message",  # noqa: E501
                             "params": {
                                 "expectation_type": "expect_column_kl_divergence_to_be_less_than",
                                 "exception_message": "Invalid partition object.",
@@ -208,7 +208,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
                             {
                                 "content_block_type": "string_template",
                                 "string_template": {
-                                    "template": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+                                    "template": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',  # noqa: E501
                                     "tag": "code",
                                 },
                             }
@@ -486,7 +486,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
 
 
 @pytest.mark.filterwarnings("ignore:V2 API style custom rendering*:DeprecationWarning")
-def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():
+def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():  # noqa: E501
     """Test backwards support for custom expectation rendering with the V2 API as described at
     https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_docs_reference.html#customizing-data-docs.
     """
@@ -528,7 +528,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
         ),
     )
 
-    content_block_fn = ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations._get_content_block_fn(
+    content_block_fn = ValidationResultsTableContentBlockRendererWithV2ApiStyleCustomExpectations._get_content_block_fn(  # noqa: E501
         "expect_custom_expectation_written_in_v2_api_style"
     )
     content_block_fn_output = content_block_fn(result=evr)
@@ -741,7 +741,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",
+                    "template": "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows.",  # noqa: E501
                     "params": {
                         "unexpected_count": "3",
                         "unexpected_percent": "≈0.2285%",
@@ -1210,7 +1210,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_p
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_and_query(
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_and_query(  # noqa: E501
     evr_id_pk_basic_pandas,
 ):
     rendered_value = get_renderer_impl(
@@ -1236,7 +1236,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_with_sampled_table(
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_with_sampled_table(  # noqa: E501
     evr_id_pk_basic_pandas,
 ):
     evr_id_pk_pandas = evr_id_pk_basic_pandas
@@ -1315,7 +1315,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query_with_sampled_table(
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query_with_sampled_table(  # noqa: E501
     evr_id_pk_basic_sql,
 ):
     new_index = [

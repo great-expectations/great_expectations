@@ -120,7 +120,7 @@ def test_evaluation_parameter_store_methods(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
@@ -158,14 +158,14 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
         "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,
+        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
     }
 
 

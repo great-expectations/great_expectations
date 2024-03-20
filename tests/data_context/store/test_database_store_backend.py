@@ -160,7 +160,7 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
     Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
     concrete classes that inherit from them.
     See also test_store_backends::test_StoreBackend_id_initialization
-    """
+    """  # noqa: E501
 
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_id_initialization requires postgresql")

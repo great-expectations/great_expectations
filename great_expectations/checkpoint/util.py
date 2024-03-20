@@ -224,7 +224,7 @@ def get_substituted_validation_dict(
     return substituted_validation_dict
 
 
-# TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
+# TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>  # noqa: E501
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
     validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -281,7 +281,7 @@ def substitute_runtime_config(  # noqa: C901 - 11
             batch_request=batch_request_from_runtime_kwargs
         )
 
-        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
+        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.  # noqa: E501
         updated_batch_request = copy.deepcopy(batch_request)
         if batch_request_from_runtime_kwargs and "options" in updated_batch_request:
             updated_batch_request["options"] = {}

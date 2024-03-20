@@ -49,7 +49,7 @@ class TestSnowflake:
         However, if we try to add an asset that is not queryable with the current datasource connection details,
         then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
-        """
+        """  # noqa: E501
         snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
             "my_ds", connection_string=connection_string
         )

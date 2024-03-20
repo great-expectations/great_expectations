@@ -79,7 +79,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     See Also:
         [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -144,7 +144,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
             elif not params.min_value:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             else:
@@ -193,7 +193,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
             elif params["min_value"] is None:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             elif params["max_value"] is None:

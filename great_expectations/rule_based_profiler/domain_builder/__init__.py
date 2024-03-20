@@ -13,7 +13,7 @@ from great_expectations.rule_based_profiler.domain_builder.column_pair_domain_bu
 from great_expectations.rule_based_profiler.domain_builder.multi_column_domain_builder import (  # isort:skip
     MultiColumnDomainBuilder,
 )
-from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # isort:skip
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # isort:skip  # noqa: E501
     CategoricalColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.domain_builder.map_metric_column_domain_builder import (

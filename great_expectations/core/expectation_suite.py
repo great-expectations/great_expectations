@@ -123,7 +123,7 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.
-        """
+        """  # noqa: E501
         output: set[str] = set()
         for expectation in self.expectations:
             output.update(expectation.evaluation_parameter_options)
@@ -187,7 +187,7 @@ class ExpectationSuite(SerializableDictDot):
 
         Raises:
             ValueError: If expectation_like is of type Expectation and expectation_like.id is not None.
-        """
+        """  # noqa: E501
         from great_expectations.expectations.expectation import Expectation
         from great_expectations.expectations.expectation_configuration import (
             ExpectationConfiguration,
@@ -196,8 +196,8 @@ class ExpectationSuite(SerializableDictDot):
         if isinstance(expectation_like, Expectation):
             if expectation_like.id:
                 raise ValueError(
-                    "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "
-                    "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."
+                    "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "  # noqa: E501
+                    "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."  # noqa: E501
                 )
             expectation_like.register_save_callback(save_callback=self._save_expectation)
             return expectation_like
@@ -209,7 +209,7 @@ class ExpectationSuite(SerializableDictDot):
             )
         else:
             raise TypeError(
-                f"Expected Expectation, ExpectationConfiguration, or dict, but received type {type(expectation_like)}."
+                f"Expected Expectation, ExpectationConfiguration, or dict, but received type {type(expectation_like)}."  # noqa: E501
             )
 
     @public_api
@@ -248,7 +248,7 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now
+        # TODO: Need to emit an event from here - we've opted out of an ExpectationSuiteUpdated event for now  # noqa: E501
         key = self._store.get_key(name=self.name, id=self.id)
         self._store.update(key=key, value=self)
 
@@ -304,7 +304,7 @@ class ExpectationSuite(SerializableDictDot):
             citation_date_obj = citation_date
         else:
             raise gx_exceptions.GreatExpectationsTypeError(
-                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
+                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"  # noqa: E501
             )
 
         citation: Dict[str, Any] = {
@@ -328,7 +328,7 @@ class ExpectationSuite(SerializableDictDot):
         - data_asset_name
         - name
         - meta
-        """
+        """  # noqa: E501
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
@@ -337,7 +337,7 @@ class ExpectationSuite(SerializableDictDot):
                     other = ExpectationSuite(**other_dict)
                 except ValidationError:
                     logger.debug(
-                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
+                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "  # noqa: E501
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
                     return NotImplemented
@@ -401,7 +401,7 @@ class ExpectationSuite(SerializableDictDot):
             A JSON-serializable dict representation of this ExpectationSuite.
         """
         myself = expectationSuiteSchema.dump(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
+        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
         expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(expectation_configurations)
@@ -479,7 +479,7 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             TypeError: Must provide either expectation_configuration or id.
             ValueError: No match or multiple matches found (and remove_multiple_matches=False).
-        """
+        """  # noqa: E501
         expectation_configurations = [exp.configuration for exp in self.expectations]
         if expectation_configuration is None and id is None:
             raise TypeError("Must provide either expectation_configuration or id")
@@ -503,7 +503,7 @@ class ExpectationSuite(SerializableDictDot):
                 return removed_expectations
             else:
                 raise ValueError(
-                    "More than one matching expectation was found. Specify more precise matching criteria,"
+                    "More than one matching expectation was found. Specify more precise matching criteria,"  # noqa: E501
                     "or set remove_multiple_matches=True"
                 )
 
@@ -558,7 +558,7 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             InvalidExpectationConfigurationError
 
-        """
+        """  # noqa: E501
         from great_expectations.expectations.expectation_configuration import (
             ExpectationConfiguration,
         )
@@ -609,7 +609,7 @@ class ExpectationSuite(SerializableDictDot):
             id: Great Expectations Cloud id
 
         Returns: A list of matching ExpectationConfigurations
-        """
+        """  # noqa: E501
 
         if expectation_configuration is None and id is None:
             raise TypeError("Must provide either expectation_configuration or id")
@@ -645,7 +645,7 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             More than one match
             One match if overwrite_existing = False
-        """
+        """  # noqa: E501
 
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
@@ -653,15 +653,15 @@ class ExpectationSuite(SerializableDictDot):
 
         if len(found_expectation_indexes) > 1:
             raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
+                "More than one matching expectation was found. Please be more specific with your search "  # noqa: E501
                 "criteria"
             )
         elif len(found_expectation_indexes) == 1:
-            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation
+            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation  # noqa: E501
             # to update instead. We need to consider how to handle meta in that situation.
             # patch_expectation = jsonpatch.make_patch(self.expectations[found_expectation_index] \
             #   .kwargs, expectation_configuration.kwargs)
-            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
+            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)  # noqa: E501
             if overwrite_existing:
                 # if existing Expectation has a id, add it back to the new Expectation Configuration
                 existing_expectation_id = self.expectations[found_expectation_indexes[0]].id
@@ -673,7 +673,7 @@ class ExpectationSuite(SerializableDictDot):
                 )
             else:
                 raise gx_exceptions.DataContextError(
-                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
+                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "  # noqa: E501
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
         else:
@@ -705,7 +705,7 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             More than one match
             One match if overwrite_existing = False
-        """
+        """  # noqa: E501
         expectation_configuration: ExpectationConfiguration
         expectation_configurations_attempted_to_be_added: List[ExpectationConfiguration] = [
             self.add_expectation_configuration(
@@ -741,7 +741,7 @@ class ExpectationSuite(SerializableDictDot):
             DataContextError: One match if overwrite_existing = False
 
         # noqa: DAR402
-        """
+        """  # noqa: E501
         self._build_expectation(expectation_configuration)
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
@@ -769,7 +769,7 @@ class ExpectationSuite(SerializableDictDot):
         """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
 
         The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
-        """
+        """  # noqa: E501
         expectation_configurations_by_domain: Dict[str, List[ExpectationConfiguration]] = (
             self.get_grouped_and_ordered_expectations_by_domain_type()
         )
@@ -792,7 +792,7 @@ class ExpectationSuite(SerializableDictDot):
         """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
 
         The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
-        """
+        """  # noqa: E501
         if expectation_configurations is None:
             expectation_configurations = (
                 self.get_grouped_and_ordered_expectations_by_expectation_type()
@@ -824,7 +824,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         Returns "ExpectationConfiguration" list in predetermined order by passing appropriate methods for retrieving
         "ExpectationConfiguration" lists by corresponding "domain_type" (with "table" first; then "column", and so on).
-        """
+        """  # noqa: E501
         expectation_configurations_by_domain: Dict[str, List[ExpectationConfiguration]] = (
             self._get_expectations_by_domain_using_accessor_method(
                 domain_type=MetricDomainTypes.TABLE.value,
@@ -856,7 +856,7 @@ class ExpectationSuite(SerializableDictDot):
     ) -> List[ExpectationConfiguration]:
         """
         Returns "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
-        """
+        """  # noqa: E501
         table_expectation_configurations: List[ExpectationConfiguration] = sorted(
             self.get_table_expectations(),
             key=lambda element: element["expectation_type"],
@@ -1017,7 +1017,7 @@ class ExpectationSuite(SerializableDictDot):
         # Group items by column
         sorted_columns = sorted(list(expectations_by_column.keys()))
 
-        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column  # noqa: E501
         # names from entire evr, else use alphabetic sort
         if set(sorted_columns) == set(ordered_columns):
             return expectations_by_column, ordered_columns
@@ -1048,7 +1048,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
-        """
+        """  # noqa: E501
         from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
         for expectation in self.expectations:
@@ -1087,7 +1087,7 @@ class ExpectationSuiteSchema(Schema):
     meta = fields.Dict()
     notes = fields.Raw(required=False, allow_none=True)
 
-    # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
+    # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;  # noqa: E501
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     # noinspection PyMethodMayBeStatic
     def clean_empty(self, data: _TExpectationSuite) -> _TExpectationSuite:

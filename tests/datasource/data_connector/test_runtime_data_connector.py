@@ -99,7 +99,7 @@ execution_engine:
         )
     expected_error_message: str = """
         RuntimeDataConnector "runtime" requires batch_identifiers to be configured, either at the DataConnector or Asset-level.
-    """
+    """  # noqa: E501
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
@@ -132,7 +132,7 @@ execution_engine:
 
     expected_error_message: str = """
         RuntimeDataConnector "runtime" requires batch_identifiers to be configured when specifying Assets.
-        """
+        """  # noqa: E501
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
@@ -211,7 +211,7 @@ def test_asset_is_name_batch_identifier_correctly_used(
 ):
     """
     Using asset_a, which is named in the RuntimeDataConnector configuration, and using batch_identifier that is named.
-    """
+    """  # noqa: E501
     runtime_data_connector: RuntimeDataConnector = basic_datasource_with_assets.data_connectors[
         "runtime"
     ]
@@ -351,7 +351,7 @@ def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_l
 
                 The RuntimeDataConnector was configured with : ['hour', 'minute']
                 It was invoked with : ['year', 'hour', 'minute']
-    """
+    """  # noqa: E501
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
@@ -397,7 +397,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
         "test_runtime_data_connector"
     ]
 
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
@@ -435,8 +435,8 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         "test_runtime_data_connector"
     ]
 
-    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in
-    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in  # noqa: E501
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.  # noqa: E501
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
@@ -459,7 +459,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
 
                 The RuntimeDataConnector was configured with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0']
                 It was invoked with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0', 'custom_key_1']
-    """
+    """  # noqa: E501
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
     batch_identifiers = {"batch_identifiers": {"unknown_key": "some_value"}}
@@ -468,7 +468,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         "test_runtime_data_connector"
     ]
 
-    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in configuration
+    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in configuration  # noqa: E501
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -491,7 +491,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         appear among the configured batch identifiers.
 
                 The RuntimeDataConnector was configured with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0']
-                It was invoked with : ['batch_identifiers']    """
+                It was invoked with : ['batch_identifiers']    """  # noqa: E501
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 

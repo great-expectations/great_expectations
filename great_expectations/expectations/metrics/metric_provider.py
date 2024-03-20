@@ -134,7 +134,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
         1. Data Docs rendering methods decorated with the @renderer decorator. See the guide
         "How to create renderers for custom expectations" for more information.
 
-    """
+    """  # noqa: E501
 
     domain_keys: Tuple[str, ...] = tuple()
     value_keys: Tuple[str, ...] = tuple()
@@ -196,7 +196,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 of "resolved_metric_dependencies_by_metric_name" using previously declared "metric_partial_fn" key (as
                 described above), composes full metric execution configuration structure, and adds this configuration
                 to list of metrics to be resolved as one bundle (specifics pertaining to "ExecutionEngine" subclasses).
-                """
+                """  # noqa: E501
                 if metric_fn_type not in [
                     MetricFunctionTypes.VALUE,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -204,7 +204,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     raise ValueError(
                         f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
 support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
-"metric_fn_type" property."""
+"metric_fn_type" property."""  # noqa: E501
                     )
 
                 if metric_fn_type == MetricFunctionTypes.VALUE:

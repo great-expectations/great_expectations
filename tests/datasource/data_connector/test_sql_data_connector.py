@@ -40,7 +40,7 @@ def get_data_context_for_datasource_and_execution_engine(
 ) -> AbstractDataContext:
     context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine={
             "class_name": "SqlAlchemyExecutionEngine",
             "url": connection_url,
@@ -56,7 +56,7 @@ def get_data_context_for_datasource_and_execution_engine(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
     return context
 
@@ -605,7 +605,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_asset_override__a_list(
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_asset_override__a_list(  # noqa: E501
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -903,7 +903,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 @pytest.mark.sqlite
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(  # noqa: E501
     mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -929,7 +929,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 @pytest.mark.sqlite
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name(
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name(  # noqa: E501
     mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -955,7 +955,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_asset_partitioner(
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_asset_partitioner(  # noqa: E501
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -992,7 +992,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_partitioner(
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_partitioner(  # noqa: E501
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1029,7 +1029,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_partitioner_asset_override(
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_partitioner_asset_override(  # noqa: E501
     partitioner_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1069,7 +1069,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_no_partitioner_no_sampler(
+def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_no_partitioner_no_sampler(  # noqa: E501
     partitioner_method_name_prefix,
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -1108,7 +1108,7 @@ def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_w
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_default_partitioner_sampler_asset_override(
+def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_default_partitioner_sampler_asset_override(  # noqa: E501
     partitioner_method_name_prefix,
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -1164,7 +1164,7 @@ def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnec
 @pytest.mark.sqlite
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnector_with_default_partitioner_sampler_asset_override(
+def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnector_with_default_partitioner_sampler_asset_override(  # noqa: E501
     partitioner_method_name_prefix,
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -1515,7 +1515,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "table",
         },
         {
@@ -1551,7 +1551,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "view",
         },
         {
@@ -1615,7 +1615,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "table",
         },
         {
@@ -1651,7 +1651,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "view",
         },
         {
@@ -1693,7 +1693,7 @@ def test_introspect_db(
 
     assert my_data_connector._introspect_db(schema_name="waffle") == []
 
-    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
+    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.  # noqa: E501
     assert my_data_connector._introspect_db(ignore_information_schemas_and_system_tables=False) == [
         {
             "schema_name": "main",
@@ -1718,7 +1718,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "table",
         },
         {
@@ -1754,7 +1754,7 @@ def test_introspect_db(
         },
         {
             "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",  # noqa: E501
             "type": "view",
         },
         {

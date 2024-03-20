@@ -117,7 +117,7 @@ except ImportError:
 
 if snowflake.snowflakedialect:
     if sa:
-        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.  # noqa: E501
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect")
 
@@ -146,7 +146,7 @@ if TYPE_CHECKING:
 def _get_dialect_type_module(dialect):  # noqa: C901
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects
-    """
+    """  # noqa: E501
     if dialect is None:
         logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
@@ -280,7 +280,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ```python
         execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="dbmstype://user:password@host:5432/database_name")
     ```
-    """
+    """  # noqa: E501
 
     # noinspection PyUnusedLocal
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
@@ -293,7 +293,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
-        # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine  # noqa: E501
         **kwargs,
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
@@ -305,9 +305,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._create_temp_table = create_temp_table
         os.environ["SF_PARTNER"] = "great_expectations_oss"  # noqa: TID251
 
-        # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
+        # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by  # noqa: E501
         # keeping a reference to it.
-        # Even though we use a single connection pool for dialects that need a single persisted connection
+        # Even though we use a single connection pool for dialects that need a single persisted connection  # noqa: E501
         # (e.g. for accessing temporary tables), if we don't keep a reference
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
         self._connection = None
@@ -320,7 +320,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if engine is not None:
             if credentials is not None:
                 logger.warning(
-                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "
+                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "  # noqa: E501
                     "Ignoring credentials."
                 )
             self.engine = engine
@@ -332,12 +332,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 url=url,
             )
 
-        # these are two backends where temp_table_creation is not supported we set the default value to False.
-        if self.dialect_name in [
-            GXSqlDialect.TRINO,
-            GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
-            GXSqlDialect.CLICKHOUSE,
-        ]:
+        # these are two backends where temp_table_creation is not supported we set the default value to False.  # noqa: E501
+        if (
+            self.dialect_name
+            in [
+                GXSqlDialect.TRINO,
+                GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.  # noqa: E501
+                GXSqlDialect.CLICKHOUSE,
+            ]
+        ):
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
@@ -378,9 +381,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect_module = None
 
-        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
-        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
-        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine  # noqa: E501
+        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,  # noqa: E501
+        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and  # noqa: E501
         # Connection can be handled separately.
         self._engine_backup = None
         if self.engine and self.dialect_name in [
@@ -408,12 +411,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     _add_sqlite_functions(dbapi_con)
 
                 sa.event.listen(self.engine, "connect", _on_connect)
-                # Also immediately add the sqlite functions in case there already exists an underlying
+                # Also immediately add the sqlite functions in case there already exists an underlying  # noqa: E501
                 # sqlite3.Connection (distinct from a sqlalchemy Connection).
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
 
-        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
+        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,  # noqa: E501
         # and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
             "name": name,
@@ -449,7 +452,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             Nothing, the engine instance variable is set.
-        """
+        """  # noqa: E501
         if credentials is not None:
             self.engine = self._build_engine(credentials=credentials, **kwargs)
         elif connection_string is not None:
@@ -505,7 +508,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
-        """
+        """  # noqa: E501
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
         schema_name = credentials.pop("schema_name", None)
@@ -552,7 +555,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             a tuple consisting of a url with the serialized key-pair authentication, and a dictionary of engine kwargs.
-        """
+        """  # noqa: E501
         from cryptography.hazmat.backends import default_backend
         from cryptography.hazmat.primitives import serialization
 
@@ -600,7 +603,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute returned in the format of an SqlAlchemy table/column(s) object)
-        """
+        """  # noqa: E501
         data_object: SqlAlchemyBatchData
 
         batch_id: Optional[str] = domain_kwargs.get("batch_id")
@@ -654,7 +657,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 selectable = sa.select(sa.text("*")).select_from(selectable).where(parsed_condition)
             else:
                 raise GreatExpectationsError(
-                    "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
+                    "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."  # noqa: E501
                 )
 
         # Filtering by filter_conditions
@@ -667,7 +670,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
-            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.  # noqa: E501
             if not isinstance(selectable, (sa.Table, Subquery)):
                 selectable = selectable.subquery()
 
@@ -805,7 +808,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             SqlAlchemy column
-        """
+        """  # noqa: E501
         partitioned_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
@@ -834,7 +837,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        """  # noqa: E501
         assert (
             domain_type == MetricDomainTypes.COLUMN
         ), "This method only supports MetricDomainTypes.COLUMN"
@@ -873,7 +876,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        """  # noqa: E501
         assert (
             domain_type == MetricDomainTypes.COLUMN_PAIR
         ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
@@ -916,7 +919,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs partition from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        """  # noqa: E501
         assert (
             domain_type == MetricDomainTypes.MULTICOLUMN
         ), "This method only supports MetricDomainTypes.MULTICOLUMN"
@@ -959,7 +962,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
-        """
+        """  # noqa: E501
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[sqlalchemy.Row]
@@ -1047,8 +1050,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(query["metric_ids"]):
-                # Converting SQL query execution results into JSON-serializable format produces simple data types,
-                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                # Converting SQL query execution results into JSON-serializable format produces simple data types,  # noqa: E501
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.  # noqa: E501
                 resolved_metrics[metric_id] = convert_to_json_serializable(data=res[0][idx])
 
         return resolved_metrics
@@ -1070,7 +1073,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self.engine.dispose()
 
         More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
-        """
+        """  # noqa: E501
         if self._engine_backup:
             if self._connection:
                 self._connection.close()
@@ -1130,7 +1133,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
-        """
+        """  # noqa: E501
         return self._data_partitioner.get_data_for_batch_identifiers(
             execution_engine=self,
             selectable=selectable,
@@ -1214,7 +1217,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidBatchSpecError(
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
         RuntimeQueryBatchSpec (illegal type "{type(batch_spec)!s}" was received).
-                        """
+                        """  # noqa: E501
             )
         if sum(1 if x else 0 for x in [batch_spec.get("query"), batch_spec.get("table_name")]) != 1:
             raise InvalidBatchSpecError(
@@ -1241,7 +1244,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         selectable: sqlalchemy.Selectable = self._build_selectable_from_batch_spec(
             batch_spec=batch_spec
         )
-        # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly
+        # NOTE: what's being checked here is the presence of a `query` attribute, we could check this directly  # noqa: E501
         # instead of doing an instance check
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
@@ -1290,7 +1293,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             Sqlalchemy connection
-        """
+        """  # noqa: E501
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
                 if not self._connection:
@@ -1336,7 +1339,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
-        """
+        """  # noqa: E501
         with self.get_connection() as connection:
             if (
                 is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")

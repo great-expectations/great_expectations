@@ -66,7 +66,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
                 pyspark.types.IntegerType,
             ),
         ):
-            # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+            # if column is any type that could have NA values, remove them (not filtered by .isNotNull())  # noqa: E501
             compute_domain_kwargs = execution_engine.add_column_row_condition(
                 metric_domain_kwargs,
                 filter_null=cls.filter_column_isnull,

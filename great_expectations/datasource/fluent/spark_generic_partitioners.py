@@ -83,7 +83,7 @@ class _Partitioner(Protocol):  # noqa: PYI046
                  {"passenger_count": 2}, means the raw passenger count value is in the set:
                  {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
                  This category was only 1 parameter per column.
-        """
+        """  # noqa: E501
 
 
 class _PartitionerDatetime(FluentBaseModel):
@@ -289,7 +289,7 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(
-                f"All column names, {self.column_names}, must be specified in the batch request options. "
+                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}

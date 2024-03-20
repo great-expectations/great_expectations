@@ -284,7 +284,7 @@ class RenderedTableContent(RenderedComponentContent):
             name and the values being a dictionary with the following form:
 
             sortable: A boolean indicating whether the column is sortable.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -473,7 +473,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
             styling: A dictionary containing styling information.
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -625,7 +625,7 @@ class CollapseContent(RenderedComponentContent):
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
         inline_link: Whether to include a link inline.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -947,7 +947,7 @@ class RenderedAtomicContentSchema(Schema):
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE during serialization if
-        their values are None."""
+        their values are None."""  # noqa: E501
         data = deepcopy(data)
         for key in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

@@ -68,13 +68,13 @@ class QueryTemplateValues(QueryMetricProvider):
 
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery; sectioning
+        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery; sectioning  # noqa: E501
             # the active batch off w/ parentheses ensures flow of operations doesn't break
             query = cls.get_query(query, template_dict, f"({selectable})")
 
         elif isinstance(
             selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation &
+        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation &  # noqa: E501
             # aliasing when formatting the parameterized query
             query = cls.get_query(
                 query,

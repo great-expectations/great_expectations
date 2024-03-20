@@ -70,7 +70,7 @@ execution_engine:
     database: {database}
 \"\"\"
 
-"""
+"""  # noqa: E501
 
 
 @pytest.fixture
@@ -823,7 +823,7 @@ class TestCodeReferenceFilter:
         will not include multiple copies of the same definitions (when not
         accounting for different but equivalent ast definition object instances).
         """
-        observed = code_reference_filter_with_include_by_file_and_name_already_included.filter_definitions()
+        observed = code_reference_filter_with_include_by_file_and_name_already_included.filter_definitions()  # noqa: E501
         # There are two extra (8 vs 6) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 8
@@ -847,7 +847,7 @@ class TestCodeReferenceFilter:
 
         Include overrides exclude.
         """
-        observed = code_reference_filter_with_include_by_file_and_name_already_excluded.filter_definitions()
+        observed = code_reference_filter_with_include_by_file_and_name_already_excluded.filter_definitions()  # noqa: E501
         # There are two extra (4 vs 2) here due to the ast_definition classes
         #  pointing to different but equivalent objects.
         assert len(observed) == 4
@@ -861,14 +861,14 @@ class TestCodeReferenceFilter:
 
     def test_filter_definitions_include_by_file_and_name_already_excluded_not_used_in_docs_example(
         self,
-        code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
+        code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,  # noqa: E501
     ):
         """What does this test and why?
 
         Include overrides exclude. Method that was not included in docs examples
         is still included if manually added.
         """
-        observed = code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file.filter_definitions()
+        observed = code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file.filter_definitions()  # noqa: E501
         assert len(observed) == 1
         assert {d.name for d in observed} == {
             "example_no_usages_in_sample_docs_example_python_file_string",

@@ -48,7 +48,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         if not self.base_directory.exists():
             raise TestConnectionError(f"Path: {self.base_directory.resolve()} does not exist.")
 

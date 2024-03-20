@@ -13,7 +13,7 @@ class Action:
 
     Attributes:
         name: A description of what happened. For example (<object>.<verb>) "validation_result.saved" or "token.deleted"
-    """
+    """  # noqa: E501
 
     name: str
 

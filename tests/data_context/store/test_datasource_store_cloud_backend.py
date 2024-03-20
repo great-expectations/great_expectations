@@ -28,7 +28,7 @@ def test_datasource_store_set(
     """What does this test and why?
 
     The datasource store when used with a cloud backend should emit the correct request when creating a new datasource.
-    """
+    """  # noqa: E501
 
     # Note: id will be provided by the backend on create
     key = GXCloudIdentifier(
@@ -80,7 +80,7 @@ def test_datasource_store_get_by_id(
     """What does this test and why?
 
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
-    """
+    """  # noqa: E501
 
     id: str = "example_id_normally_uuid"
 
@@ -117,7 +117,7 @@ def test_datasource_store_get_by_name(
     """What does this test and why?
 
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
-    """
+    """  # noqa: E501
 
     id: str = "example_id_normally_uuid"
     datasource_name: str = "example_datasource_config_name"
@@ -138,7 +138,7 @@ def test_datasource_store_get_by_name(
     ) as mock_get, mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
     ) as mock_has_key:
-        # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
+        # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.  # noqa: E501
         mock_has_key.return_value = True
 
         datasource_store_ge_cloud_backend.retrieve_by_name(datasource_name=datasource_name)
@@ -159,7 +159,7 @@ def test_datasource_store_delete_by_id(
     """What does this test and why?
 
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
-    """
+    """  # noqa: E501
     id: str = "example_id_normally_uuid"
 
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)

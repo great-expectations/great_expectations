@@ -4,7 +4,7 @@ Use this code to create the reproducible data in ./tests/test_sets/fixed_distrib
 The data should pass a kstest with the cdf parameter=distribution and a=0.05,
 e.g. kstest(data_column, "distribution name", p-value=0.05) == True
 
-"""
+"""  # noqa: E501
 
 import numpy as np
 import pandas as pd

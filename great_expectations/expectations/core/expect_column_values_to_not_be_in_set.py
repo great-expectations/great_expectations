@@ -89,7 +89,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 

@@ -68,7 +68,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
     * Legacy test cases used "in" (a python reserved word). This has been changed to "input".
     * To maintain parallelism, we've also made the corresponding change from "out" to "output".
     * To avoid any ambiguity, ExpectationLegacyTestCaseAdapter only accepts keyword arguments. Positional arguments are not allowed.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,

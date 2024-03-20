@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
-#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
-#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.  # noqa: E501
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>  # noqa: E501
 # TODO: <Alex>See also "great_expectations/core/batch.py".</Alex>
 # TODO: <Alex>The following class is part of the new design.</Alex>
 class BatchMarkers(BatchSpec):
     """A BatchMarkers is a special type of BatchSpec (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
-    process, such as the timestamp at which a query was executed."""
+    process, such as the timestamp at which a query was executed."""  # noqa: E501
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -144,7 +144,7 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
             return getattr(fabric, self.reader_method)
         except AttributeError:
             raise AttributeError(
-                f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"
+                f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"  # noqa: E501
             )
 
 

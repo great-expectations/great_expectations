@@ -43,7 +43,7 @@ def is_valid_continuous_partition_object(partition_object):
 
     :param partition_object: The partition_object to evaluate
     :return: Boolean
-    """
+    """  # noqa: E501
     if (
         (partition_object is None)
         or ("weights" not in partition_object)
@@ -58,11 +58,11 @@ def is_valid_continuous_partition_object(partition_object):
     else:
         comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects  # noqa: E501
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
-    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
+    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one  # noqa: E501
     return (
         (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
         and np.all(np.diff(partition_object["bins"]) > 0)
@@ -115,7 +115,7 @@ def kde_partition_data(data, estimate_tails=True):
         }
 
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     kde = stats.kde.gaussian_kde(data)
     evaluation_bins = np.linspace(
         start=np.min(data) - (kde.covariance_factor() / 2),
@@ -159,7 +159,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
             "weights": (list) The densities of the bins implied by the partition.
         }
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     if bins == "uniform":
         bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins + 1)
     elif bins == "ntile":
@@ -171,7 +171,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         hist, bin_edges = np.histogram(data, bins, density=False, **kwargs)
     except ValueError as e:
         raise ValueError(
-            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
+            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"  # noqa: E501
             "such as a range? Numpy error was: " + str(e)
         )
     except TypeError as e:
@@ -206,7 +206,7 @@ def build_continuous_partition_object(
             }
 
             See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
@@ -244,7 +244,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
             "weights": (list) The densities of the values implied by the partition.
         }
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     counts = dataset.get_column_value_counts(column, sort)
     return {
         "values": list(counts.index),
@@ -362,7 +362,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
        Raises:
            AttributeError: \
                If an unsupported distribution is provided.
-    """
+    """  # noqa: E501
 
     params["loc"] = params.get("loc", 0)
     if "scale" not in params:
@@ -404,14 +404,14 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR09
            ValueError: \
                With an informative description, usually when necessary parameters are omitted or are invalid.
 
-    """
+    """  # noqa: E501
 
     norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."  # noqa: E501
     gamma_msg = (
         "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
     )
-    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."  # noqa: E501
     uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
@@ -513,7 +513,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR09
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"  # noqa: E501
         )
 
 
@@ -533,7 +533,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         A list of expectation results.
 
 
-    """
+    """  # noqa: E501
     expectation = getattr(df, expectation_type)
     results = list()
 

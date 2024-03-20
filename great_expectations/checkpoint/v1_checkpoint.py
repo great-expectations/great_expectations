@@ -29,7 +29,7 @@ class Checkpoint(BaseModel):
         validation_definitions: List of validation definitions to be run.
         actions: List of actions to be taken after the validation definitions are run.
 
-    """
+    """  # noqa: E501
 
     name: str
     validation_definitions: List[ValidationConfig]
@@ -64,7 +64,7 @@ class Checkpoint(BaseModel):
                         "class_name": "SlackRenderer",
                     }
                 }
-        """
+        """  # noqa: E501
 
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep

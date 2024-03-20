@@ -35,7 +35,7 @@ class SlackRenderer(Renderer):
 
         query = {
             "blocks": [title_block],
-            # this abbreviated root level "text" will show up in the notification and not the message
+            # this abbreviated root level "text" will show up in the notification and not the message  # noqa: E501
             "text": default_text,
         }
 
@@ -99,7 +99,7 @@ class SlackRenderer(Renderer):
                 summary_text += failed_expectations_text
 
             query["blocks"][0]["text"]["text"] = summary_text
-            # this abbreviated root level "text" will show up in the notification and not the message
+            # this abbreviated root level "text" will show up in the notification and not the message  # noqa: E501
             query["text"] = f"{expectation_suite_name}: {status}"
 
             if data_docs_pages:
@@ -110,15 +110,15 @@ class SlackRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             logger.critical(
-                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
-                                f"{docs_link_key!s}`, but it is not configured under `data_docs_sites` in the "
+                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"  # noqa: E501
+                                f"{docs_link_key!s}`, but it is not configured under `data_docs_sites` in the "  # noqa: E501
                                 f"`great_expectations.yml`\n"
                             )
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "
+                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "  # noqa: E501
                                     f"`{docs_link_key!s}`, but it is not configured under "
                                     f"`data_docs_sites` in the `great_expectations.yml`\n",
                                 },
@@ -162,7 +162,7 @@ class SlackRenderer(Renderer):
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"Learn how to review validation results in Data Docs: {documentation_url}",
+                    "text": f"Learn how to review validation results in Data Docs: {documentation_url}",  # noqa: E501
                 }
             ],
         }
@@ -182,7 +182,7 @@ class SlackRenderer(Renderer):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into "
+                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into "  # noqa: E501
                             f"a browser to view)\n",
                         },
                     }
@@ -198,7 +198,7 @@ class SlackRenderer(Renderer):
                 logger.warning(
                     f"""SlackRenderer had a problem with generating the docs link.
                     link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}.
-                    Error: {e}"""
+                    Error: {e}"""  # noqa: E501
                 )
                 return
         else:

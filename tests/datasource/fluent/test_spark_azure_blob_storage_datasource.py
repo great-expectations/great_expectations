@@ -112,7 +112,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     data_connector: AzureBlobStorageDataConnector = cast(
         AzureBlobStorageDataConnector, csv_asset._data_connector
     )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""
+    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""  # noqa: E501
     return regex, test_connection_error_message
 
 
@@ -136,7 +136,7 @@ def test_construct_spark_abs_datasource_with_conn_str_and_credential():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
         azure_options={  # Representative of format noted in official docs
-            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
             "credential": "my_credential",
         },
     )
@@ -166,7 +166,7 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
         azure_options={  # Representative of format noted in official docs
-            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
             "credential": "my_credential",
         },
     )
@@ -178,13 +178,13 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
 
 @pytest.mark.unit
 def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error():
-    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
+    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`  # noqa: E501
     with pytest.raises(SparkAzureBlobStorageDatasourceError):
         spark_abs_datasource = SparkAzureBlobStorageDatasource(
             name="spark_abs_datasource",
             azure_options={
                 "account_url": "account.blob.core.windows.net",
-                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
                 "credential": "my_credential",
             },
         )
@@ -345,7 +345,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 @pytest.mark.big
 @pytest.mark.xfail(
-    reason="Accessing objects on azure.storage.blob using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
+    reason="Accessing objects on azure.storage.blob using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."  # noqa: E501
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,

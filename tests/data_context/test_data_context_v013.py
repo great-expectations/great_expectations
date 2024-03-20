@@ -236,9 +236,9 @@ def test_config_variables(empty_data_context):
 
 @pytest.mark.filesystem
 @pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"  # noqa: E501
 )
-def test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine(
+def test_conveying_partitioning_and_sampling_directives_from_data_context_to_pandas_execution_engine(  # noqa: E501
     empty_data_context, test_df, tmp_path_factory
 ):
     base_directory = str(
@@ -342,7 +342,7 @@ data_connectors:
 
 @pytest.mark.filesystem
 @pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"  # noqa: E501
 )
 def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
     empty_data_context, test_df, tmp_path_factory
@@ -417,7 +417,7 @@ data_connectors:
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(  # noqa: E501
         mode=ConfigOutputModes.DICT
     )
     project_config_dict["plugins_directory"] = None
@@ -437,7 +437,7 @@ def test_in_memory_data_context_configuration(
         }
     }
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     project_config_dict = dataContextConfigSchema.dump(project_config_dict)
     project_config_dict = dataContextConfigSchema.load(project_config_dict)
 
@@ -460,7 +460,7 @@ def test_in_memory_data_context_configuration(
 
 @pytest.mark.sqlite
 @pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"  # noqa: E501
 )
 def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
@@ -496,7 +496,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     # since create_temp_table defaults to True, there should be 1 temp table
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
-    # if create_temp_table in batch_spec_passthrough is set to False, no new temp tables should be created
+    # if create_temp_table in batch_spec_passthrough is set to False, no new temp tables should be created  # noqa: E501
     batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_runtime_sql_datasource",
@@ -543,13 +543,13 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
 
 @pytest.mark.filesystem
 @pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"  # noqa: E501
 )
 def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
@@ -624,7 +624,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )

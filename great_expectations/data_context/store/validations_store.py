@@ -88,7 +88,7 @@ class ValidationsStore(Store):
             bug_risk: Moderate
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     _key_class: ClassVar[Type] = ValidationResultIdentifier
 
@@ -127,8 +127,8 @@ class ValidationsStore(Store):
             store_name=store_name,
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,

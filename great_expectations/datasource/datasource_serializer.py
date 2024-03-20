@@ -57,7 +57,7 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
         Returns:
             Representation of object as a dict suitable for return in list_datasources().
-        """
+        """  # noqa: E501
 
         config: dict = self.schema.dump(obj)
 

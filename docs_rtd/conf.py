@@ -280,7 +280,7 @@ def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     |           **Integration Infrastructure/Test Coverage**: {maturity_details[integration_infrastructure_test_coverage]}
     |           **Documentation Completeness**: {maturity_details[documentation_completeness]}
     |           **Bug Risk**: {maturity_details[bug_risk]}\
-"""
+"""  # noqa: E501
     expectation_completeness_template = """
     |           **Expectation Completeness**: {maturity_details[expectation_completeness]}\
 """

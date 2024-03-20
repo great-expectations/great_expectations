@@ -95,7 +95,7 @@ def _parse_attribute_naming_pattern(name: str) -> ParseResults:
 
     Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
     Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
-    """
+    """  # noqa: E501
 
     try:
         return attribute_naming_pattern.parseString(name)
@@ -114,7 +114,7 @@ def validate_fully_qualified_parameter_name_delimiter(
         raise gx_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
-"""
+"""  # noqa: E501
         )
 
 
@@ -156,7 +156,7 @@ class ParameterNode(SerializableDotDict):
     Even though, typically, only the leaf nodes (characterized by having no keys of "ParameterNode" type) store
     parameter values and details, intermediate nodes may also have these properties.  This is important for supporting
     the situations where multiple long fully-qualified parameter names have overlapping intermediate parts (see below).
-    """
+    """  # noqa: E501
 
     def to_dict(self) -> dict:
         return convert_parameter_node_to_dictionary(source=dict(self))  # type: ignore[return-value] # could be None
@@ -220,7 +220,7 @@ class ParameterContainer(SerializableDictDot):
     The ParameterContainer maintains a dictionary that holds references to root-level ParameterNode objects for all
     parameter "name spaces" applicable to the given Domain (where the first part of all fully-qualified parameter names
     within the same "name space" serves as the dictionary key, and the root-level ParameterNode objects are the values).
-    """
+    """  # noqa: E501
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = None
 
@@ -251,7 +251,7 @@ def deep_convert_properties_iterable_to_parameter_node(
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_parameter_node(source=ParameterNode(source))
 
-    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.  # noqa: E501
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
@@ -363,7 +363,7 @@ def build_parameter_container(
     (and any "details") and builds the tree under a single root-level ParameterNode object for a "name space".
     In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
     exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
-    """
+    """  # noqa: E501
     parameter_node: Optional[ParameterNode]
     fully_qualified_parameter_name: str
     parameter_value: Any
@@ -415,12 +415,12 @@ def _build_parameter_node_tree_for_one_parameter(
         parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
         parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
         parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
-    """
+    """  # noqa: E501
     node: ParameterNode = parameter_node
     parameter_name: str
     for parameter_name in parameter_name_as_list[:-1]:
-        # This conditional is functionally equivalent to `node = node.setdefault(parameter_name, ParameterNode({})).`
-        # However, setdefault always evaluates its second argument which is much slower in this hot code path.
+        # This conditional is functionally equivalent to `node = node.setdefault(parameter_name, ParameterNode({})).`  # noqa: E501
+        # However, setdefault always evaluates its second argument which is much slower in this hot code path.  # noqa: E501
         if parameter_name in node:
             node = node[parameter_name]
         else:
@@ -448,14 +448,14 @@ def get_parameter_value_by_fully_qualified_parameter_name(
         :param parameters
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
     name supplied as argument -- a value (of type "Any") or a ParameterNode object (containing the sub-tree structure).
-    """
+    """  # noqa: E501
     validate_fully_qualified_parameter_name_delimiter(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     )
 
-    # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
-    # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the
-    # DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
+    # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the  # noqa: E501
+    # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the  # noqa: E501
+    # DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).  # noqa: E501
     if fully_qualified_parameter_name == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME:
         if domain:
             # Supports the "$domain.domain_kwargs" style syntax.
@@ -528,7 +528,7 @@ def _get_parameter_value_from_parameter_container(
                 raise KeyError(
                     f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" in fully-qualified parameter name does not represent a valid expression.
-"""
+"""  # noqa: E501
                 )
 
             parent_parameter_node = return_value
@@ -638,7 +638,7 @@ def _get_parameter_node_attribute_names(
                 attribute_name_as_list=attribute_name_as_list
             )
         )
-        attribute_name = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER.join(attribute_name_as_list[1:])}"
+        attribute_name = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER.join(attribute_name_as_list[1:])}"  # noqa: E501
         attribute_names.add(attribute_name)
 
     return list(attribute_names)
@@ -681,7 +681,7 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
-    # TODO: <Alex>12/29/2022: Lexicographical order avoids collisions between regular keys and reserved literals.</Alex>
+    # TODO: <Alex>12/29/2022: Lexicographical order avoids collisions between regular keys and reserved literals.</Alex>  # noqa: E501
     reserved_terminal_literals: List[str] = list(sorted(RESERVED_TERMINAL_LITERALS))
 
     idx: Optional[int] = None

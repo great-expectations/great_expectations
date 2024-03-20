@@ -607,7 +607,7 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
             value_type="StringValueType",
             value=RenderedAtomicValue(
                 schema={"type": "com.superconductive.rendered.string"},
-                template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+                template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
                 params={
                     "column": {
                         "schema": {"type": "string"},

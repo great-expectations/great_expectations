@@ -403,7 +403,7 @@ def test_resolve_metric_bundle():
     )
 
 
-# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
+# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error  # noqa: E501
 @pytest.mark.unit
 def test_resolve_metric_bundle_with_nonexistent_metric():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
@@ -653,9 +653,9 @@ def test_get_batch_data_with_gcs_batch_spec(
 )
 @pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
-    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
-    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
-    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
+    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,  # noqa: E501
+    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.  # noqa: E501
+    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.  # noqa: E501
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
     with pytest.raises(gx_exceptions.ExecutionEngineError):

@@ -180,7 +180,7 @@ class CloudMigrator:
     def _log_about_test_migrate(self) -> None:
         logger.info(
             "This is a test run! Please pass `test_migrate=False` to begin the "
-            "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"
+            "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"  # noqa: E501
         )
 
     def _log_about_usage_stats_disabled(self) -> None:
@@ -366,7 +366,7 @@ class CloudMigrator:
     def _print_migration_conclusion_message(self, test_migrate: bool) -> None:
         if test_migrate:
             print(
-                "\nTest run completed! Please set `test_migrate=False` to perform an actual migration."
+                "\nTest run completed! Please set `test_migrate=False` to perform an actual migration."  # noqa: E501
             )
             return
 

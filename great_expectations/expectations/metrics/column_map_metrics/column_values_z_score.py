@@ -112,7 +112,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
-        types and their respective domains"""
+        types and their respective domains"""  # noqa: E501
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
@@ -122,7 +122,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
 
         if (
             metric.metric_name
-            == f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+            == f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"  # noqa: E501
         ):
             dependencies[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"] = (
                 MetricConfiguration(

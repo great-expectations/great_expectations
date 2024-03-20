@@ -28,7 +28,7 @@ from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases
 )
 
 # Here we add SqlAlchemyDataPartitioner specific test cases to the generic test cases:
-from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCase,
     TaxiPartitioningTestCasesBase,
     TaxiPartitioningTestCasesColumnValue,
@@ -87,7 +87,7 @@ def test_named_date_part_methods(
 ):
     """Test that a partially pre-filled version of partition_on_date_parts() was called with the appropriate params.
     For example, partition_on_year.
-    """
+    """  # noqa: E501
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
@@ -192,7 +192,7 @@ def test_get_data_for_batch_identifiers_year(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251
     mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
-    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
     # selectable should be a sa.Selectable object but since we are mocking out
     # get_data_for_batch_identifiers_for_partition_on_date_parts
@@ -223,7 +223,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251
     mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
-    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
     selectable: str = "mock_selectable"
     column_name: str = "column_name"
@@ -251,7 +251,7 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251
     mock_get_data_for_batch_identifiers_for_partition_on_date_parts: mock.MagicMock,  # noqa: TID251
 ):
-    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""
+    """test that get_data_for_batch_identifiers_for_partition_on_date_parts() was called with the appropriate params."""  # noqa: E501
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
     selectable: str = "mock_selectable"
     column_name: str = "column_name"
@@ -275,20 +275,20 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     SINGLE_DATE_PART_DATE_PARTS,
 )
 @pytest.mark.sqlite
-def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_single_date_parts(
+def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_single_date_parts(  # noqa: E501
     date_parts, sa
 ):
     """What does this test and why?
 
     get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts should still build the correct
     query when passed a single element list of date_parts that is a string, DatePart enum object, or mixed case string.
-    """
+    """  # noqa: E501
 
     data_partitioner: SqlAlchemyDataPartitioner = SqlAlchemyDataPartitioner(dialect="sqlite")
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(  # noqa: E501
         selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,
@@ -323,19 +323,19 @@ def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_dat
     [
         pytest.param(
             "sqlite",
-            "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",  # noqa: E501
             marks=pytest.mark.sqlite,
             id="sqlite",
         ),
         pytest.param(
             "postgres",
-            "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",  # noqa: E501
             marks=pytest.mark.postgresql,
             id="postgres",
         ),
     ],
 )
-def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_multiple_date_parts(
+def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts_multiple_date_parts(  # noqa: E501
     date_parts, dialect, expected_query_str, sa
 ):
     """What does this test and why?
@@ -346,7 +346,7 @@ def test_get_partition_query_for_data_for_batch_identifiers_for_partition_on_dat
     selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_partitioner.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(  # noqa: E501
         selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,

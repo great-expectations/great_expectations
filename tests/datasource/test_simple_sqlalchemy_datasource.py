@@ -41,15 +41,15 @@ if sa:
                 self.pool = DummySAEngine.DummyPool
 
             def get_schema_names(self, *args, **kwargs) -> List[str]:
-                # This is a list of schema names we expect to see in the test cases, which is empty list.
+                # This is a list of schema names we expect to see in the test cases, which is empty list.  # noqa: E501
                 return []
 
             def get_table_names(self, *args, **kwargs) -> List[str]:
-                # This is a list of table names we expect to see in the test cases, which is an empty list.
+                # This is a list of table names we expect to see in the test cases, which is an empty list.  # noqa: E501
                 return []
 
             def get_view_names(self, *args, **kwargs) -> List[str]:
-                # This is a list of view names we expect to see in the test cases, which is an empty list.
+                # This is a list of view names we expect to see in the test cases, which is an empty list.  # noqa: E501
                 return []
 
         class DummyConnection:

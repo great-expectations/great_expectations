@@ -66,7 +66,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_match_json_schema](https://greatexpectations.io/expectations/expect_column_values_to_match_json_schema)
-    """
+    """  # noqa: E501
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -45,7 +45,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         # tests Filesystem connection
         if not self.base_directory.exists():
             raise TestConnectionError(

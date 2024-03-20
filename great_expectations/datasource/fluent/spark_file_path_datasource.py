@@ -62,7 +62,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
 class CSVAsset(_SparkGenericFilePathAssetMixin):
     type: Literal["csv"] = "csv"
 
-    # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above
+    # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
     # path: PathOrPaths,
@@ -351,7 +351,7 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
 class JSONAsset(_SparkGenericFilePathAssetMixin):
     type: Literal["json"] = "json"
 
-    # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above
+    # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309)
     # path: Union[str, List[str], RDD[str]],
     # NA - path determined by asset

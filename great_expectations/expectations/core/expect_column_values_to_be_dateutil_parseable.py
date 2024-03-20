@@ -58,7 +58,7 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

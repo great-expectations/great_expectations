@@ -41,7 +41,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             A query as a string or sqlalchemy object.
-        """
+        """  # noqa: E501
 
         # Partition clause should be permissive of all values if not supplied.
         if where_clause is None:
@@ -57,7 +57,7 @@ class SqlAlchemyDataSampler(DataSampler):
         dialect_name: str = execution_engine.dialect_name
         if dialect_name == GXSqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
-            # limit doesn't compile properly for oracle so we will append rownum to query string later
+            # limit doesn't compile properly for oracle so we will append rownum to query string later  # noqa: E501
             raw_query: sqlalchemy.Selectable = (
                 sa.select("*")
                 .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
@@ -88,7 +88,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
             self._validate_mssql_limit_param(n)
-            # This string replacement is here because the limit parameter is not substituted during query.compile()
+            # This string replacement is here because the limit parameter is not substituted during query.compile()  # noqa: E501
             string_of_query = string_of_query.replace("?", str(n))
             return string_of_query
         else:
@@ -108,7 +108,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             None
-        """
+        """  # noqa: E501
         if not isinstance(n, (str, int)):
             raise gx_exceptions.InvalidConfigError(
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
@@ -138,7 +138,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Returns:
             Sqlalchemy selectable.
-        """
+        """  # noqa: E501
         try:
             table_name: str = batch_spec["table_name"]
         except KeyError as e:
@@ -230,7 +230,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         Raises:
             SamplerError
-        """
+        """  # noqa: E501
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")

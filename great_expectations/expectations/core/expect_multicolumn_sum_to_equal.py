@@ -53,7 +53,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     sum_total: float
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (

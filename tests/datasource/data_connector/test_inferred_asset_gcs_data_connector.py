@@ -179,7 +179,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         prefix="",
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -223,7 +223,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
     my_data_connector._refresh_data_references_cache()
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name
+    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(

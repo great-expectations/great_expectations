@@ -287,30 +287,30 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
 #                         if found_first:
 #                             if work_line.startswith("#"):
 #                                 if is_phrase_tagged(cur_phrase, work_line):
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN A HEADER LINE."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN A HEADER LINE."  # noqa: E501
 #                                     # output.append((TODO, number, text))
 #                                     header_lines.append(f"TAG:{number}")
 #                                 else:
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (header line)."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (header line)."  # noqa: E501
 #                                     # output.append((NOTE, number, text))
 #                                     header_lines.append(number)
 #                             elif work_line.startswith("title:"):
 #                                 if is_phrase_tagged(cur_phrase, work_line):
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN THE TITLE BLOCK."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN THE TITLE BLOCK."  # noqa: E501
 #                                     # output.append((TODO, number, text))
 #                                     header_lines.append(f"TAG:{number}")
 #                                 else:
-#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (title block)."
+#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (title block)."  # noqa: E501
 #                                     output.append((NOTE, number, text))
 #                                     header_lines.append(number)
 #                             else:
 #                                 if is_phrase_tagged(cur_phrase, work_line):
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" IS TAGGED AFTER FIRST OCCURENCE."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" IS TAGGED AFTER FIRST OCCURENCE."  # noqa: E501
 #                                     is_done = True
 #                                     # output.append((TODO, number, text))
 #                                     valid_lines.append(f"TAG({number})")
 #                                 elif is_phrase_in_generic_tag(cur_phrase, work_line):
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is inside a generic tag."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is inside a generic tag."  # noqa: E501
 #                                     # generic_lines.append(f"TAG({number})")
 #                                     pass
 #                                 else:
@@ -321,20 +321,20 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
 #                         else:
 #                             if work_line.startswith("#"):
 #                                 if is_phrase_tagged(cur_phrase, work_line):
-#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN A HEADER LINE."
+#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN A HEADER LINE."  # noqa: E501
 #                                     output.append((TODO, number, text))
 #                                     header_lines.append(f"TAG:{number}")
 #                                 else:
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (header line)."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (header line)."  # noqa: E501
 #                                     # output.append((NOTE, number, text))
 #                                     header_lines.append(number)
 #                             elif work_line.startswith("title:"):
 #                                 if is_phrase_tagged(cur_phrase, work_line):
-#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN THE TITLE BLOCK."
+#                                     text = f"\"{'/'.join(phrase.one_of_these)}\" is TAGGED IN THE TITLE BLOCK."  # noqa: E501
 #                                     output.append((TODO, number, text))
 #                                     header_lines.append(f"TAG:{number}")
 #                                 else:
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (title block)."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is not tagged (title block)."  # noqa: E501
 #                                     header_lines.append(number)
 #                                     # output.append((NOTE, number, text))
 #                             else:
@@ -345,7 +345,7 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
 #                                     output.append((DONE, number, text))
 #                                     valid_lines.append(f"TAG:{number}")
 #                                 elif is_phrase_in_generic_tag(cur_phrase, work_line):
-#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is inside a generic tag."
+#                                     # text = f"\"{'/'.join(phrase.one_of_these)}\" is inside a generic tag."  # noqa: E501
 #                                     # output.append((NOTE, number, text))
 #                                     generic_lines.append(number)
 #                                 else:
@@ -360,7 +360,7 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
 #                 output.append((f"{'/'.join(phrase.one_of_these)}", "", ""))
 #                 output.append(("Valid lines:", valid_lines, f"{'/'.join(phrase.one_of_these)}"))
 #                 output.append(("Header lines:", header_lines, f"{'/'.join(phrase.one_of_these)}"))
-#                 output.append(("Generic lines:", generic_lines, f"{'/'.join(phrase.one_of_these)}"))
+#                 output.append(("Generic lines:", generic_lines, f"{'/'.join(phrase.one_of_these)}"))  # noqa: E501
 #             if len(lines) > 1 and not is_done:
 #                 output.append((NOTE, lines[0], f"{'/'.join(phrase.one_of_these)} {lines}"))
 #
@@ -431,13 +431,13 @@ if __name__ == "__main__":
     # iter_files(
     #     "/Users/rachelreverie/PycharmProjects/great_expectations/docs/guides/expectations"
     # )
-    filepath = "/Users/rachelreverie/PycharmProjects/great_expectations/ge_220811/docs/terms/data_assistant.md"
+    filepath = "/Users/rachelreverie/PycharmProjects/great_expectations/ge_220811/docs/terms/data_assistant.md"  # noqa: E501
     scan_file(filepath, PHRASES[:])
-    # rint_results(scan_file("../docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md", PHRASES))
-    # print(is_phrase_in_generic_tag('store', ' **Confirm that the new Validation Results Store has been added by running** ``great_expectations store list``'))
+    # rint_results(scan_file("../docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md", PHRASES))  # noqa: E501
+    # print(is_phrase_in_generic_tag('store', ' **Confirm that the new Validation Results Store has been added by running** ``great_expectations store list``'))  # noqa: E501
 
-    # phrase = Phrase(('expectation',), ('expectation suite', 'expectation store', 'expectations store', 'expectations suite', 'great expectation', 'custom expectation'))
-    # line_contents = """We recommend that you create new <TechnicalTag relative="../../../" tag="data_context" text="Data Contexts" /> by using the a ``great_expectations init`` command in the directory where you want to deploy Great Expectations."""
+    # phrase = Phrase(('expectation',), ('expectation suite', 'expectation store', 'expectations store', 'expectations suite', 'great expectation', 'custom expectation'))  # noqa: E501
+    # line_contents = """We recommend that you create new <TechnicalTag relative="../../../" tag="data_context" text="Data Contexts" /> by using the a ``great_expectations init`` command in the directory where you want to deploy Great Expectations."""  # noqa: E501
     # line_working_contents = line_contents.lower().strip()
     # line_working_contents = remove_but_not_in(line_working_contents, phrase)
     # print(line_working_contents)

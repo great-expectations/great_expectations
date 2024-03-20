@@ -18,7 +18,7 @@ def make_store_get(data_file_name, data_dir, with_slack):
         # key is a 3-tuple with the form
         # (GXCloudRESTResource, cloud_id as a string uuid, name as string)
         # For example:
-        # (<GXCloudRESTResource.CHECKPOINT: 'checkpoint'>, '731dc2a5-45d8-4827-9118-39b77c5cd413', 'my_checkpoint')
+        # (<GXCloudRESTResource.CHECKPOINT: 'checkpoint'>, '731dc2a5-45d8-4827-9118-39b77c5cd413', 'my_checkpoint')  # noqa: E501
         type_ = key[0]
         if type_ == GXCloudRESTResource.CHECKPOINT:
             return {"data": _checkpoint_config(data_file_name, with_slack)}
@@ -44,7 +44,7 @@ def store_set(self, key, value, **kwargs):
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
                 "organization_id": org_id,
                 "validation_result": {
-                    "display_url": f"{base_url}{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
+                    "display_url": f"{base_url}{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",  # noqa: E501
                 },
             }
         }
@@ -328,7 +328,7 @@ def _datasource(data_dir):
                                 "taxi_data": {
                                     "batch_identifiers": ["runtime_batch_identifier_name"],
                                     "class_name": "Asset",
-                                    "module_name": "great_expectations.datasource.data_connector.asset",
+                                    "module_name": "great_expectations.datasource.data_connector.asset",  # noqa: E501
                                 }
                             },
                             "class_name": "RuntimeDataConnector",

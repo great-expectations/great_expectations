@@ -99,7 +99,7 @@ def test_create_pandas_datasource(data_context_parameterized_expectation_suite, 
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
-    # To match what we expect out of the yaml file, we need to deserialize our config using the same mechanism
+    # To match what we expect out of the yaml file, we need to deserialize our config using the same mechanism  # noqa: E501
     serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
     datasource_config: DatasourceConfig = DataContextConfigSchema().dump(data_context_config)[
         "datasources"

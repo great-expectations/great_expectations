@@ -189,7 +189,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
 
     # multiple stores URNs can be used
     res5 = parse_evaluation_parameter(
-        parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",
+        parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",  # noqa: E501
         evaluation_parameters=None,
         data_context=data_context_with_query_store,
     )
@@ -197,7 +197,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
 
     # complex expressions can combine operators, urns, and functions
     res6 = parse_evaluation_parameter(
-        parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",
+        parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",  # noqa: E501
         evaluation_parameters=None,
         data_context=data_context_with_query_store,
     )
@@ -207,11 +207,11 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
 @pytest.mark.unit
 def test_parser_timing():
     """We currently reuse the parser, clearing the stack between calls, which is about 10 times faster than not
-    doing so. But these operations are really quick, so this may not be necessary."""
+    doing so. But these operations are really quick, so this may not be necessary."""  # noqa: E501
     assert (
         timeit(
             "parse_evaluation_parameter('x', {'x': 1})",
-            setup="from great_expectations.core.evaluation_parameters import parse_evaluation_parameter",
+            setup="from great_expectations.core.evaluation_parameters import parse_evaluation_parameter",  # noqa: E501
             number=100,
         )
         < 1
@@ -252,7 +252,7 @@ def test_temporal_evaluation_parameters_complex():
 
 @pytest.mark.unit
 def test_find_evaluation_parameter_dependencies():
-    parameter_expression = "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm) + urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm"
+    parameter_expression = "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm) + urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm"  # noqa: E501
     dependencies = find_evaluation_parameter_dependencies(parameter_expression)
     assert dependencies == {
         "urns": {
@@ -262,7 +262,7 @@ def test_find_evaluation_parameter_dependencies():
         "other": set(),
     }
 
-    parameter_expression = "upstream_value * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm"
+    parameter_expression = "upstream_value * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm"  # noqa: E501
     dependencies = find_evaluation_parameter_dependencies(parameter_expression)
     assert dependencies == {
         "urns": {
@@ -428,7 +428,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     expectation_kwargs: Dict[str, dict],
     expected_expectation_validation_result: ExpectationValidationResult,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     expectation_suite_name = "test_suite"
     context.suites.add(ExpectationSuite(name=expectation_suite_name))
@@ -464,7 +464,7 @@ def test_now_evaluation_parameter():
     """
     now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).
     The following tests ensure that it is properly parsed and evaluated in a variety of contexts.
-    """
+    """  # noqa: E501
     # By itself
     res = parse_evaluation_parameter("now()")
     assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"

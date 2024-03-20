@@ -181,7 +181,7 @@ def test_clean_data_docs_on_context_with_no_sites_raises_error(
 
 
 @pytest.mark.filesystem
-def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(
+def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(  # noqa: E501
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
@@ -199,7 +199,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans
 
 
 @pytest.mark.filesystem
-def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(
+def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(  # noqa: E501
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
@@ -225,7 +225,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_n
 
 
 @pytest.mark.filesystem
-def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
+def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(  # noqa: E501
     tmp_path_factory,
 ):
     """

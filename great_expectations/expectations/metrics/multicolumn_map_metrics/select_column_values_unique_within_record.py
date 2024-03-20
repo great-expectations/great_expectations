@@ -13,7 +13,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
     multicolumn_condition_partial,
 )
 
@@ -44,7 +44,7 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
         cost is O(num_columns^2).  However, until a more efficient implementation compatible with SQLAlchemy is
         available, this is the only feasible mechanism under the current architecture, where map metric providers must
         return a condition.  Nevertheless, SQL query length limit is 1GB (sufficient for most practical scenarios).
-        """
+        """  # noqa: E501
         num_columns = len(column_list)
 
         # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
@@ -52,7 +52,7 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
             logger.warning(
                 f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
 metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
-"""
+"""  # noqa: E501
             )
 
         conditions = sa.or_(

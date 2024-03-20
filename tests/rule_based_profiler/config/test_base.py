@@ -134,7 +134,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_option
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():
+def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():  # noqa: E501
     data = {}
     schema = ExpectationConfigurationBuilderConfigSchema()
 
@@ -326,7 +326,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                 "expectation_type": "expect_column_values_to_be_between",
                 "meta": {
                     "details": {
@@ -370,7 +370,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                 "expectation_type": "expect_column_values_to_be_between",
                 "meta": {
                     "details": {

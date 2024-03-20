@@ -50,7 +50,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
     threshold: Union[float, EvaluationParameterDict]
@@ -71,7 +71,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
     args_keys = ("column", "threshold")

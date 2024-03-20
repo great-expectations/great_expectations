@@ -61,7 +61,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
-        """
+        """  # noqa: E501
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
         table_column_names: List[str] = self.get_validator(variables=variables).get_metric(
             metric=MetricConfiguration(

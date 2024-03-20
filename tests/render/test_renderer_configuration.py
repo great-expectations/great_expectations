@@ -96,7 +96,7 @@ def test_successful_renderer_configuration_instantiation(
 
 @pytest.mark.unit
 @pytest.mark.xfail(
-    reason="As of v0.15.46 test will fail until RendererConfiguration._validate_configuration_or_result is re-enabled.",
+    reason="As of v0.15.46 test will fail until RendererConfiguration._validate_configuration_or_result is re-enabled.",  # noqa: E501
     strict=True,
 )
 def test_failed_renderer_configuration_instantiation():

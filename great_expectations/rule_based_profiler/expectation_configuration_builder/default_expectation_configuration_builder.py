@@ -67,7 +67,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
 
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
-    """
+    """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = (
         ExpectationConfigurationBuilder.exclude_field_names
@@ -96,7 +96,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
             data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
-        """
+        """  # noqa: E501
 
         super().__init__(
             expectation_type=expectation_type,
@@ -114,14 +114,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{type(meta)!s}" was encountered).
-"""
+"""  # noqa: E501
             )
 
         if condition and (not isinstance(condition, str)):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{type(condition)!s}" was encountered).
-"""
+"""  # noqa: E501
             )
 
         self._condition = condition
@@ -158,7 +158,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
         Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
-        """
+        """  # noqa: E501
 
         try:
             return expr.parseString(self._condition)
@@ -213,7 +213,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         Returns:
             ParseResults: a ParseResults object identical to the one returned by self._parse_condition except with
                           substituted parameters and variables.
-        """
+        """  # noqa: E501
         idx: int
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
@@ -265,7 +265,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         Returns:
             ParseResults: a ParseResults object with all terms evaluated except for binary operations.
 
-        """
+        """  # noqa: E501
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(substituted_term_list):
@@ -300,7 +300,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         Returns:
             bool: a boolean representing the evaluation of the entire provided condition.
 
-        """
+        """  # noqa: E501
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(binary_list):
@@ -345,7 +345,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Optional[ExpectationConfiguration]:
-        """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
+        """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""  # noqa: E501
         parameter_name: str
         fully_qualified_parameter_name: str
         expectation_kwargs: Dict[str, Any] = {

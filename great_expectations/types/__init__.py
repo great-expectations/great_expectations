@@ -58,7 +58,7 @@ class DictDot:
             bar: int
 
     For more examples of usage, please see `test_dataclass_serializable_dot_dict_pattern.py` in the tests folder.
-    """
+    """  # noqa: E501
 
     include_field_names: ClassVar[Set[str]] = set()
     exclude_field_names: ClassVar[Set[str]] = set()
@@ -98,7 +98,7 @@ class DictDot:
         """Convert this object into a standard dictionary, recursively.
 
         This is often convenient for serialization, and in cases where an untyped version of the object is required.
-        """
+        """  # noqa: E501
 
         new_dict = safe_deep_copy(data=self.__dict__)
 
@@ -126,7 +126,7 @@ class DictDot:
                     if isinstance(element, Enum):
                         new_dict[key][i] = element.value
 
-            # Note: conversion will not work automatically if there are additional layers in between.
+            # Note: conversion will not work automatically if there are additional layers in between.  # noqa: E501
 
         return new_dict
 
@@ -175,7 +175,7 @@ class DictDot:
         :param include_keys: inclusion list ("include only these properties, while excluding all the rest")
         :param exclude_keys: exclusion list ("exclude only these properties, while include all the rest")
         :return: property names, subject to inclusion/exclusion filtering
-        """
+        """  # noqa: E501
         if include_keys is None:
             include_keys = set()
 
@@ -184,13 +184,13 @@ class DictDot:
 
         if include_keys & exclude_keys:
             raise ValueError(
-                "Common keys between sets of include_keys and exclude_keys filtering directives are illegal."
+                "Common keys between sets of include_keys and exclude_keys filtering directives are illegal."  # noqa: E501
             )
 
         key: str
 
         # Gather private fields:
-        # By Python convention, properties of non-trivial length, prefixed by underscore ("_") character, are private.
+        # By Python convention, properties of non-trivial length, prefixed by underscore ("_") character, are private.  # noqa: E501
         private_fields: Set[str] = set(
             filter(
                 lambda name: len(name) > 1,
@@ -214,7 +214,7 @@ class DictDot:
                         _ = self[f"_{name}"]
                     except AttributeError:
                         raise ValueError(
-                            f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'
+                            f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'  # noqa: E501
                         )
 
         if include_keys:
@@ -243,15 +243,15 @@ class SerializableDictDot(DictDot):
         """
 
         # TODO: <Alex>2/4/2022</Alex>
-        # A reference implementation can be provided, once circular import dependencies, caused by relative locations of
-        # the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
+        # A reference implementation can be provided, once circular import dependencies, caused by relative locations of  # noqa: E501
+        # the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.  # noqa: E501
         raise NotImplementedError
 
 
 def safe_deep_copy(data, memo=None):
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
-    """
+    """  # noqa: E501
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
         pyspark.pyspark and isinstance(data, pyspark.DataFrame)
     ):

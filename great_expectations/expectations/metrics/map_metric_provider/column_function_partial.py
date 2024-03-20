@@ -54,7 +54,7 @@ def column_function_partial(  # noqa: C901, PLR0915
     Returns:
         An annotated metric_function which will be called with a simplified signature.
 
-    """
+    """  # noqa: E501
     domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -64,7 +64,7 @@ def column_function_partial(  # noqa: C901, PLR0915
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
-"column_function_partial" "partial_fn_type" property."""
+"column_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -124,7 +124,7 @@ def column_function_partial(  # noqa: C901, PLR0915
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_FN]:
             raise ValueError(
                 f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
-"column_function_partial" "partial_fn_type" property."""
+"column_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -157,7 +157,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
 
                 (
@@ -196,7 +196,7 @@ def column_function_partial(  # noqa: C901, PLR0915
         ]:
             raise ValueError(
                 f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" and \
-"{MetricPartialFunctionTypes.WINDOW_FN.value}" for "column_function_partial" "partial_fn_type" property."""
+"{MetricPartialFunctionTypes.WINDOW_FN.value}" for "column_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -229,7 +229,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
 
                 (

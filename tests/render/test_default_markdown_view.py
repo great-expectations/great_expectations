@@ -293,7 +293,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(" ", "")
+""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -461,7 +461,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(" ", "")
+""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )

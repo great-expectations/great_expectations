@@ -33,7 +33,7 @@ def test_ge_validations_urn():
 
 @pytest.mark.unit
 def test_ge_metrics_urn():
-    urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value:column=mycol"
+    urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value:column=mycol"  # noqa: E501
     res = ge_urn.parseString(urn)
 
     assert res["urn_type"] == "metrics"

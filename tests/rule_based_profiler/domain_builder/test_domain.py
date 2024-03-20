@@ -35,7 +35,7 @@ def test_semantic_domain_consistency():
         )
 
     assert (
-        """Cannot instantiate Domain (domain_type "MetricDomainTypes.COLUMN" of type "<enum 'MetricDomainTypes'>" -- key "num_passengers", detected in "inferred_semantic_domain_type" dictionary, does not exist as value of appropriate key in "domain_kwargs" dictionary."""
+        """Cannot instantiate Domain (domain_type "MetricDomainTypes.COLUMN" of type "<enum 'MetricDomainTypes'>" -- key "num_passengers", detected in "inferred_semantic_domain_type" dictionary, does not exist as value of appropriate key in "domain_kwargs" dictionary."""  # noqa: E501
         in str(excinfo.value)
     )
 

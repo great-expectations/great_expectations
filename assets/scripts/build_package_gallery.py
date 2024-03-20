@@ -48,7 +48,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
 
     Returns:
         A list of dictionaries that represents contributor package manifests
-    """
+    """  # noqa: E501
     payload: List[dict] = []
     root = os.getcwd()  # noqa: PTH109
     for path in package_paths:
@@ -65,7 +65,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
             json_data: dict = package.to_json_dict()
             payload.append(json_data)
             logger.info(
-                f"Successfully serialized {package.package_name} to dict and appended to manifest list"
+                f"Successfully serialized {package.package_name} to dict and appended to manifest list"  # noqa: E501
             )
         except Exception as e:
             logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")

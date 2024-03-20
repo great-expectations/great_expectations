@@ -173,7 +173,7 @@ def test_get_non_existent_expectation_suite(
     provider_state = "the Expectation Suite does not exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"  # noqa: E501
     status = 404
 
     (

@@ -300,7 +300,7 @@ def type_check(  # noqa: C901, PLR0912
             )
             relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
-        # following imports here can cause mutually exclusive import errors with normal type-checking
+        # following imports here can cause mutually exclusive import errors with normal type-checking  # noqa: E501
         cmds.append("--follow-imports=silent")
 
     cmds.extend(ge_pkgs)
@@ -334,11 +334,11 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
-        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
-        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",  # noqa: E501
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",  # noqa: E501
         "html": "Create html coverage report",
-        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
-        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",  # noqa: E501
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",  # noqa: E501
     },
 )
 def tests(  # noqa: C901
@@ -360,7 +360,7 @@ def tests(  # noqa: C901
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
 
     See also, the newer `invoke ci-tests --help`.
-    """
+    """  # noqa: E501
     markers = []
     markers += ["unit" if unit else "not unit"]
 
@@ -567,7 +567,7 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
         os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     )
     curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."  # noqa: E501
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -595,7 +595,7 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",  # noqa: E501
         "lint": "Run the linter",
         "clear": "Delete the docs' generated assets, caches, and build artifacts.",
     },
@@ -608,7 +608,7 @@ def docs(
     version: str | None = None,
     clear: bool = False,
 ):
-    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""  # noqa: E501
     from packaging.version import parse as parse_version
 
     from docs.docs_build import DocsBuilder
@@ -656,7 +656,7 @@ def public_api_task(
     ctx: Context,
     write_to_file: bool = False,
 ):
-    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""  # noqa: E501
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -779,7 +779,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-mssql.txt",
             "reqs/requirements-dev-mysql.txt",
             "reqs/requirements-dev-postgresql.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
             "reqs/requirements-dev-trino.txt",
         ),
@@ -800,7 +800,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
             "reqs/requirements-dev-snowflake.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
         ),
         extra_pytest_args=(
@@ -907,7 +907,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -933,7 +933,7 @@ def deps(
     the 'requirements-dev-cloud.txt' dependencies.
 
     $ invoke deps -m external_sqldialect -r cloud
-    """
+    """  # noqa: E501
     cmds = ["pip", "install"]
     if editable_install:
         cmds.append("-e .")

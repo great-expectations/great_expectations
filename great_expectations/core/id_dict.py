@@ -41,7 +41,7 @@ def deep_convert_properties_iterable_to_id_dict(
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_id_dict(source=IDDict(source))
 
-    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.  # noqa: E501
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 

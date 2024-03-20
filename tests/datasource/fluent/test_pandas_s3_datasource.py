@@ -103,7 +103,7 @@ def csv_asset(pandas_s3_datasource: PandasS3Datasource) -> _FilePathDataAsset:
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
     return regex, test_connection_error_message
 
 
@@ -212,7 +212,7 @@ def test_invalid_connect_options_value(
         param({}, id="default connect options"),
         param({"s3_prefix": ""}, id="prefix ''"),
         param({"s3_delimiter": "/"}, id="s3_delimiter '/'"),
-        # param({"s3_prefix": "non_default"}, id="s3_prefix 'non_default'"), # TODO: what prefix should I test?
+        # param({"s3_prefix": "non_default"}, id="s3_prefix 'non_default'"), # TODO: what prefix should I test?  # noqa: E501
         param(
             {"s3_prefix": "", "s3_delimiter": "/", "s3_max_keys": 20},
             id="all options",

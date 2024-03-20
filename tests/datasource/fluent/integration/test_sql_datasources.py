@@ -179,7 +179,7 @@ def _get_exception_details(
         print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
         for i, exc_info in enumerate(exc_details, start=1):
             print(
-                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"  # noqa: E501
             )
     return exc_details
 
@@ -233,7 +233,7 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
             LOGGER.info(f"Skipping table creation for {table_names} for {sa_engine.dialect.name}")
             return
         LOGGER.info(
-            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
+            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"  # noqa: E501
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
@@ -248,14 +248,14 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
                 # TODO: use dialect specific quotes
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
-                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
+                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"  # noqa: E501
                     f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
-                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"
+                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"  # noqa: E501
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"  # noqa: E501
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -346,7 +346,7 @@ def snowflake_ds(
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
-        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
+        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account  # noqa: E501
         # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
@@ -715,7 +715,7 @@ def _raw_query_check_column_exists(
     qualified_table_name: str,
     gx_execution_engine: SqlAlchemyExecutionEngine,
 ) -> bool:
-    """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""
+    """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""  # noqa: E501
     with gx_execution_engine.get_connection() as connection:
         query = f"""SELECT {column_name_param} FROM {qualified_table_name} LIMIT 1;"""
         print(f"query:\n  {query}")
@@ -815,7 +815,7 @@ class TestColumnIdentifiers:
         )
 
         qualified_table_name: str = f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        # check that the column exists so that we know what if the expectation should succeed or fail
+        # check that the column exists so that we know what if the expectation should succeed or fail  # noqa: E501
         column_exists = _raw_query_check_column_exists(
             column_name,
             qualified_table_name,

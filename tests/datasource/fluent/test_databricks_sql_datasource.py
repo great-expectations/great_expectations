@@ -17,7 +17,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -33,7 +33,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -49,7 +49,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -65,7 +65,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -81,7 +81,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {

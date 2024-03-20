@@ -87,7 +87,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name="non_existent_datasource",
                 data_connector_name="test_runtime_data_connector",
@@ -110,7 +110,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
                 data_connector_name="non_existent_data_connector",
@@ -132,7 +132,7 @@ def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
         # runtime_parameters are not configured in the DataConnector
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
                 data_connector_name="test_runtime_data_connector",
@@ -155,7 +155,7 @@ def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifi
         "custom_key_0": "custom_value_0",
     }
 
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -188,7 +188,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
     }
 
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -204,7 +204,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -234,7 +234,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -282,7 +282,7 @@ def test_batch_data_sparkdf_execution_engine_get_available_data_asset_names(
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one(
+def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
@@ -353,7 +353,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
     my_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
         spark_session.createDataFrame(pd.DataFrame({"x": range(10), "y": range(10)}))
     )
-    batch: Batch = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_from_batch_definition(
+    batch: Batch = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_from_batch_definition(  # noqa: E501
         batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
@@ -373,7 +373,7 @@ def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
     )
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -408,7 +408,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two
     )
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -439,7 +439,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two
 
     # second batch request
     batch_identifiers: Dict[str, int] = {"day": 2, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -505,12 +505,12 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_directory_but_no_reader_method(
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_directory_but_no_reader_method(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
     spark_session,
 ):
-    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified  # noqa: E501
     batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
@@ -530,17 +530,17 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_d
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
 
-def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_request_fail_directory_wrong_reader_method(
+def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_request_fail_directory_wrong_reader_method(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
     spark_session,
 ):
-    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified  # noqa: E501
     batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
@@ -563,17 +563,17 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
 
-def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_file_path_wrong_reader_method(
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_file_path_wrong_reader_method(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file,
     spark_session,
 ):
-    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified  # noqa: E501
     batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
@@ -596,7 +596,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_f
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -637,7 +637,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_no_headers(
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_no_headers(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file,
     spark_session,
@@ -669,7 +669,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_endswith_upcase_no_headers(
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_endswith_upcase_no_headers(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_upcase,
     spark_session,
@@ -701,7 +701,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_directory_no_headers(
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_directory_no_headers(  # noqa: E501
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
     spark_session,
@@ -757,7 +757,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_failed
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -766,7 +766,7 @@ def test_file_path_sparkedf_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
 ):
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -797,7 +797,7 @@ def test_file_path_sparkdf_execution_engine_get_batch_list_with_named_asset_two_
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
 ):
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -828,7 +828,7 @@ def test_file_path_sparkdf_execution_engine_get_batch_list_with_named_asset_two_
 
     # second batch request
     batch_identifiers: Dict[str, int] = {"day": 2, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",

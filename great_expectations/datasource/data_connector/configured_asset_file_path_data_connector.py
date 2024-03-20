@@ -41,7 +41,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex (dict): Optional dict the filter and organize the data_references.
         sorters (list): Optional list if you want to sort the data_references
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -134,7 +134,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             number of data_references known by this DataConnector.
-        """
+        """  # noqa: E501
         total_references: int = sum(
             len(self._data_references_cache[data_asset_name])
             for data_asset_name in self._data_references_cache
@@ -150,7 +150,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         unmatched_data_references: List[str] = []
         for (
             data_asset_name,
@@ -236,7 +236,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset  # noqa: E501
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 

@@ -20,7 +20,7 @@ CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py datasource_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py datasource_config">  # noqa: E501
 datasource_config = {
     "name": "my_bigquery_datasource",
     "class_name": "Datasource",
@@ -45,11 +45,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py add_datasource">  # noqa: E501
 context.add_datasource(**datasource_config)
 # </snippet>
 
@@ -70,7 +70,7 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Test for BatchRequest naming a table.
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py batch_request">  # noqa: E501
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",

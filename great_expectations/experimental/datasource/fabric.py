@@ -137,7 +137,7 @@ class _PowerBIAsset(DataAsset):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -208,7 +208,7 @@ class PowerBITable(_PowerBIAsset):
     mode: Mode = "xmla"
 
 
-# This improves our error messages by providing a more specific type for pydantic to validate against
+# This improves our error messages by providing a more specific type for pydantic to validate against  # noqa: E501
 # It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
 # https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
 AssetTypes = Annotated[
@@ -297,7 +297,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIDax(
             name=name,
@@ -329,7 +329,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIMeasure(
             name=name,
@@ -368,7 +368,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBITable(
             name=name,

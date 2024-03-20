@@ -36,7 +36,7 @@ class DictionarySorter(Sorter):
 
         Returns:
             None
-        """
+        """  # noqa: E501
         super().__init__(name=name, orderby=orderby)
         if order_keys_by is None or order_keys_by == "asc":
             reverse_keys = False

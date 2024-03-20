@@ -51,7 +51,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             and `include_views` which defaults to True.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -98,7 +98,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         self._introspection_directives = introspection_directives
         # This cache will contain a "config" for each data_asset discovered via introspection.
-        # This approach ensures that ConfiguredAssetSqlDataConnector._assets and _introspected_assets_cache store objects of the same "type"
+        # This approach ensures that ConfiguredAssetSqlDataConnector._assets and _introspected_assets_cache store objects of the same "type"  # noqa: E501
         # Note: We should probably turn them into AssetConfig objects
 
         self._refresh_introspected_assets_cache()
@@ -168,7 +168,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 else:
                     # We're being strict. Crash now.
                     raise ValueError(
-                        f"Couldn't execute a query against table {metadata['table_name']} in schema {metadata['schema_name']}"
+                        f"Couldn't execute a query against table {metadata['table_name']} in schema {metadata['schema_name']}"  # noqa: E501
                     ) from e
 
             # Store an asset config for each introspected data asset.
@@ -245,7 +245,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                             }
                         )
 
-        # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).
+        # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).  # noqa: E501
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
@@ -263,7 +263,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                         }
                     )
         except Exception as e:
-            # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this
+            # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this  # noqa: E501
             # exception is highly unlikely to fire.
             if "UndefinedTable" not in str(e):
                 raise e

@@ -116,7 +116,7 @@ class TestQueryAssets:
         passenger_count_value = 5
         asset = datasource.add_query_asset(
             name="query_asset",
-            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
         ).add_sorters(["year"])
         validator = context.get_validator(
             batch_request=asset.build_batch_request(
@@ -389,7 +389,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
 
     asset = datasource.add_query_asset(
         "query_asset",
-        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
+        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",  # noqa: E501
     )
     partitioner = PartitionerColumnValue(column_name="pickup_date")
     asset.add_sorters(["pickup_date"])
@@ -450,7 +450,7 @@ def test_success_with_partitioners_from_batch_configs(
     passenger_count_value = 5
     asset = datasource.add_query_asset(
         name="query_asset",
-        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
+        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
     ).add_sorters(["year"])
     batch_config = asset.add_batch_config(
         name="whatevs",

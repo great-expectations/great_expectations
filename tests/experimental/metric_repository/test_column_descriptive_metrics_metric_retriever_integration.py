@@ -10,7 +10,7 @@ from pandas import Timestamp
 
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent.batch_request import BatchRequest
-from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (
+from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (  # noqa: E501
     ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metrics import (
@@ -204,7 +204,7 @@ def test_get_metrics(
         ),
     ]
 
-    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
+    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):  # noqa: E501
     assert len(metrics) == len(expected_metrics)
     for metric in metrics:
         assert metric.dict() in [expected_metric.dict() for expected_metric in expected_metrics]

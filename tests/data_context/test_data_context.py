@@ -107,7 +107,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         titanic_data_context.add_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
-    # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
+    # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True  # noqa: E501
     assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
     )
@@ -440,7 +440,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
 def test_data_context_updates_expectation_suite_names(
     data_context_parameterized_expectation_suite,
 ):
-    # A data context should update the data_asset_name and expectation_suite_name of expectation suites
+    # A data context should update the data_asset_name and expectation_suite_name of expectation suites  # noqa: E501
     # that it creates when it saves them.
 
     expectation_suites = data_context_parameterized_expectation_suite.list_expectation_suites()
@@ -450,13 +450,13 @@ def test_data_context_updates_expectation_suite_names(
 
     expectation_suite_name = expectation_suites[0].name
 
-    # We'll get that expectation suite and then update its name and re-save, then verify that everything
+    # We'll get that expectation suite and then update its name and re-save, then verify that everything  # noqa: E501
     # has been properly updated
     expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
         expectation_suite_name
     )
 
-    # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects
+    # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects  # noqa: E501
     # will enable changing that
     assert expectation_suite.name == expectation_suite_name
 
@@ -465,7 +465,7 @@ def test_data_context_updates_expectation_suite_names(
     #   2. Using a different name that should be overwritten
     #   3. Using the new name but having the context draw that from the suite
 
-    # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.
+    # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.  # noqa: E501
 
     expectation_suite.name = "a_new_suite_name"
 
@@ -562,7 +562,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
 
 
 @pytest.mark.filesystem
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -571,7 +571,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
 
 
 @pytest.mark.filesystem
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -579,7 +579,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 
 
 @pytest.mark.filesystem
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_yml_file(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_yml_file(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -588,7 +588,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 
 
 @pytest.mark.filesystem
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_dir(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_dir(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -597,7 +597,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 
 
 @pytest.mark.filesystem
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_the_project_has_an_invalid_config_file(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_the_project_has_an_invalid_config_file(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -607,7 +607,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 
 
 @pytest.mark.filesystem
-def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_one_suite(
+def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_one_suite(  # noqa: E501
     empty_context,
 ):
     context = empty_context
@@ -620,7 +620,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
 
 
 @pytest.mark.filesystem
-def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
+def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(  # noqa: E501
     empty_context,
 ):
     context = empty_context
@@ -664,7 +664,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
 
 
 @pytest.mark.filesystem
-def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -679,7 +679,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
 
 
 @pytest.mark.filesystem
-def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
+def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(  # noqa: E501
     empty_context,
 ):
     ge_dir = empty_context.root_directory
@@ -1083,7 +1083,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     # add Checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -1356,7 +1356,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     validator.expect_table_row_count_to_equal(
         value={
             # unnecessarily complex URN which should resolve to the actual row count.
-            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"
+            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"  # noqa: E501
         }
     )
 
@@ -1496,7 +1496,7 @@ class ExpectSkyToBeColor(BatchExpectation):
 
 
 @pytest.mark.xfail(
-    reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"
+    reason="Uses unsupported expectation but tests required behavior - fix this test as part of V1-117"  # noqa: E501
 )
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
@@ -1524,7 +1524,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         for expectation_configuration in expectation_suite.expectation_configurations
     )
 
-    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
+    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.  # noqa: E501
     context.variables.include_rendered_content.expectation_suite = True
     expectation_suite = context.suites.get(name=expectation_suite_name)
     for expectation_configuration in expectation_suite.expectation_configurations:
@@ -1533,7 +1533,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             for rendered_content_block in expectation_configuration.rendered_content
         )
 
-    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
+    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is  # noqa: E501
     # broken, we should get the failure message for one of the content blocks.
     expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name,
@@ -1567,7 +1567,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                 }
             ),
             value_type="StringValueType",
-            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '
+            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '  # noqa: E501
             '"expect_sky_to_be_color with exception message: This renderer is broken!".',
         ),
         RenderedAtomicContent(
@@ -1598,7 +1598,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
 
     assert actual_rendered_content == expected_rendered_content
 
-    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,
+    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,  # noqa: E501
     # we should not update the existing rendered_content.
     legacy_rendered_content = [
         RenderedAtomicContent(

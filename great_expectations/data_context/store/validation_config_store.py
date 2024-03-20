@@ -19,7 +19,7 @@ class ValidationConfigStore(Store):
     _key_class = StringKey
 
     def get_key(self, name: str, id: str | None = None) -> GXCloudIdentifier | StringKey:
-        """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""
+        """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""  # noqa: E501
         if self.cloud_mode:
             return GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.VALIDATION_CONFIG,
@@ -58,7 +58,7 @@ class ValidationConfigStore(Store):
             data["suite"] = data["suite"].to_json_dict()
             return data
 
-        # In order to enable the custom json_encoders in ValidationConfig, we need to set `models_as_dict` off
+        # In order to enable the custom json_encoders in ValidationConfig, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
         return value.json(models_as_dict=False, indent=2, sort_keys=True)
 

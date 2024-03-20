@@ -99,7 +99,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if expectation_string_fn is None:
             expectation_string_fn = cls._missing_content_block_fn
 
-        # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
+        # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes  # noqa: E501
         def row_generator_fn(  # noqa: C901
             configuration=None,
             result=None,
@@ -133,7 +133,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            """  # noqa: E501
             try:
                 unexpected_statement_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -213,14 +213,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _get_legacy_v2_api_style_expectation_string_fn(cls, expectation_type):
         legacy_expectation_string_fn = getattr(cls, expectation_type, None)
         if legacy_expectation_string_fn is None:
-            # With the V2 API, expectation rendering was implemented by defining a method with the same name as the expectation.
+            # With the V2 API, expectation rendering was implemented by defining a method with the same name as the expectation.  # noqa: E501
             # If no legacy rendering is present, return None.
             return None
 
         # deprecated-v0.13.28
         warnings.warn(
-            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "
-            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",
+            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "  # noqa: E501
+            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",  # noqa: E501
             DeprecationWarning,
         )
 
@@ -230,7 +230,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             if runtime_configuration is None:
                 runtime_configuration = {}
 
-            # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.
+            # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.  # noqa: E501
             return legacy_expectation_string_fn(
                 expectation=configuration,
                 styling=runtime_configuration.get("styling", None),
@@ -242,9 +242,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @staticmethod
     def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
         if expectation_string_fn.__name__ != "expectation_string_fn_with_legacy_translation":
-            # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".
+            # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".  # noqa: E501
             # If this isn't the case, return None, so we don't do any legacy logic.
             return None
 
-        # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.
+        # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.  # noqa: E501
         return result["result"].get("observed_value")

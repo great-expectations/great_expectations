@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class EphemeralDataContext(AbstractDataContext):
-    """Subclass of AbstractDataContext that uses runtime values to generate a temporary or in-memory DataContext."""
+    """Subclass of AbstractDataContext that uses runtime values to generate a temporary or in-memory DataContext."""  # noqa: E501
 
     def __init__(
         self,

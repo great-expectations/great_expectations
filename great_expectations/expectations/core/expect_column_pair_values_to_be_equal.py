@@ -56,7 +56,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
         "both_values_are_missing"
@@ -114,7 +114,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."  # noqa: E501
 
         renderer_configuration.template_str = template_str
 
@@ -158,7 +158,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         else:
             params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."  # noqa: E501
 
         if params["row_condition"] is not None:
             (

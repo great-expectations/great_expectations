@@ -61,8 +61,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                     expectation_type = filename.split(".json")[0].split("/")[-1]
                     for index, test_config in enumerate(test_configuration["datasets"], 1):
                         datasets = []
-                        # optional only_for and suppress_test flag at the datasets-level that can prevent data being
-                        # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
+                        # optional only_for and suppress_test flag at the datasets-level that can prevent data being  # noqa: E501
+                        # added to incompatible backends. Currently only used by expect_column_values_to_be_unique  # noqa: E501
                         only_for = test_config.get("only_for")
                         if only_for and not isinstance(only_for, list):
                             # coerce into list if passed in as string
@@ -134,7 +134,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             skip_test = False
                             only_for = test.get("only_for")
                             if only_for:
-                                # if we're not on the "only_for" list, then never even generate the test
+                                # if we're not on the "only_for" list, then never even generate the test  # noqa: E501
                                 generate_test = False
                                 if not isinstance(only_for, list):
                                     # coerce into list if passed in as string
@@ -198,7 +198,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "bigquery"
                                     ):
                                         generate_test = True
@@ -209,12 +209,12 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "bigquery"
                                     ):
                                         # <WILL> : Marker to get the test to only run for CFE
-                                        # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones
-                                        # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                        # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones  # noqa: E501
+                                        # works in different ways between CFE (V3) and V2 Expectations. This flag allows for  # noqa: E501
                                         # the test to only be run in the CFE case
                                         generate_test = True
                                     elif (
@@ -225,7 +225,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "trino"
                                     ):
                                         generate_test = True
@@ -351,7 +351,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "bigquery"
                                     )
                                     or (
@@ -366,7 +366,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "bigquery"
                                     )
                                     or (
@@ -382,7 +382,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
                                         )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name
+                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
                                         == "trino"
                                     )
                                     or (

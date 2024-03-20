@@ -96,7 +96,7 @@ class SerializableDataContext(AbstractDataContext):
     ) -> PathStr | None:
         if project_root_dir and context_root_dir:
             raise TypeError(
-                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
+                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"  # noqa: E501
             )
 
         if project_root_dir:
@@ -149,7 +149,7 @@ class SerializableDataContext(AbstractDataContext):
         if project_config_usage_stats is None or context_config_usage_stats is None:
             return True
 
-        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         if (
             project_config_usage_stats.data_context_id  # noqa: PLR1714
@@ -158,7 +158,7 @@ class SerializableDataContext(AbstractDataContext):
         ):
             return True
 
-        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
         global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
         if (
             project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
@@ -195,7 +195,7 @@ class SerializableDataContext(AbstractDataContext):
 
         Returns:
             DataContext
-        """
+        """  # noqa: E501
         gx_dir = cls._scaffold(
             project_root_dir=project_root_dir,
         )
@@ -394,7 +394,7 @@ class SerializableDataContext(AbstractDataContext):
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
                 raise gx_exceptions.UnsupportedConfigVersionError(
-                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(  # noqa: E501
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )

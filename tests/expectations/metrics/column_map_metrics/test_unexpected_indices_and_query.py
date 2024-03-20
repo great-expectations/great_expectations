@@ -26,7 +26,7 @@ from tests.expectations.test_util import get_table_columns_metric
 def animal_table_df() -> pd.DataFrame:
     """
     Returns: pandas dataframe that contains example data for unexpected_index_column_names metric tests
-    """
+    """  # noqa: E501
     df = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -84,7 +84,7 @@ def _build_table_columns_and_unexpected(
 
         Tuple with MetricConfigurations corresponding to unexpected_condition and table_columns metric, as well as metrics dict.
 
-    """
+    """  # noqa: E501
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     # get table_columns_metric

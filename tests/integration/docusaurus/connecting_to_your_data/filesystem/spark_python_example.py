@@ -34,7 +34,7 @@ data_context_config = DataContextConfig(
 )
 context = get_context(project_config=data_context_config)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py python">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py python">  # noqa: E501
 datasource_config = {
     "name": "my_filesystem_datasource",
     "class_name": "Datasource",
@@ -62,20 +62,20 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"]["ba
     folder_path
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py add_datasource">  # noqa: E501
 context.add_datasource(**datasource_config)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request">  # noqa: E501
 # Here is a RuntimeBatchRequest using a path to a single CSV file
 batch_request = RuntimeBatchRequest(
     datasource_name="my_filesystem_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # this can be anything that identifies this data_asset for you  # noqa: E501
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
@@ -85,7 +85,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters["path"] = data_filepath
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request validator">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request validator">  # noqa: E501
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
@@ -94,7 +94,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request">  # noqa: E501
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
     datasource_name="my_filesystem_datasource",
@@ -107,7 +107,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator">  # noqa: E501
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
@@ -123,7 +123,7 @@ assert (
     ]
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory">  # noqa: E501
 # Here is a RuntimeBatchRequest using a path to a directory
 batch_request = RuntimeBatchRequest(
     datasource_name="my_filesystem_datasource",
@@ -139,7 +139,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters["path"] = folder_path
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator">  # noqa: E501
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 

@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py imports">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py imports">  # noqa: E501
 import pandas as pd
 
 import great_expectations as gx
@@ -10,19 +10,19 @@ from great_expectations.validator.validator import Validator
 yaml: YAMLHandler = YAMLHandler()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_context">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_context">  # noqa: E501
 context = gx.get_context()
 # </snippet>
 
 # create and load Expectation Suite
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py create_expectation_suite">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py create_expectation_suite">  # noqa: E501
 context.add_expectation_suite(expectation_suite_name="insert_your_expectation_suite_name_here")
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_expectation_suite">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_expectation_suite">  # noqa: E501
 suite: ExpectationSuite = context.suites.get(name="insert_your_expectation_suite_name_here")
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py datasource_yaml">  # noqa: E501
 datasource_yaml = """
 name: my_pandas_datasource
 class_name: Datasource
@@ -39,22 +39,22 @@ data_connectors:
 """
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py add_datasource">  # noqa: E501
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # RuntimeBatchRequest with batch_data as Pandas Dataframe
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py path_to_file">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py path_to_file">  # noqa: E501
 path_to_file: str = "some_path.csv"
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 path_to_file: str = "./data/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py read_csv">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py read_csv">  # noqa: E501
 df: pd.DataFrame = pd.read_csv(path_to_file)
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py runtime_batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py runtime_batch_request">  # noqa: E501
 runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_pandas_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -68,7 +68,7 @@ runtime_batch_request = RuntimeBatchRequest(
 # </snippet>
 
 # RuntimeBatchRequest with path
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py runtime_batch_request_with_path">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py runtime_batch_request_with_path">  # noqa: E501
 runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_pandas_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -86,7 +86,7 @@ runtime_batch_request = RuntimeBatchRequest(
 # </snippet>
 
 # Constructing Validator by passing in RuntimeBatchRequest
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_validator_runtime_batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_validator_runtime_batch_request">  # noqa: E501
 my_validator: Validator = context.get_validator(
     batch_request=runtime_batch_request,
     expectation_suite=suite,  # OR
@@ -96,7 +96,7 @@ my_validator: Validator = context.get_validator(
 # my_validator.head()
 
 # Constructing Validator by passing in arguments
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_validator_args">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_validator_args">  # noqa: E501
 my_validator: Validator = context.get_validator(
     datasource_name="my_pandas_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -114,6 +114,6 @@ my_validator: Validator = context.get_validator(
     # expectation_suite_name=suite_name
 )
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator head">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator head">  # noqa: E501
 my_validator.head()
 # </snippet>

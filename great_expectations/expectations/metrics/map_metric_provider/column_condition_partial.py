@@ -58,7 +58,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
+    """  # noqa: E501
     domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -68,7 +68,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
             raise ValueError(
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
-"column_condition_partial" "partial_fn_type" property."""
+"column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -137,7 +137,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
         ]:
             raise ValueError(
                 f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
-"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -196,7 +196,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
                 )
                 if filter_column_isnull:
-                    # If we "filter" (ignore) nulls then we allow null as part of our new expected condition
+                    # If we "filter" (ignore) nulls then we allow null as part of our new expected condition  # noqa: E501
                     unexpected_condition = sa.and_(
                         sa.not_(sa.column(column_name).is_(None)),
                         sa.not_(expected_condition),
@@ -224,7 +224,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
         ]:
             raise ValueError(
                 f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
-"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):

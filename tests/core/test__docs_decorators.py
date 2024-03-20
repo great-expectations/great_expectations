@@ -581,7 +581,7 @@ def _func_full_docstring_all_decorators_all_sections(
 
 @pytest.mark.unit
 def test_all_decorators_full_docstring_all_sections():
-    """Makes sure that Returns and Raises are rendered correctly in the context of a full docstring."""
+    """Makes sure that Returns and Raises are rendered correctly in the context of a full docstring."""  # noqa: E501
 
     assert _func_full_docstring_all_decorators_all_sections.__doc__ == (
         "--Public API--My docstring.\n"

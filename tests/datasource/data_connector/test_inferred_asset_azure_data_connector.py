@@ -230,7 +230,7 @@ def test_instantiation_with_conn_str_and_credential(
         container="my_container",
         name_starts_with="",
         azure_options={  # Representative of format noted in official docs
-            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
             "credential": "my_credential",
         },
     )
@@ -279,7 +279,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
         container="my_container",
         name_starts_with="",
         azure_options={  # Representative of format noted in official docs
-            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
             "credential": "my_credential",
         },
     )
@@ -293,7 +293,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 def test_instantiation_with_multiple_auth_methods_raises_error(
     mock_azure_conn,
 ):
-    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
+    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`  # noqa: E501
     with pytest.raises(AssertionError):
         InferredAssetAzureDataConnector(
             name="my_data_connector",
@@ -307,7 +307,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
             name_starts_with="",
             azure_options={
                 "account_url": "account.blob.core.windows.net",
-                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",  # noqa: E501
                 "credential": "my_credential",
             },
         )
@@ -320,7 +320,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
 ):
-    # Raises error in InferredAssetAzureDataConnector's constructor due to `account_url` not conforming to the expected format
+    # Raises error in InferredAssetAzureDataConnector's constructor due to `account_url` not conforming to the expected format  # noqa: E501
     # Format: <ACCOUNT>.blob.core.windows.net
     with pytest.raises(ImportError):
         InferredAssetAzureDataConnector(
@@ -336,8 +336,8 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
             azure_options={"account_url": "not_a_valid_url"},
         )
 
-    # Raises error in InferredAssetAzureDataConnector's constructor due to `conn_str` not conforming to the expected format
-    # Format: Must be a variable length, semicolon-delimited string containing "AccountName=<ACCOUNT>"
+    # Raises error in InferredAssetAzureDataConnector's constructor due to `conn_str` not conforming to the expected format  # noqa: E501
+    # Format: Must be a variable length, semicolon-delimited string containing "AccountName=<ACCOUNT>"  # noqa: E501
     with pytest.raises(ImportError):
         InferredAssetAzureDataConnector(
             name="my_data_connector",
@@ -379,7 +379,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         },
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -441,7 +441,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
+    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg  # noqa: E501
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
@@ -483,7 +483,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`
+    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`  # noqa: E501
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -546,12 +546,12 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
-    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
     unsorted_batch_definition_list = (
         my_data_connector._get_batch_definition_list_from_batch_request(
@@ -617,12 +617,12 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
-    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
@@ -927,7 +927,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -990,7 +990,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1058,13 +1058,13 @@ azure_options:
             path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
             data_asset_name="alpha",
         )
-        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"  # noqa: E501
     )
     assert (
         my_data_connector._get_full_file_path(
             path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
         )
-        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"  # noqa: E501
     )
     assert (
         my_data_connector._get_full_file_path(

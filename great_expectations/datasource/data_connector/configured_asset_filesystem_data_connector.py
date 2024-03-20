@@ -38,7 +38,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         sorters (list): Optional list if you want to sort the data_references
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -111,7 +111,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
-        """
+        """  # noqa: E501
         return str(
             normalize_directory_path(
                 dir_path=self._base_directory,

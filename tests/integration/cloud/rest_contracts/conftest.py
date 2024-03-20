@@ -78,7 +78,7 @@ def cloud_data_context(
     cloud_base_url: str,
     cloud_access_token: str,
 ) -> CloudDataContext:
-    """This is a real Cloud Data Context that points to the pact mock service instead of the Mercury API."""
+    """This is a real Cloud Data Context that points to the pact mock service instead of the Mercury API."""  # noqa: E501
     cloud_data_context = CloudDataContext(
         cloud_base_url=cloud_base_url,
         cloud_organization_id=EXISTING_ORGANIZATION_ID,
@@ -121,7 +121,7 @@ def pact_test(request) -> pact.Pact:
         publish_to_broker = False
     else:
         pytest.skip(
-            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
+            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"  # noqa: E501
         )
 
     # Adding random id to the commit hash allows us to run the build
@@ -175,7 +175,7 @@ class ContractInteraction(pydantic.BaseModel):
 
     Returns:
         ContractInteraction
-    """
+    """  # noqa: E501
 
     class Config:
         arbitrary_types_allowed = True
@@ -208,7 +208,7 @@ def run_rest_api_pact_test(
 
         Returns:
             None
-        """
+        """  # noqa: E501
 
         request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,

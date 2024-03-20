@@ -14,7 +14,7 @@ from great_expectations.validator.validator import Validator
 context = gx.get_context()
 suite = context.suites.get("yellow_tripdata_validations")
 
-# Create three BatchRequests for Jan, Feb, and March 2019 data and instantiate a Validator with all three BatchRequests
+# Create three BatchRequests for Jan, Feb, and March 2019 data and instantiate a Validator with all three BatchRequests  # noqa: E501
 jan_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
@@ -77,7 +77,7 @@ for batch_definition in jan_feb_batch_definition_list:
     )
     cumulative_min = current_min if current_min < cumulative_min else cumulative_min
 
-# Use the highest max and lowest min from Jan and Feb to create an expectation which we validate against March
+# Use the highest max and lowest min from Jan and Feb to create an expectation which we validate against March  # noqa: E501
 result = validator.expect_column_values_to_be_between(
     "fare_amount", min_value=cumulative_min, max_value=cumulative_max
 )

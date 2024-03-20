@@ -240,7 +240,7 @@ Invalid result values were found when trying to instantiate an ExpectationValida
 - Great Expectations enables caching by default.
 - Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.
 Result: {}
-"""
+"""  # noqa: E501
         self.message = template.format(json.dumps(result_dict, indent=2))
         super().__init__(self.message)
 
@@ -252,7 +252,7 @@ class ConfigNotFoundError(DataContextError):
         self.message = """Error: No gx directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
-"""
+"""  # noqa: E501
         super().__init__(self.message)
 
 
@@ -331,12 +331,12 @@ class ClassInstantiationError(GreatExpectationsError):
             self.message = f"""No module named "{package_name + module_name}" could be found in the repository.  \
 Please make sure that the file, corresponding to this package and module, exists and that dynamic loading of code \
 modules, templates, and assets is supported in your execution environment.  This error is unrecoverable.
-            """
+            """  # noqa: E501
         else:
             self.message = f"""The module "{module_name}" exists; however, the system is unable to create an instance \
 of the class "{class_name}", searched for inside this module.  Please make sure that the class named "{class_name}" is \
 properly defined inside its intended module and declared correctly by the calling entity.  This error is unrecoverable.
-            """
+            """  # noqa: E501
         super().__init__(self.message)
 
 
@@ -463,7 +463,7 @@ class GXCloudError(GreatExpectationsError):
 class GXCloudConfigurationError(GreatExpectationsError):
     """
     Error finding and verifying the required configuration values when preparing to connect to GX Cloud
-    """
+    """  # noqa: E501
 
 
 class DatabaseConnectionError(GreatExpectationsError):

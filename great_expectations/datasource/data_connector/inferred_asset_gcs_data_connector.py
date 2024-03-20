@@ -51,7 +51,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         gcs_options: Options passed to the GCS Storage Client.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,

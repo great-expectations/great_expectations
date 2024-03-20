@@ -131,7 +131,7 @@ TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
     "Hashable": "str",
     "Sequence[Hashable]": "Sequence[str]",
     "Iterable[Hashable]": "Iterable[str]",
-    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8
+    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8  # noqa: E501
     "Sequence[tuple[int, int]]": "Sequence[Tuple[int, int]]",
     # TypeVars
     "IntStrT": "Union[int, str]",
@@ -442,7 +442,7 @@ def _generate_pandas_data_asset_models(
             continue
         except TypeError as err:
             logger.info(
-                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
+                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"  # noqa: E501
             )
             logger.info(f"{model_name} fields\n{pf(fields)}")
             continue
@@ -452,7 +452,7 @@ def _generate_pandas_data_asset_models(
             asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
         except TypeError as e:
             raise DynamicAssetError(
-                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"
+                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"  # noqa: E501
             ) from e
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")

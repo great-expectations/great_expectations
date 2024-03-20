@@ -81,11 +81,11 @@ def sqlachemy_execution_engine_mock_cls(
         partitioner_query_response: An optional list of dictionaries. Each dictionary is a row returned
             from the partitioner query. The keys are the column names and the value is the column values,
             eg: [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
-    """
+    """  # noqa: E501
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, create_temp_table: bool = True, *args, **kwargs):
-            # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
+            # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in  # noqa: E501
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
             self.engine = MockSaEngine(dialect=Dialect(dialect))
@@ -107,7 +107,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We know that partitioner_query_response is non-empty because of validation
             # at the top of the outer function.
             # In some cases, such as in the datetime partitioners,
-            # a dictionary is returned our from out partitioner query with the key as the parameter_name.
+            # a dictionary is returned our from out partitioner query with the key as the parameter_name.  # noqa: E501
             # Otherwise, a list of values is returned.
             if isinstance(partitioner_query_response[0], dict):
                 return [Row(row_dict) for row_dict in partitioner_query_response]
@@ -311,7 +311,7 @@ def cloud_storage_get_client_doubles(
 
     gcs
     azure
-    """
+    """  # noqa: E501
     logger.warning("Patching cloud storage _get_*_client() methods to return client test doubles")
 
 

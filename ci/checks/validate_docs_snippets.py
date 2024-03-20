@@ -2,7 +2,7 @@
 Purpose: To ensure that no stray snippet opening/closing tags are present in our production docs
 
 In short, this script creates a temporary Docusaurus build and utilizes grep to parse for stray tags.
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 

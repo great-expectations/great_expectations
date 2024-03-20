@@ -19,7 +19,7 @@ RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_S
 class DummyDomain(Domain):
     """
     To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
-    """
+    """  # noqa: E501
 
     def __init__(self, domain_type=MetricDomainTypes.TABLE):
         super().__init__(domain_type=domain_type)

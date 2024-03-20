@@ -26,7 +26,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
     have been certified; hence, they should be used going forward.  On the other hand, "SimpleSqlalchemyDatasource",
     fully implemented on top of "ConfiguredAssetSqlDataConnector" and "InferredAssetSqlDataConnector", remains
     potentially useful for demonstration purposes, and should be maintained, even though it violates abstractions.
-    """
+    """  # noqa: E501
 
     execution_engine: SqlAlchemyExecutionEngine
 
@@ -44,7 +44,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         introspection = introspection or {}
         tables = tables or {}
 
-        # In "SQLAlchemy" datasources, "connection_string" resides in "SqlAlchemyExecutionEngine" (not "DataConnector").
+        # In "SQLAlchemy" datasources, "connection_string" resides in "SqlAlchemyExecutionEngine" (not "DataConnector").  # noqa: E501
         self._execution_engine_config = {
             "class_name": "SqlAlchemyExecutionEngine",
             "connection_string": connection_string,
@@ -63,17 +63,17 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             table_configs=tables,
         )
 
-        # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
+        # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.  # noqa: E501
         self._datasource_config: dict = {}
 
     # noinspection PyMethodOverriding
-    # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).
+    # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).  # noqa: E501
     def _init_data_connectors(
         self,
         introspection_configs: dict,
         table_configs: dict,
     ) -> None:
-        # Step-1: Build "DataConnector" objects for introspected tables/views (using "InferredAssetSqlDataConnector").
+        # Step-1: Build "DataConnector" objects for introspected tables/views (using "InferredAssetSqlDataConnector").  # noqa: E501
         for name, config in introspection_configs.items():
             data_connector_config = dict(
                 **{
@@ -87,7 +87,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 config=data_connector_config,
             )
 
-        # Step-2: Build "DataConnector" objects for tables (using "ConfiguredAssetSqlDataConnector").
+        # Step-2: Build "DataConnector" objects for tables (using "ConfiguredAssetSqlDataConnector").  # noqa: E501
         for data_asset_name, table_config in table_configs.items():
             for partitioner_name, partitioner_config in table_config["partitioners"].items():
                 data_connector_name: str = partitioner_name
@@ -109,7 +109,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 if "table_name" not in data_asset_config:
                     data_asset_config["table_name"] = data_asset_name
 
-                # "ConfiguredAssetSqlDataConnector" has only one asset type: "table" (adding for interface consistency).
+                # "ConfiguredAssetSqlDataConnector" has only one asset type: "table" (adding for interface consistency).  # noqa: E501
                 data_asset_config["type"] = "table"
 
                 # If config contains any prefix, suffix or schema_name values,

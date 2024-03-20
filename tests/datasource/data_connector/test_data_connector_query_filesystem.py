@@ -196,7 +196,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -253,7 +253,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -307,7 +307,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -345,7 +345,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -389,7 +389,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -432,7 +432,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -463,12 +463,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_no_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_no_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -523,12 +523,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -571,12 +571,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step_reverse(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step_reverse(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -631,12 +631,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_right_no_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_right_no_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -679,12 +679,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_no_right_no_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_no_right_no_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -721,13 +721,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_no_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_no_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -765,12 +765,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(  # noqa: E501
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
@@ -813,7 +813,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]

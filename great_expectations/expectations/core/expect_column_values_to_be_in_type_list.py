@@ -101,7 +101,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
-    """
+    """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
     type_list: Union[List[str], EvaluationParameterDict, None]
@@ -211,7 +211,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
             if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 if include_column_name:
                     template_str = (
                         "$column value types must belong to this set: "
@@ -301,8 +301,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 np.__version__
             ) < version.parse("1.21")
             if _numpy_doesnt_support_extensions_properly and _pandas_supports_extension_dtypes:
-                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
-                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes  # noqa: E501
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to  # noqa: E501
                 # ExtensionDtypes
                 actual_type_is_ext_dtype = isinstance(
                     actual_column_type, pd.core.dtypes.base.ExtensionDtype
@@ -411,11 +411,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             PandasExecutionEngine,
         )
 
-        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version  # noqa: E501
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
-        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.  # noqa: E501
+        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate  # noqa: E501
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
@@ -457,7 +457,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
-                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies  # noqa: E501
                 validation_dependencies = super().get_validation_dependencies(
                     execution_engine, runtime_configuration
                 )

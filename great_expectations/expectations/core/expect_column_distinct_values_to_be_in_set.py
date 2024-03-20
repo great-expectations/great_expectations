@@ -104,7 +104,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     See Also:
         [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 
@@ -118,7 +118,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
 

@@ -41,7 +41,7 @@ def gx_sqlalchemy_execution_engine_spy(
     the GX SqlAlchemyExecutionEngine constructor can be inspected.
 
     NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
-    """
+    """  # noqa: E501
     spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
     monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
     yield spy
@@ -167,7 +167,7 @@ def test_table_quoted_name_type_does_not_exist(
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that mechanism for detection of non-existent table_nam" works correctly.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "table_name_0",
         "table_name_1",
@@ -197,7 +197,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all upper case entity usage does not undergo any conversion.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "ACTORS",
         "ARTISTS",
@@ -241,7 +241,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all lower case entity usage undergo conversion to quoted literals.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "actors",
         "artists",

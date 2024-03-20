@@ -34,7 +34,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     )
 
 
-def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
+def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -63,7 +63,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
 
-def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -81,7 +81,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
+    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
@@ -95,7 +95,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
     }
 
 
-def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -142,7 +142,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
+    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",

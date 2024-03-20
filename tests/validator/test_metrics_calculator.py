@@ -86,7 +86,7 @@ def _test_column_partition_metric(
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
-    """
+    """  # noqa: E501
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
         table_name="column_partition_metric_test",
@@ -161,7 +161,7 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
 
     The "with mock.patch" is used judiciously, trading off the focus on the functionality under test (i.e., avoiding
     "test leakage") against going as far as mocking all non-essential methods and properties, favoring code readability.
-    """
+    """  # noqa: E501
 
     class DummyExecutionEngine:
         pass

@@ -81,7 +81,7 @@ def fluent_batch_request(batch_request_as_dict: Dict[str, str]) -> FluentBatchRe
 def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     # create expectation suite
     suite = context.suites.add(ExpectationSuite("my_expectation_suite"))
     expectation = gxe.ExpectColumnValuesToBeBetween(
@@ -96,10 +96,10 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
+def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     datasource_name = "my_pandas_filesystem_datasource"
     datasource = context.get_datasource(datasource_name=datasource_name)
@@ -134,10 +134,10 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     datasource_name = "my_pandas_filesystem_datasource"
     datasource = context.get_datasource(datasource_name=datasource_name)

@@ -77,7 +77,7 @@ class Domain(SerializableDotDict):
             raise ValueError(
                 f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type "{type(domain_type)!s}" is \
 not supported).
-"""
+"""  # noqa: E501
             )
 
         if domain_kwargs is None:
@@ -118,7 +118,7 @@ not supported).
                         f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
 "{type(domain_type)!s}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
 not exist as value of appropriate key in "domain_kwargs" dictionary.
-"""
+"""  # noqa: E501
                     )
 
         super().__init__(
@@ -157,14 +157,14 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         return _result_hash
 
     def is_superset(self, other: Domain) -> bool:
-        """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""
+        """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""  # noqa: E501
         if other is None:
             return True
 
         return other.is_subset(other=self)
 
     def is_subset(self, other: Domain) -> bool:
-        """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""
+        """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""  # noqa: E501
         if other is None:
             return False
 
@@ -173,7 +173,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
         return is_candidate_subset_of_target(candidate=this_json_dict, target=other_json_dict)
 
-    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
+    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).  # noqa: E501
     @property
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
@@ -215,7 +215,7 @@ def deep_convert_properties_iterable_to_domain_kwargs(
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_domain_kwargs(source=DomainKwargs(source))
 
-    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.  # noqa: E501
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 

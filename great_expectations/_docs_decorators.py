@@ -128,7 +128,7 @@ def deprecated_argument(
         argument_name: Name of the argument to associate with the deprecation note.
         version: Version number when the method was deprecated.
         message: Optional deprecation message.
-    """
+    """  # noqa: E501
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 

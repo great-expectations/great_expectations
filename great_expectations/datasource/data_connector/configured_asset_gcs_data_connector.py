@@ -47,7 +47,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         max_results (int): max blob filepaths to return
         gcs_options (dict): wrapper object for optional GCS `**kwargs`
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,

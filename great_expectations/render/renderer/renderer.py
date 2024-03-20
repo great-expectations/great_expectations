@@ -35,7 +35,7 @@ class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
 
     def serialize(self) -> dict:
-        # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)
+        # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)  # noqa: E501
         # TODO: Renderers should be ported over to Pydantic to prevent this fork in logic
         return {
             "module_name": self.__class__.__module__,
@@ -82,7 +82,7 @@ class Renderer:
 
         :param evrs:
         :return: list of columns with best effort sorting
-        """
+        """  # noqa: E501
         evrs_ = evrs if isinstance(evrs, list) else evrs.results
 
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(
@@ -106,7 +106,7 @@ class Renderer:
         else:
             ordered_columns = []
 
-        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column  # noqa: E501
         # names from entire evr
         if set(sorted_columns) == set(ordered_columns):
             return ordered_columns

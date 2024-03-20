@@ -87,7 +87,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
 
     See Also:
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -104,7 +104,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.max",)
     success_keys = (
         "min_value",
@@ -151,7 +151,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 if params.min_value == params.max_value:
                     template_str = "maximum value must be $min_value"
                 else:
-                    template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                    template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
             elif not params.min_value:
                 template_str = f"maximum value must be {at_most_str} $max_value."
             else:

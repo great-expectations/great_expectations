@@ -58,7 +58,7 @@ def test_parse_row_condition_string_pandas_engine():
         "Survived == 1 and (SexCode not in (0, 7, x) | ~(Age > 50)) & not (PClass != '1st')"
     )
     assert parse_row_condition_string_pandas_engine(test_condition_string) == (
-        "if $row_condition__0 and ($row_condition__1 or not ($row_condition__2)) and not ($row_condition__3)",
+        "if $row_condition__0 and ($row_condition__1 or not ($row_condition__2)) and not ($row_condition__3)",  # noqa: E501
         {
             "row_condition__0": "Survived == 1",
             "row_condition__1": "SexCode not in [0, 7, x]",
@@ -76,7 +76,7 @@ def test_all_expectations_using_test_definitions():
     )
     test_files = glob.glob(pattern)  # noqa: PTH207
 
-    # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
+    # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.  # noqa: E501
     assert (
         len(test_files) == 61
     ), "Something went wrong when collecting JSON Expectation test fixtures"

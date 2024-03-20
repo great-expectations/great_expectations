@@ -91,7 +91,7 @@ for batch_definition in jan_feb_batch_definition_list:
     )
     cumulative_min = current_min if current_min < cumulative_min else cumulative_min
 
-# Use the highest max and lowest min from Jan and Feb to create an expectation which we validate against March
+# Use the highest max and lowest min from Jan and Feb to create an expectation which we validate against March  # noqa: E501
 result = validator.expect_column_values_to_be_between(
     "fare_amount", min_value=cumulative_min, max_value=cumulative_max
 )

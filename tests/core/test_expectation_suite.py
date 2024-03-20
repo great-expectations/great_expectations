@@ -144,7 +144,7 @@ class TestInit:
         """What does this test and why?
 
         The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
-        """
+        """  # noqa: E501
 
         test_expectations_input = [
             expect_column_values_to_be_in_set_col_a_with_meta_dict,
@@ -220,7 +220,7 @@ class TestCRUDMethods:
         ]
         with pytest.raises(
             ValueError,
-            match="Expectations in parameter `expectations` must not belong to another ExpectationSuite.",
+            match="Expectations in parameter `expectations` must not belong to another ExpectationSuite.",  # noqa: E501
         ):
             ExpectationSuite(name=self.expectation_suite_name, expectations=expectations)
 
@@ -519,7 +519,7 @@ class TestCRUDMethods:
         with the remote ExpectationSuite. ExpectationSuite._save_expectation (and the corresponding logic
         the suite uses within the ExpectationsStore) must work equivalently regardless of which Suite instance
         it belongs to.
-        """
+        """  # noqa: E501
         # Arrange
         context = empty_cloud_context_fluent
         suite_name = "test-suite"
@@ -573,7 +573,7 @@ class TestEvaluationParameterOptions:
     """Tests around the evaluation_parameter_options property of ExpectationSuites.
 
     Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
-    """
+    """  # noqa: E501
 
     EVALUATION_PARAMETER_VALUE_SET = "my_value_set"
     EVALUATION_PARAMETER_MIN = "my_min"
@@ -728,7 +728,7 @@ class TestAddCitation:
     @pytest.mark.unit
     @pytest.mark.v2_api
     def test_add_citation_accepts_v2_api_params(self, empty_suite_with_meta: ExpectationSuite):
-        """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""
+        """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""  # noqa: E501
         empty_suite_with_meta.add_citation(
             "fake_comment",
             batch_kwargs={"fake": "batch_kwargs"},
@@ -851,7 +851,7 @@ class TestIsEquivalentTo:
     def test_is_equivalent_to_unsupported_class_returns_notimplemented(
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""
+        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""  # noqa: E501
 
         class UnsupportedClass:
             pass
@@ -860,10 +860,10 @@ class TestIsEquivalentTo:
         assert return_value == NotImplemented
 
     @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(
+    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(  # noqa: E501
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
+        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
         different_but_equivalent_suite.name = "different_name"
         different_but_equivalent_suite.meta = {"notes": "Different meta."}
@@ -876,7 +876,7 @@ class TestIsEquivalentTo:
     def test_is_equivalent_to_expectation_suite_classes_false(
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
+        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Set different column in expectation kwargs
         expectation = different_and_not_equivalent_suite.expectations[0]
@@ -890,9 +890,9 @@ class TestIsEquivalentTo:
     def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
+        """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
-        # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite
+        # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite  # noqa: E501
         different_and_not_equivalent_suite.expectations.append(
             different_and_not_equivalent_suite._build_expectation(
                 expectation_configuration=different_and_not_equivalent_suite.expectation_configurations[
@@ -952,7 +952,7 @@ class TestEqDunder:
                 marks=pytest.mark.xfail(
                     strict=True,
                     raises=AssertionError,
-                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",
+                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",  # noqa: E501
                 ),
             ),
             pytest.param("meta", {"notes": "Different meta."}),
@@ -984,7 +984,7 @@ class TestEqDunder:
         assert different_but_equivalent_suite != suite_with_single_expectation
 
 
-# ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
+# ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up  # noqa: E501
 
 
 @pytest.fixture
@@ -1357,7 +1357,7 @@ def test_get_expectations_by_expectation_type(
     table_exp2,
     table_exp3,
 ):
-    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()  # noqa: E501
     assert obs == [
         table_exp1,
         table_exp2,
@@ -1382,7 +1382,7 @@ def test_get_expectations_by_domain_type(
     table_exp2,
     table_exp3,
 ):
-    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()  # noqa: E501
     assert list(itertools.chain.from_iterable(obs.values())) == [
         table_exp1,
         table_exp2,

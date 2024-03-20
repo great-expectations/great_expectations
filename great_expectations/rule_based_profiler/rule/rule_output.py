@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class RuleOutput:
     """
     RuleOutput provides methods for extracting useful information from RuleState using directives and application logic.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -33,7 +33,7 @@ class RuleOutput:
         """
         Args:
             rule_state: RuleState object represented by "Domain" objects and parameters,.computed for one Rule object.
-        """
+        """  # noqa: E501
         self._rule_state = rule_state
 
     @property

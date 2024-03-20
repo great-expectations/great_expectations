@@ -63,7 +63,7 @@ def main() -> None:
     new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(
-            f"[ERROR] Found {len(new_violations)} snippets using file and line number syntax.  Please use named snippet syntax:"
+            f"[ERROR] Found {len(new_violations)} snippets using file and line number syntax.  Please use named snippet syntax:"  # noqa: E501
         )
         for line in new_violations:
             print(line)

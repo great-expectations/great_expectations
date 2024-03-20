@@ -113,7 +113,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -123,7 +123,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],
@@ -139,7 +139,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -149,7 +149,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],
@@ -165,7 +165,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -175,7 +175,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],

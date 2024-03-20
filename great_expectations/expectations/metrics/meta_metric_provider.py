@@ -25,7 +25,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
         Support isinstance and issubclass checks.
     """
 
-    # TODO: <Alex>All logging/warning directives should be placed into a common module to be imported as needed.</Alex>
+    # TODO: <Alex>All logging/warning directives should be placed into a common module to be imported as needed.</Alex>  # noqa: E501
     # deprecated-v0.13.12
     warnings.simplefilter("default", category=DeprecationWarning)
 
@@ -45,7 +45,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
                     warnings.warn(
                         f"""{cls.__name__} has been renamed to {alias} -- the alias {cls.__name__} is \
 deprecated as of v0.13.12 and will be removed in v0.16.
-""",
+""",  # noqa: E501
                         DeprecationWarning,
                         stacklevel=2,
                     )
@@ -65,7 +65,7 @@ deprecated as of v0.13.12 and will be removed in v0.16.
                 warnings.warn(
                     f"""{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} is deprecated \
 as of v0.13.12 and will be removed in v0.16.
-""",
+""",  # noqa: E501
                     DeprecationWarning,
                     stacklevel=2,
                 )

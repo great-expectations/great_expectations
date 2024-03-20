@@ -48,7 +48,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         boto3_options: Options passed to the `boto3` library.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -63,7 +63,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         id: Optional[str] = None,
     ):
         logger.warning(
-            "Warning: great_expectations.datasource.data_connector.ConfiguredAssetAWSGlueDataCatalogDataConnector is "
+            "Warning: great_expectations.datasource.data_connector.ConfiguredAssetAWSGlueDataCatalogDataConnector is "  # noqa: E501
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
         if execution_engine:
@@ -83,7 +83,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             self._glue_client: Any = aws.boto3.client("glue", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."
+                "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."  # noqa: E501
             )
 
         self._catalog_id = catalog_id
@@ -135,7 +135,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset  # noqa: E501
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
@@ -161,7 +161,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         return []
 
     @override
@@ -178,7 +178,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         Returns:
             A list of BatchDefinition objects that match BatchRequest
-        """
+        """  # noqa: E501
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
@@ -224,14 +224,14 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     ) -> None:
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
-        """
+        """  # noqa: E501
         if "database_name" not in config:
             raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'database_name' was not specified"
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'database_name' was not specified"  # noqa: E501
             )
         if "table_name" not in config:
             raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"  # noqa: E501
             )
 
         if self.partitions:
@@ -241,7 +241,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         partitions = config.get("partitions")
         if partitions and not isinstance(partitions, list):
             raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'partitions' must be a list, got {type(partitions)}"
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'partitions' must be a list, got {type(partitions)}"  # noqa: E501
             )
 
         name = self._update_data_asset_name_from_config(
@@ -262,7 +262,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             return [p["Name"] for p in table["Table"]["PartitionKeys"]]
         except self.glue_client.exceptions.EntityNotFoundException:
             raise DataConnectorError(
-                f"ConfiguredAssetAWSGlueDataCatalogDataConnector could not find a table with name: {database_name}.{table_name}"
+                f"ConfiguredAssetAWSGlueDataCatalogDataConnector could not find a table with name: {database_name}.{table_name}"  # noqa: E501
             )
 
     def _get_batch_identifiers(

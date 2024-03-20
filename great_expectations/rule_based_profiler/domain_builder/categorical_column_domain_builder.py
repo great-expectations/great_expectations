@@ -110,7 +110,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
             data_context: AbstractDataContext associated with this DomainBuilder
-        """
+        """  # noqa: E501
         if exclude_column_names is None:
             exclude_column_names = [
                 "id",
@@ -216,7 +216,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             List of domains that match the desired cardinality.
-        """
+        """  # noqa: E501
         batch_ids: Optional[List[str]] = self.get_batch_ids(variables=variables)
 
         validator: Optional[Validator] = self.get_validator(variables=variables)
@@ -227,7 +227,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        # Obtain cardinality_limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain cardinality_limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = (
             get_parameter_value_and_validate_return_type(
                 domain=None,
@@ -238,7 +238,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             )
         )
 
-        # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         max_unique_values: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_unique_values,
@@ -247,7 +247,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         max_proportion_unique: Optional[float] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_proportion_unique,
@@ -268,7 +268,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             max_proportion_unique=max_proportion_unique,
         )
 
-        # Obtain allowed_semantic_types_passthrough from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain allowed_semantic_types_passthrough from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         allowed_semantic_types_passthrough: Union[
             str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
         ] = get_parameter_value_and_validate_return_type(
@@ -309,7 +309,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         if validator is None:
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."
+                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."  # noqa: E501
             )
 
         candidate_column_names: List[str] = self._column_names_meeting_cardinality_limit(
@@ -383,7 +383,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             List of column names meeting cardinality.
-        """
+        """  # noqa: E501
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_value: MetricValue

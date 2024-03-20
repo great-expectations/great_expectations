@@ -261,7 +261,7 @@ data_connectors:
     assert len(batch.data.dataframe.columns) == 2
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(  # noqa: E501
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     context = empty_data_context
@@ -454,14 +454,14 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored(
+def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored(  # noqa: E501
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     """
     What does this test and why?
     This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter
     passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
-    """
+    """  # noqa: E501
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -568,7 +568,7 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
-def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request(
+def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request(  # noqa: E501
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     context = empty_data_context
@@ -666,7 +666,7 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
     add_datasource() takes in the kwargs directly, which means the schema is converted into a string
     like "StructType(List(StructField(x,IntegerType,true)". Therefore we ask that users call the jsonValue()
     method to serialize the schema before loading into Datasource config
-    """
+    """  # noqa: E501
 
     context = empty_data_context
     base_directory = str(
@@ -763,7 +763,7 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_non_serializ
     like "StructType(List(StructField(x,IntegerType,true)". Therefore we ask that users call the jsonValue()
     method to serialize the schema before loading into Datasource config
     This test tests that not serializing the schema will return the expected error message
-    """
+    """  # noqa: E501
 
     context = empty_data_context
     base_directory = str(
@@ -811,7 +811,7 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_non_serializ
                     group_names:
                         - name
                         - year
-        """,
+        """,  # noqa: E501
     )
     context.add_datasource(
         "my_datasource",

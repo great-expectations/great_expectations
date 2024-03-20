@@ -68,7 +68,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
-    """
+    """  # noqa: E501
 
     value: Union[float, EvaluationParameterDict]
 
@@ -150,7 +150,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values must be $value characters long"
             if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

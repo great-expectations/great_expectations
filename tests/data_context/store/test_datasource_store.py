@@ -459,7 +459,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
 
 
 @pytest.mark.unit
-def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
+def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(  # noqa: E501
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
     empty_data_context,
@@ -501,7 +501,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 
 
 @pytest.mark.filesystem
-def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
+def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(  # noqa: E501
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
     empty_data_context,
@@ -660,7 +660,7 @@ def test_gx_cloud_response_json_to_object_collection():
                                     "hurricanes_and_typhoons": {
                                         "batch_identifiers": ["ocean"],
                                         "class_name": "Asset",
-                                        "module_name": "great_expectations.datasource.data_connector.asset",
+                                        "module_name": "great_expectations.datasource.data_connector.asset",  # noqa: E501
                                         "name": "hurricanes_and_typhoons",
                                     }
                                 },

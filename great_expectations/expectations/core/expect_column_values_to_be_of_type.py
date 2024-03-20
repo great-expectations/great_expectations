@@ -123,7 +123,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
-    """
+    """  # noqa: E501
 
     type_: str
 
@@ -367,11 +367,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             PandasExecutionEngine,
         )
 
-        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version  # noqa: E501
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
-        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.  # noqa: E501
+        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate  # noqa: E501
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
@@ -421,7 +421,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     None,
                 ]
             ):
-                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies  # noqa: E501
                 validation_dependencies = super().get_validation_dependencies(
                     execution_engine, runtime_configuration
                 )

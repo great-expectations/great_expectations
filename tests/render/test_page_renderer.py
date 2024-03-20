@@ -213,7 +213,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
         "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
+                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501
                 "params": {
                     "suite_title": "Expectation Suite:",
                     "data_asset": "Data asset:",
@@ -221,7 +221,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
                     "success": "Failed",
-                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',
+                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',  # noqa: E501
                 },
                 "styling": {
                     "params": {

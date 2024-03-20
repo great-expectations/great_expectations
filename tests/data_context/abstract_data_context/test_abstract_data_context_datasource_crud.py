@@ -102,7 +102,7 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
         "base_directory"
     ].endswith(value_associated_with_variable)
 
-    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)  # noqa: E501
     assert (
         instantiated_datasource._raw_config["data_connectors"][data_connector_name][
             "base_directory"

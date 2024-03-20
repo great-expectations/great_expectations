@@ -20,7 +20,7 @@ import great_expectations.expectations as gxe
 # </snippet>
 
 # Set up
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py get_context">
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py get_context">  # noqa: E501
 context = gx.get_context()
 # </snippet>
 
@@ -40,27 +40,27 @@ assert sqlite_database_path.exists()
 shutil.copy(sqlite_database_path, "yellow_tripdata.db")
 
 
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
-# curl https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/quickstart/yellow_tripdata.db > yellow_tripdata.db
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">  # noqa: E501
+# curl https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/quickstart/yellow_tripdata.db > yellow_tripdata.db  # noqa: E501
 connection_string = "sqlite:///yellow_tripdata.db"
 batch = context.sources.pandas_default.read_sql(
     "SELECT * FROM yellow_tripdata_sample_2022_01", connection_string
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py create_expectation">
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py create_expectation">  # noqa: E501
 expectation = gxe.ExpectColumnValuesToBeBetween(
     column="passenger_count",
     min_value=0,
     max_value=6,
-    notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+    notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",  # noqa: E501
 )
 result = batch.validate(expectation)
 result.describe()
 # </snippet>
 assert result.success is False
 
-# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py update_expectation">
+# <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py update_expectation">  # noqa: E501
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.95
 result = batch.validate(expectation)

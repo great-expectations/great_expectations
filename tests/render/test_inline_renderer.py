@@ -42,7 +42,7 @@ def test_inline_renderer_instantiation_error_message(
         InlineRenderer(render_object=expectation_suite)  # type: ignore
     assert (
         str(e.value)
-        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
+        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."  # noqa: E501
     )
 
 

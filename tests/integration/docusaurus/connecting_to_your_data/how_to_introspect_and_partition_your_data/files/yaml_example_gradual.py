@@ -1,18 +1,18 @@
 # ruff: noqa: PTH118
 import os
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports">  # noqa: E501
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_context">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_context">  # noqa: E501
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
@@ -38,11 +38,11 @@ data_dir_path = os.path.join("..", "data")
 
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml">  # noqa: E501
 buggy_data_connector_yaml = """
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
@@ -52,7 +52,7 @@ buggy_data_connector_yaml = """
           pattern: (.*)
           group_names:  # required "data_asset_name" reserved group name for "InferredAssetFilePathDataConnector" is absent
             - nonexistent_group_name
-"""
+"""  # noqa: E501
 # </snippet>
 
 # noinspection PyRedeclaration
@@ -80,13 +80,13 @@ data_connectors:
           pattern: (.*)
           group_names:  # required "data_asset_name" reserved group name for "InferredAssetFilePathDataConnector" is absent
             - nonexistent_group_name
-"""
+"""  # noqa: E501
 
 buggy_datasource_yaml = buggy_datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
 context.test_yaml_config(buggy_datasource_yaml)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml">  # noqa: E501
 another_buggy_data_connector_yaml = """
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
@@ -132,10 +132,10 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
 
 report = context.test_yaml_config(buggy_datasource_yaml, shorten_tracebacks=True)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource">  # noqa: E501
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names">  # noqa: E501
 available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
 )["default_inferred_data_connector_name"]
@@ -154,7 +154,7 @@ bare_bones_configured_data_connector_yaml = """
         assets: {}
 """
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
@@ -179,7 +179,7 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 
 context.test_yaml_config(datasource_yaml)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type">  # noqa: E501
 configured_data_connector_yaml = """
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
@@ -233,7 +233,7 @@ available_data_asset_names = context.datasources["taxi_datasource"].get_availabl
 assert len(available_data_asset_names) == 1
 
 # noinspection PyRedeclaration
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names">  # noqa: E501
 configured_data_connector_yaml = """
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector

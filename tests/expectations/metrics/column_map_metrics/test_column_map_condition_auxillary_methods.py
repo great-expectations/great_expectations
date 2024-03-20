@@ -17,7 +17,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.expectations.metrics import (
     MapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (
+from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (  # noqa: E501
     _spark_column_map_condition_values,
     _sqlalchemy_column_map_condition_values,
 )
@@ -29,7 +29,7 @@ from tests.expectations.test_util import get_table_columns_metric
 def mini_taxi_df() -> pd.DataFrame:
     """
     Returns: pandas dataframe that contains a small selection of columns and rows from taxi_data, for unittesting.
-    """
+    """  # noqa: E501
     df = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4],
@@ -129,8 +129,8 @@ def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with
 
 
 # We calculate the column_values.between.condition with min value 0.0 and max value 10.0.
-# when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).
-# when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).
+# when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).  # noqa: E501
+# when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).  # noqa: E501
 @pytest.mark.sqlite
 @pytest.mark.parametrize(
     "execution_engine_fixture_name",
@@ -184,7 +184,7 @@ def test_sqlalchemy_column_map_condition_values(
         metric_value_kwargs=metric_value_kwargs,
     )
 
-    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.  # noqa: E501
     table_columns_metric, table_column_metrics_results = get_table_columns_metric(
         execution_engine=execution_engine
     )
@@ -258,7 +258,7 @@ def test_spark_column_map_condition_values(
         metric_value_kwargs=metric_value_kwargs,
     )
 
-    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.  # noqa: E501
     table_columns_metric, table_column_metrics_results = get_table_columns_metric(
         execution_engine=execution_engine
     )

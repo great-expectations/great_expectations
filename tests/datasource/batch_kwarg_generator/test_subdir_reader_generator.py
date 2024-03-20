@@ -67,7 +67,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     }
     partitions = subdir_reader_generator.get_available_partition_ids(data_asset_name="asset_1")
 
-    # SubdirReaderBatchKwargsGenerator uses filenames from subdirectories to generate partition names
+    # SubdirReaderBatchKwargsGenerator uses filenames from subdirectories to generate partition names  # noqa: E501
     assert set(partitions) == {
         "20190101__asset_1",
         "20190102__asset_1",

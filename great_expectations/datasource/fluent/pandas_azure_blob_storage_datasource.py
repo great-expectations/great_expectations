@@ -59,22 +59,22 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 self, self.azure_options, raise_warning_if_provider_not_present=True
             )
             # pull in needed config substitutions using the `_config_provider`
-            # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
+            # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.  # noqa: E501
             azure_options: dict = self.dict(config_provider=self._config_provider).get(
                 "azure_options", {}
             )
 
-            # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
-            # use in authentication (but not both). If the format or content of the provided keys is invalid,
-            # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
+            # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to  # noqa: E501
+            # use in authentication (but not both). If the format or content of the provided keys is invalid,  # noqa: E501
+            # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.  # noqa: E501
             conn_str: str | None = azure_options.get("conn_str")
             account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
                 raise PandasAzureBlobStorageDatasourceError(
-                    "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+                    "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"  # noqa: E501
                 )
 
-            # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+            # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.  # noqa: E501
             if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
                 try:
                     if conn_str is not None:
@@ -90,13 +90,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                         ).group(1)
                         azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
-                    # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
+                    # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.  # noqa: E501
                     raise PandasAzureBlobStorageDatasourceError(
                         f'Due to exception: "{e!s}", "azure_client" could not be created.'
                     ) from e
             else:
                 raise PandasAzureBlobStorageDatasourceError(
-                    'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'
+                    'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'  # noqa: E501
                 )
 
             self._azure_client = azure_client
@@ -115,7 +115,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         try:
             _ = self._get_azure_client()
         except Exception as e:

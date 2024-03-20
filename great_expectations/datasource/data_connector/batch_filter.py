@@ -43,7 +43,7 @@ class SliceValidator:
         # the returned value will be ignored
         field_schema.update(
             slice={
-                "description": "A slice object representing the set of indices specified by range(start, stop, step).",
+                "description": "A slice object representing the set of indices specified by range(start, stop, step).",  # noqa: E501
                 "type": "object",
                 "properties": {
                     "start": {
@@ -113,7 +113,7 @@ def build_batch_filter(  # noqa: C901 - too complex
         raise gx_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{type(custom_filter_function)!s}", which is illegal.
-            """
+            """  # noqa: E501
         )
     batch_filter_parameters: Optional[Union[dict, IDDict]] = data_connector_query_dict.get(  # type: ignore[assignment]
         "batch_filter_parameters"
@@ -123,7 +123,7 @@ def build_batch_filter(  # noqa: C901 - too complex
             raise gx_exceptions.BatchFilterError(
                 f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
 "{type(batch_filter_parameters)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
             raise gx_exceptions.BatchFilterError(
@@ -138,11 +138,11 @@ def build_batch_filter(  # noqa: C901 - too complex
         raise gx_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{type(limit)!s}" and "{limit}", respectively, which is illegal.
-            """
+            """  # noqa: E501
         )
     if index is not None and limit is not None:
         raise gx_exceptions.BatchFilterError(
-            "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
+            "Only one of index or limit, but not both, can be specified (specifying both is illegal)."  # noqa: E501
         )
     parsed_index: slice | None = parse_batch_slice(batch_slice=index) if index is not None else None
     return BatchFilter(
@@ -175,7 +175,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
                     slice_params.append(int(param))
                 except ValueError as e:
                     raise ValueError(
-                        f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
+                        f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'  # noqa: E501
                     )
             else:
                 slice_params.append(None)
@@ -196,7 +196,7 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
         raise ValueError(
-            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
+            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."  # noqa: E501
         )
 
 
@@ -238,7 +238,7 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
         return_slice = _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
         raise TypeError(
-            f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."
+            f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."  # noqa: E501
         )
     logger.info(f"batch_slice: {batch_slice} was parsed to: {return_slice}")
     return return_slice

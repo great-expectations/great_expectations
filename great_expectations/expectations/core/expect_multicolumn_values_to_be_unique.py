@@ -67,7 +67,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
          An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
          Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_list: Union[tuple, list]
     ignore_row_if: str = "all_values_are_missing"

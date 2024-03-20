@@ -521,7 +521,7 @@ def test_file_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
@@ -533,7 +533,7 @@ def test_file_data_context_variables_e2e(
     )
     updated_include_rendered_content.expectation_validation_result = True
 
-    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
+    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     value_associated_with_env_var: str = "foo/bar/baz"
     monkeypatch.setenv(env_var_name, value_associated_with_env_var)
@@ -587,7 +587,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 )
 @pytest.mark.xfail(
     strict=False,
-    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
+    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",  # noqa: E501
 )
 def test_cloud_enabled_data_context_variables_e2e(
     mock_save_project_config: MagicMock,
@@ -606,13 +606,13 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated plugins directory to set and save to the Cloud backend.
-    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results  # noqa: E501
+    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
     updated_data_docs_sites = data_docs_sites
-    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
     updated_data_docs_sites[new_site_name] = {}
 
     context = get_context(cloud_mode=True)

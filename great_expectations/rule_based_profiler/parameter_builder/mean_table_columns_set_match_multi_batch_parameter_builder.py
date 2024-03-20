@@ -41,7 +41,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParamet
     Step-2: Compute set union operation of column lists from Step-1 over all Batch objects (gives maximum column set).
     Step-3: Assign match scores: if column set of a Batch equals overall (maximum) column set, give it 1; 0 otherwise.
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
-    """
+    """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = (
         MetricMultiBatchParameterBuilder.exclude_field_names
@@ -73,7 +73,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParamet
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name="table.columns",
@@ -99,7 +99,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParamet
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
+        """  # noqa: E501
         # Compute "table.columns" metric value for each Batch object.
         super().build_parameters(
             domain=domain,
@@ -138,7 +138,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParamet
                     1
                     if one_batch_table_columns_names_set == multi_batch_table_columns_names_as_set
                     else 0
-                    for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
+                    for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list  # noqa: E501
                 ]
             )
         )

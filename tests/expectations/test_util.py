@@ -124,7 +124,7 @@ def test_prescriptive_renderer_no_decorator(
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = configuration.kwargs
-        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
         return [
             RenderedStringTemplateContent(
                 **{
@@ -146,7 +146,7 @@ def test_prescriptive_renderer_no_decorator(
     # string template should remain constant
     assert (
         res[0].string_template["template"]
-        == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
     )
 
     # params should contain our evaluation parameters
@@ -157,7 +157,7 @@ def test_prescriptive_renderer_no_decorator(
     assert res[0].to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
-            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value",
+            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value",  # noqa: E501
             "params": {
                 "column": "live",
                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
@@ -190,7 +190,7 @@ def test_prescriptive_renderer_with_decorator(
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         params = configuration.kwargs
-        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        template_str = "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
         return [
             RenderedStringTemplateContent(
                 **{
@@ -213,7 +213,7 @@ def test_prescriptive_renderer_with_decorator(
     # string template should remain constant
     assert (
         res[0].string_template["template"]
-        == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"
+        == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
     )
 
     # params should contain our evaluation parameters
@@ -222,7 +222,7 @@ def test_prescriptive_renderer_with_decorator(
     assert res[0].to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
-            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value",
+            "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value",  # noqa: E501
             "params": {
                 "column": "live",
                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},

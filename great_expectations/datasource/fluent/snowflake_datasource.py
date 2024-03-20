@@ -99,7 +99,7 @@ class SnowflakeDatasource(SQLDatasource):
             For example: "snowflake://<user_login_name>:<password>@<account_identifier>"
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
-    """
+    """  # noqa: E501
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
     # TODO: rename this to `connection` for v1?
@@ -116,7 +116,7 @@ class SnowflakeDatasource(SQLDatasource):
         It also allows for users to continue to provide connection details in the
         `context.sources.add_snowflake()` factory functions without nesting it in a
         `connection_string` dict.
-        """
+        """  # noqa: E501
         connection_detail_fields: set[str] = {
             "schema",  # field name in ConnectionDetails is schema_ (with underscore)
             *ConnectionDetails.__fields__.keys(),
@@ -144,7 +144,7 @@ class SnowflakeDatasource(SQLDatasource):
             ):
                 return values
         raise ValueError(
-            "Must provide either a connection string or a combination of account, user, and password."
+            "Must provide either a connection string or a combination of account, user, and password."  # noqa: E501
         )
 
     class Config:
@@ -175,7 +175,7 @@ class SnowflakeDatasource(SQLDatasource):
         the database to be created.
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
-        """
+        """  # noqa: E501
         gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = self.execution_engine_type
 
         connection_string: str | None = (
@@ -213,12 +213,12 @@ class SnowflakeDatasource(SQLDatasource):
                     self._engine = self._build_engine_with_connect_args(**connection_string)
 
             except Exception as e:
-                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
                     "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
-            # Since a connection string isn't strictly required for Snowflake, we conditionally cache
+            # Since a connection string isn't strictly required for Snowflake, we conditionally cache  # noqa: E501
             if isinstance(self.connection_string, str):
                 self._cached_connection_string = self.connection_string
         return self._engine

@@ -12,7 +12,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCase,
     TaxiPartitioningTestCasesBase,
 )
@@ -193,7 +193,7 @@ def _execute_taxi_partitioning_test_cases(
 
         assert (
             set(batch_definition_list) == set(expected_batch_definition_list)
-        ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
+        ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"  # noqa: E501
 
         # 4. Check that loaded data is as expected
 

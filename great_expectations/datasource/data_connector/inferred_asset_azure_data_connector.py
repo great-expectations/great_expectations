@@ -47,7 +47,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         azure_options: Options passed to the `BlobServiceClient`.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -82,14 +82,14 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         if azure_options is None:
             azure_options = {}
 
-        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
-        # use in authentication (but not both). If the format or content of the provided keys is invalid,
-        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to  # noqa: E501
+        # use in authentication (but not both). If the format or content of the provided keys is invalid,  # noqa: E501
+        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.  # noqa: E501
         conn_str: Optional[str] = azure_options.get("conn_str")
         account_url: Optional[str] = azure_options.get("account_url")
         assert (
             bool(conn_str) ^ bool(account_url)
-        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"  # noqa: E501
 
         try:
             if conn_str is not None:
@@ -104,8 +104,10 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
                 self._azure = azure.BlobServiceClient(**azure_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector). \
-                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
+                "Unable to load Azure BlobServiceClient"
+                " (it is required for InferredAssetAzureDataConnector)."
+                " Please ensure that you have provided the appropriate keys to `azure_options`"
+                " for authentication."
             )
 
     @override

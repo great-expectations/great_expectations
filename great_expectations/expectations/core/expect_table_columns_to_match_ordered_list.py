@@ -53,7 +53,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_list: Union[list, set, EvaluationParameterDict, None]
 
@@ -168,7 +168,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                 "result": {"observed_value": list(actual_column_list)},
             }
         else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # In the case of differing column lengths between the defined expectation and the observed column set, the  # noqa: E501
             # max is determined to generate the column_index.
             number_of_columns = max(len(expected_column_list), len(actual_column_list))
             column_index = range(number_of_columns)

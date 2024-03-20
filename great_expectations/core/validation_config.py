@@ -83,7 +83,7 @@ class ValidationConfig(BaseModel):
             },
             "id": "20dna816-64c8-46cb-8f7e-03c12cea1d67"
         }
-        """
+        """  # noqa: E501
         json_encoders = {
             ExpectationSuite: lambda e: e.identifier_bundle(),
             BatchConfig: lambda b: b.identifier_bundle(),
@@ -115,7 +115,7 @@ class ValidationConfig(BaseModel):
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
-        # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.
+        # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.  # noqa: E501
         if isinstance(v, dict):
             return cls._decode_suite(v)
         elif isinstance(v, ExpectationSuite):
@@ -126,7 +126,7 @@ class ValidationConfig(BaseModel):
 
     @validator("data", pre=True)
     def _validate_data(cls, v: dict | BatchConfig):
-        # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.
+        # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.  # noqa: E501
         if isinstance(v, dict):
             return cls._decode_data(v)
         elif isinstance(v, BatchConfig):
@@ -137,7 +137,7 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
-        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.  # noqa: E501
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
@@ -158,7 +158,7 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchConfig:
-        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
         except ValidationError as e:
@@ -189,7 +189,7 @@ class ValidationConfig(BaseModel):
             batch_definition = asset.get_batch_config(batch_definition_name)
         except KeyError as e:
             raise ValueError(
-                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501
             ) from e
 
         return batch_definition

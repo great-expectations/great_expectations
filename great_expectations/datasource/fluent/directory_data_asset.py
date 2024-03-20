@@ -10,7 +10,7 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
     FilePathDataConnector,
     make_directory_get_unfiltered_batch_definition_list_fn,
 )
@@ -40,7 +40,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
 
         Returns:
             List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
-        """
+        """  # noqa: E501
         if batch_request.partitioner:
             # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
@@ -65,14 +65,14 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     def get_unfiltered_batch_definition_list_fn(
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""  # noqa: E501
         return make_directory_get_unfiltered_batch_definition_list_fn(self.data_directory)
 
     @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
+work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
         )
 
     @override

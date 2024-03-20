@@ -119,7 +119,7 @@ class ExpectationValidationResult(SerializableDictDot):
         self.rendered_content = rendered_content
 
     def __eq__(self, other):
-        """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
+        """ExpectationValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         # NOTE: JPC - 20200213 - need to spend some time thinking about whether we want to
         # consistently allow dict as a comparison alternative in situations like these...
         # if isinstance(other, dict):
@@ -149,8 +149,8 @@ class ExpectationValidationResult(SerializableDictDot):
                             other=other.expectation_config, match_type="success"
                         )
                     ),
-                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
+                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.  # noqa: E501
+                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is  # noqa: E501
                     # handled appropriately.
                     not (self.result or other.result) or contents_equal,
                     self.meta == other.meta,
@@ -162,7 +162,7 @@ class ExpectationValidationResult(SerializableDictDot):
             return False
 
     def __ne__(self, other):
-        # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.
+        # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.  # noqa: E501
         # return not self == other
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __ne__.
@@ -176,7 +176,7 @@ class ExpectationValidationResult(SerializableDictDot):
                         self.expectation_config is not None
                         and not self.expectation_config.isEquivalentTo(other.expectation_config)
                     ),
-                    # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:
+                    # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:  # noqa: E501
                     (self.result is None and other.result is not None)
                     or (self.result != other.result),
                     self.meta != other.meta,
@@ -193,7 +193,7 @@ class ExpectationValidationResult(SerializableDictDot):
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
             if (
@@ -221,7 +221,7 @@ class ExpectationValidationResult(SerializableDictDot):
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        """  # noqa: E501
         return json.dumps(self.to_json_dict(), indent=2)
 
     def render(self) -> None:
@@ -306,7 +306,7 @@ class ExpectationValidationResult(SerializableDictDot):
             A JSON-serializable dict representation of this ExpectationValidationResult.
         """
         myself = expectationValidationResultSchema.dump(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
+        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
         if "expectation_config" in myself:
             myself["expectation_config"] = convert_to_json_serializable(
@@ -417,7 +417,7 @@ class ExpectationValidationResultSchema(Schema):
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in ExpectationValidationResultSchema.REMOVE_KEYS_IF_NONE during serialization if
-        their values are None."""
+        their values are None."""  # noqa: E501
         from great_expectations.expectations.expectation_configuration import (
             ExpectationConfigurationSchema,
         )
@@ -504,7 +504,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         statistics: Dict of values describing the results.
         meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
 
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -532,7 +532,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         self._metrics: dict = {}
 
     def __eq__(self, other):
-        """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
+        """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
@@ -560,7 +560,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             A JSON-serializable dict representation of this ExpectationSuiteValidationResult.
         """
         myself = deepcopy(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
+        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
         myself["evaluation_parameters"] = convert_to_json_serializable(
             myself["evaluation_parameters"]

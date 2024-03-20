@@ -46,14 +46,14 @@ def num_to_str(  # noqa: C901
 
     Returns:
         A string representation of the input float `f`, according to the desired parameters.
-    """
+    """  # noqa: E501
     assert not (use_locale and no_scientific)
     if precision != DEFAULT_PRECISION:
         local_context = decimal.Context()
         local_context.prec = precision
     else:
         local_context = ctx
-    # We cast to string; we want to avoid precision issues, but format everything as though it were a float.
+    # We cast to string; we want to avoid precision issues, but format everything as though it were a float.  # noqa: E501
     # So, if it's not already a float, we will append a decimal point to the string representation
     s = repr(f)
     if not isinstance(f, float):
@@ -145,7 +145,7 @@ def substitute_none_for_missing(
 
     This is helpful for standardizing the input objects for rendering functions.
     The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
-    """
+    """  # noqa: E501
 
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
@@ -313,7 +313,7 @@ def build_count_and_index_table(  # noqa: C901
     )
     if unexpected_index_df.empty:
         raise RenderingError(
-            "GX ran into an issue while building count and index table for rendering. Please check your configuration."
+            "GX ran into an issue while building count and index table for rendering. Please check your configuration."  # noqa: E501
         )
 
     # using default indices for Pandas
@@ -384,7 +384,7 @@ def _convert_unexpected_indices_to_df(
         unexpected_list: if we are using default Pandas output.
     Returns:
         pd.DataFrame that contains indices for unexpected values
-    """
+    """  # noqa: E501
     domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
@@ -397,7 +397,7 @@ def _convert_unexpected_indices_to_df(
             )
         else:
             raise TypeError(
-                f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."
+                f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."  # noqa: E501
             )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
@@ -447,7 +447,7 @@ def truncate_list_of_indices(indices: list[int | str], max_index: int = 10) -> s
     Returns:
         string of indices that are joined using ` `
 
-    """
+    """  # noqa: E501
     if len(indices) > max_index:
         indices = indices[:max_index]
         indices.append("...")

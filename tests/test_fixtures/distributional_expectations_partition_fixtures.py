@@ -15,7 +15,7 @@ They also expect a set of partitions: "test_partitions.json"
 
 The partitions should be built from distributional_expectations_data_base.csv. The tests will use distributional_expectations_data_test.csv
 
-"""
+"""  # noqa: E501
 
 
 def generate_new_data(seed):
@@ -42,14 +42,14 @@ def generate_new_partitions(df):
     test_partitions = {}
     for column in ["norm_0_1", "norm_1_1", "bimodal"]:
         partition_object = gx.dataset.util.kde_partition_data(df[column])
-        # Print how close sum of weights is to one for a quick visual consistency check when data are generated
+        # Print how close sum of weights is to one for a quick visual consistency check when data are generated  # noqa: E501
         # print(column + '_kde: '+ str(abs(1-np.sum(partition_object['weights']))))
         test_partitions[column + "_kde"] = partition_object
 
         for bin_type in ["uniform", "ntile", "auto"]:
             partition_object = gx.dataset.util.continuous_partition_data(df[column], bin_type)
-            # Print how close sum of weights is to one for a quick visual consistency check when data are generated
-            # print(column + '_' + bin_type + ': ' + str(abs(1 - np.sum(partition_object['weights']))))
+            # Print how close sum of weights is to one for a quick visual consistency check when data are generated  # noqa: E501
+            # print(column + '_' + bin_type + ': ' + str(abs(1 - np.sum(partition_object['weights']))))  # noqa: E501
             test_partitions[column + "_" + bin_type] = partition_object
 
         # Create infinite endpoint partitions:

@@ -145,13 +145,13 @@ class DefaultJinjaView:
         :param content_block_id:
         :param render_to_markdown: Whether this method should render the markdown version instead of HTML
         :return:
-        """
+        """  # noqa: E501
         if isinstance(content_block, str):
             return content_block
         elif content_block is None:
             return ""
         elif isinstance(content_block, list):
-            # If the content_block item here is actually a list of content blocks then we want to recursively render
+            # If the content_block item here is actually a list of content blocks then we want to recursively render  # noqa: E501
             rendered_block = ""
             for idx, content_block_el in enumerate(content_block):
                 if (
@@ -251,7 +251,7 @@ class DefaultJinjaView:
         If they aren't present, they simply won't be rendered.
 
         Other dictionary keys are also allowed and ignored.
-        """
+        """  # noqa: E501
 
         class_list = styling.get("classes", None)
         if class_list is None:
@@ -289,7 +289,7 @@ class DefaultJinjaView:
 
     def render_styling_from_string_template(self, template: dict | OrderedDict) -> str:
         # NOTE: We should add some kind of type-checking to template
-        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
+        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""  # noqa: E501
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
@@ -369,7 +369,7 @@ class DefaultJinjaView:
                 )
 
                 for parameter in template["params"].keys():
-                    # If this param has styling that over-rides the default, skip it here and get it in the next loop.
+                    # If this param has styling that over-rides the default, skip it here and get it in the next loop.  # noqa: E501
                     if "params" in template["styling"]:
                         if parameter in template["styling"]["params"]:
                             continue
@@ -467,7 +467,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         Handle list as well as single document
         """
         if isinstance(document, list):
-            # We need to keep this as super(DefaultMarkdownPageView, self); otherwise a wrong render will be called.
+            # We need to keep this as super(DefaultMarkdownPageView, self); otherwise a wrong render will be called.  # noqa: E501
             return [
                 super(DefaultMarkdownPageView, self).render(document=d, template=template, **kwargs)
                 for d in document

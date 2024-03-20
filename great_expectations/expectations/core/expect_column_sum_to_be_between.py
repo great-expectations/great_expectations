@@ -74,7 +74,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         * If max_value is None, then min_value is treated as a lower bound
         * observed_value field in the result object is customized for this expectation to be a list \
           representing the actual column sum
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -91,7 +91,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.sum",)
     success_keys = (
         "min_value",

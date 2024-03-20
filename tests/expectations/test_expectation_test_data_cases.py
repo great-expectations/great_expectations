@@ -47,4 +47,4 @@ def test_basic_instantiation_of_ExpectationTestCase():
 
     assert my_test_case.input == {"column": "a", "regex": "^a", "mostly": 0.9}
     assert my_test_case.input["column"] == "a"
-    # assert my_test_case.input.column == "a" #Not supported yet. We'll need to add types to input and output to get there.
+    # assert my_test_case.input.column == "a" #Not supported yet. We'll need to add types to input and output to get there.  # noqa: E501

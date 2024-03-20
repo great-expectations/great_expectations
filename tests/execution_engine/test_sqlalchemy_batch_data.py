@@ -87,7 +87,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
-    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
+    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True  # noqa: E501
     SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
@@ -131,7 +131,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 4
 
     # test schema with execution engine
-    # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation
+    # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation  # noqa: E501
     my_batch_spec = SqlAlchemyDatasourceBatchSpec(
         **{
             "table_name": "test_table",
@@ -202,7 +202,7 @@ def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine
 
     In cases where we create a validator but explicitly set `create_temp_table`=False, we directly use the
     selectable created by SqlAlchemyExecutionEngine's _build_selectable_from_batch_spec() method.
-    """
+    """  # noqa: E501
 
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
     # only have the view that is created by the `sqlite_view_engine` fixture

@@ -67,7 +67,7 @@ data_connectors:
             group_names:
             - letter
             - number
-    """,
+    """,  # noqa: E501
         ),
         runtime_environment={"name": "my_datasource"},
         config_defaults={"module_name": "great_expectations.datasource"},
@@ -155,7 +155,7 @@ data_connectors:
             group_names:
             - letter
             - number
-    """,
+    """,  # noqa: E501
         ),
         runtime_environment={"name": "my_datasource"},
         config_defaults={"module_name": "great_expectations.datasource"},
@@ -382,7 +382,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
 
 
 @pytest.mark.filesystem
-def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(  # noqa: E501
     basic_pandas_datasource_v013,
 ):
     data_connector_name: str = "test_runtime_data_connector"
@@ -411,7 +411,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
 
 
 @pytest.mark.spark
-def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(  # noqa: E501
     basic_spark_datasource,
 ):
     data_connector_name: str = "test_runtime_data_connector"

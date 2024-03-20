@@ -34,7 +34,7 @@ data_connectors:
             group_names:
                 - year
                 - month
-"""
+"""  # noqa: E501
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.

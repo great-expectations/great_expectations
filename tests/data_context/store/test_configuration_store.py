@@ -322,6 +322,6 @@ def test_init_with_invalid_configuration_class_raises_error() -> None:
         InvalidConfigurationStore(store_name="my_configuration_store")
 
     assert (
-        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
+        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."  # noqa: E501
         in str(e.value)
     )

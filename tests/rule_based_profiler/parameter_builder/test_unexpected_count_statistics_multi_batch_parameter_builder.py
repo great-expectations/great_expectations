@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     UnexpectedCountStatisticsMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (  # noqa: E501
     _standardize_mostly_for_single_batch,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -37,7 +37,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
 
 @pytest.mark.big
-def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder_builder_required_arguments_absent(
+def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder_builder_required_arguments_absent(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -49,7 +49,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
         )
 
     assert (
-        "__init__() missing 3 required positional arguments: 'unexpected_count_parameter_builder_name', 'total_count_parameter_builder_name', and 'mode'"
+        "__init__() missing 3 required positional arguments: 'unexpected_count_parameter_builder_name', 'total_count_parameter_builder_name', and 'mode'"  # noqa: E501
         in str(excinfo.value)
     )
 
@@ -68,7 +68,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
 
 @pytest.mark.big
-def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
+def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -84,7 +84,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
+    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(unexpected_count_statistics_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
@@ -99,7 +99,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
 
 
 @pytest.mark.big
-def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
+def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -144,7 +144,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
+    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(unexpected_count_statistics_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",

@@ -261,7 +261,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         modified_after: Optional[Union[bool, str]] = None,
         recursive_file_lookup: Optional[Union[bool, str]] = None,
         # Spark Generic File Reader Options ^^^
-        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)
+        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)  # noqa: E501
         # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
         merge_schema: Optional[Union[bool, str]] = None,
@@ -294,7 +294,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         modified_after: Optional[Union[bool, str]] = None,
         recursive_file_lookup: Optional[Union[bool, str]] = None,
         # Spark Generic File Reader Options ^^^
-        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)
+        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)  # noqa: E501
         # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
         merge_schema: Optional[Union[bool, str]] = None,

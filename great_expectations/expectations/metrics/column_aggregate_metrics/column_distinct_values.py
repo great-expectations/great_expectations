@@ -49,7 +49,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values depended on column.value_counts.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
         (
@@ -69,7 +69,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             distinct_values = execution_engine.execute_query(
                 sa.select(column).where(column.isnot(None)).distinct().select_from(selectable)
             ).fetchall()
-        # Vectorized operation is not faster here due to overhead of converting to and from numpy array
+        # Vectorized operation is not faster here due to overhead of converting to and from numpy array  # noqa: E501
         return {row[0] for row in distinct_values}
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -83,7 +83,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values depended on column.value_counts.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
         (
@@ -119,7 +119,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
@@ -132,7 +132,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         return F.countDistinct(column)
 
 

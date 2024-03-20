@@ -98,7 +98,7 @@ class DataConnectorStorageDataReferenceResolver:
                 data_connector_name
             ]
         )
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[  # noqa: E501
             (storage_name, execution_engine_name)
         ](template_arguments)
 
@@ -124,7 +124,7 @@ class FilePathDataConnector(DataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -211,7 +211,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of BatchDefinition objects that match BatchRequest
 
-        """
+        """  # noqa: E501
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(batch_request=batch_request_base)
 
@@ -232,7 +232,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of BatchDefinition objects that match BatchRequest
 
-        """
+        """  # noqa: E501
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
@@ -352,7 +352,7 @@ class FilePathDataConnector(DataConnector):
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""
+"""  # noqa: E501
             )
 
         path = self._get_full_file_path(path=path, data_asset_name=batch_definition.data_asset_name)
@@ -373,14 +373,14 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
-                    """
+                    """  # noqa: E501
                 )
 
             if len(group_names) < len(self.sorters):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    """
+                    """  # noqa: E501
                 )
 
     def _get_batch_definition_list_from_cache(self) -> List[LegacyBatchDefinition]:

@@ -158,7 +158,7 @@ class SparkDataSampler(DataSampler):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
+                    Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
 

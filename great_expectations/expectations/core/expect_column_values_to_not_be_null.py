@@ -78,7 +78,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
-    """
+    """  # noqa: E501
 
     library_metadata: ClassVar[dict] = {
         "maturity": "production",

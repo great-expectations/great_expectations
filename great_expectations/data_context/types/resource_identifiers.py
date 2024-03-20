@@ -100,7 +100,7 @@ class BatchIdentifierSchema(Schema):
 
 @public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""  # noqa: E501
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
@@ -437,7 +437,7 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
     @property
@@ -468,7 +468,7 @@ class SiteSectionIdentifier(DataContextKey):
             )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
 

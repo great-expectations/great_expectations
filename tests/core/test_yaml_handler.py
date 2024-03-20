@@ -76,7 +76,7 @@ def test_dump_default_behavior_with_no_stream_specified(
 
 @pytest.mark.unit
 def test_dump_stdout_specified(capsys, yaml_handler: YAMLHandler) -> None:
-    # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.
+    # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.  # noqa: E501
     simplest_dict: dict = dict(abc=1)
     yaml_handler.dump(simplest_dict, stream=sys.stdout)
     captured: Any = capsys.readouterr()

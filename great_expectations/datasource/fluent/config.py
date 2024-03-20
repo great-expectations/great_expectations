@@ -88,15 +88,15 @@ class GxConfig(FluentBaseModel):
     fluent_datasources: List[Datasource] = Field(..., description=_FLUENT_STYLE_DESCRIPTION)
 
     _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
-        _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+        _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     _EXCLUDE_FROM_DATA_ASSET_SERIALIZATION: ClassVar[Set[str]] = {
-        _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+        _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     _EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION: ClassVar[Set[str]] = {
-        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     class Config:
@@ -149,7 +149,7 @@ class GxConfig(FluentBaseModel):
             )[0]
         except IndexError as exc:
             raise LookupError(
-                f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"
+                f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"  # noqa: E501
             ) from exc
 
     def update_datasources(self, datasources: Dict[str, Datasource]) -> None:
@@ -244,7 +244,7 @@ class GxConfig(FluentBaseModel):
 
         TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
         we use a new `config_version` instead of `fluent_datasources` key.
-        """
+        """  # noqa: E501
         loaded = yaml.load(f)
         logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         loaded = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(

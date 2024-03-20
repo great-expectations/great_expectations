@@ -165,7 +165,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
         logger.debug(
-            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",  # noqa: E501
             exc_info=True,
         )
         pass
@@ -382,7 +382,7 @@ def get_sqlalchemy_column_metadata(
                     # We must explicitly create a subquery
                     columns = table_selectable.columns().subquery().columns
             else:
-                # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
+                # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled  # noqa: E501
                 table_name = str(table_selectable)
                 if execution_engine.dialect_name == GXSqlDialect.SNOWFLAKE:
                     table_name = table_name.lower()
@@ -406,7 +406,7 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
-        # Use fallback because for mssql and trino reflection mechanisms do not throw an error but return an empty list
+        # Use fallback because for mssql and trino reflection mechanisms do not throw an error but return an empty list  # noqa: E501
         if len(columns) == 0:
             columns = column_reflection_fallback(
                 selectable=table_selectable,
@@ -544,7 +544,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0915
                     # "type": getattr(type_module, column_data_type.upper())(),
                     "type": column_data_type.upper(),
                 }
-                for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
+                for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list  # noqa: E501
             ]
         elif dialect.name.lower() == "trino":
             try:
@@ -668,7 +668,7 @@ def get_dbms_compatible_metric_domain_kwargs(
 
     Returns:
         metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
-    """
+    """  # noqa: E501
     column_names: List[str | sqlalchemy.quoted_name]
     if "column" in metric_domain_kwargs:
         column_name: str | sqlalchemy.quoted_name = get_dbms_compatible_column_names(
@@ -721,7 +721,7 @@ def get_dbms_compatible_column_names(
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
-    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',  # noqa: E501
 ) -> List[str | sqlalchemy.quoted_name] | str | sqlalchemy.quoted_name:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
@@ -739,7 +739,7 @@ def get_dbms_compatible_column_names(
 
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
-    """
+    """  # noqa: E501
     normalized_typed_batch_columns_mappings: List[Tuple[str, str | sqlalchemy.quoted_name]] = (
         _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
@@ -762,7 +762,7 @@ def get_dbms_compatible_column_names(
 def verify_column_names_exist(
     column_names: List[str] | str,
     batch_columns_list: List[str | sqlalchemy.quoted_name],
-    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',  # noqa: E501
 ) -> None:
     _ = _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         column_names=column_names,
@@ -775,7 +775,7 @@ def verify_column_names_exist(
 def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noqa: C901
     column_names: List[str] | str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
-    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',  # noqa: E501
     verify_only: bool = False,
 ) -> List[Tuple[str, str | sqlalchemy.quoted_name]] | None:
     """
@@ -789,7 +789,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
 
     Returns:
         List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
-    """
+    """  # noqa: E501
     column_names_list: List[str]
     if isinstance(column_names, list):
         column_names_list = column_names
@@ -949,14 +949,14 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
            ValueError: \
                With an informative description, usually when necessary parameters are omitted or are invalid.
 
-    """
+    """  # noqa: E501
 
     norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."  # noqa: E501
     gamma_msg = (
         "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
     )
-    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
+    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."  # noqa: E501
     uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
     expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
@@ -1058,7 +1058,7 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"  # noqa: E501
         )
 
 
@@ -1078,7 +1078,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
        Raises:
            AttributeError: \
                If an unsupported distribution is provided.
-    """
+    """  # noqa: E501
 
     params["loc"] = params.get("loc", 0)
     if "scale" not in params:
@@ -1105,7 +1105,7 @@ def is_valid_continuous_partition_object(partition_object):
 
     :param partition_object: The partition_object to evaluate
     :return: Boolean
-    """
+    """  # noqa: E501
     if (
         (partition_object is None)
         or ("weights" not in partition_object)
@@ -1120,11 +1120,11 @@ def is_valid_continuous_partition_object(partition_object):
     else:
         comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects  # noqa: E501
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
-    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
+    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one  # noqa: E501
     return (
         (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
         and np.all(np.diff(partition_object["bins"]) > 0)
@@ -1150,7 +1150,7 @@ def sql_statement_with_post_compile_to_string(
     Returns:
         String representation of select_statement
 
-    """
+    """  # noqa: E501
     sqlalchemy_connection: sa.engine.base.Connection = engine.engine
     compiled = select_statement.compile(
         sqlalchemy_connection,
@@ -1184,7 +1184,7 @@ def get_sqlalchemy_source_table_and_schema(
         engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
     Returns:
         SqlAlchemy Table that is the source table and schema.
-    """
+    """  # noqa: E501
     assert isinstance(
         engine.batch_manager.active_batch_data, SqlAlchemyBatchData
     ), "`active_batch_data` not SqlAlchemyBatchData"
@@ -1217,10 +1217,10 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
 
     Returns:
         List of Dicts that contain ID/PK values
-    """
+    """  # noqa: E501
     if not expectation_domain_column_list:
         raise gx_exceptions.MetricResolutionError(
-            message="Error: The list of domain columns is currently empty. Please check your configuration.",
+            message="Error: The list of domain columns is currently empty. Please check your configuration.",  # noqa: E501
             failed_metrics=["unexpected_index_list"],
         )
 
@@ -1281,7 +1281,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     Returns:
         List of Dicts that contain ID/PK values
 
-    """
+    """  # noqa: E501
     if not expectation_domain_column_list:
         return []
     unexpected_index_values_by_named_index: List[int | str] = list(domain_records_df.index)
@@ -1291,7 +1291,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         and unexpected_index_column_names[0] == domain_records_df.index.name
     ):
         raise gx_exceptions.MetricResolutionError(
-            message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
+            message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",  # noqa: E501
             failed_metrics=["unexpected_index_list"],
         )
 
@@ -1334,7 +1334,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
     Returns:
         list of unexpected_index_list values. It can either be a list of dicts or a list of numbers (if using default index).
 
-    """
+    """  # noqa: E501
     unexpected_index_column_names: List[str]
     unexpected_index_list: List[Dict[str, Any]]
     exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
@@ -1379,7 +1379,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
                     column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
                         column_names=column_name,
                         batch_columns_list=metrics["table.columns"],
-                        error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+                        error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',  # noqa: E501
                     )
                     primary_key_dict_list[column_name].append(
                         domain_records_df.at[index, column_name]
@@ -1400,7 +1400,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
                         column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
                             column_names=column_name,
                             batch_columns_list=metrics["table.columns"],
-                            error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+                            error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',  # noqa: E501
                         )
                         primary_key_dict[column_name] = domain_records_df.at[index, column_name]
                 unexpected_index_list.append(primary_key_dict)

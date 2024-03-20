@@ -143,7 +143,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: Expectation configurations.
         citation: Citations.
         _batch_id_to_batch_identifier_display_name_map: Mapping from "batch_id" values to friendly display names.
-    """
+    """  # noqa: E501
 
     ALLOWED_KEYS = {
         "_batch_id_to_batch_identifier_display_name_map",
@@ -195,7 +195,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
         and displays this "ExpectationConfiguration" list, grouped by "domain_type", in predetermined order.
-        """
+        """  # noqa: E501
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
@@ -213,7 +213,7 @@ class DataAssistantResult(SerializableDictDot):
             expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
             include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to
                 generate the Expectation Suite.
-        """
+        """  # noqa: E501
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
@@ -234,7 +234,7 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             ExpectationSuite object.
 
-        """
+        """  # noqa: E501
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
             expectation_suite=None,
@@ -264,7 +264,7 @@ class DataAssistantResult(SerializableDictDot):
     def to_dict(self) -> dict:
         """
         Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
-        """
+        """  # noqa: E501
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
@@ -289,11 +289,11 @@ class DataAssistantResult(SerializableDictDot):
                 {
                     "domain_id": domain.id,
                     "domain": domain.to_json_dict(),
-                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(  # noqa: E501
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()  # noqa: E501
             ]
             if self.metrics_by_domain
             else None,
@@ -338,7 +338,7 @@ class DataAssistantResult(SerializableDictDot):
         # TODO: <Alex>6/23/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
             key: str
@@ -370,7 +370,7 @@ class DataAssistantResult(SerializableDictDot):
         # TODO: <Alex>6/23/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         auxiliary_profiler_execution_details: dict = self._get_auxiliary_profiler_execution_details(
             verbose=True
@@ -501,7 +501,7 @@ class DataAssistantResult(SerializableDictDot):
 
         Returns:
             PlotResult wrapper object around Altair charts.
-        """
+        """  # noqa: E501
         return self._plot(
             plot_mode=PlotMode.DESCRIPTIVE,
             sequential=sequential,
@@ -531,7 +531,7 @@ class DataAssistantResult(SerializableDictDot):
 
         Returns:
             PlotResult wrapper object around Altair charts.
-        """
+        """  # noqa: E501
         return self._plot(
             plot_mode=PlotMode.DIAGNOSTIC,
             sequential=sequential,
@@ -565,10 +565,10 @@ class DataAssistantResult(SerializableDictDot):
 
         Returns:
             A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
-        """
+        """  # noqa: E501
         if include_column_names is not None and exclude_column_names is not None:
             raise ValueError(
-                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."  # noqa: E501
             )
 
         display_charts: List[Union[alt.Chart, alt.LayerChart, alt.VConcatChart]] = []
@@ -625,7 +625,7 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             charts: A list of Altair chart objects to display
             theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
-        """
+        """  # noqa: E501
         altair_theme: Dict[str, Any]
         if theme:
             altair_theme = self._get_theme(theme=theme)
@@ -645,7 +645,7 @@ class DataAssistantResult(SerializableDictDot):
                 print(
                     f"""{expectations_produced} Expectations produced, {metric_plot_count} Expectation and Metric plots implemented
 Use DataAssistantResult.show_expectations_by_domain_type() or
-DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations"""
+DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations"""  # noqa: E501
                 )
             else:
                 metrics_count: int = 0
@@ -653,7 +653,7 @@ DataAssistantResult.show_expectations_by_expectation_type() to show all produced
                     metrics_count = sum(len(metrics) for metrics in self.metrics_by_domain.values())
                 print(
                     f"""{metrics_count} Metrics calculated, {metric_plot_count} Metric plots implemented
-Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
+Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # noqa: E501
                 )
 
             display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {" ": None}
@@ -691,7 +691,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 """
                 display(HTML(font_css))
 
-            # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+            # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly  # noqa: E501
             altair_dropdown_css: str = f"""
                 <style>
                 span.vega-bind-name {{
@@ -764,7 +764,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_chart_layer_title(
         layer: Union[alt.Chart, alt.LayerChart],
     ) -> Optional[str]:
-        """Recursively searches through the chart layers for a title and returns one if it exists."""
+        """Recursively searches through the chart layers for a title and returns one if it exists."""  # noqa: E501
         chart_title: Optional[str] = None
         if isinstance(layer.title, str):
             chart_title = layer.title
@@ -783,7 +783,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_chart_titles(charts: List[Union[alt.Chart, alt.LayerChart]]) -> List[str]:
-        """Recursively searches through each chart layer for a title and returns a list of titles."""
+        """Recursively searches through each chart layer for a title and returns a list of titles."""  # noqa: E501
         chart_titles: List[str] = []
         chart_title: Optional[str]
         for chart in charts:
@@ -824,7 +824,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             A list of Altair charts with the theme applied
-        """
+        """  # noqa: E501
         theme = DataAssistantResult._get_theme(theme=theme)
         return [chart.configure(**theme) for chart in charts]
 
@@ -865,7 +865,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             df_transformed = pd.concat([df_new_shape, cols_flat_df], axis=1)
 
             if "table_columns" in list_column_names:
-                # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
+                # create column number by encoding the categorical column name and adding 1 since encoding starts at 0  # noqa: E501
                 df_transformed["column_number"] = (
                     pd.factorize(df_transformed["table_columns"])[0] + 1
                 )
@@ -885,7 +885,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _get_column_set_text(column_set: List[str]) -> tuple[str, int]:
         dy: int
         if len(column_set) > 50:  # noqa: PLR2004
-            text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
+            text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."  # noqa: E501
             dy = 0
         else:
             column_set_text: str = ""
@@ -917,7 +917,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An altair chart for nominal metrics
-        """
+        """  # noqa: E501
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
@@ -997,7 +997,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An altair chart for nominal metrics
-        """
+        """  # noqa: E501
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
@@ -1053,7 +1053,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             )
         else:
-            return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
+            return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(  # noqa: E501
                 expectation_type=expectation_type,
                 df=df,
                 metric_plot_components=metric_plot_components,
@@ -1277,7 +1277,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An altair line chart
-        """
+        """  # noqa: E501
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
@@ -1348,7 +1348,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
-        """
+        """  # noqa: E501
         domain_type: MetricDomainTypes
         if subtitle:
             domain_type = MetricDomainTypes.COLUMN
@@ -1515,7 +1515,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An interactive chart
-        """
+        """  # noqa: E501
         column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
             column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
         )
@@ -1602,7 +1602,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         Returns:
             An interactive expect_column_values_to_be_between chart
-        """
+        """  # noqa: E501
         column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
             column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
         )
@@ -1787,7 +1787,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
         else:  # noqa: PLR5501
             if "column_quantile_values" in df.columns:
-                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(  # noqa: E501
                     expectation_type=expectation_type,
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1797,7 +1797,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     predicates=predicates,
                 )
             else:
-                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(  # noqa: E501
                     expectation_type=expectation_type,
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -3318,7 +3318,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
             else:
                 raise gx_exceptions.DataAssistantResultExecutionError(
-                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
             return expectation_plot_impl(
@@ -3357,7 +3357,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 metric_plot_impl = self._get_temporal_metrics_chart
             else:
                 raise gx_exceptions.DataAssistantResultExecutionError(
-                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
             return metric_plot_impl(
@@ -3383,7 +3383,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             plot_mode=plot_mode,
         )
 
-        # if all metrics in metric_names failed to resolve, the list will be empty and we return without attempting
+        # if all metrics in metric_names failed to resolve, the list will be empty and we return without attempting  # noqa: E501
         # to chart column values
         if len(column_dfs) > 0:
             return self._chart_column_values(
@@ -3516,7 +3516,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 expectation_plot_impl = self._get_interactive_expect_column_values_temporal_chart
             else:
                 raise gx_exceptions.DataAssistantResultExecutionError(
-                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
             return [
@@ -3555,7 +3555,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 plot_impl = self._get_interactive_temporal_metrics_chart
             else:
                 raise gx_exceptions.DataAssistantResultExecutionError(
-                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
             return [
@@ -3606,7 +3606,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         batch_identifier_records: List[List] = []
         for batch_identifier_set in batch_identifier_list:
             # make sure batch_identifier keys are sorted the same from batch to batch
-            # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"
+            # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"  # noqa: E501
             batch_identifier_list_sorted = sorted(
                 batch_identifier_set,
                 key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
@@ -3617,7 +3617,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 batch_identifier_value,
             ) in batch_identifier_list_sorted:
                 batch_identifier_keys.add(batch_identifier_key)
-                # if dictionary type batch_identifier values are detected, format them as a string for tooltip display
+                # if dictionary type batch_identifier values are detected, format them as a string for tooltip display  # noqa: E501
                 if isinstance(batch_identifier_value, dict):
                     batch_identifier_value = str(  # noqa: PLW2901
                         {str(key).title(): value for key, value in batch_identifier_value.items()}

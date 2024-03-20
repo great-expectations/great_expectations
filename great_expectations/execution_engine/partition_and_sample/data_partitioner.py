@@ -78,7 +78,7 @@ class DataPartitioner(abc.ABC):
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. DataPartitioner.date_part.MONTH
-    """
+    """  # noqa: E501
 
     date_part: ClassVar[Type[DatePart]] = DatePart
 
@@ -159,7 +159,7 @@ class DataPartitioner(abc.ABC):
             [DatePart(date_part_string) for date_part_string in date_part_strings]
         except ValueError as e:
             raise gx_exceptions.InvalidConfigError(
-                f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"
+                f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"  # noqa: E501
             )
 
     def _convert_datetime_batch_identifiers_to_date_parts_dict(

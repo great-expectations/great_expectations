@@ -8,7 +8,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
  import great_expectations as gx
  context = gx.get_context()
  context.test_yaml_config(my_config)
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 

@@ -32,7 +32,7 @@ def assert_exception_info(
                 "exception_message"
             ]
         else:
-            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in  # noqa: E501
             #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
             for k, v in result["exception_info"].items():
                 assert ("exception_traceback" not in v) or not v["exception_traceback"]
@@ -43,7 +43,7 @@ def assert_exception_info(
         if expected_exception_message:
             assert result["exception_message"] == expected_exception_message
     else:
-        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in  # noqa: E501
         #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
         for k, v in result["exception_info"].items():
             assert v.get("exception_traceback")
@@ -182,7 +182,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
+        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations  # noqa: E501
     }
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -250,7 +250,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         )
     assert e.value.message == expected_exception_message
 
-    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.  # noqa: E501
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_table
@@ -284,7 +284,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
+        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations  # noqa: E501
     }
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -337,7 +337,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 2
 
-    # Confirm that even though an exception occurred in one expectation, the other expectation is validated properly.
+    # Confirm that even though an exception occurred in one expectation, the other expectation is validated properly.  # noqa: E501
 
     results = sorted(results, key=lambda element: element.expectation_config["expectation_type"])
 
@@ -365,7 +365,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     assert not result.success
     assert_exception_info(result=result, expected_exception_message=expected_exception_message)
 
-    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.  # noqa: E501
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_table

@@ -40,7 +40,7 @@ class InlineStoreBackend(StoreBackend):
 
     It performs these actions through a reference to a DataContext instance.
     Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -62,8 +62,8 @@ class InlineStoreBackend(StoreBackend):
         self._data_context = data_context
         self._resource_type = resource_type
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "runtime_environment": runtime_environment,
             "fixed_length_key": fixed_length_key,
@@ -108,8 +108,8 @@ class InlineStoreBackend(StoreBackend):
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
-            # NOTE: fluent datasources may be present under both the `fluent_datasources` & `datasources` key
-            # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail
+            # NOTE: fluent datasources may be present under both the `fluent_datasources` & `datasources` key  # noqa: E501
+            # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail  # noqa: E501
             for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
                 config_commented_map_from_yaml.get("datasources", {}).pop(name, None)  # type: ignore[union-attr,arg-type,call-arg]
             value = DataContextConfig.from_commented_map(
@@ -126,7 +126,7 @@ class InlineStoreBackend(StoreBackend):
     @override
     def _move(self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict) -> None:
         raise StoreBackendError(
-            "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
+            "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"  # noqa: E501
         )
 
     @override
@@ -140,7 +140,7 @@ class InlineStoreBackend(StoreBackend):
 
         Returns:
             A list of string keys from the user's project config.
-        """
+        """  # noqa: E501
         config_section: str | None = None
         if self._resource_type is not DataContextVariableSchema.ALL_VARIABLES:
             config_section = self._resource_type
@@ -171,11 +171,11 @@ class InlineStoreBackend(StoreBackend):
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             raise StoreBackendError(
-                "InlineStoreBackend does not support the deletion of the overall DataContext project config"
+                "InlineStoreBackend does not support the deletion of the overall DataContext project config"  # noqa: E501
             )
         if resource_name is None:
             raise StoreBackendError(
-                "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"
+                "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"  # noqa: E501
             )
         elif not self._has_key(key):
             raise StoreBackendError(f"Could not find a value associated with key `{key}`")
@@ -190,7 +190,7 @@ class InlineStoreBackend(StoreBackend):
         id: str | None = None,
         name: str | None = None,
     ) -> DataContextVariableKey:
-        """Get the store backend specific implementation of the key. id included for super class compatibility."""
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""  # noqa: E501
         return DataContextVariableKey(
             resource_name=name,
         )

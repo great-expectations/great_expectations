@@ -61,7 +61,7 @@ class CheckpointResult(SerializableDictDot):
         run_results: A Dict with ValidationResultIdentifier keys and Dict values, which contains at minimum a `validation_result` key and an `action_results` key.
         checkpoint_config: The CheckpointConfig instance used to create this CheckpointResult.
         success: An optional boolean describing the success of all run_results in this CheckpointResult.
-    """
+    """  # noqa: E501
 
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
@@ -342,9 +342,9 @@ class CheckpointResult(SerializableDictDot):
             A JSON-serializable dict representation of this CheckpointResult.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
         # make this refactoring infeasible at the present time.
 
         serializable_dict: dict = {
@@ -363,7 +363,7 @@ class CheckpointResult(SerializableDictDot):
     def __getstate__(self):
         """
         In order for object to be picklable, its "__dict__" or or result of calling "__getstate__()" must be picklable.
-        """
+        """  # noqa: E501
         return self.to_json_dict()
 
     def __deepcopy__(self, memo):
@@ -390,7 +390,7 @@ class CheckpointResult(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         serializable_dict: dict = self.to_json_dict()
         return json.dumps(serializable_dict, indent=2)
 
@@ -402,7 +402,7 @@ class CheckpointResult(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
 

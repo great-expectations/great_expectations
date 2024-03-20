@@ -1,15 +1,15 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py imports">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py imports">  # noqa: E501
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_context">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_context">  # noqa: E501
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -17,7 +17,7 @@ connection_string: <CONNECTION_STRING>
 
 introspection:  # Each key in the "introspection" section is the name of an InferredAssetSqlDataConnector (key name "introspection" in "SimpleSqlalchemyDatasource" configuration is reserved).
     whole_table: {}  # Any alphanumeric key name is acceptable.
-"""
+"""  # noqa: E501
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -27,11 +27,11 @@ CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py buggy_datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py buggy_datasource_yaml">  # noqa: E501
 datasource_yaml = """  # buggy datasource_yaml configuration
 name: mis_configured_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -44,11 +44,11 @@ introspecting:  # illegal top-level key name
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2">  # noqa: E501
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_introspection">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_introspection">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -62,18 +62,18 @@ introspection:  # Each key in the "introspection" section is the name of an Infe
         skip_inapplicable_tables: true  # skip and continue upon encountering introspection errors
         excluded_tables:  # a list of tables to ignore when inferring data asset_names
             - main.yellow_tripdata_sample_2019_03  # format: schema_name.table_name
-"""
+"""  # noqa: E501
 # </snippet>
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
 context.test_yaml_config(datasource_yaml)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource">  # noqa: E501
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_available_data_asset_names">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_available_data_asset_names">  # noqa: E501
 available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="whole_table"
 )["whole_table"]
@@ -81,7 +81,7 @@ available_data_asset_names = context.datasources["taxi_datasource"].get_availabl
 
 assert len(available_data_asset_names) == 2
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -91,16 +91,16 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
         partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
             whole_table: {}
-"""
+"""  # noqa: E501
 # </snippet>
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3">  # noqa: E501
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables_partitioners">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables_partitioners">  # noqa: E501
 datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -114,16 +114,16 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
-"""
+"""  # noqa: E501
 # </snippet>
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_4">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_4">  # noqa: E501
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource_2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource_2">  # noqa: E501
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 

@@ -30,7 +30,7 @@ class SqlAlchemyConnectionManager:
                         self._connections[connection_string] = conn
                     except (ImportError, SQLAlchemyError) as e:
                         print(
-                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'
+                            f'Unable to establish connection with {connection_string} -- exception "{e}" occurred.'  # noqa: E501
                         )
                         raise
 

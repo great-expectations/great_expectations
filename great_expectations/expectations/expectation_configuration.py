@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 def parse_result_format(result_format: Union[str, dict]) -> dict:
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
-    there is no need to specify a custom partial_unexpected_count."""
+    there is no need to specify a custom partial_unexpected_count."""  # noqa: E501
     if isinstance(result_format, str):
         result_format = {
             "result_format": result_format,
@@ -120,7 +120,7 @@ class ExpectationConfiguration(SerializableDictDot):
         InvalidExpectationConfigurationError: If `kwargs` arg is not a dict.
         InvalidExpectationKwargsError: If domain kwargs are missing.
         ValueError: If a `domain_type` cannot be determined.
-    """
+    """  # noqa: E501
 
     runtime_kwargs: ClassVar[tuple[str, ...]] = (
         "result_format",
@@ -354,7 +354,7 @@ class ExpectationConfiguration(SerializableDictDot):
         other: Union[dict, ExpectationConfiguration],
         match_type: str = "success",
     ) -> bool:
-        """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
+        """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""  # noqa: E501
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
@@ -362,7 +362,7 @@ class ExpectationConfiguration(SerializableDictDot):
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug(
-                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
+                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "  # noqa: E501
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
                     return NotImplemented
@@ -431,11 +431,11 @@ class ExpectationConfiguration(SerializableDictDot):
             A JSON-serializable dict representation of this ExpectationConfiguration.
         """
         myself = expectationConfigurationSchema.dump(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
+        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
 
-        # Post dump hook removes this value if null so we need to ensure applicability before conversion
+        # Post dump hook removes this value if null so we need to ensure applicability before conversion  # noqa: E501
         if "expectation_context" in myself:
             myself["expectation_context"] = convert_to_json_serializable(
                 myself["expectation_context"]
@@ -519,7 +519,7 @@ class ExpectationConfiguration(SerializableDictDot):
             return MetricDomainTypes.MULTICOLUMN
 
         raise ValueError(
-            'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
+            'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'  # noqa: E501
         )
 
     def _get_expectation_class_defaults(self) -> dict[str, Any]:
@@ -577,7 +577,7 @@ class ExpectationConfigurationSchema(Schema):
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE during serialization if
-        their values are None."""
+        their values are None."""  # noqa: E501
         data = copy.deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

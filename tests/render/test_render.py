@@ -321,7 +321,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
         'Must have greater than or equal to <span class="badge badge-secondary" >0</span> rows.'
         in rendered_page
     )
-    # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
+    # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \  # noqa: E501
     #        in rendered_page
 
 
@@ -348,7 +348,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
 
 def test_render_string_template():
     template = {
-        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",  # noqa: E501
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
@@ -374,14 +374,14 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
-            </span>""".replace(" ", "")
+            </span>""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
     assert res == expected
 
     template = {
-        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",  # noqa: E501
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
@@ -407,7 +407,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
-            </span>""".replace(" ", "")
+            </span>""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )

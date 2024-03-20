@@ -115,7 +115,7 @@ class CustomPageRenderer(Renderer):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "This is a string template with tooltip, using a top-level custom tag.",
+                    "template": "This is a string template with tooltip, using a top-level custom tag.",  # noqa: E501
                     "tag": "code",
                     "tooltip": {"content": "This is the tooltip content."},
                 },
@@ -132,7 +132,7 @@ class CustomPageRenderer(Renderer):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "$icon This is a Font Awesome Icon, using a param-level custom tag\n$red_text\n$bold_serif",
+                    "template": "$icon This is a Font Awesome Icon, using a param-level custom tag\n$red_text\n$bold_serif",  # noqa: E501
                     "params": {
                         "icon": "",
                         "red_text": "And this is red text!",

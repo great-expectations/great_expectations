@@ -24,7 +24,7 @@ This integration test tests the following:
 2. passing in `bigquery_temp_table` as part of `batch_spec_passthrough` will raise a DeprecationWarning.
 3. the validator.head method (and corresponding metric) will work on bigquery datasources even when temp table creation
     is turned off
-"""
+"""  # noqa: E501
 
 gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:

@@ -187,7 +187,7 @@ class DatabricksSQLDatasource(SQLDatasource):
             For example: "databricks://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>""
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
-    """
+    """  # noqa: E501
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [DatabricksTableAsset, SqlQueryAsset]
@@ -211,7 +211,7 @@ class DatabricksSQLDatasource(SQLDatasource):
             # Raise specific error informing how to install dependencies only if relevant
             if isinstance(nested_exception, sa.exc.NoSuchModuleError):
                 raise TestConnectionError(
-                    "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."
+                    "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."  # noqa: E501
                 ) from e
             raise e
 
@@ -234,6 +234,6 @@ class DatabricksSQLDatasource(SQLDatasource):
         http_path = _parse_param_from_query_string(param="http_path", query=connection_string.query)
         assert http_path, "Presence of http_path query string is guaranteed due to prior validation"
 
-        # Databricks connection is a bit finicky - the http_path portion of the connection string needs to be passed in connect_args
+        # Databricks connection is a bit finicky - the http_path portion of the connection string needs to be passed in connect_args  # noqa: E501
         connect_args = {"http_path": http_path}
         return sa.create_engine(connection_string, connect_args=connect_args, **kwargs)

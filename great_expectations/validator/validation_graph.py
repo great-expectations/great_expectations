@@ -96,16 +96,16 @@ class ValidationGraph:
 
     @property
     def edges(self) -> List[MetricEdge]:
-        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as list)."""
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as list)."""  # noqa: E501
         return self._edges
 
     @property
     def edge_ids(self) -> Set[Tuple[str, str]]:
-        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as set of two-tuples)."""
+        """Returns "MetricEdge" objects, contained within this "ValidationGraph" object (as set of two-tuples)."""  # noqa: E501
         return {edge.id for edge in self._edges}
 
     def add(self, edge: MetricEdge) -> None:
-        """Adds supplied "MetricEdge" object to this "ValidationGraph" object (if not already present)."""
+        """Adds supplied "MetricEdge" object to this "ValidationGraph" object (if not already present)."""  # noqa: E501
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
             self._edge_ids.add(edge.id)
@@ -122,7 +122,7 @@ class ValidationGraph:
         Args:
             metric_configuration: Desired MetricConfiguration object to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-        """
+        """  # noqa: E501
 
         metric_impl_klass: MetricProvider
         metric_provider: Callable
@@ -170,7 +170,7 @@ class ValidationGraph:
     ) -> Tuple[MetricProvider, Callable]:
         """
         Updates "metric_domain_kwargs" and/or "metric_value_kwargs" of "MetricConfiguration" with defualts (if needed).
-        """
+        """  # noqa: E501
         metric_impl_klass: MetricProvider
         metric_provider: Callable
         metric_impl_klass, metric_provider = get_metric_provider(
@@ -215,7 +215,7 @@ class ValidationGraph:
         self,
         metrics: Dict[_MetricKey, MetricValue],
         runtime_configuration: Optional[dict] = None,
-        min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+        min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.  # noqa: E501
         show_progress_bars: bool = True,
     ) -> _AbortedMetricsInfoDict:
         if metrics is None:
@@ -271,7 +271,7 @@ class ValidationGraph:
                     computable_metrics.add(metric)
 
             try:
-                # Access "ExecutionEngine.resolve_metrics()" method, to resolve missing "MetricConfiguration" objects.
+                # Access "ExecutionEngine.resolve_metrics()" method, to resolve missing "MetricConfiguration" objects.  # noqa: E501
                 metrics.update(
                     self._execution_engine.resolve_metrics(
                         metrics_to_resolve=computable_metrics,  # type: ignore[arg-type]  # Metric typing needs further refinement.
@@ -306,7 +306,7 @@ class ValidationGraph:
             except Exception as e:
                 if catch_exceptions:
                     logger.error(
-                        f"""Caught exception {e!s} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
+                        f"""Caught exception {e!s} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""  # noqa: E501
                     )
                     done = True
                 else:
@@ -326,7 +326,7 @@ class ValidationGraph:
         metrics: Dict[_MetricKey, MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
-        validation graph (a graph structure of metric ids) edges"""
+        validation graph (a graph structure of metric ids) edges"""  # noqa: E501
         unmet_dependency_ids = set()
         unmet_dependency = set()
         maybe_ready_ids = set()
@@ -373,12 +373,12 @@ class ExpectationValidationGraph:
     ) -> None:
         if configuration is None:
             raise ValueError(
-                """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""
+                """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""  # noqa: E501
             )
 
         if graph is None:
             raise ValueError(
-                """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""
+                """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""  # noqa: E501
             )
 
         self._configuration = configuration

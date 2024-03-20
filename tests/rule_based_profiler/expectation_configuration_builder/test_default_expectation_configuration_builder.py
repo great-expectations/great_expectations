@@ -85,7 +85,7 @@ def test_meta_not_dict_exception(
 
     assert (
         str(e.value)
-        == 'Argument "Strings are not acceptable" in "DefaultExpectationConfigurationBuilder" must be of type "dictionary" (value of type "<class \'str\'>" was encountered).\n'
+        == 'Argument "Strings are not acceptable" in "DefaultExpectationConfigurationBuilder" must be of type "dictionary" (value of type "<class \'str\'>" was encountered).\n'  # noqa: E501
     )
 
 
@@ -148,12 +148,12 @@ def test_condition_not_string_exception(
 
     assert (
         str(e.value)
-        == 'Argument "{\'condition\': \'$variables.tolerance<0.8\'}" in "DefaultExpectationConfigurationBuilder" must be of type "string" (value of type "<class \'dict\'>" was encountered).\n'
+        == 'Argument "{\'condition\': \'$variables.tolerance<0.8\'}" in "DefaultExpectationConfigurationBuilder" must be of type "string" (value of type "<class \'dict\'>" was encountered).\n'  # noqa: E501
     )
 
 
 @pytest.mark.slow  # 1.31s
-def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -218,7 +218,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
 
 @pytest.mark.slow  # 1.34s
-def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -545,7 +545,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -614,7 +614,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
 
 @pytest.mark.slow  # 1.18s
-def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -683,7 +683,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -752,7 +752,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -821,7 +821,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -892,7 +892,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
 
 @pytest.mark.slow  # 1.20s
-def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -963,7 +963,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -1034,7 +1034,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
 
 @pytest.mark.slow  # 1.21s
-def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context

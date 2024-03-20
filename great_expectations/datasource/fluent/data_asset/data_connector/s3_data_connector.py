@@ -50,7 +50,7 @@ class S3DataConnector(FilePathDataConnector):
         # sorters (list): optional list of sorters for sorting data_references
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
-    """
+    """  # noqa: E501
 
     asset_level_option_keys: ClassVar[tuple[str, ...]] = (
         "s3_prefix",
@@ -71,7 +71,7 @@ class S3DataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_keys: int = 1000,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -95,7 +95,7 @@ class S3DataConnector(FilePathDataConnector):
             batching_regex=re.compile(
                 f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
             ),
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -114,7 +114,7 @@ class S3DataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_keys: int = 1000,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -140,7 +140,7 @@ class S3DataConnector(FilePathDataConnector):
 
         Returns:
             Instantiated "S3DataConnector" object
-        """
+        """  # noqa: E501
         return S3DataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
@@ -151,7 +151,7 @@ class S3DataConnector(FilePathDataConnector):
             delimiter=delimiter,
             max_keys=max_keys,
             recursive_file_discovery=recursive_file_discovery,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -180,8 +180,8 @@ class S3DataConnector(FilePathDataConnector):
 
         Returns:
             Customized error message
-        """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        """  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
@@ -233,7 +233,7 @@ class S3DataConnector(FilePathDataConnector):
             raise ValueError(
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
-"""
+"""  # noqa: E501
             )
 
         template_arguments: dict = {

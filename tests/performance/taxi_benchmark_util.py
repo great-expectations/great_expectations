@@ -2,7 +2,7 @@
 Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_tripdata_sample_2019-01.csv)
     found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 
@@ -34,12 +34,12 @@ def create_checkpoint(
 
     Returns:
         Configured checkpoint ready to be run.
-    """
+    """  # noqa: E501
     checkpoint_name = "my_checkpoint"
     datasource_name = "my_datasource"
     data_connector_name = "my_data_connector"
 
-    # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.
+    # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.  # noqa: E501
     assert 1 <= number_of_tables <= 100
     suite_and_asset_names = [f"taxi_trips_{i}" for i in range(1, number_of_tables + 1)]
 
@@ -257,7 +257,7 @@ def _create_context(
     bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_PERFORMANCE_DATASET")
     if not bigquery_dataset:
         raise ValueError(
-            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"
+            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"  # noqa: E501
         )
 
     data_context_config = DataContextConfig(

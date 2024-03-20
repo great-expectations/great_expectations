@@ -47,7 +47,7 @@ class DataConnector:
         execution_engine: The Execution Engine object to used by this Data Connector to read the data.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -112,7 +112,7 @@ class DataConnector:
         Args:
             batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
 
-        """
+        """  # noqa: E501
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -133,14 +133,14 @@ class DataConnector:
         Returns:
             BatchSpec object built from BatchDefinition
 
-        """
+        """  # noqa: E501
         batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
             batch_definition=batch_definition
         )
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
 
-        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
+        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config  # noqa: E501
         if isinstance(batch_definition.batch_spec_passthrough, dict):
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
@@ -161,7 +161,7 @@ class DataConnector:
         Args:
             data_asset_name (str): optional data_asset_name to retrieve more specific results
 
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
@@ -229,9 +229,9 @@ class DataConnector:
         """
         if batch_request.datasource_name != self.datasource_name:
             raise ValueError(
-                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""
+                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""  # noqa: E501
             )
         if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""  # noqa: E501
             )

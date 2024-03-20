@@ -62,7 +62,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     The PasswordMasker.mask_db_url() should mask passwords consistently inruff  database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
     This test uses database url examples from
     https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
-    """
+    """  # noqa: E501
     # PostgreSQL (if installed in test environment)
     # default
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -277,13 +277,13 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
 
 @pytest.mark.unit
 def test_sanitize_config_azure_blob_store():
-    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"  # noqa: E501
     assert (
         PasswordMasker.mask_db_url(azure_url)
-        == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"
+        == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"  # noqa: E501
     )
 
-    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"  # noqa: E501
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_wrong_url)
 

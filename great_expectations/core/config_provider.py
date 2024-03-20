@@ -37,7 +37,7 @@ class _AbstractConfigurationProvider(ABC):
 
         Returns:
             The input config object with any $VARIABLES replaced with their corresponding config values.
-        """
+        """  # noqa: E501
         if config_values is None:
             config_values = self.get_values()
         return self._substitutor.substitute_all_config_variables(config, config_values)
@@ -147,7 +147,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
     def get_values(self) -> Dict[str, str]:
         env_vars = dict(os.environ)  # noqa: TID251 # os.environ allowed in config files
         try:
-            # If the user specifies the config variable path with an environment variable, we want to substitute it
+            # If the user specifies the config variable path with an environment variable, we want to substitute it  # noqa: E501
             defined_path: str = self._substitutor.substitute_config_variable(  # type: ignore[assignment]
                 self._config_variables_file_path, env_vars
             )

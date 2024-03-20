@@ -59,7 +59,7 @@ class OrderedProfilerCardinality(OrderedEnum):
 
         Returns:
             The column cardinality
-        """
+        """  # noqa: E501
         if pct_unique == 1.0:
             cardinality = cls.UNIQUE
         elif num_unique == 1:

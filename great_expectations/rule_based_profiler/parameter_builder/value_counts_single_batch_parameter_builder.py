@@ -64,7 +64,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         self._column_value_counts_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
                 module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -127,10 +127,10 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
-        # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        """  # noqa: E501
+        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"  # noqa: E501
+        # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(  # noqa: E501
             domain=domain,
             parameter_reference=fully_qualified_column_values_nonnull_count_metric_parameter_builder_name,
             expected_return_type=None,
@@ -138,9 +138,9 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
-        fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
-        # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"  # noqa: E501
+        # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(  # noqa: E501
             domain=domain,
             parameter_reference=fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name,
             expected_return_type=None,

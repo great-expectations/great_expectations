@@ -79,7 +79,7 @@ def test_domain_builder(data_context_with_taxi_data):
     is DomainBuilder, which returns the domains (in this case columns of our data) that the profiler
     will be run on.  This test will ColumnDomainBuilder on the suffix "_amount", which
     returns 4 columns as the domain.
-    """
+    """  # noqa: E501
     context = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multibatch_datasource_other_possibility",

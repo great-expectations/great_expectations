@@ -120,7 +120,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "csv",
                     "name": "my_csv_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",  # noqa: E501
                     "sep": "|",
                     "names": ["col1", "col2"],
                     "batch_configs": [
@@ -135,7 +135,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "json",
                     "name": "my_json_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",  # noqa: E501
                     "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
@@ -272,7 +272,7 @@ class TestExcludeUnsetAssetFields:
     def test_from_gx_config(self, asset_dict: dict):
         """
         Ensure that unset fields are excluded even when being parsed by the top-level `GxConfig` class.
-        """
+        """  # noqa: E501
         # fill in required args
         asset_dict.update(
             {

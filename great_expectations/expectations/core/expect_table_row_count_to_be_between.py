@@ -70,7 +70,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     See Also:
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
-    """
+    """  # noqa: E501
 
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None
     max_value: Union[int, EvaluationParameterDict, datetime, None] = None

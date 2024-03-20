@@ -48,7 +48,7 @@ config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 # Datasources tell Great Expectations where your data lives and how to get it.
 # Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {{}}
-"""
+"""  # noqa: E501
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables: 1) keeping

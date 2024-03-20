@@ -34,7 +34,7 @@ class ValidationOperator:
     It defines the signature of the public run method. This method and the validation_operator_config property are the
     only contract re operators' API. Everything else is up to the implementors
     of validation operator classes that will be the descendants of this base class.
-    """
+    """  # noqa: E501
 
     def __init__(self) -> None:
         self._validation_operator_config = None
@@ -68,7 +68,7 @@ class ValidationOperator:
                 "notify_on": self.notify_on,
             },
         }
-        """
+        """  # noqa: E501
 
         raise NotImplementedError
 
@@ -183,7 +183,7 @@ class ActionListValidationOperator(ValidationOperator):
                 }
             },
         }
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -207,8 +207,8 @@ class ActionListValidationOperator(ValidationOperator):
 
         self.action_list = action_list
         self.actions = OrderedDict()
-        # For a great expectations cloud context it's important that we store the validation result before we send
-        # notifications. That's because we want to provide a link to the validation result and the validation result
+        # For a great expectations cloud context it's important that we store the validation result before we send  # noqa: E501
+        # notifications. That's because we want to provide a link to the validation result and the validation result  # noqa: E501
         # page won't get created until we run the store action.
         store_action_detected = False
         notify_before_store: Optional[str] = None
@@ -229,7 +229,7 @@ class ActionListValidationOperator(ValidationOperator):
                     action_config["action"]["class_name"].endswith("NotificationAction")
                     and not store_action_detected
                 ):
-                    # We currently only support SlackNotifications but setting this for any notification.
+                    # We currently only support SlackNotifications but setting this for any notification.  # noqa: E501
                     notify_before_store = action_config["action"]["class_name"]
 
             config = action_config["action"]
@@ -248,8 +248,8 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
         if notify_before_store and self._using_cloud_context:
             warnings.warn(
-                f"The checkpoints action_list configuration has a notification, {notify_before_store}"
-                "configured without a StoreValidationResultAction configured. This means the notification can't"
+                f"The checkpoints action_list configuration has a notification, {notify_before_store}"  # noqa: E501
+                "configured without a StoreValidationResultAction configured. This means the notification can't"  # noqa: E501
                 "provide a link the validation result. Please move all notification actions after "
                 "StoreValidationResultAction in your configuration."
             )
@@ -571,7 +571,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             }
         }
 
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -743,7 +743,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError(
-                    "base_expectation_suite_name must be configured in the validation operator or passed at runtime"
+                    "base_expectation_suite_name must be configured in the validation operator or passed at runtime"  # noqa: E501
                 )
             base_expectation_suite_name = self.base_expectation_suite_name
 

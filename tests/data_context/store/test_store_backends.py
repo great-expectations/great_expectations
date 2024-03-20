@@ -169,7 +169,7 @@ def check_store_backend_store_backend_id_functionality(
         store_backend_id: Manually input store_backend_id
     Returns:
         None
-    """
+    """  # noqa: E501
     # Check that store_backend_id exists can be read
     assert store_backend.store_backend_id is not None
     store_error_uuid = "00000000-0000-0000-0000-00000000e003"
@@ -203,7 +203,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     Note: StoreBackend & TupleStoreBackend are abstract classes, so we will test the
     concrete classes that inherit from them.
     See also test_database_store_backend::test_database_store_backend_id_initialization
-    """
+    """  # noqa: E501
 
     # InMemoryStoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
@@ -212,8 +212,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
 
     # Create a new store with the same config and make sure it reports the same store_backend_id
     # in_memory_store_backend_duplicate = InMemoryStoreBackend()
-    # assert in_memory_store_backend.store_backend_id == in_memory_store_backend_duplicate.store_backend_id
-    # This is not currently implemented for the InMemoryStoreBackend, the store_backend_id is ephemeral since
+    # assert in_memory_store_backend.store_backend_id == in_memory_store_backend_duplicate.store_backend_id  # noqa: E501
+    # This is not currently implemented for the InMemoryStoreBackend, the store_backend_id is ephemeral since  # noqa: E501
     # there is no place to persist it.
 
     # TupleFilesystemStoreBackend
@@ -304,7 +304,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     # TODO: Improve GCS Testing e.g. using a docker service to mock
     # Note: Currently there is not a great way to mock GCS so here we are just testing that a config
     # with unreachable bucket returns the error store backend id
-    # If we were to mock GCS, we would need to provide the value returned from the TupleGCSStoreBackend which
+    # If we were to mock GCS, we would need to provide the value returned from the TupleGCSStoreBackend which  # noqa: E501
     # is circumventing actually testing the store backend.
 
     bucket = "leakybucket"
@@ -852,7 +852,7 @@ def test_TupleS3StoreBackend_with_s3_put_options(aws_credentials):
 
     my_store = TupleS3StoreBackend(
         bucket=bucket,
-        # Since not all out options are supported in moto, only Metadata and StorageClass is passed here.
+        # Since not all out options are supported in moto, only Metadata and StorageClass is passed here.  # noqa: E501
         s3_put_options={
             "Metadata": {"test": "testMetadata"},
             "StorageClass": "REDUCED_REDUNDANCY",
@@ -893,7 +893,7 @@ def test_TupleGCSStoreBackend_base_public_path():
 
     This test will exercise the get_url_for_key method twice to see that we are getting the expected url,
     with or without base_public_path
-    """
+    """  # noqa: E501
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
@@ -947,7 +947,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     and assert that the store backend makes the right calls for set, get, and list.
 
     TODO : One option may be to have a GCS Store in Docker, which can be use to "actually" run these tests.
-    """
+    """  # noqa: E501
 
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
@@ -1093,7 +1093,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
     and assert that the store backend makes the right calls for set, get, and list.
     """
-    connection_string = "DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=secret;EndpointSuffix=core.windows.net"
+    connection_string = "DefaultEndpointsProtocol=https;AccountName=dummy;AccountKey=secret;EndpointSuffix=core.windows.net"  # noqa: E501
     prefix = "this_is_a_test_prefix"
     container = "dummy-container"
 
@@ -1506,9 +1506,9 @@ def test_InMemoryStoreBackend_add_or_update(previous_key_exists: bool):
 
 @pytest.mark.unit
 def test_store_backend_path_special_character_escape():
-    path = "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-#ephemeral_pandas_asset.html"
+    path = "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-#ephemeral_pandas_asset.html"  # noqa: E501
     escaped_path = StoreBackend._url_path_escape_special_characters(path=path)
     assert (
         escaped_path
-        == "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-%23ephemeral_pandas_asset.html"
+        == "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-%23ephemeral_pandas_asset.html"  # noqa: E501
     )

@@ -316,7 +316,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         assets={"alpha": {}},
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -378,7 +378,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
+    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg  # noqa: E501
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
@@ -420,7 +420,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`
+    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`  # noqa: E501
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -482,12 +482,12 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://cloud.google.com/storage/docs/listing-objects
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
     unsorted_batch_definition_list = (
         my_data_connector._get_batch_definition_list_from_batch_request(
@@ -552,12 +552,12 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://cloud.google.com/storage/docs/listing-objects
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
@@ -862,7 +862,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -923,7 +923,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -992,8 +992,8 @@ assets:
         },
     )
 
-    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`
-    # Our patched object provides the ability to define a "side_effect", an iterable containing return
+    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`  # noqa: E501
+    # Our patched object provides the ability to define a "side_effect", an iterable containing return  # noqa: E501
     # values for subsequent calls. Since `_refresh_data_references_cache()` makes multiple calls to
     # this method (once per asset), we define our expected behavior below.
     #

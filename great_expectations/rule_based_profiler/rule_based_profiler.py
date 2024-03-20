@@ -89,7 +89,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     """
     BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
-    """
+    """  # noqa: E501
 
     EXPECTATION_SUCCESS_KEYS: Set[str] = {
         "_auto",
@@ -116,7 +116,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 Defaults to False.
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
-         """
+         """  # noqa: E501
         name: str = profiler_config.name
         id: Optional[str] = None
         if hasattr(profiler_config, "id"):
@@ -257,7 +257,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Returns:
             A `RuleBasedProfilerResult` instance that contains the profiling output.
-        """
+        """  # noqa: E501
         # Check to see if the user has disabled progress bars
         disable = False
         if self._data_context:
@@ -368,7 +368,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
-        """
+        """  # noqa: E501
         expectation_configurations: List[ExpectationConfiguration] = []
 
         rule_state: RuleState
@@ -383,7 +383,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Returns:
             Dictionary of fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
-        """
+        """  # noqa: E501
         fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = {}
 
         rule_state: RuleState
@@ -403,7 +403,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Returns:
             List of fully-qualified parameter names for Domain with domain_id as specified, accumulated from RuleState of corresponding Rule executed.
-        """
+        """  # noqa: E501
         rule_state: RuleState
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
@@ -419,7 +419,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
-        """
+        """  # noqa: E501
         values_for_fully_qualified_parameter_names_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = {}
@@ -443,20 +443,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Returns:
             Dictionary of values for fully-qualified parameter names for Domain with domain_id as specified, accumulated from RuleState of corresponding Rule executed.
-        """
+        """  # noqa: E501
         rule_state: RuleState
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
             if domain is not None:
                 rule_output = RuleOutput(rule_state=rule_state)
-                return rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+                return rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(  # noqa: E501
                     domain_id=domain_id
                 )
 
     def add_rule(self, rule: Rule) -> None:
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
-        """
+        """  # noqa: E501
         rules_dict: Dict[str, Dict[str, Any]] = {
             rule.name: rule.to_json_dict(),
         }
@@ -477,7 +477,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def reconcile_profiler_variables(
         self,
         variables: Optional[Dict[str, Any]] = None,
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,  # noqa: E501
     ) -> Optional[ParameterContainer]:
         """
         Profiler "variables" reconciliation involves combining the variables, instantiated from Profiler configuration
@@ -489,7 +489,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param variables: variables overrides, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled variables in their canonical ParameterContainer object form
-        """
+        """  # noqa: E501
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
             variables_configs: dict = self._reconcile_profiler_variables_as_dict(
@@ -506,7 +506,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _reconcile_profiler_variables_as_dict(
         self,
         variables: Optional[Dict[str, Any]],
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,  # noqa: E501
     ) -> dict:
         if variables is None:
             variables = {}
@@ -543,7 +543,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param rules: rules overrides, supplied in dictionary (configuration) form for each rule name as the key
         :param reconciliation_directives directives for how each rule component should be overwritten
         :return: reconciled rules in their canonical List[Rule] object form
-        """
+        """  # noqa: E501
         effective_rules: Dict[str, Rule] = self._reconcile_profiler_rules_as_dict(
             rules=rules,
             reconciliation_directives=reconciliation_directives,
@@ -614,7 +614,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param rule_config: configuration of an override rule candidate, supplied in dictionary (configuration) form
         :param reconciliation_directives directives for how each rule component should be overwritten
         :return: reconciled rule configuration, returned in dictionary (configuration) form
-        """
+        """  # noqa: E501
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
@@ -657,7 +657,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "variables": effective_variables,
                 "domain_builder": effective_domain_builder_config,
                 "parameter_builders": effective_parameter_builder_configs,
-                "expectation_configuration_builders": effective_expectation_configuration_builder_configs,
+                "expectation_configuration_builders": effective_expectation_configuration_builder_configs,  # noqa: E501
             }
         else:
             effective_rule_config = rule_config
@@ -668,7 +668,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _reconcile_rule_domain_builder_config(
         domain_builder: DomainBuilder,
         domain_builder_config: dict,
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.domain_builder,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.domain_builder,  # noqa: E501
     ) -> dict:
         """
         Rule "domain builder" reconciliation involves combining the domain builder, instantiated from Rule configuration
@@ -683,7 +683,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param domain_builder_config: domain builder configuration override, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
-        """
+        """  # noqa: E501
         domain_builder_as_dict: dict = domain_builder.to_json_dict()
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
@@ -713,7 +713,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _reconcile_rule_parameter_builder_configs(
         rule: Rule,
         parameter_builder_configs: List[dict],
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.parameter_builder,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.parameter_builder,  # noqa: E501
     ) -> Optional[List[dict]]:
         """
         Rule "parameter builders" reconciliation involves combining the parameter builders, instantiated from Rule
@@ -729,7 +729,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param parameter_builder_configs: parameter builder configuration overrides, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled parameter builder configuration, returned in dictionary (configuration) form
-        """
+        """  # noqa: E501
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
             _validate_builder_override_config(builder_config=parameter_builder_config)
@@ -783,7 +783,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _reconcile_rule_expectation_configuration_builder_configs(
         rule: Rule,
         expectation_configuration_builder_configs: List[dict],
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.expectation_configuration_builder,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.expectation_configuration_builder,  # noqa: E501
     ) -> List[dict]:
         """
         Rule "expectation configuration builders" reconciliation involves combining the expectation configuration builders, instantiated from Rule
@@ -799,7 +799,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param expectation_configuration_builder_configs: expectation configuration builder configuration overrides, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled expectation configuration builder configuration, returned in dictionary (configuration) form
-        """
+        """  # noqa: E501
         expectation_configuration_builder_config: dict
         for expectation_configuration_builder_config in expectation_configuration_builder_configs:
             _validate_builder_override_config(
@@ -845,7 +845,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             expectation_configuration_builder_config[
                 "expectation_type"
             ]: expectation_configuration_builder_config
-            for expectation_configuration_builder_config in expectation_configuration_builder_configs
+            for expectation_configuration_builder_config in expectation_configuration_builder_configs  # noqa: E501
         }
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             effective_expectation_configuration_builder_configs = nested_update(
@@ -884,7 +884,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
         variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
         domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
-        """
+        """  # noqa: E501
         BaseRuleBasedProfiler._apply_variables_directives_runtime_environment(
             rules=rules,
             variables_directives_list=variables_directives_list,
@@ -905,7 +905,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
         variables_directives_list: additional/override runtime "variables" directives (modify "BaseRuleBasedProfiler")
-        """
+        """  # noqa: E501
         if rules is None:
             rules = []
 
@@ -916,7 +916,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables_directives_list is None:
             variables_directives_list = []
 
-        # 1. Ensure that "variables_directives_list" pertains to "Rule" objects (no spurrious "Rule" names).
+        # 1. Ensure that "variables_directives_list" pertains to "Rule" objects (no spurrious "Rule" names).  # noqa: E501
         variables_directives_list = list(
             filter(
                 lambda element: element.rule_name in rule_names,
@@ -926,12 +926,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         variables_directives: RuntimeEnvironmentVariablesDirectives
 
-        # 2. Now obtain "Rule" names solely pertaining to additional/override runtime "variables" directives.
+        # 2. Now obtain "Rule" names solely pertaining to additional/override runtime "variables" directives.  # noqa: E501
         rule_names = [
             variables_directives.rule_name for variables_directives in variables_directives_list
         ]
 
-        # 3. Filter "Rule" objects to contain only those subject to additional/override runtime "variables" directives.
+        # 3. Filter "Rule" objects to contain only those subject to additional/override runtime "variables" directives.  # noqa: E501
         rules = list(
             filter(
                 lambda element: element.name in rule_names,
@@ -941,14 +941,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rules_as_dict: Dict[str, Rule] = {rule.name: rule for rule in rules}
 
-        # 4. Update "variables" of pertinent "Rule" objects, according to corresponding additional/override directives.
+        # 4. Update "variables" of pertinent "Rule" objects, according to corresponding additional/override directives.  # noqa: E501
         variables: Optional[Dict[str, Any]]
         rule_variables_configs: Optional[Dict[str, Any]]
         for variables_directives in variables_directives_list:
             variables = variables_directives.variables or {}
             rule = rules_as_dict[variables_directives.rule_name]
             rule_variables_configs = convert_variables_to_dict(variables=rule.variables)
-            # Filter only those additional/override directives that correspond to keys in "Rule" "variables" settings.
+            # Filter only those additional/override directives that correspond to keys in "Rule" "variables" settings.  # noqa: E501
             # noinspection PyTypeChecker
             variables = dict(
                 filter(
@@ -956,7 +956,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     variables.items(),
                 )
             )
-            # Update "Rule" "variables" settings with corresponding values specified by additional/override directives.
+            # Update "Rule" "variables" settings with corresponding values specified by additional/override directives.  # noqa: E501
             rule_variables_configs.update(variables)
             # Restore "ParameterContainer" typed object satus of "Rule" "variables" field.
             rule.variables = build_parameter_container_for_variables(
@@ -971,7 +971,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
         domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
-        """
+        """  # noqa: E501
         if rules is None:
             rules = []
 
@@ -982,7 +982,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_rules: List[Rule]
         rule: Rule
         for domain_type_directives in domain_type_directives_list:
-            # 1. Ensure that Domain directives pertain to "Rule" objects with "DomainBuilder" of correct "Domain" type.
+            # 1. Ensure that Domain directives pertain to "Rule" objects with "DomainBuilder" of correct "Domain" type.  # noqa: E501
             domain_rules = [
                 rule
                 for rule in rules
@@ -991,13 +991,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             domain_property_key: str
             domain_property_value: Any
             existing_domain_property_value: Any
-            # 2. Update Domain properties of pertinent "Rule" objects, according to corresponding Domain directives.
+            # 2. Update Domain properties of pertinent "Rule" objects, according to corresponding Domain directives.  # noqa: E501
             for rule in domain_rules:
                 for (
                     domain_property_key,
                     domain_property_value,
                 ) in domain_type_directives.directives.items():
-                    # Use property getter/setter methods on "DomainBuilder" of "Rule" to affect override directives.
+                    # Use property getter/setter methods on "DomainBuilder" of "Rule" to affect override directives.  # noqa: E501
                     try:
                         # Ensure that new directives augment (not eliminate) existing directives.
                         existing_domain_property_value = getattr(
@@ -1015,7 +1015,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                             domain_property_value,
                         )
                     except AttributeError:
-                        # Skip every directive that is not defined property of "DomainBuilder" object of "domain_type".
+                        # Skip every directive that is not defined property of "DomainBuilder" object of "domain_type".  # noqa: E501
                         pass
 
     @staticmethod
@@ -1023,7 +1023,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         dest_property_value: Optional[Any] = None,
         source_property_value: Optional[Any] = None,
     ) -> Optional[Any]:
-        # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
+        # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).  # noqa: E501
         if isinstance(dest_property_value, list) and isinstance(source_property_value, list):
             return list(set(dest_property_value + source_property_value))
 
@@ -1241,7 +1241,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> RuleBasedProfilerConfig:
         if not ((profiler is None) ^ all(arg is None for arg in (name, config_version, rules))):
             raise TypeError(
-                "Must either pass in an existing 'profiler' or individual constructor arguments (but not both)"
+                "Must either pass in an existing 'profiler' or individual constructor arguments (but not both)"  # noqa: E501
             )
 
         if profiler:
@@ -1259,7 +1259,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "variables": variables,
             }
 
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
             validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
             profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
             profiler_config.pop("class_name")
@@ -1311,7 +1311,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 key.configuration_key if isinstance(key, ConfigurationIdentifier) else key
             )
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'  # noqa: E501
             )
 
         config: dict = profiler_config.to_json_dict()
@@ -1347,7 +1347,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         except (gx_exceptions.InvalidKeyError, KeyError) as exc_ik:
             config_id = key.configuration_key if isinstance(key, ConfigurationIdentifier) else key
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'  # noqa: E501
             )
 
     @staticmethod
@@ -1386,7 +1386,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @property
     def variables(self) -> Optional[ParameterContainer]:
-        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
+        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.  # noqa: E501
         return copy.deepcopy(self._variables)
 
     @variables.setter
@@ -1519,7 +1519,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             expectation_completeness: Moderate
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -1555,7 +1555,7 @@ def _validate_builder_override_config(builder_config: dict) -> None:
 
     :param builder_config: candidate builder override configuration
     :raises: ProfilerConfigurationError
-    """
+    """  # noqa: E501
     if not all(
         (
             isinstance(builder_config, dict),

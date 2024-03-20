@@ -84,7 +84,7 @@ def csv_asset(spark_s3_datasource: SparkS3Datasource) -> _FilePathDataAsset:
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
     return regex, test_connection_error_message
 
 
@@ -199,7 +199,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 @pytest.mark.big
 @pytest.mark.xfail(
-    reason="Accessing objects on moto.mock_s3 using Spark is not working (this test is conducted using Jupyter notebook manually)."
+    reason="Accessing objects on moto.mock_s3 using Spark is not working (this test is conducted using Jupyter notebook manually)."  # noqa: E501
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_s3_datasource: SparkS3Datasource,

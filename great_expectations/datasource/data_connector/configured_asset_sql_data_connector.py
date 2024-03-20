@@ -60,7 +60,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         sampling_kwargs (dict): Keyword arguments to pass to sampling_method
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
 
-    """
+    """  # noqa: E501
 
     PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[PartitionerMethod, type[Sorter] | None] = {
         PartitionerMethod.PARTITION_ON_YEAR: DictionarySorter,
@@ -155,7 +155,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ) -> None:
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
-        """
+        """  # noqa: E501
         name = self._update_data_asset_name_from_config(
             data_asset_name=name, data_asset_config=config
         )
@@ -174,7 +174,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         Returns:
             A list of BatchDefinition objects that match BatchRequest
-        """
+        """  # noqa: E501
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
@@ -253,7 +253,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         return []
 
     def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
@@ -291,7 +291,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset  # noqa: E501
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
@@ -312,7 +312,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         Returns:
             an ordered list of sorters required to sort partitioner batches.
-        """
+        """  # noqa: E501
         partitioner_method_to_sorter_method_mapping: Dict[str, Optional[Sorter]] = (
             self.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING
         )
@@ -325,7 +325,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             ]
         except KeyError:
             raise gx_exceptions.SorterError(
-                f"No Sorter is defined in ConfiguredAssetSqlDataConnector.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING for partitioner_method: {partitioner_method_name}"
+                f"No Sorter is defined in ConfiguredAssetSqlDataConnector.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING for partitioner_method: {partitioner_method_name}"  # noqa: E501
             )
 
         if sorter_method == DictionarySorter:
@@ -379,13 +379,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 keys used for partitioning.
-                        """
+                        """  # noqa: E501
                     )
                 if len(partitioner_group_names) < len(sorters):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" is configured with {len(partitioner_group_names)} partitioner groups;
 this is fewer than number of sorters specified, which is {len(sorters)}.
-                        """
+                        """  # noqa: E501
                     )
 
     @staticmethod
@@ -420,7 +420,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
 
         Returns:
             a list of batch definitions sorted depending on partitioner method used to define them.
-        """
+        """  # noqa: E501
         if (
             partitioner_method_name is not None
             and partitioner_kwargs is not None
@@ -502,7 +502,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         In order to support "SimpleSqlalchemyDatasource", which supports "data_asset_name_prefix" and
         "data_asset_name_suffix" as part of "tables" (reserved key for configuring "ConfiguredAssetSqlDataConnector" for
         a table), these configuration attributes can exist in "data_asset_config" and must be handled appropriately.
-        """
+        """  # noqa: E501
         data_asset_name_prefix: str = data_asset_config.get("data_asset_name_prefix", "")
         data_asset_name_suffix: str = data_asset_config.get("data_asset_name_suffix", "")
 
@@ -620,7 +620,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         data_asset_name in those cases are [schema].[table_name].
 
         function will split data_asset_name on [schema]. and return the resulting table_name.
-        """
+        """  # noqa: E501
         data_asset_name: str = batch_definition.data_asset_name
         data_asset_dict: dict = self.assets[data_asset_name]
         table_name: str = data_asset_dict["table_name"]
@@ -638,7 +638,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         data_reference,
         data_asset_name: Optional[str] = None,  #: Any,
     ) -> Optional[List[LegacyBatchDefinition]]:
-        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
+        # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,  # noqa: E501
         # allowing us to invoke `IDDict(data_reference)`
         return [
             LegacyBatchDefinition(

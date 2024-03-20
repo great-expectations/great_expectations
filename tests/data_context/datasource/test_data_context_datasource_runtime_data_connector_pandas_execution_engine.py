@@ -178,7 +178,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
 
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
-    """
+    """  # noqa: E501
     context = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
@@ -205,7 +205,7 @@ def test_get_validator_wrong_type_pandas_engine(
 
     context.add_expectation_suite("my_expectations")
 
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
+    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()  # noqa: E501
     # data_connector_name should be a dict not an int
     with pytest.raises(TypeError):
         context.get_validator(

@@ -17,7 +17,7 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 
 
 @pytest.mark.unit
-def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
+def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (  # noqa: E501
     None
 ):
     data_assistant_result: DataAssistantResult = ColumnValueMissingDataAssistantResult()
@@ -29,7 +29,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
         include_column_names=include_column_names
     )
 
-    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.  # noqa: E501
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 0
 
@@ -149,7 +149,7 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
 
     Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
     compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html, specifically the dot case e.g. `a.b`.
-    """
+    """  # noqa: E501
 
     columns = ["snake_case", "kebab-case", "dot.case"]
     values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
@@ -165,7 +165,7 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
         batch_request=batch_request, exclude_column_names=["snake_case", "kebab-case"]
     )
 
-    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
+    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.  # noqa: E501
     # Other metrics should pass.
     assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
         "column_value_missing_rule"
@@ -174,5 +174,5 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
         data_assistant_result.rule_exception_tracebacks["column_value_missing_rule"][
             "exception_message"
         ]
-        == "Column names cannot contain '.' when computing parameters for unexpected count statistics."
+        == "Column names cannot contain '.' when computing parameters for unexpected count statistics."  # noqa: E501
     )

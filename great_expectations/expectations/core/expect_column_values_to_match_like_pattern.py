@@ -67,7 +67,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     like_pattern: Union[str, EvaluationParameterDict]
 

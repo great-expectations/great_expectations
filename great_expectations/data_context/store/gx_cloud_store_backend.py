@@ -204,8 +204,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         self._session = create_session(access_token=self._ge_cloud_credentials["access_token"])
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "ge_cloud_base_url": ge_cloud_base_url,
             "ge_cloud_resource_name": ge_cloud_resource_name,
@@ -273,12 +273,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(f"Unable to get object in GX Cloud Store Backend: {jsonError}")
         except requests.HTTPError as http_err:
             raise StoreBackendError(
-                f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
+                f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"  # noqa: E501
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
-                "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
 
     @override
@@ -344,12 +344,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
-                "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
         except Exception as e:
             logger.debug(repr(e))
@@ -433,12 +433,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
             ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
-                "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
         except Exception as e:
             logger.debug(str(e))
@@ -549,12 +549,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             logger.exception(http_exc)
             raise StoreBackendError(
-                f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
+                f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
-                "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."
+                "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
         except Exception as e:
             logger.debug(str(e))
@@ -569,7 +569,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GET requests to cloud can either return response data that is a single object (get by id) or a
         list of objects with length >= 0 (get by name). This method takes this response data and returns a single
         object or None.
-        """
+        """  # noqa: E501
         if not isinstance(response_data, list):
             return response_data
         if len(response_data) == 0:
@@ -590,13 +590,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> GXCloudResourceRef:
         # todo: ID should never be optional for update - remove this additional get
         response_data = self._get(key)["data"]
-        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
+        # if the provided key does not contain id (only name), cloud will return a list of resources filtered  # noqa: E501
         # by name, with length >= 0, instead of a single object (or error if not found)
         existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
 
         if existing is None:
             raise StoreBackendError(
-                f"Unable to update object in GX Cloud Store Backend: could not find object associated with key {key}."
+                f"Unable to update object in GX Cloud Store Backend: could not find object associated with key {key}."  # noqa: E501
             )
 
         if key[1] is None:
@@ -611,7 +611,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.info(f"Could not find object associated with key {key}: {e}")
             response_data = None
 
-        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
+        # if the provided key does not contain id (only name), cloud will return a list of resources filtered  # noqa: E501
         # by name, with length >= 0, instead of a single object (or error if not found)
         existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
 
@@ -643,7 +643,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> GXCloudIdentifier:
-        """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
+        """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""  # noqa: E501
         return GXCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
             id=id,
@@ -654,7 +654,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _validate_key(self, key) -> None:
         if not isinstance(key, tuple) or len(key) != 3:  # noqa: PLR2004
             raise TypeError(
-                "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
+                "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."  # noqa: E501
             )
 
         resource_type, _id, _resource_name = key

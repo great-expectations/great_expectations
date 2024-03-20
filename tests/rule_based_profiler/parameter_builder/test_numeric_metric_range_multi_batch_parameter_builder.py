@@ -105,8 +105,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)  # noqa: E501
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).  # noqa: E501
     rtol: float = 1.0e-2
     atol: float = 0
 
@@ -116,7 +116,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         desired=expected_value,
         rtol=rtol,
         atol=atol,
-        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",  # noqa: E501
     )
 
     expected_estimation_histogram: np.ndarray = np.asarray(
@@ -135,7 +135,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -249,7 +249,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -321,7 +321,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -434,7 +434,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ],
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -442,7 +442,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -562,7 +562,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -634,7 +634,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -685,7 +685,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     error_message: str = re.escape(
         f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.  A false_positive_rate of \
 {1 - NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=error_message):
@@ -698,7 +698,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -741,7 +741,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     error_message: str = re.escape(
         """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but -0.05 was \
 provided.
-"""
+"""  # noqa: E501
     )
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError, match=error_message):
@@ -755,7 +755,7 @@ provided.
 
 
 @pytest.mark.slow  # 2.51s
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -798,7 +798,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     warning_message: str = re.escape(
         f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.  A false_positive_rate of \
 {NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -811,7 +811,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -823,11 +823,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    # a commonly used defect rate in quality control that equates to 3.4 defects per million opportunities
+    # a commonly used defect rate in quality control that equates to 3.4 defects per million opportunities  # noqa: E501
     six_sigma_false_positive_rate: float = 3.4 / 1000000.0
     assert six_sigma_false_positive_rate > NP_EPSILON
 
-    # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?
+    # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?  # noqa: E501
     smaller_than_np_epsilon_false_positive_rate: float = NP_EPSILON / 10
 
     numeric_metric_range_parameter_builder: ParameterBuilder = (
@@ -861,7 +861,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     warning_message: str = re.escape(
         f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close \
 to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -954,8 +954,8 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)  # noqa: E501
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).  # noqa: E501
     rtol: float = 1.0e-2
     atol: float = 0
 
@@ -965,7 +965,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         desired=expected_value,
         rtol=rtol,
         atol=atol,
-        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",  # noqa: E501
     )
 
     expected_estimation_histogram: np.ndarray = np.asarray(
@@ -984,7 +984,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -993,7 +993,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
 
 @pytest.mark.slow  # 1.12s
-def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
+def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     """

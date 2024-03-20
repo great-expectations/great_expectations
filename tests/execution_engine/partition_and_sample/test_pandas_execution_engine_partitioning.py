@@ -182,7 +182,7 @@ def test_partition_on_date_parts_single_date_parts(
      date_parts that is a string, DatePart enum objects, mixed case string.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "timestamp"
     result: pd.DataFrame = data_partitioner.partition_on_date_parts(
@@ -212,7 +212,7 @@ def test_partition_on_date_parts_multiple_date_parts(
      date parts that are strings, DatePart enum objects, a mixture and mixed case.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "timestamp"
     result: pd.DataFrame = data_partitioner.partition_on_date_parts(
@@ -247,7 +247,7 @@ def test_named_date_part_methods(
 ):
     """Test that a partially pre-filled version of partition_on_date_parts() was called with the appropriate params.
     For example, partition_on_year.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}

@@ -297,6 +297,9 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"ci/checks" = [
+    "E501", # line too long - too many violation & not relevant for CI checks
+]
 "assets/benchmark/benchmark.py" = [
     "DTZ", # flake8-datetimez-dtz - doesn't matter for benchmark tests
 ]

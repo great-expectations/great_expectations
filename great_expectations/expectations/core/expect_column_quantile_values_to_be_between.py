@@ -129,7 +129,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
-    """
+    """  # noqa: E501
 
     quantile_ranges: QuantileRange
     allow_relative_error: Union[bool, str] = False
@@ -527,7 +527,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                         "string_template": {
                             "template": quantile_string if quantile_string else f"{quantile:3.2f}",
                             "tooltip": {
-                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
+                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"  # noqa: E501
                                 if quantile == 0.50  # noqa: PLR2004
                                 else "expect_column_quantile_values_to_be_between"
                             },

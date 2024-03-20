@@ -56,7 +56,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_set: Union[list, set, EvaluationParameterDict, None]
     exact_match: Union[bool, None]
@@ -152,7 +152,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
             exact_match_str = "exactly" if params["exact_match"] is True else "at least"
 
-            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"  # noqa: E501
 
             for idx in range(len(params["column_list"])):
                 params[f"column_list_{idx!s}"] = params["column_list"][idx]
@@ -189,9 +189,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             return {"success": True, "result": {"observed_value": actual_column_list}}
         else:
             # Convert to lists and sort to lock order for testing and output rendering
-            # unexpected_list contains items from the dataset columns that are not in expected_column_set
+            # unexpected_list contains items from the dataset columns that are not in expected_column_set  # noqa: E501
             unexpected_list = sorted(list(actual_column_set - expected_column_set))
-            # missing_list contains items from expected_column_set that are not in the dataset columns
+            # missing_list contains items from expected_column_set that are not in the dataset columns  # noqa: E501
             missing_list = sorted(list(expected_column_set - actual_column_set))
             # observed_value contains items that are in the dataset columns
             observed_value = sorted(actual_column_list)

@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py imports">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py imports">  # noqa: E501
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
@@ -7,7 +7,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_context">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_context">  # noqa: E501
 context = gx.get_context()
 # </snippet>
 
@@ -30,7 +30,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 context.add_or_update_expectation_suite(expectation_suite_name="my_expectation_suite")
 
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py build_batch_request">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py build_batch_request">  # noqa: E501
 batch_request = BatchRequest(
     datasource_name="my_datasource",
     data_connector_name="my_configured_asset_data_connector",
@@ -38,7 +38,7 @@ batch_request = BatchRequest(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_validator_and_inspect_data">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_validator_and_inspect_data">  # noqa: E501
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name="my_expectation_suite",
@@ -47,20 +47,20 @@ validator.head()
 # </snippet>
 
 # this snippet is only for users who are not using a jupyter notebook
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py inspect_data_no_jupyter">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py inspect_data_no_jupyter">  # noqa: E501
 print(validator.head())
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation">  # noqa: E501
 validator.expect_column_values_to_not_be_null(column="vendor_id")
 # </snippet>
 
 # this snippet is only for users who are not using a jupyter notebook
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation_no_jupyter">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation_no_jupyter">  # noqa: E501
 expectation_validation_result = validator.expect_column_values_to_not_be_null(column="vendor_id")
 print(expectation_validation_result)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py save_expectation_suite">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py save_expectation_suite">  # noqa: E501
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>

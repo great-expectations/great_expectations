@@ -1,5 +1,5 @@
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports">
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports no yaml">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports">  # noqa: E501
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports no yaml">  # noqa: E501
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
@@ -12,7 +12,7 @@ yaml = YAMLHandler()
 context = gx.get_context()
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -43,7 +43,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -79,7 +79,7 @@ test_python = context.test_yaml_config(
 
 context.add_datasource(**datasource_config)
 
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic datasource workthrough">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic datasource workthrough">  # noqa: E501
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_configured_data_connector_name",
@@ -106,7 +106,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource s3">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource s3">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -139,7 +139,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -187,7 +187,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -217,7 +217,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -250,7 +250,7 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
 )
 
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output">  # noqa: E501
 context.add_datasource(**datasource_config)
 
 batch_request = BatchRequest(
@@ -276,7 +276,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -307,7 +307,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -350,7 +350,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 yaml">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 yaml">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -387,7 +387,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 python">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 python">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -439,7 +439,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 yaml">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 yaml">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -478,7 +478,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 python">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 python">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -532,7 +532,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 yaml">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 yaml">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -569,7 +569,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 python">
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 python">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

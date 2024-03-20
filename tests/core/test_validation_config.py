@@ -351,7 +351,7 @@ class TestValidationConfigSerialization:
             "id": validation_id,
         }
 
-        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
+        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one  # noqa: E501
         if suite_id is None:
             self._assert_contains_valid_uuid(actual["suite"])
 

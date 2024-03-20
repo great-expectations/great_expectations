@@ -111,7 +111,7 @@ class _SourceFactories:
         >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
-        """
+        """  # noqa: E501
 
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
         ds_type_name = _get_field_details(ds_type, "type").default_value
@@ -121,7 +121,7 @@ class _SourceFactories:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:  # noqa: E501
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -232,7 +232,7 @@ class _SourceFactories:
         for t in asset_types:
             if t.__name__.startswith("_"):
                 logger.debug(
-                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
+                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"  # noqa: E501
                 )
                 continue
             try:
@@ -242,12 +242,12 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
+                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"  # noqa: E501
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
                 raise TypeRegistrationError(
-                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
+                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",  # noqa: E501
                 ) from bad_field_exc
 
             cls._bind_asset_factory_method_if_not_present(ds_type, t, asset_type_name)
@@ -264,7 +264,7 @@ class _SourceFactories:
 
         if not asset_factory_defined:
             logger.debug(
-                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
+                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."  # noqa: E501
             )
 
             def _add_asset_factory(self: Datasource, name: str, **kwargs) -> pydantic.BaseModel:
@@ -273,7 +273,7 @@ class _SourceFactories:
                 # push them to `connect_options` field
                 if self.data_connector_type:
                     logger.info(
-                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"
+                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"  # noqa: E501
                     )
                     connect_options = {
                         k: v
@@ -282,7 +282,7 @@ class _SourceFactories:
                     }
                     if connect_options:
                         logger.info(
-                            f"{self.data_connector_type.__name__} connect_options provided -> {list(connect_options.keys())}"
+                            f"{self.data_connector_type.__name__} connect_options provided -> {list(connect_options.keys())}"  # noqa: E501
                         )
                         for k in connect_options:  # TODO: avoid this extra loop
                             kwargs.pop(k)
@@ -343,8 +343,8 @@ class _SourceFactories:
             return existing_datasource
 
         raise DefaultPandasDatasourceError(
-            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
-            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
+            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '  # noqa: E501
+            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."  # noqa: E501
         )
 
     @property
@@ -532,7 +532,7 @@ class _SourceFactories:
                 else datasource_type(**kwargs)
             )
 
-            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
+            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg  # noqa: E501
             datasource_name: str = new_datasource.name
             logger.debug(f"Adding or updating {datasource_type.__name__} with '{datasource_name}'")
             self._validate_current_datasource_type(
@@ -605,7 +605,7 @@ class _SourceFactories:
             elif crud_method_type == CrudMethodType.DELETE:
                 # deprecated-v0.17.2
                 warnings.warn(
-                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",
+                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",  # noqa: E501
                     DeprecationWarning,
                 )
                 return self.create_delete_crud_method(datasource_type, docstring)

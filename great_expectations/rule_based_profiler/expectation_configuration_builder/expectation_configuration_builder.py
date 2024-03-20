@@ -54,7 +54,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
             data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
-        """
+        """  # noqa: E501
 
         super().__init__(data_context=data_context)
 
@@ -69,11 +69,11 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         Since ExpectationConfigurationBuilderConfigSchema allows arbitrary fields (as ExpectationConfiguration kwargs)
         to be provided, they must be all converted to public property accessors and/or public fields in order for all
         provisions by Builder, SerializableDictDot, and DictDot to operate properly in compliance with their interfaces.
-        """
+        """  # noqa: E501
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'  # noqa: E501
             )
 
     def build_expectation_configuration(  # noqa: PLR0913
@@ -96,7 +96,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
 
         Returns:
             ExpectationConfiguration object.
-        """
+        """  # noqa: E501
         self.resolve_validation_dependencies(
             domain=domain,
             variables=variables,
@@ -118,7 +118,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     ) -> ExpectationConfiguration:
         """
         Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
-        """
+        """  # noqa: E501
         expectation_cls = get_expectation_impl(config.expectation_type)
         kwargs = {**config.kwargs, **domain.domain_kwargs}
         expectation = expectation_cls(**kwargs, meta=config.meta)
@@ -191,12 +191,12 @@ def init_expectation_configuration_builder(
             expectation_configuration_builder_config.to_dict()
         )
 
-    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
+    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(  # noqa: E501
         config=expectation_configuration_builder_config,
         runtime_environment={"data_context": data_context},
         config_defaults={
             "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
         },
     )
     return expectation_configuration_builder

@@ -329,7 +329,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - unexpected_index_column defined in Checkpoint only.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-    """
+    """  # noqa: E501
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -379,7 +379,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to True
-    """
+    """  # noqa: E501
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -417,7 +417,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.filesystem
-def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(
+def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_column_pairs_table: dict,
     expect_column_pair_values_to_be_equal: ExpectationConfiguration,
@@ -461,7 +461,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
     unexpected_index_query: str = evrs[0]["results"][0]["result"]["unexpected_index_query"]
     assert (
         unexpected_index_query
-        == "SELECT pk_1, ordered_item, received_item \nFROM column_pairs \nWHERE NOT (ordered_item = received_item AND NOT (ordered_item IS NULL OR received_item IS NULL));"
+        == "SELECT pk_1, ordered_item, received_item \nFROM column_pairs \nWHERE NOT (ordered_item = received_item AND NOT (ordered_item IS NULL OR received_item IS NULL));"  # noqa: E501
     )
 
 
@@ -508,7 +508,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
 
 
 @pytest.mark.filesystem
-def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(
+def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
     expect_multicolumn_sum_to_equal: ExpectationConfiguration,
@@ -519,7 +519,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to True
-    """
+    """  # noqa: E501
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -629,7 +629,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to False
-    """
+    """  # noqa: E501
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -666,7 +666,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.filesystem
-def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
+def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
     expect_column_values_to_be_in_set: ExpectationConfiguration,
@@ -678,7 +678,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-    """
+    """  # noqa: E501
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
     context = _add_expectations_and_checkpoint(
@@ -711,7 +711,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 
 @pytest.mark.filesystem
-def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(
+def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
     expect_column_values_to_be_in_set: ExpectationConfiguration,
@@ -722,7 +722,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-    """
+    """  # noqa: E501
     context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
@@ -752,7 +752,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 
 @pytest.mark.filesystem
-def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
+def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: E501
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
     expect_column_values_to_be_in_set: ExpectationConfiguration,
@@ -800,7 +800,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 2 Expectations added to suite
-    """
+    """  # noqa: E501
     context = _add_expectations_and_checkpoint(
         data_context=data_context_with_connection_to_metrics_db,
         checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
@@ -966,7 +966,7 @@ def test_sql_complete_output_no_id_pk_fallback(
     # query does not contain id_pk column
     assert (
         unexpected_index_query
-        == "SELECT animals \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
+        == "SELECT animals \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"  # noqa: E501
     )
 
 
@@ -1108,7 +1108,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1155,7 +1155,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1196,7 +1196,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1232,7 +1232,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1371,7 +1371,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: E501, F811
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1405,7 +1405,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: F811 # TODO: review test for duplication
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: E501, F811
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1436,7 +1436,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: F811 # TODO: review test for duplication
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: E501, F811
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1605,7 +1605,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
         - unexpected_index_column defined in Checkpoint only.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-    """
+    """  # noqa: E501
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1636,7 +1636,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
 
 
 @pytest.mark.spark
-def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1649,7 +1649,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
-    """
+    """  # noqa: E501
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
     context = _add_expectations_and_checkpoint(
@@ -1686,7 +1686,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.spark
-def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1700,7 +1700,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
         - return_unexpected_index_query set to True
-    """
+    """  # noqa: E501
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
     context = _add_expectations_and_checkpoint(
@@ -1739,7 +1739,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.spark
-def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1752,7 +1752,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 1 Expectations added to suite
         - return_unexpected_index_query set to False
-    """
+    """  # noqa: E501
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
     context = _add_expectations_and_checkpoint(
@@ -1789,7 +1789,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.spark
-def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
+def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1841,7 +1841,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
         - unexpected_index_column not defined in Checkpoint config, but passed in at run_checkpoint.
         - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
         - 2 Expectations added to suite
-    """
+    """  # noqa: E501
     context = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
@@ -2386,7 +2386,7 @@ def test_spark_complete_output_no_id_pk_fallback(
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: F811 # TODO: review test for duplication
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: E501, F811
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2441,7 +2441,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
     What does this test?
         - DataFrame being passed into Checkpoint has named index 'pk_1', which correspond to unexpected_index_column_names
         - MapMatric calculation happens the same as if `pk_1` was a non-index column
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2510,7 +2510,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
     """
     What does this test?
         - DataFrame being passed into Checkpoint has named index 'pk_1', which doesn't match the unexpected_index_column_name
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2566,7 +2566,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
     What does this test?
         - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
         - MapMatric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2637,7 +2637,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
     What does this test?
         - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
         - MapMatric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2700,7 +2700,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
     What does this test?
         - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
         - MapMatric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2771,7 +2771,7 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
         - DataFrame being passed into Checkpoint has a different named index than then column passed in
         - we also pass in `pk_1`  as unexpected_index_column_names
         - but pk_2 is the actual index
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2828,7 +2828,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
         - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
         - MapMetric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
         - we also pass in `pk_1` and `pk_2`  as unexpected_index_column_names
-    """
+    """  # noqa: E501
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2976,7 +2976,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_one_index_column(
+def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_one_index_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -3045,7 +3045,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_two_index_column(
+def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_two_index_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -3172,7 +3172,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_one_index_column(
+def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_one_index_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -3245,7 +3245,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_two_index_column(
+def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_two_index_column(  # noqa: E501
     in_memory_runtime_context: AbstractDataContext,
     pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -3328,7 +3328,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(  # noqa: E501
     empty_data_context: AbstractDataContext,
     reference_checkpoint_config_for_unexpected_column_names: dict,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,

@@ -35,7 +35,7 @@ from tests.test_utils import (
 if TYPE_CHECKING:
     import pandas as pd
 
-# The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from
+# The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from  # noqa: E501
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
 
 Base = sqlalchemy.declarative_base()
@@ -57,7 +57,7 @@ def _compare_select_statement_with_converted_string(engine) -> None:
     Helper method used to do the call to sql_statement_with_post_compile_to_string() and compare with expected val
     Args:
         engine (ExecutionEngine): SqlAlchemyExecutionEngine with connection to backend under test
-    """
+    """  # noqa: E501
     select_statement: sqlalchemy.Select = select_with_post_compile_statements()
     returned_string = sql_statement_with_post_compile_to_string(
         engine=engine, select_statement=select_statement
@@ -184,7 +184,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_index_columns_without_column_values(
+def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_index_columns_without_column_values(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column_without_column_values,
 ):
@@ -295,7 +295,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_without_column_values(
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_without_column_values(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_two_index_columns_without_column_values,
 ):
@@ -314,7 +314,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column(
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column,
 ):
@@ -332,7 +332,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column_without_column_values(
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column_without_column_values(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column_without_column_values,
 ):
@@ -351,7 +351,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_wrong_column(
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_wrong_column(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -371,7 +371,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_wrong_domain(
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_wrong_domain(  # noqa: E501
     pandas_animals_dataframe_for_unexpected_rows_and_index,
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -573,7 +573,7 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
     """
     This shuffle intersperses input "column_list" so to ensure that there is no dependency on position of column names
     that must be quoted.  Sorting in assertion below ensures that types are correct, regardless of column order.
-    """
+    """  # noqa: E501
     random.shuffle(test_column_names)
 
     metric_domain_kwargs: dict

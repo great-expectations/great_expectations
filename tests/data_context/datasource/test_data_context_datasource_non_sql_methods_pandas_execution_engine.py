@@ -273,7 +273,7 @@ data_connectors:
     assert batch.data.dataframe.shape == (2, 2)
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -366,7 +366,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -459,13 +459,13 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     """
     What does this test and why?
     This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
-    """
+    """  # noqa: E501
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -568,7 +568,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -638,7 +638,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         data_connector_query={"custom_filter_function": my_custom_batch_selector},
     )
 
-    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request
+    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request  # noqa: E501
     batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request, limit=2)
     assert len(batch_list) == 4
 

@@ -17,7 +17,7 @@ class GXCloudIDAwareRef:
 class GXCloudResourceRef(GXCloudIDAwareRef):
     """
     This class represents a reference to a Great Expectations object persisted to Great Expectations Cloud.
-    """
+    """  # noqa: E501
 
     def __init__(self, resource_type: str, id: str, url: str, response_json: dict) -> None:
         self._resource_type = resource_type

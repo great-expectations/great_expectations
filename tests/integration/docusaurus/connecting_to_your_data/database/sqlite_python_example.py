@@ -7,7 +7,7 @@ context = gx.get_context()
 
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata.db"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py datasource_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py datasource_config">  # noqa: E501
 datasource_config = {
     "name": "my_sqlite_datasource",
     "class_name": "Datasource",
@@ -32,11 +32,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py test_yaml_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py test_yaml_config">  # noqa: E501
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py add_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py add_datasource">  # noqa: E501
 context.add_datasource(**datasource_config)
 # </snippet>
 
@@ -56,11 +56,11 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py batch request table name">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py batch request table name">  # noqa: E501
 batch_request = BatchRequest(
     datasource_name="my_sqlite_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="main.yellow_tripdata_sample_2019_01",  # this is the name of the table you want to retrieve
+    data_asset_name="main.yellow_tripdata_sample_2019_01",  # this is the name of the table you want to retrieve  # noqa: E501
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")

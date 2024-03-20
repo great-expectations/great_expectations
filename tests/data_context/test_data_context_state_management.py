@@ -90,7 +90,7 @@ class CheckpointStoreSpy(CheckpointStore):
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
     Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -322,7 +322,7 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
             datasource = context.add_or_update_datasource(**config_dict)
         datasource.base_directory = new_base_directory
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
@@ -371,7 +371,7 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
         ):
             persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
         assert datasource == persisted_datasource
@@ -426,7 +426,7 @@ def test_add_or_update_datasource_adds_successfully(
         else:
             _ = context.add_or_update_datasource(**parametrized_datasource_configs)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)

@@ -4,7 +4,7 @@ import operator
 from functools import reduce
 from typing import List, Tuple
 
-# The following method is used to ensure that the dictionary used to verify universal configuration elements
+# The following method is used to ensure that the dictionary used to verify universal configuration elements  # noqa: E501
 # remains the same in all the configuration tests.  Users may disregard it.
 
 
@@ -34,7 +34,7 @@ def _gather_key_paths_from_dict(
                 key_paths.extend(new_key_paths)
                 full_paths.extend(new_full_paths)
             else:
-                # If this is an empty dictionary, then there will be no further nested keys to gather.
+                # If this is an empty dictionary, then there will be no further nested keys to gather.  # noqa: E501
                 key_paths.append(tuple(next_path))
                 full_paths.append(tuple(next_path))
         elif current_path:
@@ -63,7 +63,7 @@ def is_subset(subset, superset, test_mode=True):
 
     subset_items = [_get_items_by_path(subset, key_path) for key_path in subset_key_paths]
     superset_items = [_get_items_by_path(superset, key_path) for key_path in superset_key_paths]
-    # key_paths that point to empty values should only be checked to see if they exist as key_paths in the superset
+    # key_paths that point to empty values should only be checked to see if they exist as key_paths in the superset  # noqa: E501
     # empty_paths = [x[0] for x in subset_items if not x[1]]
     subset_items = [x for x in subset_items if x[1]]
     #
@@ -81,11 +81,11 @@ def is_subset(subset, superset, test_mode=True):
     if test_mode is True:
         assert all(
             [items_test, keys_test]
-        ), f"\nEITHER:\n{subset_items}\n is not a subset of \n{superset_items}\n\nOR:\n\n{subset_full_paths}\n is not a subset of \n{superset_full_paths}"
+        ), f"\nEITHER:\n{subset_items}\n is not a subset of \n{superset_items}\n\nOR:\n\n{subset_full_paths}\n is not a subset of \n{superset_full_paths}"  # noqa: E501
     else:
         assert (
             all([items_test, keys_test]) is False
-        ), f"\nBOTH:\n{subset_items} is a subset of \n{superset_items}\nAND:\n{subset_full_paths} is a subset of \n{superset_full_paths}"
+        ), f"\nBOTH:\n{subset_items} is a subset of \n{superset_items}\nAND:\n{subset_full_paths} is a subset of \n{superset_full_paths}"  # noqa: E501
 
 
 if __name__ == "__main__":

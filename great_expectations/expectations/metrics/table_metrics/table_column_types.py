@@ -54,7 +54,7 @@ class ColumnTypes(TableMetricProvider):
                 batch_id = execution_engine.batch_manager.active_batch_data_id
             else:
                 raise GreatExpectationsError(
-                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
+                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "  # noqa: E501
                     "execution engine"
                 )
 
@@ -64,7 +64,7 @@ class ColumnTypes(TableMetricProvider):
         )
         if batch_data is None:
             raise GreatExpectationsError(
-                "the requested batch is not available; please load the batch into the execution engine."
+                "the requested batch is not available; please load the batch into the execution engine."  # noqa: E501
             )
 
         return _get_sqlalchemy_column_metadata(execution_engine, batch_data)

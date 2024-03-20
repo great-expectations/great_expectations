@@ -109,7 +109,7 @@ class DataContext:
             return self._datasources[datasource_name]
         except KeyError as exc:
             raise LookupError(
-                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
+                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"  # noqa: E501
             ) from exc
 
     def _save_project_config(self) -> None: ...
@@ -296,7 +296,7 @@ class TestMisconfiguredMetaDatasource:
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
         with pytest.raises(
             TypeRegistrationError,
-            match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",
+            match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",  # noqa: E501
         ):
 
             class MissingTypeAsset(DataAsset):

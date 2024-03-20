@@ -26,7 +26,7 @@ def assert_how_to_buttons(
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various
     Data Docs pages.
-    """
+    """  # noqa: E501
 
     # these are simple checks for presence of certain page elements
     show_walkthrough_button = "Show Walkthrough"

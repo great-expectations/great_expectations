@@ -19,10 +19,10 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_pair_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.column_pair_condition_partial import (  # noqa: E501
     column_pair_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
     multicolumn_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import (
@@ -158,7 +158,7 @@ def test__column_map_metric__registration(mock_registry):
     The actual logic for this lives in the private method: `_register_metric_functions`, which is invoked from within `__new__` for the ancestor class `MetricProvider`.
 
     Since _register_metric_functions is private, we don't want to test it directly. Instead, we declare a custom ColumnMapMetricProvider, and test that the correct metrics are registered.
-    """
+    """  # noqa: E501
     registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "column_values.equal_seven" not in key

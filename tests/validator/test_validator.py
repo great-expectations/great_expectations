@@ -48,10 +48,10 @@ def yellow_trip_pandas_data_context(
     monkeypatch,
 ) -> FileDataContext:
     """
-    Provides a data context with a data_connector for a pandas datasource which can connect to three months of
-    yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
-    where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
-    batch_filter_parameters is set to "01", "02", or "03"
+    Provides a data context with a data_connector for a pandas datasource which can connect to three
+    months of yellow trip taxi data in csv form. This data connector enables access to all three
+    months through a BatchRequest where the "year" in batch_filter_parameters is set to "2019", or
+    to individual months if the "month" in batch_filter_parameters is set to "01", "02", or "03"
     """
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -205,7 +205,7 @@ def test_validator_default_expectation_args__sql(
 def test_columns(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -233,7 +233,7 @@ def test_columns(
 def test_head(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -370,7 +370,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     The multi_batch_taxi_validator_ge_cloud_mode fixture has a suite with a single expectation.
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
-    """
+    """  # noqa: E501
     mock_suite = ExpectationSuite(
         name="validating_taxi_data",
         expectations=[
@@ -646,7 +646,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
         )
 
     assert ve.value.args == (
-        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",
+        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",  # noqa: E501
     )
 
 
@@ -1022,7 +1022,7 @@ def test_validator_include_rendered_content_diagnostic(
                     "value": "passenger_count>0",
                 },
             },
-            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         ),
         value_type="StringValueType",
     )
@@ -1184,7 +1184,7 @@ def _context_to_validator_and_expectation_sql(
     Expectation after building a BatchRequest and creating ExpectationSuite.
     Args:
         context (FileDataContext): DataContext to use
-    """
+    """  # noqa: E501
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -1257,7 +1257,7 @@ def test_validator_result_format_config_from_expectation(
 
 
 @pytest.mark.big
-def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(
+def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(  # noqa: E501
     in_memory_runtime_context, basic_datasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
@@ -1595,7 +1595,7 @@ def test_validator_with_exception_info_in_result():
         "include_nested=True",
     )
     exception_message = "Danger Will Robinson! Danger!"
-    exception_traceback = 'Traceback (most recent call last):\n File "lostinspace.py", line 42, in <module>\n    raise Exception("Danger Will Robinson! Danger!")\nException: Danger Will Robinson! Danger!'
+    exception_traceback = 'Traceback (most recent call last):\n File "lostinspace.py", line 42, in <module>\n    raise Exception("Danger Will Robinson! Danger!")\nException: Danger Will Robinson! Danger!'  # noqa: E501
 
     mock_aborted_metrics_info = {
         metric_id: {

@@ -10,7 +10,7 @@ context = gx.get_context()
 
 CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py datasource config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py datasource config">  # noqa: E501
 datasource_config = {
     "name": "my_azure_datasource",
     "class_name": "Datasource",
@@ -58,11 +58,11 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"]["na
     "data/taxi_yellow_tripdata_samples/"
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py test datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py test datasource">  # noqa: E501
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py add datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py add datasource">  # noqa: E501
 context.add_datasource(**datasource_config)
 # </snippet>
 

@@ -48,14 +48,14 @@ class QueryColumn(QueryMetricProvider):
             query = query.format(col=column, batch=selectable)
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
+        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break  # noqa: E501
             query = query.format(col=column, batch=f"({selectable})")
         elif isinstance(
             selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
+        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
             query = query.format(
                 col=column,
-                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
             )
         else:
             query = query.format(col=column, batch=f"({selectable})")

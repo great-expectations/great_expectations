@@ -553,7 +553,7 @@ def test_checkpoint_config_deepcopy():
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
-    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""
+    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""  # noqa: E501
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config
 
@@ -686,7 +686,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -733,7 +733,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -780,7 +780,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -827,7 +827,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_with_schema",
         ),
@@ -857,7 +857,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_without_schema",
         ),

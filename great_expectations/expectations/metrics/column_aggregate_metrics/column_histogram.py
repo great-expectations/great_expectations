@@ -70,7 +70,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         Args:
             column: the name of the column for which to get the histogram
             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
-        """
+        """  # noqa: E501
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
@@ -101,7 +101,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
             )
         ):
-            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).  # noqa: E501
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
@@ -124,7 +124,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 .select_from(selectable)
             )
 
-            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types  # noqa: E501
             return convert_to_json_serializable(
                 list(execution_engine.execute_query(query).fetchone())
             )

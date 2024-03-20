@@ -75,7 +75,7 @@ class DataContextVariables(ABC):
         config:          A reference to the DataContextConfig to perform CRUD on.
         config_provider: Responsible for determining config values and substituting them in GET calls.
         _store:          An instance of a DataContextStore with the appropriate backend to persist config changes.
-    """
+    """  # noqa: E501
 
     config: DataContextConfig
     config_provider: _ConfigurationProvider
@@ -285,7 +285,7 @@ class FileDataContextVariables(DataContextVariables):
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are
-        # required to use default values because the parent class defines arguments with default values
+        # required to use default values because the parent class defines arguments with default values  # noqa: E501
         # ("Fields without default values cannot appear after fields with default values").
         #
         # Python 3.10 resolves this issue around dataclass inheritance using `kw_only=True` (https://docs.python.org/3/library/dataclasses.html)
@@ -306,7 +306,7 @@ class FileDataContextVariables(DataContextVariables):
         )
 
         # Chetan - 20230222 - `instantiate_class_from_config` used in the Store constructor
-        # causes a runtime error with InlineStoreBackend due to attempting to deepcopy a DataContext.
+        # causes a runtime error with InlineStoreBackend due to attempting to deepcopy a DataContext.  # noqa: E501
         #
         # This should be resolved by moving the specific logic required from the context to a class
         # and injecting that object instead of the entire context.
@@ -348,7 +348,7 @@ class FileDataContextVariables(DataContextVariables):
         try:
             if config_fluent_datasources_stash:
                 logger.info(
-                    f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"
+                    f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"  # noqa: E501
                 )
                 for fluent_datasource_name in config_fluent_datasources_stash.keys():
                     self.data_context.datasources.pop(fluent_datasource_name)
@@ -376,7 +376,7 @@ class CloudDataContextVariables(DataContextVariables):
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above arguments are not truly optional, we are
-        # required to use default values because the parent class defines arguments with default values
+        # required to use default values because the parent class defines arguments with default values  # noqa: E501
         # ("Fields without default values cannot appear after fields with default values").
         #
         # Python 3.10 resolves this issue around dataclass inheritance using `kw_only=True` (https://docs.python.org/3/library/dataclasses.html)
@@ -391,7 +391,7 @@ class CloudDataContextVariables(DataContextVariables):
             )
         ):
             raise ValueError(
-                f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"
+                f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"  # noqa: E501
             )
 
     @override
@@ -425,7 +425,7 @@ class CloudDataContextVariables(DataContextVariables):
     def get_key(self) -> GXCloudIdentifier:
         """
         Generates a GX Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
-        """
+        """  # noqa: E501
         from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
         key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES)

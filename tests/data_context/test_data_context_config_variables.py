@@ -223,7 +223,7 @@ def test_substitute_config_variable():
             r"prefix$ARG4.$arg0/$aRg3:${ARG4}/\$dontsub${arg0}:${aRg3}.suffix",
             config_variables_dict,
         )
-        == "prefixval_of_ARG_4.val_of_arg_0/val_of_aRg_3:val_of_ARG_4/$dontsubval_of_arg_0:val_of_aRg_3.suffix"
+        == "prefixval_of_ARG_4.val_of_arg_0/val_of_aRg_3:val_of_ARG_4/$dontsubval_of_arg_0:val_of_aRg_3.suffix"  # noqa: E501
     )
 
 
@@ -257,7 +257,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     """
     Make sure that all types of input to escape_all_config_variables are escaped properly: str, dict, OrderedDict, list
     Make sure that changing the escape string works as expected.
-    """
+    """  # noqa: E501
     context = empty_data_context_with_config_variables
 
     # str
@@ -373,7 +373,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     """
     What does this test and why?
     escape_all_config_variables(skip_if_substitution_variable=True/False) should function as documented.
-    """
+    """  # noqa: E501
     context = empty_data_context_with_config_variables
 
     # str
@@ -602,7 +602,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     What does this test and why?
     Creating a DataContext via .create(), then using .save_config_variable() to save a variable that will eventually be substituted (e.g. ${SOME_VAR}) should result in the proper escaping of $.
     This is in response to issue #2196
-    """
+    """  # noqa: E501
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context = FileDataContext.create(

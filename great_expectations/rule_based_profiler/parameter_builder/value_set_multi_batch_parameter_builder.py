@@ -98,7 +98,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name="column.distinct_values",
@@ -124,7 +124,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
+        """  # noqa: E501
         # Build the list of unique values for each Batch object.
         super().build_parameters(
             domain=domain,
@@ -134,7 +134,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             runtime_configuration=runtime_configuration,
         )
 
-        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
+        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.  # noqa: E501
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.raw_fully_qualified_parameter_name,
@@ -200,7 +200,7 @@ def _get_unique_values_from_nested_collection_of_sets(
     In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
-    """
+    """  # noqa: E501
     unique_values: Set[V] = set(
         sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(

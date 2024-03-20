@@ -35,7 +35,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -87,7 +87,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
-        """
+        """  # noqa: E501
         return str(
             normalize_directory_path(
                 dir_path=self._base_directory,

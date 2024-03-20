@@ -46,7 +46,7 @@ assets:
     return basic_data_connector
 
 
-# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
+# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>  # noqa: E501
 @pytest.mark.unit
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>

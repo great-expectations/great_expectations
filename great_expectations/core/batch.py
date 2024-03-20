@@ -167,7 +167,7 @@ class LegacyBatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
-            """
+            """  # noqa: E501
             )
         if data_connector_name is None:
             raise ValueError("A valid data_connector must be specified.")
@@ -175,7 +175,7 @@ class LegacyBatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of a data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if data_asset_name is None:
             raise ValueError("A valid data_asset_name must be specified.")
@@ -183,7 +183,7 @@ class LegacyBatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
 "{type(data_asset_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
@@ -254,7 +254,7 @@ class BatchRequestBase(SerializableDictDot):
     for the internal protocol use, whereby NULL values are allowed as per the internal needs.  The BatchRequest class extends
     BatchRequestBase and adds to it strong validation (described above plus additional attribute validation) so as to formally
     validate user specified fields.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -362,9 +362,9 @@ class BatchRequestBase(SerializableDictDot):
             A JSON-serializable dict representation of this BatchRequestBase.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
         # make this refactoring infeasible at the present time.
 
         # if batch_data appears in BatchRequest, temporarily replace it with
@@ -412,7 +412,7 @@ class BatchRequestBase(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -428,7 +428,7 @@ class BatchRequestBase(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
     @staticmethod
@@ -444,13 +444,13 @@ class BatchRequestBase(SerializableDictDot):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
-            """
+            """  # noqa: E501
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
                 f"""The type of data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
             raise TypeError(
@@ -469,7 +469,7 @@ class BatchRequestBase(SerializableDictDot):
             raise TypeError(
                 f"""The type of limit must be an integer (Python "int").  The type given is "{type(limit)!s}", which
 is illegal.
-                """
+                """  # noqa: E501
             )
 
 
@@ -636,26 +636,26 @@ class RuntimeBatchRequest(BatchRequestBase):
         """
         We must have both or neither of runtime_parameters and batch_identifiers (but not either one of them).
         This is strict equivalence ("if-and-only") condition ("exclusive NOR"); otherwise, ("exclusive OR") means error.
-        """
+        """  # noqa: E501
         if (not runtime_parameters and batch_identifiers) or (
             runtime_parameters and not batch_identifiers
         ):
             raise ValueError(
-                "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"
+                "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
-                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""
+                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
-                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""
+                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""  # noqa: E501
             )
 
         if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
@@ -666,11 +666,11 @@ class RuntimeBatchRequest(BatchRequestBase):
             )
 
 
-# TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
+# TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>  # noqa: E501
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
-    process, such as the timestamp at which a query was executed."""
+    process, such as the timestamp at which a query was executed."""  # noqa: E501
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -698,8 +698,8 @@ class BatchData:
 
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
-#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
-#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.  # noqa: E501
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>  # noqa: E501
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
 @public_api
 @deprecated_argument(argument_name="data_context", version="0.14.0")
@@ -1115,7 +1115,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             ]
         ):
             raise ValueError(
-                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
+                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "  # noqa: E501
                 "runtime_parameters argument."
             )
 
@@ -1218,7 +1218,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
 
     Returns:
         (BatchRequest, RuntimeBatchRequest or FluentBatchRequest) The formal BatchRequest, RuntimeBatchRequest or FluentBatchRequest object
-    """
+    """  # noqa: E501
 
     # block-style batch-request args, includes arguments for both runtime and basic batch requests
     block_config_args = {
@@ -1243,7 +1243,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         """Returns a list of the block-config batch request arguments"""
         return [k for k, v in block_config_args.items() if v]
 
-    # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
+    # ensure that the first parameter is datasource_name, which should be a str. This check prevents users  # noqa: E501
     # from passing in batch_request as an unnamed parameter.
     if datasource_name and not isinstance(datasource_name, str):
         raise TypeError(
@@ -1285,7 +1285,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         block_args = block_style_args()
         if block_args:
             raise ValueError(
-                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"
+                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"  # noqa: E501
             )
 
         result = _get_fluent_batch_request_class()(

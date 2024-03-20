@@ -156,7 +156,7 @@ class SparkDataPartitioner(DataPartitioner):
 
         Returns:
             String representing the spark function to use for the given DatePart.
-        """
+        """  # noqa: E501
         date_part = DatePart(date_part)
 
         spark_date_part_decoder: dict = {
@@ -197,7 +197,7 @@ class SparkDataPartitioner(DataPartitioner):
 
         Returns:
             Filtered spark DataFrame.
-        """
+        """  # noqa: E501
         return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
@@ -283,7 +283,7 @@ class SparkDataPartitioner(DataPartitioner):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
+                    Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
 

@@ -32,7 +32,7 @@ class Sorter:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
-            # if the batch_identifiers take the form of a nested dictionary, we need to extract the values of the
+            # if the batch_identifiers take the form of a nested dictionary, we need to extract the values of the  # noqa: E501
             # inner dict to check for special case sorting of None
             batch_identifier_values: Union[list, ValuesView]
             if len(list(batch_definition.batch_identifiers.values())) == 0:
@@ -58,7 +58,7 @@ class Sorter:
             reverse=self.reverse,
         )
 
-        # the convention for ORDER BY in SQL is for NULL values to be first in the sort order for ascending
+        # the convention for ORDER BY in SQL is for NULL values to be first in the sort order for ascending  # noqa: E501
         # and last in the sort order for descending
         if self.reverse:
             return value_batch_definitions + none_batch_definitions

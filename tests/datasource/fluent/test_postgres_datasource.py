@@ -783,7 +783,7 @@ def test_sort_batch_list_by_unknown_key(empty_data_context, create_source: Creat
     ],
 )
 def test_table_asset_sorter_parsing(order_by: list):
-    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
+    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""  # noqa: E501
     expected_sorters = [
         Sorter(key="year"),
         Sorter(key="month", reverse=True),
@@ -927,7 +927,7 @@ def test_validate_valid_postgres_connection_string(
         dialect="postgresql",
         connection_string=connection_string,
     ):
-        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying
+        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying  # noqa: E501
         # connection string so a direct str comparison isn't possible.
         pass
 

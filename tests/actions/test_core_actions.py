@@ -608,7 +608,7 @@ def test_EmailAction(
 @pytest.mark.unit
 def test_api_action_create_payload(mock_context):
     mock_validation_results = []
-    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
+    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'  # noqa: E501
     api_notification_action = APINotificationAction(url="http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
@@ -801,7 +801,7 @@ class TestActionSerialization:
         # we've properly implemented the Pydantic discriminated union feature.
         class DummyClassWithActionChild(BaseModel):
             class Config:
-                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy
+                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy  # noqa: E501
                 json_encoders = {Renderer: lambda r: r.serialize()}
 
             action: Union[

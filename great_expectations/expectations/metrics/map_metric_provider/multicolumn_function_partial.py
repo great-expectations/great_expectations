@@ -56,7 +56,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
+    """  # noqa: E501
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -66,7 +66,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
-"multicolumn_function_partial" "partial_fn_type" property."""
+"multicolumn_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -122,7 +122,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
                 f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
-"multicolumn_function_partial" "partial_fn_type" property."""
+"multicolumn_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):
@@ -195,7 +195,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
                 f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
-"multicolumn_function_partial" "partial_fn_type" property."""
+"multicolumn_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
 
         def wrapper(metric_fn: Callable):

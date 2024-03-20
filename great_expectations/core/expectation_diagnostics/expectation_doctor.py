@@ -149,7 +149,7 @@ class ExpectationDoctor:
         )
         if not _expectation_config:
             _error(
-                f"Was NOT able to get Expectation configuration for {self._expectation.expectation_type}. "
+                f"Was NOT able to get Expectation configuration for {self._expectation.expectation_type}. "  # noqa: E501
                 "Is there at least one sample test where 'success' is True?"
             )
         metric_diagnostics_list: List[ExpectationMetricDiagnostics] = (
@@ -170,7 +170,7 @@ class ExpectationDoctor:
             if i is True
         ]
         _debug(
-            f"Implemented engines for {self._expectation.expectation_type}: {', '.join(engines_implemented)}"
+            f"Implemented engines for {self._expectation.expectation_type}: {', '.join(engines_implemented)}"  # noqa: E501
         )
 
         _debug("Getting test results")
@@ -249,7 +249,7 @@ class ExpectationDoctor:
         )
 
     def _get_augmented_library_metadata(self):
-        """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""
+        """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""  # noqa: E501
 
         augmented_library_metadata = {
             "maturity": Maturity.CONCEPT_ONLY,
@@ -388,14 +388,14 @@ class ExpectationDoctor:
 
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
-        """
+        """  # noqa: E501
         # Currently, only community contrib expectations have an examples attribute
         all_examples: List[dict] = self._expectation.examples or self._get_examples_from_json()
 
         included_examples = []
         for i, example in enumerate(all_examples, 1):
             included_test_cases = []
-            # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
+            # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests  # noqa: E501
             # See:
             #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
             #   - https://github.com/great-expectations/great_expectations/pull/4073
@@ -420,7 +420,7 @@ class ExpectationDoctor:
                     included_test_cases.append(ExpectationLegacyTestCaseAdapter(**copied_test))
 
             # If at least one ExpectationTestCase from the ExpectationTestDataCases was selected,
-            # then keep a copy of the ExpectationTestDataCases including data and the selected ExpectationTestCases.
+            # then keep a copy of the ExpectationTestDataCases including data and the selected ExpectationTestCases.  # noqa: E501
             if len(included_test_cases) > 0:
                 copied_example = copy.deepcopy(example)
                 copied_example["tests"] = included_test_cases
@@ -509,7 +509,7 @@ class ExpectationDoctor:
         """Check to see which execution_engines are fully supported for this Expectation.
 
         In order for a given execution engine to count, *every* metric must have support on that execution engines.
-        """
+        """  # noqa: E501
         if not execution_engine_names:
             execution_engine_names = [
                 "PandasExecutionEngine",
@@ -533,7 +533,7 @@ class ExpectationDoctor:
                 except KeyError:
                     # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
                     # expect_table_row_count_to_equal_other_table does tricky things and replaces
-                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"
+                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"  # noqa: E501
                     if "table.row_count" in metric_diagnostics.name:
                         continue
 
@@ -547,8 +547,8 @@ class ExpectationDoctor:
     ) -> List[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream validation_dependencies for this Expectation."""
 
-        # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
-        # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
+        # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.  # noqa: E501
+        # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.  # noqa: E501
 
         if not expectation_config:
             return []
@@ -650,7 +650,7 @@ class ExpectationDoctor:
             _duration = _end - _start
             backend_test_times[exp_test["backend"]].append(_duration)
             _debug(
-                f"Took {_duration} seconds to evaluate_json_test_v3_api for {exp_combined_test_name}"
+                f"Took {_duration} seconds to evaluate_json_test_v3_api for {exp_combined_test_name}"  # noqa: E501
             )
             if error_message is None:
                 _debug(f"PASSED {exp_combined_test_name}")
@@ -669,7 +669,7 @@ class ExpectationDoctor:
 
             if validation_result:
                 # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
-                # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
+                # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')  # noqa: E501
                 validation_result.expectation_config.raw_kwargs = (
                     validation_result.expectation_config._raw_kwargs
                 )
@@ -687,7 +687,7 @@ class ExpectationDoctor:
 
         for backend_name, test_times in sorted(backend_test_times.items()):
             _debug(
-                f"Took {sum(test_times)} seconds to run {len(test_times)} tests {backend_name}--{expectation_type}"
+                f"Took {sum(test_times)} seconds to run {len(test_times)} tests {backend_name}--{expectation_type}"  # noqa: E501
             )
 
         return test_results
@@ -701,7 +701,7 @@ class ExpectationDoctor:
             List[Union[str, LegacyRendererType, LegacyDiagnosticRendererType]]
         ] = None,
     ) -> List[ExpectationRendererDiagnostics]:
-        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
+        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""  # noqa: E501
 
         if not standard_renderers:
             standard_renderers = [
@@ -830,7 +830,7 @@ class ExpectationDoctor:
 
         else:
             raise TypeError(
-                f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
+                f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."  # noqa: E501
             )
 
         if "inf" in result:

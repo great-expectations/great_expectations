@@ -291,7 +291,7 @@ class FluentBaseModel(pydantic.BaseModel):
             include_exclude: The include or exclude key passed to pydantic model export methods.
 
         Returns: A mutable dictionary that can be used for nested include/exclude.
-        """
+        """  # noqa: E501
         if isinstance(include_exclude, Mapping):
             include_exclude_dict = dict(include_exclude)
         elif isinstance(include_exclude, AbstractSet):

@@ -85,7 +85,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     regex: Union[str, EvaluationParameterDict]
 
@@ -170,11 +170,11 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 if include_column_name:
-                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."  # noqa: E501
                 else:
-                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if include_column_name:
                     template_str = "$column values must not match this regular expression: $regex."

@@ -24,7 +24,7 @@ class DateTimeSorter(Sorter):
             raise gx_exceptions.SorterError(
                 f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{type(datetime_format)!s}").
-                    """
+                    """  # noqa: E501
             )
 
         self._datetime_format = datetime_format

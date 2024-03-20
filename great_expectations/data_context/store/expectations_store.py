@@ -45,7 +45,7 @@ class ExpectationsStore(Store):
         data_context=None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
+        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.  # noqa: E501
         self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -74,8 +74,8 @@ class ExpectationsStore(Store):
             store_name=store_name,
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -132,15 +132,15 @@ class ExpectationsStore(Store):
             if len(new_ids) > 1:
                 # edge case: suite has been changed remotely, and one or more new expectations
                 #            have been added. Since the store doesn't return the updated object,
-                #            we have no reliable way to know which new ID belongs to this expectation,
+                #            we have no reliable way to know which new ID belongs to this expectation,  # noqa: E501
                 #            so we raise an exception and ask the user to refresh their suite.
                 #            The Expectation should have been successfully added to the suite.
                 raise RuntimeError(
-                    "Expectation was added, however this ExpectationSuite is out of sync with the Cloud backend. "
-                    f'Please fetch the latest state of this suite by calling `context.suites.get(name="{suite.name}")`.'
+                    "Expectation was added, however this ExpectationSuite is out of sync with the Cloud backend. "  # noqa: E501
+                    f'Please fetch the latest state of this suite by calling `context.suites.get(name="{suite.name}")`.'  # noqa: E501
                 )
             elif len(new_ids) == 0:
-                # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,
+                # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,  # noqa: E501
                 #            it should have already raised an exception.
                 raise RuntimeError("Unknown error occurred and Expectation was not added.")
             else:

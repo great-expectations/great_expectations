@@ -50,14 +50,14 @@ def sample_rule_dict():
     return {
         "domain_builder": {
             "include_column_names": None,
-            "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
             "class_name": "ColumnDomainBuilder",
             "include_column_name_suffixes": ["_amount"],
         },
         "parameter_builders": [],
         "expectation_configuration_builders": [
             {
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                 "condition": None,
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {},
@@ -141,7 +141,7 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -155,7 +155,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -174,13 +174,13 @@ def test_reconcile_profiler_rules_new_rule_override(
         "rule_0": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -190,7 +190,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -207,7 +207,7 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -221,7 +221,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -237,13 +237,13 @@ def test_reconcile_profiler_rules_new_rule_override(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -255,7 +255,7 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -306,7 +306,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
                 "include_column_name_suffixes": [
                     "_ts",
@@ -315,7 +315,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -327,7 +327,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -394,13 +394,13 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
                     "single_batch_mode": False,
@@ -410,7 +410,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -427,7 +427,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -466,7 +466,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -480,7 +480,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -499,13 +499,13 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -517,7 +517,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -531,7 +531,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -589,7 +589,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -603,7 +603,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -622,13 +622,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -638,7 +638,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -655,7 +655,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -671,7 +671,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -728,7 +728,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -747,13 +747,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -770,7 +770,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -833,7 +833,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -847,7 +847,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -866,13 +866,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -882,7 +882,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -899,7 +899,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -913,7 +913,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -1118,7 +1118,7 @@ def test_serialize_profiler_config(
     assert ParameterBuilderConfig(
         **profiler.rules[0].parameter_builders[0].to_json_dict()
     ).to_json_dict() == {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
         "class_name": "MetricMultiBatchParameterBuilder",
         "name": "my_parameter",
         "metric_name": "my_metric",
@@ -1137,7 +1137,7 @@ def test_serialize_profiler_config(
     assert DefaultExpectationConfigurationBuilder(
         **profiler.rules[0].expectation_configuration_builders[0].to_json_dict()
     ).to_json_dict() == {
-        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
         "class_name": "DefaultExpectationConfigurationBuilder",
         "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "validation_parameter_builder_configs": None,

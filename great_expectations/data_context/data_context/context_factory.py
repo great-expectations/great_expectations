@@ -90,7 +90,7 @@ class ProjectManager:
         if not self.__project:
             raise RuntimeError(
                 "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."
+                + "Please call `great_expectations.get_context()` first, then try your action again."  # noqa: E501
             )
         return self.__project
 
@@ -230,10 +230,10 @@ class ProjectManager:
 
         expected_type = expected_ctx_types[mode]
         if not isinstance(context, expected_type):
-            # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context
+            # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context  # noqa: E501
             # this kind of thing should not be possible but there may be some edge cases
             raise ValueError(
-                f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."
+                f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."  # noqa: E501
             )
 
         return context
@@ -330,7 +330,7 @@ class ProjectManager:
 
         if cloud_mode and not config_available:
             raise GXCloudConfigurationError(
-                "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
+                "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"  # noqa: E501
             )
 
         return None
@@ -398,7 +398,7 @@ def get_context(  # type: ignore[overload-overlap]
 @overload
 def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
-    context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
+    context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be  # noqa: E501
     project_root_dir: None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
@@ -412,7 +412,7 @@ def get_context(  # type: ignore[overload-overlap]
 def get_context(  # type: ignore[overload-overlap]
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
-    project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
+    project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be  # noqa: E501
     runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
@@ -532,7 +532,7 @@ def get_context(  # noqa: PLR0913
 
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
-    """
+    """  # noqa: E501
     return project_manager.get_project(
         project_config=project_config,
         context_root_dir=context_root_dir,

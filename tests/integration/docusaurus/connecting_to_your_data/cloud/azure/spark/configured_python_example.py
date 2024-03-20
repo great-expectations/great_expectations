@@ -31,7 +31,7 @@ datasource_config = {
             "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
-                "pattern": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{4})-(\\d{2})\\.csv",
+                "pattern": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{4})-(\\d{2})\\.csv",  # noqa: E501
                 "group_names": ["year", "month"],
             },
         },

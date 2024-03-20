@@ -698,7 +698,7 @@ def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).
+        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).  # noqa: E501
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
@@ -1015,7 +1015,7 @@ def bad_batching_regex_config(
 ) -> tuple[re.Pattern, TestConnectionError]:
     batching_regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
-        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
+        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""  # noqa: E501
     )
     return batching_regex, test_connection_error
 
@@ -1076,7 +1076,7 @@ def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     request = asset.build_batch_request({"year": "2018"})
     request_before_call = copy.deepcopy(request)
     batches = asset.get_batch_list_from_batch_request(request)
-    # We assert the request before the call to get_batch_list_from_batch_request is equal to the request after the
+    # We assert the request before the call to get_batch_list_from_batch_request is equal to the request after the  # noqa: E501
     # call. This test exists because this call was modifying the request.
     assert request == request_before_call
     # We get all 12 batches, one for each month of 2018.
@@ -1154,7 +1154,7 @@ def column_value_partitioner():
 
 class TestPartitionerDirectoryAsset:
     @pytest.mark.unit
-    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_request_options(
+    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_request_options(  # noqa: E501
         self, directory_asset, column_value_partitioner
     ):
         assert directory_asset.get_batch_request_options_keys(

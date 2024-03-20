@@ -65,7 +65,7 @@ class Rule(SerializableDictDot):
             domain_builder: A Domain Builder object used to build rule data domain
             parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
             expectation_configuration_builders: A list of Expectation Configuration Builders
-        """
+        """  # noqa: E501
         self._name = name
 
         if variables is None:
@@ -112,7 +112,7 @@ class Rule(SerializableDictDot):
 
         Returns:
             RuleState representing effect of executing Rule
-        """
+        """  # noqa: E501
         if not reconciliation_directives:
             reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
 
@@ -194,7 +194,7 @@ class Rule(SerializableDictDot):
 
     @property
     def variables(self) -> ParameterContainer:
-        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
+        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.  # noqa: E501
         return copy.deepcopy(self._variables)
 
     @variables.setter
@@ -260,7 +260,7 @@ class Rule(SerializableDictDot):
         reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         dict_obj: dict = self.to_dict()
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
@@ -277,7 +277,7 @@ class Rule(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -293,7 +293,7 @@ class Rule(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:

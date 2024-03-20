@@ -78,7 +78,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     See Also:
         [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -95,7 +95,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.median",)
     success_keys = (
         "min_value",

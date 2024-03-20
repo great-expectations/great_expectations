@@ -227,7 +227,7 @@ def test__get_test_results():
         ),
     )
     for result in test_results:
-        # Abe: 1/1/2022: I'm not sure this is the behavior we want long term. How does backend relate to ExecutionEngine?
+        # Abe: 1/1/2022: I'm not sure this is the behavior we want long term. How does backend relate to ExecutionEngine?  # noqa: E501
         if result.backend == "pandas":
             assert result.test_passed is True
         elif result.backend == "sqlite":

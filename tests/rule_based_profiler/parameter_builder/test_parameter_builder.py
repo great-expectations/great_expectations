@@ -31,7 +31,7 @@ object.  When one "ParameterBuilder" specifies dependencies on other "ParameterB
 "ParameterBuilder.resolve_evaluation_dependencies()" will process these dependencies recursively.  Hence, tests are
 provided for behavior of this method.  Utility method "get_fully_qualified_parameter_names()", whose thorough tests
 are elsewhere, is used to query shared memory.
-"""
+"""  # noqa: E501
 
 
 class DummyParameterBuilder(ParameterBuilder):
@@ -40,7 +40,7 @@ class DummyParameterBuilder(ParameterBuilder):
     of public interface method, "ParameterBuilder.build_parameters()", is called (as proof that
     "evaluation_parameter_builder" dependencies of given "ParameterBuilder" are executed).  All production functionality
     is "mocked", and "call_count" property is introduced and incremented in relevant method for assertions in tests.
-    """
+    """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = ParameterBuilder.exclude_field_names | {
         "call_count",
@@ -112,7 +112,7 @@ def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_speci
 
     """
     This assertion shows that shared memory is empty: no "ParameterBuilder" dependencies given to compute values of.
-    """
+    """  # noqa: E501
     assert not all_fully_qualified_parameter_names
 
 
@@ -162,7 +162,7 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     dependent "ParameterBuilder", both "ParameterBuilder" dependencies computed their values (this was accomplished by
     "my_dependent_parameter_builder.resolve_evaluation_dependencies()", which ran "build_parameters()" method of each
     dependency "ParameterBuilder" object).  Consequently, shared memory namespace became filled with dependency results.
-    """
+    """  # noqa: E501
     assert all_fully_qualified_parameter_names == [
         f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
         f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
@@ -220,7 +220,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     Instead of defining constant list of known fully qualified parameter names, here,
     "get_fully_qualified_parameter_names()" is used as utility in order to faithfully track actual contents of shared
     memory as ParameterBuilders are executed; otherwise, initial state of shared memory would not be known exactly.
-    """
+    """  # noqa: E501
     dependencies_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
         domain=domain,
         variables=None,
@@ -229,19 +229,19 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
 
     """
     These assertions show that both "ParameterBuilder" dependencies computed their values (and stored in shared memory).
-    """
-    # First evaluation "ParameterBuilder" dependency computed its value, and it was stored in shared memory.
+    """  # noqa: E501
+    # First evaluation "ParameterBuilder" dependency computed its value, and it was stored in shared memory.  # noqa: E501
     assert (
         my_evaluation_dependency_0_parameter_builder.raw_fully_qualified_parameter_name
         in dependencies_fully_qualified_parameter_names
-        and my_evaluation_dependency_0_parameter_builder.json_serialized_fully_qualified_parameter_name
+        and my_evaluation_dependency_0_parameter_builder.json_serialized_fully_qualified_parameter_name  # noqa: E501
         in dependencies_fully_qualified_parameter_names
     )
-    # Second evaluation "ParameterBuilder" dependency computed its value, and it was stored in shared memory.
+    # Second evaluation "ParameterBuilder" dependency computed its value, and it was stored in shared memory.  # noqa: E501
     assert (
         my_evaluation_dependency_1_parameter_builder.raw_fully_qualified_parameter_name
         in dependencies_fully_qualified_parameter_names
-        and my_evaluation_dependency_1_parameter_builder.json_serialized_fully_qualified_parameter_name
+        and my_evaluation_dependency_1_parameter_builder.json_serialized_fully_qualified_parameter_name  # noqa: E501
         in dependencies_fully_qualified_parameter_names
     )
 
@@ -255,7 +255,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    # Assert that precomuted evaluation parameters are not recomputed (call_count for each should remain at 1).
+    # Assert that precomuted evaluation parameters are not recomputed (call_count for each should remain at 1).  # noqa: E501
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
@@ -328,7 +328,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     """
     This assertion shows that both "ParameterBuilder" dependencies computed their values, and that dependent
     "ParameterBuilder" also computed its value (as all names are in list).
-    """
+    """  # noqa: E501
     assert sorted(all_fully_qualified_parameter_names) == sorted(
         [
             f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
@@ -391,7 +391,7 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     """
     This assertion shows that first "ParameterBuilder" dependency computed its value, but second "ParameterBuilder"
     dependency and dependent "ParameterBuilder" have not yet computed their values (as can be seen by parameter names).
-    """
+    """  # noqa: E501
     assert dependencies_fully_qualified_parameter_names == [
         f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
         f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
@@ -415,7 +415,7 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     """
     This assertion shows that both "ParameterBuilder" dependencies computed their values, and that dependent
     "ParameterBuilder" also computed its value (as all names are in list).
-    """
+    """  # noqa: E501
     assert sorted(all_fully_qualified_parameter_names) == sorted(
         dependencies_fully_qualified_parameter_names
         + [

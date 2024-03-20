@@ -12,7 +12,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     SimpleDateFormatStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (  # noqa: E501
     DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -70,7 +70,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 
     assert (
         str(e.value)
-        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
+        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."  # noqa: E501
     )
 
 

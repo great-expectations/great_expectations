@@ -205,7 +205,7 @@ def test_get_batch_request_from_acceptable_arguments_block_data_connector_query(
 
 
 @pytest.mark.unit
-def test_get_batch_request_from_acceptable_arguments_block_partitioner_sampler_batch_spec_passthrough(
+def test_get_batch_request_from_acceptable_arguments_block_partitioner_sampler_batch_spec_passthrough(  # noqa: E501
     base_block: Dict[str, str],
 ):
     # partitioner and sampling as batch_spec_passthrough

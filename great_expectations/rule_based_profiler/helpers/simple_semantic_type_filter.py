@@ -39,7 +39,7 @@ def _is_sequence_of(sequence: Sequence, type_: Type[T]) -> TypeGuard[Sequence[T]
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
     """
     This class provides default implementation methods, any of which can be overwritten with different mechanisms.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -88,7 +88,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 ]
 
             raise ValueError(
-                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."  # noqa: E501
             )
 
         raise ValueError("Unrecognized semantic_types directive.")
@@ -138,7 +138,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_types_dict_list: List[Dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:
-        # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
+        # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.  # noqa: E501
         column_types_dict_list = list(
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]
@@ -153,7 +153,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
-    """
+    """  # noqa: E501
             )
 
         column_type: str = str(column_types_dict_list[0]["type"]).upper()

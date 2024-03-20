@@ -37,7 +37,7 @@ class TaxiTestData:
         self._test_column_name = test_column_name
         self._test_column_names = test_column_names
 
-        # Convert specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
+        # Convert specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.  # noqa: E501
         convert_string_columns_to_datetime(
             df=test_df, column_names_to_convert=column_names_to_convert
         )

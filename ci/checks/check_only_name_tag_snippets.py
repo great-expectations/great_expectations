@@ -33,7 +33,7 @@ context = gx.get_context()
 # </snippet>
 
 Adherence to this pattern is assertained by the present checker module.
-"""
+"""  # noqa: E501
 
 import pathlib
 import re
@@ -111,7 +111,7 @@ def main() -> None:
     new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(
-            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'
+            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'  # noqa: E501
         )
         for line in new_violations:
             print(line)

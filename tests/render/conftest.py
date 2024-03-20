@@ -25,7 +25,7 @@ def empty_data_context_module_scoped(tmp_path_factory):
 @pytest.fixture
 def titanic_profiled_name_column_evrs():
     # This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
+    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column  # noqa: E501
     from great_expectations.render.renderer.renderer import Renderer
 
     with open(

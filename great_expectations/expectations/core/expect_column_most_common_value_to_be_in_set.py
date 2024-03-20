@@ -69,7 +69,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
           representing the most common values in the column, which is often a single element... if there \
           is a tie for most common among multiple values, observed_value will contain a single copy of each \
           most common value
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
     ties_okay: Union[bool, None] = None
@@ -84,7 +84,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.most_common_value",)
     success_keys = (
         "value_set",

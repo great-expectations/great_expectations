@@ -56,7 +56,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
 
     See Also:
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
-    """
+    """  # noqa: E501
 
     value: Union[int, EvaluationParameterDict]
 

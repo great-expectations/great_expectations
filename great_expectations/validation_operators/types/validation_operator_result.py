@@ -37,7 +37,7 @@ class ValidationOperatorResult(DictDot):
             "actions_results": {}
         }
     }
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,

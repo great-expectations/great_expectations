@@ -103,7 +103,7 @@ class LegacyDatasource:
             documentation_completeness: Minimal
             bug_risk: Unknown
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     recognized_batch_parameters = {"limit"}
 
@@ -143,7 +143,7 @@ class LegacyDatasource:
         Returns:
             A complete datasource configuration.
 
-        """
+        """  # noqa: E501
         verify_dynamic_loading_support(module_name=module_name)
         class_ = load_class(class_name=class_name, module_name=module_name)
         configuration = class_.build_configuration(
@@ -176,7 +176,7 @@ class LegacyDatasource:
         if isinstance(data_asset_type, str):
             warnings.warn(
                 "String-only configuration for data_asset_type is deprecated as of v0.7.11. "
-                "As support will be removed in v0.16, please use module_name and class_name instead.",
+                "As support will be removed in v0.16, please use module_name and class_name instead.",  # noqa: E501
                 DeprecationWarning,
             )
         self._data_asset_type = data_asset_type
@@ -187,9 +187,9 @@ class LegacyDatasource:
         if batch_kwargs_generators is not None:
             self._datasource_config["batch_kwargs_generators"] = batch_kwargs_generators
 
-        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
-        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).  # noqa: E501
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.  # noqa: E501
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.  # noqa: E501
         self._raw_config = self._datasource_config
 
     @property
@@ -233,7 +233,7 @@ class LegacyDatasource:
 
         Returns:
              BatchKwargGenerator (BatchKwargGenerator)
-        """
+        """  # noqa: E501
         kwargs["class_name"] = class_name
         generator = self._build_batch_kwargs_generator(**kwargs)
         if "batch_kwargs_generators" not in self._datasource_config:
@@ -243,7 +243,7 @@ class LegacyDatasource:
         return generator
 
     def _build_batch_kwargs_generator(self, **kwargs):
-        """Build a BatchKwargGenerator using the provided configuration and return the newly-built generator."""
+        """Build a BatchKwargGenerator using the provided configuration and return the newly-built generator."""  # noqa: E501
         generator = instantiate_class_from_config(
             config=kwargs,
             runtime_environment={"datasource": self},
@@ -278,7 +278,7 @@ class LegacyDatasource:
             )
         else:
             raise ValueError(
-                f"Unable to load batch kwargs generator {name} -- no configuration found or invalid configuration."
+                f"Unable to load batch kwargs generator {name} -- no configuration found or invalid configuration."  # noqa: E501
             )
         generator = self._build_batch_kwargs_generator(**generator_config)
         self._batch_kwargs_generators[name] = generator
@@ -310,7 +310,7 @@ class LegacyDatasource:
 
         Returns:
             batch_kwargs: Result will include both parameters passed via argument and configured parameters.
-        """
+        """  # noqa: E501
         batch_kwargs = self._datasource_config.get("batch_kwargs", {})
 
         if limit is not None:
@@ -337,7 +337,7 @@ class LegacyDatasource:
         Returns:
             Batch
 
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def get_available_data_asset_names(self, batch_kwargs_generator_names=None):
@@ -362,7 +362,7 @@ class LegacyDatasource:
                   ...
                 }
 
-        """
+        """  # noqa: E501
         available_data_asset_names = {}
         if batch_kwargs_generator_names is None:
             batch_kwargs_generator_names = [

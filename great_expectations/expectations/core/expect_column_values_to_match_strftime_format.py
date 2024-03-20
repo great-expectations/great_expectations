@@ -65,7 +65,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     strftime_format: Union[str, EvaluationParameterDict]
 
@@ -171,7 +171,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             template_str = "values must match the following strftime format: $strftime_format"
             if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

@@ -176,7 +176,7 @@ def test_evaluation_parameter_store_methods(
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
         "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,
+        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
     }
 
 

@@ -71,7 +71,7 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
 
         if (
             metric.metric_name
-            == f"column_values.value_length.equals.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+            == f"column_values.value_length.equals.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"  # noqa: E501
         ):
             dependencies[
                 f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
@@ -246,7 +246,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
 
         if (
             metric.metric_name
-            == f"column_values.value_length.between.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+            == f"column_values.value_length.between.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"  # noqa: E501
         ):
             dependencies[
                 f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"

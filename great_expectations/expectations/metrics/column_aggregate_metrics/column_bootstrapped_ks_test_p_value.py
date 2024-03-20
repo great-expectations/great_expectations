@@ -40,7 +40,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
-        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
+        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object  # noqa: E501
         if (partition_object["bins"][0] == -np.inf) or (partition_object["bins"][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
@@ -56,10 +56,10 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
             bootstrap_samples = 1000
 
         if bootstrap_sample_size is None:
-            # Sampling too many elements (or not bootstrapping) will make the test too sensitive to the fact that we've
+            # Sampling too many elements (or not bootstrapping) will make the test too sensitive to the fact that we've  # noqa: E501
             # compressed via a partition.
 
-            # Sampling too few elements will make the test insensitive to significant differences, especially
+            # Sampling too few elements will make the test insensitive to significant differences, especially  # noqa: E501
             # for nonoverlapping ranges.
             bootstrap_sample_size = len(partition_object["weights"]) * 2
 

@@ -54,7 +54,7 @@ def test_simple_sematic_filter_defaults_to_all_columns(empty_data_context):
         data_connector_name="default_runtime_data_connector_name",
         data_asset_name="default_name",  # this can be anything that identifies this data
         runtime_parameters={
-            "query": "SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10"
+            "query": "SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10"  # noqa: E501
         },
         batch_identifiers={"default_identifier_name": "default_identifier"},
     )

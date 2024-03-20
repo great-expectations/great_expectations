@@ -95,15 +95,15 @@ def run_checkpoint_and_data_doc(
     expected_metric_values = {
         "expect_table_row_count_to_be_between": {
             "value": 10000,
-            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",
+            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",  # noqa: E501
         },
         "expect_column_max_to_be_between": {
             "value": 6,
-            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
         "expect_column_median_to_be_between": {
             "value": 1,
-            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
     }
     assert len(validation_result.results) == 3
@@ -152,7 +152,7 @@ def run_checkpoint_and_data_doc(
     with open(path) as f:
         data_doc_index = f.read()
 
-    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.
+    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.  # noqa: E501
     assert "ge-success-icon" in data_doc_index
     assert "ge-failed-icon" not in data_doc_index
 
@@ -215,7 +215,7 @@ def run_batch_head(  # noqa: C901, PLR0915
             # if n_rows is greater than the total_row_count, we only expect total_row_count rows
             elif n_rows > total_row_count:
                 assert head_data_row_count == total_row_count
-            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
+            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows  # noqa: E501
             elif n_rows < 0 and abs(n_rows) > total_row_count:
                 assert head_data_row_count == 0
             # if n_rows is negative, we expect all but the final abs(n_rows)

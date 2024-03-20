@@ -225,13 +225,13 @@ def test__migrate_to_cloud_outputs_warnings(
     if not enable_usage_stats:
         expected_log_count += 1
         assert (
-            "Please note that by migrating your context to GX Cloud your new Cloud Data Context will emit usage statistics."
+            "Please note that by migrating your context to GX Cloud your new Cloud Data Context will emit usage statistics."  # noqa: E501
             in aggregated_log_output
         )
     if include_datasources:
         expected_log_count += 1
         assert (
-            "Since your existing context includes one or more datasources, please note that if your credentials are included"
+            "Since your existing context includes one or more datasources, please note that if your credentials are included"  # noqa: E501
             in aggregated_log_output
         )
 
@@ -247,7 +247,7 @@ def test__migrate_to_cloud_outputs_warnings(
             [
                 "Thank you for using Great Expectations!",
                 "We will now begin the migration process to GX Cloud.",
-                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
                 "Then we will send each of your validation results.",
                 "[Step 1/4]: Bundling context configuration",
                 "Bundled 1 Datasource(s):",
@@ -264,7 +264,7 @@ def test__migrate_to_cloud_outputs_warnings(
             [
                 "Thank you for using Great Expectations!",
                 "We will now begin the migration process to GX Cloud.",
-                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
                 "Then we will send each of your validation results.",
                 "[Step 1/4]: Bundling context configuration",
                 "Bundled 1 Datasource(s):",
@@ -274,8 +274,8 @@ def test__migrate_to_cloud_outputs_warnings(
                 "[Step 3/4]: Sending context configuration",
                 "[Step 4/4]: Sending validation results",
                 "Success!",
-                "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
-                "If you continue to use your existing Data Context your configurations could become out of sync.",
+                "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",  # noqa: E501
+                "If you continue to use your existing Data Context your configurations could become out of sync.",  # noqa: E501
             ],
         ),
     ],
@@ -315,7 +315,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the Cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
@@ -355,7 +355,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the Cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
@@ -366,8 +366,8 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "[Step 4/4]: Sending validation results",
         "Error sending validation result 'some_key' (1/1)",
         "Partial success!",
-        "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
-        "If you continue to use your existing Data Context your configurations could become out of sync.",
+        "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",  # noqa: E501
+        "If you continue to use your existing Data Context your configurations could become out of sync.",  # noqa: E501
         "Please note that there were 1 validation result(s) that were not successfully migrated",
         "To retry uploading these validation results, you can use the following code snippet:",
         "migrator.retry_migrate_validation_results()",

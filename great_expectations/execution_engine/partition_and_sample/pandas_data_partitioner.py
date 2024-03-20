@@ -164,7 +164,7 @@ class PandasDataPartitioner(DataPartitioner):
 
         Returns:
             Filtered spark DataFrame.
-        """
+        """  # noqa: E501
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -234,7 +234,7 @@ class PandasDataPartitioner(DataPartitioner):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                        Reference to {hash_function_name} cannot be found."""
+                        Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
         matching_rows = df[column_name].map(

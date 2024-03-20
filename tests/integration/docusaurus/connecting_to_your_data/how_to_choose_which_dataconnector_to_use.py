@@ -5,7 +5,7 @@ yaml = YAMLHandler()
 context = gx.get_context()
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -38,7 +38,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -90,7 +90,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml_2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml_2">  # noqa: E501
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -129,7 +129,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2">  # noqa: E501
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

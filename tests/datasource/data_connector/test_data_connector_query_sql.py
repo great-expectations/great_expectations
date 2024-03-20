@@ -190,7 +190,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
 ):
     my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()
@@ -222,7 +222,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
 ):
     my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()
@@ -253,12 +253,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
     assert expected_batch_definition == returned_batch_definition_list[0]
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(  # noqa: E501
     create_db_and_instantiate_simple_sql_datasource,
 ):
     my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.  # noqa: E501
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()

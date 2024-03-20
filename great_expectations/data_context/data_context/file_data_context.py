@@ -39,7 +39,7 @@ yaml.default_flow_style = False
 
 @public_api
 class FileDataContext(SerializableDataContext):
-    """Subclass of AbstractDataContext that contains functionality necessary to work in a filesystem-backed environment."""
+    """Subclass of AbstractDataContext that contains functionality necessary to work in a filesystem-backed environment."""  # noqa: E501
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class FileDataContext(SerializableDataContext):
                 searches for the file based on conventions for project subdirectories.
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
-        """
+        """  # noqa: E501
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir=context_root_dir,
             project_root_dir=project_root_dir,
@@ -127,7 +127,7 @@ class FileDataContext(SerializableDataContext):
             "root_directory": self.root_directory,
             "data_context": self,
             # By passing this value in our runtime_environment,
-            # we ensure that the same exact context (memory address and all) is supplied to the Store backend
+            # we ensure that the same exact context (memory address and all) is supplied to the Store backend  # noqa: E501
         }
 
         datasource_store = DatasourceStore(
@@ -166,7 +166,7 @@ class FileDataContext(SerializableDataContext):
                 if fluent_datasources:
                     self.fluent_config.update_datasources(datasources=fluent_datasources)
                     logger.info(
-                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
+                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"  # noqa: E501
                     )
                     fluent_json_dict: dict[str, JSONValues] = self.fluent_config._json_dict()
                     fluent_json_dict = (
@@ -196,7 +196,7 @@ class FileDataContext(SerializableDataContext):
             )
         except YAMLError as err:
             raise gx_exceptions.InvalidConfigurationYamlError(
-                f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"
+                f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"  # noqa: E501
             )
         except OSError:
             raise gx_exceptions.ConfigNotFoundError()
