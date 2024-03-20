@@ -1004,7 +1004,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                             rule.domain_builder, domain_property_key
                         )
                         domain_property_value = (
-                            BaseRuleBasedProfiler._get_effective_domain_builder_property_value(  # noqa: PLW2901
+                            BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
                                 dest_property_value=domain_property_value,
                                 source_property_value=existing_domain_property_value,
                             )
