@@ -52,9 +52,7 @@ SINGLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
     ),
     pytest.param(None, marks=pytest.mark.xfail(strict=True), id="date_parts=None"),
     pytest.param([], marks=pytest.mark.xfail(strict=True), id="date_parts=[]"),
-    pytest.param(
-        ["invalid"], marks=pytest.mark.xfail(strict=True), id="invalid date_parts"
-    ),
+    pytest.param(["invalid"], marks=pytest.mark.xfail(strict=True), id="invalid date_parts"),
     pytest.param(
         "invalid",
         marks=pytest.mark.xfail(strict=True),

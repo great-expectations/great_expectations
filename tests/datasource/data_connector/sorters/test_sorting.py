@@ -23,81 +23,61 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="james_20200810_1003",
-        batch_identifiers=IDDict(
-            {"name": "james", "timestamp": "20200810", "price": "1003"}
-        ),
+        batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
     )
     b = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="b",
         data_asset_name="abe_20200809_1040",
-        batch_identifiers=IDDict(
-            {"name": "abe", "timestamp": "20200809", "price": "1040"}
-        ),
+        batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
     )
     c = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="c",
         data_asset_name="eugene_20200809_1500",
-        batch_identifiers=IDDict(
-            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-        ),
+        batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
     )
     d = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="d",
         data_asset_name="alex_20200819_1300",
-        batch_identifiers=IDDict(
-            {"name": "alex", "timestamp": "20200819", "price": "1300"}
-        ),
+        batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
     )
     e = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="e",
         data_asset_name="alex_20200809_1000",
-        batch_identifiers=IDDict(
-            {"name": "alex", "timestamp": "20200809", "price": "1000"}
-        ),
+        batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
     )
     f = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="f",
         data_asset_name="will_20200810_1001",
-        batch_identifiers=IDDict(
-            {"name": "will", "timestamp": "20200810", "price": "1001"}
-        ),
+        batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
     )
     g = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="g",
         data_asset_name="eugene_20201129_1900",
-        batch_identifiers=IDDict(
-            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-        ),
+        batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
     )
     h = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="h",
         data_asset_name="will_20200809_1002",
-        batch_identifiers=IDDict(
-            {"name": "will", "timestamp": "20200809", "price": "1002"}
-        ),
+        batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
     )
     i = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="i",
         data_asset_name="james_20200811_1009",
-        batch_identifiers=IDDict(
-            {"name": "james", "timestamp": "20200811", "price": "1009"}
-        ),
+        batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
     )
     j = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="j",
         data_asset_name="james_20200713_1567",
-        batch_identifiers=IDDict(
-            {"name": "james", "timestamp": "20200713", "price": "1567"}
-        ),
+        batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
     )
     return [a, b, c, d, e, f, g, h, i, j]
 
@@ -332,15 +312,11 @@ def test_custom_list(periodic_table_of_elements):
 def test_dictionary(example_hierarchical_batch_def_list):
     [a, b, c, d, e, f, g, h, i, j] = example_hierarchical_batch_def_list
     batch_list = [a, b, c, d, e, f, g, h, i, j]
-    my_sorter = DictionarySorter(
-        name="date", orderby="desc", key_reference_list=["year", "month"]
-    )
+    my_sorter = DictionarySorter(name="date", orderby="desc", key_reference_list=["year", "month"])
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [d, h, b, i, j, a, g, e, f, c]
 
-    my_sorter = DictionarySorter(
-        name="date", orderby="asc", key_reference_list=["year", "month"]
-    )
+    my_sorter = DictionarySorter(name="date", orderby="asc", key_reference_list=["year", "month"])
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
 
@@ -360,15 +336,11 @@ def test_dictionary(example_hierarchical_batch_def_list):
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
 
-    my_sorter = DictionarySorter(
-        name="date", orderby="desc", key_reference_list=["month"]
-    )
+    my_sorter = DictionarySorter(name="date", orderby="desc", key_reference_list=["month"])
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [d, h, b, g, e, i, f, j, a, c]
 
-    my_sorter = DictionarySorter(
-        name="date", orderby="asc", key_reference_list=["month"]
-    )
+    my_sorter = DictionarySorter(name="date", orderby="asc", key_reference_list=["month"])
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [a, c, f, j, e, i, b, g, h, d]
 
@@ -392,34 +364,26 @@ def test_example_file_list_sorters(example_batch_def_list):
     batch_list = [a, b, c, d, e, f, g, h, i, j]
 
     name_sorter = LexicographicSorter(name="name", orderby="desc")
-    timestamp_sorter = DateTimeSorter(
-        name="timestamp", datetime_format="%Y%m%d", orderby="desc"
-    )
+    timestamp_sorter = DateTimeSorter(name="timestamp", datetime_format="%Y%m%d", orderby="desc")
     price_sorter = NumericSorter(name="price", orderby="desc")
 
     # 1. sorting just by name
     sorters_list = [name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(
-            batch_definitions=batch_list
-        )
+        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
     assert sorted_batch_list == [f, h, a, i, j, c, g, d, e, b]
 
     # 2. sorting by timestamp + name
     sorters_list = [timestamp_sorter, name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(
-            batch_definitions=batch_list
-        )
+        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
     assert sorted_batch_list == [g, d, i, a, f, b, c, e, h, j]
 
     # 3. sorting just by price + timestamp + name
     sorters_list = [price_sorter, timestamp_sorter, name_sorter]
     sorters: Iterator[Sorter] = reversed(sorters_list)
     for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(
-            batch_definitions=batch_list
-        )
+        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
     assert sorted_batch_list == [g, j, c, d, b, i, a, h, f, e]

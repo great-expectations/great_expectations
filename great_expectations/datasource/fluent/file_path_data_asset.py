@@ -40,7 +40,7 @@ from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
     FilePathDataConnector,
     file_get_unfiltered_batch_definition_list_fn,
 )
@@ -102,12 +102,10 @@ class _FilePathDataAsset(DataAsset):
     )
     connect_options: Mapping = pydantic.Field(
         default_factory=dict,
-        description="Optional filesystem specific advanced parameters for connecting to data assets",
+        description="Optional filesystem specific advanced parameters for connecting to data assets",  # noqa: E501
     )
 
-    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
-        default="batch_request_param_"
-    )
+    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
     _regex_parser: RegExParser = pydantic.PrivateAttr()
 
     _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
@@ -117,9 +115,7 @@ class _FilePathDataAsset(DataAsset):
     # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: DataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
-    _test_connection_error_message: str = pydantic.PrivateAttr(
-        "Could not connect to your asset"
-    )
+    _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
     _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
         pydantic.PrivateAttr(
             default={
@@ -161,15 +157,11 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    def get_partitioner_implementation(
-        self, abstract_partitioner: Partitioner
-    ) -> SparkPartitioner:
-        PartitionerClass = self._partitioner_implementation_map.get(
-            type(abstract_partitioner)
-        )
+    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SparkPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if PartitionerClass is None:
             raise ValueError(
-                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "  # noqa: E501
             )
         return PartitionerClass(**abstract_partitioner.dict())
 
@@ -178,9 +170,7 @@ class _FilePathDataAsset(DataAsset):
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (
-            FILE_PATH_BATCH_SPEC_KEY,
-        )
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
             spark_partitioner = self.get_partitioner_implementation(partitioner)
             option_keys += tuple(spark_partitioner.param_names)
@@ -212,7 +202,7 @@ class _FilePathDataAsset(DataAsset):
             Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
             applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
             local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
-        """
+        """  # noqa: E501
         if options:
             for option, value in options.items():
                 if (
@@ -221,7 +211,7 @@ class _FilePathDataAsset(DataAsset):
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(
-                        f"All batching_regex matching options must be strings. The value of '{option}' is "
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
                         f"not a string: {value}"
                     )
 
@@ -229,9 +219,7 @@ class _FilePathDataAsset(DataAsset):
             options=options,
             partitioner=partitioner,
         ):
-            allowed_keys = set(
-                self.get_batch_request_options_keys(partitioner=partitioner)
-            )
+            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -278,9 +266,7 @@ class _FilePathDataAsset(DataAsset):
             )
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         self._validate_batch_request(batch_request)
 
         execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
@@ -297,12 +283,8 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchMetadata
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._data_connector.build_batch_spec(
-                batch_definition=batch_definition
-            )
-            batch_spec_options = self._batch_spec_options_from_batch_request(
-                batch_request
-            )
+            batch_spec = self._data_connector.build_batch_spec(batch_definition=batch_definition)
+            batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
             batch_spec.update(batch_spec_options)
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -310,9 +292,7 @@ class _FilePathDataAsset(DataAsset):
             )
 
             fully_specified_batch_request = copy.deepcopy(batch_request)
-            fully_specified_batch_request.options.update(
-                batch_definition.batch_identifiers
-            )
+            fully_specified_batch_request.options.update(batch_definition.batch_identifiers)
             batch_metadata = self._get_batch_metadata_from_batch_request(
                 batch_request=fully_specified_batch_request
             )
@@ -329,8 +309,8 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX-MOVE_SORTING_INTO_FILE_PATH_DATA_CONNECTOR_ON_BATCH_DEFINITION_OBJECTS</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
+        # TODO: <Alex>ALEX-MOVE_SORTING_INTO_FILE_PATH_DATA_CONNECTOR_ON_BATCH_DEFINITION_OBJECTS</Alex>  # noqa: E501
         self.sort_batches(batch_list)
 
         return batch_list
@@ -345,26 +325,22 @@ class _FilePathDataAsset(DataAsset):
 
         Returns:
             List of batch definitions.
-        """
+        """  # noqa: E501
         if batch_request.partitioner:
-            spark_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
-            # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+            # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options  # noqa: E501
             valid_options = self.get_batch_request_options_keys(
                 partitioner=batch_request.partitioner
             )
             batch_request_options_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
             for param_name in spark_partitioner.param_names:
-                # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.
+                # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.  # noqa: E501
                 if batch_request_options_counts[param_name] == 1:
-                    batch_request_copy_without_partitioner_kwargs.options.pop(
-                        param_name
-                    )
+                    batch_request_copy_without_partitioner_kwargs.options.pop(param_name)
                 else:
                     warnings.warn(
-                        f"The same option name is applied for your batch regex and partitioner config: {param_name}"
+                        f"The same option name is applied for your batch regex and partitioner config: {param_name}"  # noqa: E501
                     )
             batch_definition_list = self._data_connector.get_batch_definition_list(
                 batch_request=batch_request_copy_without_partitioner_kwargs
@@ -375,9 +351,7 @@ class _FilePathDataAsset(DataAsset):
             )
         return batch_definition_list
 
-    def _batch_spec_options_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> dict:
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
 
         Args:
@@ -388,7 +362,7 @@ class _FilePathDataAsset(DataAsset):
         """
         get_reader_options_include: set[str] | None = self._get_reader_options_include()
         if not get_reader_options_include:
-            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`
+            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`  # noqa: E501
             get_reader_options_include = None
         batch_spec_options = {
             "reader_method": self._get_reader_method(),
@@ -402,9 +376,7 @@ class _FilePathDataAsset(DataAsset):
         }
 
         if batch_request.partitioner:
-            spark_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
             batch_spec_options["partitioner_method"] = spark_partitioner.method_name
             partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
             partitioner_kwargs["batch_identifiers"] = (
@@ -428,24 +400,24 @@ class _FilePathDataAsset(DataAsset):
                 return None
         except Exception as e:
             raise TestConnectionError(
-                f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"
+                f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"  # noqa: E501
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
     def get_unfiltered_batch_definition_list_fn(
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""  # noqa: E501
         return file_get_unfiltered_batch_definition_list_fn
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
+work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
         )
 
     def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for File-Path style DataAsset processing."""
+to use as its "include" directive for File-Path style DataAsset processing."""  # noqa: E501
         )

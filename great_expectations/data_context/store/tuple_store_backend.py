@@ -27,7 +27,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     For example, in the following template path: expectations/{0}/{1}/{2}/prefix-{2}.json, keys must have
     three components.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -54,9 +54,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.platform_specific_separator = platform_specific_separator
 
         if filepath_template is not None and filepath_suffix is not None:
-            raise ValueError(
-                "filepath_suffix may only be used when filepath_template is None"
-            )
+            raise ValueError("filepath_suffix may only be used when filepath_template is None")
 
         self.filepath_template = filepath_template
         if filepath_prefix and len(filepath_prefix) > 0:
@@ -112,11 +110,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Handle store_backend_id separately
         if key == self.STORE_BACKEND_ID_KEY:
             filepath = f"{self.filepath_prefix or ''}{'/' if self.filepath_prefix else ''}{key[0]}"
-            return (
-                filepath
-                if not self.platform_specific_separator
-                else os.path.normpath(filepath)
-            )
+            return filepath if not self.platform_specific_separator else os.path.normpath(filepath)
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
         else:
@@ -142,9 +136,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 not filepath.startswith(self.filepath_prefix)
                 and len(filepath) >= len(self.filepath_prefix) + 1
             ):
-                # If filepath_prefix is set, we expect that it is the first component of a valid filepath.
+                # If filepath_prefix is set, we expect that it is the first component of a valid filepath.  # noqa: E501
                 raise ValueError(
-                    "filepath must start with the filepath_prefix when one is set by the store_backend"
+                    "filepath must start with the filepath_prefix when one is set by the store_backend"  # noqa: E501
                 )
             else:
                 # Remove the prefix before processing
@@ -153,9 +147,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         if self.filepath_suffix:
             if not filepath.endswith(self.filepath_suffix):
-                # If filepath_suffix is set, we expect that it is the last component of a valid filepath.
+                # If filepath_suffix is set, we expect that it is the last component of a valid filepath.  # noqa: E501
                 raise ValueError(
-                    "filepath must end with the filepath_suffix when one is set by the store_backend"
+                    "filepath must end with the filepath_suffix when one is set by the store_backend"  # noqa: E501
                 )
             else:
                 # Remove the suffix before processing
@@ -163,7 +157,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         if self.filepath_template:
             # filepath_template is always specified with forward slashes, but it is then
-            # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
+            # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath  # noqa: E501
             if self.platform_specific_separator:
                 filepath_template = os.path.join(  # noqa: PTH118
                     *self.filepath_template.split("/")
@@ -175,8 +169,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Convert the template to a regex
             indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
             tuple_index_list = [
-                f"(?P<tuple_index_{i}>.*)"
-                for i in range(len(indexed_string_substitutions))
+                f"(?P<tuple_index_{i}>.*)" for i in range(len(indexed_string_substitutions))
             ]
             intermediate_filepath_regex = re.sub(
                 r"{\d+}",
@@ -196,9 +189,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Map key elements into the appropriate parts of the tuple
             new_key = [None] * self.key_length
             for i in range(len(tuple_index_list)):
-                tuple_index = int(
-                    re.search(r"\d+", indexed_string_substitutions[i]).group(0)
-                )
+                tuple_index = int(re.search(r"\d+", indexed_string_substitutions[i]).group(0))
                 key_element = matches.group(f"tuple_index_{i!s}")
                 new_key[tuple_index] = key_element
 
@@ -209,9 +200,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
         def get_random_hex(size=4):
-            return "".join(
-                [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
-            )
+            return "".join([random.choice(list("ABCDEF0123456789")) for _ in range(size)])
 
         key = tuple(get_random_hex() for _ in range(self.key_length))
         filepath = self._convert_key_to_filepath(key)
@@ -238,7 +227,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     The key to this StoreBackend must be a tuple with fixed length based on the filepath_template,
     or a variable-length tuple may be used and returned with an optional filepath_suffix (to be) added.
     The filepath_template is a string template used to convert the key to a filepath.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -276,9 +265,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 )
             elif not os.path.isabs(root_directory):  # noqa: PTH117
                 raise ValueError(
-                    "root_directory must be an absolute path. Got {} instead.".format(
-                        root_directory
-                    )
+                    f"root_directory must be an absolute path. Got {root_directory} instead."
                 )
             else:
                 self.full_base_directory = os.path.join(  # noqa: PTH118
@@ -293,8 +280,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "base_directory": base_directory,
             "filepath_template": filepath_template,
@@ -322,7 +309,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"  # noqa: E501
             )
 
         return contents
@@ -383,13 +370,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                if self.filepath_prefix and not filepath.startswith(
-                    self.filepath_prefix
-                ):
+                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
                     continue
-                elif self.filepath_suffix and not filepath.endswith(
-                    self.filepath_suffix
-                ):
+                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
                     continue
                 key = self._convert_filepath_to_key(filepath)
                 if key and not self.is_ignored_key(key):
@@ -443,7 +426,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             raise StoreBackendError(
                 """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
-                """
+                """  # noqa: E501
             )
         path = self._convert_key_to_filepath(key)
         public_url = self.base_public_path + path
@@ -469,7 +452,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     The key to this StoreBackend must be a tuple with fixed length based on the filepath_template,
     or a variable-length tuple may be used and returned with an optional filepath_suffix (to be) added.
     The filepath_template is a string template used to convert the key to a filepath.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -521,8 +504,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "bucket": bucket,
             "prefix": prefix,
@@ -554,9 +537,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 s3_object_key = self._convert_key_to_filepath(key)
         else:  # noqa: PLR5501
             if self.prefix:
-                s3_object_key = "/".join(
-                    (self.prefix, self._convert_key_to_filepath(key))
-                )
+                s3_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
             else:
                 s3_object_key = self._convert_key_to_filepath(key)
         return s3_object_key
@@ -570,7 +551,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"  # noqa: E501
             )
 
         return (
@@ -605,9 +586,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     **self.s3_put_options,
                 )
             else:
-                result_s3.put(
-                    Body=value, ContentType=content_type, **self.s3_put_options
-                )
+                result_s3.put(Body=value, ContentType=content_type, **self.s3_put_options)
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
@@ -625,15 +604,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if not dest_filepath.startswith(self.prefix):
             dest_filepath = os.path.join(self.prefix, dest_filepath)  # noqa: PTH118
 
-        s3.Bucket(self.bucket).copy(
-            {"Bucket": self.bucket, "Key": source_filepath}, dest_filepath
-        )
+        s3.Bucket(self.bucket).copy({"Bucket": self.bucket, "Key": source_filepath}, dest_filepath)
 
         s3.Object(self.bucket, source_filepath).delete()
 
     @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:  # noqa: C901 - too complex
-        # Note that the prefix arg is only included to maintain consistency with the parent class signature
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature  # noqa: E501
         s3r = self._create_resource()
         bucket = s3r.Bucket(self.bucket)
         key_list = []
@@ -652,13 +629,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 else:  # noqa: PLR5501
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not s3_object_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not s3_object_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -712,7 +685,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         # Check if the object exists
         if self.has_key(key):
-            # This implementation deletes the object if non-versioned or adds a delete marker if versioned
+            # This implementation deletes the object if non-versioned or adds a delete marker if versioned  # noqa: E501
             s3.Object(self.bucket, s3_object_key).delete()
             return True
         else:
@@ -732,15 +705,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             RoleSessionName=role_session_name,
             DurationSeconds=assume_role_duration,
         )
-        self._boto3_options["aws_access_key_id"] = response["Credentials"][
-            "AccessKeyId"
-        ]
-        self._boto3_options["aws_secret_access_key"] = response["Credentials"][
-            "SecretAccessKey"
-        ]
-        self._boto3_options["aws_session_token"] = response["Credentials"][
-            "SessionToken"
-        ]
+        self._boto3_options["aws_access_key_id"] = response["Credentials"]["AccessKeyId"]
+        self._boto3_options["aws_secret_access_key"] = response["Credentials"]["SecretAccessKey"]
+        self._boto3_options["aws_session_token"] = response["Credentials"]["SessionToken"]
 
     @property
     def boto3_options(self):
@@ -774,7 +741,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     or a variable-length tuple may be used and returned with an optional filepath_suffix (to be) added.
 
     The filepath_template is a string template used to convert the key to a filepath.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -813,8 +780,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "bucket": bucket,
             "project": project,
@@ -845,9 +812,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         else:  # noqa: PLR5501
             if self.prefix:
-                gcs_object_key = "/".join(
-                    (self.prefix, self._convert_key_to_filepath(key))
-                )
+                gcs_object_key = "/".join((self.prefix, self._convert_key_to_filepath(key)))
             else:
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
@@ -862,7 +827,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"  # noqa: E501
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
@@ -889,9 +854,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
         if isinstance(value, str):
             blob.content_encoding = content_encoding
-            blob.upload_from_string(
-                value.encode(content_encoding), content_type=content_type
-            )
+            blob.upload_from_string(value.encode(content_encoding), content_type=content_type)
         else:
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
@@ -915,7 +878,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
-        # Note that the prefix arg is only included to maintain consistency with the parent class signature
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature  # noqa: E501
         key_list = []
 
         from great_expectations.compatibility import google
@@ -928,13 +891,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if self.filepath_prefix and not gcs_object_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not gcs_object_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
@@ -1004,7 +963,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     You need to setup the connection string environment variable
     https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python
-    """
+    """  # noqa: E501
 
     # We will use blobclient here
     def __init__(  # noqa: PLR0913
@@ -1052,14 +1011,12 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 
-        # Validate that "azure" libraries were successfully imported and attempt to create "azure_client" handle.
+        # Validate that "azure" libraries were successfully imported and attempt to create "azure_client" handle.  # noqa: E501
         if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
                     blob_service_client: azure.BlobServiceClient = (
-                        azure.BlobServiceClient.from_connection_string(
-                            self.connection_string
-                        )
+                        azure.BlobServiceClient.from_connection_string(self.connection_string)
                     )
                 elif self.account_url:
                     blob_service_client = azure.BlobServiceClient(
@@ -1072,16 +1029,16 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     )
                 else:
                     raise StoreBackendError(
-                        "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                        "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"  # noqa: E501
                     )
             except Exception as e:
-                # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
+                # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.  # noqa: E501
                 raise StoreBackendError(
                     f'Due to exception: "{e!s}", "azure_client" could not be created.'
                 ) from e
         else:
             raise StoreBackendError(
-                'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'
+                'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'  # noqa: E501
             )
 
         return blob_service_client.get_container_client(self.container)
@@ -1090,9 +1047,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         az_blob_key = os.path.join(  # noqa: PTH118
             self.prefix, self._convert_key_to_filepath(key)
         )
-        return (
-            self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
-        )
+        return self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
 
     @override
     def _get_all(self) -> list[Any]:
@@ -1123,27 +1078,21 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     overwrite=True,
                 )
         else:
-            self._container_client.upload_blob(
-                name=az_blob_key, data=value, overwrite=True
-            )
+            self._container_client.upload_blob(name=az_blob_key, data=value, overwrite=True)
         return az_blob_key
 
     @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
-        # Note that the prefix arg is only included to maintain consistency with the parent class signature
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature  # noqa: E501
         key_list = []
 
         for obj in self._container_client.list_blobs(name_starts_with=self.prefix):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not az_blob_key.startswith(
-                self.filepath_prefix
-            ):
+            if self.filepath_prefix and not az_blob_key.startswith(self.filepath_prefix):
                 continue
-            elif self.filepath_suffix and not az_blob_key.endswith(
-                self.filepath_suffix
-            ):
+            elif self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 
@@ -1156,10 +1105,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             self.container, self.prefix, az_blob_key
         )
 
-        return "https://{}.blob.core.windows.net/{}".format(
-            self._container_client.account_name,
-            az_blob_path,
-        )
+        return f"https://{self._container_client.account_name}.blob.core.windows.net/{az_blob_path}"
 
     def _has_key(self, key):
         all_keys = self.list_keys()

@@ -58,17 +58,11 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
 
         if match_on == "any":
             condition = sa.or_(
-                *(
-                    get_dialect_regex_expression(column, regex, _dialect)
-                    for regex in regex_list
-                )
+                *(get_dialect_regex_expression(column, regex, _dialect) for regex in regex_list)
             )
         else:
             condition = sa.and_(
-                *(
-                    get_dialect_regex_expression(column, regex, _dialect)
-                    for regex in regex_list
-                )
+                *(get_dialect_regex_expression(column, regex, _dialect) for regex in regex_list)
             )
         return condition
 

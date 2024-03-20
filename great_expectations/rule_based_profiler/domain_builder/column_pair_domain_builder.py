@@ -25,20 +25,17 @@ if TYPE_CHECKING:
 class ColumnPairDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses "include_column_names" property of its parent class to specify "column_A" and "column_B" (order-preserving).
-    """
+    """  # noqa: E501
 
-    exclude_field_names: ClassVar[Set[str]] = (
-        ColumnDomainBuilder.exclude_field_names
-        | {
-            "exclude_column_names",
-            "include_column_name_suffixes",
-            "exclude_column_name_suffixes",
-            "semantic_type_filter_module_name",
-            "semantic_type_filter_class_name",
-            "include_semantic_types",
-            "exclude_semantic_types",
-        }
-    )
+    exclude_field_names: ClassVar[Set[str]] = ColumnDomainBuilder.exclude_field_names | {
+        "exclude_column_names",
+        "include_column_name_suffixes",
+        "exclude_column_name_suffixes",
+        "semantic_type_filter_module_name",
+        "semantic_type_filter_class_name",
+        "include_semantic_types",
+        "exclude_semantic_types",
+    }
 
     def __init__(
         self,
@@ -83,7 +80,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             List of domains that match the desired tolerance limits.
-        """
+        """  # noqa: E501
         batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could be None
 
         validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
@@ -100,7 +97,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
 "column_A" and "column_B" (in this exact order).
-"""
+"""  # noqa: E501
             )
 
         domain_kwargs: Dict[str, str] = dict(
@@ -115,7 +112,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 
         column_name: str
         semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
-            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None  # noqa: E501
                 column_name
             ]
             for column_name in effective_column_names

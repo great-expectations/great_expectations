@@ -184,9 +184,7 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation)
             ],
         )
 
-        template_str = (
-            "column average must be in fcc projection within $range of $center_point."
-        )
+        template_str = "column average must be in fcc projection within $range of $center_point."
 
         if include_column_name:
             template_str = f"$column {template_str}"

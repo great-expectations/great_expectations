@@ -179,9 +179,7 @@ def parse_condition_to_sqlalchemy(
     if "date" in parsed:
         date_value: str = parsed["condition_value"]
         cast_as_date = f"date({date_value})"
-        return generate_condition_by_operator(
-            sa.column(column), parsed["op"], cast_as_date
-        )
+        return generate_condition_by_operator(sa.column(column), parsed["op"], cast_as_date)
 
     elif "condition_value" in parsed:
         return generate_condition_by_operator(

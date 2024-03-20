@@ -635,9 +635,7 @@ def test_get_metrics_only_gets_a_validator_once(mocker: MockerFixture):
         f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
         return_value=["col1", "col2"],
     )
-    metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
-    )
+    metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=cdm_metrics_list)
 
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
 
@@ -662,9 +660,7 @@ def test_get_metrics_with_no_metrics(mocker: MockerFixture):
     mock_batch_request = mocker.Mock(spec=BatchRequest)
 
     with pytest.raises(ValueError):
-        metric_retriever.get_metrics(
-            batch_request=mock_batch_request, metric_list=cdm_metrics_list
-        )
+        metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=cdm_metrics_list)
 
 
 def test_valid_metric_types_true(mocker: MockerFixture):
@@ -712,12 +708,7 @@ def test_column_metrics_in_metrics_list_with_column_metrics(mocker: MockerFixtur
         MetricTypes.TABLE_COLUMN_TYPES,
         MetricTypes.COLUMN_MIN,
     ]
-    assert (
-        metric_retriever._column_metrics_in_metric_list(
-            metrics_list_with_column_metrics
-        )
-        is True
-    )
+    assert metric_retriever._column_metrics_in_metric_list(metrics_list_with_column_metrics) is True
 
 
 def test_get_table_column_types(mocker: MockerFixture):

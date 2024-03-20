@@ -146,9 +146,7 @@ def file_data_context(
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
     context_root_dir = project_path / FileDataContext.GX_DIR
-    context = FileDataContext(
-        project_config=data_context_config, context_root_dir=context_root_dir
-    )
+    context = FileDataContext(project_config=data_context_config, context_root_dir=context_root_dir)
     project_manager.set_project(context)
     return context
 
@@ -306,9 +304,7 @@ def test_data_context_variables_get_with_substitutions(
     env_var_name: str = "MY_CONFIG_VERSION"
     value_associated_with_env_var: float = 7.0
 
-    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = (
-        f"${env_var_name}"
-    )
+    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     config_values: dict = {
         env_var_name: value_associated_with_env_var,
@@ -426,13 +422,8 @@ def test_data_context_variables_save_config(
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save_config()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
-    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(
-        key=key
-    )
-    assert (
-        persisted_value.to_json_dict()
-        == ephemeral_data_context_variables.config.to_json_dict()
-    )
+    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
+    assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
 
     # FileDataContextVariables
     mock_save = mocker.patch(
@@ -530,7 +521,7 @@ def test_file_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
@@ -542,16 +533,14 @@ def test_file_data_context_variables_e2e(
     )
     updated_include_rendered_content.expectation_validation_result = True
 
-    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
+    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     value_associated_with_env_var: str = "foo/bar/baz"
     monkeypatch.setenv(env_var_name, value_associated_with_env_var)
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
-    file_data_context.variables.include_rendered_content = (
-        updated_include_rendered_content
-    )
+    file_data_context.variables.include_rendered_content = updated_include_rendered_content
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -569,9 +558,7 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk.include_rendered_content.to_dict()
         == updated_include_rendered_content.to_dict()
     )
-    assert (
-        file_data_context.variables.plugins_directory == value_associated_with_env_var
-    )
+    assert file_data_context.variables.plugins_directory == value_associated_with_env_var
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
@@ -600,7 +587,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 )
 @pytest.mark.xfail(
     strict=False,
-    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
+    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",  # noqa: E501
 )
 def test_cloud_enabled_data_context_variables_e2e(
     mock_save_project_config: MagicMock,
@@ -619,13 +606,13 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated plugins directory to set and save to the Cloud backend.
-    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results  # noqa: E501
+    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
     updated_data_docs_sites = data_docs_sites
-    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
     updated_data_docs_sites[new_site_name] = {}
 
     context = get_context(cloud_mode=True)

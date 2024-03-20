@@ -119,9 +119,9 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
     expected_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, ParameterNode]
     ] = {
-        Domain(
-            rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}
-        ): {"$mean": 5.0},
+        Domain(rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}): {
+            "$mean": 5.0
+        },
         Domain(
             domain_type="column",
             domain_kwargs={"column": "Date"},
@@ -500,12 +500,10 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_fo
     rule_output_for_rule_state_with_domains_and_parameters,
     column_Age_domain,
 ):
-    expected_parameter_values_for_fully_qualified_parameter_names: ParameterNode = (
-        ParameterNode(
-            {
-                "$mean": 5.0,
-            }
-        )
+    expected_parameter_values_for_fully_qualified_parameter_names: ParameterNode = ParameterNode(
+        {
+            "$mean": 5.0,
+        }
     )
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters

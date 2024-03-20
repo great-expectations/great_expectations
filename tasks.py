@@ -35,7 +35,9 @@ GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
 GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
 REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
-_CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
+_CHECK_HELP_DESC = (
+    "Only checks for needed changes without writing back. Exit with error code if changes needed."
+)
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
 # https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
@@ -168,9 +170,7 @@ def upgrade(ctx: Context, path: str = "."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(
-    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
-):
+def hooks(ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -300,7 +300,7 @@ def type_check(  # noqa: C901, PLR0912
             )
             relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
-        # following imports here can cause mutually exclusive import errors with normal type-checking
+        # following imports here can cause mutually exclusive import errors with normal type-checking  # noqa: E501
         cmds.append("--follow-imports=silent")
 
     cmds.extend(ge_pkgs)
@@ -334,11 +334,11 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
-        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
-        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",  # noqa: E501
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",  # noqa: E501
         "html": "Create html coverage report",
-        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
-        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",  # noqa: E501
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",  # noqa: E501
     },
 )
 def tests(  # noqa: C901
@@ -360,7 +360,7 @@ def tests(  # noqa: C901
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
 
     See also, the newer `invoke ci-tests --help`.
-    """
+    """  # noqa: E501
     markers = []
     markers += ["unit" if unit else "not unit"]
 
@@ -444,10 +444,7 @@ def docker(
                 "-f",
                 "docker/Dockerfile.tests",
                 f"--tag {name}:{tag}",
-                *[
-                    f"--build-arg {arg}"
-                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
-                ],
+                *[f"--build-arg {arg}" for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]],
                 ".",
             ]
         )
@@ -505,9 +502,7 @@ def type_schema(  # noqa: C901 - too complex
         _iter_all_registered_types,
     )
 
-    schema_dir_root: Final[pathlib.Path] = (
-        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
-    )
+    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
         print(f"🗑️ removing schema directory and contents - {file_count} .json files")
@@ -572,7 +567,7 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
         os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     )
     curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."  # noqa: E501
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -586,9 +581,7 @@ def api_docs(ctx: Context):
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
     sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
 
     doc_builder = SphinxInvokeDocsBuilder(
@@ -602,7 +595,7 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",  # noqa: E501
         "lint": "Run the linter",
         "clear": "Delete the docs' generated assets, caches, and build artifacts.",
     },
@@ -615,16 +608,14 @@ def docs(
     version: str | None = None,
     clear: bool = False,
 ):
-    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""  # noqa: E501
     from packaging.version import parse as parse_version
 
     from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
 
     print("Running invoke docs from:", repo_root)
     old_cwd = pathlib.Path.cwd()
@@ -665,13 +656,11 @@ def public_api_task(
     ctx: Context,
     write_to_file: bool = False,
 ):
-    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""  # noqa: E501
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="public-api", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="public-api", correct_dir=repo_root)
 
     # Docs folder is not reachable from install of Great Expectations
     api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
@@ -687,7 +676,9 @@ def _exit_with_error_if_not_run_from_correct_dir(
     if not correct_dir:
         correct_dir = pathlib.Path(__file__).parent
     curdir = pathlib.Path.cwd()
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    exit_message = (
+        f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    )
     if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -788,7 +779,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-mssql.txt",
             "reqs/requirements-dev-mysql.txt",
             "reqs/requirements-dev-postgresql.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
             "reqs/requirements-dev-trino.txt",
         ),
@@ -809,7 +800,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
             "reqs/requirements-dev-snowflake.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
         ),
         extra_pytest_args=(
@@ -916,7 +907,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -942,7 +933,7 @@ def deps(
     the 'requirements-dev-cloud.txt' dependencies.
 
     $ invoke deps -m external_sqldialect -r cloud
-    """
+    """  # noqa: E501
     cmds = ["pip", "install"]
     if editable_install:
         cmds.append("-e .")
@@ -1058,9 +1049,7 @@ def ci_tests(
             pytest_options.append(extra_pytest_arg)
 
     marker_statement = (
-        f"'all_backends or {marker}'"
-        if _add_all_backends_marker(marker)
-        else f"'{marker}'"
+        f"'all_backends or {marker}'" if _add_all_backends_marker(marker) else f"'{marker}'"
     )
 
     pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
@@ -1123,9 +1112,7 @@ def service(
                 )
 
             if restart_services:
-                print(
-                    f"  Removing existing containers and building latest for {service_name} ..."
-                )
+                print(f"  Removing existing containers and building latest for {service_name} ...")
                 cmds.extend(
                     [
                         "docker",

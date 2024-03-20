@@ -39,9 +39,7 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
             if col_start is None or col_end is None or col_gap is None:
                 return None
 
-            diff_months = (col_end.year - col_start.year) * 12 + (
-                col_end.month - col_start.month
-            )
+            diff_months = (col_end.year - col_start.year) * 12 + (col_end.month - col_start.month)
             return col_gap == diff_months or abs(col_gap - diff_months) <= threshold
 
         if threshold is None:
@@ -175,9 +173,7 @@ class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
         "threshold": 0,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

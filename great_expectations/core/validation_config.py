@@ -54,9 +54,7 @@ class ValidationConfig(BaseModel):
     """
 
     class Config:
-        arbitrary_types_allowed = (
-            True  # Necessary for compatibility with suite's Marshmallow dep
-        )
+        arbitrary_types_allowed = True  # Necessary for compatibility with suite's Marshmallow dep
         validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
@@ -85,7 +83,7 @@ class ValidationConfig(BaseModel):
             },
             "id": "20dna816-64c8-46cb-8f7e-03c12cea1d67"
         }
-        """
+        """  # noqa: E501
         json_encoders = {
             ExpectationSuite: lambda e: e.identifier_bundle(),
             BatchConfig: lambda b: b.identifier_bundle(),
@@ -117,7 +115,7 @@ class ValidationConfig(BaseModel):
 
     @validator("suite", pre=True)
     def _validate_suite(cls, v: dict | ExpectationSuite):
-        # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.
+        # Input will be a dict of identifiers if being deserialized or a suite object if being constructed by a user.  # noqa: E501
         if isinstance(v, dict):
             return cls._decode_suite(v)
         elif isinstance(v, ExpectationSuite):
@@ -128,7 +126,7 @@ class ValidationConfig(BaseModel):
 
     @validator("data", pre=True)
     def _validate_data(cls, v: dict | BatchConfig):
-        # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.
+        # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.  # noqa: E501
         if isinstance(v, dict):
             return cls._decode_data(v)
         elif isinstance(v, BatchConfig):
@@ -139,13 +137,11 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def _decode_suite(cls, suite_dict: dict) -> ExpectationSuite:
-        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual suite.  # noqa: E501
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
-            raise ValueError(
-                "Serialized suite did not contain expected identifiers"
-            ) from e
+            raise ValueError("Serialized suite did not contain expected identifiers") from e
 
         name = suite_identifiers.name
         id = suite_identifiers.id
@@ -156,21 +152,17 @@ class ValidationConfig(BaseModel):
         try:
             config = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
-            raise ValueError(
-                f"Could not find suite with name: {name} and id: {id}"
-            ) from e
+            raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e
 
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchConfig:
-        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.
+        # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
         except ValidationError as e:
-            raise ValueError(
-                "Serialized data did not contain expected identifiers"
-            ) from e
+            raise ValueError("Serialized data did not contain expected identifiers") from e
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
@@ -197,7 +189,7 @@ class ValidationConfig(BaseModel):
             batch_definition = asset.get_batch_config(batch_definition_name)
         except KeyError as e:
             raise ValueError(
-                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."
+                f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501
             ) from e
 
         return batch_definition
@@ -215,9 +207,7 @@ class ValidationConfig(BaseModel):
             batch_request_options=batch_definition_options,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(
-            self.suite, evaluation_parameters
-        )
+        results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
 
         (
             expectation_suite_identifier,
@@ -255,9 +245,7 @@ class ValidationConfig(BaseModel):
         else:
             run_time = datetime.datetime.now(tz=datetime.timezone.utc)
             run_id = RunIdentifier(run_time=run_time)
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=self.suite.name
-            )
+            expectation_suite_identifier = ExpectationSuiteIdentifier(name=self.suite.name)
             validation_result_id = ValidationResultIdentifier(
                 batch_identifier=validator.active_batch_id,
                 expectation_suite_identifier=expectation_suite_identifier,

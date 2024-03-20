@@ -4,7 +4,7 @@ from .meta_metric_provider import (  # isort:skip
 )
 from .column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
-    ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).
+    ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).  # noqa: E501
     column_aggregate_partial,
     column_aggregate_value,
 )

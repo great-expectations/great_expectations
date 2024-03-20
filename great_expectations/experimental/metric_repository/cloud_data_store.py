@@ -82,9 +82,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         payload = Payload(
             data=PayloadData(
                 type=self._map_to_resource_type(value),
-                attributes=value.dict(
-                    exclude={"metrics": {"__all__": {"__orig_class__"}}}
-                ),
+                attributes=value.dict(exclude={"metrics": {"__all__": {"__orig_class__"}}}),
             )
         )
         return payload.json()

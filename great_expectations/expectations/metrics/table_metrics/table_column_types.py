@@ -37,10 +37,7 @@ class ColumnTypes(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        return [
-            {"name": name, "type": dtype}
-            for (name, dtype) in zip(df.columns, df.dtypes)
-        ]
+        return [{"name": name, "type": dtype} for (name, dtype) in zip(df.columns, df.dtypes)]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
@@ -57,7 +54,7 @@ class ColumnTypes(TableMetricProvider):
                 batch_id = execution_engine.batch_manager.active_batch_data_id
             else:
                 raise GreatExpectationsError(
-                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
+                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "  # noqa: E501
                     "execution engine"
                 )
 
@@ -67,7 +64,7 @@ class ColumnTypes(TableMetricProvider):
         )
         if batch_data is None:
             raise GreatExpectationsError(
-                "the requested batch is not available; please load the batch into the execution engine."
+                "the requested batch is not available; please load the batch into the execution engine."  # noqa: E501
             )
 
         return _get_sqlalchemy_column_metadata(execution_engine, batch_data)
@@ -100,9 +97,7 @@ def _get_sqlalchemy_column_metadata(
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
-    elif sqlalchemy.TextClause and isinstance(
-        batch_data.selectable, sqlalchemy.TextClause
-    ):
+    elif sqlalchemy.TextClause and isinstance(batch_data.selectable, sqlalchemy.TextClause):
         table_selectable = batch_data.selectable
         schema_name = None
     else:

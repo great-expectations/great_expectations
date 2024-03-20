@@ -64,81 +64,61 @@ def expected_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
     ]
     return expected
@@ -156,81 +136,61 @@ def expected_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_gcs_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     return expected
@@ -244,9 +204,7 @@ def expected_batch_definitions_sorted():
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.google.storage.Client"
 )
-def test_instantiation_without_args(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
-):
+def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_config_dict):
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -358,7 +316,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         assets={"alpha": {}},
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -420,7 +378,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
+    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg  # noqa: E501
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
@@ -462,7 +420,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`
+    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`  # noqa: E501
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -524,12 +482,12 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://cloud.google.com/storage/docs/listing-objects
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
     unsorted_batch_definition_list = (
         my_data_connector._get_batch_definition_list_from_batch_request(
@@ -594,20 +552,18 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).  # noqa: E501
     # Source: https://cloud.google.com/storage/docs/listing-objects
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").  # noqa: E501
+    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.  # noqa: E501
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.  # noqa: E501
 
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_gcs_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
@@ -675,13 +631,11 @@ def test_return_all_batch_definitions_basic_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_gcs_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
@@ -761,10 +715,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
         ),
     )
 
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
 
     assert len(my_batch_definition_list) == 1
@@ -847,13 +799,11 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_gcs_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
@@ -912,7 +862,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -920,9 +870,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                 "name": "general_gcs_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -975,7 +923,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`  # noqa: E501
     with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -983,9 +931,7 @@ def test_return_all_batch_definitions_too_many_sorters(
                 "name": "general_gcs_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -1046,8 +992,8 @@ assets:
         },
     )
 
-    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`
-    # Our patched object provides the ability to define a "side_effect", an iterable containing return
+    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`  # noqa: E501
+    # Our patched object provides the ability to define a "side_effect", an iterable containing return  # noqa: E501
     # values for subsequent calls. Since `_refresh_data_references_cache()` makes multiple calls to
     # this method (once per asset), we define our expected behavior below.
     #
@@ -1125,9 +1071,7 @@ assets:
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
 )
-def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path(mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: ConfiguredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -1182,14 +1126,10 @@ assets:
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/beta_here/beta-202002.txt", "beta")
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/gamma-202005.csv", "gamma")
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"
     )

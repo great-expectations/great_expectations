@@ -63,7 +63,7 @@ def test_instantiation_from_datasource(
     data_source_config_with_aws_glue_catalog_data_connectors,
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a  # noqa: E501
     # round-trip to the configuration.
     context = empty_data_context
 

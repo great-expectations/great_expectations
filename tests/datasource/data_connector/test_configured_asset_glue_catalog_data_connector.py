@@ -140,19 +140,15 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
             runtime_environment={
                 "execution_engine": "execution_engine",
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
     )
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="with_partitions",
-                data_connector_query={"batch_filter_parameters": {"PClass": "1st"}},
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="with_partitions",
+            data_connector_query={"batch_filter_parameters": {"PClass": "1st"}},
         )
     )
     assert len(batch_definition_list) == 2
@@ -165,14 +161,12 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
         "SexCode": "1",
     }
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="with_partitions",
-                data_connector_query={"batch_filter_parameters": {"SexCode": "0"}},
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="with_partitions",
+            data_connector_query={"batch_filter_parameters": {"SexCode": "0"}},
         )
     )
     assert len(batch_definition_list) == 3
@@ -189,60 +183,50 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
         "SexCode": "0",
     }
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="with_partitions",
-                data_connector_query={"batch_filter_parameters": {}},
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="with_partitions",
+            data_connector_query={"batch_filter_parameters": {}},
         )
     )
     assert len(batch_definition_list) == 6
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="with_partitions",
-                data_connector_query={"batch_filter_parameters": {"SexCode": "1st"}},
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="with_partitions",
+            data_connector_query={"batch_filter_parameters": {"SexCode": "1st"}},
         )
     )
     assert len(batch_definition_list) == 0
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="with_partitions",
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="with_partitions",
         )
     )
     assert len(batch_definition_list) == 6
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="without_partitions",
-                data_connector_query={"batch_filter_parameters": {"PClass": "1st"}},
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="without_partitions",
+            data_connector_query={"batch_filter_parameters": {"PClass": "1st"}},
         )
     )
     assert len(batch_definition_list) == 0
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-                data_connector_name="my_glue_catalog_data_connector",
-                data_asset_name="without_partitions",
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="FAKE_Datasource_NAME",
+            data_connector_name="my_glue_catalog_data_connector",
+            data_asset_name="without_partitions",
         )
     )
     assert len(batch_definition_list) == 1
@@ -275,9 +259,7 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
 
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest()
-        )
+        my_data_connector.get_batch_definition_list_from_batch_request(batch_request=BatchRequest())
 
 
 @mock_glue
@@ -295,9 +277,7 @@ def test_instantiation_with_batch_spec_passthrough(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -328,8 +308,8 @@ def test_instantiation_with_batch_spec_passthrough(
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
-    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a  # noqa: E501
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.  # noqa: E501
     assert len(validator.head(fetch_all=True)) < 788
 
 
@@ -395,9 +375,7 @@ def test_instantiation_with_partitioner_sampling_and_prefix(
 
 
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
-def test_build_batch_spec_with_all_options(
-    partitioner_method_name_prefix, glue_titanic_catalog
-):
+def test_build_batch_spec_with_all_options(partitioner_method_name_prefix, glue_titanic_catalog):
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -510,9 +488,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_asset_confi
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -542,8 +518,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_asset_confi
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
-    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a  # noqa: E501
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.  # noqa: E501
     assert len(validator.head(fetch_all=True)) < 788
 
 
@@ -551,9 +527,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(
         name="my_glue_catalog_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -584,8 +558,8 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
-    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a  # noqa: E501
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.  # noqa: E501
     assert len(validator.head(fetch_all=True)) < 788
 
 
@@ -594,12 +568,10 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -613,7 +585,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -637,9 +609,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__mod(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_not_be_in_set("Age", [25, 50]).success
     assert len(validator.head(fetch_all=True)) == 38
 
@@ -649,12 +619,10 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -668,7 +636,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -692,9 +660,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__list(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert len(validator.head(fetch_all=True)) == 322
 
@@ -704,12 +670,10 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -723,7 +687,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -750,9 +714,7 @@ def test_get_batch_data_and_metadata_with_sampling_method__hash(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert len(validator.head(fetch_all=True)) == 77
 
 
@@ -763,12 +725,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -782,7 +742,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -803,9 +763,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__whole_table(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert len(validator.head(fetch_all=True)) == 1313
 
 
@@ -816,12 +774,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -835,7 +791,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -860,9 +816,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__column_value(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert len(validator.head(fetch_all=True)) == 322
 
@@ -874,12 +828,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -893,7 +845,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -919,12 +871,8 @@ def test_get_batch_data_and_metadata_with_partitioning_method__divided_integer(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
-    assert validator.expect_column_values_to_be_in_set(
-        "Age", list(range(20, 40))
-    ).success
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
+    assert validator.expect_column_values_to_be_in_set("Age", list(range(20, 40))).success
     assert len(validator.head(fetch_all=True)) == 420
 
 
@@ -935,12 +883,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -954,7 +900,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -980,9 +926,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__mod_integer(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_be_in_set("Age", [26, 1, 1.5, 51]).success
     assert len(validator.head(fetch_all=True)) == 38
 
@@ -994,12 +938,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -1013,7 +955,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -1024,7 +966,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
         data_asset_name="db_test.tb_titanic",
         batch_identifiers=IDDict(),
         batch_spec_passthrough={
-            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_multi_column_values",
+            "partitioner_method": f"{partitioner_method_name_prefix}partition_on_multi_column_values",  # noqa: E501
             "partitioner_kwargs": {
                 "column_names": ["Age", "PClass"],
                 "batch_identifiers": {"Age": 25, "PClass": "1st"},
@@ -1038,9 +980,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__multi_column_valu
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_be_in_set("Age", [25]).success
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert len(validator.head(fetch_all=True)) == 4
@@ -1053,12 +993,10 @@ def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -1072,7 +1010,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -1099,9 +1037,7 @@ def test_get_batch_data_and_metadata_with_partitioning_method__hashed_column(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert len(validator.head(fetch_all=True)) == 77
 
 
@@ -1110,12 +1046,10 @@ def test_get_batch_data_and_metadata_with_partitions(
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
     glue_titanic_catalog,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_glue_catalog_data_connector": {
@@ -1130,7 +1064,7 @@ def test_get_batch_data_and_metadata_with_partitions(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -1148,8 +1082,6 @@ def test_get_batch_data_and_metadata_with_partitions(
         batch_definition=batch_definition
     )
     batch = Batch(data=batch_data, batch_definition=batch_definition)
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
     assert validator.expect_column_values_to_be_in_set("PClass", ["2nd"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["1"]).success

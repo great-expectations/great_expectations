@@ -29,7 +29,7 @@ class Checkpoint(BaseModel):
         validation_definitions: List of validation definitions to be run.
         actions: List of actions to be taken after the validation definitions are run.
 
-    """
+    """  # noqa: E501
 
     name: str
     validation_definitions: List[ValidationConfig]
@@ -64,7 +64,7 @@ class Checkpoint(BaseModel):
                         "class_name": "SlackRenderer",
                     }
                 }
-        """
+        """  # noqa: E501
 
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep
@@ -79,9 +79,7 @@ class Checkpoint(BaseModel):
         cls, validation_definitions: list[ValidationConfig] | list[dict]
     ) -> list[ValidationConfig]:
         if len(validation_definitions) == 0:
-            raise ValueError(
-                "Checkpoint must contain at least one validation definition"
-            )
+            raise ValueError("Checkpoint must contain at least one validation definition")
 
         if isinstance(validation_definitions[0], dict):
             validation_config_store = project_manager.get_validation_config_store()
@@ -106,9 +104,7 @@ class Checkpoint(BaseModel):
             try:
                 validation_definition = store.get(key=key)
             except (KeyError, gx_exceptions.InvalidKeyError):
-                raise ValueError(
-                    f"Unable to retrieve validation definition {id_bundle} from store"
-                )
+                raise ValueError(f"Unable to retrieve validation definition {id_bundle} from store")
 
             if not validation_definition:
                 raise ValueError(

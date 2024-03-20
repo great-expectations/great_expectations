@@ -9,7 +9,7 @@ DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 def checkpoint(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     return Checkpoint(
         data_context=context,
         **{

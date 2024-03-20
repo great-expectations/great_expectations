@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 class SparkDataSampler(DataSampler):
     """Methods for sampling a Spark dataframe."""
 
-    def sample_using_limit(
-        self, df: pyspark.DataFrame, batch_spec: BatchSpec
-    ) -> pyspark.DataFrame:
+    def sample_using_limit(self, df: pyspark.DataFrame, batch_spec: BatchSpec) -> pyspark.DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -64,16 +62,10 @@ class SparkDataSampler(DataSampler):
         seed: int = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="seed", default_value=1
         )
-        res = (
-            df.withColumn("rand", F.rand(seed=seed))
-            .filter(F.col("rand") < p)
-            .drop("rand")
-        )
+        res = df.withColumn("rand", F.rand(seed=seed)).filter(F.col("rand") < p).drop("rand")
         return res
 
-    def sample_using_mod(
-        self, df: pyspark.DataFrame, batch_spec: BatchSpec
-    ) -> pyspark.DataFrame:
+    def sample_using_mod(self, df: pyspark.DataFrame, batch_spec: BatchSpec) -> pyspark.DataFrame:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -90,15 +82,11 @@ class SparkDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
         value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
         res = (
-            df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType())
-            )
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType()))
             .filter(F.col("mod_temp") == value)
             .drop("mod_temp")
         )
@@ -124,12 +112,8 @@ class SparkDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
-        value_list: list = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "value_list"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
+        value_list: list = self.get_sampling_kwargs_value_or_default(batch_spec, "value_list")
 
         return df.where(F.col(column_name).isin(value_list))
 
@@ -154,9 +138,7 @@ class SparkDataSampler(DataSampler):
         """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         hash_digits: int = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
         )
@@ -176,16 +158,14 @@ class SparkDataSampler(DataSampler):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
+                    Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
 
         def _encrypt_value(to_encode):
             to_encode_str = str(to_encode)
             hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[
-                -1 * hash_digits :
-            ]
+            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
         encrypt_udf = F.udf(_encrypt_value, pyspark.types.StringType())

@@ -48,7 +48,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -63,12 +63,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -79,11 +75,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -101,12 +97,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     assert len(data_context.validations_store.list_keys()) == 0
@@ -117,11 +109,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = (
-        data_context.validations_store.list_keys()[0]
-    )
-    validation_result: ExpectationSuiteValidationResult = (
-        data_context.validations_store.get(validation_result_identifier)
+    validation_result_identifier: DataContextKey = data_context.validations_store.list_keys()[0]
+    validation_result: ExpectationSuiteValidationResult = data_context.validations_store.get(
+        validation_result_identifier
     )
 
     assert "checkpoint_name" in validation_result.meta
@@ -130,12 +120,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
 @pytest.mark.filesystem
 @pytest.mark.slow  # 1.15s
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -157,12 +147,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 @pytest.mark.filesystem
 @pytest.mark.slow  # 1.15s
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     fluent_batch_request,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     batch_request: FluentBatchRequest = fluent_batch_request
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     validator: Validator = data_context.get_validator(
@@ -190,7 +180,7 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -218,7 +208,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -247,9 +237,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -261,7 +251,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
@@ -289,9 +279,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -401,11 +391,11 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     ],
 )
 def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_result_meta(
-    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation: FileDataContext,
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation: FileDataContext,  # noqa: E501
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
-    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     data_context.add_checkpoint(**checkpoint_config_dict)
@@ -414,20 +404,20 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(
-        result.run_results.values()
-    )[0]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0][
+        "validation_result"
+    ]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_pandasdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_pandasdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     batch_request = FluentBatchRequest(
         datasource_name="my_pandas_dataframes_datasource",
@@ -448,11 +438,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     batch_request = FluentBatchRequest(
         datasource_name="my_spark_dataframes_datasource",
@@ -473,12 +463,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -503,12 +493,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 @pytest.mark.spark
 @pytest.mark.slow  # 1.31s
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_multi_validation_pandasdf_and_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_multi_validation_pandasdf_and_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
 
@@ -550,12 +540,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multi_validation_batch_request_sql_asset_objects_in_validations_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multi_validation_batch_request_sql_asset_objects_in_validations_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -588,11 +578,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_pandasdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_pandasdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -616,11 +606,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -644,12 +634,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_top_level_batch_request_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_top_level_batch_request_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -674,12 +664,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -703,11 +693,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_pandasdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_pandasdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -734,11 +724,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -765,12 +755,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -797,11 +787,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_pandasdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_pandasdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -830,11 +820,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -863,12 +853,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -897,11 +887,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_pandasdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_pandasdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -925,11 +915,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
 
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_sparkdf(
+def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_sparkdf(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -954,12 +944,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
 @pytest.mark.slow  # 1.75s
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_pandas(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1027,12 +1017,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.75s
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_spark(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_spark(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1100,12 +1090,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.35s
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_pandas(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1191,12 +1181,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.35s
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_spark(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_spark(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1283,12 +1273,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.91s
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_pandas(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1358,12 +1348,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.91s
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_spark(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_spark(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1433,12 +1423,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.46s
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_pandas(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1526,12 +1516,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.46s
 @pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_spark(
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_spark(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation  # noqa: E501
 
     batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
     batch_request_0["options"] = {
@@ -1618,12 +1608,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_sql_asset_in_validations_sqlalchemy(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_sql_asset_in_validations_sqlalchemy(  # noqa: E501
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
 ):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))

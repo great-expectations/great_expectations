@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).  # noqa: E501
 RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
@@ -91,7 +91,7 @@ def test_bootstrap_point_estimate_efficacy(
             desired=false_positive_rate,
             rtol=RTOL,
             atol=EFFICACY_TOLERANCE,
-            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
+            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",  # noqa: E501
         )
 
 
@@ -284,7 +284,7 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
             )
 
         assert (
-            """Applicability of MetricMultiBatchParameterBuilder is restricted to numeric-valued and datetime-valued metrics (value unparseable_metric_value_0 of type "<class 'numpy.str_'>" was computed)."""
+            """Applicability of MetricMultiBatchParameterBuilder is restricted to numeric-valued and datetime-valued metrics (value unparseable_metric_value_0 of type "<class 'numpy.str_'>" was computed)."""  # noqa: E501
             in str(excinfo.value)
         )
     else:

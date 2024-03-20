@@ -17,55 +17,55 @@ connecting_to_your_data = [
         backend_dependencies=[BackendDependencies.GCS],
     ),
     # TODO: <Alex>ALEX -- Implement GCS Configured YAML Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>
+    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name = "gcs_spark_configured_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[ BackendDependencies.GCS],
     # ),
     # TODO: <Alex>ALEX -- Implement GCS Configured Python Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>
+    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name = "gcs_spark_configured_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[ BackendDependencies.GCS],
     # ),
-    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
+    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[ BackendDependencies.GCS],
     # ),
     # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
+    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",  # noqa: E501
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[ BackendDependencies.GCS],
     # ),
 ]
 
 how_to_configure_metadata_store = [
-    # Chetan - 20231117 - These have been commented out due to their reliance on the CLI (which has been deleted).
+    # Chetan - 20231117 - These have been commented out due to their reliance on the CLI (which has been deleted).  # noqa: E501
     #                     They should be re-enabled once they have been updated.
     # IntegrationTestFixture(
     #     name="how_to_configure_an_expectation_store_in_gcs",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",  # noqa: E501
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[BackendDependencies.GCS],
     # ),
     # IntegrationTestFixture(
     #     name="how_to_host_and_share_data_docs_on_gcs",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",  # noqa: E501
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.GCS],
     # ),
     # IntegrationTestFixture(
     #     name="how_to_configure_a_validation_result_store_in_gcs",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+    #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",  # noqa: E501
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[BackendDependencies.GCS],

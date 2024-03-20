@@ -12,7 +12,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     SimpleDateFormatStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (  # noqa: E501
     DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -47,11 +47,9 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 ):
     data_context = alice_columnar_table_single_batch_context
 
-    date_format_string_parameter: ParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
-            data_context=data_context,
-        )
+    date_format_string_parameter: ParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_simple_date_format_string_parameter_builder",
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -72,7 +70,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 
     assert (
         str(e.value)
-        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
+        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."  # noqa: E501
     )
 
 
@@ -253,8 +251,7 @@ def test_simple_date_format_parameter_builder_bobby(
     )
 
     assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
+        parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
     )
 
     fully_qualified_parameter_name_for_value: str = (

@@ -45,9 +45,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public"
-)
+datasource_yaml = datasource_yaml.replace("<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
     "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
@@ -75,15 +73,11 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = (
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
-)
+batch_request.data_asset_name = "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py validator_creation">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 # </snippet>
 print(validator.head())
 

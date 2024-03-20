@@ -29,7 +29,7 @@ class NumericSorter(Sorter):
             )
         if is_int(value=batch_value):
             return int(batch_value)
-        # The case of strings having floating point number format used as references to partitions should be rare.
+        # The case of strings having floating point number format used as references to partitions should be rare.  # noqa: E501
         return round(float(batch_value))
 
     @override

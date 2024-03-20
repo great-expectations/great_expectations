@@ -134,7 +134,7 @@ def test_expectation_self_check():
                     "passed": False,
                     "sub_messages": [
                         {
-                            "message": "No example found to get kwargs for ExpectationConfiguration",
+                            "message": "No example found to get kwargs for ExpectationConfiguration",  # noqa: E501
                             "passed": False,
                         },
                     ],
@@ -147,7 +147,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",  # noqa: E501
                     "passed": False,
                     "sub_messages": [
                         {
@@ -171,13 +171,13 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has at least one positive and negative example case, and all test cases pass",
+                    "message": "Has at least one positive and negative example case, and all test cases pass",  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -202,7 +202,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has passed a manual review by a code owner for code standards and style guides",
+                    "message": "Has passed a manual review by a code owner for code standards and style guides",  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -242,9 +242,7 @@ def test_self_check_on_an_existing_expectation():
     report_object = expectation().run_diagnostics()
     # print(json.dumps(report_object, indent=2))
 
-    report_object["description"].pop(
-        "docstring"
-    )  # Don't try to exact match the docstring
+    report_object["description"].pop("docstring")  # Don't try to exact match the docstring
 
     # one of the test cases in the examples for this expectation is failing on our CI
     # and the number of items depends on the flags
@@ -256,7 +254,7 @@ def test_self_check_on_an_existing_expectation():
         "description": {
             "camel_name": "ExpectColumnValuesToMatchRegex",
             "snake_name": "expect_column_values_to_match_regex",
-            "short_description": "Expect column entries to be strings that match a given regular expression.",
+            "short_description": "Expect column entries to be strings that match a given regular expression.",  # noqa: E501
         },
         "execution_engines": {
             "PandasExecutionEngine": True,
@@ -265,13 +263,13 @@ def test_self_check_on_an_existing_expectation():
         },
         "renderers": {
             "standard": {
-                "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',
-                "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
+                "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',  # noqa: E501
+                "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",  # noqa: E501
                 "renderer.diagnostic.observed_value": "20% unexpected",
                 "renderer.diagnostic.status_icon": "",
                 "renderer.diagnostic.unexpected_table": None,
-                "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-                "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',
+                "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",  # noqa: E501
+                "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',  # noqa: E501
             },
             "custom": [],
         },
@@ -355,9 +353,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -416,9 +412,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -467,9 +461,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -512,7 +504,7 @@ def test_expectation__get_renderers():
 
 @pytest.mark.unit
 def test_expectation_is_abstract():
-    # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
+    # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)  # noqa: E501
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 

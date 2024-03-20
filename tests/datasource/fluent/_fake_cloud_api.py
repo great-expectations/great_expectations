@@ -169,9 +169,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
             "validations_store_name": "default_validations_store",
             "stores": {
-                "default_evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
+                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -257,9 +255,7 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
 
     datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if datasource:
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(datasource)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(datasource))
     else:
         result = CallbackResult(
             404,
@@ -295,9 +291,7 @@ def delete_datasources_cb(
         LOGGER.debug(f"Deleted datasource '{ds_name}'")
         result = CallbackResult(204, headers={}, body="")
     else:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
     return result
 
@@ -324,9 +318,9 @@ def delete_data_assets_cb(
                 deleted_asset_idx = idx
                 break
         if deleted_asset_idx is not None:
-            deleted_asset = datasource["data"]["attributes"]["datasource_config"][
-                "assets"
-            ].pop(deleted_asset_idx)
+            deleted_asset = datasource["data"]["attributes"]["datasource_config"]["assets"].pop(
+                deleted_asset_idx
+            )
             break
 
     if deleted_asset:
@@ -334,9 +328,7 @@ def delete_data_assets_cb(
         LOGGER.debug(f"Deleted asset '{asset_name}'")
         result = CallbackResult(204, headers={}, body="")
     else:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
     return result
 
@@ -433,10 +425,7 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if (
-            payload.data.name
-            != old_datasource["data"]["attributes"]["datasource_config"]["name"]
-        ):
+        if payload.data.name != old_datasource["data"]["attributes"]["datasource_config"]["name"]:
             raise NotImplementedError("Unsure how to handle name change")
         _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
@@ -505,13 +494,9 @@ def get_expectation_suite_by_id_cb(
     parsed_url = urllib.parse.urlparse(url)
     expectation_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["expectation_suites"].get(
-        expectation_id
-    )
+    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["expectation_suites"].get(expectation_id)
     if expectation_suite:
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(expectation_suite)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(expectation_suite))
     else:
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
     return result
@@ -548,9 +533,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         suite_id = FAKE_EXPECTATION_SUITE_ID
         payload["data"]["id"] = suite_id
         payload["data"]["attributes"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"][
-            "expectations"
-        ]:
+        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
             expectation_configuration["id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
@@ -598,9 +581,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     else:
         payload["data"]["id"] = suite_id
         payload["data"]["attributes"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"][
-            "expectations"
-        ]:
+        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
             # add IDs to new expectations
             if not expectation_configuration.get("id"):
                 expectation_configuration["id"] = str(uuid.uuid4())
@@ -668,9 +649,7 @@ def get_checkpoint_by_id_cb(request: PreparedRequest) -> CallbackResult:
     checkpoint_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
     if checkpoint := _CLOUD_API_FAKE_DB["checkpoints"].get(checkpoint_id):
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint))
     else:
         result = CallbackResult(
             404,
@@ -748,9 +727,7 @@ def delete_checkpoint_by_name_cb(
             break
 
     if not checkpoint_id:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
         return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
 
     deleted_cp = checkpoints.pop(checkpoint_id)
@@ -781,9 +758,7 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
                     {
                         "code": "Mock 400/422",
                         "detail": "Field may not be null.",
-                        "source": {
-                            "pointer": "/data/attributes/result/meta/validation_id"
-                        },
+                        "source": {"pointer": "/data/attributes/result/meta/validation_id"},
                     }
                 ]
             ).json(),

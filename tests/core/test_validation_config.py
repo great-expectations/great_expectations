@@ -125,9 +125,7 @@ class TestValidationRun:
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run()
 
@@ -150,13 +148,9 @@ class TestValidationRun:
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
-            gxe.ExpectColumnMaxToBeBetween(
-                column="foo", max_value={"$PARAMETER": "max_value"}
-            )
+            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value={"$PARAMETER": "max_value"})
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run(
             batch_definition_options={"year": 2024},
@@ -207,9 +201,7 @@ class TestValidationRun:
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run()
 
@@ -242,9 +234,7 @@ class TestValidationRun:
         cloud_validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         cloud_validation_config.run()
 
@@ -361,7 +351,7 @@ class TestValidationConfigSerialization:
             "id": validation_id,
         }
 
-        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
+        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one  # noqa: E501
         if suite_id is None:
             self._assert_contains_valid_uuid(actual["suite"])
 
