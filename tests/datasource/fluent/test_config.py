@@ -21,7 +21,7 @@ from typing import (  # TODO: revert use of cast
 import pytest
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
@@ -444,7 +444,7 @@ def test_batch_configs_are_assigned_data_assets(
     loaded: GxConfig = load_method(input_)
     assert loaded
 
-    batch_configs: List[BatchConfig] = []
+    batch_configs: List[BatchDefinition] = []
     assert loaded.datasources
     for datasource in loaded.datasources:
         for data_asset in datasource.assets:

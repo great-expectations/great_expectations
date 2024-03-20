@@ -15,7 +15,7 @@ from great_expectations.checkpoint.actions import (
 )
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -44,7 +44,7 @@ class TestCheckpointSerialization:
         name = "my_first_validation"
         vc = ValidationConfig(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
@@ -61,7 +61,7 @@ class TestCheckpointSerialization:
         name = "my_second_validation"
         vc = ValidationConfig(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(

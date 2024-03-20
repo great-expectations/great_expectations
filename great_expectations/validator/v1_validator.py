@@ -13,7 +13,7 @@ from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
-    from great_expectations.core.batch_config import BatchConfig
+    from great_expectations.core.batch_config import BatchDefinition
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
     from great_expectations.expectations.expectation import (
         Expectation,
@@ -36,7 +36,7 @@ class Validator:
 
     def __init__(
         self,
-        batch_config: BatchConfig,
+        batch_config: BatchDefinition,
         result_format: ResultFormat = ResultFormat.SUMMARY,
         batch_request_options: Optional[BatchRequestOptions] = None,
     ) -> None:

@@ -5,7 +5,7 @@ from pprint import pformat as pf
 import pytest
 
 import great_expectations.expectations as gxe
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import PartitionerColumnValue
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -66,8 +66,8 @@ def fds_data_asset_with_event_type_partitioner(
 @pytest.fixture
 def batch_config(
     fds_data_asset: DataAsset,
-) -> BatchConfig:
-    batch_config = BatchConfig(name="test_batch_config")
+) -> BatchDefinition:
+    batch_config = BatchDefinition(name="test_batch_config")
     batch_config.set_data_asset(fds_data_asset)
     return batch_config
 
@@ -75,15 +75,15 @@ def batch_config(
 @pytest.fixture
 def batch_config_with_event_type_partitioner(
     fds_data_asset_with_event_type_partitioner: DataAsset,
-) -> BatchConfig:
+) -> BatchDefinition:
     partitioner = PartitionerColumnValue(column_name="event_type")
-    batch_config = BatchConfig(name="test_batch_config", partitioner=partitioner)
+    batch_config = BatchDefinition(name="test_batch_config", partitioner=partitioner)
     batch_config.set_data_asset(fds_data_asset_with_event_type_partitioner)
     return batch_config
 
 
 @pytest.fixture
-def validator(fds_data_context: AbstractDataContext, batch_config: BatchConfig) -> Validator:
+def validator(fds_data_context: AbstractDataContext, batch_config: BatchDefinition) -> Validator:
     return Validator(
         batch_config=batch_config,
         batch_request_options=None,
@@ -153,7 +153,7 @@ def test_validate_expectation_failure(validator: Validator, failing_expectation:
 @pytest.mark.unit
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
-    batch_config_with_event_type_partitioner: BatchConfig,
+    batch_config_with_event_type_partitioner: BatchDefinition,
 ):
     desired_event_type = "start"
     validator = Validator(

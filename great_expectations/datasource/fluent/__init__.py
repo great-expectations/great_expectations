@@ -17,10 +17,10 @@ from great_expectations.datasource.fluent.invalid_datasource import (
 )
 
 # Now that DataAsset has both been defined, we need to
-# provide it to the BatchConfig pydantic model.
-from great_expectations.core.batch_config import BatchConfig
+# provide it to the BatchDefinition pydantic model.
+from great_expectations.core.batch_config import BatchDefinition
 
-BatchConfig.update_forward_refs(DataAsset=DataAsset)
+BatchDefinition.update_forward_refs(DataAsset=DataAsset)
 
 
 from great_expectations.datasource.fluent.batch_request import (

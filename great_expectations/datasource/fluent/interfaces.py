@@ -39,7 +39,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
@@ -184,10 +184,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
-    batch_configs: List[BatchConfig] = Field(default_factory=list)
+    batch_configs: List[BatchDefinition] = Field(default_factory=list)
 
     # non-field private attributes
-    _save_batch_config: Callable[[BatchConfig], None] = pydantic.PrivateAttr()
+    _save_batch_config: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
@@ -253,7 +253,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(self, name: str, partitioner: Optional[Partitioner] = None) -> BatchConfig:
+    def add_batch_config(
+        self, name: str, partitioner: Optional[Partitioner] = None
+    ) -> BatchDefinition:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
 
@@ -264,7 +266,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             partitioner: Optional Partitioner to partition this BatchConfig
 
         Returns:
-            BatchConfig: The new batch config.
+            BatchDefinition: The new batch config.
         """
         batch_config_names = {bc.name for bc in self.batch_configs}
         if name in batch_config_names:
@@ -275,7 +277,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_config = BatchConfig(name=name, partitioner=partitioner)
+        batch_config = BatchDefinition(name=name, partitioner=partitioner)
         batch_config.set_data_asset(self)
         self.batch_configs.append(batch_config)
         self.update_batch_config_field_set()
@@ -290,11 +292,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_config
 
     @public_api
-    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+    def delete_batch_config(self, batch_config: BatchDefinition) -> None:
         """Delete a batch config.
 
         Args:
-            batch_config (BatchConfig): BatchConfig to delete.
+            batch_config (BatchDefinition): BatchConfig to delete.
         """
         batch_config_names = {bc.name for bc in self.batch_configs}
         if batch_config not in self.batch_configs:
@@ -324,14 +326,14 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         elif "batch_configs" not in self.__fields_set__ and has_batch_configs:
             self.__fields_set__.add("batch_configs")
 
-    def get_batch_config(self, batch_config_name: str) -> BatchConfig:
+    def get_batch_config(self, batch_config_name: str) -> BatchDefinition:
         batch_configs = [
             batch_config
             for batch_config in self.batch_configs
             if batch_config.name == batch_config_name
         ]
         if len(batch_configs) == 0:
-            raise KeyError(f"BatchConfig {batch_config_name} not found")
+            raise KeyError(f"BatchDefinition {batch_config_name} not found")
         elif len(batch_configs) > 1:
             raise KeyError(f"Multiple keys for {batch_config_name} found")
         return batch_configs[0]
@@ -540,7 +542,7 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
+    def add_batch_config(self, batch_config: BatchDefinition) -> BatchDefinition:
         asset_name = batch_config.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")
@@ -559,7 +561,7 @@ class Datasource(
         output.set_data_asset(batch_config.data_asset)
         return output
 
-    def delete_batch_config(self, batch_config: BatchConfig) -> None:
+    def delete_batch_config(self, batch_config: BatchDefinition) -> None:
         asset_name = batch_config.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
-class BatchConfig(pydantic.BaseModel):
+class BatchDefinition(pydantic.BaseModel):
     """Configuration for a batch of data.
 
     References the DataAsset to be used, and any additional parameters needed to fetch the data.

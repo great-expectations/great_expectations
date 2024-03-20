@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -75,7 +75,7 @@ def data_asset_with_batch_config(datasource: Datasource) -> DataAsset:
 
 
 @pytest.fixture
-def persisted_batch_config(data_asset_with_batch_config: DataAsset) -> BatchConfig:
+def persisted_batch_config(data_asset_with_batch_config: DataAsset) -> BatchDefinition:
     return data_asset_with_batch_config.batch_configs[0]
 
 
@@ -237,7 +237,7 @@ def _test_add_batch_config__does_not_clobber_other_batch_configs(
 @pytest.mark.unit
 def test_delete_batch_config__success(
     data_asset_with_batch_config: DataAsset,
-    persisted_batch_config: BatchConfig,
+    persisted_batch_config: BatchDefinition,
 ):
     assert persisted_batch_config in data_asset_with_batch_config.batch_configs
 
@@ -250,7 +250,7 @@ def test_delete_batch_config__success(
 def test_delete_batch_config__persists(
     file_context_with_assets: AbstractDataContext,
     data_asset_with_batch_config: DataAsset,
-    persisted_batch_config: BatchConfig,
+    persisted_batch_config: BatchDefinition,
 ):
     data_asset_with_batch_config.delete_batch_config(persisted_batch_config)
 
@@ -263,7 +263,7 @@ def test_delete_batch_config__persists(
 
 @pytest.mark.unit
 def test_delete_batch_config__unsaved_batch_config(empty_data_asset: DataAsset):
-    batch_config = BatchConfig(name="uh oh")
+    batch_config = BatchDefinition(name="uh oh")
 
     with pytest.raises(ValueError, match="does not exist"):
         empty_data_asset.delete_batch_config(batch_config)

@@ -9,7 +9,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -257,7 +257,7 @@ class TestValidationConfigSerialization:
     def validation_config_data(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-    ) -> tuple[PandasDatasource, CSVAsset, BatchConfig]:
+    ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
         context = in_memory_runtime_context
 
         ds = context.sources.add_pandas(self.ds_name)
@@ -310,7 +310,7 @@ class TestValidationConfigSerialization:
         batch_definition_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
     ):
         pandas_ds, csv_asset, batch_definition = validation_config_data
@@ -369,7 +369,7 @@ class TestValidationConfigSerialization:
     def test_validation_config_deserialization_success(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
     ):
         context = in_memory_runtime_context
@@ -587,7 +587,7 @@ class TestValidationConfigSerialization:
     )
     def test_validation_config_deserialization_non_existant_resource(
         self,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
         serialized_config: dict,
         error_substring: str,

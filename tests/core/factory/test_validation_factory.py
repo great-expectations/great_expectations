@@ -3,7 +3,7 @@ import json
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_config import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_factory import ValidationFactory
 from great_expectations.core.validation_config import ValidationConfig
@@ -24,7 +24,7 @@ from great_expectations.exceptions import DataContextError
 
 @pytest.fixture
 def validation_config(mocker: MockerFixture) -> ValidationConfig:
-    batch_definition = mocker.Mock(spec=BatchConfig)
+    batch_definition = mocker.Mock(spec=BatchDefinition)
     suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationConfig(
         name="test-validation",
