@@ -304,6 +304,7 @@ extend-exclude = [
     "PLR0912", # Too many branches  - scripts are not part of the main codebase
     "PLR0913", # Too many arguments - scripts are not part of the main codebase
     "PLR0915", # Too many statements - scripts are not part of the main codebase
+    "E501", # line too long - scripts are not part of the main codebase
 ]
 "__init__.py" = [
     "F401", # unused import
