@@ -226,8 +226,8 @@ Configure your Great Expectations project to substitute variables from the Azure
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/oss/guides/setup/setup_overview.md)
-- Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
+- GX 1.0. See [Install GX 1.0](/core/installation_and_setup/install_gx.md).
+- A secrets manager and secrets stored in an [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview).
 
 </Prerequisites>
 
