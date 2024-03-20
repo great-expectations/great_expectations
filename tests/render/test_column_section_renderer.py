@@ -36,9 +36,7 @@ from great_expectations.self_check.util import (
 
 @pytest.fixture(scope="module")
 def titanic_expectations():
-    with open(
-        file_relative_path(__file__, "../test_sets/titanic_expectations.json")
-    ) as infile:
+    with open(file_relative_path(__file__, "../test_sets/titanic_expectations.json")) as infile:
         titanic_expectation_suite_dict: dict = expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
@@ -49,13 +47,9 @@ def titanic_expectations():
 def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
     context = empty_data_context_stats_enabled
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_expectations.json"),
     ) as infile:
-        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
-            json.load(infile)
-        )
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(json.load(infile))
         titanic_profiled_expectations = ExpectationSuite(
             **titanic_profiled_expectations_dict, data_context=context
         )
@@ -114,9 +108,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
             "w",
         ) as outfile:
             json.dump(
-                ProfilingResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
+                ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -142,17 +134,13 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
         with open(
             file_relative_path(
                 __file__,
-                "./output/test_render_expectation_suite_column_section_renderer"
-                + column
-                + ".json",
+                "./output/test_render_expectation_suite_column_section_renderer" + column + ".json",
                 strict=False,
             ),
             "w",
         ) as outfile:
             json.dump(
-                ExpectationSuiteColumnSectionRenderer()
-                .render(exp_groups[column])
-                .to_json_dict(),
+                ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -288,8 +276,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     distinct_values_evrs = [
         evr
         for evr in titanic_profiled_evrs_1.results
-        if evr.expectation_config.expectation_type
-        == "expect_column_distinct_values_to_be_in_set"
+        if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"
     ]
 
     assert len(distinct_values_evrs) == 4
@@ -411,9 +398,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
         },
-        notes=[
-            "#### These are expectation notes \n - you can use markdown \n - or just strings"
-        ],
+        notes=["#### These are expectation notes \n - you can use markdown \n - or just strings"],
     )
     expectations = [expectation_with_markdown_meta_notes]
     expected_result_json = {
@@ -469,14 +454,8 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
                                     "v__7": "float",
                                 },
                                 "styling": {
-                                    "default": {
-                                        "classes": ["badge", "badge-secondary"]
-                                    },
-                                    "params": {
-                                        "column": {
-                                            "classes": ["badge", "badge-primary"]
-                                        }
-                                    },
+                                    "default": {"classes": ["badge", "badge-secondary"]},
+                                    "params": {"column": {"classes": ["badge", "badge-primary"]}},
                                 },
                             },
                         },
@@ -510,9 +489,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
                                     "content_block_type": "text",
                                     "styling": {
                                         "classes": ["col-12", "mt-2", "mb-2"],
-                                        "parent": {
-                                            "styles": {"list-style-type": "none"}
-                                        },
+                                        "parent": {"styles": {"list-style-type": "none"}},
                                     },
                                     "subheader": "Notes:",
                                     "text": [
@@ -543,9 +520,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
         "section_name": "Car Insurance Premiums ($)",
     }
 
-    result_json = (
-        ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
-    )
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
 
@@ -632,14 +607,8 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                     "v__7": "float",
                                 },
                                 "styling": {
-                                    "default": {
-                                        "classes": ["badge", "badge-secondary"]
-                                    },
-                                    "params": {
-                                        "column": {
-                                            "classes": ["badge", "badge-primary"]
-                                        }
-                                    },
+                                    "default": {"classes": ["badge", "badge-secondary"]},
+                                    "params": {"column": {"classes": ["badge", "badge-primary"]}},
                                 },
                             },
                         },
@@ -673,9 +642,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                     "content_block_type": "text",
                                     "styling": {
                                         "classes": ["col-12", "mt-2", "mb-2"],
-                                        "parent": {
-                                            "styles": {"list-style-type": "none"}
-                                        },
+                                        "parent": {"styles": {"list-style-type": "none"}},
                                     },
                                     "subheader": "Notes:",
                                     "text": [
@@ -720,9 +687,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         "section_name": "Car Insurance Premiums ($)",
     }
 
-    result_json = (
-        ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
-    )
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
 
@@ -804,14 +769,8 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "v__7": "float",
                                 },
                                 "styling": {
-                                    "default": {
-                                        "classes": ["badge", "badge-secondary"]
-                                    },
-                                    "params": {
-                                        "column": {
-                                            "classes": ["badge", "badge-primary"]
-                                        }
-                                    },
+                                    "default": {"classes": ["badge", "badge-secondary"]},
+                                    "params": {"column": {"classes": ["badge", "badge-primary"]}},
                                 },
                             },
                         },
@@ -845,9 +804,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "content_block_type": "text",
                                     "styling": {
                                         "classes": ["col-12", "mt-2", "mb-2"],
-                                        "parent": {
-                                            "styles": {"list-style-type": "none"}
-                                        },
+                                        "parent": {"styles": {"list-style-type": "none"}},
                                     },
                                     "subheader": "Notes:",
                                     "text": [
@@ -879,9 +836,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         "section_name": "Car Insurance Premiums ($)",
     }
 
-    result_json = (
-        ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
-    )
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
 
@@ -963,14 +918,8 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                     "v__7": "float",
                                 },
                                 "styling": {
-                                    "default": {
-                                        "classes": ["badge", "badge-secondary"]
-                                    },
-                                    "params": {
-                                        "column": {
-                                            "classes": ["badge", "badge-primary"]
-                                        }
-                                    },
+                                    "default": {"classes": ["badge", "badge-secondary"]},
+                                    "params": {"column": {"classes": ["badge", "badge-primary"]}},
                                 },
                             },
                         },
@@ -1004,9 +953,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
                                     "content_block_type": "text",
                                     "styling": {
                                         "classes": ["col-12", "mt-2", "mb-2"],
-                                        "parent": {
-                                            "styles": {"list-style-type": "none"}
-                                        },
+                                        "parent": {"styles": {"list-style-type": "none"}},
                                     },
                                     "subheader": "Notes:",
                                     "text": [
@@ -1041,9 +988,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         "section_name": "Car Insurance Premiums ($)",
     }
 
-    result_json = (
-        ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
-    )
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
 
@@ -1125,14 +1070,8 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "v__7": "float",
                                 },
                                 "styling": {
-                                    "default": {
-                                        "classes": ["badge", "badge-secondary"]
-                                    },
-                                    "params": {
-                                        "column": {
-                                            "classes": ["badge", "badge-primary"]
-                                        }
-                                    },
+                                    "default": {"classes": ["badge", "badge-secondary"]},
+                                    "params": {"column": {"classes": ["badge", "badge-primary"]}},
                                 },
                             },
                         },
@@ -1166,9 +1105,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
                                     "content_block_type": "text",
                                     "styling": {
                                         "classes": ["col-12", "mt-2", "mb-2"],
-                                        "parent": {
-                                            "styles": {"list-style-type": "none"}
-                                        },
+                                        "parent": {"styles": {"list-style-type": "none"}},
                                     },
                                     "subheader": "Notes:",
                                     "text": [
@@ -1200,9 +1137,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         "section_name": "Car Insurance Premiums ($)",
     }
 
-    result_json = (
-        ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
-    )
+    result_json = ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     print(result_json)
     assert result_json == expected_result_json
 
@@ -1330,18 +1265,14 @@ def test_ValidationResultsColumnSectionRenderer_render_table(
     assert "may have any number of unique values." in content_block_stringified
     assert "may have any fraction of unique values." in content_block_stringified
     assert (
-        "values must not be null, at least $mostly_pct % of the time."
-        in content_block_stringified
+        "values must not be null, at least $mostly_pct % of the time." in content_block_stringified
     )
     assert "values must belong to this set: [ ]." in content_block_stringified
     assert (
         "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
         in content_block_stringified
     )
-    assert (
-        "values must not match this regular expression: $regex."
-        in content_block_stringified
-    )
+    assert "values must not match this regular expression: $regex." in content_block_stringified
     assert (
         "\\n\\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
         in content_block_stringified
@@ -1395,11 +1326,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             [
                 {
                     "content_block_type": "string_template",
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                     "string_template": {
                         "template": "$icon",
                         "params": {"icon": "", "markdown_status_icon": "✅"},
@@ -1433,9 +1360,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "default": {"classes": ["badge", "badge-secondary"]},
-                            "params": {
-                                "column": {"classes": ["badge", "badge-primary"]}
-                            },
+                            "params": {"column": {"classes": ["badge", "badge-primary"]}},
                         },
                     },
                 },
@@ -1500,11 +1425,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             [
                 {
                     "content_block_type": "string_template",
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                     "string_template": {
                         "template": "$icon",
                         "params": {"icon": "", "markdown_status_icon": "✅"},
@@ -1539,9 +1460,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             },
                             "styling": {
                                 "default": {"classes": ["badge", "badge-secondary"]},
-                                "params": {
-                                    "column": {"classes": ["badge", "badge-primary"]}
-                                },
+                                "params": {"column": {"classes": ["badge", "badge-primary"]}},
                             },
                         },
                     },
@@ -1555,9 +1474,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             },
                             "styling": {
                                 "default": {"classes": ["badge", "badge-secondary"]},
-                                "params": {
-                                    "column": {"classes": ["badge", "badge-primary"]}
-                                },
+                                "params": {"column": {"classes": ["badge", "badge-primary"]}},
                             },
                         },
                     },
@@ -1571,9 +1488,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             },
                             "styling": {
                                 "default": {"classes": ["badge", "badge-secondary"]},
-                                "params": {
-                                    "column": {"classes": ["badge", "badge-primary"]}
-                                },
+                                "params": {"column": {"classes": ["badge", "badge-primary"]}},
                             },
                         },
                     },
@@ -1632,11 +1547,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             [
                 {
                     "content_block_type": "string_template",
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                     "string_template": {
                         "template": "$icon",
                         "params": {"icon": "", "markdown_status_icon": "✅"},
@@ -1660,12 +1571,8 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         "params": {
                             "column": "start_date",
                             "condition_parser": None,
-                            "max_value": {
-                                "$PARAMETER": "now() " "- " "timedelta(weeks=1)"
-                            },
-                            "min_value": {
-                                "$PARAMETER": "now() " "- " "timedelta(weeks=208)"
-                            },
+                            "max_value": {"$PARAMETER": "now() " "- " "timedelta(weeks=1)"},
+                            "min_value": {"$PARAMETER": "now() " "- " "timedelta(weeks=208)"},
                             "result_format": "SUMMARY",
                             "row_condition": None,
                             "strict_max": None,
@@ -1673,9 +1580,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                         "styling": {
                             "default": {"classes": ["badge", "badge-secondary"]},
-                            "params": {
-                                "column": {"classes": ["badge", "badge-primary"]}
-                            },
+                            "params": {"column": {"classes": ["badge", "badge-primary"]}},
                         },
                         "template": "$column minimum value must be "
                         "greater than or equal to "
@@ -1890,9 +1795,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Distinct (n)",
-                        "tooltip": {
-                            "content": "expect_column_unique_value_count_to_be_between"
-                        },
+                        "tooltip": {"content": "expect_column_unique_value_count_to_be_between"},
                     },
                 },
                 3,

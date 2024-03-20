@@ -161,7 +161,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                template_str += (
+                    f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                )
             elif not params.min_value:
                 template_str += f"values must be {at_most_str} $max_value"
             else:
@@ -221,9 +223,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
             mostly_str = ""
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 mostly_str = ", at least $mostly_pct % of the time"
 

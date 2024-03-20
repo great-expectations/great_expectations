@@ -125,9 +125,8 @@ def test_parse_evaluation_parameter():
     # Valid variables but invalid expression is no good
     with pytest.raises(EvaluationParameterError) as err:
         parse_evaluation_parameter("1 / a", {"a": 0})
-    assert (
-        "Error while evaluating evaluation parameter expression: division by zero"
-        in str(err.value)
+    assert "Error while evaluating evaluation parameter expression: division by zero" in str(
+        err.value
     )
 
     # It is okay to *substitute* strings in the expression...
@@ -232,9 +231,7 @@ def test_temporal_evaluation_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
-        )
+        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)"))
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -293,16 +290,12 @@ def test_deduplicate_evaluation_parameter_dependencies():
         "profile": [
             {
                 "metric_kwargs_id": {
-                    "column=norm": [
-                        "expect_column_mean_to_be_between.result.observed_value"
-                    ]
+                    "column=norm": ["expect_column_mean_to_be_between.result.observed_value"]
                 }
             },
             {
                 "metric_kwargs_id": {
-                    "column=norm": [
-                        "expect_column_stdev_to_be_between.result.observed_value"
-                    ]
+                    "column=norm": ["expect_column_stdev_to_be_between.result.observed_value"]
                 }
             },
         ]
@@ -463,9 +456,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         **expectation_kwargs
     )
 
-    assert (
-        actual_expectation_validation_result == expected_expectation_validation_result
-    )
+    assert actual_expectation_validation_result == expected_expectation_validation_result
 
 
 @pytest.mark.unit
@@ -476,15 +467,11 @@ def test_now_evaluation_parameter():
     """
     # By itself
     res = parse_evaluation_parameter("now()")
-    assert dateutil.parser.parse(
-        res
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
 
     # In conjunction with timedelta
     res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert dateutil.parser.parse(
-        res
-    ), "Provided evaluation parameter is not dateutil-parseable"
+    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
 
     # Require parens to actually invoke
     with pytest.raises(EvaluationParameterError):

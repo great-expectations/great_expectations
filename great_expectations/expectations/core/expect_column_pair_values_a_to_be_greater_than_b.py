@@ -60,9 +60,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     """
 
     or_equal: Union[bool, None] = None
-    ignore_row_if: Literal[
-        "both_values_are_missing", "either_value_is_missing", "neither"
-    ] = "both_values_are_missing"
+    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
+        "both_values_are_missing"
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -114,7 +114,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
 
         if not params.mostly or params.mostly.value == 1.0:
             if not params.or_equal:
-                template_str += "Values in $column_A must always be greater than those in $column_B."
+                template_str += (
+                    "Values in $column_A must always be greater than those in $column_B."
+                )
             else:
                 template_str += "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
@@ -166,9 +168,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
@@ -181,10 +181,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
 

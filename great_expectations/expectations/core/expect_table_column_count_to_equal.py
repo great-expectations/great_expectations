@@ -79,9 +79,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="value", param_type=RendererValueType.NUMBER
-        )
+        renderer_configuration.add_param(name="value", param_type=RendererValueType.NUMBER)
         renderer_configuration.template_str = "Must have exactly $value columns."
         return renderer_configuration
 

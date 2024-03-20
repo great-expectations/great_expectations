@@ -49,9 +49,7 @@ class MetricListMetricRetriever(MetricRetriever):
             return metrics_result
 
         table_column_types = list(
-            filter(
-                lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics
-            )
+            filter(lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics)
         )[0]
 
         # We need to skip columns that do not report a type, because the metric computation
@@ -106,9 +104,7 @@ class MetricListMetricRetriever(MetricRetriever):
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
         metrics: list[Metric] = []
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
 
         if not metrics_to_calculate:
             return metrics
@@ -144,9 +140,7 @@ class MetricListMetricRetriever(MetricRetriever):
             MetricTypes.COLUMN_MEDIAN,
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
         if not metrics_to_calculate:
             return metrics
 
@@ -181,9 +175,7 @@ class MetricListMetricRetriever(MetricRetriever):
             #  MetricTypes.COLUMN_MEDIAN,  # Currently not supported for timestamp in Snowflake
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
         if not metrics_to_calculate:
             return metrics
 

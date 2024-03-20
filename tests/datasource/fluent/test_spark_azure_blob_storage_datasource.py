@@ -57,9 +57,7 @@ class MockBlobServiceClient:
 def _build_spark_abs_datasource(
     azure_options: Dict[str, Any] | None = None,
 ) -> SparkAzureBlobStorageDatasource:
-    azure_client: azure.BlobServiceClient = cast(
-        azure.BlobServiceClient, MockBlobServiceClient()
-    )
+    azure_client: azure.BlobServiceClient = cast(azure.BlobServiceClient, MockBlobServiceClient())
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
         azure_options=azure_options or {},
@@ -70,9 +68,7 @@ def _build_spark_abs_datasource(
 
 @pytest.fixture
 def spark_abs_datasource() -> SparkAzureBlobStorageDatasource:
-    spark_abs_datasource: SparkAzureBlobStorageDatasource = (
-        _build_spark_abs_datasource()
-    )
+    spark_abs_datasource: SparkAzureBlobStorageDatasource = _build_spark_abs_datasource()
     return spark_abs_datasource
 
 
@@ -112,9 +108,7 @@ def csv_asset(
 
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(
-        r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    )
+    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     data_connector: AzureBlobStorageDataConnector = cast(
         AzureBlobStorageDataConnector, csv_asset._data_connector
     )
@@ -232,9 +226,7 @@ def test_add_csv_asset_to_datasource(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
-def test_construct_csv_asset_directly(
-    mock_azure_client, mock_list_keys, object_keys: List[str]
-):
+def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_keys: List[str]):
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
@@ -348,9 +340,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request(
-            {"name": "alex", "timestamp": "1234567890", "price": 1300}
-        )
+        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
 
 
 @pytest.mark.big
@@ -361,9 +351,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
 ):
-    azure_client: azure.BlobServiceClient = cast(
-        azure.BlobServiceClient, MockBlobServiceClient()
-    )
+    azure_client: azure.BlobServiceClient = cast(azure.BlobServiceClient, MockBlobServiceClient())
 
     def instantiate_azure_client_spy(self) -> None:
         self._azure_client = azure_client
@@ -382,9 +370,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -403,10 +389,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
         **asset_specified_metadata,
     }
-    assert (
-        batch.id
-        == "spark_abs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-    )
+    assert batch.id == "spark_abs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)

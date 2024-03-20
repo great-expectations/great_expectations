@@ -70,11 +70,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
         result["execution_engines_list"] = sorted(
-            [
-                engine
-                for engine, _bool in result["execution_engines"].items()
-                if _bool is True
-            ]
+            [engine for engine, _bool in result["execution_engines"].items() if _bool is True]
         )
         return result
 
@@ -89,9 +85,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
         sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
@@ -125,9 +119,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 message=message,
                 passed=False,
             )
-        elif short_description.startswith("Expect ") and short_description.endswith(
-            "."
-        ):
+        elif short_description.startswith("Expect ") and short_description.endswith("."):
             return ExpectationDiagnosticCheckMessage(
                 message=message,
                 sub_messages=[
@@ -165,9 +157,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         ) = cls._count_positive_and_negative_example_cases(examples)
         unexpected_case_count = cls._count_unexpected_test_cases(tests)
         passed = (
-            (positive_case_count > 0)
-            and (negative_case_count > 0)
-            and (unexpected_case_count == 0)
+            (positive_case_count > 0) and (negative_case_count > 0) and (unexpected_case_count == 0)
         )
         print(positive_case_count, negative_case_count, unexpected_case_count, passed)
         return ExpectationDiagnosticCheckMessage(
@@ -187,8 +177,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None
-            and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
         ]
 
         if len(all_passing) > 0:
@@ -227,9 +216,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
             if test_result.test_passed is False:
-                backend_failing_names[test_result.backend].append(
-                    test_result.test_title
-                )
+                backend_failing_names[test_result.backend].append(test_result.test_title)
 
         for backend in backend_results:
             result_counts = ExpectationBackendTestResultCounts(
@@ -250,12 +237,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
-        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        message = (
+            "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        )
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None
-            and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
         ]
         some_failing = [
             backend_test_result
@@ -346,9 +334,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         output_message = f"Completeness checklist for {class_name} ({maturity_level}):"
 
         checks = (
-            maturity_messages.experimental
-            + maturity_messages.beta
-            + maturity_messages.production
+            maturity_messages.experimental + maturity_messages.beta + maturity_messages.production
         )
 
         for check in checks:
@@ -454,9 +440,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_full_test_suite(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
@@ -466,9 +450,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(

@@ -326,16 +326,10 @@ REDSHIFT_TYPES: Dict[str, Any] = (
 )
 
 SNOWFLAKE_TYPES: Dict[str, Any]
-if (
-    snowflake.snowflakesqlalchemy
-    and snowflake.snowflakedialect
-    and snowflake.snowflaketypes
-):
+if snowflake.snowflakesqlalchemy and snowflake.snowflakedialect and snowflake.snowflaketypes:
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sqlalchemy.dialects.registry.register(
-        "snowflake", "snowflake.sqlalchemy", "dialect"
-    )
+    sqlalchemy.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
 
     SNOWFLAKE_TYPES = {
         "ARRAY": snowflake.snowflaketypes.ARRAY,
@@ -621,9 +615,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         try:
             spark_schema = pyspark.types.StructType(
                 [
-                    pyspark.types.StructField(
-                        column, spark_types[schema[column]](), True
-                    )
+                    pyspark.types.StructField(column, spark_types[schema[column]](), True)
                     for column in schema
                 ]
             )
@@ -667,30 +659,20 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
                             vals.append(parse(val))  # type: ignore[arg-type]
                     data[col] = vals
             # Do this again, now that we have done type conversion using the provided schema
-            data_reshaped = list(
-                zip(*(v for _, v in data.items()))
-            )  # create a list of rows
+            data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
             spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
         except TypeError:
             string_schema = pyspark.types.StructType(
-                [
-                    pyspark.types.StructField(column, pyspark.types.StringType())
-                    for column in schema
-                ]
+                [pyspark.types.StructField(column, pyspark.types.StringType()) for column in schema]
             )
             spark_df = spark.createDataFrame(data_reshaped, string_schema)
             for c in spark_df.columns:
-                spark_df = spark_df.withColumn(
-                    c, spark_df[c].cast(spark_types[schema[c]]())
-                )
+                spark_df = spark_df.withColumn(c, spark_df[c].cast(spark_types[schema[c]]()))
     elif len(data_reshaped) == 0:
         # if we have an empty dataset and no schema, need to assign an arbitrary type
         columns = list(data.keys())
         spark_schema = pyspark.types.StructType(
-            [
-                pyspark.types.StructField(column, pyspark.types.StringType())
-                for column in columns
-            ]
+            [pyspark.types.StructField(column, pyspark.types.StringType()) for column in columns]
         )
         spark_df = spark.createDataFrame(data_reshaped, spark_schema)
     else:
@@ -867,9 +849,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         if pk_column:
             schema["pk_index"] = "INTEGER"
 
-        sql_dtypes = {
-            col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
-        }
+        sql_dtypes = {col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()}
         for col in schema:
             type_ = schema[col]
             if type_ in ["INTEGER", "SMALLINT", "BIGINT", "NUMBER"]:
@@ -915,9 +895,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         sql_insert_method = None
 
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name=table_name
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, table_name=table_name)
     with execution_engine.get_connection() as connection:
         _debug("Calling df.to_sql")
         _start = time.time()
@@ -931,16 +909,12 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
             method=sql_insert_method,
         )
         _end = time.time()
-        _debug(
-            f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
-        )
+        _debug(f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}")
 
     if context is None:
         context = build_in_memory_runtime_context()
 
-    assert (
-        context is not None
-    ), 'Instance of any child of "AbstractDataContext" class is required.'
+    assert context is not None, 'Instance of any child of "AbstractDataContext" class is required.'
 
     context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
@@ -962,17 +936,15 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
     context.datasources["my_test_datasource"]._execution_engine = execution_engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animals_table",
-                },
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "table_name": "animals_table",
             },
-        )
+        },
     )
 
     if batch_definition is None:
@@ -1085,9 +1057,7 @@ def build_sa_execution_engine(  # noqa: PLR0913
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlalchemy_engine
     )
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name=table_name
-    )
+    batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, table_name=table_name)
     batch = Batch(data=batch_data)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     if batch_id is None:
@@ -1118,9 +1088,7 @@ def build_spark_engine(
         )
         != 1
     ):
-        raise ValueError(
-            "Exactly one of batch_id or batch_definition must be specified."
-        )
+        raise ValueError("Exactly one of batch_id or batch_definition must be specified.")
 
     if batch_id is None:
         batch_id = cast(LegacyBatchDefinition, batch_definition).id
@@ -1160,9 +1128,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         return getter in []
 
 
-def candidate_test_is_on_temporary_notimplemented_list_v2_api(
-    context, expectation_type
-):
+def candidate_test_is_on_temporary_notimplemented_list_v2_api(context, expectation_type):
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
@@ -1234,9 +1200,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
     return False
 
 
-def candidate_test_is_on_temporary_notimplemented_list_v3_api(
-    context, expectation_type
-):
+def candidate_test_is_on_temporary_notimplemented_list_v3_api(context, expectation_type):
     candidate_test_is_on_temporary_notimplemented_list_v3_api_trino = [
         "expect_column_distinct_values_to_contain_set",
         "expect_column_max_to_be_between",
@@ -1302,9 +1266,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
     if context in ["trino"]:
         return expectation_type in set(
             candidate_test_is_on_temporary_notimplemented_list_v3_api_trino
-        ).union(
-            set(candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql)
-        )
+        ).union(set(candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql))
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
@@ -1397,13 +1359,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if not pyspark.pyspark:
             if raise_exceptions_for_backends is True:
-                raise ValueError(
-                    "spark tests are requested, but pyspark is not installed"
-                )
+                raise ValueError("spark tests are requested, but pyspark is not installed")
             else:
-                logger.warning(
-                    "spark tests are requested, but pyspark is not installed"
-                )
+                logger.warning("spark tests are requested, but pyspark is not installed")
         else:
             test_backends += ["spark"]
 
@@ -1412,13 +1370,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
-                raise ImportError(
-                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
-                )
+                raise ImportError("sqlalchemy tests are requested, but sqlalchemy in not installed")
             else:
-                logger.warning(
-                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
-                )
+                logger.warning("sqlalchemy tests are requested, but sqlalchemy in not installed")
             return test_backends
 
         if include_sqlite:
@@ -1502,13 +1456,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "bigquery tests are requested, but unable to connect"
-                    ) from e
+                    raise ImportError("bigquery tests are requested, but unable to connect") from e
                 else:
-                    logger.warning(
-                        f"bigquery tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"bigquery tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["bigquery"]
 
@@ -1529,13 +1479,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 and not aws_config_file
             ):
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "AWS tests are requested, but credentials were not set up"
-                    )
+                    raise ImportError("AWS tests are requested, but credentials were not set up")
                 else:
-                    logger.warning(
-                        "AWS tests are requested, but credentials were not set up"
-                    )
+                    logger.warning("AWS tests are requested, but credentials were not set up")
 
         if include_clickhouse:
             # noinspection PyUnresolvedReferences
@@ -1549,9 +1495,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         "clickhouse tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
-                        f"clickhouse tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"clickhouse tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["clickhouse"]
 
@@ -1563,35 +1507,21 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "trino tests are requested, but unable to connect"
-                    ) from e
+                    raise ImportError("trino tests are requested, but unable to connect") from e
                 else:
-                    logger.warning(
-                        f"trino tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"trino tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["trino"]
 
         if include_azure:
-            azure_connection_string: Optional[str] = os.getenv(
-                "AZURE_CONNECTION_STRING"
-            )
+            azure_connection_string: Optional[str] = os.getenv("AZURE_CONNECTION_STRING")
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if (
-                not azure_access_key
-                and not azure_connection_string
-                and not azure_credential
-            ):
+            if not azure_access_key and not azure_connection_string and not azure_credential:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "Azure tests are requested, but credentials were not set up"
-                    )
+                    raise ImportError("Azure tests are requested, but credentials were not set up")
                 else:
-                    logger.warning(
-                        "Azure tests are requested, but credentials were not set up"
-                    )
+                    logger.warning("Azure tests are requested, but credentials were not set up")
             test_backends += ["azure"]
 
         if include_redshift:
@@ -1602,13 +1532,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "redshift tests are requested, but unable to connect"
-                    ) from e
+                    raise ImportError("redshift tests are requested, but unable to connect") from e
                 else:
-                    logger.warning(
-                        f"redshift tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"redshift tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["redshift"]
 
@@ -1620,13 +1546,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "athena tests are requested, but unable to connect"
-                    ) from e
+                    raise ImportError("athena tests are requested, but unable to connect") from e
                 else:
-                    logger.warning(
-                        f"athena tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"athena tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["athena"]
 
@@ -1638,13 +1560,9 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
-                        "snowflake tests are requested, but unable to connect"
-                    ) from e
+                    raise ImportError("snowflake tests are requested, but unable to connect") from e
                 else:
-                    logger.warning(
-                        f"snowflake tests are requested, but unable to connect; {e!r}"
-                    )
+                    logger.warning(f"snowflake tests are requested, but unable to connect; {e!r}")
             else:
                 test_backends += ["snowflake"]
 
@@ -1695,9 +1613,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         engines_implemented.append("spark")
     if execution_engine_diagnostics.SqlAlchemyExecutionEngine:
         engines_implemented.append("sqlalchemy")
-    _debug(
-        f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
-    )
+    _debug(f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}")
 
     if only_consider_these_backends:
         _debug(f"only_consider_these_backends -> {only_consider_these_backends}")
@@ -1712,24 +1628,13 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include["pandas"] = (
-            execution_engine_diagnostics.PandasExecutionEngine
-        )
-        engines_to_include["spark"] = (
-            execution_engine_diagnostics.SparkDFExecutionEngine
-        )
-        engines_to_include["sqlalchemy"] = (
-            execution_engine_diagnostics.SqlAlchemyExecutionEngine
-        )
-        if (
-            engines_to_include.get("sqlalchemy") is True
-            and raise_exceptions_for_backends is False
-        ):
+        engines_to_include["pandas"] = execution_engine_diagnostics.PandasExecutionEngine
+        engines_to_include["spark"] = execution_engine_diagnostics.SparkDFExecutionEngine
+        engines_to_include["sqlalchemy"] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        if engines_to_include.get("sqlalchemy") is True and raise_exceptions_for_backends is False:
             dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
 
-    _debug(
-        f"Attempting engines ({engines_to_include}) and dialects ({dialects_to_include})"
-    )
+    _debug(f"Attempting engines ({engines_to_include}) and dialects ({dialects_to_include})")
 
     backends = build_test_backends_list(
         include_pandas=engines_to_include.get("pandas", False),
@@ -1774,9 +1679,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
             _debug(f"Getting validators with data: {c}")
 
             tests_suppressed_for_backend = [
-                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
-                if sup
-                else False
+                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES) if sup else False
                 for sup in suppress_test_fors
             ]
             only_fors_ok = []
@@ -1784,22 +1687,16 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 if not only_for:
                     only_fors_ok.append(True)
                     continue
-                if c in only_for or (
-                    "sqlalchemy" in only_for and c in SQL_DIALECT_NAMES
-                ):
+                if c in only_for or ("sqlalchemy" in only_for and c in SQL_DIALECT_NAMES):
                     only_fors_ok.append(True)
                 else:
                     only_fors_ok.append(False)
             if tests_suppressed_for_backend and all(tests_suppressed_for_backend):
-                _debug(
-                    f"All {len(tests_suppressed_for_backend)} tests are SUPPRESSED for {c}"
-                )
+                _debug(f"All {len(tests_suppressed_for_backend)} tests are SUPPRESSED for {c}")
                 continue
             if not any(only_fors_ok):
                 _debug(f"No tests are allowed for {c}")
-                _debug(
-                    f"c -> {c}  only_fors -> {only_fors}  only_fors_ok -> {only_fors_ok}"
-                )
+                _debug(f"c -> {c}  only_fors -> {only_fors}  only_fors_ok -> {only_fors_ok}")
                 continue
 
             datasets = []
@@ -1836,9 +1733,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         expectation_type=expectation_type,
                         index=i,
                     )
-                    dataset_name = d.get(
-                        "dataset_name", f"{expectation_type}_dataset_{i}"
-                    )
+                    dataset_name = d.get("dataset_name", f"{expectation_type}_dataset_{i}")
                     validator_with_data = get_test_validator_with_data(
                         execution_engine=c,
                         data=d["data"],
@@ -1989,10 +1884,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
                 f"Backend {backend} is suppressed for test {expectation_test_case.title}: | {extra_debug_info}"
             )
             return False
-    if (
-        "sqlalchemy" in expectation_test_case.suppress_test_for
-        and backend in SQL_DIALECT_NAMES
-    ):
+    if "sqlalchemy" in expectation_test_case.suppress_test_for and backend in SQL_DIALECT_NAMES:
         if ignore_suppress:
             _debug(
                 f"Should be suppressing {expectation_test_case.title} for sqlalchemy (including {backend}), but ignore_suppress is True | {extra_debug_info}"
@@ -2005,10 +1897,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
             return False
     if expectation_test_case.only_for is not None and expectation_test_case.only_for:
         if backend not in expectation_test_case.only_for:
-            if (
-                "sqlalchemy" in expectation_test_case.only_for
-                and backend in SQL_DIALECT_NAMES
-            ):
+            if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
                 return True
             elif "pandas" == backend:
                 major, minor, *_ = pd.__version__.split(".")
@@ -2053,9 +1942,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
                 key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
             )
         # if python built-in class has __lt__ then sorting can always work this way
-        elif type(test_value_list[0].__lt__(test_value_list[0])) is not type(
-            NotImplemented
-        ):
+        elif type(test_value_list[0].__lt__(test_value_list[0])) is not type(NotImplemented):
             test_value_list = sorted(test_value_list, key=lambda x: str(x))
             result_value_list = sorted(result_value_list, key=lambda x: str(x))
 
@@ -2111,25 +1998,19 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
         raise ValueError("Invalid test configuration detected: 'title' is required.")
 
     if "exact_match_out" not in test:
-        raise ValueError(
-            "Invalid test configuration detected: 'exact_match_out' is required."
-        )
+        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")
 
     if "input" not in test:
         if "in" in test:
             test["input"] = test["in"]
         else:
-            raise ValueError(
-                "Invalid test configuration detected: 'input' is required."
-            )
+            raise ValueError("Invalid test configuration detected: 'input' is required.")
 
     if "output" not in test:
         if "out" in test:
             test["output"] = test["out"]
         else:
-            raise ValueError(
-                "Invalid test configuration detected: 'output' is required."
-            )
+            raise ValueError("Invalid test configuration detected: 'output' is required.")
 
     kwargs = copy.deepcopy(test["input"])
     error_message = None
@@ -2174,9 +2055,7 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
                 pk_column=pk_column,
             )
         except Exception as e:
-            _debug(
-                f"RESULT: {result['result']}  |  CONFIG: {result['expectation_config']}"
-            )
+            _debug(f"RESULT: {result['result']}  |  CONFIG: {result['expectation_config']}")
             if raise_exception:
                 raise
             error_message = str(e)
@@ -2196,9 +2075,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                 assert "unexpected_index_query" in result["result"]
 
     if "unexpected_list" in result["result"]:
-        if ("result" in test["output"]) and (
-            "unexpected_list" in test["output"]["result"]
-        ):
+        if ("result" in test["output"]) and ("unexpected_list" in test["output"]["result"]):
             (
                 test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
@@ -2216,9 +2093,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
             )
 
     if "partial_unexpected_list" in result["result"]:
-        if ("result" in test["output"]) and (
-            "partial_unexpected_list" in test["output"]["result"]
-        ):
+        if ("result" in test["output"]) and ("partial_unexpected_list" in test["output"]["result"]):
             (
                 test["output"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
@@ -2254,8 +2129,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     atol=ATOL,
                 ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
             else:
-                assert (
-                    result == expectationValidationResultSchema.load(test["output"])
+                assert result == expectationValidationResultSchema.load(
+                    test["output"]
                 ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
         else:
             assert result == expectationValidationResultSchema.load(
@@ -2277,9 +2152,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
                     except TypeError:
-                        assert (
-                            result["success"] == value
-                        ), f"{result['success']} != {value}"
+                        assert result["success"] == value, f"{result['success']} != {value}"
                 else:
                     assert result["success"] == value, f"{result['success']} != {value}"
 
@@ -2287,8 +2160,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                 if "tolerance" in test:
                     if isinstance(value, dict):
                         assert (
-                            set(result["result"]["observed_value"].keys())
-                            == set(value.keys())
+                            set(result["result"]["observed_value"].keys()) == set(value.keys())
                         ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(
@@ -2355,9 +2227,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                             unexpected_list_tup = [
                                 tuple(x) for x in result["result"]["unexpected_list"]
                             ]
-                            assert (
-                                unexpected_list_tup == value
-                            ), f"{unexpected_list_tup} != {value}"
+                            assert unexpected_list_tup == value, f"{unexpected_list_tup} != {value}"
                         else:
                             raise
                     else:
@@ -2384,27 +2254,16 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
             elif key.startswith("observed_cdf"):
                 if "x_-1" in key:
                     if key.endswith("gt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1] > value
-                        )
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] > value
                     else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1]
-                            == value
-                        )
+                        assert result["result"]["details"]["observed_cdf"]["x"][-1] == value
                 elif "x_0" in key:
                     if key.endswith("lt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] < value
-                        )
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] < value
                     else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] == value
-                        )
+                        assert result["result"]["details"]["observed_cdf"]["x"][0] == value
                 else:
-                    raise ValueError(
-                        f"Invalid test specification: unknown key {key} in 'out'"
-                    )
+                    raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")
 
             elif key == "traceback_substring":
                 if "raised_exception" not in result["exception_info"]:
@@ -2413,10 +2272,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     for k, v in result["exception_info"].items():
                         assert v["raised_exception"], f"{v['raised_exception']}"
                         assert value in v["exception_traceback"], (
-                            "expected to find "
-                            + value
-                            + " in "
-                            + value["exception_traceback"]
+                            "expected to find " + value + " in " + value["exception_traceback"]
                         )
                 else:
                     assert result["exception_info"][
@@ -2440,9 +2296,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                 )
                 if "tail_weights" in result["result"]["details"]["expected_partition"]:
                     assert np.allclose(
-                        result["result"]["details"]["expected_partition"][
-                            "tail_weights"
-                        ],
+                        result["result"]["details"]["expected_partition"]["tail_weights"],
                         value["tail_weights"],
                     )
 
@@ -2457,16 +2311,12 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                 )
                 if "tail_weights" in result["result"]["details"]["observed_partition"]:
                     assert np.allclose(
-                        result["result"]["details"]["observed_partition"][
-                            "tail_weights"
-                        ],
+                        result["result"]["details"]["observed_partition"]["tail_weights"],
                         value["tail_weights"],
                     )
 
             else:
-                raise ValueError(
-                    f"Invalid test specification: unknown key {key} in 'out'"
-                )
+                raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")
 
 
 def generate_test_table_name(
@@ -2496,9 +2346,7 @@ def generate_dataset_name_from_expectation_name(
 
     dataset_name: str
     if not sub_index:
-        dataset_name = dataset.get(
-            "dataset_name", f"{expectation_type}_dataset_{index}"
-        )
+        dataset_name = dataset.get("dataset_name", f"{expectation_type}_dataset_{index}")
     else:
         dataset_name = dataset.get(
             "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
@@ -2641,9 +2489,7 @@ def _create_trino_engine(
     # )
 
 
-def _get_trino_connection_string(
-    hostname: str = "localhost", schema_name: str = "schema"
-) -> str:
+def _get_trino_connection_string(hostname: str = "localhost", schema_name: str = "schema") -> str:
     return f"trino://test@{hostname}:8088/memory/{schema_name}"
 
 
@@ -2695,9 +2541,7 @@ def _get_redshift_connection_string() -> str:
 def _create_athena_engine(
     db_name_env_var: str = "ATHENA_DB_NAME",
 ) -> sqlalchemy.Engine:
-    return sa.create_engine(
-        _get_athena_connection_string(db_name_env_var=db_name_env_var)
-    )
+    return sa.create_engine(_get_athena_connection_string(db_name_env_var=db_name_env_var))
 
 
 def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
@@ -2757,9 +2601,7 @@ def generate_sqlite_db_path():
         os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
-            + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            + "".join([random.choice(string.ascii_letters + string.digits) for _ in range(8)])
             + ".db",
         )
     )

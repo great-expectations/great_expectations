@@ -33,9 +33,9 @@ def is_valid_categorical_partition_object(partition_object):
     ):
         return False
     # Expect the same number of values as weights; weights should sum to one
-    return len(partition_object["values"]) == len(
-        partition_object["weights"]
-    ) and np.allclose(np.sum(partition_object["weights"]), 1)
+    return len(partition_object["values"]) == len(partition_object["weights"]) and np.allclose(
+        np.sum(partition_object["weights"]), 1
+    )
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -120,9 +120,7 @@ def kde_partition_data(data, estimate_tails=True):
     evaluation_bins = np.linspace(
         start=np.min(data) - (kde.covariance_factor() / 2),
         stop=np.max(data) + (kde.covariance_factor() / 2),
-        num=np.floor(
-            ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1
-        ).astype(int),
+        num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1).astype(int),
     )
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
     evaluation_weights = np.diff(cdf_vals)
@@ -177,9 +175,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
             "such as a range? Numpy error was: " + str(e)
         )
     except TypeError as e:
-        raise TypeError(
-            f"Unable to compute histogram. numpy histogram raised error: {e!s}"
-        )
+        raise TypeError(f"Unable to compute histogram. numpy histogram raised error: {e!s}")
 
     return {"bins": bin_edges, "weights": hist / len(data)}
 
@@ -286,9 +282,7 @@ def infer_distribution_parameters(data, distribution, params=None):  # noqa: C90
     if params is None:
         params = {}
     elif not isinstance(params, dict):
-        raise TypeError(
-            "params must be a dictionary object, see great_expectations documentation"
-        )
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")
 
     if "mean" not in params.keys():
         params["mean"] = data.mean()
@@ -412,19 +406,15 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR09
 
     """
 
-    norm_msg = (
-        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    )
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
-    gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    gamma_msg = (
+        "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    )
     # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
-    uniform_msg = (
-        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = (
-        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if distribution not in [
         "norm",
@@ -443,9 +433,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR09
             raise ValueError("std_dev and scale must be positive.")
 
         # alpha and beta are required and positive
-        if distribution == "beta" and (
-            params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
-        ):
+        if distribution == "beta" and (params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0):
             raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
@@ -559,11 +547,7 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
     return ", ".join(
         [
             "approximate "
-            + str(
-                stmt.compile(
-                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}
-                )
-            )
+            + str(stmt.compile(dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}))
             for stmt in selects
         ]
     )
@@ -592,7 +576,5 @@ def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
     if mostly is not None:
         # Even though we type mostly as an int or float, we can't typecheck this whole project and
         # need to verify the type.
-        assert isinstance(
-            mostly, (int, float)
-        ), "'mostly' parameter must be an integer or float"
+        assert isinstance(mostly, (int, float)), "'mostly' parameter must be an integer or float"
         assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"

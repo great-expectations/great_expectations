@@ -52,9 +52,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -83,17 +81,19 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
                 evaluation_parameter_builder_configs=None,
             )
         )
-        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_values_nonnull_count_metric_single_batch_parameter_builder",
-            metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
+        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_values_nonnull_count_metric_single_batch_parameter_builder",
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
 
         if evaluation_parameter_builder_configs is None:
@@ -149,16 +149,12 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         )
 
         values: list = list(
-            column_value_counts_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ].index
+            column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY].index
         )
         weights: np.ndarray = np.asarray(
             column_value_counts_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
         ) / (
-            column_values_nonnull_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            column_values_nonnull_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
             + NP_EPSILON
         )
 

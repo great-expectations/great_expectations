@@ -141,9 +141,7 @@ class TestCheckpointSerialization:
         expected_actions: dict,
         request: pytest.FixtureRequest,
     ):
-        actions = (
-            request.getfixturevalue(action_fixture_name) if action_fixture_name else []
-        )
+        actions = request.getfixturevalue(action_fixture_name) if action_fixture_name else []
         cp = Checkpoint(
             name="my_checkpoint",
             validation_definitions=validation_configs,
@@ -271,9 +269,7 @@ class TestCheckpointSerialization:
 
     def _assert_valid_uuid(self, id: str | None) -> None:
         if not id:
-            pytest.fail(
-                "id is None when it should be a valid UUID generated from a Store."
-            )
+            pytest.fail("id is None when it should be a valid UUID generated from a Store.")
 
         try:
             uuid.UUID(id)

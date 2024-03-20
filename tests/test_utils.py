@@ -206,9 +206,7 @@ def build_checkpoint_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> CheckpointStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -239,9 +237,7 @@ def build_profiler_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> ProfilerStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     store = build_profiler_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -259,9 +255,7 @@ def save_config_to_filesystem(
     configuration: BaseYamlConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     save_config_to_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -280,9 +274,7 @@ def load_config_from_filesystem(
     configuration_key: str,
 ) -> BaseYamlConfig:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return load_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -451,9 +443,7 @@ def delete_config_from_filesystem(
     configuration_key: str,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     delete_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -691,9 +681,7 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
-                print(
-                    f"Adding to existing table {table_name} and adding data from {csv_paths}"
-                )
+                print(f"Adding to existing table {table_name} and adding data from {csv_paths}")
 
             with engine.connect() as connection:
                 add_dataframe_to_db(
@@ -828,9 +816,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
 
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        execution_engine.execute_query_in_transaction(
-            sa.text(f"DROP TABLE IF EXISTS {table_name}")
-        )
+        execution_engine.execute_query_in_transaction(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))

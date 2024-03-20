@@ -292,18 +292,14 @@ class ValidationGraph:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
                             failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
-                            failed_metric_info[failed_metric.id]["exception_info"] = (
-                                exception_info
-                            )
+                            failed_metric_info[failed_metric.id]["exception_info"] = exception_info
                         else:
                             failed_metric_info[failed_metric.id] = {}
-                            failed_metric_info[failed_metric.id][
-                                "metric_configuration"
-                            ] = failed_metric
-                            failed_metric_info[failed_metric.id]["num_failures"] = 1
-                            failed_metric_info[failed_metric.id]["exception_info"] = (
-                                exception_info
+                            failed_metric_info[failed_metric.id]["metric_configuration"] = (
+                                failed_metric
                             )
+                            failed_metric_info[failed_metric.id]["num_failures"] = 1
+                            failed_metric_info[failed_metric.id]["exception_info"] = exception_info
 
                 else:
                     raise err
@@ -406,9 +402,7 @@ class ExpectationValidationGraph:
         metric_info: _AbortedMetricsInfoDict,
     ) -> Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
-        metric_exception_info: Dict[
-            str, Union[MetricConfiguration, ExceptionInfo, int]
-        ] = {}
+        metric_exception_info: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]] = {}
         metric_id: _MetricKey
         metric_info_item: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]]
         for metric_id, metric_info_item in metric_info.items():

@@ -43,9 +43,7 @@ class InlineRenderer(Renderer):
     ) -> None:
         super().__init__()
 
-        if isinstance(
-            render_object, (ExpectationConfiguration, ExpectationValidationResult)
-        ):
+        if isinstance(render_object, (ExpectationConfiguration, ExpectationValidationResult)):
             self._render_object = render_object
         else:
             raise InlineRendererError(
@@ -137,9 +135,7 @@ class InlineRenderer(Renderer):
     @staticmethod
     def _get_renderer_atomic_rendered_content(
         render_object: ExpectationConfiguration | ExpectationValidationResult,
-        renderer_name: str
-        | AtomicDiagnosticRendererType
-        | AtomicPrescriptiveRendererType,
+        renderer_name: str | AtomicDiagnosticRendererType | AtomicPrescriptiveRendererType,
         expectation_type: str,
     ) -> RenderedAtomicContent:
         renderer_impl: Optional[RendererImpl]
@@ -148,11 +144,9 @@ class InlineRenderer(Renderer):
                 object_name=expectation_type, renderer_type=renderer_name
             )
             if renderer_impl:
-                renderer_rendered_content = (
-                    InlineRenderer._get_rendered_content_from_renderer_impl(
-                        renderer_impl=renderer_impl,
-                        render_object=render_object,
-                    )
+                renderer_rendered_content = InlineRenderer._get_rendered_content_from_renderer_impl(
+                    renderer_impl=renderer_impl,
+                    render_object=render_object,
                 )
             else:
                 raise InlineRendererError(
@@ -166,26 +160,26 @@ class InlineRenderer(Renderer):
             error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {e!s}".'
             logger.info(error_message)
 
-            failure_renderer: (
-                AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
-            )
+            failure_renderer: AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
             if renderer_name.startswith(AtomicRendererType.PRESCRIPTIVE):
                 failure_renderer = AtomicPrescriptiveRendererType.FAILED
-                failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render prescriptive content.'
+                failure_renderer_message = (
+                    f'Renderer "{failure_renderer}" will be used to render prescriptive content.'
+                )
             else:
                 failure_renderer = AtomicDiagnosticRendererType.FAILED
-                failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render diagnostic content.'
+                failure_renderer_message = (
+                    f'Renderer "{failure_renderer}" will be used to render diagnostic content.'
+                )
             logger.info(failure_renderer_message)
 
             renderer_impl = get_renderer_impl(
                 object_name=expectation_type, renderer_type=failure_renderer
             )
             if renderer_impl:
-                renderer_rendered_content = (
-                    InlineRenderer._get_rendered_content_from_renderer_impl(
-                        renderer_impl=renderer_impl,
-                        render_object=render_object,
-                    )
+                renderer_rendered_content = InlineRenderer._get_rendered_content_from_renderer_impl(
+                    renderer_impl=renderer_impl,
+                    render_object=render_object,
                 )
                 renderer_rendered_content.exception = error_message
             else:
@@ -200,9 +194,7 @@ class InlineRenderer(Renderer):
         renderer_impl: RendererImpl,
         render_object: ExpectationConfiguration | ExpectationValidationResult,
     ) -> RenderedAtomicContent:
-        renderer_fn: Callable[..., RenderedAtomicContent | RenderedContent] = (
-            renderer_impl.renderer
-        )
+        renderer_fn: Callable[..., RenderedAtomicContent | RenderedContent] = renderer_impl.renderer
         if isinstance(render_object, ExpectationConfiguration):
             renderer_rendered_content = renderer_fn(configuration=render_object)
         else:
@@ -228,24 +220,18 @@ class InlineRenderer(Renderer):
     def replace_or_keep_existing_rendered_content(
         existing_rendered_content: Optional[List[RenderedAtomicContent]],
         new_rendered_content: List[RenderedAtomicContent],
-        failed_renderer_type: Union[
-            AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
-        ],
+        failed_renderer_type: Union[AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
     ) -> List[RenderedAtomicContent]:
         new_rendered_content_block_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
-        ] = [
-            rendered_content_block.name
-            for rendered_content_block in new_rendered_content
-        ]
+        ] = [rendered_content_block.name for rendered_content_block in new_rendered_content]
 
         existing_rendered_content_block_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = []
         if existing_rendered_content is not None:
             existing_rendered_content_block_names = [
-                rendered_content_block.name
-                for rendered_content_block in existing_rendered_content
+                rendered_content_block.name for rendered_content_block in existing_rendered_content
             ]
 
         if (

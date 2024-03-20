@@ -98,9 +98,7 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(
-        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
-    ),
+    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]),
     "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,

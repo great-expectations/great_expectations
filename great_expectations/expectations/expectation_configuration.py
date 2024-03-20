@@ -63,10 +63,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             "include_unexpected_rows": False,
         }
     else:
-        if (
-            "include_unexpected_rows" in result_format
-            and "result_format" not in result_format
-        ):
+        if "include_unexpected_rows" in result_format and "result_format" not in result_format:
             raise ValueError(
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
@@ -142,9 +139,7 @@ class ExpectationConfiguration(SerializableDictDot):
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
-            raise InvalidExpectationConfigurationError(
-                "expectation_type must be a string"
-            )
+            raise InvalidExpectationConfigurationError("expectation_type must be a string")
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
             raise InvalidExpectationConfigurationError(
@@ -181,9 +176,7 @@ class ExpectationConfiguration(SerializableDictDot):
             self._raw_kwargs = self._kwargs
             self._kwargs = evaluation_args
         else:
-            logger.debug(
-                "evaluation_parameters have already been built on this expectation"
-            )
+            logger.debug("evaluation_parameters have already been built on this expectation")
 
     def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters
@@ -282,14 +275,11 @@ class ExpectationConfiguration(SerializableDictDot):
             default_kwarg_values = self._get_expectation_class_defaults()
 
         domain_kwargs = {
-            key: self.kwargs.get(key, default_kwarg_values.get(key))
-            for key in domain_keys
+            key: self.kwargs.get(key, default_kwarg_values.get(key)) for key in domain_keys
         }
         missing_kwargs = set(domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
-            raise InvalidExpectationKwargsError(
-                f"Missing domain kwargs: {list(missing_kwargs)}"
-            )
+            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")
 
         return domain_kwargs
 
@@ -309,9 +299,7 @@ class ExpectationConfiguration(SerializableDictDot):
             impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
-            default_kwarg_values = expectation_kwargs_dict.get(
-                "default_kwarg_values", {}
-            )
+            default_kwarg_values = expectation_kwargs_dict.get("default_kwarg_values", {})
             success_keys = expectation_kwargs_dict["success_kwargs"]
         else:
             success_keys = impl.success_keys
@@ -319,8 +307,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         domain_kwargs = self.get_domain_kwargs()
         success_kwargs = {
-            key: self.kwargs.get(key, default_kwarg_values.get(key))
-            for key in success_keys
+            key: self.kwargs.get(key, default_kwarg_values.get(key)) for key in success_keys
         }
         success_kwargs.update(domain_kwargs)
 
@@ -335,9 +322,7 @@ class ExpectationConfiguration(SerializableDictDot):
             impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
             expectation_kwargs_dict = self._get_default_custom_kwargs()
-            default_kwarg_values = expectation_kwargs_dict.get(
-                "default_kwarg_values", {}
-            )
+            default_kwarg_values = expectation_kwargs_dict.get("default_kwarg_values", {})
             runtime_keys = self.runtime_kwargs
         else:
             runtime_keys = impl.runtime_keys
@@ -349,12 +334,9 @@ class ExpectationConfiguration(SerializableDictDot):
             lookup_kwargs.update(runtime_configuration)
 
         runtime_kwargs = {
-            key: lookup_kwargs.get(key, default_kwarg_values.get(key))
-            for key in runtime_keys
+            key: lookup_kwargs.get(key, default_kwarg_values.get(key)) for key in runtime_keys
         }
-        runtime_kwargs["result_format"] = parse_result_format(
-            runtime_kwargs["result_format"]
-        )
+        runtime_kwargs["result_format"] = parse_result_format(runtime_kwargs["result_format"])
         runtime_kwargs.update(success_kwargs)
 
         return runtime_kwargs
@@ -362,15 +344,9 @@ class ExpectationConfiguration(SerializableDictDot):
     def applies_to_same_domain(
         self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
-        if (
-            not self.expectation_type
-            == other_expectation_configuration.expectation_type
-        ):
+        if not self.expectation_type == other_expectation_configuration.expectation_type:
             return False
-        return (
-            self.get_domain_kwargs()
-            == other_expectation_configuration.get_domain_kwargs()
-        )
+        return self.get_domain_kwargs() == other_expectation_configuration.get_domain_kwargs()
 
     # noinspection PyPep8Naming
     def isEquivalentTo(
@@ -465,9 +441,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 myself["expectation_context"]
             )
         if "rendered_content" in myself:
-            myself["rendered_content"] = convert_to_json_serializable(
-                myself["rendered_content"]
-            )
+            myself["rendered_content"] = convert_to_json_serializable(myself["rendered_content"])
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
@@ -512,11 +486,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 dependencies,
                 {
                     urn["expectation_suite_name"]: [
-                        {
-                            "metric_kwargs_id": {
-                                urn["metric_kwargs"]: [urn["metric_name"]]
-                            }
-                        }
+                        {"metric_kwargs_id": {urn["metric_kwargs"]: [urn["metric_name"]]}}
                     ]
                 },
             )
@@ -563,9 +533,7 @@ class ExpectationConfiguration(SerializableDictDot):
 class ExpectationConfigurationSchema(Schema):
     expectation_type = fields.Str(
         required=True,
-        error_messages={
-            "required": "expectation_type missing in expectation configuration"
-        },
+        error_messages={"required": "expectation_type missing in expectation configuration"},
     )
     kwargs = fields.Dict(
         required=False,

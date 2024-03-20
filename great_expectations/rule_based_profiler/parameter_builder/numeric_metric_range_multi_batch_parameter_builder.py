@@ -146,9 +146,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
         round_decimals: Optional[Union[str, int]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -208,9 +206,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             data_context=data_context,
         )
 
-        self._metric_multi_batch_parameter_builder_name = (
-            metric_multi_batch_parameter_builder_name
-        )
+        self._metric_multi_batch_parameter_builder_name = metric_multi_batch_parameter_builder_name
 
         if false_positive_rate is None:
             false_positive_rate = 5.0e-2
@@ -223,15 +219,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._random_seed = random_seed
 
-        self._quantile_statistic_interpolation_method = (
-            quantile_statistic_interpolation_method
-        )
+        self._quantile_statistic_interpolation_method = quantile_statistic_interpolation_method
 
         self._quantile_bias_correction = quantile_bias_correction
 
-        self._quantile_bias_std_error_ratio_threshold = (
-            quantile_bias_std_error_ratio_threshold
-        )
+        self._quantile_bias_std_error_ratio_threshold = quantile_bias_std_error_ratio_threshold
 
         self._bw_method = bw_method
 
@@ -350,9 +342,7 @@ detected.
                     parameters=parameters,
                 )
             )
-            parameter_reference = (
-                f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
-            )
+            parameter_reference = f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
         else:
             # Compute metric value for each Batch object.
             super().build_parameters(
@@ -372,9 +362,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        metric_values: MetricValues = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         round_decimals: int
         if (
@@ -391,13 +379,11 @@ detected.
                 parameters=parameters,
             )
 
-        numeric_range_estimator: NumericRangeEstimator = (
-            self._build_numeric_range_estimator(
-                round_decimals=round_decimals,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        numeric_range_estimator: NumericRangeEstimator = self._build_numeric_range_estimator(
+            round_decimals=round_decimals,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
         numeric_range_estimation_result: NumericRangeEstimationResult = (
             self._estimate_metric_value_range(
@@ -427,9 +413,7 @@ detected.
         )
 
         if include_estimator_samples_histogram_in_details:
-            details["estimation_histogram"] = (
-                numeric_range_estimation_result.estimation_histogram
-            )
+            details["estimation_histogram"] = numeric_range_estimation_result.estimation_histogram
 
         return Attributes(
             {
@@ -604,9 +588,7 @@ detected.
                 metric_values=metric_values,
                 metric_value_vector_indices=metric_value_vector_indices,
             ):
-                metric_values = convert_ndarray_decimal_to_float_dtype(
-                    data=metric_values
-                )
+                metric_values = convert_ndarray_decimal_to_float_dtype(data=metric_values)
 
             metric_value_range = np.zeros(shape=metric_value_range_shape)
             estimation_histogram = np.empty(shape=estimation_histogram_shape)
@@ -668,12 +650,8 @@ detected.
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:  # noqa: PLR5501
                 if round_decimals is None:
-                    metric_value_range[metric_value_range_min_idx] = np.float64(
-                        min_value
-                    )
-                    metric_value_range[metric_value_range_max_idx] = np.float64(
-                        max_value
-                    )
+                    metric_value_range[metric_value_range_min_idx] = np.float64(min_value)
+                    metric_value_range[metric_value_range_max_idx] = np.float64(max_value)
                 else:
                     metric_value_range[metric_value_range_min_idx] = round(
                         np.float64(min_value), round_decimals
@@ -739,14 +717,12 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        truncate_values: Dict[str, Optional[Number]] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.truncate_values,
-                expected_return_type=dict,
-                variables=variables,
-                parameters=parameters,
-            )
+        truncate_values: Dict[str, Optional[Number]] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.truncate_values,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
         )
 
         distribution_boundary: Optional[Union[int, float]]
@@ -795,8 +771,7 @@ detected.
             parameters=parameters,
         )
         if not (
-            round_decimals is None
-            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+            round_decimals is None or (isinstance(round_decimals, int) and (round_decimals >= 0))
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a

@@ -63,9 +63,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
     @override

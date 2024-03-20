@@ -100,8 +100,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     # noinspection PyUnresolvedReferences
     try:
         if hasattr(dialect, "RedshiftDialect") or (
-            aws.redshiftdialect
-            and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+            aws.redshiftdialect and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
         ):
             if positive:
                 return sqlalchemy.BinaryExpression(
@@ -160,9 +159,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, sqlalchemy.literal(regex))
             else:
-                return sa.not_(
-                    sa.func.REGEXP_CONTAINS(column, sqlalchemy.literal(regex))
-                )
+                return sa.not_(sa.func.REGEXP_CONTAINS(column, sqlalchemy.literal(regex)))
     except (
         AttributeError,
         TypeError,
@@ -210,9 +207,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
             if positive:
                 return sa.func.REGEXP_MATCHES(column, sqlalchemy.literal(regex))
             else:
-                return sa.not_(
-                    sa.func.REGEXP_MATCHES(column, sqlalchemy.literal(regex))
-                )
+                return sa.not_(sa.func.REGEXP_MATCHES(column, sqlalchemy.literal(regex)))
     except (
         AttributeError,
         TypeError,
@@ -263,9 +258,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
 def _get_dialect_type_module(dialect=None):
     if dialect is None:
-        logger.warning(
-            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-        )
+        logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
 
     # Redshift does not (yet) export types to top level; only recognize base SA types
@@ -312,12 +305,9 @@ def attempt_allowing_relative_error(dialect):
         candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
     )
     # noinspection PyTypeChecker
-    detected_psycopg2: bool = (
-        sqlalchemy_psycopg2 is not None
-        and check_sql_engine_dialect(
-            actual_sql_engine_dialect=dialect,
-            candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
-        )
+    detected_psycopg2: bool = sqlalchemy_psycopg2 is not None and check_sql_engine_dialect(
+        actual_sql_engine_dialect=dialect,
+        candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
     )
     return detected_redshift or detected_psycopg2
 
@@ -383,9 +373,7 @@ def get_sqlalchemy_column_metadata(
         inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
-            if sqlalchemy.TextClause and isinstance(
-                table_selectable, sqlalchemy.TextClause
-            ):
+            if sqlalchemy.TextClause and isinstance(table_selectable, sqlalchemy.TextClause):
                 if hasattr(table_selectable, "selected_columns"):
                     # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
@@ -408,12 +396,8 @@ def get_sqlalchemy_column_metadata(
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
         ) as exc:
-            logger.debug(
-                f"{type(exc).__name__} while introspecting columns", exc_info=exc
-            )
-            logger.info(
-                f"While introspecting columns {exc!r}; attempting reflection fallback"
-            )
+            logger.debug(f"{type(exc).__name__} while introspecting columns", exc_info=exc)
+            logger.info(f"While introspecting columns {exc!r}; attempting reflection fallback")
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
@@ -473,9 +457,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0915
             tables_table_query: sqlalchemy.Select = (
                 sa.select(
                     tables_table_clause.columns.object_id.label("object_id"),
-                    sa.func.schema_name(tables_table_clause.columns.schema_id).label(
-                        "schema_name"
-                    ),
+                    sa.func.schema_name(tables_table_clause.columns.schema_id).label("schema_name"),
                     tables_table_clause.columns.name.label("table_name"),
                 )
                 .select_from(tables_table_clause)
@@ -554,9 +536,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0915
                     columns_table_query.c.column_id.asc(),
                 )
             )
-            col_info_tuples_list: List[tuple] = connection.execute(
-                col_info_query
-            ).fetchall()
+            col_info_tuples_list: List[tuple] = connection.execute(col_info_query).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
@@ -609,8 +589,7 @@ def column_reflection_fallback(  # noqa: C901, PLR0915
             conditions = sa.and_(
                 *(
                     tables_table_query.c.table_name == columns_table_query.c.table_name,
-                    tables_table_query.c.schema_name
-                    == columns_table_query.c.schema_name,
+                    tables_table_query.c.schema_name == columns_table_query.c.schema_name,
                 )
             )
             col_info_query = (
@@ -664,17 +643,9 @@ def column_reflection_fallback(  # noqa: C901, PLR0915
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
-                    query = (
-                        sa.select(sa.text("*"))
-                        .select_from(sa.text(selectable))
-                        .limit(1)
-                    )
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
                 else:
-                    query = (
-                        sa.select(sa.text("*"))
-                        .select_from(sa.text(selectable))
-                        .limit(1)
-                    )
+                    query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
@@ -769,9 +740,7 @@ def get_dbms_compatible_column_names(
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
-    normalized_typed_batch_columns_mappings: List[
-        Tuple[str, str | sqlalchemy.quoted_name]
-    ] = (
+    normalized_typed_batch_columns_mappings: List[Tuple[str, str | sqlalchemy.quoted_name]] = (
         _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
             batch_columns_list=batch_columns_list,
@@ -840,26 +809,15 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
 
             # use explicit identifier if passed in by user
             if isinstance(typed_column_name_cursor, str) and (
-                (
-                    column_name.casefold().strip('"')
-                    == typed_column_name_cursor.casefold()
-                )
-                or (
-                    column_name.casefold().strip("[]")
-                    == typed_column_name_cursor.casefold()
-                )
-                or (
-                    column_name.casefold().strip("`")
-                    == typed_column_name_cursor.casefold()
-                )
+                (column_name.casefold().strip('"') == typed_column_name_cursor.casefold())
+                or (column_name.casefold().strip("[]") == typed_column_name_cursor.casefold())
+                or (column_name.casefold().strip("`") == typed_column_name_cursor.casefold())
             ):
                 return column_name, column_name
 
         return None
 
-    normalized_batch_columns_mappings: List[
-        Tuple[str, str | sqlalchemy.quoted_name]
-    ] = []
+    normalized_batch_columns_mappings: List[Tuple[str, str | sqlalchemy.quoted_name]] = []
 
     normalized_column_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
     column_name: str
@@ -879,9 +837,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
 
 
 def parse_value_set(value_set):
-    parsed_value_set = [
-        parse(value) if isinstance(value, str) else value for value in value_set
-    ]
+    parsed_value_set = [parse(value) if isinstance(value, str) else value for value in value_set]
     return parsed_value_set
 
 
@@ -995,19 +951,15 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
 
     """
 
-    norm_msg = (
-        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    )
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
-    gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    gamma_msg = (
+        "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
+    )
     # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
-    uniform_msg = (
-        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = (
-        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if distribution not in [
         "norm",
@@ -1026,9 +978,7 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
             raise ValueError("std_dev and scale must be positive.")
 
         # alpha and beta are required and positive
-        if distribution == "beta" and (
-            params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
-        ):
+        if distribution == "beta" and (params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0):
             raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
@@ -1286,9 +1236,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
                 failed_metrics=["unexpected_index_list"],
             )
         else:
-            tuple_index[column_name] = domain_records_df_index_names.index(
-                column_name, 0
-            )
+            tuple_index[column_name] = domain_records_df_index_names.index(column_name, 0)
 
     unexpected_index_list: List[Dict[str, Any]] = list()
 
@@ -1298,9 +1246,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(  # noqa: C901
         }
         for index in unexpected_indices:
             for column_name in unexpected_index_column_names:
-                primary_key_dict_list[column_name].append(
-                    index[tuple_index[column_name]]
-                )
+                primary_key_dict_list[column_name].append(index[tuple_index[column_name]])
 
         unexpected_index_list.append(primary_key_dict_list)
 
@@ -1338,9 +1284,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     """
     if not expectation_domain_column_list:
         return []
-    unexpected_index_values_by_named_index: List[int | str] = list(
-        domain_records_df.index
-    )
+    unexpected_index_values_by_named_index: List[int | str] = list(domain_records_df.index)
     unexpected_index_list: List[Dict[str, Any]] = list()
     if not (
         len(unexpected_index_column_names) == 1
@@ -1352,9 +1296,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         )
 
     if exclude_unexpected_values and len(unexpected_index_values_by_named_index) != 0:
-        primary_key_dict_list: dict[str, List[Any]] = {
-            unexpected_index_column_names[0]: []
-        }
+        primary_key_dict_list: dict[str, List[Any]] = {unexpected_index_column_names[0]: []}
         for index in unexpected_index_values_by_named_index:
             primary_key_dict_list[unexpected_index_column_names[0]].append(index)
         unexpected_index_list.append(primary_key_dict_list)
@@ -1363,9 +1305,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         for index in unexpected_index_values_by_named_index:
             primary_key_dict: Dict[str, Any] = dict()
             for domain_column in expectation_domain_column_list:
-                primary_key_dict[domain_column] = domain_records_df.at[
-                    index, domain_column
-                ]
+                primary_key_dict[domain_column] = domain_records_df.at[index, domain_column]
             column_name: str = unexpected_index_column_names[0]
             primary_key_dict[column_name] = index
             unexpected_index_list.append(primary_key_dict)
@@ -1397,9 +1337,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
     """
     unexpected_index_column_names: List[str]
     unexpected_index_list: List[Dict[str, Any]]
-    exclude_unexpected_values: bool = result_format.get(
-        "exclude_unexpected_values", False
-    )
+    exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
 
     if domain_records_df.index.name is not None:
         unexpected_index_column_names = result_format.get(
@@ -1416,13 +1354,11 @@ def compute_unexpected_pandas_indices(  # noqa: C901
         unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", list(domain_records_df.index.names)
         )
-        unexpected_index_list = (
-            get_unexpected_indices_for_multiple_pandas_named_indices(
-                domain_records_df=domain_records_df,
-                unexpected_index_column_names=unexpected_index_column_names,
-                expectation_domain_column_list=expectation_domain_column_list,
-                exclude_unexpected_values=exclude_unexpected_values,
-            )
+        unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+            domain_records_df=domain_records_df,
+            unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_list=expectation_domain_column_list,
+            exclude_unexpected_values=exclude_unexpected_values,
         )
     # named columns
     elif result_format.get("unexpected_index_column_names"):
@@ -1466,9 +1402,7 @@ def compute_unexpected_pandas_indices(  # noqa: C901
                             batch_columns_list=metrics["table.columns"],
                             error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                         )
-                        primary_key_dict[column_name] = domain_records_df.at[
-                            index, column_name
-                        ]
+                        primary_key_dict[column_name] = domain_records_df.at[index, column_name]
                 unexpected_index_list.append(primary_key_dict)
 
     else:

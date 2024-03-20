@@ -151,9 +151,7 @@ class DatasourceStore(Store):
         if isinstance(data, list):
             if len(data) > 1:
                 # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`
-                raise TypeError(
-                    f"GX Cloud returned {len(data)} Datasources but expected 1"
-                )
+                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")
             data = data[0]
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
@@ -170,9 +168,7 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if not isinstance(data, list):
-            raise TypeError(
-                "GX Cloud did not return a collection of Datasources when expected"
-            )
+            raise TypeError("GX Cloud did not return a collection of Datasources when expected")
 
         return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
 
@@ -183,9 +179,7 @@ class DatasourceStore(Store):
         datasource_config_dict["id"] = datasource_id
         return datasource_config_dict
 
-    def retrieve_by_name(
-        self, datasource_name: str
-    ) -> DatasourceConfig | FluentDatasource:
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig | FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -278,9 +272,7 @@ class DatasourceStore(Store):
     ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(
-            key=key, value=config
-        )
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key=key, value=config)
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 
@@ -292,9 +284,7 @@ class DatasourceStore(Store):
 
         return return_value
 
-    def add_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def add_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Persists a DatasourceConfig in the store by a given name.
 
         Args:
@@ -315,9 +305,7 @@ class DatasourceStore(Store):
                 message="A Datasource with the given name already exists",
             )
 
-    def update_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def update_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Updates a DatasourceConfig that already exists in the store.
 
         Args:

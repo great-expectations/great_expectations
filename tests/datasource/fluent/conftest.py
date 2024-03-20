@@ -220,9 +220,7 @@ def empty_contexts(
     request: FixtureRequest,
     cloud_storage_get_client_doubles,
 ) -> FileDataContext | CloudDataContext:
-    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
-        request.param
-    )
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(request.param)
     return context_fixture
 
 
@@ -253,9 +251,7 @@ def aws_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def s3_mock(
-    aws_credentials, aws_region_name: str
-) -> Generator[BotoBaseClient, None, None]:
+def s3_mock(aws_credentials, aws_region_name: str) -> Generator[BotoBaseClient, None, None]:
     with mock_s3():
         client = aws.boto3.client("s3", region_name=aws_region_name)
         yield client
@@ -269,9 +265,7 @@ _CLIENT_DUMMY = _TestClientDummy()
 
 
 def _get_test_client_dummy(*args, **kwargs) -> _TestClientDummy:
-    logger.debug(
-        f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}"
-    )
+    logger.debug(f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}")
     return _CLIENT_DUMMY
 
 
@@ -318,9 +312,7 @@ def cloud_storage_get_client_doubles(
     gcs
     azure
     """
-    logger.warning(
-        "Patching cloud storage _get_*_client() methods to return client test doubles"
-    )
+    logger.warning("Patching cloud storage _get_*_client() methods to return client test doubles")
 
 
 @pytest.fixture
@@ -331,9 +323,7 @@ def filter_data_connector_build_warning():
 
 
 @pytest.fixture
-def fluent_only_config(
-    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
-) -> GxConfig:
+def fluent_only_config(fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
     fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
     assert fluent_config.datasources
@@ -369,9 +359,7 @@ def seeded_file_context(
     fluent_yaml_config_file: pathlib.Path,
     seed_ds_env_vars: tuple,
 ) -> FileDataContext:
-    context = gx.get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
+    context = gx.get_context(context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -419,7 +407,5 @@ def seeded_contexts(
     request: FixtureRequest,
 ):
     """Parametrized fixture for seeded File and Cloud DataContexts."""
-    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
-        request.param
-    )
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(request.param)
     return context_fixture

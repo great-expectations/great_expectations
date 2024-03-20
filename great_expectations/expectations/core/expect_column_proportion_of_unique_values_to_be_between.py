@@ -150,20 +150,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     renderer_configuration=renderer_configuration
                 )
             if not params.min_value:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif not params.max_value:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params.min_value.value != params.max_value.value:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -205,20 +199,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params["min_value"] != params["max_value"]:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if include_column_name:
             template_str = f"$column {template_str}"

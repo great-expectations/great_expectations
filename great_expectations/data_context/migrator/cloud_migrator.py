@@ -80,9 +80,7 @@ class CloudMigrator:
 
         # Invariant due to `get_cloud_config` raising an error if any config values are missing
         if not cloud_organization_id:
-            raise ValueError(
-                "An organization id must be present when performing a migration"
-            )
+            raise ValueError("An organization id must be present when performing a migration")
 
         self._cloud_base_url = cloud_base_url
         self._cloud_access_token = cloud_access_token
@@ -146,15 +144,9 @@ class CloudMigrator:
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
         self._print_migration_introduction_message()
 
-        configuration_bundle: ConfigurationBundle = ConfigurationBundle(
-            context=self._context
-        )
-        self._emit_log_stmts(
-            configuration_bundle=configuration_bundle, test_migrate=test_migrate
-        )
-        self._print_configuration_bundle_summary(
-            configuration_bundle=configuration_bundle
-        )
+        configuration_bundle: ConfigurationBundle = ConfigurationBundle(context=self._context)
+        self._emit_log_stmts(configuration_bundle=configuration_bundle, test_migrate=test_migrate)
+        self._print_configuration_bundle_summary(configuration_bundle=configuration_bundle)
 
         serialized_bundle = self._serialize_configuration_bundle(
             configuration_bundle=configuration_bundle
@@ -224,9 +216,7 @@ class CloudMigrator:
             # ExpectationSuite is not AbstractConfig but contains required `name`
             self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
 
-    def _print_object_summary(
-        self, obj_name: str, obj_collection: List[AbstractConfig]
-    ) -> None:
+    def _print_object_summary(self, obj_name: str, obj_collection: List[AbstractConfig]) -> None:
         length = len(obj_collection)
 
         summary = f"  Bundled {length} {obj_name}(s)"
@@ -241,12 +231,8 @@ class CloudMigrator:
             extra = length - 10
             print(f"    ({extra} other {obj_name.lower()}(s) not displayed)")
 
-    def _serialize_configuration_bundle(
-        self, configuration_bundle: ConfigurationBundle
-    ) -> dict:
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+    def _serialize_configuration_bundle(self, configuration_bundle: ConfigurationBundle) -> dict:
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
@@ -254,9 +240,7 @@ class CloudMigrator:
         print("[Step 2/4]: Preparing validation results")
         return serialized_bundle.pop("validation_results")
 
-    def _send_configuration_bundle(
-        self, serialized_bundle: dict, test_migrate: bool
-    ) -> bool:
+    def _send_configuration_bundle(self, serialized_bundle: dict, test_migrate: bool) -> bool:
         print("[Step 3/4]: Sending context configuration")
         if test_migrate:
             return True
@@ -297,16 +281,12 @@ class CloudMigrator:
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
         resource_type = GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT
-        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
-            resource_type
-        ]
+        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[resource_type]
         attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         unsuccessful_validations = {}
 
-        for i, (key, validation_result) in enumerate(
-            serialized_validation_results.items()
-        ):
+        for i, (key, validation_result) in enumerate(serialized_validation_results.items()):
             success: bool
             if test_migrate:
                 success = True
@@ -358,9 +338,7 @@ class CloudMigrator:
         status_code = response.status_code
         success = response.ok
 
-        return MigrationResponse(
-            message=message, status_code=status_code, success=success
-        )
+        return MigrationResponse(message=message, status_code=status_code, success=success)
 
     def _print_unsuccessful_validation_message(self) -> None:
         print(

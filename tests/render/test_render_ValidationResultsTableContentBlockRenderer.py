@@ -249,24 +249,19 @@ def test_ValidationResultsTableContentBlockRenderer_render(
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_custom_columns(evr_success):
-    assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
-        == []
-    )
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == []
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {}
-    assert (
-        ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success])
-        == []
-    )
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == []
 
     evr_success.expectation_config.kwargs["meta_properties_to_render"] = {
         "doesntmatterone": "doesntmatter",
         "doesntmattertwo": "doesntmatter",
     }
-    assert ValidationResultsTableContentBlockRenderer._get_custom_columns(
-        [evr_success]
-    ) == ["doesntmatterone", "doesntmattertwo"]
+    assert ValidationResultsTableContentBlockRenderer._get_custom_columns([evr_success]) == [
+        "doesntmatterone",
+        "doesntmattertwo",
+    ]
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_success):
@@ -296,11 +291,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -345,11 +336,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -410,11 +397,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -423,9 +406,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                     "string_template": {
                         "template": "Must have greater than or equal to $min_value rows.",
                         "params": {
-                            "meta_properties_to_render": {
-                                "property_that_doesnt_exist": "property"
-                            },
+                            "meta_properties_to_render": {"property_that_doesnt_exist": "property"},
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
@@ -472,11 +453,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -577,11 +554,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             ),
             RenderedStringTemplateContent(
@@ -834,9 +807,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
                     "classes": ["text-danger"],
                     "params": {
                         "exception_message": {"tag": "code"},
-                        "expectation_type": {
-                            "classes": ["badge", "badge-danger", "mb-2"]
-                        },
+                        "expectation_type": {"classes": ["badge", "badge-danger", "mb-2"]},
                     },
                 },
             },
@@ -1185,9 +1156,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
             "template": "$icon",
             "params": {"icon": "", "markdown_status_icon": "❌"},
             "styling": {
-                "params": {
-                    "icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}
-                }
+                "params": {"icon": {"tag": "i", "classes": ["fas", "fa-times", "text-danger"]}}
             },
         },
     }

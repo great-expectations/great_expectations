@@ -39,8 +39,7 @@ class SqlAlchemyQueryStore(Store):
     ) -> None:
         if not sa:
             raise gx_exceptions.DataContextError(
-                "sqlalchemy module not found, but is required for "
-                "SqlAlchemyQueryStore"
+                "sqlalchemy module not found, but is required for " "SqlAlchemyQueryStore"
             )
         super().__init__(
             store_backend=store_backend,
@@ -54,8 +53,7 @@ class SqlAlchemyQueryStore(Store):
                     queries, dict
                 ), "SqlAlchemyQueryStore queries must be defined as a dictionary"
                 assert (
-                    store_backend is None
-                    or store_backend["class_name"] == "InMemoryStoreBackend"
+                    store_backend is None or store_backend["class_name"] == "InMemoryStoreBackend"
                 ), (
                     "If queries are provided in configuration, then store_backend must be empty or an "
                     "InMemoryStoreBackend"

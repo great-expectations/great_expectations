@@ -84,9 +84,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -144,10 +142,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
-            attributed_metric_values=parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-            ]
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+            )
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
@@ -191,9 +191,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[V]], Set[V]] = list(
-        itertools.chain.from_iterable(collection)
-    )
+    flattened: Union[List[Set[V]], Set[V]] = list(itertools.chain.from_iterable(collection))
     element: V
     if all(isinstance(element, set) for element in flattened):
         flattened = set().union(*flattened)
@@ -207,8 +205,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(
                 lambda element: not (
-                    (element is None)
-                    or (isinstance(element, float) and np.isnan(element))
+                    (element is None) or (isinstance(element, float) and np.isnan(element))
                 ),
                 set(flattened),
             )

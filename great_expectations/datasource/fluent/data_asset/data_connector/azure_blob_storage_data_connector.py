@@ -195,9 +195,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         )
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> AzureBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -207,9 +205,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return AzureBatchSpec(batch_spec)
 
     # Interface Method

@@ -159,8 +159,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(execution_engine, runtime_configuration)
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine, runtime_configuration
         )
 
         configuration = self.configuration
@@ -169,17 +169,13 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
         # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
         table_row_count_metric_config_other: Optional[MetricConfiguration] = deepcopy(
-            validation_dependencies.get_metric_configuration(
-                metric_name="table.row_count"
-            )
+            validation_dependencies.get_metric_configuration(metric_name="table.row_count")
         )
         assert (
             table_row_count_metric_config_other
         ), "table_row_count_metric_config_other should not be None"
 
-        table_row_count_metric_config_other.metric_domain_kwargs["table"] = (
-            other_table_name
-        )
+        table_row_count_metric_config_other.metric_domain_kwargs["table"] = other_table_name
         # rename original "table.row_count" metric to "table.row_count.self"
         table_row_count_metric = validation_dependencies.get_metric_configuration(
             metric_name="table.row_count"
@@ -189,9 +185,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             metric_name="table.row_count.self",
             metric_configuration=table_row_count_metric,
         )
-        validation_dependencies.remove_metric_configuration(
-            metric_name="table.row_count"
-        )
+        validation_dependencies.remove_metric_configuration(metric_name="table.row_count")
         # add a new metric dependency named "table.row_count.other" with modified metric config
         validation_dependencies.set_metric_configuration(
             "table.row_count.other", table_row_count_metric_config_other

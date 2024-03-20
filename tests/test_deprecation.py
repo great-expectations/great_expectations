@@ -79,9 +79,7 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     with open(deployment_version_path) as f:
         current_version = f.read().strip()
 
-    current_parsed_version: version.Version = cast(
-        version.Version, version.parse(current_version)
-    )
+    current_parsed_version: version.Version = cast(version.Version, version.parse(current_version))
     current_major_version: int = current_parsed_version.major
     current_minor_version: int = current_parsed_version.minor
 
@@ -92,9 +90,7 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
 
         matches: List[str] = regex_for_deprecation_comments.findall(contents)
         for match in matches:
-            parsed_version: version.Version = cast(
-                version.Version, version.parse(match)
-            )
+            parsed_version: version.Version = cast(version.Version, version.parse(match))
             major_version: int = parsed_version.major
             minor_version: int = parsed_version.minor
             if (current_major_version - major_version > 0) and (
@@ -104,9 +100,7 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
                 unneeded_deprecation_warnings.append(unneeded_deprecation_warning)
 
     if unneeded_deprecation_warnings:
-        print(
-            "\nThe following deprecation warnings must be cleared per the code style guide:"
-        )
+        print("\nThe following deprecation warnings must be cleared per the code style guide:")
         for file, version_ in unneeded_deprecation_warnings:
             print(f"{file} - v{version_}")
 

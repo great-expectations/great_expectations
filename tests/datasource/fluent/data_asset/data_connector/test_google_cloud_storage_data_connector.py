@@ -572,9 +572,7 @@ def test_alpha(mock_list_keys):
     my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(
-        datasource_name="BASE", data_asset_name="A", options={}
-    )
+    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
     )

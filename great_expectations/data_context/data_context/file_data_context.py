@@ -104,9 +104,7 @@ class FileDataContext(SerializableDataContext):
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
         if project_config:
-            project_config = FileDataContext.get_or_create_data_context_config(
-                project_config
-            )
+            project_config = FileDataContext.get_or_create_data_context_config(project_config)
         else:
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=self._context_root_directory,
@@ -136,9 +134,7 @@ class FileDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=YAMLReadyDictDatasourceConfigSerializer(
-                schema=datasourceConfigSchema
-            ),
+            serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 
@@ -168,15 +164,11 @@ class FileDataContext(SerializableDataContext):
             with open(config_filepath, "w") as outfile:
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
-                    self.fluent_config.update_datasources(
-                        datasources=fluent_datasources
-                    )
+                    self.fluent_config.update_datasources(datasources=fluent_datasources)
                     logger.info(
                         f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
                     )
-                    fluent_json_dict: dict[str, JSONValues] = (
-                        self.fluent_config._json_dict()
-                    )
+                    fluent_json_dict: dict[str, JSONValues] = self.fluent_config._json_dict()
                     fluent_json_dict = (
                         self.fluent_config._exclude_name_fields_from_fluent_datasources(
                             config=fluent_json_dict

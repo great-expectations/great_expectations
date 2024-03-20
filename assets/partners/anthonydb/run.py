@@ -49,9 +49,7 @@ def test_ge():
         batch_spec_passthrough={"create_temp_table": False},
     )
 
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )

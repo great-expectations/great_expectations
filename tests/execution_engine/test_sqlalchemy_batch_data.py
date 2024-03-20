@@ -35,9 +35,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     # This is a very hacky type check.
     # A better way would be to figure out the proper parent class for dialects within SQLAlchemy
-    assert (
-        str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
-    )
+    assert str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
@@ -84,9 +82,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {
-        "test_temp_view"
-    }
+    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {"test_temp_view"}
 
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine

@@ -186,9 +186,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             return self._build_batch_kwargs_from_path(path, **batch_parameters)
 
         else:
-            return self.yield_batch_kwargs(
-                data_asset_name=data_asset_name, **batch_parameters
-            )
+            return self.yield_batch_kwargs(data_asset_name=data_asset_name, **batch_parameters)
 
     def _get_valid_file_options(self, base_directory=None):
         valid_options = []
@@ -212,10 +210,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                             base_directory, file_option
                         )
                     )
-                    if (
-                        len(subdir_options) > 0
-                        and (file_option, "directory") not in valid_options
-                    ):
+                    if len(subdir_options) > 0 and (file_option, "directory") not in valid_options:
                         valid_options.append((file_option, "directory"))
         return valid_options
 
@@ -234,9 +229,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             batches = []
             for file_option in subdir_options:
                 for extension in self.known_extensions:
-                    if file_option.endswith(extension) and not file_option.startswith(
-                        "."
-                    ):
+                    if file_option.endswith(extension) and not file_option.startswith("."):
                         batches.append(
                             os.path.join(  # noqa: PTH118
                                 self.base_directory, data_asset_name, file_option

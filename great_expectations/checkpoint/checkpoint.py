@@ -89,9 +89,7 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
-    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
-        ActionDicts.DEFAULT_ACTION_LIST
-    )
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = ActionDicts.DEFAULT_ACTION_LIST
 
     def __init__(
         self,
@@ -151,14 +149,9 @@ class BaseCheckpoint(ConfigPeer):
                 "Must associate Checkpoint with a DataContext before running; please add using context.checkpoints.add"
             )
 
-        validations = convert_validations_list_to_checkpoint_validation_configs(
-            validations
-        )
+        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
 
-        if (
-            sum(bool(x) for x in [self._validator is not None, validator is not None])
-            > 1
-        ):
+        if sum(bool(x) for x in [self._validator is not None, validator is not None]) > 1:
             raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
             )
@@ -167,18 +160,13 @@ class BaseCheckpoint(ConfigPeer):
             self._validator = validator
 
         if self._validator:
-            if batch_request or _does_validation_contain_batch_request(
-                validations=validations
-            ):
+            if batch_request or _does_validation_contain_batch_request(validations=validations):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying a batch_request and/or validations with a batch_request to run() is not allowed.'
                 )
 
-            if (
-                expectation_suite_name
-                or _does_validation_contain_expectation_suite_name(
-                    validations=validations
-                )
+            if expectation_suite_name or _does_validation_contain_expectation_suite_name(
+                validations=validations
             ):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding its expectation_suite_name by supplying an expectation_suite_name and/or validations with an expectation_suite_name to run() is not allowed.'
@@ -204,9 +192,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
+        validations = get_validations_with_batch_request_as_dict(validations=validations)
 
         runtime_kwargs: dict = {
             "expectation_suite_name": expectation_suite_name,
@@ -338,9 +324,9 @@ class BaseCheckpoint(ConfigPeer):
                 batch_request_required=(not self._validator),
             )
 
-            batch_request: Union[
-                BatchRequest, FluentBatchRequest, RuntimeBatchRequest, None
-            ] = substituted_validation_dict.get("batch_request")
+            batch_request: Union[BatchRequest, FluentBatchRequest, RuntimeBatchRequest, None] = (
+                substituted_validation_dict.get("batch_request")
+            )
             expectation_suite_name: str | None = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
@@ -351,16 +337,16 @@ class BaseCheckpoint(ConfigPeer):
                 "include_rendered_content"
             )
             if include_rendered_content is None:
-                include_rendered_content = context._determine_if_expectation_validation_result_include_rendered_content()
+                include_rendered_content = (
+                    context._determine_if_expectation_validation_result_include_rendered_content()
+                )
 
             validator: Validator = self._validator or context.get_validator(
                 batch_request=batch_request,
                 expectation_suite_name=expectation_suite_name
                 if not self._using_cloud_context
                 else None,
-                expectation_suite_id=(
-                    expectation_suite_id if self._using_cloud_context else None
-                ),
+                expectation_suite_id=(expectation_suite_id if self._using_cloud_context else None),
                 include_rendered_content=include_rendered_content,
             )
 
@@ -370,12 +356,8 @@ class BaseCheckpoint(ConfigPeer):
             runtime_configuration_validation = substituted_validation_dict.get(
                 "runtime_configuration", {}
             )
-            catch_exceptions_validation = runtime_configuration_validation.get(
-                "catch_exceptions"
-            )
-            result_format_validation = runtime_configuration_validation.get(
-                "result_format"
-            )
+            catch_exceptions_validation = runtime_configuration_validation.get("catch_exceptions")
+            result_format_validation = runtime_configuration_validation.get("result_format")
             result_format = result_format or result_format_validation
 
             if result_format is None:
@@ -406,9 +388,7 @@ class BaseCheckpoint(ConfigPeer):
             return action_list_validation_operator.run(
                 assets_to_validate=[validator],
                 run_id=run_id,
-                evaluation_parameters=substituted_validation_dict.get(
-                    "evaluation_parameters"
-                ),
+                evaluation_parameters=substituted_validation_dict.get("evaluation_parameters"),
                 result_format=result_format,
                 checkpoint_identifier=checkpoint_identifier,
                 checkpoint_name=self.name,
@@ -540,23 +520,16 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> None:
-        validations = convert_validations_list_to_checkpoint_validation_configs(
-            validations
-        )
+        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
 
         if validator:
-            if batch_request or _does_validation_contain_batch_request(
-                validations=validations
-            ):
+            if batch_request or _does_validation_contain_batch_request(validations=validations):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
                 )
 
-            if (
-                expectation_suite_name
-                or _does_validation_contain_expectation_suite_name(
-                    validations=validations
-                )
+            if expectation_suite_name or _does_validation_contain_expectation_suite_name(
+                validations=validations
             ):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{name}" cannot be called with a validator and contain an expectation_suite_name and/or an expectation_suite_name in validations.'
@@ -572,9 +545,7 @@ constructor arguments.
 """
             )
 
-        if does_batch_request_in_validations_contain_batch_data(
-            validations=validations
-        ):
+        if does_batch_request_in_validations_contain_batch_data(validations=validations):
             raise ValueError(
                 """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
@@ -614,9 +585,7 @@ constructor arguments.
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[list[dict], list[CheckpointValidationConfig]]
-        ] = None,
+        validations: Optional[Union[list[dict], list[CheckpointValidationConfig]]] = None,
         id: Optional[str] = None,
         expectation_suite_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -624,15 +593,11 @@ constructor arguments.
     ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        validations = cls._reconcile_validations(
-            validations=validations, validator=validator
-        )
+        validations = cls._reconcile_validations(validations=validations, validator=validator)
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
+        validations = get_validations_with_batch_request_as_dict(validations=validations)
 
         # DataFrames shouldn't be saved to CheckpointStore
         if batch_request_contains_batch_data(batch_request=batch_request):
@@ -640,9 +605,7 @@ constructor arguments.
                 f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )
 
-        if does_batch_request_in_validations_contain_batch_data(
-            validations=validations
-        ):
+        if does_batch_request_in_validations_contain_batch_data(validations=validations):
             raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )

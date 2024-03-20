@@ -50,9 +50,7 @@ march_batch_request: BatchRequest = BatchRequest(
     data_connector_query={"batch_filter_parameters": {"month": "03", "year": "2019"}},
 )
 
-march_batch_list: List[Batch] = context.get_batch_list(
-    batch_request=march_batch_request
-)
+march_batch_list: List[Batch] = context.get_batch_list(batch_request=march_batch_request)
 
 validator.load_batch_list(batch_list=march_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "03"
@@ -60,23 +58,16 @@ assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
 
 # Get the list of all batches contained by the Validator for use in the BatchFileter
-total_batch_definition_list: list = [
-    v.batch_definition for k, v in validator.batches.items()
-]
+total_batch_definition_list: list = [v.batch_definition for k, v in validator.batches.items()]
 
 # Filter to all batch_definitions prior to March
 jan_feb_batch_filter: BatchFilter = build_batch_filter(
     data_connector_query_dict={
-        "custom_filter_function": lambda batch_identifiers: int(
-            batch_identifiers["month"]
-        )
-        < 3
+        "custom_filter_function": lambda batch_identifiers: int(batch_identifiers["month"]) < 3
     }
 )
-jan_feb_batch_definition_list: list = (
-    jan_feb_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
-    )
+jan_feb_batch_definition_list: list = jan_feb_batch_filter.select_from_data_connector_query(
+    batch_definition_list=total_batch_definition_list
 )
 
 # Get the highest max and lowest min between January and February

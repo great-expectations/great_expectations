@@ -149,23 +149,17 @@ class RuntimeDataConnector(DataConnector):
         self._data_references_cache: dict = {}
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the cache to create a list of data_references. If data_asset_name is passed in, method will
         return all data_references for the named data_asset. If no data_asset_name is passed in, will return a list of
         all data_references for all data_assets in the cache.
         """
         if data_asset_name:
-            return self._get_data_reference_list_from_cache_by_data_asset_name(
-                data_asset_name
-            )
+            return self._get_data_reference_list_from_cache_by_data_asset_name(data_asset_name)
         else:
             data_reference_list = [
-                self._get_data_reference_list_from_cache_by_data_asset_name(
-                    data_asset_name
-                )
+                self._get_data_reference_list_from_cache_by_data_asset_name(data_asset_name)
                 for data_asset_name in self.get_available_data_asset_names()
             ]
             return data_reference_list  # type: ignore[return-value] # could be list of lists
@@ -187,9 +181,7 @@ class RuntimeDataConnector(DataConnector):
         self, data_asset_name: str
     ) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache."""
-        data_references_for_data_asset_name = self._data_references_cache.get(
-            data_asset_name
-        )
+        data_references_for_data_asset_name = self._data_references_cache.get(data_asset_name)
         if data_references_for_data_asset_name is not None:
             return list(data_references_for_data_asset_name.keys())
         else:
@@ -236,9 +228,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: RuntimeBatchRequest,
     ) -> List[LegacyBatchDefinition]:
-        return self._get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
+        return self._get_batch_definition_list_from_batch_request(batch_request=batch_request)
 
     def _get_batch_definition_list_from_batch_request(
         self,
@@ -294,14 +284,10 @@ class RuntimeDataConnector(DataConnector):
         data_reference = self._get_data_reference_name(batch_identifiers)
         if data_asset_name not in self._data_references_cache:
             # add
-            self._data_references_cache[data_asset_name] = {
-                data_reference: batch_definition_list
-            }
+            self._data_references_cache[data_asset_name] = {data_reference: batch_definition_list}
             # or replace
         else:
-            self._data_references_cache[data_asset_name][data_reference] = (
-                batch_definition_list
-            )
+            self._data_references_cache[data_asset_name][data_reference] = batch_definition_list
 
     def _self_check_fetch_batch(
         self,
@@ -327,17 +313,13 @@ class RuntimeDataConnector(DataConnector):
         runtime_parameters: dict,
     ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
         self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         if "batch_data" in runtime_parameters:
             batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
-            batch_spec["temp_table_schema_name"] = runtime_parameters.get(
-                "temp_table_schema_name"
-            )
+            batch_spec["temp_table_schema_name"] = runtime_parameters.get("temp_table_schema_name")
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]
@@ -398,9 +380,7 @@ class RuntimeDataConnector(DataConnector):
         if runtime_parameters:
             self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
 
-    def _validate_batch_identifiers(
-        self, data_asset_name: str, batch_identifiers: dict
-    ) -> None:
+    def _validate_batch_identifiers(self, data_asset_name: str, batch_identifiers: dict) -> None:
         """
         Called by _get_batch_definition_list_from_batch_request() ie, when a RuntimeBatchRequest is passed in.
 
@@ -448,9 +428,7 @@ class RuntimeDataConnector(DataConnector):
                 """
             )
 
-    def _validate_data_connector_level_batch_identifiers(
-        self, batch_identifiers: dict
-    ) -> None:
+    def _validate_data_connector_level_batch_identifiers(self, batch_identifiers: dict) -> None:
         """
         Check that batch_identifiers passed in are a subset of the ones configured at the DataConnector-level
         """

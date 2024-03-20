@@ -430,9 +430,7 @@ def main() -> None:
         .difference(set(IGNORED_VIOLATIONS))
     )
     if new_violations:
-        print(
-            f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file."
-        )
+        print(f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file.")
         for line in new_violations:
             print(line)
         sys.exit(1)

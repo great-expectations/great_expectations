@@ -31,9 +31,7 @@ def titanic_profiled_name_column_evrs():
     with open(
         file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json"),
     ) as infile:
-        titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(
-            json.load(infile)
-        )
+        titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(json.load(infile))
 
     evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
     name_column_evrs = evrs_by_column["Name"]

@@ -130,9 +130,7 @@ class PandasDatasource(LegacyDatasource):
         )
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop(
-            "batch_kwargs_generators", None
-        )
+        batch_kwargs_generators = configuration_with_defaults.pop("batch_kwargs_generators", None)
         super().__init__(
             name,
             data_context=data_context,
@@ -230,12 +228,8 @@ class PandasDatasource(LegacyDatasource):
             logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
-            default_reader_options = self._infer_default_options(
-                reader_fn, reader_options
-            )
-            if not reader_options.get("encoding") and default_reader_options.get(
-                "encoding"
-            ):
+            default_reader_options = self._infer_default_options(reader_fn, reader_options)
+            if not reader_options.get("encoding") and default_reader_options.get("encoding"):
                 reader_options["encoding"] = s3_object.get(
                     "ContentEncoding", default_reader_options.get("encoding")
                 )
@@ -273,9 +267,7 @@ class PandasDatasource(LegacyDatasource):
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return {"reader_method": "read_parquet"}
         elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}

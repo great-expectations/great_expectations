@@ -82,9 +82,7 @@ def csv_asset(spark_s3_datasource: SparkS3Datasource) -> _FilePathDataAsset:
 
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(
-        r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    )
+    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
     test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
     return regex, test_connection_error_message
@@ -196,9 +194,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request(
-            {"name": "alex", "timestamp": "1234567890", "price": 1300}
-        )
+        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
 
 
 @pytest.mark.big
@@ -217,9 +213,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -238,10 +232,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
         **asset_specified_metadata,
     }
-    assert (
-        batch.id
-        == "spark_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-    )
+    assert batch.id == "spark_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)

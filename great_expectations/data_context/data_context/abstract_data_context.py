@@ -309,9 +309,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_fluent_config_datasources_and_build_data_connectors(
-            self.fluent_config
-        )
+        self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
@@ -332,9 +330,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        self._validations: ValidationFactory = ValidationFactory(
-            store=self.validation_config_store
-        )
+        self._validations: ValidationFactory = ValidationFactory(store=self.validation_config_store)
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -462,15 +458,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
             )
         self._evaluation_parameter_dependencies_compiled = False
-        include_rendered_content = (
-            self._determine_if_expectation_suite_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
+        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
+            include_rendered_content=include_rendered_content
         )
         if include_rendered_content:
             expectation_suite.render()
@@ -529,9 +521,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """The directory in which custom plugin modules should be placed."""
         # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
         # FileDataContext both use it. Determine whether this should stay here or in child classes
-        return self._normalize_absolute_or_relative_path(
-            self.variables.plugins_directory
-        )
+        return self._normalize_absolute_or_relative_path(self.variables.plugins_directory)
 
     @property
     def stores(self) -> dict:
@@ -618,9 +608,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def validation_config_store(self) -> ValidationConfigStore:
         # Purposely not exposing validation_config_store_name as a user-configurable property
-        return self.stores[
-            DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value
-        ]
+        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value]
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
@@ -687,9 +675,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = ds_type(**kwargs)
         assert isinstance(datasource, FluentDatasource)
 
-        return_obj = self.datasources.set_datasource(
-            name=datasource_name, ds=datasource
-        )
+        return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
         self._save_project_config()
@@ -726,9 +712,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(updated_datasource, FluentDatasource)
         return updated_datasource
 
-    def _delete_fluent_datasource(
-        self, datasource_name: str, _call_store: bool = True
-    ) -> None:
+    def _delete_fluent_datasource(self, datasource_name: str, _call_store: bool = True) -> None:
         """
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
@@ -817,7 +801,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
-            error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
+            error_message = (
+                "Must either pass in an existing 'datasource' or individual constructor arguments"
+            )
             if datasource and name:
                 error_message += " (but not both)"
             raise TypeError(error_message)
@@ -861,14 +847,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource:
             config = datasource.config
         else:
-            module_name: str = kwargs.get(
-                "module_name", "great_expectations.datasource"
-            )
+            module_name: str = kwargs.get("module_name", "great_expectations.datasource")
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
-            datasource_class = load_class(
-                class_name=class_name, module_name=module_name
-            )
+            datasource_class = load_class(class_name=class_name, module_name=module_name)
 
             # For any class that should be loaded, it may control its configuration construction
             # by implementing a classmethod called build_configuration
@@ -877,9 +859,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             else:
                 config = kwargs
 
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            CommentedMap(**config)
-        )
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(CommentedMap(**config))
         datasource_config.name = name or datasource_config.name
 
         return self._instantiate_datasource_from_config_and_update_project_config(
@@ -922,11 +902,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource_name=name, datasource_config=datasource_config
         )
 
-        updated_datasource = (
-            self._instantiate_datasource_from_config_and_update_project_config(
-                config=datasource_config,
-                initialize=True,
-            )
+        updated_datasource = self._instantiate_datasource_from_config_and_update_project_config(
+            config=datasource_config,
+            initialize=True,
         )
 
         # Invariant based on `initalize=True` above
@@ -1054,9 +1032,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             active_store_names.append(self.checkpoint_store_name)  # type: ignore[arg-type]
         except (AttributeError, gx_exceptions.InvalidTopLevelConfigKeyError):
-            logger.info(
-                "Checkpoint store is not configured; omitting it from active stores"
-            )
+            logger.info("Checkpoint store is not configured; omitting it from active stores")
 
         return [
             store
@@ -1089,14 +1065,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `datasource_name` is None.
         """
         if datasource_name is None:
-            raise ValueError(
-                "Must provide a datasource_name to retrieve an existing Datasource"
-            )
+            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")
 
         try:
-            datasource: BaseDatasource | LegacyDatasource | FluentDatasource = (
-                self.datasources[datasource_name]
-            )
+            datasource: BaseDatasource | LegacyDatasource | FluentDatasource = self.datasources[
+                datasource_name
+            ]
         except KeyError as e:
             raise ValueError(str(e)) from e
 
@@ -1118,9 +1092,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         datasource_dict: dict = serializer.serialize(datasource_config)
 
-        substituted_config = cast(
-            dict, self.config_provider.substitute_config(datasource_dict)
-        )
+        substituted_config = cast(dict, self.config_provider.substitute_config(datasource_dict))
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
@@ -1146,9 +1118,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.17.2")
-    def add_data_docs_site(
-        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
-    ) -> None:
+    def add_data_docs_site(self, site_name: str, site_config: DataDocsSiteConfigTypedDict) -> None:
         """Add a new Data Docs Site to the DataContext.
 
         Example site config dicts can be found in our "Host and share Data Docs" guides.
@@ -1267,10 +1237,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             datasource_config.name = datasource_name
 
-            masked_config: dict = (
-                self._serialize_substitute_and_sanitize_datasource_config(
-                    serializer, datasource_config
-                )
+            masked_config: dict = self._serialize_substitute_and_sanitize_datasource_config(
+                serializer, datasource_config
             )
             datasources.append(masked_config)
 
@@ -1446,9 +1414,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
-        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
-            checkpoint
-        )
+        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(checkpoint)
         if isinstance(result, CheckpointConfig):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
                 checkpoint_config=result,
@@ -1559,8 +1525,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        result: Checkpoint | CheckpointConfig = (
-            self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = self.checkpoint_store.add_or_update_checkpoint(
+            checkpoint
         )
         if isinstance(result, CheckpointConfig):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
@@ -1588,7 +1554,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if not ((checkpoint is None) ^ (name is None)):
-            error_message = "Must either pass in an existing 'checkpoint' or individual constructor arguments"
+            error_message = (
+                "Must either pass in an existing 'checkpoint' or individual constructor arguments"
+            )
             if checkpoint and name:
                 error_message += " (but not both)"
             raise TypeError(error_message)
@@ -1596,7 +1564,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list = action_list or self._determine_default_action_list()
 
         if not checkpoint:
-            assert name, "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
+            assert (
+                name
+            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
@@ -1620,9 +1590,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return Checkpoint.DEFAULT_ACTION_LIST
 
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
+    def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
         """
         Stores ValidationResult EvaluationParameters to defined store
         """
@@ -1659,9 +1627,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
-            raise gx_exceptions.InvalidConfigError(
-                f"Unable to find configured store: {e!s}"
-            )
+            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")
         return keys  # type: ignore[return-value]
 
     @public_api
@@ -1966,9 +1932,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         datasource_name: str = batch_list[-1].batch_definition.datasource_name
-        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
-            self.datasources[datasource_name]
-        )
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = self.datasources[
+            datasource_name
+        ]
         execution_engine: ExecutionEngine
         if isinstance(datasource, FluentDatasource):
             batch = batch_list[-1]
@@ -2419,9 +2385,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         try:
-            existing = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite.name
-            )
+            existing = self.get_expectation_suite(expectation_suite_name=expectation_suite.name)
         except gx_exceptions.DataContextError:
             # not found
             return self._add_expectation_suite(expectation_suite=expectation_suite)
@@ -2517,9 +2481,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operator (ValidationOperator)
         """
 
-        self.config.validation_operators[validation_operator_name] = (
-            validation_operator_config
-        )
+        self.config.validation_operators[validation_operator_name] = validation_operator_config
         config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
@@ -2611,9 +2573,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if run_id is None and run_name is None:
-            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            )
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info(f"Setting run_name to: {run_name}")
         if evaluation_parameters is None:
             return validation_operator.run(
@@ -2657,13 +2617,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
 
-    def _validate_datasource_names(
-        self, datasource_names: list[str] | str | None
-    ) -> list[str]:
+    def _validate_datasource_names(self, datasource_names: list[str] | str | None) -> list[str]:
         if datasource_names is None:
-            datasource_names = [
-                datasource["name"] for datasource in self.list_datasources()
-            ]
+            datasource_names = [datasource["name"] for datasource in self.list_datasources()]
         elif isinstance(datasource_names, str):
             datasource_names = [datasource_names]
         elif not isinstance(datasource_names, list):
@@ -2725,9 +2681,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
                 else:
                     data_asset_names[datasource_names[0]] = (
-                        datasource.get_available_data_asset_names(
-                            batch_kwargs_generator_names
-                        )
+                        datasource.get_available_data_asset_names(batch_kwargs_generator_names)
                     )
 
             else:
@@ -2956,9 +2910,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "data_context": self,
                 "root_directory": self.root_directory,
             },
-            config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
-            },
+            config_defaults={"module_name": "great_expectations.render.renderer.site_builder"},
         )
         site_builder.clean_site()
         return True
@@ -3013,8 +2965,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         for kwarg_name in metric_configuration.keys():
             if not isinstance(metric_configuration[kwarg_name], dict):
                 raise gx_exceptions.DataContextError(
-                    "Invalid metric_configuration: each key must contain a "
-                    "dictionary."
+                    "Invalid metric_configuration: each key must contain a " "dictionary."
                 )
             if (
                 kwarg_name == "metric_kwargs_id"
@@ -3025,32 +2976,22 @@ class AbstractDataContext(ConfigPeer, ABC):
                             "Invalid metric_configuration: when specifying "
                             "metric_kwargs_id, no other keys or values may be defined."
                         )
-                    if not isinstance(
-                        metric_configuration[kwarg_name][metric_kwargs_id], list
-                    ):
+                    if not isinstance(metric_configuration[kwarg_name][metric_kwargs_id], list):
                         raise gx_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
+                            "Invalid metric_configuration: each value must contain a " "list."
                         )
                     metric_configurations_list += [
                         (metric_name, {"metric_kwargs_id": metric_kwargs_id})
-                        for metric_name in metric_configuration[kwarg_name][
-                            metric_kwargs_id
-                        ]
+                        for metric_name in metric_configuration[kwarg_name][metric_kwargs_id]
                     ]
             else:
                 for kwarg_value in metric_configuration[kwarg_name].keys():
                     base_kwargs.update({kwarg_name: kwarg_value})
-                    if not isinstance(
-                        metric_configuration[kwarg_name][kwarg_value], list
-                    ):
+                    if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
                         raise gx_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
+                            "Invalid metric_configuration: each value must contain a " "list."
                         )
-                    for nested_configuration in metric_configuration[kwarg_name][
-                        kwarg_value
-                    ]:
+                    for nested_configuration in metric_configuration[kwarg_name][kwarg_value]:
                         metric_configurations_list += (
                             AbstractDataContext._get_metric_configuration_tuples(
                                 nested_configuration, base_kwargs=base_kwargs
@@ -3093,9 +3034,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @overload
     def _normalize_absolute_or_relative_path(self, path: None) -> None: ...
 
-    def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
+    def _normalize_absolute_or_relative_path(self, path: Optional[str]) -> Optional[str]:
         """
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
         """
@@ -3106,9 +3045,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]  # noqa: PTH118
 
-    def _apply_global_config_overrides(
-        self, config: DataContextConfig
-    ) -> DataContextConfig:
+    def _apply_global_config_overrides(self, config: DataContextConfig) -> DataContextConfig:
         """
         Applies global configuration overrides for
             - usage_statistics being enabled
@@ -3128,9 +3065,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             logger.debug(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
-            config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
-                False
-            )
+            config_with_global_config_overrides.anonymous_usage_statistics.enabled = False
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         # data_context_id
         if global_data_context_id:
@@ -3141,14 +3076,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = global_data_context_id
+                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
+                    global_data_context_id
+                )
             else:
                 validation_errors.update(data_context_id_errors)
 
         # usage statistics url
-        global_usage_statistics_url: Optional[str] = (
-            self._get_usage_stats_url_override()
-        )
+        global_usage_statistics_url: Optional[str] = self._get_usage_stats_url_override()
         if global_usage_statistics_url:
             usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
                 {"usage_statistics_url": global_usage_statistics_url}
@@ -3254,9 +3189,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # the expectations_store does not yet exist by:
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
+        if (store_name == self.expectations_store_name) and store_config.get("store_backend"):
             store_config["store_backend"].update(
                 {
                     "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
@@ -3308,18 +3241,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
-            name: ds
-            for (name, ds) in self.datasources.items()
-            if isinstance(ds, FluentDatasource)
+            name: ds for (name, ds) in self.datasources.items() if isinstance(ds, FluentDatasource)
         }
 
     @property
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_primary_stores(
-        self, store_configs: Dict[str, StoreConfigTypedDict]
-    ) -> None:
+    def _init_primary_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -3366,9 +3295,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             config.read(cls._ROOT_CONF_FILE)
         except OSError as e:
-            logger.info(
-                f"Something went wrong when trying to read from the user's conf file: {e}"
-            )
+            logger.info(f"Something went wrong when trying to read from the user's conf file: {e}")
             return None
 
         oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
@@ -3462,14 +3389,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         config = copy.deepcopy(datasource_config)
 
         raw_config_dict = dict(datasourceConfigSchema.dump(config))
-        substituted_config_dict: dict = self.config_provider.substitute_config(
-            raw_config_dict
-        )
+        substituted_config_dict: dict = self.config_provider.substitute_config(raw_config_dict)
 
         raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-        substituted_datasource_config = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
+        substituted_datasource_config = datasourceConfigSchema.load(substituted_config_dict)
         substituted_datasource_config.name = datasource_name
 
         return self._instantiate_datasource_from_config(
@@ -3498,9 +3421,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         except Exception as e:
             name = getattr(substituted_config, "name", None) or ""
-            raise gx_exceptions.DatasourceInitializationError(
-                datasource_name=name, message=str(e)
-            )
+            raise gx_exceptions.DatasourceInitializationError(datasource_name=name, message=str(e))
         return datasource
 
     def _build_datasource_from_config(
@@ -3526,9 +3447,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             "BaseDatasource",
             "Datasource",
         ]:
-            substituted_config_dict.update(
-                {"data_context_root_directory": self.root_directory}
-            )
+            substituted_config_dict.update({"data_context_root_directory": self.root_directory})
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=substituted_config_dict,
@@ -3565,13 +3484,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = self.config_provider.substitute_config(
-            raw_config
-        )
+        substituted_config_dict: dict = self.config_provider.substitute_config(raw_config)
 
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
+        substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
 
         return substituted_config
 
@@ -3606,9 +3521,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: Optional[Datasource] = None
         if initialize:
             try:
-                substituted_config = self._perform_substitutions_on_datasource_config(
-                    config
-                )
+                substituted_config = self._perform_substitutions_on_datasource_config(config)
 
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
@@ -3693,9 +3606,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
 
-            dependencies: dict = (
-                expectation_suite.get_evaluation_parameter_dependencies()
-            )
+            dependencies: dict = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
 
@@ -3737,10 +3648,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             for key in key_list:
                 if run_id is not None and key.run_id != run_id:
                     continue
-                if (
-                    batch_identifier is not None
-                    and key.batch_identifier != batch_identifier
-                ):
+                if batch_identifier is not None and key.batch_identifier != batch_identifier:
                     continue
                 filtered_key_list.append(key)
 
@@ -3757,21 +3665,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
         if include_rendered_content is None:
-            include_rendered_content = self._determine_if_expectation_validation_result_include_rendered_content()
+            include_rendered_content = (
+                self._determine_if_expectation_validation_result_include_rendered_content()
+            )
 
         key = ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name=expectation_suite_name
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name=expectation_suite_name),
             run_id=run_id,
             batch_identifier=batch_identifier,
         )
         results_dict = selected_store.get(key)
 
         validation_result = (
-            results_dict.get_failed_validation_results()
-            if failed_only
-            else results_dict
+            results_dict.get_failed_validation_results() if failed_only else results_dict
         )
 
         if include_rendered_content:
@@ -3789,9 +3695,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             target_store_name=target_store_name,
         )
 
-    def _store_metrics(
-        self, requested_metrics, validation_results, target_store_name
-    ) -> None:
+    def _store_metrics(self, requested_metrics, validation_results, target_store_name) -> None:
         """
         requested_metrics is a dictionary like this:
 
@@ -3807,9 +3711,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get(
-            "active_batch_definition", {}
-        ).get("data_asset_name")
+        data_asset_name = validation_results.meta.get("active_batch_definition", {}).get(
+            "data_asset_name"
+        )
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (  # noqa: PLR1714
@@ -3824,16 +3728,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             for metric_configuration in metrics_list:
-                metric_configurations = (
-                    AbstractDataContext._get_metric_configuration_tuples(
-                        metric_configuration
-                    )
+                metric_configurations = AbstractDataContext._get_metric_configuration_tuples(
+                    metric_configuration
                 )
                 for metric_name, metric_kwargs in metric_configurations:
                     try:
-                        metric_value = validation_results.get_metric(
-                            metric_name, **metric_kwargs
-                        )
+                        metric_value = validation_results.get_metric(metric_name, **metric_kwargs)
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,
@@ -3842,9 +3742,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                                     expectation_suite_name
                                 ),
                                 metric_name=metric_name,
-                                metric_kwargs_id=get_metric_kwargs_id(
-                                    metric_kwargs=metric_kwargs
-                                ),
+                                metric_kwargs_id=get_metric_kwargs_id(metric_kwargs=metric_kwargs),
                             ),
                             metric_value,
                         )
@@ -4000,11 +3898,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder: SiteBuilder = (
-                        self._init_site_builder_for_data_docs_site_creation(
-                            site_name=site_name,
-                            site_config=site_config,
-                        )
+                    site_builder: SiteBuilder = self._init_site_builder_for_data_docs_site_creation(
+                        site_name=site_name,
+                        site_config=site_config,
                     )
                     if not site_builder:
                         raise gx_exceptions.ClassInstantiationError(
@@ -4013,8 +3909,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                             class_name=complete_site_config["class_name"],
                         )
                     if dry_run:
-                        index_page_locator_infos[site_name] = (
-                            site_builder.get_resource_url(only_if_exists=False)
+                        index_page_locator_infos[site_name] = site_builder.get_resource_url(
+                            only_if_exists=False
                         )
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
@@ -4148,9 +4044,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             exist_ok=True,
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
-            logger.info(
-                f"Creating new substitution_variables file at {config_variables_filepath}"
-            )
+            logger.info(f"Creating new substitution_variables file at {config_variables_filepath}")
             with open(config_variables_filepath, "w") as template:
                 template.write(CONFIG_VARIABLES_TEMPLATE)
 
@@ -4164,9 +4058,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return GxConfig(fluent_datasources=[])
 
-    def _attach_fluent_config_datasources_and_build_data_connectors(
-        self, config: GxConfig
-    ):
+    def _attach_fluent_config_datasources_and_build_data_connectors(self, config: GxConfig):
         """Called at end of __init__"""
         for datasource in config.datasources:
             ds_name = datasource.name
@@ -4203,6 +4095,4 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise TypeError(
-                "One of expectation_suite_name or expectation_suite must be specified."
-            )
+            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")

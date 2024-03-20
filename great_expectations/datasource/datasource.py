@@ -247,9 +247,7 @@ class LegacyDatasource:
         generator = instantiate_class_from_config(
             config=kwargs,
             runtime_environment={"datasource": self},
-            config_defaults={
-                "module_name": "great_expectations.datasource.batch_kwargs_generator"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.batch_kwargs_generator"},
         )
         if not generator:
             raise ClassInstantiationError(
@@ -295,9 +293,7 @@ class LegacyDatasource:
         generators = []
 
         if "batch_kwargs_generators" in self._datasource_config:
-            for key, value in self._datasource_config[
-                "batch_kwargs_generators"
-            ].items():
+            for key, value in self._datasource_config["batch_kwargs_generators"].items():
                 generators.append({"name": key, "class_name": value["class_name"]})
 
         return generators
@@ -377,9 +373,7 @@ class LegacyDatasource:
 
         for generator_name in batch_kwargs_generator_names:
             generator = self.get_batch_kwargs_generator(generator_name)
-            available_data_asset_names[generator_name] = (
-                generator.get_available_data_asset_names()
-            )
+            available_data_asset_names[generator_name] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
     # TODO: move to dataconnector
@@ -389,6 +383,4 @@ class LegacyDatasource:
         generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
         if partition_id is not None:
             kwargs["partition_id"] = partition_id
-        return generator_obj.build_batch_kwargs(
-            data_asset_name=data_asset_name, **kwargs
-        )
+        return generator_obj.build_batch_kwargs(data_asset_name=data_asset_name, **kwargs)

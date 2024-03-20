@@ -49,9 +49,7 @@ class DummyParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -106,12 +104,10 @@ def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_speci
         runtime_configuration=None,
     )
 
-    all_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    all_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -127,23 +123,17 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     domain = empty_rule_state["domain"]
     parameters = empty_rule_state["parameters"]
 
-    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_0",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_0",
+        evaluation_parameter_builder_configs=None,
     )
-    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_1",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_1",
+        evaluation_parameter_builder_configs=None,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-        ParameterBuilderConfig(
-            **my_evaluation_dependency_0_parameter_builder.to_json_dict()
-        ),
+        ParameterBuilderConfig(**my_evaluation_dependency_0_parameter_builder.to_json_dict()),
         ParameterBuilderConfig(
             **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
         ),
@@ -161,12 +151,10 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
         runtime_configuration=None,
     )
 
-    all_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    all_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -193,17 +181,13 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     mock_convert_to_json_serializable: mock.MagicMock,  # noqa: TID251
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
-    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_0",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_0",
+        evaluation_parameter_builder_configs=None,
     )
-    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_1",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_1",
+        evaluation_parameter_builder_configs=None,
     )
 
     my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
@@ -237,12 +221,10 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     "get_fully_qualified_parameter_names()" is used as utility in order to faithfully track actual contents of shared
     memory as ParameterBuilders are executed; otherwise, initial state of shared memory would not be known exactly.
     """
-    dependencies_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    dependencies_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -277,12 +259,10 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    all_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -309,23 +289,17 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     domain = empty_rule_state["domain"]
     parameters = empty_rule_state["parameters"]
 
-    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_0",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_0",
+        evaluation_parameter_builder_configs=None,
     )
-    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_1",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_1",
+        evaluation_parameter_builder_configs=None,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-        ParameterBuilderConfig(
-            **my_evaluation_dependency_0_parameter_builder.to_json_dict()
-        ),
+        ParameterBuilderConfig(**my_evaluation_dependency_0_parameter_builder.to_json_dict()),
         ParameterBuilderConfig(
             **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
         ),
@@ -345,12 +319,10 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    all_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -382,17 +354,13 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     domain = empty_rule_state["domain"]
     parameters = empty_rule_state["parameters"]
 
-    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_0",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_0",
+        evaluation_parameter_builder_configs=None,
     )
-    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = (
-        DummyParameterBuilder(
-            name="my_evaluation_dependency_parameter_name_1",
-            evaluation_parameter_builder_configs=None,
-        )
+    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_evaluation_dependency_parameter_name_1",
+        evaluation_parameter_builder_configs=None,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -414,12 +382,10 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     )
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
 
-    dependencies_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    dependencies_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """
@@ -440,12 +406,10 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    all_fully_qualified_parameter_names: List[str] = (
-        get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-        )
+    all_fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     """

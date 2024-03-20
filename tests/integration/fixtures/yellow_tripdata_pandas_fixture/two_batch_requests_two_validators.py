@@ -28,9 +28,7 @@ batch_request_march = BatchRequest(
     data_asset_name="my_reports",
     data_connector_query={"index": -1},
 )
-validator_march = context.get_validator(
-    batch_request=batch_request_march, expectation_suite=suite
-)
+validator_march = context.get_validator(batch_request=batch_request_march, expectation_suite=suite)
 
 # Create a row count expectation based on the February row count, and validate it against the March row count
 result = validator_march.expect_table_row_count_to_equal(value=february_table_row_count)

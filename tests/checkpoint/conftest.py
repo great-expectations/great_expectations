@@ -165,9 +165,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
 
 @pytest.fixture
-def context_with_single_taxi_csv_spark(
-    empty_data_context, tmp_path_factory, spark_session
-):
+def context_with_single_taxi_csv_spark(empty_data_context, tmp_path_factory, spark_session):
     context = empty_data_context
 
     yaml = YAMLHandler()
@@ -203,9 +201,7 @@ def context_with_single_taxi_csv_spark(
             base_directory, "data/yellow_tripdata_sample_2020-01.csv"
         )
     )
-    shutil.copy(
-        taxi_csv_source_file_path_test_data, taxi_csv_destination_file_path_test_data
-    )
+    shutil.copy(taxi_csv_source_file_path_test_data, taxi_csv_destination_file_path_test_data)
 
     config = yaml.load(
         f"""

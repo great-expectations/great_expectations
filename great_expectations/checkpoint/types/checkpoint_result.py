@@ -89,23 +89,17 @@ class CheckpointResult(SerializableDictDot):
         else:
             self._success = success
 
-        self._validation_results: (
-            list[ExpectationSuiteValidationResult] | dict | None
-        ) = None
+        self._validation_results: list[ExpectationSuiteValidationResult] | dict | None = None
         self._data_assets_validated: list[dict] | dict | None = None
         self._data_assets_validated_by_batch_id: dict | None = None
-        self._validation_result_identifiers: list[ValidationResultIdentifier] | None = (
-            None
-        )
+        self._validation_result_identifiers: list[ValidationResultIdentifier] | None = None
         self._expectation_suite_names: list[str] | None = None
         self._data_asset_names: list[str] | None = None
         self._validation_results_by_expectation_suite_name: dict | None = None
         self._validation_results_by_data_asset_name: dict | None = None
         self._batch_identifiers: list[str] | None = None
         self._statistics: dict | None = None
-        self._validation_statistics: dict[ValidationResultIdentifier, dict] | None = (
-            None
-        )
+        self._validation_statistics: dict[ValidationResultIdentifier, dict] | None = None
         self._validation_results_by_validation_result_identifier: dict | None = None
 
     @property
@@ -262,12 +256,9 @@ class CheckpointResult(SerializableDictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_definition"].data_asset_name
-                        == data_asset_name
+                        if data_asset["batch_definition"].data_asset_name == data_asset_name
                     ]
-            self._validation_results_by_data_asset_name = (
-                validation_results_by_data_asset_name
-            )
+            self._validation_results_by_data_asset_name = validation_results_by_data_asset_name
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
@@ -287,13 +278,9 @@ class CheckpointResult(SerializableDictDot):
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                active_batch_definition = validation_result.meta[
-                    "active_batch_definition"
-                ]
+                active_batch_definition = validation_result.meta["active_batch_definition"]
                 batch_id = active_batch_definition.id
-                expectation_suite_name = validation_result.meta[
-                    "expectation_suite_name"
-                ]
+                expectation_suite_name = validation_result.meta["expectation_suite_name"]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
                         "batch_definition": active_batch_definition,
@@ -304,9 +291,9 @@ class CheckpointResult(SerializableDictDot):
                     assets_validated_by_batch_id[batch_id]["validation_results"].append(
                         validation_result
                     )
-                    assets_validated_by_batch_id[batch_id][
-                        "expectation_suite_names"
-                    ].append(expectation_suite_name)
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(
+                        expectation_suite_name
+                    )
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
         return self._data_assets_validated_by_batch_id
 
@@ -321,9 +308,7 @@ class CheckpointResult(SerializableDictDot):
                     if validation_result.success
                 ]
             )
-            unsuccessful_validation_count = (
-                validation_result_count - successful_validation_count
-            )
+            unsuccessful_validation_count = validation_result_count - successful_validation_count
             successful_validation_percent = (
                 validation_result_count
                 and (successful_validation_count / validation_result_count) * 100

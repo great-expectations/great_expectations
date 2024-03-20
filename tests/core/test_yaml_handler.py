@@ -35,9 +35,7 @@ def yaml_handler() -> YAMLHandler:
 
 
 @pytest.mark.unit
-def test_load_correct_input(
-    simple_yaml: str, simple_dict: dict, yaml_handler: YAMLHandler
-) -> None:
+def test_load_correct_input(simple_yaml: str, simple_dict: dict, yaml_handler: YAMLHandler) -> None:
     res: dict = yaml_handler.load(simple_yaml)
 
     assert res == simple_dict

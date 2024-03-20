@@ -79,9 +79,7 @@ def test_parameter_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-    assert (
-        config.module_name == "great_expectations.rule_based_profiler.parameter_builder"
-    )
+    assert config.module_name == "great_expectations.rule_based_profiler.parameter_builder"
 
 
 def test_parameter_builder_config_successfully_loads_with_optional_args():
@@ -152,9 +150,7 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
 def test_rule_config_successfully_loads_with_required_args():
     data = {
         "domain_builder": {"class_name": "DomainBuilder"},
-        "parameter_builders": [
-            {"class_name": "ParameterBuilder", "name": "my_parameter"}
-        ],
+        "parameter_builders": [{"class_name": "ParameterBuilder", "name": "my_parameter"}],
         "expectation_configuration_builders": [
             {
                 "class_name": "ExpectationConfigurationBuilder",
@@ -195,9 +191,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
         "rules": {
             "rule_1": {
                 "domain_builder": {"class_name": "DomainBuilder"},
-                "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
-                ],
+                "parameter_builders": [{"class_name": "ParameterBuilder", "name": "my_parameter"}],
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
@@ -210,9 +204,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
     assert isinstance(config, dict)
-    assert len(config["rules"]) == 1 and isinstance(
-        config["rules"]["rule_1"], RuleConfig
-    )
+    assert len(config["rules"]) == 1 and isinstance(config["rules"]["rule_1"], RuleConfig)
 
 
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
@@ -223,9 +215,7 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
         "rules": {
             "rule_1": {
                 "domain_builder": {"class_name": "DomainBuilder"},
-                "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
-                ],
+                "parameter_builders": [{"class_name": "ParameterBuilder", "name": "my_parameter"}],
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
@@ -266,9 +256,7 @@ def test_rule_based_profiler_from_commented_map():
         "rules": {
             "rule_1": {
                 "domain_builder": {"class_name": "DomainBuilder"},
-                "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
-                ],
+                "parameter_builders": [{"class_name": "ParameterBuilder", "name": "my_parameter"}],
                 "expectation_configuration_builders": [
                     {
                         "class_name": "ExpectationConfigurationBuilder",
@@ -289,9 +277,7 @@ def test_resolve_config_using_acceptable_arguments(
     old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
 
     # Roundtrip through schema validation to add/or restore any missing fields.
-    old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(
-        old_config.to_json_dict()
-    )
+    old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(old_config.to_json_dict())
     old_deserialized_config.pop("class_name")
     old_deserialized_config.pop("module_name")
 
@@ -313,9 +299,7 @@ def test_resolve_config_using_acceptable_arguments(
     new_config = RuleBasedProfilerConfig(**new_deserialized_config)
 
     assert id(old_config) != id(new_config)
-    assert all(
-        old_config[attr] == new_config[attr] for attr in ("config_version", "name")
-    )
+    assert all(old_config[attr] == new_config[attr] for attr in ("config_version", "name"))
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
@@ -323,8 +307,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
 ) -> None:
     runtime_override_rule_name: str = "my_runtime_override_rule"
     assert all(
-        rule.name != runtime_override_rule_name
-        for rule in profiler_with_placeholder_args.rules
+        rule.name != runtime_override_rule_name for rule in profiler_with_placeholder_args.rules
     )
 
     runtime_override_rule: dict = {
@@ -399,9 +382,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     }
 
     runtime_override_rule_name: str = "rule_with_batch_request"
-    runtime_override_rules: Dict[str, dict] = {
-        runtime_override_rule_name: runtime_override_rule
-    }
+    runtime_override_rules: Dict[str, dict] = {runtime_override_rule_name: runtime_override_rule}
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(

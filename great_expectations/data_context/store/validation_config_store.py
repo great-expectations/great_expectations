@@ -18,9 +18,7 @@ if TYPE_CHECKING:
 class ValidationConfigStore(Store):
     _key_class = StringKey
 
-    def get_key(
-        self, name: str, id: str | None = None
-    ) -> GXCloudIdentifier | StringKey:
+    def get_key(self, name: str, id: str | None = None) -> GXCloudIdentifier | StringKey:
         """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""
         if self.cloud_mode:
             return GXCloudIdentifier(
@@ -48,9 +46,7 @@ class ValidationConfigStore(Store):
             validation_data = response_data
 
         id: str = validation_data["id"]
-        validation_config_dict: dict = validation_data["attributes"][
-            "validation_config"
-        ]
+        validation_config_dict: dict = validation_data["attributes"]["validation_config"]
         validation_config_dict["id"] = id
 
         return validation_config_dict

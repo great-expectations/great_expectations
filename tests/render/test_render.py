@@ -28,9 +28,7 @@ pytestmark = pytest.mark.big
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
-    with open(
-        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")
-    ) as infile:
+    with open(file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
@@ -39,9 +37,7 @@ def titanic_profiler_evrs():
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs_with_exception():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"),
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
@@ -49,9 +45,7 @@ def titanic_profiler_evrs_with_exception():
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_expectations.json"),
     ) as infile:
         expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
@@ -76,9 +70,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
 @pytest.fixture
 def titanic_profiled_expectations_1():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_expectations.json"),
     ) as infile:
         expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
         return ExpectationSuite(**expectation_suite_dict)
@@ -123,9 +115,7 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
             "w",
         ) as outfile:
             json.dump(
-                ProfilingResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
+                ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -169,9 +159,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
             "w",
         ) as outfile:
             json.dump(
-                ValidationResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
+                ValidationResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -195,17 +183,13 @@ def test_render_expectation_suite_column_section_renderer(
         with open(
             file_relative_path(
                 __file__,
-                "./output/test_render_expectation_suite_column_section_renderer"
-                + column
-                + ".json",
+                "./output/test_render_expectation_suite_column_section_renderer" + column + ".json",
                 strict=False,
             ),
             "w",
         ) as outfile:
             json.dump(
-                ExpectationSuiteColumnSectionRenderer()
-                .render(exp_groups[column])
-                .to_json_dict(),
+                ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -259,20 +243,14 @@ def test_content_block_list_available_expectations():
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     }
-    assert known_validation_results_implemented_expectations <= set(
-        available_expectations
-    )
-    assert len(available_expectations) >= len(
-        known_validation_results_implemented_expectations
-    )
+    assert known_validation_results_implemented_expectations <= set(available_expectations)
+    assert len(available_expectations) >= len(known_validation_results_implemented_expectations)
 
 
 def test_render_profiled_fixture_expectation_suite(
     titanic_dataset_profiler_expectations,
 ):
-    rendered_content = ExpectationSuitePageRenderer().render(
-        titanic_dataset_profiler_expectations
-    )
+    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
@@ -317,9 +295,7 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(
-            __file__, "./output/test_render_profiling_results.html", strict=False
-        ),
+        file_relative_path(__file__, "./output/test_render_profiling_results.html", strict=False),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -333,9 +309,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(
-            __file__, "./output/test_render_validation_results.html", strict=False
-        ),
+        file_relative_path(__file__, "./output/test_render_validation_results.html", strict=False),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -354,9 +328,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
 def test_smoke_render_profiling_results_page_renderer_with_exception(
     titanic_profiler_evrs_with_exception,
 ):
-    rendered_content = ProfilingResultsPageRenderer().render(
-        titanic_profiler_evrs_with_exception
-    )
+    rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(

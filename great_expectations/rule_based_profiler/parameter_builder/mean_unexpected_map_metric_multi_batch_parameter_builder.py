@@ -36,9 +36,7 @@ if TYPE_CHECKING:
     )
 
 
-class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-    MetricMultiBatchParameterBuilder
-):
+class MeanUnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
@@ -62,9 +60,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -125,28 +121,24 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_builder_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.total_count_parameter_builder_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=parameters,
-            )
+        total_count_parameter_builder_name: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.total_count_parameter_builder_name,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
             f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_total_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        total_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_total_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         total_count_values: MetricValues = total_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
@@ -185,9 +177,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 variables=variables,
                 parameters=parameters,
             )
-            null_count_values = null_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            null_count_values = null_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         nonnull_count_values: np.ndarray = total_count_values - null_count_values
 

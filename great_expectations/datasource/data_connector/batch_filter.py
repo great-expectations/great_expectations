@@ -115,10 +115,8 @@ def build_batch_filter(  # noqa: C901 - too complex
 "{type(custom_filter_function)!s}", which is illegal.
             """
         )
-    batch_filter_parameters: Optional[Union[dict, IDDict]] = (
-        data_connector_query_dict.get(  # type: ignore[assignment]
-            "batch_filter_parameters"
-        )
+    batch_filter_parameters: Optional[Union[dict, IDDict]] = data_connector_query_dict.get(  # type: ignore[assignment]
+        "batch_filter_parameters"
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
@@ -146,9 +144,7 @@ type and value given are "{type(limit)!s}" and "{limit}", respectively, which is
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    parsed_index: slice | None = (
-        parse_batch_slice(batch_slice=index) if index is not None else None
-    )
+    parsed_index: slice | None = parse_batch_slice(batch_slice=index) if index is not None else None
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
@@ -167,9 +163,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
         delimiter: str = ":"
         if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
             parsed_batch_slice = parsed_batch_slice[1:-1]
-        elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(
-            ")"
-        ):
+        elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
             parsed_batch_slice = parsed_batch_slice[6:-1]
             delimiter = ","
 
@@ -190,9 +184,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
 
 
 def _batch_slice_from_string(batch_slice: str) -> slice:
-    slice_params: list[int | None] = _batch_slice_string_to_slice_params(
-        batch_slice=batch_slice
-    )
+    slice_params: list[int | None] = _batch_slice_string_to_slice_params(batch_slice=batch_slice)
 
     if len(slice_params) == 0:
         return slice(0, None, None)
@@ -327,9 +319,7 @@ class BatchFilter:
                 selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:
                 selected_batch_definitions = list(
-                    itertools.chain.from_iterable(
-                        [selected_batch_definitions[self.index]]
-                    )
+                    itertools.chain.from_iterable([selected_batch_definitions[self.index]])
                 )
         return selected_batch_definitions
 

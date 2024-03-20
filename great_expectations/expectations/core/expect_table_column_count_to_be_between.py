@@ -128,7 +128,9 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
+                template_str = (
+                    f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
+                )
             elif not params.min_value:
                 template_str = f"Must have {at_most_str} $max_value columns."
             else:
@@ -161,7 +163,9 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
+                template_str = (
+                    f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
+                )
             elif params["min_value"] is None:
                 template_str = f"Must have {at_most_str} $max_value columns."
             elif params["max_value"] is None:

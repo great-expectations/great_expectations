@@ -80,9 +80,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.parametrize(
@@ -168,9 +166,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -223,9 +219,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -292,9 +286,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.big

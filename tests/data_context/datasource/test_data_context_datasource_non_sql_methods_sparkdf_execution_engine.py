@@ -41,9 +41,7 @@ def schema_for_spark_testset(spark_session):
 
 
 @pytest.fixture
-def context_with_single_titanic_csv_spark(
-    empty_data_context, tmp_path_factory, spark_session
-):
+def context_with_single_titanic_csv_spark(empty_data_context, tmp_path_factory, spark_session):
     context = empty_data_context
 
     base_directory = str(
@@ -57,9 +55,7 @@ def context_with_single_titanic_csv_spark(
     )
     os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../../test_sets/Titanic.csv"
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../../test_sets/Titanic.csv")
     titanic_csv_destination_file_path: str = str(
         os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
@@ -129,9 +125,7 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
-        context.get_validator(
-            batch_request=batch_request, expectation_suite_name="temp_suite"
-        )
+        context.get_validator(batch_request=batch_request, expectation_suite_name="temp_suite")
 
 
 def test_get_batch_list_spark_engine_inferred_assets(
@@ -639,9 +633,7 @@ def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_ba
 
     # Add the limit here in the call to get_batch_list instead of in the BatchRequest.
     # The limit is ignored since we passed a BatchRequest via batch_request
-    batch_list: List[Batch] = context.get_batch_list(
-        batch_request=batch_request, limit=2
-    )
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request, limit=2)
     assert len(batch_list) == 3
 
     # first batch
@@ -738,9 +730,7 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
 
     # Add the limit here in the call to get_batch_list instead of in the BatchRequest.
     # The limit is ignored since we passed a BatchRequest via batch_request
-    batch_list: List[Batch] = context.get_batch_list(
-        batch_request=batch_request, limit=2
-    )
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request, limit=2)
     # first batch
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None

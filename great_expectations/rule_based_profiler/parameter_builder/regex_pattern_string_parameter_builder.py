@@ -71,9 +71,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -162,9 +160,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = (
-            metric_computation_result.attributed_resolved_metrics[0]
-        )
+        attributed_resolved_metrics = metric_computation_result.attributed_resolved_metrics[0]
 
         metric_values: MetricValues
 
@@ -233,9 +229,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        for (
-            attributed_resolved_metrics
-        ) in metric_computation_result.attributed_resolved_metrics:
+        for attributed_resolved_metrics in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
@@ -248,9 +242,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
                 nonnull_count + NP_EPSILON
             )
-            regex_string_success_ratios[
-                attributed_resolved_metrics.metric_attributes["regex"]
-            ] = success_ratio
+            regex_string_success_ratios[attributed_resolved_metrics.metric_attributes["regex"]] = (
+                success_ratio
+            )
 
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
@@ -270,9 +264,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
         # dict of sorted regex and ratios for all evaluated candidates
         sorted_regex_candidates_and_ratios: dict = (
-            ParameterBuilder._get_sorted_candidates_and_ratios(
-                regex_string_success_ratios
-            )
+            ParameterBuilder._get_sorted_candidates_and_ratios(regex_string_success_ratios)
         )
 
         return Attributes(

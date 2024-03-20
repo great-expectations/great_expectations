@@ -154,9 +154,7 @@ class SiteIndexPageRenderer(Renderer):
                 "table_options": table_options,
                 "styling": {
                     "classes": ["col-12", "ge-index-page-table-container"],
-                    "body": {
-                        "classes": ["table-sm", "ge-index-page-profiling-results-table"]
-                    },
+                    "body": {"classes": ["table-sm", "ge-index-page-profiling-results-table"]},
                 },
             }
         )
@@ -279,9 +277,7 @@ class SiteIndexPageRenderer(Renderer):
         )
 
     @classmethod
-    def _render_expectation_suite_cell(
-        cls, expectation_suite_name, expectation_suite_path
-    ):
+    def _render_expectation_suite_cell(cls, expectation_suite_name, expectation_suite_path):
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -396,9 +392,7 @@ class SiteIndexPageRenderer(Renderer):
                                     "site_name": index_links_dict.get("site_name"),
                                     "title_prefix": "Data Docs",
                                 },
-                                "styling": {
-                                    "params": {"title_prefix": {"tag": "strong"}}
-                                },
+                                "styling": {"params": {"title_prefix": {"tag": "strong"}}},
                             },
                         }
                     ),
@@ -425,9 +419,7 @@ class SiteIndexPageRenderer(Renderer):
                 tabs.append(
                     {
                         "tab_name": "Profiling Results",
-                        "tab_content": cls._generate_profiling_results_link_table(
-                            index_links_dict
-                        ),
+                        "tab_content": cls._generate_profiling_results_link_table(index_links_dict),
                     }
                 )
             if index_links_dict.get("expectations_links"):

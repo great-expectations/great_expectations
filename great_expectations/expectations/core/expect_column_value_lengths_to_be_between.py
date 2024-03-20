@@ -179,9 +179,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 if params.min_value and params.max_value:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
                 elif not params.min_value:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
                 else:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -235,9 +239,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
@@ -252,10 +254,14 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
 
                 elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if include_column_name:
             template_str = f"$column {template_str}"

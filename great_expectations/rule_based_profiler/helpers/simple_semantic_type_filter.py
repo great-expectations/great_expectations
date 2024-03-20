@@ -84,8 +84,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
             if _is_sequence_of(semantic_types, str):
                 return [
-                    SemanticDomainTypes(semantic_type.lower())
-                    for semantic_type in semantic_types
+                    SemanticDomainTypes(semantic_type.lower()) for semantic_type in semantic_types
                 ]
 
             raise ValueError(
@@ -163,8 +162,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if any(
             map(
                 lambda type_name: column_type.startswith(type_name.upper()),
-                ProfilerTypeMapping.INT_TYPE_NAMES
-                + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
+                ProfilerTypeMapping.INT_TYPE_NAMES + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
             )
         ):
             semantic_column_type = SemanticDomainTypes.NUMERIC
@@ -196,10 +194,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         }:
             semantic_column_type = SemanticDomainTypes.IDENTIFIER
         elif column_type in (
-            {
-                type_name.upper()
-                for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES
-            }
+            {type_name.upper() for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES}
             | {type_name.upper() for type_name in ProfilerTypeMapping.RECORD_TYPE_NAMES}
         ):
             semantic_column_type = SemanticDomainTypes.MISCELLANEOUS

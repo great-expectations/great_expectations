@@ -105,9 +105,7 @@ class _FilePathDataAsset(DataAsset):
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
 
-    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
-        default="batch_request_param_"
-    )
+    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
     _regex_parser: RegExParser = pydantic.PrivateAttr()
 
     _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
@@ -117,9 +115,7 @@ class _FilePathDataAsset(DataAsset):
     # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: DataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
-    _test_connection_error_message: str = pydantic.PrivateAttr(
-        "Could not connect to your asset"
-    )
+    _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
     _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
         pydantic.PrivateAttr(
             default={
@@ -161,12 +157,8 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    def get_partitioner_implementation(
-        self, abstract_partitioner: Partitioner
-    ) -> SparkPartitioner:
-        PartitionerClass = self._partitioner_implementation_map.get(
-            type(abstract_partitioner)
-        )
+    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SparkPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if PartitionerClass is None:
             raise ValueError(
                 f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
@@ -178,9 +170,7 @@ class _FilePathDataAsset(DataAsset):
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (
-            FILE_PATH_BATCH_SPEC_KEY,
-        )
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
             spark_partitioner = self.get_partitioner_implementation(partitioner)
             option_keys += tuple(spark_partitioner.param_names)
@@ -229,9 +219,7 @@ class _FilePathDataAsset(DataAsset):
             options=options,
             partitioner=partitioner,
         ):
-            allowed_keys = set(
-                self.get_batch_request_options_keys(partitioner=partitioner)
-            )
+            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -278,9 +266,7 @@ class _FilePathDataAsset(DataAsset):
             )
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         self._validate_batch_request(batch_request)
 
         execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
@@ -297,12 +283,8 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchMetadata
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._data_connector.build_batch_spec(
-                batch_definition=batch_definition
-            )
-            batch_spec_options = self._batch_spec_options_from_batch_request(
-                batch_request
-            )
+            batch_spec = self._data_connector.build_batch_spec(batch_definition=batch_definition)
+            batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
             batch_spec.update(batch_spec_options)
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -310,9 +292,7 @@ class _FilePathDataAsset(DataAsset):
             )
 
             fully_specified_batch_request = copy.deepcopy(batch_request)
-            fully_specified_batch_request.options.update(
-                batch_definition.batch_identifiers
-            )
+            fully_specified_batch_request.options.update(batch_definition.batch_identifiers)
             batch_metadata = self._get_batch_metadata_from_batch_request(
                 batch_request=fully_specified_batch_request
             )
@@ -347,9 +327,7 @@ class _FilePathDataAsset(DataAsset):
             List of batch definitions.
         """
         if batch_request.partitioner:
-            spark_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             valid_options = self.get_batch_request_options_keys(
                 partitioner=batch_request.partitioner
@@ -359,9 +337,7 @@ class _FilePathDataAsset(DataAsset):
             for param_name in spark_partitioner.param_names:
                 # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.
                 if batch_request_options_counts[param_name] == 1:
-                    batch_request_copy_without_partitioner_kwargs.options.pop(
-                        param_name
-                    )
+                    batch_request_copy_without_partitioner_kwargs.options.pop(param_name)
                 else:
                     warnings.warn(
                         f"The same option name is applied for your batch regex and partitioner config: {param_name}"
@@ -375,9 +351,7 @@ class _FilePathDataAsset(DataAsset):
             )
         return batch_definition_list
 
-    def _batch_spec_options_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> dict:
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
 
         Args:
@@ -402,9 +376,7 @@ class _FilePathDataAsset(DataAsset):
         }
 
         if batch_request.partitioner:
-            spark_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
             batch_spec_options["partitioner_method"] = spark_partitioner.method_name
             partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
             partitioner_kwargs["batch_identifiers"] = (

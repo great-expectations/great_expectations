@@ -103,9 +103,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             self._azure_client = azure_client
 
         if not azure_client:
-            raise SparkAzureBlobStorageDatasourceError(
-                "Failed to return `azure_client`"
-            )
+            raise SparkAzureBlobStorageDatasourceError("Failed to return `azure_client`")
 
         return azure_client
 
@@ -151,9 +149,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         if abs_container is _MISSING:
-            raise TypeError(
-                f"'{data_asset.name}' is missing required argument 'abs_container'"
-            )
+            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,

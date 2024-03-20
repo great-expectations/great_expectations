@@ -91,9 +91,7 @@ class DataPartitioner(abc.ABC):
         Returns:
             partitioner method.
         """
-        partitioner_method_name = self._get_partitioner_method_name(
-            partitioner_method_name
-        )
+        partitioner_method_name = self._get_partitioner_method_name(partitioner_method_name)
 
         return getattr(self, partitioner_method_name)
 
@@ -145,9 +143,7 @@ class DataPartitioner(abc.ABC):
             (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
             for dp in date_parts
         ):
-            raise gx_exceptions.InvalidConfigError(
-                "date_parts should be of type DatePart or str."
-            )
+            raise gx_exceptions.InvalidConfigError("date_parts should be of type DatePart or str.")
 
     @staticmethod
     def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
@@ -190,7 +186,5 @@ class DataPartitioner(abc.ABC):
                 for date_part in date_parts
             }
         else:
-            self._verify_all_strings_are_valid_date_parts(
-                list(column_batch_identifiers.keys())
-            )
+            self._verify_all_strings_are_valid_date_parts(list(column_batch_identifiers.keys()))
             return column_batch_identifiers

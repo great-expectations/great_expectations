@@ -125,9 +125,7 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(
-        cls: Type[BYC], commented_map: Union[CommentedMap, Dict]
-    ) -> BYC:
+    def from_commented_map(cls: Type[BYC], commented_map: Union[CommentedMap, Dict]) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BYC] = schema_instance.load(commented_map)
@@ -399,9 +397,7 @@ class AssetConfigSchema(Schema):
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     pattern = fields.String(required=False, allow_none=True)
-    group_names = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    group_names = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
     bucket = fields.String(required=False, allow_none=True)
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
@@ -419,17 +415,13 @@ class AssetConfigSchema(Schema):
     values from the AWS Glue Data Catalog.
     """
     database_name = fields.String(required=False, allow_none=True)
-    partitions = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    partitions = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
 
     # Necessary addition for Cloud assets
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
 
-    batch_identifiers = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    batch_identifiers = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
 
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
@@ -437,9 +429,7 @@ class AssetConfigSchema(Schema):
     partitioner_method = fields.String(required=False, allow_none=True)
     partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
-        cls_or_instance=fields.Nested(
-            SorterConfigSchema, required=False, allow_none=True
-        ),
+        cls_or_instance=fields.Nested(SorterConfigSchema, required=False, allow_none=True),
         required=False,
         allow_none=True,
     )
@@ -467,14 +457,8 @@ class AssetConfigSchema(Schema):
             reader_options: dict = batch_spec_passthrough_config.get("reader_options")
             if reader_options:
                 schema = reader_options.get("schema")
-                if (
-                    schema
-                    and pyspark.types
-                    and isinstance(schema, pyspark.types.StructType)
-                ):
-                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
-                        schema.jsonValue()
-                    )
+                if schema and pyspark.types and isinstance(schema, pyspark.types.StructType):
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = schema.jsonValue()
         return data
 
     # noinspection PyUnusedLocal
@@ -664,9 +648,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     glob_directive = fields.String(required=False, allow_none=True)
     default_regex = fields.Dict(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
-    batch_identifiers = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    batch_identifiers = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
 
     # S3
     boto3_options = fields.Dict(
@@ -701,21 +683,15 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     partitioner_method = fields.String(required=False, allow_none=True)
     partitioner_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
-        cls_or_instance=fields.Nested(
-            SorterConfigSchema, required=False, allow_none=True
-        ),
+        cls_or_instance=fields.Nested(SorterConfigSchema, required=False, allow_none=True),
         required=False,
         allow_none=True,
     )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
-    excluded_tables = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
-    included_tables = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    excluded_tables = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
+    included_tables = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
     introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
@@ -723,9 +699,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     # AWS Glue Data Catalog
     glue_introspection_directives = fields.Dict(required=False, allow_none=True)
     catalog_id = fields.String(required=False, allow_none=True)
-    partitions = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
+    partitions = fields.List(cls_or_instance=fields.Str(), required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -814,9 +788,7 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if (
-            "azure_options" in data or "container" in data or "name_starts_with" in data
-        ) and not (
+        if ("azure_options" in data or "container" in data or "name_starts_with" in data) and not (
             data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetAzureDataConnector",
@@ -841,9 +813,7 @@ the Azure type of data connector. You must only select one between `conn_str` or
 configuration to continue.
 """
                 )
-        if (
-            "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
-        ) and not (
+        if ("gcs_options" in data or "bucket_or_name" in data or "max_results" in data) and not (
             data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetGCSDataConnector",
@@ -910,9 +880,7 @@ continue.
             )
 
         if (
-            "partitions" in data
-            or "catalog_id" in data
-            or "glue_introspection_directives" in data
+            "partitions" in data or "catalog_id" in data or "glue_introspection_directives" in data
         ) and not (
             data["class_name"]  # noqa: E713 # membership check
             in [
@@ -950,14 +918,8 @@ continue.
             reader_options: dict = batch_spec_passthrough_config.get("reader_options")
             if reader_options:
                 schema = reader_options.get("schema")
-                if (
-                    schema
-                    and pyspark.types
-                    and isinstance(schema, pyspark.types.StructType)
-                ):
-                    data["batch_spec_passthrough"]["reader_options"]["schema"] = (
-                        schema.jsonValue()
-                    )
+                if schema and pyspark.types and isinstance(schema, pyspark.types.StructType):
+                    data["batch_spec_passthrough"]["reader_options"]["schema"] = schema.jsonValue()
         return data
 
 
@@ -1069,9 +1031,7 @@ SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{da
 configuration to continue.
                 """
             )
-        if "spark_config" in data and not (
-            data["class_name"] == "SparkDFExecutionEngine"
-        ):
+        if "spark_config" in data and not (data["class_name"] == "SparkDFExecutionEngine"):
             raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
@@ -1216,9 +1176,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     persist = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
-    execution_engine = fields.Nested(
-        ExecutionEngineConfigSchema, required=False, allow_none=True
-    )
+    execution_engine = fields.Nested(ExecutionEngineConfigSchema, required=False, allow_none=True)
     data_connectors = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(DataConnectorConfigSchema),
@@ -1289,17 +1247,13 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     @post_load
     def make_datasource_config(self, data, **kwargs):
         # Add names to data connectors
-        for data_connector_name, data_connector_config in data.get(
-            "data_connectors", {}
-        ).items():
+        for data_connector_name, data_connector_config in data.get("data_connectors", {}).items():
             data_connector_config["name"] = data_connector_name
         return DatasourceConfig(**data)
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(
-        self, enabled=True, data_context_id=None, usage_statistics_url=None
-    ) -> None:
+    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None) -> None:
         self._enabled = enabled
 
         if data_context_id is None:
@@ -1338,9 +1292,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         try:
             uuid.UUID(data_context_id)
         except ValueError:
-            raise gx_exceptions.InvalidConfigError(
-                "data_context_id must be a valid uuid"
-            )
+            raise gx_exceptions.InvalidConfigError("data_context_id must be a valid uuid")
 
         self._data_context_id = data_context_id
         self._explicit_id = True
@@ -1483,14 +1435,10 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
-    data_docs_sites = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), allow_none=True
-    )
+    data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    progress_bars = fields.Nested(
-        ProgressBarsConfigSchema, required=False, allow_none=True
-    )
+    progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
     include_rendered_content = fields.Nested(
         IncludeRenderedContentConfigSchema, required=False, allow_none=True
     )
@@ -1523,9 +1471,7 @@ class DataContextConfigSchema(Schema):
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
-        message: str = (
-            f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
-        )
+        message: str = f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
         logger.error(message)
         raise gx_exceptions.InvalidDataContextConfigError(
             message=message,
@@ -1611,9 +1557,7 @@ class DataContextConfigDefaults(enum.Enum):
 
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
-    DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"{EXPECTATIONS_BASE_DIRECTORY}/"
-    )
+    DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{EXPECTATIONS_BASE_DIRECTORY}/"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
@@ -1626,13 +1570,9 @@ class DataContextConfigDefaults(enum.Enum):
     )
 
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
-    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        "evaluation_parameters/"
-    )
+    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "evaluation_parameters/"
     DATA_DOCS_BASE_DIRECTORY = "data_docs"
-    DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
-    )
+    DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
 
     # Datasource
     DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
@@ -1643,9 +1583,7 @@ class DataContextConfigDefaults(enum.Enum):
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
-    DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"{CHECKPOINTS_BASE_DIRECTORY}/"
-    )
+    DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{CHECKPOINTS_BASE_DIRECTORY}/"
 
     # Profilers
     DEFAULT_PROFILER_STORE_NAME = "profiler_store"
@@ -1768,9 +1706,7 @@ class BaseStoreBackendDefaults(DictDot):
 
         self.stores = stores
         if data_docs_sites is None:
-            data_docs_sites = copy.deepcopy(
-                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
-            )
+            data_docs_sites = copy.deepcopy(DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value)
 
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
@@ -1920,9 +1856,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
         super().__init__()
 
         if plugins_directory is None:
-            plugins_directory = (
-                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-            )
+            plugins_directory = DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
         self.plugins_directory = str(plugins_directory)
         if root_directory is not None:
             root_directory = str(root_directory)
@@ -1973,9 +1907,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.evaluation_parameter_store_name: {
-                "class_name": "EvaluationParameterStore"
-            },
+            self.evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
             self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1999,9 +1931,9 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
             temp_dir = tempfile.TemporaryDirectory()
             path = temp_dir.name
             logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
-            self.data_docs_sites[  # type: ignore[index]
-                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
-            ]["store_backend"]["base_directory"] = path
+            self.data_docs_sites[DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value][  # type: ignore[index]
+                "store_backend"
+            ]["base_directory"] = path
         else:
             self.data_docs_sites = {}
 
@@ -2373,9 +2305,7 @@ class DataContextConfig(BaseYamlConfig):
         if include_rendered_content is None:
             include_rendered_content = IncludeRenderedContentConfig()
         elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(
-                **include_rendered_content
-            )
+            include_rendered_content = IncludeRenderedContentConfig(**include_rendered_content)
         self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
@@ -2519,11 +2449,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
         data = super().dump(obj, many=many)
 
         for key, value in obj.items():
-            if (
-                key not in data
-                and key not in self.declared_fields
-                and value is not None
-            ):
+            if key not in data and key not in self.declared_fields and value is not None:
                 data[key] = value
 
         sorted_data = dict(sorted(data.items()))
@@ -2567,9 +2493,7 @@ class CheckpointConfigSchema(Schema):
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
-    action_list = fields.List(
-        cls_or_instance=fields.Dict(), required=False, allow_none=True
-    )
+    action_list = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
     evaluation_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
     validations = fields.List(
@@ -2579,16 +2503,12 @@ class CheckpointConfigSchema(Schema):
     )
     default_validation_id = fields.String(required=False, allow_none=True)
 
-    profilers = fields.List(
-        cls_or_instance=fields.Dict(), required=False, allow_none=True
-    )
+    profilers = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
-        if not (
-            "name" in data or "validation_operator_name" in data or "batches" in data
-        ):
+        if not ("name" in data or "validation_operator_name" in data or "batches" in data):
             raise gx_exceptions.InvalidConfigError(
                 """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.

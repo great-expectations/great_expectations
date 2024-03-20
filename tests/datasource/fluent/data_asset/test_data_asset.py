@@ -99,9 +99,7 @@ def test_add_batch_config_with_partitioner__success(empty_data_asset: DataAsset)
 
 
 @pytest.mark.unit
-def test_add_batch_config__persists(
-    file_context: AbstractDataContext, empty_data_asset: DataAsset
-):
+def test_add_batch_config__persists(file_context: AbstractDataContext, empty_data_asset: DataAsset):
     name = "my batch config"
     partitioner = PartitionerYear(column_name="test-column")
     batch_config = empty_data_asset.add_batch_config(name, partitioner=partitioner)
@@ -187,9 +185,7 @@ def _test_add_batch_config__does_not_clobber_other_assets(
     loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
     assert loaded_datasource.get_asset(my_asset.name).batch_configs == [my_batch_config]
-    assert loaded_datasource.get_asset(your_asset.name).batch_configs == [
-        your_batch_config
-    ]
+    assert loaded_datasource.get_asset(your_asset.name).batch_configs == [your_batch_config]
 
 
 @pytest.mark.unit

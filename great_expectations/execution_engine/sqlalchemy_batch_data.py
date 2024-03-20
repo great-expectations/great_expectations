@@ -142,9 +142,7 @@ class SqlAlchemyBatchData(BatchData):
         self._source_schema_name = source_schema_name
 
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
-            raise ValueError(
-                "Exactly one of table_name, query, or selectable must be specified"
-            )
+            raise ValueError("Exactly one of table_name, query, or selectable must be specified")
         elif (query and schema_name) or (selectable is not None and schema_name):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
@@ -160,13 +158,11 @@ class SqlAlchemyBatchData(BatchData):
         self._dialect = dialect
 
         if table_name:
-            self._selectable = (
-                self._generate_selectable_from_schema_name_and_table_name(
-                    dialect=dialect,
-                    use_quoted_name=use_quoted_name,
-                    table_name=table_name,
-                    schema_name=schema_name,
-                )
+            self._selectable = self._generate_selectable_from_schema_name_and_table_name(
+                dialect=dialect,
+                use_quoted_name=use_quoted_name,
+                table_name=table_name,
+                schema_name=schema_name,
             )
         elif query:
             self._selectable = self._generate_selectable_from_query(  # type: ignore[call-overload] # https://github.com/python/mypy/issues/14764
@@ -412,9 +408,7 @@ class SqlAlchemyBatchData(BatchData):
         if not create_temp_table:
             return selectable.alias()
 
-        if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
-            selectable, str
-        ):
+        if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(selectable, str):
             # oracle, mssql query could already be passed as a string
             query = selectable
         else:

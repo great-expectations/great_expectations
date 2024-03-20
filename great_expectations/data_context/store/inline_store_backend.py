@@ -124,9 +124,7 @@ class InlineStoreBackend(StoreBackend):
         self._save_changes()
 
     @override
-    def _move(
-        self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict
-    ) -> None:
+    def _move(self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict) -> None:
         raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
@@ -180,9 +178,7 @@ class InlineStoreBackend(StoreBackend):
                 "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"
             )
         elif not self._has_key(key):
-            raise StoreBackendError(
-                f"Could not find a value associated with key `{key}`"
-            )
+            raise StoreBackendError(f"Could not find a value associated with key `{key}`")
 
         del self._data_context.config[resource_type][resource_name]
 

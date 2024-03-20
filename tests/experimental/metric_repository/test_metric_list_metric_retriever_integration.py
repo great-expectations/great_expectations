@@ -49,9 +49,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
 
 @pytest.mark.cloud
 def test_get_metrics_table_metrics_only(
-    cloud_context_and_batch_request_with_simple_dataframe: tuple[
-        CloudDataContext, BatchRequest
-    ],
+    cloud_context_and_batch_request_with_simple_dataframe: tuple[CloudDataContext, BatchRequest],
 ):
     context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
     table_metrics_list: List[MetricTypes] = [
@@ -104,16 +102,12 @@ def test_get_metrics_table_metrics_only(
     # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
     assert len(metrics) == len(expected_metrics)
     for metric in metrics:
-        assert metric.dict() in [
-            expected_metric.dict() for expected_metric in expected_metrics
-        ]
+        assert metric.dict() in [expected_metric.dict() for expected_metric in expected_metrics]
 
 
 @pytest.mark.cloud
 def test_get_metrics_full_cdm(
-    cloud_context_and_batch_request_with_simple_dataframe: tuple[
-        CloudDataContext, BatchRequest
-    ],
+    cloud_context_and_batch_request_with_simple_dataframe: tuple[CloudDataContext, BatchRequest],
 ):
     context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
     cdm_metrics_list: List[MetricTypes] = [
@@ -282,6 +276,4 @@ def test_get_metrics_full_cdm(
 
     assert len(metrics) == len(expected_metrics)
     for metric in metrics:
-        assert metric.dict() in [
-            expected_metric.dict() for expected_metric in expected_metrics
-        ]
+        assert metric.dict() in [expected_metric.dict() for expected_metric in expected_metrics]

@@ -85,9 +85,7 @@ T = TypeVar("T")
 class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
-    fluent_datasources: List[Datasource] = Field(
-        ..., description=_FLUENT_STYLE_DESCRIPTION
-    )
+    fluent_datasources: List[Datasource] = Field(..., description=_FLUENT_STYLE_DESCRIPTION)
 
     _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
         _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
@@ -219,10 +217,7 @@ class GxConfig(FluentBaseModel):
                 datasource.delete_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
             # if the default pandas datasource has no assets, it should not be serialized
-            if (
-                datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME
-                or len(datasource.assets) > 0
-            ):
+            if datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME or len(datasource.assets) > 0:
                 loaded_datasources.append(datasource)
 
                 # TODO: move this to a different 'validator' method
@@ -356,9 +351,7 @@ class GxConfig(FluentBaseModel):
                     data_assets: List[dict] = datasource_config["assets"]
                     data_asset_config: dict
                     data_assets_config_as_dict = {
-                        data_asset_config[
-                            _DATA_ASSET_NAME_KEY
-                        ]: _exclude_fields_from_serialization(
+                        data_asset_config[_DATA_ASSET_NAME_KEY]: _exclude_fields_from_serialization(
                             source_dict=data_asset_config,
                             exclusions=self._EXCLUDE_FROM_DATA_ASSET_SERIALIZATION,
                         )
@@ -414,8 +407,10 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
                 for data_asset_name, data_asset_config in data_assets.items():
                     data_asset_config[_DATA_ASSET_NAME_KEY] = data_asset_name
                     if _BATCH_CONFIGS_KEY in data_asset_config:
-                        batch_config_list = _convert_batch_configs_from_yaml_to_internal_object_representation(
-                            data_asset_config[_BATCH_CONFIGS_KEY]
+                        batch_config_list = (
+                            _convert_batch_configs_from_yaml_to_internal_object_representation(
+                                data_asset_config[_BATCH_CONFIGS_KEY]
+                            )
                         )
                         data_asset_config[_BATCH_CONFIGS_KEY] = batch_config_list
 

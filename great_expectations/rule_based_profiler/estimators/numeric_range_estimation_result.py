@@ -10,7 +10,9 @@ from great_expectations.types import DictDot
 if TYPE_CHECKING:
     import numpy as np
 
-NUM_HISTOGRAM_BINS: int = 10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+NUM_HISTOGRAM_BINS: int = (
+    10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+)
 
 
 @dataclass(frozen=True)

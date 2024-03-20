@@ -96,9 +96,7 @@ PHRASES = [
             "validate data step",
         ),
     ),
-    Phrase(
-        ("validation result",), ("validation result store", "validation results store")
-    ),
+    Phrase(("validation result",), ("validation result store", "validation results store")),
     Phrase(("validation result store", "validation results store"), ()),
     Phrase(("validator",), ()),
 ]
@@ -122,9 +120,7 @@ def get_phrases(source_json_path):
 def remove_but_not_in(line_working_contents, phrase):
     for _ in phrase.but_not_in:
         line_working_contents = line_working_contents.replace(_, "")
-        line_working_contents = line_working_contents.replace(
-            "_".join(_.split(" ")), ""
-        )
+        line_working_contents = line_working_contents.replace("_".join(_.split(" ")), "")
     return line_working_contents
 
 
@@ -136,9 +132,7 @@ def phrase_in_line(line_working_contents, phrase):
 
 
 def phrase_is_tagged_in_line(line_working_contents, phrase):
-    tagged_results = re.findall(
-        "<TechnicalTag(.*?)\\>", line_working_contents, re.IGNORECASE
-    )
+    tagged_results = re.findall("<TechnicalTag(.*?)\\>", line_working_contents, re.IGNORECASE)
     for possible_phrase in phrase.one_of_these:
         for tagged_result in tagged_results:
             if possible_phrase in tagged_result:
@@ -196,9 +190,7 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
                 line_working_contents = line_contents.lower().strip()
                 line_working_contents = remove_but_not_in(line_working_contents, phrase)
 
-                if line_working_contents.startswith("---") and (
-                    line_number == 1 or in_title_block
-                ):
+                if line_working_contents.startswith("---") and (line_number == 1 or in_title_block):
                     in_title_block = not in_title_block
                 if line_working_contents.startswith("title") and in_title_block:
                     header_lines.append(line_number)
@@ -214,9 +206,7 @@ def scan_file(file_path, phrases):  # noqa: C901, PLR0915
                         valid_lines.append(f"TAG({line_number})")
                         continue
                     if in_code_block:
-                        code_lines.append(
-                            f"TAG({line_number})" if is_tagged else line_number
-                        )
+                        code_lines.append(f"TAG({line_number})" if is_tagged else line_number)
                     elif is_header_line(line_working_contents):
                         if is_tagged:
                             header_lines.append(f"TAG({line_number})")

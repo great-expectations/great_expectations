@@ -163,8 +163,7 @@ class SerializableDataContext(AbstractDataContext):
         if (
             project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
             != context_config_usage_stats.usage_statistics_url
-            and context_config_usage_stats.usage_statistics_url
-            != global_usage_stats_url
+            and context_config_usage_stats.usage_statistics_url != global_usage_stats_url
         ):
             return True
 
@@ -369,9 +368,7 @@ class SerializableDataContext(AbstractDataContext):
         return result
 
     @classmethod
-    def get_ge_config_version(
-        cls, context_root_dir: Optional[PathStr] = None
-    ) -> Optional[float]:
+    def get_ge_config_version(cls, context_root_dir: Optional[PathStr] = None) -> Optional[float]:
         yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return None
@@ -422,9 +419,7 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def _find_context_yml_file(
-        cls, search_start_dir: Optional[PathStr] = None
-    ) -> str | None:
+    def _find_context_yml_file(cls, search_start_dir: Optional[PathStr] = None) -> str | None:
         """Search for the yml file starting here and moving upward."""
         if search_start_dir is None:
             search_start_dir = pathlib.Path.cwd()
@@ -446,9 +441,7 @@ class SerializableDataContext(AbstractDataContext):
         yml_path: str | None = None
 
         for i in range(4):
-            logger.debug(
-                f"Searching for config file {search_start_dir} ({i} layer deep)"
-            )
+            logger.debug(f"Searching for config file {search_start_dir} ({i} layer deep)")
 
             potential_ge_dir = search_start_dir / gx_dir
 
@@ -524,9 +517,7 @@ class SerializableDataContext(AbstractDataContext):
         return bool(context.list_expectation_suites())
 
     @classmethod
-    def _attempt_context_instantiation(
-        cls, ge_dir: PathStr
-    ) -> Optional[SerializableDataContext]:
+    def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:
         try:
             context = cls(context_root_dir=ge_dir)
             return context

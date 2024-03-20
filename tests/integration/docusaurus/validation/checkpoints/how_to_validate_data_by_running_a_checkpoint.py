@@ -30,9 +30,7 @@ asset = datasource.add_csv_asset(
 )
 
 # use a validator to create an expectation suite
-validator = context.get_validator(
-    datasource_name="taxi_source", data_asset_name="yellow_tripdata"
-)
+validator = context.get_validator(datasource_name="taxi_source", data_asset_name="yellow_tripdata")
 validator.expect_column_values_to_not_be_null("pickup_datetime")
 context.add_expectation_suite("yellow_tripdata_suite")
 

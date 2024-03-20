@@ -223,9 +223,7 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.set(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -235,9 +233,7 @@ class Store:
 
     def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.add(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -247,21 +243,15 @@ class Store:
 
     def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.update(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.update(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
-    def add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
         return self._add_or_update(key=key, value=value, **kwargs)
 
-    def _add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         self._validate_key(key)
         return self._store_backend.add_or_update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
@@ -321,9 +311,7 @@ class Store:
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
-            logger.critical(
-                f"Error {e} occurred while attempting to instantiate a store."
-            )
+            logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
             class_name: str = store_config["class_name"]
             module_name = store_config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(

@@ -72,13 +72,11 @@ if __name__ == "test_script_module":
                 data_connectors={data_connector_name: data_connector_config},
             )
 
-            datasource: BaseDatasource = context.get_datasource(
-                datasource_name=datasource_name
-            )
+            datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
 
-            data_connector: ConfiguredAssetSqlDataConnector = (
-                datasource.data_connectors[data_connector_name]
-            )
+            data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+                data_connector_name
+            ]
 
             # 3. Check if resulting batches are as expected
             # using data_connector.get_batch_definition_list_from_batch_request()
@@ -88,14 +86,10 @@ if __name__ == "test_script_module":
                 data_asset_name=data_asset_name,
             )
             batch_definition_list: List[LegacyBatchDefinition] = (
-                data_connector.get_batch_definition_list_from_batch_request(
-                    batch_request
-                )
+                data_connector.get_batch_definition_list_from_batch_request(batch_request)
             )
 
-            assert (
-                len(batch_definition_list) == test_case.num_expected_batch_definitions
-            )
+            assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
             # 4. Check that loaded data is as expected
 

@@ -124,12 +124,12 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
             )
-            template_str += (
-                f"most common value must belong to this set: {value_set_str}."
-            )
+            template_str += f"most common value must belong to this set: {value_set_str}."
 
             if params.ties_okay:
-                template_str += " Values outside this set that are as common (but not more common) are allowed."
+                template_str += (
+                    " Values outside this set that are as common (but not more common) are allowed."
+                )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -164,14 +164,14 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"most common value must belong to this set: {values_string}."
 
         if params.get("ties_okay"):
-            template_str += " Values outside this set that are as common (but not more common) are allowed."
+            template_str += (
+                " Values outside this set that are as common (but not more common) are allowed."
+            )
 
         if include_column_name:
             template_str = f"$column {template_str}"

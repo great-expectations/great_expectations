@@ -44,10 +44,8 @@ def test_datasource_store_set(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-        saved_datasource_config: DatasourceConfig = (
-            datasource_store_ge_cloud_backend.set(
-                key=key, value=block_config_datasource_config
-            )
+        saved_datasource_config: DatasourceConfig = datasource_store_ge_cloud_backend.set(
+            key=key, value=block_config_datasource_config
         )
 
     serializer = DictConfigSerializer(schema=datasourceConfigSchema)
@@ -99,9 +97,7 @@ def test_datasource_store_get_by_id(
             200,
         )
 
-    with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_response
-    ) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_response) as mock_get:
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
@@ -145,9 +141,7 @@ def test_datasource_store_get_by_name(
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
         mock_has_key.return_value = True
 
-        datasource_store_ge_cloud_backend.retrieve_by_name(
-            datasource_name=datasource_name
-        )
+        datasource_store_ge_cloud_backend.retrieve_by_name(datasource_name=datasource_name)
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
@@ -198,9 +192,7 @@ def test_datasource_store_delete_by_id(
             "delete",
             "delete",
             [],
-            marks=pytest.mark.xfail(
-                reason="We do not raise errors on delete fail", strict=True
-            ),
+            marks=pytest.mark.xfail(reason="We do not raise errors on delete fail", strict=True),
         ),
     ],
 )

@@ -68,9 +68,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     try:
         assert (
-            PasswordMasker.mask_db_url(
-                f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase"
-            )
+            PasswordMasker.mask_db_url(f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase")
             == f"postgresql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
         )
     except ModuleNotFoundError:
@@ -146,9 +144,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     # mysqlclient (a maintained fork of MySQL-Python) (if installed in test environment)
     try:
         assert (
-            PasswordMasker.mask_db_url(
-                f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo"
-            )
+            PasswordMasker.mask_db_url(f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo")
             == f"mysql+mysqldb://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
@@ -163,9 +159,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     # PyMySQL (if installed in test environment)
     try:
         assert (
-            PasswordMasker.mask_db_url(
-                f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo"
-            )
+            PasswordMasker.mask_db_url(f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo")
             == f"mysql+pymysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
@@ -202,9 +196,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     except ModuleNotFoundError:
         pass
     assert (
-        PasswordMasker.mask_db_url(
-            "oracle+cx_oracle://scott:tiger@tnsname", use_urlparse=True
-        )
+        PasswordMasker.mask_db_url("oracle+cx_oracle://scott:tiger@tnsname", use_urlparse=True)
         == f"oracle+cx_oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@tnsname"
     )
 
@@ -218,18 +210,14 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     except ModuleNotFoundError:
         pass
     assert (
-        PasswordMasker.mask_db_url(
-            "mssql+pyodbc://scott:tiger@mydsn", use_urlparse=True
-        )
+        PasswordMasker.mask_db_url("mssql+pyodbc://scott:tiger@mydsn", use_urlparse=True)
         == f"mssql+pyodbc://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@mydsn"
     )
 
     # pymssql (if installed in test environment)
     try:
         assert (
-            PasswordMasker.mask_db_url(
-                f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname"
-            )
+            PasswordMasker.mask_db_url(f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname")
             == f"mssql+pymssql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:12345/dbname"
         )
     except ModuleNotFoundError:
@@ -246,10 +234,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     temp_dir = tmp_path / "sqllite_tests"
     temp_dir.mkdir()
     monkeypatch.chdir(temp_dir)
-    assert (
-        PasswordMasker.mask_db_url("sqlite:///something/foo.db")
-        == "sqlite:///something/foo.db"
-    )
+    assert PasswordMasker.mask_db_url("sqlite:///something/foo.db") == "sqlite:///something/foo.db"
     assert (
         PasswordMasker.mask_db_url("sqlite:///something/foo.db", use_urlparse=True)
         == "sqlite:///something/foo.db"
@@ -262,9 +247,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
         == "sqlite:////absolute/path/to/foo.db"
     )
     assert (
-        PasswordMasker.mask_db_url(
-            "sqlite:////absolute/path/to/foo.db", use_urlparse=True
-        )
+        PasswordMasker.mask_db_url("sqlite:////absolute/path/to/foo.db", use_urlparse=True)
         == "sqlite:////absolute/path/to/foo.db"
     )
 
@@ -280,8 +263,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
 
     # Windows alternative using raw string
     assert (
-        PasswordMasker.mask_db_url(r"sqlite:///C:\path\to\foo.db")
-        == r"sqlite:///C:\path\to\foo.db"
+        PasswordMasker.mask_db_url(r"sqlite:///C:\path\to\foo.db") == r"sqlite:///C:\path\to\foo.db"
     )
     assert (
         PasswordMasker.mask_db_url(r"sqlite:///C:\path\to\foo.db", use_urlparse=True)
@@ -305,7 +287,9 @@ def test_sanitize_config_azure_blob_store():
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_wrong_url)
 
-    azure_missing_fields: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    azure_missing_fields: str = (
+        "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    )
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_missing_fields)
 
@@ -324,9 +308,7 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
     basic_data_context_config_dict,
 ):
     # expect no change without datasources
-    config_without_creds = PasswordMasker.sanitize_config(
-        basic_data_context_config_dict
-    )
+    config_without_creds = PasswordMasker.sanitize_config(basic_data_context_config_dict)
     assert config_without_creds == basic_data_context_config_dict
 
 
@@ -342,22 +324,17 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
         if (
             not store_config.get("store_backend")
             or not store_config["store_backend"].get("ge_cloud_credentials")
-            or not store_config["store_backend"]["ge_cloud_credentials"].get(
-                "access_token"
-            )
+            or not store_config["store_backend"]["ge_cloud_credentials"].get("access_token")
         ):
             # a field in store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
             # doesn't exist, so we expect this config to be unchanged
-            assert (
-                store_config
-                == data_context_config_dict_with_cloud_backed_stores["stores"][name]
-            )
+            assert store_config == data_context_config_dict_with_cloud_backed_stores["stores"][name]
         else:
             # check that the original token exists
             assert (
-                data_context_config_dict_with_cloud_backed_stores["stores"][name][
-                    "store_backend"
-                ]["ge_cloud_credentials"]["access_token"]
+                data_context_config_dict_with_cloud_backed_stores["stores"][name]["store_backend"][
+                    "ge_cloud_credentials"
+                ]["access_token"]
                 == ge_cloud_access_token
             )
             # expect that the GX Cloud token has been obscured
@@ -381,9 +358,9 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
     # iterate through the processed datasources and check for correctness
     for name, processed_config in masked_datasources.items():
         # check if processed_config["execution_engine"]["connection_string"] exists
-        if processed_config.get("execution_engine") and processed_config[
-            "execution_engine"
-        ].get("connection_string"):
+        if processed_config.get("execution_engine") and processed_config["execution_engine"].get(
+            "connection_string"
+        ):
             # check if the connection string contains a password
             if (
                 conn_string_password
@@ -429,9 +406,7 @@ def test_sanitize_config_with_password_field():
 
 
 @pytest.mark.unit
-def test_sanitize_config_with_url_field(
-    conn_string_with_embedded_password, conn_string_password
-):
+def test_sanitize_config_with_url_field(conn_string_with_embedded_password, conn_string_password):
     # this case has a url field inside a credentials dict - expect the password inside
     # of it to be masked
     config = {"credentials": {"url": conn_string_with_embedded_password}}
@@ -447,17 +422,12 @@ def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
     # this case has a connection string in an execution_engine dict
-    config = {
-        "execution_engine": {"connection_string": conn_string_with_embedded_password}
-    }
+    config = {"execution_engine": {"connection_string": conn_string_with_embedded_password}}
     config_copy = safe_deep_copy(config)
     res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert conn_string_password not in res["execution_engine"]["connection_string"]
-    assert (
-        PasswordMasker.MASKED_PASSWORD_STRING
-        in res["execution_engine"]["connection_string"]
-    )
+    assert PasswordMasker.MASKED_PASSWORD_STRING in res["execution_engine"]["connection_string"]
 
 
 @pytest.mark.unit
@@ -470,19 +440,13 @@ def test_sanitize_config_regardless_of_parent_key():
     config_copy = safe_deep_copy(config)
     res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
-    assert (
-        res["some_other_field"]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
-    )
+    assert res["some_other_field"]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
 @pytest.mark.cloud
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
     # expect the access token to be found and masked
-    config = {
-        "store_backend": {
-            "ge_cloud_credentials": {"access_token": ge_cloud_access_token}
-        }
-    }
+    config = {"store_backend": {"ge_cloud_credentials": {"access_token": ge_cloud_access_token}}}
     config_copy = safe_deep_copy(config)
     res = PasswordMasker.sanitize_config(config_copy)
     assert res != config

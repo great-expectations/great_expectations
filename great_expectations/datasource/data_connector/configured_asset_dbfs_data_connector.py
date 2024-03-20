@@ -65,9 +65,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         )
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         full_path = super()._get_full_file_path_for_asset(path=path, asset=asset)
         template_arguments: dict = {
             "path": full_path,

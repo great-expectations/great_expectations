@@ -56,26 +56,18 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             selectable,
             _,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name: str = accessor_domain_kwargs["column"]
         column: sqlalchemy.ColumnClause = sa.column(column_name)
 
         distinct_values: List[sqlalchemy.Row]
         if hasattr(column, "is_not"):
             distinct_values = execution_engine.execute_query(
-                sa.select(column)
-                .where(column.is_not(None))
-                .distinct()
-                .select_from(selectable)
+                sa.select(column).where(column.is_not(None)).distinct().select_from(selectable)
             ).fetchall()
         else:
             distinct_values = execution_engine.execute_query(
-                sa.select(column)
-                .where(column.isnot(None))
-                .distinct()
-                .select_from(selectable)
+                sa.select(column).where(column.isnot(None)).distinct().select_from(selectable)
             ).fetchall()
         # Vectorized operation is not faster here due to overhead of converting to and from numpy array
         return {row[0] for row in distinct_values}
@@ -98,9 +90,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             df,
             _,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name: str = accessor_domain_kwargs["column"]
         distinct_values: List[pyspark.Row] = (
             df.select(F.col(column_name))
@@ -161,9 +151,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        return (
-            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
-        )
+        return metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -172,9 +160,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        return (
-            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
-        )
+        return metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
 
     @classmethod
     @override

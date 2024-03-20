@@ -149,9 +149,7 @@ def mocked_get_by_name_response_1_result(
                 "data": [
                     {
                         "attributes": {
-                            "checkpoint_config": copy.deepcopy(
-                                checkpoint_config_with_ids
-                            ),
+                            "checkpoint_config": copy.deepcopy(checkpoint_config_with_ids),
                             "class_name": "Checkpoint",
                             "created_by_id": created_by_id,
                             "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",

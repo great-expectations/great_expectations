@@ -195,9 +195,7 @@ class SiteBuilder:
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
-                "validation_results_limit": site_index_builder.get(
-                    "validation_results_limit"
-                ),
+                "validation_results_limit": site_index_builder.get("validation_results_limit"),
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
@@ -221,9 +219,7 @@ class SiteBuilder:
                 }
         if site_section_builders.get("profiling", "None") not in FALSEY_YAML_STRINGS:
             if site_section_builders["profiling"].get("run_name_filter") is None:
-                site_section_builders["profiling"]["run_name_filter"] = {
-                    "includes": "profiling"
-                }
+                site_section_builders["profiling"]["run_name_filter"] = {"includes": "profiling"}
 
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
@@ -233,23 +229,21 @@ class SiteBuilder:
                 site_section_config.get("module_name")
                 or "great_expectations.render.renderer.site_builder"
             )
-            self.site_section_builders[site_section_name] = (
-                instantiate_class_from_config(
-                    config=site_section_config,
-                    runtime_environment={
-                        "data_context": data_context,
-                        "target_store": self.target_store,
-                        "custom_styles_directory": custom_styles_directory,
-                        "custom_views_directory": custom_views_directory,
-                        "data_context_id": self.data_context_id,
-                        "show_how_to_buttons": self.show_how_to_buttons,
-                        "cloud_mode": self.cloud_mode,
-                    },
-                    config_defaults={
-                        "name": site_section_name,
-                        "module_name": module_name,
-                    },
-                )
+            self.site_section_builders[site_section_name] = instantiate_class_from_config(
+                config=site_section_config,
+                runtime_environment={
+                    "data_context": data_context,
+                    "target_store": self.target_store,
+                    "custom_styles_directory": custom_styles_directory,
+                    "custom_views_directory": custom_views_directory,
+                    "data_context_id": self.data_context_id,
+                    "show_how_to_buttons": self.show_how_to_buttons,
+                    "cloud_mode": self.cloud_mode,
+                },
+                config_defaults={
+                    "name": site_section_name,
+                    "module_name": module_name,
+                },
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
@@ -382,12 +376,9 @@ class DefaultSiteSectionBuilder:
         self.ge_cloud_mode = cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration "
-                "with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration " "with a class_name key."
             )
-        module_name = (
-            renderer.get("module_name") or "great_expectations.render.renderer"
-        )
+        module_name = renderer.get("module_name") or "great_expectations.render.renderer"
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={"data_context": data_context},
@@ -439,9 +430,7 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):
-                if not resource_key_passes_run_name_filter(
-                    resource_key, self.run_name_filter
-                ):
+                if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
                     continue
             try:
                 resource = self.source_store.get(resource_key)
@@ -455,9 +444,7 @@ class DefaultSiteSectionBuilder:
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.name
-                logger.debug(
-                    f"        Rendering expectation suite {expectation_suite_name}"
-                )
+                logger.debug(f"        Rendering expectation suite {expectation_suite_name}")
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
                 run_name = run_id.run_name
@@ -477,9 +464,7 @@ class DefaultSiteSectionBuilder:
 
                 if self.cloud_mode:
                     self.target_store.set(
-                        GXCloudIdentifier(
-                            resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
-                        ),
+                        GXCloudIdentifier(resource_type=GXCloudRESTResource.RENDERED_DATA_DOC),
                         rendered_content,
                         source_type=resource_key.resource_type,
                         source_id=resource_key.id,
@@ -506,8 +491,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += (
-                    f'{type(e).__name__}: "{e!s}".  '
-                    f'Traceback: "{exception_traceback}".'
+                    f'{type(e).__name__}: "{e!s}".  ' f'Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 
@@ -546,9 +530,7 @@ class DefaultSiteIndexBuilder:
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
-        module_name = (
-            renderer.get("module_name") or "great_expectations.render.renderer"
-        )
+        module_name = renderer.get("module_name") or "great_expectations.render.renderer"
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={"data_context": data_context},
@@ -616,9 +598,7 @@ class DefaultSiteIndexBuilder:
             )
         else:
             filepath = (
-                pathlib.Path(
-                    *["expectations", *expectation_suite_name.split(".")]
-                ).as_posix()
+                pathlib.Path(*["expectations", *expectation_suite_name.split(".")]).as_posix()
                 + ".html"
             )
 
@@ -641,9 +621,7 @@ class DefaultSiteIndexBuilder:
                 "asset_name": asset_name,
                 "batch_kwargs": batch_kwargs,
                 "batch_spec": batch_spec,
-                "expectation_suite_filepath": expectation_suite_filepath
-                if run_id
-                else None,
+                "expectation_suite_filepath": expectation_suite_filepath if run_id else None,
             }
         )
 
@@ -756,9 +734,7 @@ class DefaultSiteIndexBuilder:
 
         self._add_expectations_to_index_links(index_links_dict, skip_and_clean_missing)
         validation_and_profiling_result_site_keys = (
-            self._build_validation_and_profiling_result_site_keys(
-                skip_and_clean_missing
-            )
+            self._build_validation_and_profiling_result_site_keys(skip_and_clean_missing)
         )
         self._add_profiling_to_index_links(
             index_links_dict, validation_and_profiling_result_site_keys
@@ -795,9 +771,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectations = self.site_section_builders_config.get("expectations", "None")
         if expectations and expectations not in FALSEY_YAML_STRINGS:
             expectation_suite_source_keys = self.data_context.stores[
-                self.site_section_builders_config["expectations"].get(
-                    "source_store_name"
-                )
+                self.site_section_builders_config["expectations"].get("source_store_name")
             ].list_keys()
             expectation_suite_site_keys = [
                 ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
@@ -809,9 +783,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 cleaned_keys = []
                 for expectation_suite_site_key in expectation_suite_site_keys:
                     if expectation_suite_site_key not in expectation_suite_source_keys:
-                        self.target_store.store_backends[
-                            ExpectationSuiteIdentifier
-                        ].remove_key(expectation_suite_site_key)
+                        self.target_store.store_backends[ExpectationSuiteIdentifier].remove_key(
+                            expectation_suite_site_key
+                        )
                     else:
                         cleaned_keys.append(expectation_suite_site_key)
                 expectation_suite_site_keys = cleaned_keys
@@ -839,9 +813,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             validation_and_profiling_result_source_keys = set(
                 self.data_context.stores[
-                    self.site_section_builders_config[source_store].get(
-                        "source_store_name"
-                    )
+                    self.site_section_builders_config[source_store].get("source_store_name")
                 ].list_keys()
             )
             validation_and_profiling_result_site_keys = [
@@ -852,16 +824,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
             ]
             if skip_and_clean_missing:
                 cleaned_keys = []
-                for (
-                    validation_result_site_key
-                ) in validation_and_profiling_result_site_keys:
+                for validation_result_site_key in validation_and_profiling_result_site_keys:
                     if (
                         validation_result_site_key
                         not in validation_and_profiling_result_source_keys
                     ):
-                        self.target_store.store_backends[
-                            ValidationResultIdentifier
-                        ].remove_key(validation_result_site_key)
+                        self.target_store.store_backends[ValidationResultIdentifier].remove_key(
+                            validation_result_site_key
+                        )
                     else:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
@@ -921,9 +891,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ) -> None:
         validations = self.site_section_builders_config.get("validations", "None")
         if validations and validations not in FALSEY_YAML_STRINGS:
-            validations_run_name_filter = self.site_section_builders_config[
-                "validations"
-            ]["run_name_filter"]
+            validations_run_name_filter = self.site_section_builders_config["validations"][
+                "run_name_filter"
+            ]
             validation_result_site_keys = [
                 validation_result_key
                 for validation_result_key in validation_and_profiling_result_site_keys

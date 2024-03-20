@@ -231,12 +231,8 @@ class DatabricksSQLDatasource(SQLDatasource):
 
         kwargs = model_dict.pop("kwargs", {})
 
-        http_path = _parse_param_from_query_string(
-            param="http_path", query=connection_string.query
-        )
-        assert (
-            http_path
-        ), "Presence of http_path query string is guaranteed due to prior validation"
+        http_path = _parse_param_from_query_string(param="http_path", query=connection_string.query)
+        assert http_path, "Presence of http_path query string is guaranteed due to prior validation"
 
         # Databricks connection is a bit finicky - the http_path portion of the connection string needs to be passed in connect_args
         connect_args = {"http_path": http_path}

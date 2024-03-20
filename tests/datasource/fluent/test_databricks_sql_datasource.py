@@ -98,9 +98,7 @@ def test_invalid_connection_string_raises_dsn_error(
     connection_string: str, expected_errors: list[dict]
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = DatabricksSQLDatasource(
-            name="my_databricks", connection_string=connection_string
-        )
+        _ = DatabricksSQLDatasource(name="my_databricks", connection_string=connection_string)
 
     assert expected_errors == exc_info.value.errors()
     assert "my_token" not in str(exc_info.value.errors())

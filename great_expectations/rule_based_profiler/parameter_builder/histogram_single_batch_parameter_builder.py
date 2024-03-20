@@ -58,9 +58,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         bins: str = "uniform",
         n_bins: int = 10,
         allow_relative_error: bool = False,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -141,10 +139,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        if (
-            domain.domain_type == MetricDomainTypes.COLUMN
-            and "." in domain.domain_kwargs["column"]
-        ):
+        if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
             raise gx_exceptions.ProfilerExecutionError(
                 "Column names cannot contain '.' when computing the histogram metric."
             )
@@ -167,16 +162,18 @@ elements.
         # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).
         bins = sorted(set(bins))
 
-        column_values_nonnull_count_metric_single_batch_parameter_builder = MetricSingleBatchParameterBuilder(
-            name="column_values_nonnull_count_metric_single_batch_parameter_builder",
-            metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
-            data_context=self.data_context,
+        column_values_nonnull_count_metric_single_batch_parameter_builder = (
+            MetricSingleBatchParameterBuilder(
+                name="column_values_nonnull_count_metric_single_batch_parameter_builder",
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+                data_context=self.data_context,
+            )
         )
         column_values_nonnull_count_metric_single_batch_parameter_builder.build_parameters(
             domain=domain,
@@ -221,9 +218,7 @@ elements.
         weights: np.ndarray = np.asarray(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
         ) / (
-            column_values_nonnull_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            column_values_nonnull_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
             + NP_EPSILON
         )
         tail_weights: float = (1.0 - sum(weights)) / 2.0

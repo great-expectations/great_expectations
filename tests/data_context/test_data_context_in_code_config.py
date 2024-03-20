@@ -124,18 +124,12 @@ def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> str:
     Returns:
 
     """
-    s3_response_object = boto3.client("s3").get_object(
-        Bucket=bucket, Key=f"{prefix}/{key}"
-    )
+    s3_response_object = boto3.client("s3").get_object(Bucket=bucket, Key=f"{prefix}/{key}")
     ge_store_backend_id_file_contents = (
-        s3_response_object["Body"]
-        .read()
-        .decode(s3_response_object.get("ContentEncoding", "utf-8"))
+        s3_response_object["Body"].read().decode(s3_response_object.get("ContentEncoding", "utf-8"))
     )
 
-    store_backend_id_file_parser = StoreBackend.STORE_BACKEND_ID_PREFIX + pp.Word(
-        pp.hexnums + "-"
-    )
+    store_backend_id_file_parser = StoreBackend.STORE_BACKEND_ID_PREFIX + pp.Word(pp.hexnums + "-")
     parsed_store_backend_id = store_backend_id_file_parser.parseString(
         ge_store_backend_id_file_contents
     )
@@ -154,9 +148,9 @@ def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
     """
     return {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)[
+            "Contents"
+        ]
     }
 
 
@@ -214,9 +208,7 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
         prefix=expectations_store_prefix,
         key=store_backend_id_filename,
     )
-    assert (
-        expectations_store_backend_id_from_s3_file == s3_expectations_store_backend_id
-    )
+    assert expectations_store_backend_id_from_s3_file == s3_expectations_store_backend_id
 
     # Create a DataContext (note existing expectations store already set up)
     in_code_data_context_project_config = build_in_code_data_context_project_config(
@@ -225,9 +217,7 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_code_data_context = get_context(
-        project_config=in_code_data_context_project_config
-    )
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
     bucket_contents_after_instantiating_get_context = list_s3_bucket_contents(
         bucket=bucket, prefix=data_context_prefix
     )
@@ -237,9 +227,9 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     }
 
     # Make sure ids are consistent
-    in_code_data_context_expectations_store_store_backend_id = (
-        in_code_data_context.stores["expectations_S3_store"].store_backend_id
-    )
+    in_code_data_context_expectations_store_store_backend_id = in_code_data_context.stores[
+        "expectations_S3_store"
+    ].store_backend_id
     in_code_data_context_data_context_id = in_code_data_context.data_context_id
     constructed_data_context_id = in_code_data_context._construct_data_context_id()
     assert (
@@ -268,9 +258,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     when instantiating the DataContext,
     and also that this data_context_id is used to configure the expectations_store.store_backend_id
     """
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
 
     bucket = "leakybucket"
     expectations_store_prefix = "expectations_store_prefix"
@@ -293,9 +281,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     in_code_data_context_project_config.anonymous_usage_statistics.data_context_id = (
         manually_created_uuid
     )
-    in_code_data_context = get_context(
-        project_config=in_code_data_context_project_config
-    )
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places
     assert (
@@ -343,9 +329,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_code_data_context = get_context(
-        project_config=in_code_data_context_project_config
-    )
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places
     assert (
@@ -413,9 +397,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": validations_store_prefix,
             },
         },
-        "inactive_evaluation_parameter_store": {
-            "class_name": "EvaluationParameterStore"
-        },
+        "inactive_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
@@ -424,9 +406,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    in_code_data_context = get_context(
-        project_config=in_code_data_context_project_config
-    )
+    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
 
     # Check here that suppress_store_backend_id == True for inactive stores
     # and False for active stores
@@ -591,9 +571,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": validations_store_prefix,
             },
         },
-        "inactive_evaluation_parameter_store": {
-            "class_name": "EvaluationParameterStore"
-        },
+        "inactive_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",

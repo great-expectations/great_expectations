@@ -158,15 +158,13 @@ class DataAssistantRunner:
             )
             variables_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    not in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] not in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
             domain_type_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
@@ -181,9 +179,9 @@ class DataAssistantRunner:
                     **variables_directives_kwargs,
                 )
             )
-            domain_type_directives_list: List[
-                RuntimeEnvironmentDomainTypeDirectives
-            ] = build_domain_type_directives(**domain_type_directives_kwargs)
+            domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = (
+                build_domain_type_directives(**domain_type_directives_kwargs)
+            )
             """
             Run "data_assistant" with thus constructed "variables"-level and "Domain"-level custom user-specified
             overwrite arguments/directives and return computed "data_assistant_result" to caller.
@@ -219,19 +217,13 @@ class DataAssistantRunner:
         ]
 
         # 2. Extend the signature to include "DataAssistant"-specific "Domain"-level arguments/directives.
-        parameters.extend(
-            self._get_method_signature_parameters_for_domain_type_directives()
-        )
+        parameters.extend(self._get_method_signature_parameters_for_domain_type_directives())
         # 3. Extend the signature to include "DataAssistant"-specific "variables"-level arguments/directives.
         # Use separate call for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.
-        parameters.extend(
-            self._get_method_signature_parameters_for_variables_directives()
-        )
+        parameters.extend(self._get_method_signature_parameters_for_variables_directives())
 
         # 4. Encapsulate all arguments/directives into "DataAssistant"-specific "DataAssistantRunner.run()" signature.
-        func_sig = Signature(
-            parameters=parameters, return_annotation=DataAssistantResult
-        )
+        func_sig = Signature(parameters=parameters, return_annotation=DataAssistantResult)
         # 5. Override the runner docstring with the docstring defined in the implemented DataAssistant child-class.
         run.__doc__ = self._data_assistant_cls.__doc__
         # 6. Create "DataAssistant"-specific "DataAssistantRunner.run()" method and parametrized implementation closure.
@@ -331,15 +323,15 @@ class DataAssistantRunner:
         )  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
-            assert domain_builder, "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
+            assert (
+                domain_builder
+            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 """
                 "getattr_static()" returns "getter" "property" definition object, and "fget" on it gives its "Callable"
                 """
-                property_accessor_method = getattr_static(
-                    domain_builder, key, None
-                ).fget
+                property_accessor_method = getattr_static(domain_builder, key, None).fget
                 property_accessor_method_return_type = signature(
                     obj=property_accessor_method, follow_wrapped=False
                 ).return_annotation
@@ -391,9 +383,7 @@ class DataAssistantRunner:
         if rule is None:
             domain_type_attributes: List[str] = []
             for rule in self._profiler.rules:
-                domain_type_attributes.extend(
-                    self._get_rule_domain_type_attributes(rule=rule)
-                )
+                domain_type_attributes.extend(self._get_rule_domain_type_attributes(rule=rule))
 
             return list(set(domain_type_attributes))
 
@@ -406,9 +396,7 @@ class DataAssistantRunner:
         parameters: Dict[str, Parameter] = dict(sig.parameters)
 
         domain_builder = rule.domain_builder
-        assert (
-            domain_builder
-        ), f"The underlying domain_builder on rule {rule.name} must be non-null"
+        assert domain_builder, f"The underlying domain_builder on rule {rule.name} must be non-null"
         exclude_field_names = domain_builder.exclude_field_names
 
         attribute_names: List[str] = list(

@@ -112,9 +112,7 @@ class HtmlSiteStore:
         store_backend_module_name = store_backend.get(
             "module_name", "great_expectations.data_context.store"
         )
-        store_backend_class_name = store_backend.get(
-            "class_name", "TupleFilesystemStoreBackend"
-        )
+        store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
         verify_dynamic_loading_support(module_name=store_backend_module_name)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
@@ -124,8 +122,7 @@ class HtmlSiteStore:
                 f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"
             )
         if "filepath_template" in store_backend or (
-            "fixed_length_key" in store_backend
-            and store_backend["fixed_length_key"] is True
+            "fixed_length_key" in store_backend and store_backend["fixed_length_key"] is True
         ):
             logger.warning(
                 "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
@@ -318,19 +315,13 @@ class HtmlSiteStore:
                 return store_backend.get_public_url_for_key(key)
         else:  # noqa: PLR5501
             if only_if_exists:
-                return (
-                    store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)
-                    else None
-                )
+                return store_backend.get_url_for_key(key) if store_backend.has_key(key) else None
             else:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
-            raise TypeError(
-                f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}"
-            )
+            raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")
 
         for key_class in self.store_backends.keys():
             try:
@@ -439,15 +430,11 @@ class HtmlSiteStore:
                         else:
                             # fallback
                             logger.warning(
-                                "Unable to automatically determine content_type for {}".format(
-                                    source_name
-                                )
+                                f"Unable to automatically determine content_type for {source_name}"
                             )
                             content_type = "text/html; charset=utf8"
 
-                    if not isinstance(
-                        self.store_backends["static_assets"], GXCloudStoreBackend
-                    ):
+                    if not isinstance(self.store_backends["static_assets"], GXCloudStoreBackend):
                         self.store_backends["static_assets"].set(
                             store_key,
                             f.read(),
@@ -480,9 +467,7 @@ class HtmlSiteStore:
             if is_zipfile(zip_filename):
                 with ZipFile(zip_filename) as zipfile:
                     static_files_to_extract = [
-                        file
-                        for file in zipfile.namelist()
-                        if file.startswith(path_in_zip)
+                        file for file in zipfile.namelist() if file.startswith(path_in_zip)
                     ]
                     zipfile.extractall(unzip_directory, static_files_to_extract)
                 return True

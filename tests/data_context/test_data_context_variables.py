@@ -146,9 +146,7 @@ def file_data_context(
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
     context_root_dir = project_path / FileDataContext.GX_DIR
-    context = FileDataContext(
-        project_config=data_context_config, context_root_dir=context_root_dir
-    )
+    context = FileDataContext(project_config=data_context_config, context_root_dir=context_root_dir)
     project_manager.set_project(context)
     return context
 
@@ -306,9 +304,7 @@ def test_data_context_variables_get_with_substitutions(
     env_var_name: str = "MY_CONFIG_VERSION"
     value_associated_with_env_var: float = 7.0
 
-    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = (
-        f"${env_var_name}"
-    )
+    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     config_values: dict = {
         env_var_name: value_associated_with_env_var,
@@ -426,13 +422,8 @@ def test_data_context_variables_save_config(
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save_config()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
-    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(
-        key=key
-    )
-    assert (
-        persisted_value.to_json_dict()
-        == ephemeral_data_context_variables.config.to_json_dict()
-    )
+    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
+    assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
 
     # FileDataContextVariables
     mock_save = mocker.patch(
@@ -549,9 +540,7 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
-    file_data_context.variables.include_rendered_content = (
-        updated_include_rendered_content
-    )
+    file_data_context.variables.include_rendered_content = updated_include_rendered_content
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -569,9 +558,7 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk.include_rendered_content.to_dict()
         == updated_include_rendered_content.to_dict()
     )
-    assert (
-        file_data_context.variables.plugins_directory == value_associated_with_env_var
-    )
+    assert file_data_context.variables.plugins_directory == value_associated_with_env_var
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 

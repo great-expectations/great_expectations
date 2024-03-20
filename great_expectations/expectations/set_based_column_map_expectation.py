@@ -197,9 +197,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         set_ = cls.set_
@@ -296,9 +294,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

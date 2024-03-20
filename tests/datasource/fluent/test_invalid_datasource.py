@@ -61,9 +61,7 @@ class TestPublicMethodsAreOverridden:
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
         for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
             method = getattr(InvalidDatasource, base_ds_method_name, None)
-            assert (
-                method
-            ), f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
+            assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
             with pytest.raises(TypeError):
                 method()
 
@@ -72,9 +70,7 @@ class TestPublicMethodsAreOverridden:
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
         for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
             method = getattr(InvalidAsset, base_ds_method_name, None)
-            assert (
-                method
-            ), f"Expected {base_ds_method_name} to be defined on InvalidAsset"
+            assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
             with pytest.raises(TypeError):
                 method()
 
@@ -147,9 +143,7 @@ def invalid_datasource_factory() -> InvalidDSFactory:
                 "type": "snowflake",
                 "connection_string": "${MY_CONN_STR}",
                 "user": "invalid_extra_field",
-                "assets": [
-                    {"name": "my_asset", "type": "table", "table_name": "foobar"}
-                ],
+                "assets": [{"name": "my_asset", "type": "table", "table_name": "foobar"}],
             },
             id="extra field",
         ),
@@ -270,18 +264,14 @@ class TestInvalidDatasource:
             asset_dict = asset.dict()
             extra_asset_fields = set(asset_dict.keys()) - data_asset_fields
             for field in extra_asset_fields:
-                assert (
-                    field not in asset_dict
-                ), f"Expected asset `{field}` to be ignored"
+                assert field not in asset_dict, f"Expected asset `{field}` to be ignored"
 
 
 @pytest.fixture
 def rand_invalid_datasource_with_assets(
     invalid_datasource_factory: InvalidDSFactory,
 ) -> InvalidDatasource:
-    random_ds_type = random.choice(
-        [t for t in _SourceFactories.type_lookup.type_names()]
-    )
+    random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
     invalid_ds = invalid_datasource_factory(
         {
             "name": "my invalid ds",
@@ -302,9 +292,7 @@ class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
-        random_ds_type = random.choice(
-            [t for t in _SourceFactories.type_lookup.type_names()]
-        )
+        random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
             {
@@ -331,9 +319,7 @@ class TestInvalidDataAsset:
     def test_base_data_asset_attribute_does_not_error(
         self, rand_invalid_datasource_with_assets: InvalidDatasource, attr_name: str
     ):
-        assert (
-            rand_invalid_datasource_with_assets.assets
-        ), "Expected assets to be present"
+        assert rand_invalid_datasource_with_assets.assets, "Expected assets to be present"
         for asset in rand_invalid_datasource_with_assets.assets:
             value = getattr(asset, attr_name)
             print(attr_name, value)

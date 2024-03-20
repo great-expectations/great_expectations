@@ -17,9 +17,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def renderer(
-    renderer_type: str, **kwargs
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def renderer(renderer_type: str, **kwargs) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def wrapper(renderer_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(renderer_fn)
         def inner_func(*args: P.args, **kwargs: P.kwargs):

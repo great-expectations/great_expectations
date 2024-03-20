@@ -41,7 +41,9 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     """
 
     function_metric_name = "compound_columns.count"  # pre-requisite "map" style metric
-    condition_metric_name = "compound_columns.unique"  # "condition" style metric required to be implemented by provider
+    condition_metric_name = (
+        "compound_columns.unique"  # "condition" style metric required to be implemented by provider
+    )
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -101,9 +103,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             except AttributeError:
                 dialect_name = ""
         if dialect and dialect_name == "mysql":
-            table_columns_selector = [
-                sa.column(column_name) for column_name in table_columns
-            ]
+            table_columns_selector = [sa.column(column_name) for column_name in table_columns]
             partition_by_columns = (
                 sa.func.count()
                 .over(partition_by=[sa.column(column) for column in column_names])
@@ -111,22 +111,16 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             )
             count_selector = table_columns_selector + [partition_by_columns]
             original_table_clause = (
-                sa.select(*count_selector)
-                .select_from(table)
-                .alias("original_table_clause")
+                sa.select(*count_selector).select_from(table).alias("original_table_clause")
             )
             return original_table_clause
 
         # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
-        table_columns_selector = [
-            sa.column(column_name) for column_name in table_columns
-        ]
+        table_columns_selector = [sa.column(column_name) for column_name in table_columns]
         original_table_clause = (
-            sa.select(*table_columns_selector)
-            .select_from(table)
-            .alias("original_table_clause")
+            sa.select(*table_columns_selector).select_from(table).alias("original_table_clause")
         )
 
         # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
@@ -147,10 +141,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_clause"
         # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
         conditions = sa.and_(
-            *(
-                group_count_query.c[name] == original_table_clause.c[name]
-                for name in column_names
-            )
+            *(group_count_query.c[name] == original_table_clause.c[name] for name in column_names)
         )
         # noinspection PyProtectedMember
         compound_columns_count_query = (
@@ -197,8 +188,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
-            <= 1
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names))) <= 1
         )
         return row_wise_cond
 

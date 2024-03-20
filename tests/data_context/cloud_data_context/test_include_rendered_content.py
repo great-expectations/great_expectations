@@ -52,9 +52,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         "great_expectations.data_context.data_context.CloudDataContext.get_expectation_suite",
         return_value=empty_expectation_suite,
     ):
-        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
-            "test_suite"
-        )
+        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite("test_suite")
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
@@ -81,12 +79,8 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
                         {
                             "value": {
                                 "template": "Must have exactly $value rows.",
-                                "params": {
-                                    "value": {"schema": {"type": "number"}, "value": 10}
-                                },
-                                "schema": {
-                                    "type": "com.superconductive.rendered.string"
-                                },
+                                "params": {"value": {"schema": {"type": "number"}, "value": 10}},
+                                "schema": {"type": "com.superconductive.rendered.string"},
                             },
                             "value_type": "StringValueType",
                             "name": "atomic.prescriptive.summary",
@@ -129,7 +123,5 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     for rendered_content in expectation_validation_result.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)
 
-    for (
-        rendered_content
-    ) in expectation_validation_result.expectation_config.rendered_content:
+    for rendered_content in expectation_validation_result.expectation_config.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)

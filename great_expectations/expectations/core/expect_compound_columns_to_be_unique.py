@@ -143,9 +143,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
             template_str = "Values for given compound columns must be unique together: "
@@ -164,10 +162,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
 

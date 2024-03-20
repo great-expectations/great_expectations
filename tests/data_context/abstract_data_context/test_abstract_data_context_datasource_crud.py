@@ -45,9 +45,7 @@ _STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(
-        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
-    ) -> None:
+    def __init__(self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
@@ -95,9 +93,9 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
     instantiated_datasource = context.add_datasource(**datasource_config_dict)
 
     # Runtime object should have the substituted value for downstream usage
-    assert instantiated_datasource.data_connectors[
-        data_connector_name
-    ].base_directory.endswith(value_associated_with_variable)
+    assert instantiated_datasource.data_connectors[data_connector_name].base_directory.endswith(
+        value_associated_with_variable
+    )
 
     # Config attached to object should mirror the runtime object
     assert instantiated_datasource.config["data_connectors"][data_connector_name][

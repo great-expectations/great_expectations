@@ -33,9 +33,7 @@ if TYPE_CHECKING:
     )
 
 
-class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
-    MetricMultiBatchParameterBuilder
-):
+class MeanTableColumnsSetMatchMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     Compute mean match ratio (as a fraction) of "table.columns" metric across every Batch of data given.
 
@@ -61,9 +59,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -140,8 +136,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             np.asarray(
                 [
                     1
-                    if one_batch_table_columns_names_set
-                    == multi_batch_table_columns_names_as_set
+                    if one_batch_table_columns_names_set == multi_batch_table_columns_names_as_set
                     else 0
                     for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
                 ]

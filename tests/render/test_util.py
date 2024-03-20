@@ -45,9 +45,7 @@ def test_num_to_str():
     f = 1.23456789012345e-10  # significant digits can come late
     assert num_to_str(f, precision=20) == "1.23456789012345e-10"
     assert num_to_str(f, precision=5) == "≈1.2346e-10"
-    assert (
-        num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
-    )
+    assert num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
     assert num_to_str(f, precision=5, no_scientific=True) == "≈0.00000000012346"
 
     f = 100.0  # floats should have trailing digits and numbers stripped
@@ -73,9 +71,7 @@ def test_resource_key_passes_run_name_filter():
     )
 
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"equals": "profiling"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "profiling"})
         is False
     )
     assert (
@@ -99,15 +95,11 @@ def test_resource_key_passes_run_name_filter():
     )
 
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "profiling"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "profiling"})
         is True
     )
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "foobar"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "foobar"})
         is False
     )
 

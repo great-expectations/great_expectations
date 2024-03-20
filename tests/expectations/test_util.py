@@ -64,9 +64,7 @@ def get_table_columns_metric(
             "include_nested": True,
         },
     )
-    results = execution_engine.resolve_metrics(
-        metrics_to_resolve=(table_column_types_metric,)
-    )
+    results = execution_engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
     resolved_metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -152,12 +150,8 @@ def test_prescriptive_renderer_no_decorator(
     )
 
     # params should contain our evaluation parameters
-    assert res[0].string_template["params"]["min_value"] == {
-        "$PARAMETER": "MIN_VAL_PARAM"
-    }
-    assert res[0].string_template["params"]["max_value"] == {
-        "$PARAMETER": "MAX_VAL_PARAM"
-    }
+    assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
+    assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
 
     # full json dict comparison
     assert res[0].to_json_dict() == {
@@ -223,12 +217,8 @@ def test_prescriptive_renderer_with_decorator(
     )
 
     # params should contain our evaluation parameters
-    assert res[0].string_template["params"]["min_value"] == {
-        "$PARAMETER": "MIN_VAL_PARAM"
-    }
-    assert res[0].string_template["params"]["max_value"] == {
-        "$PARAMETER": "MAX_VAL_PARAM"
-    }
+    assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
+    assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
     assert res[0].to_json_dict() == {
         "content_block_type": "string_template",
         "string_template": {
@@ -294,9 +284,7 @@ def test_prescriptive_renderer_with_decorator(
     # configuration should always be of ExpectationConfiguration-type
     with pytest.raises(AttributeError):
         # noinspection PyUnusedLocal,PyTypeChecker
-        res = bare_bones_prescriptive_renderer(
-            configuration={}, runtime_configuration={}
-        )
+        res = bare_bones_prescriptive_renderer(configuration={}, runtime_configuration={})
 
     # extra evaluation parameters will not have an effect
     runtime_configuration_with_extra = {
@@ -419,8 +407,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
             sqlalchemy_engine=sqlalchemy_engine.engine,
         )
         for column_name in [
-            reflected_column_config["name"]
-            for reflected_column_config in reflected_columns_list
+            reflected_column_config["name"] for reflected_column_config in reflected_columns_list
         ]:
             validation_result = validator.expect_column_to_exist(column=column_name)
             assert validation_result.success
@@ -428,9 +415,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     if validators_config:
         validator = list(validators_config.values())[0]
 
-        validation_result = validator.expect_column_mean_to_be_between(
-            column="age", min_value=10
-        )
+        validation_result = validator.expect_column_mean_to_be_between(column="age", min_value=10)
         assert validation_result.success
 
         validation_result = validator.expect_table_row_count_to_equal(value=5)

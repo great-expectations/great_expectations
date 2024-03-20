@@ -37,8 +37,7 @@ def datetime_string_array():
     week_idx: int
     return [
         (
-            datetime.datetime(2021, 1, 1, 0, 0, 0)
-            + datetime.timedelta(days=(week_idx * 7))
+            datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
         ).isoformat()
         for week_idx in range(4)
     ]
@@ -488,8 +487,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=False,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert ndarray_is_datetime_type
@@ -504,8 +502,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=True,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert ndarray_is_datetime_type
@@ -520,8 +517,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=False,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert not ndarray_is_datetime_type
@@ -536,8 +532,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=True,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert ndarray_is_datetime_type
@@ -553,8 +548,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=True,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert not ndarray_is_datetime_type
@@ -569,8 +563,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=False,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert not ndarray_is_datetime_type
@@ -585,8 +578,7 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
         parse_strings_as_datetimes=True,
     )
     ndarray_is_datetime_type = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
 
     assert not ndarray_is_datetime_type
@@ -600,11 +592,8 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     numeric_array,
 ):
     element: Any
-    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
-        data=datetime_array
-    ).tolist() == [
-        element.replace(tzinfo=datetime.timezone.utc).timestamp()
-        for element in datetime_array
+    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(data=datetime_array).tolist() == [
+        element.replace(tzinfo=datetime.timezone.utc).timestamp() for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
@@ -613,9 +602,7 @@ def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     assert "'int' object has no attribute 'replace'" in str(e.value)
 
     with pytest.raises(TypeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(
-            data=datetime_string_array
-        )
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=datetime_string_array)
 
     assert "replace() takes no keyword arguments" in str(e.value)
 
@@ -627,8 +614,7 @@ def test_convert_ndarray_float_to_datetime_tuple(
     element: Any
     assert convert_ndarray_float_to_datetime_tuple(
         data=[
-            element.replace(tzinfo=datetime.timezone.utc).timestamp()
-            for element in datetime_array
+            element.replace(tzinfo=datetime.timezone.utc).timestamp() for element in datetime_array
         ]
     ) == tuple([element for element in datetime_array])
 

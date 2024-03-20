@@ -58,12 +58,8 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         )
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
-        full_path = super()._get_full_file_path(
-            path=path, data_asset_name=data_asset_name
-        )
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
+        full_path = super()._get_full_file_path(path=path, data_asset_name=data_asset_name)
         template_arguments: dict = {
             "path": full_path,
         }

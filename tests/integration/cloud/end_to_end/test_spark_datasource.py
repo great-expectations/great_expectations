@@ -44,9 +44,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     datasource.persist = False
     datasource_dict = datasource.dict()
     datasource = context.sources.add_or_update_spark(**datasource_dict)
@@ -56,9 +54,7 @@ def datasource(
     datasource.persist = True
     datasource_dict = datasource.dict()
     datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -92,9 +88,7 @@ def data_asset(
 def batch_request(
     data_asset: DataAsset,
     spark_session: pyspark.SparkSession,
-    spark_df_from_pandas_df: Callable[
-        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
-    ],
+    spark_df_from_pandas_df: Callable[[pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame],
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
     """Build a BatchRequest depending on the types of Data Assets tested in the module."""

@@ -43,13 +43,9 @@ class ContentBlockRenderer(Renderer):
         pass
 
     @classmethod
-    def render(
-        cls, render_object: Any, **kwargs
-    ) -> Union[_rendered_component_type, Any, None]:
+    def render(cls, render_object: Any, **kwargs) -> Union[_rendered_component_type, Any, None]:
         cls.validate_input(render_object)
-        exception_list_content_block: bool = kwargs.get(
-            "exception_list_content_block", False
-        )
+        exception_list_content_block: bool = kwargs.get("exception_list_content_block", False)
 
         data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -84,9 +80,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ):
         expectation_type = cls._get_expectation_type(obj_)
         expectation_config = (
-            obj_.expectation_config
-            if isinstance(obj_, ExpectationValidationResult)
-            else obj_
+            obj_.expectation_config if isinstance(obj_, ExpectationValidationResult) else obj_
         )
 
         return cls._get_content_block_fn(
@@ -138,9 +132,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     logger.error(exception_message)
 
                     if isinstance(obj_, ExpectationValidationResult):
-                        content_block_fn = cls._get_content_block_fn(
-                            "_missing_content_block_fn"
-                        )
+                        content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         expectation_config = obj_.expectation_config
                         result = content_block_fn(
                             configuration=expectation_config,
@@ -194,9 +186,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                     "classes": ["mt-1", "mb-1"],
                                 },
                             },
-                            "styling": {
-                                "parent": {"styles": {"list-style-type": "none"}}
-                            },
+                            "styling": {"parent": {"styles": {"list-style-type": "none"}}},
                         }
                     )
                     result.append(horizontal_rule)
@@ -211,12 +201,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
             rendered_component_type_default_init_kwargs = getattr(
                 cls, "_rendered_component_default_init_kwargs", {}
             )
-            rendered_component_type_init_kwargs.update(
-                rendered_component_type_default_init_kwargs
-            )
-            content_block = cls._rendered_component_type(
-                **rendered_component_type_init_kwargs
-            )
+            rendered_component_type_init_kwargs.update(rendered_component_type_default_init_kwargs)
+            content_block = cls._rendered_component_type(**rendered_component_type_init_kwargs)
             cls._process_content_block(
                 content_block,
                 has_failed_evr=has_failed_evr,
@@ -261,9 +247,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 logger.error(exception_message)
 
                 if isinstance(render_object, ExpectationValidationResult):
-                    content_block_fn = cls._get_content_block_fn(
-                        "_missing_content_block_fn"
-                    )
+                    content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     result = content_block_fn(
                         result=render_object,
                         runtime_configuration=runtime_configuration,
@@ -395,9 +379,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(
-        cls, content_block, has_failed_evr, render_object=None
-    ) -> None:
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None) -> None:
         header = cls._get_header()
         if header != "":
             content_block.header = header

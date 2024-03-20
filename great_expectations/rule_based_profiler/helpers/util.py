@@ -111,9 +111,7 @@ def get_validator(  # noqa: PLR0913
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
-        expectation_suite_name = (
-            f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
-        )
+        expectation_suite_name = f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
     else:
         expectation_suite_name = (
             f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
@@ -378,10 +376,7 @@ def get_resolved_metrics_by_key(
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
     metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
-        key: [
-            metric_configuration.id
-            for metric_configuration in metric_configurations_for_key
-        ]
+        key: [metric_configuration.id for metric_configuration in metric_configurations_for_key]
         for key, metric_configurations_for_key in metric_configurations_by_key.items()
     }
 
@@ -608,14 +603,12 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
     validates the result.
     """
     # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    quantile_statistic_interpolation_method = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=quantile_statistic_interpolation_method,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
+    quantile_statistic_interpolation_method = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=quantile_statistic_interpolation_method,
+        expected_return_type=str,
+        variables=variables,
+        parameters=parameters,
     )
     if (
         quantile_statistic_interpolation_method
@@ -710,19 +703,15 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
-        numpy.numpy_quantile(
-            metric_values_gaussian_sample,
-            q=lower_quantile_pct,
-            method=quantile_statistic_interpolation_method,
-        )
+    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = (
-        numpy.numpy_quantile(
-            metric_values_gaussian_sample,
-            q=upper_quantile_pct,
-            method=quantile_statistic_interpolation_method,
-        )
+    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        method=quantile_statistic_interpolation_method,
     )
 
     return build_numeric_range_estimation_result(
@@ -811,36 +800,32 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
 
     bootstraps: np.ndarray
     if random_seed:
-        random_state: np.random.Generator = np.random.Generator(
-            np.random.PCG64(random_seed)
-        )
-        bootstraps = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
+        random_state: np.random.Generator = np.random.Generator(np.random.PCG64(random_seed))
+        bootstraps = random_state.choice(metric_values, size=(n_resamples, metric_values.size))
     else:
         bootstraps = NP_RANDOM_GENERATOR.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=lower_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_lower_quantile,
+    lower_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=lower_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_lower_quantile,
+        )
     )
-    upper_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=upper_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_upper_quantile,
+    upper_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=upper_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_upper_quantile,
+        )
     )
 
     return build_numeric_range_estimation_result(
@@ -963,8 +948,7 @@ def convert_metric_values_to_float_dtype_best_effort(
         fuzzy=False,
     )
     ndarray_is_datetime_type: bool = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
     if ndarray_is_datetime_type:
         metric_values_converted = convert_ndarray_datetime_to_float_dtype_utc_timezone(

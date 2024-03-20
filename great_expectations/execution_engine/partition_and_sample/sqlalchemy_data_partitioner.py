@@ -163,20 +163,16 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
-        date_parts_dict: dict = (
-            self._convert_datetime_batch_identifiers_to_date_parts_dict(
-                column_batch_identifiers, date_parts
-            )
+        date_parts_dict: dict = self._convert_datetime_batch_identifiers_to_date_parts_dict(
+            column_batch_identifiers, date_parts
         )
 
-        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = (
-            sa.and_(
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == date_parts_dict[date_part.value]
-                    for date_part in date_parts
-                ]
-            )
+        query: Union[sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList] = sa.and_(
+            *[
+                sa.extract(date_part.value, sa.column(column_name))
+                == date_parts_dict[date_part.value]
+                for date_part in date_parts
+            ]
         )
 
         return query
@@ -222,18 +218,14 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         """Divide the values in the named column by `divisor`, and partition on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return (
-                sa.cast(
-                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), sa.Integer
-                )
+                sa.cast((sa.cast(sa.column(column_name), sa.Integer) / divisor), sa.Integer)
                 == batch_identifiers[column_name]
             )
 
         if self._dialect == GXSqlDialect.MYSQL:
             return (
                 sa.cast(
-                    sa.func.truncate(
-                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
-                    ),
+                    sa.func.truncate((sa.cast(sa.column(column_name), sa.Integer) / divisor), 0),
                     sa.Integer,
                 )
                 == batch_identifiers[column_name]
@@ -242,9 +234,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         if self._dialect == GXSqlDialect.MSSQL:
             return (
                 sa.cast(
-                    sa.func.round(
-                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0, 1
-                    ),
+                    sa.func.round((sa.cast(sa.column(column_name), sa.Integer) / divisor), 0, 1),
                     sa.Integer,
                 )
                 == batch_identifiers[column_name]
@@ -253,9 +243,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         if self._dialect == GXSqlDialect.AWSATHENA:
             return (
                 sa.cast(
-                    sa.func.truncate(
-                        sa.cast(sa.column(column_name), sa.Integer) / divisor
-                    ),
+                    sa.func.truncate(sa.cast(sa.column(column_name), sa.Integer) / divisor),
                     sa.Integer,
                 )
                 == batch_identifiers[column_name]
@@ -263,9 +251,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
 
         return (
             sa.cast(
-                sa.func.trunc(
-                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
-                ),
+                sa.func.trunc((sa.cast(sa.column(column_name), sa.Integer) / divisor), 0),
                 sa.Integer,
             )
             == batch_identifiers[column_name]
@@ -283,8 +269,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             GXSqlDialect.MSSQL,
         ]:
             return (
-                sa.cast(sa.column(column_name), sa.Integer) % mod
-                == batch_identifiers[column_name]
+                sa.cast(sa.column(column_name), sa.Integer) % mod == batch_identifiers[column_name]
             )
 
         return (
@@ -348,9 +333,11 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         )
         batch_identifiers_list: List[dict]
         if self._is_datetime_partitioner(processed_partitioner_method_name):
-            partitioner_fn_name: str = self.DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                processed_partitioner_method_name
-            ]
+            partitioner_fn_name: str = (
+                self.DATETIME_PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                    processed_partitioner_method_name
+                ]
+            )
             batch_identifiers_list = getattr(self, partitioner_fn_name)(
                 execution_engine, selectable, **partitioner_kwargs
             )
@@ -516,9 +503,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         )
                     )
 
-                concat_clause = sa.func.distinct(concat_date_parts).label(
-                    "concat_distinct_values"
-                )
+                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")
             else:
                 concat_date_parts = sa.func.concat(
                     "",
@@ -537,16 +522,14 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                         ),
                     )
 
-                concat_clause = sa.func.distinct(concat_date_parts).label(
-                    "concat_distinct_values"
-                )
+                concat_clause = sa.func.distinct(concat_date_parts).label("concat_distinct_values")
 
         partitioned_query: sqlalchemy.Selectable = sa.select(
             concat_clause,
             *[
-                sa.cast(
-                    sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer
-                ).label(date_part.value)
+                sa.cast(sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer).label(
+                    date_part.value
+                )
                 for date_part in date_parts
             ],
         ).select_from(selectable)
@@ -576,12 +559,14 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
 
-        partitioned_query: sqlalchemy.Selectable = self.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
-            selectable, column_name, date_parts
+        partitioned_query: sqlalchemy.Selectable = (
+            self.get_partition_query_for_data_for_batch_identifiers_for_partition_on_date_parts(
+                selectable, column_name, date_parts
+            )
         )
 
-        result: List[sqlalchemy.Row | sqlalchemy.LegacyRow] = (
-            self._execute_partitioned_query(execution_engine, partitioned_query)
+        result: List[sqlalchemy.Row | sqlalchemy.LegacyRow] = self._execute_partitioned_query(
+            execution_engine, partitioned_query
         )
 
         return self._get_params_for_batch_identifiers_from_date_part_partitioner(
@@ -626,8 +611,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         data_for_batch_identifiers: List[dict] = [
             {
                 column_name: {
-                    date_part.value: getattr(row, date_part.value)
-                    for date_part in date_parts
+                    date_part.value: getattr(row, date_part.value) for date_part in date_parts
                 }
             }
             for row in result
@@ -666,20 +650,16 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             List of dicts of the form [{column_name: {"key": value}}]
         """
         get_partition_query_method_name: str = (
-            self._get_method_name_for_get_data_for_batch_identifiers_method(
-                partitioner_method_name
-            )
+            self._get_method_name_for_get_data_for_batch_identifiers_method(partitioner_method_name)
         )
 
-        partitioned_query: sqlalchemy.Selectable = getattr(
-            self, get_partition_query_method_name
-        )(selectable=selectable, **partitioner_kwargs)
+        partitioned_query: sqlalchemy.Selectable = getattr(self, get_partition_query_method_name)(
+            selectable=selectable, **partitioner_kwargs
+        )
         rows: List[sqlalchemy.LegacyRow] = self._execute_partitioned_query(
             execution_engine, partitioned_query
         )
-        column_names: List[str] = self._get_column_names_from_partitioner_kwargs(
-            partitioner_kwargs
-        )
+        column_names: List[str] = self._get_column_names_from_partitioner_kwargs(partitioner_kwargs)
         return self._get_params_for_batch_identifiers_from_non_date_part_partitioners(
             column_names, rows
         )
@@ -699,11 +679,9 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             partitioner_method_name
         )
         try:
-            return (
-                self.PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                    processed_partitioner_method_name
-                ]
-            )
+            return self.PARTITIONER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                processed_partitioner_method_name
+            ]
         except ValueError:
             raise gx_exceptions.InvalidConfigError(
                 f"Please provide a supported partitioner method name, you provided: {partitioner_method_name}"
@@ -817,9 +795,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             return sa.select(
                 sa.func.distinct(
                     sa.cast(
-                        sa.func.truncate(
-                            sa.cast(sa.column(column_name), sa.Integer) / divisor
-                        ),
+                        sa.func.truncate(sa.cast(sa.column(column_name), sa.Integer) / divisor),
                         sa.Integer,
                     )
                 )
@@ -828,9 +804,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         return sa.select(
             sa.func.distinct(
                 sa.cast(
-                    sa.func.trunc(
-                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
-                    ),
+                    sa.func.trunc((sa.cast(sa.column(column_name), sa.Integer) / divisor), 0),
                     sa.Integer,
                 )
             )
@@ -852,9 +826,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
             ).select_from(selectable)
 
         return sa.select(
-            sa.func.distinct(
-                sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
-            )
+            sa.func.distinct(sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod))
         ).select_from(selectable)
 
     @staticmethod
@@ -879,9 +851,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
                 sa.func.distinct(
-                    sa.func.md5(
-                        sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
-                    )
+                    sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
                 )
             ).select_from(selectable)
 

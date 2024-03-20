@@ -63,12 +63,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -101,12 +97,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
             },
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
-    data_context.checkpoint_store.set(
-        key=checkpoint_config_key, value=checkpoint_config
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
+    data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
     assert len(data_context.validations_store.list_keys()) == 0
@@ -117,11 +109,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = (
-        data_context.validations_store.list_keys()[0]
-    )
-    validation_result: ExpectationSuiteValidationResult = (
-        data_context.validations_store.get(validation_result_identifier)
+    validation_result_identifier: DataContextKey = data_context.validations_store.list_keys()[0]
+    validation_result: ExpectationSuiteValidationResult = data_context.validations_store.get(
+        validation_result_identifier
     )
 
     assert "checkpoint_name" in validation_result.meta
@@ -247,9 +237,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -289,9 +279,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -414,9 +404,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(
-        result.run_results.values()
-    )[0]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0][
+        "validation_result"
+    ]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id

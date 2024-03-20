@@ -41,18 +41,11 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
             raise ValueError("Invalid continuous partition object.")
 
         # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
-        if (partition_object["bins"][0] == -np.inf) or (
-            partition_object["bins"][-1] == np.inf
-        ):
+        if (partition_object["bins"][0] == -np.inf) or (partition_object["bins"][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
-        if (
-            "tail_weights" in partition_object
-            and np.sum(partition_object["tail_weights"]) > 0
-        ):
-            raise ValueError(
-                "Partition cannot have tail weights -- endpoints must be finite."
-            )
+        if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(partition_object["weights"]))
 
@@ -86,12 +79,10 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
 
         # Expand observed partition to report, if necessary
         if below_partition > 0 and above_partition > 0:
-            observed_bins = (
-                [np.min(column)] + partition_object["bins"] + [np.max(column)]
+            observed_bins = [np.min(column)] + partition_object["bins"] + [np.max(column)]
+            observed_weights = np.concatenate(([below_partition], hist, [above_partition])) / len(
+                column
             )
-            observed_weights = np.concatenate(
-                ([below_partition], hist, [above_partition])
-            ) / len(column)
         elif below_partition > 0:
             observed_bins = [np.min(column)] + partition_object["bins"]
             observed_weights = np.concatenate(([below_partition], hist)) / len(column)

@@ -53,9 +53,7 @@ def get_prescriptive_rendered_content(
 def evr_kwargs(expectation_configuration_kwargs):
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "expectation_config": ExpectationConfiguration(
-            **expectation_configuration_kwargs
-        ),
+        "expectation_config": ExpectationConfiguration(**expectation_configuration_kwargs),
         "result": {},
     }
 
@@ -1298,9 +1296,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_without_result(
-    snapshot, get_diagnostic_rendered_content
-):
+def test_atomic_diagnostic_observed_value_without_result(snapshot, get_diagnostic_rendered_content):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {

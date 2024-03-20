@@ -37,10 +37,7 @@ class ColumnTypes(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        return [
-            {"name": name, "type": dtype}
-            for (name, dtype) in zip(df.columns, df.dtypes)
-        ]
+        return [{"name": name, "type": dtype} for (name, dtype) in zip(df.columns, df.dtypes)]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
@@ -100,9 +97,7 @@ def _get_sqlalchemy_column_metadata(
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
-    elif sqlalchemy.TextClause and isinstance(
-        batch_data.selectable, sqlalchemy.TextClause
-    ):
+    elif sqlalchemy.TextClause and isinstance(batch_data.selectable, sqlalchemy.TextClause):
         table_selectable = batch_data.selectable
         schema_name = None
     else:

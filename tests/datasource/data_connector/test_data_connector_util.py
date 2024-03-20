@@ -25,9 +25,7 @@ def test_batch_definition_matches_batch_request():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=IDDict(
-            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-        ),
+        batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
     )
 
     # fully matching_batch_request
@@ -37,10 +35,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         data_connector_query=None,
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is True
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is True
 
     # execution environment doesn't match
     my_batch_request = BatchRequest(
@@ -49,10 +44,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         data_connector_query=None,
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is False
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is False
 
     # data_connector_name doesn't match
     my_batch_request = BatchRequest(
@@ -61,10 +53,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         data_connector_query=None,
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is False
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is False
 
     # data_asset_name doesn't match
     my_batch_request = BatchRequest(
@@ -73,10 +62,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="i_dont_match",
         data_connector_query=None,
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is False
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is False
 
     # batch_request.data_connector_query.batch_filter_parameters is not dict
     my_batch_request = BatchRequest(
@@ -85,10 +71,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         data_connector_query={"batch_filter_parameters": 1},
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is False
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is False
 
     # batch_identifiers do not match batch_definition.batch_identifiers
     my_batch_request = BatchRequest(
@@ -97,10 +80,7 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         data_connector_query={"batch_filter_parameters": {"i": "wont_work"}},
     )
-    assert (
-        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
-        is False
-    )
+    assert batch_definition_matches_batch_request(my_batch_definition, my_batch_request) is False
 
 
 @pytest.mark.unit
@@ -109,15 +89,13 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_____________\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = (
-        map_data_reference_string_to_batch_definition_list_using_regex(
-            datasource_name="test_datasource",
-            data_connector_name="test_data_connector",
-            data_asset_name=None,
-            data_reference=data_reference,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-        )
+    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
+        datasource_name="test_datasource",
+        data_connector_name="test_data_connector",
+        data_asset_name=None,
+        data_reference=data_reference,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
     )
     assert returned_batch_def_list is None
 
@@ -125,15 +103,13 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = (
-        map_data_reference_string_to_batch_definition_list_using_regex(
-            datasource_name="test_datasource",
-            data_connector_name="test_data_connector",
-            data_asset_name=None,
-            data_reference=data_reference,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-        )
+    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
+        datasource_name="test_datasource",
+        data_connector_name="test_data_connector",
+        data_asset_name=None,
+        data_reference=data_reference,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
     )
     assert returned_batch_def_list == [
         LegacyBatchDefinition(
@@ -151,15 +127,13 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     ]
 
     # data_asset_name configured
-    returned_batch_def_list = (
-        map_data_reference_string_to_batch_definition_list_using_regex(
-            datasource_name="test_datasource",
-            data_connector_name="test_data_connector",
-            data_asset_name="test_data_asset",
-            data_reference=data_reference,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-        )
+    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
+        datasource_name="test_datasource",
+        data_connector_name="test_data_connector",
+        data_asset_name="test_data_asset",
+        data_reference=data_reference,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
     )
     assert returned_batch_def_list == [
         LegacyBatchDefinition(
@@ -290,9 +264,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=IDDict(
-            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-        ),
+        batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
     )
     group_names = ["i", "wont", "match"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
@@ -309,9 +281,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=IDDict(
-            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-        ),
+        batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
     )
     group_names = ["name", "timestamp", "price"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
@@ -435,7 +405,9 @@ def test__invert_regex_to_data_reference_template():
     price = r"[$]\s?[+-]?[0-9]{1,3}(?:(?:,?[0-9]{3}))*(?:\.[0-9]{1,2})?"
     hex_color = r"(#(?:[0-9a-fA-F]{8})|#(?:[0-9a-fA-F]{3}){1,2})\\b"
     credit_card = r"((?:(?:\\d{4}[- ]?){3}\\d{4}|\\d{15,16}))(?![\\d])"
-    btc_address = r"(?<![a-km-zA-HJ-NP-Z0-9])[13][a-km-zA-HJ-NP-Z0-9]{26,33}(?![a-km-zA-HJ-NP-Z0-9])"
+    btc_address = (
+        r"(?<![a-km-zA-HJ-NP-Z0-9])[13][a-km-zA-HJ-NP-Z0-9]{26,33}(?![a-km-zA-HJ-NP-Z0-9])"
+    )
     street_address = r"\d{1,4} [\w\s]{1,20}(?:street|st|avenue|ave|road|rd|highway|hwy|square|sq|trail|trl|drive|dr|court|ct|park|parkway|pkwy|circle|cir|boulevard|blvd)\W?(?=\s|$)"
     zip_code = r"\b\d{5}(?:[-\s]\d{4})?\b"
     po_box = r"P\.? ?O\.? Box \d+"
@@ -465,9 +437,7 @@ def test__invert_regex_to_data_reference_template():
     for name, regex in regexes.items():
         print(name)
         group_names = ["name", "timestamp"]
-        _invert_regex_to_data_reference_template(
-            regex_pattern=regex, group_names=group_names
-        )
+        _invert_regex_to_data_reference_template(regex_pattern=regex, group_names=group_names)
 
 
 @pytest.mark.unit
@@ -535,16 +505,12 @@ def test_build_sorters_from_config_bad_config():
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}
-    with pytest.warns(
-        UserWarning
-    ):  # warning from /datasource/data_connector/util.py:383
+    with pytest.warns(UserWarning):  # warning from /datasource/data_connector/util.py:383
         list_gcs_keys(mock_gcs_conn, query_options, recursive=False)
     assert query_options["delimiter"] == "/"
 
     # Set defaults for InferredAssetGCSDataConnector
     query_options = {"delimiter": "/"}
-    with pytest.warns(
-        UserWarning
-    ):  # warning from /datasource/data_connector/util.py:390
+    with pytest.warns(UserWarning):  # warning from /datasource/data_connector/util.py:390
         list_gcs_keys(mock_gcs_conn, query_options, recursive=True)
     assert query_options["delimiter"] is None

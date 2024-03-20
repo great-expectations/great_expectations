@@ -59,9 +59,7 @@ logger = logging.getLogger(__name__)
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
 
-SparkConfig: TypeAlias = Dict[
-    StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]
-]
+SparkConfig: TypeAlias = Dict[StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]]
 
 
 class SparkDatasourceError(Exception):
@@ -120,10 +118,8 @@ class _SparkDatasource(Datasource):
         # circular imports require us to import SparkSession and update_forward_refs
         # only when assigning to self._spark for SparkSession isinstance check
         self.update_forward_refs()
-        self._spark: SparkSession = (
-            self.execution_engine_type.get_or_create_spark_session(
-                spark_config=self.spark_config,
-            )
+        self._spark: SparkSession = self.execution_engine_type.get_or_create_spark_session(
+            spark_config=self.spark_config,
         )
         return self._spark
 
@@ -173,9 +169,7 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
-        default=None, exclude=True, repr=False
-    )
+    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -253,9 +247,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             df = dataframe
 
         if df is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
 
         self.dataframe = df
 
@@ -290,18 +282,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             )
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
-        execution_engine: SparkDFExecutionEngine = (
-            self.datasource.get_execution_engine()
-        )
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        execution_engine: SparkDFExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove

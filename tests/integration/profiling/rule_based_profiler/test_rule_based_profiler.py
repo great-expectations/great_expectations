@@ -117,9 +117,7 @@ def test_batches_are_accessible(
             create_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
         )
         metric_max = validator.get_metric(
-            MetricConfiguration(
-                "column.max", metric_domain_kwargs={"column": "batch_num"}
-            )
+            MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
         )
         assert metric_max == (total_batches + 1) - batch_num
         metric_value_set = set(

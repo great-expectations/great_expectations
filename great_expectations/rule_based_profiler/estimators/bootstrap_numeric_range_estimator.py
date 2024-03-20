@@ -108,14 +108,12 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             )
 
         # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_correction: Optional[bool] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.configuration.quantile_bias_correction,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        quantile_bias_correction: Optional[bool] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.configuration.quantile_bias_correction,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         if quantile_bias_correction is None:
             quantile_bias_correction = False

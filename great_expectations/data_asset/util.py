@@ -159,9 +159,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     elif np.issubdtype(type(test_obj), np.bool_):
         return bool(test_obj)
 
-    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(
-        type(test_obj), np.uint
-    ):
+    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(type(test_obj), np.uint):
         return int(test_obj)
 
     elif np.issubdtype(type(test_obj), np.floating):
@@ -182,9 +180,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         ]
 
     elif isinstance(test_obj, pd.DataFrame):
-        return _recursively_convert_to_json_serializable(
-            test_obj.to_dict(orient="records")
-        )
+        return _recursively_convert_to_json_serializable(test_obj.to_dict(orient="records"))
 
     # elif np.issubdtype(type(test_obj), np.complexfloating):
     # Note: Use np.complexfloating to avoid Future Warning from numpy

@@ -18,9 +18,7 @@ if TYPE_CHECKING:
 class PandasDataSampler(DataSampler):
     """Methods for sampling a pandas dataframe."""
 
-    def sample_using_limit(
-        self, df: pd.DataFrame, batch_spec: BatchSpec
-    ) -> pd.DataFrame:
+    def sample_using_limit(self, df: pd.DataFrame, batch_spec: BatchSpec) -> pd.DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -84,9 +82,7 @@ class PandasDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
         value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
 
@@ -113,12 +109,8 @@ class PandasDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
 
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
-        value_list: int = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "value_list"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
+        value_list: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value_list")
 
         return df[df[column_name].isin(value_list)]  # type: ignore[arg-type]
 
@@ -143,9 +135,7 @@ class PandasDataSampler(DataSampler):
         """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "column_name"
-        )
+        column_name: str = self.get_sampling_kwargs_value_or_default(batch_spec, "column_name")
         hash_digits: int = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
         )
@@ -170,7 +160,6 @@ class PandasDataSampler(DataSampler):
             )
 
         matches = df[column_name].map(
-            lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == hash_value
+            lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :] == hash_value
         )
         return df[matches]

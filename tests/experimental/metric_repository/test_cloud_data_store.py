@@ -162,9 +162,7 @@ class TestCloudDataStoreMetricRun:
                     batch_id="batch_id",
                     metric_name="metric_name",
                     value=1,
-                    exception=MetricException(
-                        type="exception type", message="exception message"
-                    ),
+                    exception=MetricException(type="exception type", message="exception message"),
                     column="column",
                 )
             ],

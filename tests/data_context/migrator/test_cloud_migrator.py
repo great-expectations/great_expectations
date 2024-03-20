@@ -110,16 +110,12 @@ def mock_failed_migration(
 
 
 @pytest.mark.unit
-def assert_stdout_is_accurate_and_properly_ordered(
-    stdout: str, statements: List[str]
-) -> None:
+def assert_stdout_is_accurate_and_properly_ordered(stdout: str, statements: List[str]) -> None:
     last_position = -1
     for statement in statements:
         position = stdout.find(statement)
         assert position != -1, f"Could not find '{statement}' in stdout"
-        assert (
-            position > last_position
-        ), f"Statement '{statement}' occurred in the wrong order"
+        assert position > last_position, f"Statement '{statement}' occurred in the wrong order"
 
 
 @pytest.mark.cloud
@@ -202,9 +198,7 @@ def test__migrate_to_cloud_outputs_warnings(
     enable_usage_stats: bool,
     caplog,
 ):
-    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(
-        enabled=enable_usage_stats
-    )
+    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(enabled=enable_usage_stats)
     datasource_names = ("my_datasource",) if include_datasources else tuple()
 
     context = StubBaseDataContext(
@@ -298,9 +292,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
         migrator._migrate_to_cloud(test_migrate=test_migrate)
 
     stdout, _ = capsys.readouterr()
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)
 
 
 @pytest.mark.cloud
@@ -338,9 +330,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
         "Error: Bad request!",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)
 
 
 @pytest.mark.cloud
@@ -350,12 +340,8 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
 ):
     migrator = migrator_with_stub_base_data_context
 
-    good_response = MigrationResponse(
-        message="Good request!", status_code=200, success=True
-    )
-    bad_response = MigrationResponse(
-        message="Bad request!", status_code=400, success=False
-    )
+    good_response = MigrationResponse(message="Good request!", status_code=200, success=True)
+    bad_response = MigrationResponse(message="Bad request!", status_code=400, success=False)
 
     with mock.patch(
         "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
@@ -387,6 +373,4 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "migrator.retry_migrate_validation_results()",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)

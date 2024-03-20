@@ -27,9 +27,7 @@ logger = logging.getLogger(__name__)
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
     _rendered_component_type = RenderedTableContent
-    _rendered_component_default_init_kwargs = {
-        "table_options": {"search": True, "icon-size": "sm"}
-    }
+    _rendered_component_default_init_kwargs = {"table_options": {"search": True, "icon-size": "sm"}}
 
     _default_element_styling = {
         "default": {"classes": ["badge", "badge-secondary"]},
@@ -48,25 +46,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         custom_columns = []
         if (
             len(validation_results) > 0
-            and "meta_properties_to_render"
-            in validation_results[0].expectation_config.kwargs
-            and validation_results[0].expectation_config.kwargs[
-                "meta_properties_to_render"
-            ]
+            and "meta_properties_to_render" in validation_results[0].expectation_config.kwargs
+            and validation_results[0].expectation_config.kwargs["meta_properties_to_render"]
             is not None
         ):
             custom_columns = list(
-                validation_results[0]
-                .expectation_config.kwargs["meta_properties_to_render"]
-                .keys()
+                validation_results[0].expectation_config.kwargs["meta_properties_to_render"].keys()
             )
         return sorted(custom_columns)
 
     @classmethod
     @override
-    def _process_content_block(
-        cls, content_block, has_failed_evr, render_object=None
-    ) -> None:
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
@@ -81,13 +72,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if has_failed_evr is False:
             styling = deepcopy(content_block.styling) if content_block.styling else {}
             if styling.get("classes"):
-                styling["classes"].append(
-                    "hide-succeeded-validations-column-section-target-child"
-                )
+                styling["classes"].append("hide-succeeded-validations-column-section-target-child")
             else:
-                styling["classes"] = [
-                    "hide-succeeded-validations-column-section-target-child"
-                ]
+                styling["classes"] = ["hide-succeeded-validations-column-section-target-child"]
 
             content_block.styling = styling
 
@@ -190,10 +177,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     observed_value_renderer[1](result=result)
                     if observed_value_renderer
                     else (
-                        cls._get_legacy_v2_api_observed_value(
-                            expectation_string_fn, result
-                        )
-                        or "--"
+                        cls._get_legacy_v2_api_observed_value(expectation_string_fn, result) or "--"
                     )
                 ]
             except Exception as e:
@@ -250,19 +234,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return legacy_expectation_string_fn(
                 expectation=configuration,
                 styling=runtime_configuration.get("styling", None),
-                include_column_name=runtime_configuration.get(
-                    "include_column_name", True
-                ),
+                include_column_name=runtime_configuration.get("include_column_name", True),
             )
 
         return expectation_string_fn_with_legacy_translation
 
     @staticmethod
     def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
-        if (
-            expectation_string_fn.__name__
-            != "expectation_string_fn_with_legacy_translation"
-        ):
+        if expectation_string_fn.__name__ != "expectation_string_fn_with_legacy_translation":
             # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".
             # If this isn't the case, return None, so we don't do any legacy logic.
             return None

@@ -117,22 +117,18 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         super()._refresh_data_references_cache()
 
     def _refresh_introspected_assets_cache(self) -> None:
-        introspected_table_metadata = self._introspect_db(
-            **self._introspection_directives
-        )
+        introspected_table_metadata = self._introspect_db(**self._introspection_directives)
 
         introspected_assets: dict = {}
 
         for metadata in introspected_table_metadata:
             if (self._excluded_tables is not None) and (
-                f"{metadata['schema_name']}.{metadata['table_name']}"
-                in self._excluded_tables
+                f"{metadata['schema_name']}.{metadata['table_name']}" in self._excluded_tables
             ):
                 continue
 
             if (self._included_tables is not None) and (
-                f"{metadata['schema_name']}.{metadata['table_name']}"
-                not in self._included_tables
+                f"{metadata['schema_name']}.{metadata['table_name']}" not in self._included_tables
             ):
                 continue
 
@@ -207,10 +203,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         tables: List[Dict[str, str]] = []
         schema_names: List[str] = inspector.get_schema_names()
         for schema_name in schema_names:
-            if (
-                ignore_information_schemas_and_system_tables
-                and schema_name in information_schemas
-            ):
+            if ignore_information_schemas_and_system_tables and schema_name in information_schemas:
                 continue
 
             if selected_schema_name is not None and schema_name != selected_schema_name:
@@ -218,9 +211,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
             table_names: List[str] = inspector.get_table_names(schema=schema_name)
             for table_name in table_names:
-                if ignore_information_schemas_and_system_tables and (
-                    table_name in system_tables
-                ):
+                if ignore_information_schemas_and_system_tables and (table_name in system_tables):
                     continue
 
                 tables.append(

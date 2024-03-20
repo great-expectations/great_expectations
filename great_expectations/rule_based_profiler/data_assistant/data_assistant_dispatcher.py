@@ -46,22 +46,18 @@ class DataAssistantDispatcher:
 
         # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
-            raise AttributeError(
-                f'"{type(self).__name__}" object has no attribute "{name}".'
-            )
+            raise AttributeError(f'"{type(self).__name__}" object has no attribute "{name}".')
 
         data_assistant_name: str = data_assistant_cls.data_assistant_type
-        data_assistant_runner: DataAssistantRunner | None = (
-            self._data_assistant_runner_cache.get(data_assistant_name)
+        data_assistant_runner: DataAssistantRunner | None = self._data_assistant_runner_cache.get(
+            data_assistant_name
         )
         if data_assistant_runner is None:
             data_assistant_runner = DataAssistantRunner(
                 data_assistant_cls=data_assistant_cls,
                 data_context=self._data_context,
             )
-            self._data_assistant_runner_cache[data_assistant_name] = (
-                data_assistant_runner
-            )
+            self._data_assistant_runner_cache[data_assistant_name] = data_assistant_runner
 
         return data_assistant_runner
 
@@ -72,9 +68,7 @@ class DataAssistantDispatcher:
         if name in registered_data_assistants:
             raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
 
-        logger.debug(
-            f'Registering the declaration of DataAssistant "{name}" took place.'
-        )
+        logger.debug(f'Registering the declaration of DataAssistant "{name}" took place.')
         registered_data_assistants[name] = data_assistant
 
     @classmethod
@@ -106,9 +100,7 @@ class DataAssistantDispatcher:
         This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
         """
         data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
-        data_assistant_registered_names: Set[str] = (
-            get_registered_data_assistant_names()
-        )
+        data_assistant_registered_names: Set[str] = get_registered_data_assistant_names()
         combined_dir_attrs: Set[str] = (
             data_assistant_dispatcher_attrs | data_assistant_registered_names
         )

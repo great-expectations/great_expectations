@@ -25,9 +25,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
     # class attributes
-    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = (
-        FilesystemDataConnector
-    )
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = FilesystemDataConnector
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",
@@ -52,9 +50,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """
         if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
+            raise TestConnectionError(f"Path: {self.base_directory.resolve()} does not exist.")
 
         if self.assets and test_assets:
             for asset in self.assets:

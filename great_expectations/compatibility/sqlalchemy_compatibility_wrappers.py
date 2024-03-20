@@ -188,9 +188,7 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    if sqlalchemy.sqlalchemy and is_version_less_than(
-        sqlalchemy.sqlalchemy.__version__, "2.0.0"
-    ):
+    if sqlalchemy.sqlalchemy and is_version_less_than(sqlalchemy.sqlalchemy.__version__, "2.0.0"):
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this

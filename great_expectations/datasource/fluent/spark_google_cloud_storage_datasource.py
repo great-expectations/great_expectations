@@ -71,9 +71,9 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                     )
                     # pull in needed config substitutions using the `_config_provider`
                     # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
-                    gcs_options: dict = self.dict(
-                        config_provider=self._config_provider
-                    ).get("gcs_options", {})
+                    gcs_options: dict = self.dict(config_provider=self._config_provider).get(
+                        "gcs_options", {}
+                    )
 
                     if "filename" in gcs_options:
                         filename: str = gcs_options.pop("filename")
@@ -86,9 +86,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                             info=info
                         )
 
-                    gcs_client = google.storage.Client(
-                        credentials=credentials, **gcs_options
-                    )
+                    gcs_client = google.storage.Client(credentials=credentials, **gcs_options)
                 except Exception as e:
                     # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
                     raise SparkGoogleCloudStorageDatasourceError(

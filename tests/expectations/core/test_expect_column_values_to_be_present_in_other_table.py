@@ -67,9 +67,7 @@ def referential_integrity_db(sa):
 def sqlite_datasource(in_memory_runtime_context) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
-    return context.sources.add_sqlite(
-        datasource_name, connection_string=f"sqlite:///{DB_PATH}"
-    )
+    return context.sources.add_sqlite(datasource_name, connection_string=f"sqlite:///{DB_PATH}")
 
 
 @pytest.mark.sqlite

@@ -43,8 +43,8 @@ def validation_operator_result():
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result["validation_result"] = (
-                ExpectationSuiteValidationResultSchema().load(validation_result["validation_result"])
+            validation_result["validation_result"] = ExpectationSuiteValidationResultSchema().load(
+                validation_result["validation_result"]
             )
         return validation_operator_result
 
@@ -144,9 +144,7 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     """
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
     rendered_document_content_list = (
         validation_results_page_renderer.render_validation_operator_result(
@@ -312,9 +310,7 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
     rendered_document_content_list = (
         validation_results_page_renderer.render_validation_operator_result(

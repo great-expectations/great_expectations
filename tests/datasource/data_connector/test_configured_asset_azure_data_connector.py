@@ -67,81 +67,61 @@ def expected_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
     ]
     return expected
@@ -159,81 +139,61 @@ def expected_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     return expected
@@ -505,17 +465,13 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         ],
     )
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
@@ -553,17 +509,13 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
        """,
     )
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`
@@ -622,17 +574,13 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
@@ -699,17 +647,13 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
@@ -719,13 +663,11 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
@@ -787,26 +729,20 @@ def test_return_all_batch_definitions_basic_sorted(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
@@ -865,17 +801,13 @@ def test_return_all_batch_definitions_returns_specified_partition(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     my_batch_request: BatchRequest = BatchRequest(
@@ -893,10 +825,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
         ),
     )
 
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
 
     assert len(my_batch_definition_list) == 1
@@ -973,26 +903,20 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_azure_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
@@ -1063,9 +987,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -1130,9 +1052,7 @@ def test_return_all_batch_definitions_too_many_sorters(
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -1188,17 +1108,13 @@ azure_options:
         "my_base_directory/gamma-202005.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config,
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-            runtime_environment={
-                "name": "my_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
     )
 
     # Since we are using mocks, we need to redefine the output of subsequent calls to `list_azure_keys()`
@@ -1280,9 +1196,7 @@ azure_options:
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
 )
-def test_get_full_file_path(
-    mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path(mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -1325,17 +1239,13 @@ azure_options:
         "my_base_directory/gamma-202005.csv",
     ]
 
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config,
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-            runtime_environment={
-                "name": "my_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-        )
+    my_data_connector: ConfiguredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
     )
 
     assert (
@@ -1345,14 +1255,10 @@ azure_options:
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/beta_here/beta-202002.txt", "beta")
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/gamma-202005.csv", "gamma")
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
     )

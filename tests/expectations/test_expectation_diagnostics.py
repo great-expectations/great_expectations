@@ -268,9 +268,7 @@ def test__count_unexpected_test_cases__with_an_error():
 
 
 def test__count_positive_and_negative_example_cases():
-    assert edr._count_positive_and_negative_example_cases(
-        [expectation_test_data_case]
-    ) == (1, 1)
+    assert edr._count_positive_and_negative_example_cases([expectation_test_data_case]) == (1, 1)
 
 
 def test__check_example_cases__with_enough_test_cases_but_all_failing():

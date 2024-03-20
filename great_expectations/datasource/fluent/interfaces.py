@@ -143,9 +143,7 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
     # another TypeGuard. We could cast instead which may be slightly faster.
     sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
-        return [
-            _sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters
-        ]
+        return [_sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters]
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
@@ -239,9 +237,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -257,9 +253,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(
-        self, name: str, partitioner: Optional[Partitioner] = None
-    ) -> BatchConfig:
+    def add_batch_config(self, name: str, partitioner: Optional[Partitioner] = None) -> BatchConfig:
         """Add a BatchConfig to this DataAsset.
         BatchConfig names must be unique within a DataAsset.
 
@@ -348,9 +342,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
-    def _get_batch_metadata_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> BatchMetadata:
+    def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
         """Performs config variable substitution and populates batch request options for
         Batch.metadata at runtime.
         """
@@ -412,9 +404,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=functools.cmp_to_key(
-                        _sort_batches_with_none_metadata_values(sorter.key)
-                    ),
+                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(sorter.key)),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -483,9 +473,7 @@ class Datasource(
     data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource sublcasses should update this set if the field should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = set()
-    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
-        TypeLookup
-    ]
+    _type_lookup: ClassVar[TypeLookup]  # This attribute is set in `MetaDatasource.__new__`
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
     execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
@@ -567,9 +555,7 @@ class Datasource(
         updated_datasource = self.data_context.update_datasource(loaded_datasource)
         assert isinstance(updated_datasource, Datasource)
 
-        output = updated_datasource.get_asset(asset_name).get_batch_config(
-            batch_config.name
-        )
+        output = updated_datasource.get_asset(asset_name).get_batch_config(batch_config.name)
         output.set_data_asset(batch_config.data_asset)
         return output
 
@@ -603,9 +589,7 @@ class Datasource(
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
         return self._execution_engine
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that correspond to the BatchRequest.
 
         Args:
@@ -679,9 +663,7 @@ class Datasource(
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
         self._save_context_project_config()
 
-    def _add_asset(
-        self, asset: _DataAssetT, connect_options: dict | None = None
-    ) -> _DataAssetT:
+    def _add_asset(self, asset: _DataAssetT, connect_options: dict | None = None) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -708,9 +690,7 @@ class Datasource(
         # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
         # which will contain the new asset populated with an id
         if self._data_context:
-            updated_datasource = self._data_context._update_fluent_datasource(
-                datasource=self
-            )
+            updated_datasource = self._data_context._update_fluent_datasource(datasource=self)
             assert isinstance(updated_datasource, Datasource)
             if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
                 asset.id = asset_id
@@ -770,9 +750,7 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError(
-                            '"order_by" list cannot contain an empty string'
-                        )
+                        raise ValueError('"order_by" list cannot contain an empty string')
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -782,9 +760,7 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError(
-                            '"order_by" list dict must have a key named "key"'
-                        )
+                        raise ValueError('"order_by" list dict must have a key named "key"')
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
@@ -854,9 +830,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
-    name for name in Datasource.__fields__.keys()
-}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1018,9 +992,7 @@ class Batch:
     def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(
-        self, expect: ExpectationSuite
-    ) -> ExpectationSuiteValidationResult: ...
+    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(
@@ -1058,9 +1030,7 @@ class Batch:
                 "We can't validate batches that are attached to datasources without a data context"
             )
         batch_config = self.data_asset.add_batch_config(
-            name="-".join(
-                [self.datasource.name, self.data_asset.name, str(uuid.uuid4())]
-            )
+            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
         )
         return V1Validator(
             batch_config=batch_config,

@@ -68,9 +68,7 @@ def register_renderer(
     renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
-        _registered_renderers[object_name] = {
-            renderer_name: (parent_class, renderer_fn)
-        }
+        _registered_renderers[object_name] = {renderer_name: (parent_class, renderer_fn)}
         return
 
     if renderer_name in _registered_renderers[object_name]:
@@ -129,9 +127,7 @@ def get_renderer_names_with_renderer_types(
         for renderer_name in get_renderer_names(
             expectation_or_metric_type=expectation_or_metric_type
         )
-        if any(
-            renderer_name.startswith(renderer_type) for renderer_type in renderer_types
-        )
+        if any(renderer_name.startswith(renderer_type) for renderer_type in renderer_types)
     ]
 
 
@@ -140,14 +136,10 @@ def get_renderer_impls(object_name: str) -> List[str]:
 
 
 def get_renderer_impl(object_name: str, renderer_type: str) -> Optional[RendererImpl]:
-    renderer_tuple: Optional[tuple] = _registered_renderers.get(object_name, {}).get(
-        renderer_type
-    )
+    renderer_tuple: Optional[tuple] = _registered_renderers.get(object_name, {}).get(renderer_type)
     renderer_impl: Optional[RendererImpl] = None
     if renderer_tuple:
-        renderer_impl = RendererImpl(
-            expectation=renderer_tuple[0], renderer=renderer_tuple[1]
-        )
+        renderer_impl = RendererImpl(expectation=renderer_tuple[0], renderer=renderer_tuple[1])
     return renderer_impl
 
 
@@ -156,14 +148,10 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     # TODO: add version to key
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
-            logger.info(
-                f"Multiple declarations of expectation {expectation_type} found."
-            )
+            logger.info(f"Multiple declarations of expectation {expectation_type} found.")
             return
         else:
-            logger.warning(
-                f"Overwriting declaration of expectation {expectation_type}."
-            )
+            logger.warning(f"Overwriting declaration of expectation {expectation_type}.")
 
     logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
@@ -235,9 +223,7 @@ def register_metric(  # noqa: PLR0913
     execution_engine: Type[ExecutionEngine],
     metric_class: Type[MetricProvider],
     metric_provider: Optional[Callable],
-    metric_fn_type: Optional[
-        Union[MetricFunctionTypes, MetricPartialFunctionTypes]
-    ] = None,
+    metric_fn_type: Optional[Union[MetricFunctionTypes, MetricPartialFunctionTypes]] = None,
 ) -> dict:
     """Register a Metric class for use as a callable metric within Expectations.
 
@@ -285,9 +271,7 @@ def register_metric(  # noqa: PLR0913
 
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
-            _current_provider_cls, current_provider_fn = providers[
-                execution_engine_name
-            ]
+            _current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:
                 logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
@@ -358,9 +342,7 @@ def get_metric_kwargs(
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
-            raise gx_exceptions.MetricProviderError(
-                f"No definition found for {metric_name}"
-            )
+            raise gx_exceptions.MetricProviderError(f"No definition found for {metric_name}")
         default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
@@ -395,9 +377,7 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise gx_exceptions.MetricProviderError(
-            f"Incomplete definition found for {metric_name}"
-        )
+        raise gx_exceptions.MetricProviderError(f"Incomplete definition found for {metric_name}")
 
 
 def get_domain_metrics_dict_by_name(
@@ -411,9 +391,7 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
-    expectation: Type[Expectation] | None = _registered_expectations.get(
-        expectation_name
-    )
+    expectation: Type[Expectation] | None = _registered_expectations.get(expectation_name)
     if not expectation:
         raise gx_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
 
@@ -430,9 +408,7 @@ def list_registered_expectation_implementations(
     ) in _registered_expectations.items():
         if expectation_root is None:
             registered_expectation_implementations.append(expectation_name)
-        elif expectation_root and issubclass(
-            expectation_implementation, expectation_root
-        ):
+        elif expectation_root and issubclass(expectation_implementation, expectation_root):
             registered_expectation_implementations.append(expectation_name)
 
     return registered_expectation_implementations

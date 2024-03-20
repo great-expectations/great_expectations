@@ -124,17 +124,11 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         metric_series = None
         if min_value is not None and max_value is not None:
             if strict_min and strict_max:
-                metric_series = column_lengths.between(
-                    min_value, max_value, inclusive=False
-                )
+                metric_series = column_lengths.between(min_value, max_value, inclusive=False)
             elif strict_min and not strict_max:
-                metric_series = (column_lengths > min_value) & (
-                    column_lengths <= max_value
-                )
+                metric_series = (column_lengths > min_value) & (column_lengths <= max_value)
             elif not strict_min and strict_max:
-                metric_series = (column_lengths >= min_value) & (
-                    column_lengths < max_value
-                )
+                metric_series = (column_lengths >= min_value) & (column_lengths < max_value)
             elif not strict_min and not strict_max:
                 metric_series = pandas_series_between_inclusive(
                     series=column_lengths, min_value=min_value, max_value=max_value

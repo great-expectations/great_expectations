@@ -105,15 +105,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 

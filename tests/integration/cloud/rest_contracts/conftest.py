@@ -26,9 +26,7 @@ PROVIDER_NAME: Final[str] = "mercury"
 
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[pathlib.Path] = pathlib.Path(
-    pathlib.Path(__file__, ".."), "pacts"
-).resolve()
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__, ".."), "pacts").resolve()
 PACT_MOCK_SERVICE_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
 

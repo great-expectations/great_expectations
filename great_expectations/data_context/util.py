@@ -246,9 +246,7 @@ class PasswordMasker:
         )
 
         if replace_prefix is not None:
-            masked_url = masked_url.replace(
-                replace_prefix["temporary"], replace_prefix["original"]
-            )
+            masked_url = masked_url.replace(replace_prefix["temporary"], replace_prefix["original"])
 
         return masked_url
 

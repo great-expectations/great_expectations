@@ -80,9 +80,7 @@ assert validator
 temp_table_name: str = validator.active_batch.data.selectable.description
 client: bigquery.Client = bigquery.Client()
 project: str = client.project
-dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(
-    project, bigquery_dataset
-)
+dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(project, bigquery_dataset)
 table_ref: bigquery.TableReference = dataset_ref.table(temp_table_name)
 table: bigquery.Table = client.get_table(table_ref)
 

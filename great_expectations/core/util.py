@@ -367,9 +367,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return convert_to_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     # SQLAlchemy serialization
     if LegacyRow and isinstance(data, LegacyRow):
@@ -397,9 +395,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return data.to_json_dict()
 
     # Unable to serialize (unrecognized data type).
-    raise TypeError(
-        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
-    )
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")
 
 
 def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
@@ -490,9 +486,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return ensure_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     if isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
@@ -532,8 +526,7 @@ def substitute_all_strftime_format_strings(
         }
     elif isinstance(data, list):
         return [
-            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
-            for el in data
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj) for el in data
         ]
     elif isinstance(data, str):
         return datetime_obj.strftime(data)
@@ -599,9 +592,7 @@ class AzureUrl:
     )
 
     def __init__(self, url: str) -> None:
-        search = re.search(
-            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
-        )
+        search = re.search(AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url)
         if search is None:
             search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
@@ -819,9 +810,7 @@ def get_or_create_spark_session(
     )
 
 
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
+def get_sql_dialect_floating_point_infinity_value(schema: str, negative: bool = False) -> float:
     res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:

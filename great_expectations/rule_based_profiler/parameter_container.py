@@ -66,16 +66,8 @@ RESERVED_TERMINAL_LITERALS: Final[Set[str]] = {
 
 attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
     (
-        (
-            Suppress(Literal('["'))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal('"]'))
-        )
-        ^ (
-            Suppress(Literal("['"))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal("']"))
-        )
+        (Suppress(Literal('["')) + Word(alphas, alphanums + "_.") + Suppress(Literal('"]')))
+        ^ (Suppress(Literal("['")) + Word(alphas, alphanums + "_.") + Suppress(Literal("']")))
     )
     ^ (
         Suppress(Literal("["))
@@ -232,9 +224,7 @@ class ParameterContainer(SerializableDictDot):
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = None
 
-    def set_parameter_node(
-        self, parameter_name_root: str, parameter_node: ParameterNode
-    ) -> None:
+    def set_parameter_node(self, parameter_name_root: str, parameter_node: ParameterNode) -> None:
         if self.parameter_nodes is None:
             self.parameter_nodes = {}
 
@@ -259,9 +249,7 @@ def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict],
 ) -> Union[T, ParameterNode]:
     if isinstance(source, dict):
-        return _deep_convert_properties_iterable_to_parameter_node(
-            source=ParameterNode(source)
-        )
+        return _deep_convert_properties_iterable_to_parameter_node(source=ParameterNode(source))
 
     # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
     if isinstance(source, (list, set, tuple)):
@@ -283,9 +271,7 @@ def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> Paramet
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _deep_convert_properties_iterable_to_parameter_node(
-                source=value
-            )
+            source[key] = _deep_convert_properties_iterable_to_parameter_node(source=value)
         elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 
@@ -340,9 +326,7 @@ def build_parameter_container_for_variables(
     # We only want to set the ParameterContainer key PARAMETER_NAME_ROOT_FOR_VARIABLES if
     # parameter_node is non-empty since there is downstream logic that depends on this.
     return (
-        ParameterContainer(
-            parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node}
-        )
+        ParameterContainer(parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node})
         if parameter_node
         else ParameterContainer()
     )
@@ -392,9 +376,9 @@ def build_parameter_container(
         validate_fully_qualified_parameter_name_delimiter(
             fully_qualified_parameter_name=fully_qualified_parameter_name
         )
-        fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
-            1:
-        ].split(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER)
+        fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[1:].split(
+            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
+        )
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
@@ -443,8 +427,8 @@ def _build_parameter_node_tree_for_one_parameter(
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
 
-    node[parameter_name_as_list[-1]] = (
-        deep_convert_properties_iterable_to_parameter_node(parameter_value)
+    node[parameter_name_as_list[-1]] = deep_convert_properties_iterable_to_parameter_node(
+        parameter_value
     )
 
 
@@ -479,9 +463,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
         return None
 
-    if fully_qualified_parameter_name.startswith(
-        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-    ):
+    if fully_qualified_parameter_name.startswith(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME):
         if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
             # Supports the "$domain.domain_kwargs.column" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
@@ -505,10 +487,8 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
     fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-    fully_qualified_parameter_name_as_list: List[str] = (
-        fully_qualified_parameter_name.split(
-            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
-        )
+    fully_qualified_parameter_name_as_list: List[str] = fully_qualified_parameter_name.split(
+        FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
     )
 
     if len(fully_qualified_parameter_name_as_list) == 0:
@@ -609,18 +589,14 @@ def get_fully_qualified_parameter_names(
         fully_qualified_parameter_names.extend(
             _get_parameter_node_attribute_names(
                 parameter_name_root=PARAMETER_NAME_ROOT_FOR_VARIABLES,
-                parameter_node=variables.parameter_nodes[
-                    PARAMETER_NAME_ROOT_FOR_VARIABLES
-                ],
+                parameter_node=variables.parameter_nodes[PARAMETER_NAME_ROOT_FOR_VARIABLES],
             )
         )
 
     if parameters is not None:
         parameter_container: ParameterContainer = parameters[domain.id]  # type: ignore[union-attr] # could be None
 
-        if not (
-            parameter_container is None or parameter_container.parameter_nodes is None
-        ):
+        if not (parameter_container is None or parameter_container.parameter_nodes is None):
             parameter_name_root: str
             parameter_node: ParameterNode
             for (

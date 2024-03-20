@@ -80,9 +80,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     strftime_format,
                 )
             except ValueError as e:
-                raise ValueError(
-                    f"Unable to use provided strftime_format. {e!s}"
-                ) from e
+                raise ValueError(f"Unable to use provided strftime_format. {e!s}") from e
 
         return strftime_format
 
@@ -125,9 +123,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         if not params.strftime_format:
             template_str = "values must match a strftime format but none was specified."
         else:
-            template_str = (
-                "values must match the following strftime format: $strftime_format"
-            )
+            template_str = "values must match the following strftime format: $strftime_format"
             if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
@@ -172,13 +168,9 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         if not params.get("strftime_format"):
             template_str = "values must match a strftime format but none was specified."
         else:
-            template_str = (
-                "values must match the following strftime format: $strftime_format"
-            )
+            template_str = "values must match the following strftime format: $strftime_format"
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:

@@ -203,15 +203,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             }
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
@@ -247,9 +243,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
             }
         ],
     )
-    checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=checkpoint_config.name
-    )
+    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = context.checkpoints.get(checkpoint_config.name)
 
@@ -261,9 +255,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = (
-        context.validations_store.list_keys()[0]
-    )
+    validation_result_identifier: DataContextKey = context.validations_store.list_keys()[0]
     validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
         validation_result_identifier
     )
@@ -578,9 +570,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         action_list=common_action_list,
         validations=[{"batch_request": batch_request}],
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 0
@@ -616,9 +606,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
     assert len(context.validations_store.list_keys()) == 0
@@ -656,9 +644,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
@@ -706,9 +692,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
@@ -772,9 +756,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
+    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
             validations=[
@@ -1263,9 +1245,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
-        pandas_df
-    )
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(pandas_df)
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1386,9 +1366,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(
-        pandas_df
-    )
+    test_df = SparkDFExecutionEngine.get_or_create_spark_session().createDataFrame(pandas_df)
 
     # create expectation suite
     context.suites.add(ExpectationSuite("my_expectation_suite"))
@@ -1623,7 +1601,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -1694,7 +1674,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -1779,7 +1761,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -1852,7 +1836,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -2014,7 +2000,9 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -2043,7 +2031,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -2073,9 +2063,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -2087,7 +2077,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -2116,9 +2108,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult | dict = (
-        result.run_results[validation_result_identifier]["validation_result"]
-    )
+    expectation_validation_result: ExpectationValidationResult | dict = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -2237,7 +2229,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = (
+        titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    )
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     context.add_checkpoint(**checkpoint_config_dict)
@@ -2246,9 +2240,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(
-        result.run_results.values()
-    )[0]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0][
+        "validation_result"
+    ]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
@@ -2271,9 +2265,7 @@ def _fake_cloud_context_setup(tmp_path, monkeypatch):
     shutil.copy(str(data_file_path), data_dir)
 
     monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
-    monkeypatch.setenv(
-        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
-    )
+    monkeypatch.setenv("GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012")
     monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
 
     monkeypatch.setattr(
@@ -2300,9 +2292,7 @@ def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
     monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_get",
-        cloud_config.make_store_get(
-            data_file_name=data_file, data_dir=data_dir, with_slack=False
-        ),
+        cloud_config.make_store_get(data_file_name=data_file, data_dir=data_dir, with_slack=False),
     )
     context = gx.data_context.CloudDataContext()
     yield context
@@ -2314,9 +2304,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
     monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_get",
-        cloud_config.make_store_get(
-            data_file_name=data_file, data_dir=data_dir, with_slack=True
-        ),
+        cloud_config.make_store_get(data_file_name=data_file, data_dir=data_dir, with_slack=True),
     )
     slack_counter = cloud_config.CallCounter()
     monkeypatch.setattr(
@@ -2441,9 +2429,7 @@ def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
             validations=validations,
         )
 
-    assert "cannot be called with a validator and contain a batch_request" in str(
-        e.value
-    )
+    assert "cannot be called with a validator and contain a batch_request" in str(e.value)
 
 
 # Marking this as "big" instead of "unit" since it fails intermittently due to the timeout. We've seen it take over 7s.
@@ -2483,9 +2469,7 @@ def test_get_substituted_batch_request_with_no_substituted_config():
         "batch_identifiers": {},
     }
 
-    batch_request = get_substituted_batch_request(
-        {"batch_request": runtime_batch_request}, None
-    )
+    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, None)
 
     assert batch_request == RuntimeBatchRequest(**runtime_batch_request)
 

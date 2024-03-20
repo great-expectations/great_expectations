@@ -143,9 +143,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         implementation-level.
     """
 
-    configuration: Optional[ExpectationConfiguration] = Field(
-        None, allow_mutation=False
-    )
+    configuration: Optional[ExpectationConfiguration] = Field(None, allow_mutation=False)
     result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
     runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
@@ -306,10 +304,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                     for key, value in raw_configuration.kwargs.items()
                     if (key, value) not in values["kwargs"].items()
                 }
-                renderer_params_args: Dict[
-                    str, RendererConfiguration._RendererParamArgs
-                ] = RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
-                    raw_kwargs=values["_raw_kwargs"]
+                renderer_params_args: Dict[str, RendererConfiguration._RendererParamArgs] = (
+                    RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
+                        raw_kwargs=values["_raw_kwargs"]
+                    )
                 )
                 values["_params"] = (
                     {**values["_params"], **renderer_params_args}
@@ -367,10 +365,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
         values["_row_condition"] = kwargs.get("row_condition", "")
         if values["_row_condition"]:
-            renderer_params_args: Dict[
-                str, RendererConfiguration._RendererParamArgs
-            ] = RendererConfiguration._get_row_condition_params(
-                row_condition_str=values["_row_condition"],
+            renderer_params_args: Dict[str, RendererConfiguration._RendererParamArgs] = (
+                RendererConfiguration._get_row_condition_params(
+                    row_condition_str=values["_row_condition"],
+                )
             )
             values["_params"] = (
                 {**values["_params"], **renderer_params_args}
@@ -381,9 +379,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[
-            dict[str, Optional[dict[str, list[str] | tuple[str] | str]]]
-        ]
+        meta_notes: Optional[dict[str, Optional[dict[str, list[str] | tuple[str] | str]]]]
         if (
             "result" in values
             and values["result"] is not None
@@ -412,16 +408,14 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
         if not values["params"]:
-            _params: Optional[
-                Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]
-            ] = values.get("_params")
+            _params: Optional[Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]] = (
+                values.get("_params")
+            )
             if _params:
                 renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
                     renderer_param_type: Type[BaseModel] = (
-                        RendererConfiguration._get_renderer_value_base_model_type(
-                            name=name
-                        )
+                        RendererConfiguration._get_renderer_value_base_model_type(name=name)
                     )
                     renderer_param_definitions[name] = (
                         Optional[renderer_param_type],
@@ -482,9 +476,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             )
         )
         for idx, condition in enumerate(row_conditions_list):
-            row_condition_str = row_condition_str.replace(
-                condition, f"$row_condition__{idx!s}"
-            )
+            row_condition_str = row_condition_str.replace(condition, f"$row_condition__{idx!s}")
         row_condition_str = row_condition_str.lower()
         return f"If {row_condition_str}, then "
 
@@ -505,9 +497,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         for param_type in param_types:
             try:
                 renderer_param: Type[BaseModel] = (
-                    RendererConfiguration._get_renderer_value_base_model_type(
-                        name="try_param"
-                    )
+                    RendererConfiguration._get_renderer_value_base_model_type(name="try_param")
                 )
                 renderer_param(schema=RendererSchema(type=param_type), value=value)
                 return param_type
@@ -544,12 +534,10 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         Returns:
             None
         """
-        renderer_param: Type[BaseModel] = (
-            RendererConfiguration._get_renderer_value_base_model_type(name=name)
+        renderer_param: Type[BaseModel] = RendererConfiguration._get_renderer_value_base_model_type(
+            name=name
         )
-        renderer_param_definition: Dict[str, Any] = {
-            name: (Optional[renderer_param], ...)
-        }
+        renderer_param_definition: Dict[str, Any] = {name: (Optional[renderer_param], ...)}
 
         # As of Nov 30, 2022 there is a bug in autocompletion for pydantic dynamic models
         # See: https://github.com/pydantic/pydantic/issues/3930
@@ -581,16 +569,13 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             # if we already moved the evaluation parameter raw_kwargs to a param,
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
-                name in renderer_params_args
-                and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
+                name in renderer_params_args and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
             ):
                 new_args = {
                     name: renderer_param(
                         schema=RendererSchema(type=param_type),
                         value=value,
-                        evaluation_parameter=renderer_params_args[name][  # type: ignore[index]
-                            "evaluation_parameter"
-                        ],
+                        evaluation_parameter=renderer_params_args[name]["evaluation_parameter"],  # type: ignore[index]
                     )
                 }
             else:

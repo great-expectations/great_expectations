@@ -66,9 +66,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
         """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
-        return make_directory_get_unfiltered_batch_definition_list_fn(
-            self.data_directory
-        )
+        return make_directory_get_unfiltered_batch_definition_list_fn(self.data_directory)
 
     @override
     def _get_reader_method(self) -> str:

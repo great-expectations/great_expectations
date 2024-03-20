@@ -46,9 +46,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     @property
     def semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
         return self._semantic_types
 
     @property
@@ -65,9 +63,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
+        table_column_names: List[str] = self.get_validator(variables=variables).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={

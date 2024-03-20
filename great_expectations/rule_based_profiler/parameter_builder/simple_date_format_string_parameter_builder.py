@@ -115,9 +115,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -212,9 +210,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = (
-            metric_computation_result.attributed_resolved_metrics[0]
-        )
+        attributed_resolved_metrics = metric_computation_result.attributed_resolved_metrics[0]
 
         metric_values: MetricValues
 
@@ -257,9 +253,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                     "strftime_format": format_string,
                 }
 
-            match_strftime_metric_value_kwargs_list.append(
-                match_strftime_metric_value_kwargs
-            )
+            match_strftime_metric_value_kwargs_list.append(match_strftime_metric_value_kwargs)
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
@@ -277,9 +271,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
 
-        for (
-            attributed_resolved_metrics
-        ) in metric_computation_result.attributed_resolved_metrics:
+        for attributed_resolved_metrics in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
@@ -310,10 +302,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             format_string_success_ratios, threshold
         )
         # dict of sorted datetime and ratios for all evaluated candidates
-        sorted_format_strings_and_ratios: dict = (
-            ParameterBuilder._get_sorted_candidates_and_ratios(
-                format_string_success_ratios
-            )
+        sorted_format_strings_and_ratios: dict = ParameterBuilder._get_sorted_candidates_and_ratios(
+            format_string_success_ratios
         )
 
         return Attributes(

@@ -73,9 +73,7 @@ class NotNullSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_dump(pass_original=True)
-    def remove_nulls_and_keep_unknowns(
-        self, output: dict, original: DictDot, **kwargs
-    ) -> dict:
+    def remove_nulls_and_keep_unknowns(self, output: dict, original: DictDot, **kwargs) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
         Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
         attributes set through `setattr` are captured in the resulting object.
@@ -618,10 +616,8 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         Returns:
             An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
         """
-        effective_variables: Optional[ParameterContainer] = (
-            profiler.reconcile_profiler_variables(
-                variables=variables,
-            )
+        effective_variables: Optional[ParameterContainer] = profiler.reconcile_profiler_variables(
+            variables=variables,
         )
         runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=effective_variables
@@ -632,9 +628,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         )
 
         rule: Rule
-        effective_rules_dict: Dict[str, Rule] = {
-            rule.name: rule for rule in effective_rules
-        }
+        effective_rules_dict: Dict[str, Rule] = {rule.name: rule for rule in effective_rules}
         runtime_rules: Dict[str, dict] = {
             name: RuleBasedProfilerConfig._substitute_variables_in_config(
                 rule=rule,
@@ -754,9 +748,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     )
 
 
-expectationConfigurationBuilderConfigSchema = (
-    ExpectationConfigurationBuilderConfigSchema()
-)
+expectationConfigurationBuilderConfigSchema = ExpectationConfigurationBuilderConfigSchema()
 parameterBuilderConfigSchema = ParameterBuilderConfigSchema()
 domainBuilderConfigSchema = DomainBuilderConfigSchema()
 ruleConfigSchema = RuleConfigSchema()

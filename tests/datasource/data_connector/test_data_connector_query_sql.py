@@ -74,21 +74,17 @@ def create_db_and_instantiate_simple_sql_datasource():
 def test_data_connector_query_non_recognized_param(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
     # Test 1: non valid_batch_identifiers_limit
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list = (
-            my_sql_datasource.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="taxi_multi_batch_sql_datasource",
-                    data_connector_name="by_vendor_id",
-                    data_asset_name="yellow_tripdata_sample_2020_01",
-                    data_connector_query={"fake": "I_wont_work"},
-                )
+        batch_definition_list = my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={"fake": "I_wont_work"},
             )
         )
 
@@ -129,9 +125,7 @@ def test_data_connector_query_non_recognized_param(
 
 
 def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasource):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
     # no limit
     batch_definition_list: List[LegacyBatchDefinition] = (
@@ -176,9 +170,7 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
 def test_data_connector_query_illegal_index_and_limit_combination(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[  # noqa: F841
@@ -196,16 +188,12 @@ def test_data_connector_query_illegal_index_and_limit_combination(
 def test_data_connector_query_sorted_filtered_by_custom_filter(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
-                batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
-            ).date()
+            datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()
             == datetime.datetime(2020, 1, 1).date()
         )
 
@@ -215,9 +203,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
                 datasource_name="taxi_multi_batch_sql_datasource",
                 data_connector_name="by_pickup_date_time",
                 data_asset_name="yellow_tripdata_sample_2020_01",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector
-                },
+                data_connector_query={"custom_filter_function": my_custom_batch_selector},
             )
         )
     )
@@ -234,16 +220,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
-                batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
-            ).date()
+            datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()
             == datetime.datetime(2020, 1, 1).date()
         )
 
@@ -274,16 +256,12 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
-                batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
-            ).date()
+            datetime.datetime.strptime(batch_identifiers["pickup_datetime"], "%Y-%m-%d %H").date()
             == datetime.datetime(2020, 1, 1).date()
         )
 
@@ -321,9 +299,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
 def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_data_connector: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_data_connector: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
     # no limit
     returned_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -352,9 +328,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
 def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_index(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
     # no limit
     returned_batch_definition_list: List[LegacyBatchDefinition] = (
         my_sql_datasource.get_batch_definition_list_from_batch_request(
@@ -385,9 +359,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
 def test_data_connector_query_for_data_asset_name(
     create_db_and_instantiate_simple_sql_datasource,
 ):
-    my_sql_datasource: SimpleSqlalchemyDatasource = (
-        create_db_and_instantiate_simple_sql_datasource
-    )
+    my_sql_datasource: SimpleSqlalchemyDatasource = create_db_and_instantiate_simple_sql_datasource
     # no limit
     returned_batch_definition_list: List[LegacyBatchDefinition] = (
         my_sql_datasource.get_batch_definition_list_from_batch_request(

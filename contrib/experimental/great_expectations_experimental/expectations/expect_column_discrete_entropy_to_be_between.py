@@ -81,9 +81,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             _df,
             _compute_domain_kwargs,
             _accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         base = metric_value_kwargs["base"]
 
         column_value_counts = metrics.get("column.value_counts")
@@ -109,11 +107,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         }
 
         dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
+            {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
@@ -178,9 +172,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                 "b": ["Jarndyce", "Jarndyce", None, None],
                 "c": ["past", "present", "future", None],
             },
-            "schemas": {
-                "spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}
-            },
+            "schemas": {"spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}},
             "tests": [
                 {
                     "title": "positive_test_min_equal_max",

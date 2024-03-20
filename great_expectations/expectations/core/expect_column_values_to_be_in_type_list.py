@@ -174,9 +174,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             else:
                 template_str = f"value types must belong to this set: {values_string}."
         else:
-            template_str = (
-                "value types may be any value, but observed value will be reported"
-            )
+            template_str = "value types may be any value, but observed value will be reported"
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -209,14 +207,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["type_list"])])
 
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
                     template_str = (
@@ -232,20 +226,16 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     )
             else:  # noqa: PLR5501
                 if include_column_name:
-                    template_str = (
-                        f"$column value types must belong to this set: {values_string}."
-                    )
+                    template_str = f"$column value types must belong to this set: {values_string}."
                 else:
-                    template_str = (
-                        f"value types must belong to this set: {values_string}."
-                    )
+                    template_str = f"value types must belong to this set: {values_string}."
         else:  # noqa: PLR5501
             if include_column_name:
-                template_str = "$column value types may be any value, but observed value will be reported"
-            else:
                 template_str = (
-                    "value types may be any value, but observed value will be reported"
+                    "$column value types may be any value, but observed value will be reported"
                 )
+            else:
+                template_str = "value types may be any value, but observed value will be reported"
 
         if params["row_condition"] is not None:
             (
@@ -288,9 +278,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         if isinstance(pd_type, type):
                             comp_types.append(pd_type)
                             try:
-                                if isinstance(
-                                    pd_type(), pd.core.dtypes.base.ExtensionDtype
-                                ):
+                                if isinstance(pd_type(), pd.core.dtypes.base.ExtensionDtype):
                                     comp_types.append(pd_type())
                             except TypeError:
                                 pass
@@ -306,16 +294,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     comp_types.extend(native_type)
 
             # TODO: Remove when Numpy >=1.21 is pinned as a dependency
-            _pandas_supports_extension_dtypes = version.parse(
-                pd.__version__
-            ) >= version.parse("0.24")
+            _pandas_supports_extension_dtypes = version.parse(pd.__version__) >= version.parse(
+                "0.24"
+            )
             _numpy_doesnt_support_extensions_properly = version.parse(
                 np.__version__
             ) < version.parse("1.21")
-            if (
-                _numpy_doesnt_support_extensions_properly
-                and _pandas_supports_extension_dtypes
-            ):
+            if _numpy_doesnt_support_extensions_properly and _pandas_supports_extension_dtypes:
                 # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
                 # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
                 # ExtensionDtypes
@@ -383,9 +368,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     logger.debug(f"Unrecognized type: {type_}")
 
             if len(types) == 0:
-                logger.warning(
-                    "No recognized sqlalchemy types in type_list for current dialect."
-                )
+                logger.warning("No recognized sqlalchemy types in type_list for current dialect.")
             types = tuple(types)
             success = isinstance(actual_column_type, types)
 
@@ -443,9 +426,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column") if configuration else None
-            expected_types_list = (
-                configuration.kwargs.get("type_list") if configuration else None
-            )
+            expected_types_list = configuration.kwargs.get("type_list") if configuration else None
             metric_kwargs = get_metric_kwargs(
                 metric_name="table.column_types",
                 configuration=configuration,
@@ -528,14 +509,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         if isinstance(execution_engine, PandasExecutionEngine):
             # only PandasExecutionEngine supports map version of expectation and
             # only when column type is object
-            if (
-                actual_column_type.type.__name__ == "object_"
-                and expected_types_list is not None
-            ):
+            if actual_column_type.type.__name__ == "object_" and expected_types_list is not None:
                 # this calls ColumnMapMetric._validate
-                return super()._validate(
-                    metrics, runtime_configuration, execution_engine
-                )
+                return super()._validate(metrics, runtime_configuration, execution_engine)
             return self._validate_pandas(
                 actual_column_type=actual_column_type,
                 expected_types_list=expected_types_list,

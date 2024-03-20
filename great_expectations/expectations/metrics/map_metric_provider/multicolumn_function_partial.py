@@ -98,9 +98,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
-                    accessor_domain_kwargs["column_list"]
-                )
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
                 values = metric_fn(
                     cls,
@@ -126,9 +126,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
-            assert (
-                partial_fn_type is not None
-            )  # mypy has trouble type narrowing with closures
+            assert partial_fn_type is not None  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
@@ -158,17 +156,15 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
-                    accessor_domain_kwargs["column_list"]
-                )
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
                 table_columns = metrics["table.columns"]
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
-                column_selector = [
-                    sa.column(column_name) for column_name in column_list
-                ]
+                column_selector = [sa.column(column_name) for column_name in column_list]
                 dialect = execution_engine.dialect_module
                 multicolumn_function = metric_fn(
                     cls,
@@ -231,9 +227,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
-                    accessor_domain_kwargs["column_list"]
-                )
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
 
                 multicolumn_function = metric_fn(
                     cls,

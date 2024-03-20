@@ -261,13 +261,11 @@ def test_named_date_part_methods(
 def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name: str):
     data_partitioner: SparkDataPartitioner = SparkDataPartitioner()
 
-    partitioner_method_name_with_prefix = (
-        f"{underscore_prefix}{partitioner_method_name}"
-    )
+    partitioner_method_name_with_prefix = f"{underscore_prefix}{partitioner_method_name}"
 
-    assert data_partitioner.get_partitioner_method(
-        partitioner_method_name_with_prefix
-    ) == getattr(data_partitioner, partitioner_method_name)
+    assert data_partitioner.get_partitioner_method(partitioner_method_name_with_prefix) == getattr(
+        data_partitioner, partitioner_method_name
+    )
 
 
 def test_get_batch_empty_partitioner(
@@ -356,9 +354,7 @@ def test_get_batch_with_partition_on_whole_table_filesystem(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_partition_on_whole_table_s3(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_whole_table_s3(spark_session, basic_spark_df_execution_engine):
     # noinspection PyUnusedLocal
     def mocked_get_reader_function(*args, **kwargs):
         # noinspection PyUnusedLocal,PyShadowingNames
@@ -467,9 +463,7 @@ def test_get_batch_with_partition_on_whole_table_gcs(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_partition_on_column_value(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_column_value(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -517,9 +511,7 @@ def test_get_batch_with_partition_on_converted_datetime(
     assert len(partitioned_df.columns) == 10
 
 
-def test_get_batch_with_partition_on_divided_integer(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_divided_integer(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -539,9 +531,7 @@ def test_get_batch_with_partition_on_divided_integer(
     assert min_result.collect()[0]["min(id)"] == 50
 
 
-def test_get_batch_with_partition_on_mod_integer(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_mod_integer(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -625,9 +615,7 @@ def test_get_batch_with_partition_on_hashed_column_incorrect_hash_function_name(
         ).dataframe
 
 
-def test_get_batch_with_partition_on_hashed_column(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_hashed_column(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,

@@ -96,21 +96,15 @@ def test_StoreAction(mock_context):
 
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
-        validation_result_suite=ExpectationSuiteValidationResult(
-            success=False, results=[]
-        ),
+        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
         data_asset=None,
     )
 
-    expected_run_id = RunIdentifier(
-        run_name="prod_20190801", run_time="20190926T134241.000000Z"
-    )
+    expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
 
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
@@ -120,9 +114,7 @@ def test_StoreAction(mock_context):
 
     assert fake_in_memory_store.get(
         ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=expected_run_id,
             batch_identifier="1234",
         )
@@ -372,9 +364,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = True
@@ -402,9 +392,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = False
@@ -419,9 +407,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     validation_result_suite.success = True
     notify_on = "failure"

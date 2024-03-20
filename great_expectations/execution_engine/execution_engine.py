@@ -216,9 +216,7 @@ class ExecutionEngine(ABC):
         """Getter for batch_manager"""
         return self._batch_manager
 
-    def _load_batch_data_from_dict(
-        self, batch_data_dict: Dict[str, BatchDataType]
-    ) -> None:
+    def _load_batch_data_from_dict(self, batch_data_dict: Dict[str, BatchDataType]) -> None:
         """
         Loads all data in batch_data_dict using cache_batch_data
         """
@@ -285,9 +283,7 @@ class ExecutionEngine(ABC):
             metric_fn_bundle_configurations=metric_fn_bundle_configurations,
         )
 
-    def resolve_metric_bundle(
-        self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    def resolve_metric_bundle(self, metric_fn_bundle) -> Dict[Tuple[str, str, str], MetricValue]:
         """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
@@ -354,9 +350,7 @@ class ExecutionEngine(ABC):
             filter_nan: if true, add a filter for nan values
         """
         if filter_null is False and filter_nan is False:
-            logger.warning(
-                "add_column_row_condition called with no filter condition requested"
-            )
+            logger.warning("add_column_row_condition called with no filter condition requested")
             return domain_kwargs
 
         if filter_nan:
@@ -450,9 +444,7 @@ class ExecutionEngine(ABC):
                         metric_aggregate_fn,
                         compute_domain_kwargs,
                         accessor_domain_kwargs,
-                    ) = resolved_metric_dependencies_by_metric_name.pop(
-                        "metric_partial_fn"
-                    )
+                    ) = resolved_metric_dependencies_by_metric_name.pop("metric_partial_fn")
                 except KeyError as e:
                     raise gx_exceptions.MetricError(
                         message=f'Missing metric dependency: {e!s} for metric "{metric_to_resolve.metric_name}".'
@@ -508,9 +500,7 @@ class ExecutionEngine(ABC):
             metric_configuration,
         ) in metric_to_resolve.metric_dependencies.items():
             if metric_configuration.id in metrics:
-                metric_dependencies_by_metric_name[metric_name] = metrics[
-                    metric_configuration.id
-                ]
+                metric_dependencies_by_metric_name[metric_name] = metrics[metric_configuration.id]
             elif self._caching and metric_configuration.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
                 metric_dependencies_by_metric_name[metric_name] = self._metric_cache[
                     metric_configuration.id
@@ -543,25 +533,21 @@ class ExecutionEngine(ABC):
 
         for metric_computation_configuration in metric_fn_direct_configurations:
             try:
-                resolved_metrics[
-                    metric_computation_configuration.metric_configuration.id
-                ] = metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
-                    **metric_computation_configuration.metric_provider_kwargs
+                resolved_metrics[metric_computation_configuration.metric_configuration.id] = (
+                    metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
+                        **metric_computation_configuration.metric_provider_kwargs
+                    )
                 )
             except Exception as e:
                 raise gx_exceptions.MetricResolutionError(
                     message=str(e),
-                    failed_metrics=(
-                        metric_computation_configuration.metric_configuration,
-                    ),
+                    failed_metrics=(metric_computation_configuration.metric_configuration,),
                 ) from e
 
         try:
             # an engine-specific way of computing metrics together
             resolved_metric_bundle: Dict[Tuple[str, str, str], MetricValue] = (
-                self.resolve_metric_bundle(
-                    metric_fn_bundle=metric_fn_bundle_configurations
-                )
+                self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle_configurations)
             )
             resolved_metrics.update(resolved_metric_bundle)
         except Exception as e:
@@ -608,9 +594,7 @@ class ExecutionEngine(ABC):
             and accessor_keys is not None
             and len(list(accessor_keys)) > 0
         ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
-            )
+            logger.warning('Accessor keys ignored since Metric Domain Type is not "table"')
 
         partition_domain_kwargs: PartitionDomainKwargs
         if domain_type == MetricDomainTypes.TABLE:
@@ -782,9 +766,7 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs: Dict = {}
 
         if "column_list" not in domain_kwargs:
-            raise gx_exceptions.GreatExpectationsError(
-                "column_list not found within domain_kwargs"
-            )
+            raise gx_exceptions.GreatExpectationsError("column_list not found within domain_kwargs")
 
         column_list = compute_domain_kwargs.pop("column_list")
 

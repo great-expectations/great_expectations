@@ -201,9 +201,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
             template_str = "may have any number of unique values."
         else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is None:
                     template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
@@ -261,9 +259,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "Distinct (n)",
-                    "tooltip": {
-                        "content": "expect_column_unique_value_count_to_be_between"
-                    },
+                    "tooltip": {"content": "expect_column_unique_value_count_to_be_between"},
                 },
             }
         )

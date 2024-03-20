@@ -296,21 +296,17 @@ def test_named_date_part_methods(
 def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name: str):
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
 
-    partitioner_method_name_with_prefix = (
-        f"{underscore_prefix}{partitioner_method_name}"
-    )
+    partitioner_method_name_with_prefix = f"{underscore_prefix}{partitioner_method_name}"
 
-    assert data_partitioner.get_partitioner_method(
-        partitioner_method_name_with_prefix
-    ) == getattr(data_partitioner, partitioner_method_name)
+    assert data_partitioner.get_partitioner_method(partitioner_method_name_with_prefix) == getattr(
+        data_partitioner, partitioner_method_name
+    )
 
 
 @pytest.mark.unit
 def test_get_batch_with_partition_on_whole_table_runtime(test_df):
     partitioned_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df, partitioner_method="_partition_on_whole_table"
-        )
+        RuntimeDataBatchSpec(batch_data=test_df, partitioner_method="_partition_on_whole_table")
     )
     assert partitioned_df.dataframe.shape == (120, 10)
 
@@ -335,9 +331,7 @@ def test_get_batch_with_partition_on_whole_table_filesystem(
 def test_get_batch_with_partition_on_whole_table_s3(
     batch_with_partition_on_whole_table_s3, test_df_small
 ):
-    df = PandasExecutionEngine().get_batch_data(
-        batch_spec=batch_with_partition_on_whole_table_s3
-    )
+    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_with_partition_on_whole_table_s3)
     assert df.dataframe.shape == test_df_small.shape
 
 
@@ -390,9 +384,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
     )
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
-            batch_spec=my_data_connector.build_batch_spec(
-                batch_definition=batch_def_no_key
-            )
+            batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def_no_key)
         )
 
 

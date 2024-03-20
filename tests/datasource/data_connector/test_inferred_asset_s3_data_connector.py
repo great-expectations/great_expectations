@@ -43,9 +43,7 @@ def test_basic_instantiation():
         "directory/B-2.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
@@ -98,9 +96,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
         "2020/04/beta-1007.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
@@ -214,9 +210,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -251,13 +245,11 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="my_inferred_asset_filesystem_data_connector",
-                data_asset_name="some_bucket",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
         )
     )
 
@@ -342,9 +334,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -379,9 +369,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                     "name": "my_inferred_asset_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
@@ -406,9 +394,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
         "some_bucket/2021/01/07/log_file-20210107.txt.gz",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -446,9 +432,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
                     "name": "my_inferred_asset_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 

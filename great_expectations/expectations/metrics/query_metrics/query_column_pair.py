@@ -51,9 +51,7 @@ class QueryColumnPair(QueryMetricProvider):
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(
-                column_A=column_A, column_B=column_B, batch=f"({selectable})"
-            )
+            query = query.format(column_A=column_A, column_B=column_B, batch=f"({selectable})")
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
@@ -63,13 +61,9 @@ class QueryColumnPair(QueryMetricProvider):
                 batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(
-                column_A=column_A, column_B=column_B, batch=f"({selectable})"
-            )
+            query = query.format(column_A=column_A, column_B=column_B, batch=f"({selectable})")
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(
-            sa.text(query)
-        ).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
 
         return [element._asdict() for element in result]
 

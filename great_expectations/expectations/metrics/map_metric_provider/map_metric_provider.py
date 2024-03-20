@@ -104,10 +104,7 @@ class MapMetricProvider(MetricProvider):
 
     @classmethod
     def _register_metric_functions(cls):  # noqa: C901, PLR0912, PLR0915
-        if not (
-            hasattr(cls, "function_metric_name")
-            or hasattr(cls, "condition_metric_name")
-        ):
+        if not (hasattr(cls, "function_metric_name") or hasattr(cls, "condition_metric_name")):
             return
 
         for attr, candidate_metric_fn in inspect.getmembers(cls):
@@ -148,9 +145,7 @@ class MapMetricProvider(MetricProvider):
                 domain_type = getattr(
                     condition_provider,
                     "domain_type",
-                    metric_definition_kwargs.get(
-                        "domain_type", MetricDomainTypes.TABLE
-                    ),
+                    metric_definition_kwargs.get("domain_type", MetricDomainTypes.TABLE),
                 )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
@@ -323,9 +318,7 @@ class MapMetricProvider(MetricProvider):
                                 metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
                                 metric_fn_type=MetricFunctionTypes.VALUE,
                             )
-                    elif (
-                        metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
-                    ):
+                    elif metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                         register_metric(
                             metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
@@ -460,9 +453,7 @@ class MapMetricProvider(MetricProvider):
                                 metric_provider=_spark_map_condition_unexpected_count_value,
                                 metric_fn_type=MetricFunctionTypes.VALUE,
                             )
-                    elif (
-                        metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
-                    ):
+                    elif metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                         register_metric(
                             metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
@@ -572,9 +563,7 @@ class MapMetricProvider(MetricProvider):
 
         metric_name: str = metric.metric_name
 
-        metric_suffix: str = (
-            f".{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        )
+        metric_suffix: str = f".{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
 
         # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
         if metric_name.endswith(metric_suffix):

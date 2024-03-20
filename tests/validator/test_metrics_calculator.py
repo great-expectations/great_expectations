@@ -34,8 +34,7 @@ def integer_and_datetime_sample_dataset() -> dict:
             11,
         ],
         "b": [
-            datetime.datetime(2021, 1, 1, 0, 0, 0)
-            + datetime.timedelta(days=(week_idx * 7))
+            datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
             for week_idx in range(12)
         ],
     }
@@ -114,9 +113,7 @@ def _test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results, _ = metrics_calculator.compute_metrics(
-        metric_configurations=[desired_metric]
-    )
+    results, _ = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
     increment = float(n_bins + 1) / n_bins
     assert all(
@@ -135,13 +132,9 @@ def _test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results, _ = metrics_calculator.compute_metrics(
-        metric_configurations=[desired_metric]
-    )
+    results, _ = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
-    increment = datetime.timedelta(
-        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
-    )
+    increment = datetime.timedelta(seconds=(seconds_in_week * float(n_bins + 1) / n_bins))
     assert all(
         isclose(
             operand_a=element.to_pydatetime()
@@ -188,10 +181,6 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
         )
-        resolved_metric_value: Any = metrics_calculator.get_metric(
-            metric=metric_configuration
-        )
-        mock_get_metrics_method.assert_called_once_with(
-            metrics={metric_name: metric_configuration}
-        )
+        resolved_metric_value: Any = metrics_calculator.get_metric(metric=metric_configuration)
+        mock_get_metrics_method.assert_called_once_with(metrics={metric_name: metric_configuration})
         assert resolved_metric_value == actual_metric_value

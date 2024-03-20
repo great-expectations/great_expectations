@@ -42,18 +42,14 @@ class MulticolumnDatetimeDifferenceToBeLessThanTwoMonths(MulticolumnMapMetricPro
             if pd.isnull(col_start) or pd.isnull(col_end):
                 return True
 
-            diff_months = (col_end.year - col_start.year) * 12 + (
-                col_end.month - col_start.month
-            )
+            diff_months = (col_end.year - col_start.year) * 12 + (col_end.month - col_start.month)
             return abs(diff_months) < 2 or (abs(diff_months) == 2 and diff_days <= 0)
 
         return dataframe.apply(lambda row: date_diff_in_months(row), axis=1)
 
 
 # This class defines the Expectation itself
-class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
-    MulticolumnMapExpectation
-):
+class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(MulticolumnMapExpectation):
     """Expect the difference of 2 datetime columns to be less than or equal to 2 months.
 
     This means that for each row, we expect end_datetime - start_datetime <= 2 (in months)
@@ -148,9 +144,7 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
     ]
 
     # This is the id string of the Metric used by this Expectation.
-    map_metric = (
-        "multicolumn_values.column_datetime_difference_to_be_less_than_two_months"
-    )
+    map_metric = "multicolumn_values.column_datetime_difference_to_be_less_than_two_months"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("column_list", "start_datetime", "end_datetime")
@@ -161,9 +155,7 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
         "base": 2,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

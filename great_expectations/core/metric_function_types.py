@@ -59,10 +59,14 @@ class MetricPartialFunctionTypes(enum.Enum):
     MAP_FN = "map_fn"  # pertains to "PandasExecutionEngine"
     MAP_SERIES = "map_series"  # pertains to "PandasExecutionEngine"
     WINDOW_FN = "window_fn"  # currently pertains only to "SparkDFExecutionEngine"
-    MAP_CONDITION_FN = "map_condition_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
+    MAP_CONDITION_FN = (
+        "map_condition_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
+    )
     MAP_CONDITION_SERIES = "map_condition_series"  # pertains to "PandasExecutionEngine"
     WINDOW_CONDITION_FN = "window_condition_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
-    AGGREGATE_FN = "aggregate_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
+    AGGREGATE_FN = (
+        "aggregate_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
+    )
 
     @property
     @public_api

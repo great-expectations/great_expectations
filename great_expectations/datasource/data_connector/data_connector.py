@@ -134,10 +134,8 @@ class DataConnector:
             BatchSpec object built from BatchDefinition
 
         """
-        batch_spec_params: dict = (
-            self._generate_batch_spec_parameters_from_batch_definition(
-                batch_definition=batch_definition
-            )
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
@@ -155,9 +153,7 @@ class DataConnector:
     ) -> None:
         raise NotImplementedError
 
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class

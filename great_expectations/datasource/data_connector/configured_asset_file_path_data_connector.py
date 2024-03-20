@@ -105,9 +105,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list(
-                data_asset_name=data_asset_name
-            ):
+            for data_reference in self._get_data_reference_list(data_asset_name=data_asset_name):
                 mapped_batch_definition_list: List[LegacyBatchDefinition] = (
                     self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                         data_reference=data_reference,
@@ -119,9 +117,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 )
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
@@ -177,9 +173,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return batch_definition_list
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -206,11 +200,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
         asset: Optional[Asset] = None
-        if (
-            data_asset_name is not None
-            and self.assets
-            and data_asset_name in self.assets
-        ):
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
 
         return asset
@@ -222,9 +212,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         raise NotImplementedError
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -252,8 +240,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return batch_spec

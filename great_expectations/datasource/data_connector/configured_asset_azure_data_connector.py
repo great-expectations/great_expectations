@@ -94,9 +94,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 self._account_name = re.search(  # type: ignore[union-attr]
                     r".*?AccountName=(.+?);.*?", conn_str
                 ).group(1)
-                self._azure = azure.BlobServiceClient.from_connection_string(
-                    **azure_options
-                )
+                self._azure = azure.BlobServiceClient.from_connection_string(**azure_options)
             elif account_url is not None:
                 self._account_name = re.search(  # type: ignore[union-attr]
                     r"(?:https?://)?(.+?).blob.core.windows.net", account_url
@@ -109,9 +107,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> AzureBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -121,9 +117,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return AzureBatchSpec(batch_spec)
 
     @override
@@ -149,9 +143,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

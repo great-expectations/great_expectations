@@ -152,29 +152,22 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not (
-                hasattr(attr_obj, "metric_engine")
-                or hasattr(attr_obj, "_renderer_type")
-            ):
+            if not (hasattr(attr_obj, "metric_engine") or hasattr(attr_obj, "_renderer_type")):
                 # This is not a metric or renderer.
                 continue
 
             if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
-                    raise ValueError(
-                        "metric functions must be defined with an Execution Engine"
-                    )
+                    raise ValueError("metric functions must be defined with an Execution Engine")
 
                 metric_fn = attr_obj
-                metric_definition_kwargs = getattr(
-                    metric_fn, "metric_definition_kwargs", {}
-                )
+                metric_definition_kwargs = getattr(metric_fn, "metric_definition_kwargs", {})
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
                 )
-                metric_fn_type: Optional[
-                    Union[MetricFunctionTypes, MetricPartialFunctionTypes]
-                ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                metric_fn_type: Optional[Union[MetricFunctionTypes, MetricPartialFunctionTypes]] = (
+                    getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                )
 
                 if not metric_fn_type:
                     # This is not a metric (valid metrics possess exectly one metric function).
@@ -244,9 +237,7 @@ support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGG
                         metric_fn_type=metric_fn_type,
                     )
             elif hasattr(attr_obj, "_renderer_type"):
-                register_renderer(
-                    object_name=metric_name, parent_class=cls, renderer_fn=attr_obj
-                )
+                register_renderer(object_name=metric_name, parent_class=cls, renderer_fn=attr_obj)
 
     @classmethod
     def get_evaluation_dependencies(

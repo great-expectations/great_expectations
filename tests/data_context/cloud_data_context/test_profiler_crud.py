@@ -55,9 +55,7 @@ def mocked_get_response(
                         "organization_id": f"{organization_id}",
                         "updated_at": "2022-08-02T17:55:45.107550",
                     },
-                    "links": {
-                        "self": f"/organizations/{organization_id}/profilers/{profiler_id}"
-                    },
+                    "links": {"self": f"/organizations/{organization_id}/profilers/{profiler_id}"},
                     "type": "profiler",
                 },
             },

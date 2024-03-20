@@ -67,9 +67,7 @@ def _pandas_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     domain_values = df[column_list]
 
@@ -152,9 +150,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     column_selector = [sa.column(column_name) for column_name in column_list]
     query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
@@ -240,9 +236,7 @@ def _spark_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        "column_list"
-    ]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs["column_list"]
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -250,9 +244,7 @@ def _spark_multicolumn_map_condition_values(
         F.col("__unexpected")
     )
 
-    column_selector = [
-        F.col(column_name).alias(column_name) for column_name in column_list
-    ]
+    column_selector = [F.col(column_name).alias(column_name) for column_name in column_list]
 
     domain_values = filtered.select(column_selector)
 

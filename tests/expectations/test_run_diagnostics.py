@@ -242,9 +242,7 @@ def test_self_check_on_an_existing_expectation():
     report_object = expectation().run_diagnostics()
     # print(json.dumps(report_object, indent=2))
 
-    report_object["description"].pop(
-        "docstring"
-    )  # Don't try to exact match the docstring
+    report_object["description"].pop("docstring")  # Don't try to exact match the docstring
 
     # one of the test cases in the examples for this expectation is failing on our CI
     # and the number of items depends on the flags
@@ -355,9 +353,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -416,9 +412,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -467,9 +461,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )

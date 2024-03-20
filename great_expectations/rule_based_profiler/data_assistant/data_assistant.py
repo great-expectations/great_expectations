@@ -393,9 +393,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_name: Optional[str] = None,
             suffix: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
-            evaluation_parameter_builder_configs: Optional[
-                List[ParameterBuilderConfig]
-            ] = None,
+            evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         ) -> ParameterBuilder:
             """
             This method instantiates "NumericMetricRangeMultiBatchParameterBuilder" class with specific arguments for given purpose.
@@ -406,9 +404,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_multi_batch_parameter_builder_name: Optional[str] = None
             if metric_name is None:
                 metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
-                metric_multi_batch_parameter_builder_name = (
-                    evaluation_parameter_builder_configs[0].name
-                )
+                metric_multi_batch_parameter_builder_name = evaluation_parameter_builder_configs[
+                    0
+                ].name
 
             name: str = f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
             name = sanitize_parameter_name(name=name, suffix=suffix)
@@ -495,9 +493,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        self._data_context = (
-            self._validator.data_context if self._validator is not None else None
-        )
+        self._data_context = self._validator.data_context if self._validator is not None else None
         self._batches: Optional[Dict[str, Union[Batch, FluentBatch]]] = (
             self._validator.batches if self._validator is not None else None
         )
@@ -520,9 +516,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
                 Domain(
-                    domain_type=rule.domain_builder.domain_type
-                    if rule.domain_builder
-                    else "",
+                    domain_type=rule.domain_builder.domain_type if rule.domain_builder else "",
                     rule_name=rule.name,
                 )
             ] = rule.parameter_builders or []
@@ -532,12 +526,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        variables_directives_list: Optional[
-            List[RuntimeEnvironmentVariablesDirectives]
-        ] = None,
-        domain_type_directives_list: Optional[
-            List[RuntimeEnvironmentDomainTypeDirectives]
-        ] = None,
+        variables_directives_list: Optional[List[RuntimeEnvironmentVariablesDirectives]] = None,
+        domain_type_directives_list: Optional[List[RuntimeEnvironmentDomainTypeDirectives]] = None,
     ) -> DataAssistantResult:
         """Run the DataAssistant as it is currently configured.
 
@@ -577,9 +567,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
         )
-        return self._build_data_assistant_result(
-            data_assistant_result=data_assistant_result
-        )
+        return self._build_data_assistant_result(data_assistant_result=data_assistant_result)
 
     @property
     def name(self) -> str:
@@ -651,9 +639,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             filter(
                 lambda element: any(
                     element[0].is_superset(other=domain_key)
-                    for domain_key in list(
-                        self._metrics_parameter_builders_by_domain.keys()
-                    )
+                    for domain_key in list(self._metrics_parameter_builders_by_domain.keys())
                 ),
                 self.profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain().items(),
             )
@@ -727,12 +713,8 @@ def run_profiler_on_data(  # noqa: PLR0913
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    variables_directives_list: Optional[
-        List[RuntimeEnvironmentVariablesDirectives]
-    ] = None,
-    domain_type_directives_list: Optional[
-        List[RuntimeEnvironmentDomainTypeDirectives]
-    ] = None,
+    variables_directives_list: Optional[List[RuntimeEnvironmentVariablesDirectives]] = None,
+    domain_type_directives_list: Optional[List[RuntimeEnvironmentDomainTypeDirectives]] = None,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -768,13 +750,9 @@ configuration included.
         rule_based_profiler_result.rule_domain_builder_execution_time
     )
     result.rule_execution_time = rule_based_profiler_result.rule_execution_time
-    result.rule_exception_tracebacks = (
-        rule_based_profiler_result.rule_exception_tracebacks
-    )
+    result.rule_exception_tracebacks = rule_based_profiler_result.rule_exception_tracebacks
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
-    result.expectation_configurations = (
-        rule_based_profiler_result.expectation_configurations
-    )
+    result.expectation_configurations = rule_based_profiler_result.expectation_configurations
     result.citation = rule_based_profiler_result.citation
 
 
@@ -808,22 +786,20 @@ def build_map_metric_rule(  # noqa: PLR0913
 
     # Step-1: Instantiate "MapMetricColumnDomainBuilder" for specified "map_metric_name" (subject to directives).
 
-    map_metric_column_domain_builder: MapMetricColumnDomainBuilder = (
-        MapMetricColumnDomainBuilder(
-            map_metric_name=map_metric_name,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-            include_column_name_suffixes=include_column_name_suffixes,
-            exclude_column_name_suffixes=exclude_column_name_suffixes,
-            semantic_type_filter_module_name=semantic_type_filter_module_name,
-            semantic_type_filter_class_name=semantic_type_filter_class_name,
-            include_semantic_types=include_semantic_types,
-            exclude_semantic_types=exclude_semantic_types,
-            max_unexpected_values=max_unexpected_values,
-            max_unexpected_ratio=max_unexpected_ratio,
-            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
-            data_context=None,
-        )
+    map_metric_column_domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
+        map_metric_name=map_metric_name,
+        include_column_names=include_column_names,
+        exclude_column_names=exclude_column_names,
+        include_column_name_suffixes=include_column_name_suffixes,
+        exclude_column_name_suffixes=exclude_column_name_suffixes,
+        semantic_type_filter_module_name=semantic_type_filter_module_name,
+        semantic_type_filter_class_name=semantic_type_filter_class_name,
+        include_semantic_types=include_semantic_types,
+        exclude_semantic_types=exclude_semantic_types,
+        max_unexpected_values=max_unexpected_values,
+        max_unexpected_ratio=max_unexpected_ratio,
+        min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+        data_context=None,
     )
 
     # Step-2: Declare "ParameterBuilder" for every relevant metric of interest.

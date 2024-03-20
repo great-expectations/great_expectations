@@ -22,9 +22,7 @@ pytestmark = pytest.mark.big
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     parameter_builder: ParameterBuilder = (  # noqa: F841
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
@@ -39,9 +37,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     with pytest.raises(TypeError) as excinfo:
         _: ParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
@@ -62,18 +58,15 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
             data_context=data_context,
         )
 
-    assert (
-        "__init__() missing 1 required positional argument: 'map_metric_name'"
-        in str(excinfo.value)
+    assert "__init__() missing 1 required positional argument: 'map_metric_name'" in str(
+        excinfo.value
     )
 
 
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     mean_unexpected_map_metric_multi_batch_parameter_builder: ParameterBuilder = (
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
@@ -89,9 +82,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
     )
 
     # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
-    assert set(
-        mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()
-    ) == {
+    assert set(mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
         "name",
@@ -107,9 +98,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -154,9 +143,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
     )
 
     # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
-    assert set(
-        mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()
-    ) == {
+    assert set(mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
         "name",

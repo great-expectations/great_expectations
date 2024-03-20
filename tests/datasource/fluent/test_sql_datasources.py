@@ -151,9 +151,7 @@ class TestConfigPasstrough:
             **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
             **ds_kwargs.get("kwargs", {}),
             # config substitution should have been performed
-            **ds.dict(
-                include={"connection_string"}, config_provider=ds._config_provider
-            ),
+            **ds.dict(include={"connection_string"}, config_provider=ds._config_provider),
         }
         assert "create_temp_table" in expected_args
 
@@ -320,15 +318,11 @@ def test_specific_datasource_warnings(
     This test ensures that a warning is raised when a specific datasource class is suggested.
     """
     context = ephemeral_context_with_defaults
-    monkeypatch.setenv(
-        "MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db"
-    )
+    monkeypatch.setenv("MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db")
 
     if suggested_datasource_class:
         with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
-            context.sources.add_sql(
-                name="my_datasource", connection_string=connection_string
-            )
+            context.sources.add_sql(name="my_datasource", connection_string=connection_string)
     else:
         with warnings.catch_warnings():
             warnings.simplefilter("error")  # should already be the default

@@ -58,9 +58,7 @@ class DataSampler(abc.ABC):  # noqa: B024 # abstract-base-class-without-abstract
                 "Please make sure to provide sampling_kwargs in addition to your sampling_method."
             )
 
-    def verify_batch_spec_sampling_kwargs_key_exists(
-        self, key: str, batch_spec: BatchSpec
-    ) -> None:
+    def verify_batch_spec_sampling_kwargs_key_exists(self, key: str, batch_spec: BatchSpec) -> None:
         """Verify that a key within sampling_kwargs exists in batch_spec or raise error.
 
         Args:

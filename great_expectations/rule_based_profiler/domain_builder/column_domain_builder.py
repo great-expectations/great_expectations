@@ -116,9 +116,7 @@ class ColumnDomainBuilder(DomainBuilder):
         return self._include_column_names
 
     @include_column_names.setter
-    def include_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
-    ) -> None:
+    def include_column_names(self, value: Optional[Union[str, Optional[List[str]]]]) -> None:
         self._include_column_names = value
 
     @property
@@ -126,9 +124,7 @@ class ColumnDomainBuilder(DomainBuilder):
         return self._exclude_column_names
 
     @exclude_column_names.setter
-    def exclude_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
-    ) -> None:
+    def exclude_column_names(self, value: Optional[Union[str, Optional[List[str]]]]) -> None:
         self._exclude_column_names = value
 
     @property
@@ -166,34 +162,26 @@ class ColumnDomainBuilder(DomainBuilder):
     @property
     def include_semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
         return self._include_semantic_types
 
     @include_semantic_types.setter
     def include_semantic_types(
         self,
-        value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ],
+        value: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]],
     ) -> None:
         self._include_semantic_types = value
 
     @property
     def exclude_semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
         return self._exclude_semantic_types
 
     @exclude_semantic_types.setter
     def exclude_semantic_types(
         self,
-        value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ],
+        value: Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]],
     ) -> None:
         self._exclude_semantic_types = value
 
@@ -326,7 +314,9 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
         if semantic_type_filter_module_name is None:
-            semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
+            semantic_type_filter_module_name = (
+                "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
+            )
 
         # Obtain semantic_type_filter_class_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         semantic_type_filter_class_name: Optional[str] = (
@@ -363,10 +353,8 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        include_semantic_types = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-                semantic_types=include_semantic_types
-            )
+        include_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+            semantic_types=include_semantic_types
         )
 
         if include_semantic_types:
@@ -388,10 +376,8 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        exclude_semantic_types = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-                semantic_types=exclude_semantic_types
-            )
+        exclude_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+            semantic_types=exclude_semantic_types
         )
 
         if exclude_semantic_types:

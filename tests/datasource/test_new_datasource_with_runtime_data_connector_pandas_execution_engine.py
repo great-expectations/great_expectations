@@ -324,10 +324,7 @@ def test_batch_data_pandas_execution_engine_get_batch_definition_list_from_batch
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_basics(
@@ -402,10 +399,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset(
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
@@ -441,10 +435,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
     # second batch request
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
@@ -474,10 +465,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
     assert my_batch_2.data.dataframe.shape == (2, 2)
     assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
     assert my_batch_2.data.dataframe["col2"].values[1] == 8
-    assert (
-        my_batch_2.batch_markers["pandas_data_fingerprint"]
-        == "548e148ff5a8e932a3a2a1d0d8ff7f84"
-    )
+    assert my_batch_2.batch_markers["pandas_data_fingerprint"] == "548e148ff5a8e932a3a2a1d0d8ff7f84"
 
 
 ###################################
@@ -657,10 +645,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset(
     assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
@@ -691,10 +676,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_
     assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
@@ -729,10 +711,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
 
     # second batch request
     batch_identifiers: dict = {"day": 2, "month": 12}
@@ -760,7 +739,4 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
     assert isinstance(my_batch_2.data.dataframe, pd.DataFrame)
     assert my_batch_2.data.dataframe.shape == (10000, 18)
     assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
-    assert (
-        my_batch_2.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_2.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"

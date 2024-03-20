@@ -40,9 +40,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         runtime_configuration: dict,
     ):
         column_value_counts = metrics["column.value_counts"]
-        return list(
-            column_value_counts[column_value_counts == column_value_counts.max()].index
-        )
+        return list(column_value_counts[column_value_counts == column_value_counts.max()].index)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(  # noqa: PLR0913
@@ -54,9 +52,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         runtime_configuration: dict,
     ):
         column_value_counts = metrics["column.value_counts"]
-        return list(
-            column_value_counts[column_value_counts == column_value_counts.max()].index
-        )
+        return list(column_value_counts[column_value_counts == column_value_counts.max()].index)
 
     @classmethod
     @override
@@ -76,9 +72,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
+        if isinstance(execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
                 metric_domain_kwargs=metric.metric_domain_kwargs,

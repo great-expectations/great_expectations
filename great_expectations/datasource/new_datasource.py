@@ -105,9 +105,7 @@ class BaseDatasource:
                 batch_data,
                 batch_spec,
                 batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition
-            )
+            ) = data_connector.get_batch_data_and_metadata(batch_definition=batch_definition)
         new_batch = Batch(
             data=batch_data,
             batch_request=None,
@@ -122,9 +120,7 @@ class BaseDatasource:
     ) -> Batch:
         batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
-            raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch."
-            )
+            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")
         return batch_list[0]
 
     def get_batch_definition_list_from_batch_request(
@@ -139,9 +135,7 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
         return data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -158,14 +152,10 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
 
         batch_definition_list: List[LegacyBatchDefinition] = (
-            data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=batch_request
-            )
+            data_connector.get_batch_definition_list_from_batch_request(batch_request=batch_request)
         )
 
         if isinstance(batch_request, RuntimeBatchRequest):
@@ -201,9 +191,7 @@ class BaseDatasource:
         else:
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
-                batch_definition.batch_spec_passthrough = (
-                    batch_request.batch_spec_passthrough
-                )
+                batch_definition.batch_spec_passthrough = batch_request.batch_spec_passthrough
                 batch_data: Any  # type: ignore[no-redef]
                 batch_spec: PathBatchSpec  # type: ignore[no-redef]
                 batch_markers: BatchMarkers  # type: ignore[no-redef]
@@ -211,9 +199,7 @@ class BaseDatasource:
                     batch_data,
                     batch_spec,
                     batch_markers,
-                ) = data_connector.get_batch_data_and_metadata(
-                    batch_definition=batch_definition
-                )
+                ) = data_connector.get_batch_data_and_metadata(batch_definition=batch_definition)
                 new_batch = Batch(
                     data=batch_data,
                     batch_request=batch_request,
@@ -237,9 +223,7 @@ class BaseDatasource:
                 "datasource_name": self.name,
                 "execution_engine": self.execution_engine,
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
         new_data_connector.data_context_root_directory = (
             self._data_context_root_directory  # type: ignore[assignment]
@@ -333,13 +317,9 @@ class BaseDatasource:
     ) -> List[LegacyBatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
-        batch_definition_list = (
-            data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=batch_request
-            )
+        data_connector: DataConnector = self.data_connectors[batch_request.data_connector_name]
+        batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
         )
 
         return batch_definition_list
@@ -348,8 +328,7 @@ class BaseDatasource:
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> None:
         if not (
-            batch_request.datasource_name is None
-            or batch_request.datasource_name == self.name
+            batch_request.datasource_name is None or batch_request.datasource_name == self.name
         ):
             raise ValueError(
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
@@ -440,9 +419,7 @@ class Datasource(BaseDatasource):
         if data_connectors is None:
             data_connectors = {}
         self._data_connectors = data_connectors
-        self._datasource_config.update(
-            {"data_connectors": copy.deepcopy(data_connectors)}
-        )
+        self._datasource_config.update({"data_connectors": copy.deepcopy(data_connectors)})
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
@@ -460,9 +437,7 @@ class Datasource(BaseDatasource):
         from great_expectations.datasource.fluent import PandasDatasource
 
         # PandasDatasource has all the `read_*` methods + the normal Datasource methods
-        fluent_datasource_attrs.update(
-            {a for a in dir(PandasDatasource) if not a.startswith("_")}
-        )
+        fluent_datasource_attrs.update({a for a in dir(PandasDatasource) if not a.startswith("_")})
         if attr.startswith("add_"):
             from great_expectations.datasource.fluent.sources import (  # isort: skip
                 _iter_all_registered_types,
@@ -471,9 +446,7 @@ class Datasource(BaseDatasource):
             fluent_datasource_attrs.update(
                 {
                     f"add_{type_name}_asset"
-                    for type_name, _ in _iter_all_registered_types(
-                        include_datasource=False
-                    )
+                    for type_name, _ in _iter_all_registered_types(include_datasource=False)
                 }
             )
         if attr in fluent_datasource_attrs:

@@ -74,9 +74,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
@@ -92,20 +90,16 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_value: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -203,9 +197,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -220,20 +212,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -268,20 +256,18 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
 
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_multi_batch_parameter_builder_name=None,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            estimator="quantiles",
-            include_estimator_samples_histogram_in_details=True,
-            false_positive_rate=5.0e-2,
-            round_decimals=1,
-            evaluation_parameter_builder_configs=None,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="column_min_range",
+        metric_name="column.min",
+        metric_multi_batch_parameter_builder_name=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        estimator="quantiles",
+        include_estimator_samples_histogram_in_details=True,
+        false_positive_rate=5.0e-2,
+        round_decimals=1,
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
     )
 
     numeric_metric_range_parameter_builder.build_parameters(
@@ -294,20 +280,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     )
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_05 = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -400,9 +382,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -417,20 +397,16 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -534,9 +510,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -551,20 +525,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -599,20 +569,18 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
 
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_multi_batch_parameter_builder_name="my_column_min",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            estimator="quantiles",
-            include_estimator_samples_histogram_in_details=True,
-            false_positive_rate=5.0e-2,
-            round_decimals=1,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="column_min_range",
+        metric_name="column.min",
+        metric_multi_batch_parameter_builder_name="my_column_min",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        estimator="quantiles",
+        include_estimator_samples_histogram_in_details=True,
+        false_positive_rate=5.0e-2,
+        round_decimals=1,
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        data_context=data_context,
     )
 
     numeric_metric_range_parameter_builder.build_parameters(
@@ -625,20 +593,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         },
     )
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_05 = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -959,9 +923,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
@@ -977,20 +939,16 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_value: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -1090,19 +1048,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     bootstrap_value: np.ndarray = parameter_node.pop("value")
@@ -1137,19 +1091,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     kde_value: np.ndarray = parameter_node.pop("value")
@@ -1213,19 +1163,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     default_bw_method_value: np.ndarray = parameter_node.pop("value")
@@ -1261,19 +1207,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     other_bw_method_value: np.ndarray = parameter_node.pop("value")

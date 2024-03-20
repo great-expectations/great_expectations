@@ -163,9 +163,7 @@ def _get_dictionary_from_block_in_docstring(
         base_indent = _get_indentation(arg_lines[0])
         key = None
         for line in arg_lines:
-            if _get_indentation(line) == base_indent and re.search(
-                r" *[a-z|A-Z|_|0-9]+:", line
-            ):
+            if _get_indentation(line) == base_indent and re.search(r" *[a-z|A-Z|_|0-9]+:", line):
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
@@ -175,9 +173,7 @@ def _get_dictionary_from_block_in_docstring(
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:
-                raise BlockValueIndentationError(
-                    block_heading_text, block_contents, line
-                )
+                raise BlockValueIndentationError(block_heading_text, block_contents, line)
     return block_dict
 
 
@@ -528,9 +524,7 @@ def build_method_document(  # noqa: C901
     return_or_yield_content = get_yield_or_return_block(docstring)
     if return_or_yield_content:
         return_or_yield, content = return_or_yield_content
-        in_progress_output.extend(
-            ["", f"### {return_or_yield.replace(':', '')}", "", content]
-        )
+        in_progress_output.extend(["", f"### {return_or_yield.replace(':', '')}", "", content])
 
     # Add raises block to document content, if found in docstring.
     raises_dict = get_raises_dictionary(docstring)
@@ -558,9 +552,7 @@ def build_method_document(  # noqa: C901
         f.write(output)
 
     # Generate abbreviated line describing the method and linking to its API documentation.
-    abbreviated_output = (
-        f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
-    )
+    abbreviated_output = f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
     sidebar_id = file_path.replace("../docs/", "")
 
     return abbreviated_output, crosslink_snippets, sidebar_id
@@ -642,9 +634,7 @@ def build_class_document(
 
     # Add class methods in the Public API to the document.
     if in_progress_methods:
-        in_progress_output.extend(
-            ["", "## Public Methods (API documentation links)", ""]
-        )
+        in_progress_output.extend(["", "## Public Methods (API documentation links)", ""])
         in_progress_output.extend(in_progress_methods)
 
     # Add links to relevant documentation to the document.
@@ -820,9 +810,7 @@ if __name__ == "__main__":
         removed_cross_link_files = remove_existing_api_reference_files(Path("../docs"))
 
         # Generate the new documentation.
-        for source_file_path in get_relevant_source_files(
-            Path("..", "great_expectations")
-        ):
+        for source_file_path in get_relevant_source_files(Path("..", "great_expectations")):
             github_path = (
                 f"https://github.com/great-expectations/great_expectations/blob/develop"
                 f"{str(source_file_path).replace('..', '')}"

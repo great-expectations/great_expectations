@@ -204,9 +204,7 @@ class S3DataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     # Interface Method

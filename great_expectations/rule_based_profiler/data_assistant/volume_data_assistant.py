@@ -178,22 +178,20 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: DomainBuilder = (
-            CategoricalColumnDomainBuilder(
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
-                max_unique_values=None,
-                max_proportion_unique=None,
-                data_context=None,
-            )
+        categorical_column_type_domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            allowed_semantic_types_passthrough=None,
+            cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
+            max_unique_values=None,
+            max_proportion_unique=None,
+            data_context=None,
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.

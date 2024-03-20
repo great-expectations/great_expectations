@@ -62,8 +62,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # no
                     first_value_type: type = type(next(values_iterator))
                     current_type: type
                     if not all(
-                        type(current_value) == first_value_type
-                        for current_value in values_iterator
+                        type(current_value) == first_value_type for current_value in values_iterator
                     ):
                         return True
 
@@ -120,9 +119,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if attributed_metric_values is None:
             return None
 
-        metric_values_all_batches: MetricValues = list(
-            attributed_metric_values.values()
-        )
+        metric_values_all_batches: MetricValues = list(attributed_metric_values.values())
         return _condition_metric_values(metric_values=metric_values_all_batches)
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
@@ -167,8 +164,10 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if self.attributed_metric_values is None:
             return None
 
-        return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
-            attributed_metric_values=self.attributed_metric_values
+        return (
+            AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+                attributed_metric_values=self.attributed_metric_values
+            )
         )
 
     @override

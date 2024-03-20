@@ -18,9 +18,7 @@ pytestmark = pytest.mark.filesystem
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -139,27 +137,23 @@ def test_data_connector_query_non_recognized_param(
 def test_data_connector_query_limit(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={"limit": None},
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={"limit": None},
         )
     )
     assert len(sorted_batch_definition_list) == 10
 
     # proper limit
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={"limit": 3},
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={"limit": 3},
         )
     )
     assert len(sorted_batch_definition_list) == 3
@@ -206,22 +200,16 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={"custom_filter_function": my_custom_batch_selector},
         )
     )
 
@@ -230,41 +218,31 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -279,23 +257,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "limit": 4,
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "limit": 4,
+            },
         )
     )
 
@@ -304,33 +278,25 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -345,23 +311,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": 0,
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": 0,
+            },
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -371,9 +333,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -389,23 +349,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": [1, 3],
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": [1, 3],
+            },
         )
     )
 
@@ -416,17 +372,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -441,23 +393,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": (0, 4, 3),
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": (0, 4, 3),
+            },
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -467,17 +415,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -492,23 +436,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "-1",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "-1",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -517,9 +457,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -534,23 +472,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "::",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "::",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 5
@@ -559,41 +493,31 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -608,23 +532,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "::2",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "::2",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 3
@@ -633,25 +553,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -666,23 +580,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "::-1",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "::-1",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 5
@@ -691,41 +601,31 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -740,23 +640,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": ":3",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": ":3",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 3
@@ -765,25 +661,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -798,23 +688,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "3:",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "3:",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -823,17 +709,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -849,23 +731,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "3:5",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "3:5",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -875,17 +753,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -900,23 +774,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "0:4:3",
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": "0:4:3",
+            },
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -925,17 +795,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -951,23 +817,19 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
+            and datetime.datetime.strptime(batch_identifiers["timestamp"], "%Y%m%d").date()
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": slice(3, 5, None),
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "custom_filter_function": my_custom_batch_selector,
+                "index": slice(3, 5, None),
+            },
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -977,17 +839,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -998,16 +856,14 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "batch_filter_parameters": {"timestamp": "20200809"},
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "batch_filter_parameters": {"timestamp": "20200809"},
+            },
         )
     )
     assert len(returned_batch_definition_list) == 4
@@ -1017,33 +873,25 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -1054,17 +902,15 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "batch_filter_parameters": {"name": "james"},
-                    "index": 0,
-                },
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "batch_filter_parameters": {"name": "james"},
+                "index": 0,
+            },
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -1074,9 +920,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -1087,19 +931,17 @@ def test_data_connector_query_data_connector_query_batch_identifiers_2_key_name_
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "batch_filter_parameters": {
-                        "timestamp": "20200809",
-                        "name": "will",
-                    },
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            data_connector_query={
+                "batch_filter_parameters": {
+                    "timestamp": "20200809",
+                    "name": "will",
                 },
-            )
+            },
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -1109,9 +951,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_2_key_name_
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     assert returned_batch_definition_list == expected
@@ -1122,13 +962,11 @@ def test_data_connector_query_for_data_asset_name(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-            )
+    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert len(returned_batch_definition_list) == 10
@@ -1138,81 +976,61 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
     assert returned_batch_definition_list == expected

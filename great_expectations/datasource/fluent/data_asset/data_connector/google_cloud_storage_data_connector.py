@@ -203,9 +203,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
     # Interface Method

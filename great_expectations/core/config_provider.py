@@ -25,9 +25,7 @@ class _AbstractConfigurationProvider(ABC):
         """
         pass
 
-    def substitute_config(
-        self, config: Any, config_values: Optional[Dict[str, str]] = None
-    ) -> Any:
+    def substitute_config(self, config: Any, config_values: Optional[Dict[str, str]] = None) -> Any:
         """
         Utilizes the underlying ConfigurationSubstitutor instance to substitute any
         $VARIABLES with their corresponding config variable value.

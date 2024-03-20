@@ -72,9 +72,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
-            assert (
-                partial_fn_type is not None
-            )  # mypy has trouble type narrowing with closures
+            assert partial_fn_type is not None  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
@@ -104,9 +102,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -145,9 +141,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
-            assert (
-                partial_fn_type is not None
-            )  # mypy has trouble type narrowing with closures
+            assert partial_fn_type is not None  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
@@ -177,9 +171,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -264,9 +256,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 expected_condition = metric_fn(
@@ -283,10 +273,8 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 )
                 if partial_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                     if filter_column_isnull:
-                        compute_domain_kwargs = (
-                            execution_engine.add_column_row_condition(
-                                compute_domain_kwargs, column_name=column_name
-                            )
+                        compute_domain_kwargs = execution_engine.add_column_row_condition(
+                            compute_domain_kwargs, column_name=column_name
                         )
                     unexpected_condition = ~expected_condition
                 else:  # noqa: PLR5501

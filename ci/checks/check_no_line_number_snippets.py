@@ -58,8 +58,7 @@ def main() -> None:
         )
     )
     excluded_documents = {
-        project_root / file_path
-        for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
+        project_root / file_path for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
     }
     new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:

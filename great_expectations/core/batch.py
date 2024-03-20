@@ -373,9 +373,7 @@ class BatchRequestBase(SerializableDictDot):
         serializeable_dict: dict
         if batch_request_contains_batch_data(batch_request=self):
             if self.runtime_parameters is None:
-                raise ValueError(
-                    "BatchRequestBase missing runtime_parameters during serialization"
-                )
+                raise ValueError("BatchRequestBase missing runtime_parameters during serialization")
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
@@ -767,9 +765,9 @@ class Batch(SerializableDictDot):
         if batch_markers is None:
             batch_markers = BatchMarkers(
                 {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
+                    "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%dT%H%M%S.%fZ"
+                    )
                 }
             )
 
@@ -932,9 +930,7 @@ def materialize_batch_request(
     batch_request_class: type
     if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
-    elif batch_request_contains_runtime_parameters(
-        batch_request=effective_batch_request
-    ):
+    elif batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -1378,9 +1374,7 @@ if TYPE_CHECKING:
 if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     BatchDataUnion: TypeAlias = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
 
-    BatchDataType: TypeAlias = Union[
-        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
-    ]
+    BatchDataType: TypeAlias = Union[Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
     BatchDataUnion = Union[BatchData, pd.DataFrame]  # type: ignore[misc] # Cannot assign multiple types

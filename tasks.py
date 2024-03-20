@@ -35,7 +35,9 @@ GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
 GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
 REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
-_CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
+_CHECK_HELP_DESC = (
+    "Only checks for needed changes without writing back. Exit with error code if changes needed."
+)
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
 # https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
@@ -168,9 +170,7 @@ def upgrade(ctx: Context, path: str = "."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(
-    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
-):
+def hooks(ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -444,10 +444,7 @@ def docker(
                 "-f",
                 "docker/Dockerfile.tests",
                 f"--tag {name}:{tag}",
-                *[
-                    f"--build-arg {arg}"
-                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
-                ],
+                *[f"--build-arg {arg}" for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]],
                 ".",
             ]
         )
@@ -505,9 +502,7 @@ def type_schema(  # noqa: C901 - too complex
         _iter_all_registered_types,
     )
 
-    schema_dir_root: Final[pathlib.Path] = (
-        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
-    )
+    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
         print(f"🗑️ removing schema directory and contents - {file_count} .json files")
@@ -586,9 +581,7 @@ def api_docs(ctx: Context):
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
     sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
 
     doc_builder = SphinxInvokeDocsBuilder(
@@ -622,9 +615,7 @@ def docs(
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
 
     print("Running invoke docs from:", repo_root)
     old_cwd = pathlib.Path.cwd()
@@ -669,9 +660,7 @@ def public_api_task(
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="public-api", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="public-api", correct_dir=repo_root)
 
     # Docs folder is not reachable from install of Great Expectations
     api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
@@ -687,7 +676,9 @@ def _exit_with_error_if_not_run_from_correct_dir(
     if not correct_dir:
         correct_dir = pathlib.Path(__file__).parent
     curdir = pathlib.Path.cwd()
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    exit_message = (
+        f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    )
     if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -1058,9 +1049,7 @@ def ci_tests(
             pytest_options.append(extra_pytest_arg)
 
     marker_statement = (
-        f"'all_backends or {marker}'"
-        if _add_all_backends_marker(marker)
-        else f"'{marker}'"
+        f"'all_backends or {marker}'" if _add_all_backends_marker(marker) else f"'{marker}'"
     )
 
     pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
@@ -1123,9 +1112,7 @@ def service(
                 )
 
             if restart_services:
-                print(
-                    f"  Removing existing containers and building latest for {service_name} ..."
-                )
+                print(f"  Removing existing containers and building latest for {service_name} ...")
                 cmds.extend(
                     [
                         "docker",

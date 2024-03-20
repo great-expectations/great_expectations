@@ -125,8 +125,7 @@ def create_common_data_context_files(context_path, asset_config_path):
         exist_ok=True,
     )
     copy_relative_path(
-        "../test_fixtures/"
-        "expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../test_fixtures/" "expectation_suites/parameterized_expectation_suite_fixture.json",
         os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
@@ -399,9 +398,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
+                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -498,9 +495,7 @@ class MockResponse:
     ) -> None:
         self._json_data = json_data
         self.status_code = status_code
-        self.headers = headers or {
-            "content-type": "application/json" if json_data else "text/html"
-        }
+        self.headers = headers or {"content-type": "application/json" if json_data else "text/html"}
         self._exc_to_raise = exc_to_raise
 
     def json(self):
@@ -512,26 +507,20 @@ class MockResponse:
         if self._exc_to_raise:
             raise self._exc_to_raise
         if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(
-                f"Mock {self.status_code} HTTPError", response=self
-            )
+            raise requests.exceptions.HTTPError(f"Mock {self.status_code} HTTPError", response=self)
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
 
 
 @pytest.fixture
-def mock_response_factory() -> (
-    Callable[[JSONData, int, Optional[RequestError]], MockResponse]
-):
+def mock_response_factory() -> Callable[[JSONData, int, Optional[RequestError]], MockResponse]:
     def _make_mock_response(
         json_data: JSONData,
         status_code: int,
         exc_to_raise: Optional[RequestError] = None,
     ) -> MockResponse:
-        return MockResponse(
-            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
-        )
+        return MockResponse(json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise)
 
     return _make_mock_response
 
@@ -574,9 +563,7 @@ def basic_fluent_datasource_config() -> dict:
             {
                 "name": "my_csv",
                 "type": "csv",
-                "batching_regex": re.compile(
-                    r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE
-                ),
+                "batching_regex": re.compile(r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE),
             }
         ],
         "base_directory": pathlib.PosixPath("/path/to/trip_data"),

@@ -105,9 +105,7 @@ class ValidationAction(BaseModel):
     def run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
@@ -142,9 +140,7 @@ class ValidationAction(BaseModel):
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -268,9 +264,7 @@ class SlackNotificationAction(DataDocsAction):
             else:
                 assert slack_token and slack_channel
         except AssertionError:
-            raise ValueError(
-                "Please provide either slack_webhook or slack_token and slack_channel"
-            )
+            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")
 
         return values
 
@@ -278,9 +272,7 @@ class SlackNotificationAction(DataDocsAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -355,9 +347,7 @@ class SlackNotificationAction(DataDocsAction):
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(
-                            blocks, query, result
-                        )
+                        result = self._send_notifications_in_batches(blocks, query, result)
                     else:
                         result = self._get_slack_result(query)
 
@@ -367,8 +357,7 @@ class SlackNotificationAction(DataDocsAction):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
         split_text = [
-            text[position : position + chunk_size]
-            for position in range(0, chunks, chunk_size)
+            text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
         ]
         for batch in split_text:
             query["text"] = batch
@@ -427,9 +416,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -522,9 +509,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     renderer: MicrosoftTeamsRenderer = Field(default_factory=MicrosoftTeamsRenderer)
 
     @validator("renderer", pre=True)
-    def _validate_renderer(
-        cls, renderer: dict | MicrosoftTeamsRenderer
-    ) -> MicrosoftTeamsRenderer:
+    def _validate_renderer(cls, renderer: dict | MicrosoftTeamsRenderer) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, MicrosoftTeamsRenderer):
@@ -538,9 +523,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -640,9 +623,7 @@ class OpsgenieAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -687,9 +668,7 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(
-                description, expectation_suite_name, settings
-            )
+            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
@@ -791,9 +770,7 @@ class EmailAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -834,9 +811,7 @@ class EmailAction(ValidationAction):
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 
-            receiver_emails_list = list(
-                map(lambda x: x.strip(), self.receiver_emails.split(","))
-            )
+            receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
 
             # this will actually send the email
             email_result = send_email(
@@ -905,9 +880,7 @@ class StoreValidationResultAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -936,9 +909,7 @@ def store_validation_results(  # noqa: PLR0913
     validation_result_store: ValidationsStore,
     suite_validation_result: ExpectationSuiteValidationResult,
     suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
-    expectation_suite_identifier: Optional[
-        ExpectationSuiteIdentifier | GXCloudIdentifier
-    ] = None,
+    expectation_suite_identifier: Optional[ExpectationSuiteIdentifier | GXCloudIdentifier] = None,
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     cloud_mode: bool = False,
 ) -> bool | GXCloudResourceRef:
@@ -996,9 +967,7 @@ class UpdateDataDocsAction(DataDocsAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1090,9 +1059,7 @@ class SNSNotificationAction(ValidationAction):
             )
 
         if self.sns_message_subject is None:
-            logger.warning(
-                "No message subject was passed checking for expectation_suite_name"
-            )
+            logger.warning("No message subject was passed checking for expectation_suite_name")
             if expectation_suite_identifier is None:
                 subject = validation_result_suite_identifier.run_id
                 logger.warning(
@@ -1132,27 +1099,19 @@ class APINotificationAction(ValidationAction):
         elif "active_batch_definition" in validation_result_suite.meta:
             data_asset_name = (
                 validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta[
-                    "active_batch_definition"
-                ].data_asset_name
+                if validation_result_suite.meta["active_batch_definition"].data_asset_name
                 else "__no_data_asset_name__"
             )
         else:
             data_asset_name = "__no_data_asset_name__"
 
         validation_results: list = validation_result_suite.get("results")
-        validation_results_serializable: list = convert_to_json_serializable(
-            validation_results
-        )
+        validation_results_serializable: list = convert_to_json_serializable(validation_results)
 
-        payload = self.create_payload(
-            data_asset_name, suite_name, validation_results_serializable
-        )
+        payload = self.create_payload(data_asset_name, suite_name, validation_results_serializable)
 
         response = self.send_results(payload)
-        return (
-            f"Successfully Posted results to API, status code - {response.status_code}"
-        )
+        return f"Successfully Posted results to API, status code - {response.status_code}"
 
     def send_results(self, payload) -> requests.Response:
         try:
@@ -1163,9 +1122,7 @@ class APINotificationAction(ValidationAction):
             raise e
 
     @staticmethod
-    def create_payload(
-        data_asset_name, suite_name, validation_results_serializable
-    ) -> str:
+    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:
         payload = json.dumps(
             {
                 "test_suite_name": suite_name,

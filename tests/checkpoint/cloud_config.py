@@ -169,9 +169,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore"
-            },
+            "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -328,9 +326,7 @@ def _datasource(data_dir):
                         "default_runtime_data_connector_name": {
                             "assets": {
                                 "taxi_data": {
-                                    "batch_identifiers": [
-                                        "runtime_batch_identifier_name"
-                                    ],
+                                    "batch_identifiers": ["runtime_batch_identifier_name"],
                                     "class_name": "Asset",
                                     "module_name": "great_expectations.datasource.data_connector.asset",
                                 }

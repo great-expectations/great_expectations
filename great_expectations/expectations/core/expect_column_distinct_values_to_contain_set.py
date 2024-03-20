@@ -157,9 +157,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"distinct values must contain this set: {values_string}."
 
@@ -174,9 +172,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(

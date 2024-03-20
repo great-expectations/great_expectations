@@ -79,9 +79,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_conflicts
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")]
-)
+@pytest.mark.parametrize("param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")])
 def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
     base_block: Dict[str, str], param, value
 ):

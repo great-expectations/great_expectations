@@ -200,16 +200,14 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
                 {
                     "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH
-                    / "yellow_tripdata_sample_2018-04.csv",
+                    "filepath_or_buffer": CSV_PATH / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH
-                    / "yellow_tripdata_sample_2018-04.csv",
+                    "filepath_or_buffer": CSV_PATH / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
@@ -248,9 +246,7 @@ class TestExcludeUnsetAssetFields:
         asset_dict_config.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(
-                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-                ),
+                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict_config["name"]
@@ -281,9 +277,7 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(
-                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-                ),
+                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_dict_config = copy.deepcopy(asset_dict)
@@ -362,9 +356,7 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             if _BATCH_CONFIGS_KEY in asset_config:
                 with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
                     batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
-                    for batch_config in with_ids[ds_name]["assets"][asset_name][
-                        _BATCH_CONFIGS_KEY
-                    ]
+                    for batch_config in with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY]
                 }
                 for batch_config in with_ids[ds_name]["assets"][asset_name][
                     _BATCH_CONFIGS_KEY
@@ -375,28 +367,22 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
 
                 no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
                     batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
-                    for batch_config in no_ids[ds_name]["assets"][asset_name][
-                        _BATCH_CONFIGS_KEY
-                    ]
+                    for batch_config in no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY]
                 }
                 for batch_config in no_ids[ds_name]["assets"][asset_name][
                     _BATCH_CONFIGS_KEY
                 ].values():
                     batch_config.pop("id", None)
 
-    no_ids = (
-        _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
-            config={
-                _FLUENT_DATASOURCES_KEY: no_ids,
-            }
-        )
+    no_ids = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
+        config={
+            _FLUENT_DATASOURCES_KEY: no_ids,
+        }
     )
-    with_ids = (
-        _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
-            config={
-                _FLUENT_DATASOURCES_KEY: with_ids,
-            }
-        )
+    with_ids = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
+        config={
+            _FLUENT_DATASOURCES_KEY: with_ids,
+        }
     )
 
     gx_config_no_ids = GxConfig.parse_obj(no_ids)
@@ -682,9 +668,7 @@ def from_all_config(request: FixtureRequest) -> GxConfig:
 
 
 @pytest.mark.unit
-def test_dict_config_round_trip(
-    inject_engine_lookup_double, from_dict_gx_config: GxConfig
-):
+def test_dict_config_round_trip(inject_engine_lookup_double, from_dict_gx_config: GxConfig):
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
@@ -696,9 +680,7 @@ def test_dict_config_round_trip(
 
 
 @pytest.mark.unit
-def test_json_config_round_trip(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
-):
+def test_json_config_round_trip(inject_engine_lookup_double, from_json_gx_config: GxConfig):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
@@ -710,9 +692,7 @@ def test_json_config_round_trip(
 
 
 @pytest.mark.filesystem
-def test_yaml_config_round_trip(
-    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
-):
+def test_yaml_config_round_trip(inject_engine_lookup_double, from_yaml_gx_config: GxConfig):
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
@@ -745,9 +725,7 @@ def test_yaml_file_config_round_trip(
 
 
 @pytest.mark.filesystem
-def test_assets_key_presence(
-    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
-):
+def test_assets_key_presence(inject_engine_lookup_double, from_yaml_gx_config: GxConfig):
     ds_wo_assets = None
     ds_with_assets = None
     for ds in from_yaml_gx_config.datasources:
@@ -759,21 +737,17 @@ def test_assets_key_presence(
     assert ds_wo_assets, "Need at least one Datasource without assets for this test"
 
     dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
-    print(
-        f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
-    )
+    print(f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}")
 
     assert _ASSETS_KEY in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_with_assets.name]
     assert _ASSETS_KEY not in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_wo_assets.name]
 
 
 # Marked via from_all_config fixture
-def test_partitioners_deserialization(
-    inject_engine_lookup_double, from_all_config: GxConfig
-):
-    table_asset: TableAsset = from_all_config.get_datasource(
-        datasource_name="my_pg_ds"
-    ).get_asset(asset_name="with_partitioner")
+def test_partitioners_deserialization(inject_engine_lookup_double, from_all_config: GxConfig):
+    table_asset: TableAsset = from_all_config.get_datasource(datasource_name="my_pg_ds").get_asset(
+        asset_name="with_partitioner"
+    )
     partitioner = table_asset.batch_configs[0].partitioner
     assert isinstance(partitioner, PartitionerYearAndMonth)
     assert partitioner.method_name == "partition_on_year_and_month"
@@ -794,15 +768,13 @@ def test_yaml_config_round_trip_ordering(
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
 @pytest.mark.big
-def test_custom_sorter_serialization(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
-):
+def test_custom_sorter_serialization(inject_engine_lookup_double, from_json_gx_config: GxConfig):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT[_FLUENT_DATASOURCES_KEY][
-        "my_pg_ds"
-    ]["assets"]["with_dslish_sorters"]["order_by"]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT[_FLUENT_DATASOURCES_KEY]["my_pg_ds"][
+        "assets"
+    ]["with_dslish_sorters"]["order_by"]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped
@@ -834,9 +806,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
-            datasource_without_default_pandas_data_asset_config_dict[
-                _FLUENT_DATASOURCES_KEY
-            ],
+            datasource_without_default_pandas_data_asset_config_dict[_FLUENT_DATASOURCES_KEY],
         )
     )[0]
     default_pandas_datasoure_config_dict["assets"] = list(
@@ -861,9 +831,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
-            only_default_pandas_datasource_and_data_asset_config_dict[
-                _FLUENT_DATASOURCES_KEY
-            ],
+            only_default_pandas_datasource_and_data_asset_config_dict[_FLUENT_DATASOURCES_KEY],
         )
     )[0]
     default_pandas_datasoure_config_dict["assets"] = list(
@@ -920,15 +888,13 @@ def test_config_substitution_retains_original_value_on_save(
     print(f"injected env variables:\n{pf(seed_ds_env_vars)}\n")
     my_conn_str = os.environ["MY_CONN_STR"]
 
-    original: dict = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
+    original: dict = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]["my_sqlite_ds_w_subs"]
 
     from great_expectations import get_context
 
-    context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
-    )
+    context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 
     print(context.fluent_config)
 
@@ -946,9 +912,9 @@ def test_config_substitution_retains_original_value_on_save(
 
     context._save_project_config()
 
-    round_tripped = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
+    round_tripped = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]["my_sqlite_ds_w_subs"]
 
     assert round_tripped == original
 
@@ -963,18 +929,16 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     # show injected env variable
     print(f"injected env variables:\n{pf(seed_ds_env_vars)}")
 
-    original: dict = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]
+    original: dict = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]
     assert original.get("my_sqlite_ds_w_subs")  # will be modified
     assert original.get("my_pg_ds")  # will be deleted
     assert not original.get("my_sqlite")  # will be added
 
     from great_expectations import get_context
 
-    context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
-    )
+    context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 
     datasources = context.fluent_datasources
 
@@ -990,9 +954,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]
         "my_sqlite_ds_w_subs"
     )
-    sqlite_ds_w_subs.add_table_asset(
-        "new_asset", table_name="yellow_tripdata_sample_2019_01"
-    )
+    sqlite_ds_w_subs.add_table_asset("new_asset", table_name="yellow_tripdata_sample_2019_01")
 
     context._save_project_config()
 

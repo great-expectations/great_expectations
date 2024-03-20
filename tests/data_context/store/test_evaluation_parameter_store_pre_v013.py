@@ -172,9 +172,7 @@ def test_evaluation_parameter_store_methods(
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -209,9 +207,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,

@@ -89,17 +89,13 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_file(
-                        filename=filename
-                    )
+                credentials = google.service_account.Credentials.from_service_account_file(
+                    filename=filename
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_info(
-                        info=info
-                    )
+                credentials = google.service_account.Credentials.from_service_account_info(
+                    info=info
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
@@ -118,9 +114,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
     @override
@@ -153,9 +147,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

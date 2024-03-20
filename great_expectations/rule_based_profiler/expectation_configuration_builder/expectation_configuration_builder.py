@@ -40,9 +40,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def __init__(
         self,
         expectation_type: str,
-        validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
@@ -112,9 +110,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             domain=domain, variables=variables, parameters=parameters
         )
         if config:
-            return self._roundtrip_config_through_expectation(
-                domain=domain, config=config
-            )
+            return self._roundtrip_config_through_expectation(domain=domain, config=config)
         return None
 
     def _roundtrip_config_through_expectation(
@@ -187,9 +183,7 @@ def init_rule_expectation_configuration_builders(
 
 
 def init_expectation_configuration_builder(
-    expectation_configuration_builder_config: Union[
-        ExpectationConfigurationBuilder, dict
-    ],
+    expectation_configuration_builder_config: Union[ExpectationConfigurationBuilder, dict],
     data_context: Optional[AbstractDataContext] = None,
 ) -> ExpectationConfigurationBuilder:
     if not isinstance(expectation_configuration_builder_config, dict):

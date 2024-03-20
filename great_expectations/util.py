@@ -203,15 +203,11 @@ def measure_execution_time(
                 if execution_time_holder is not None and hasattr(
                     execution_time_holder, execution_time_property_name
                 ):
-                    setattr(
-                        execution_time_holder, execution_time_property_name, delta_t
-                    )
+                    setattr(execution_time_holder, execution_time_property_name, delta_t)
 
                 if pretty_print:
                     if include_arguments:
-                        bound_args: BoundArguments = signature(func).bind(
-                            *args, **kwargs
-                        )
+                        bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                         call_args: OrderedDict = bound_args.arguments
                         print(
                             f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
@@ -227,9 +223,7 @@ seconds."""
     return execution_time_decorator
 
 
-def verify_dynamic_loading_support(
-    module_name: str, package_name: Optional[str] = None
-) -> None:
+def verify_dynamic_loading_support(module_name: str, package_name: Optional[str] = None) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
@@ -425,9 +419,7 @@ def _convert_nulls_to_None(code: str) -> str:
     result = re.findall(pattern, code)
     for match in result:
         code = code.replace(f'"{match}": null', f'"{match}": None')
-        logger.info(
-            f"Replaced '{match}: null' with '{match}: None' before writing to file"
-        )
+        logger.info(f"Replaced '{match}: null' with '{match}: None' before writing to file")
     return code
 
 
@@ -504,9 +496,7 @@ def filter_properties_dict(  # noqa: C901, PLR0912, PLR0913
         )
 
     if delete_fields:
-        keys_for_deletion.extend(
-            [key for key, value in properties.items() if key in delete_fields]
-        )
+        keys_for_deletion.extend([key for key, value in properties.items() if key in delete_fields])
 
     if clean_nulls:
         keys_for_deletion.extend(
@@ -779,8 +769,7 @@ def convert_decimal_to_float(d: SupportsFloat) -> float:
         len(
             list(
                 filter(
-                    lambda frame_info: Path(frame_info.filename).name
-                    == "parameter_builder.py"
+                    lambda frame_info: Path(frame_info.filename).name == "parameter_builder.py"
                     and frame_info.function == "get_metrics",
                     stack(),
                 )
@@ -836,14 +825,10 @@ def isclose(
     if isinstance(operand_a, str) and isinstance(operand_b, str):
         return operand_a == operand_b
 
-    if isinstance(operand_a, datetime.datetime) and isinstance(
-        operand_b, datetime.datetime
-    ):
+    if isinstance(operand_a, datetime.datetime) and isinstance(operand_b, datetime.datetime):
         operand_a = operand_a.timestamp()  # type: ignore[assignment]
         operand_b = operand_b.timestamp()  # type: ignore[assignment]
-    elif isinstance(operand_a, datetime.timedelta) and isinstance(
-        operand_b, datetime.timedelta
-    ):
+    elif isinstance(operand_a, datetime.timedelta) and isinstance(operand_b, datetime.timedelta):
         operand_a = operand_a.total_seconds()  # type: ignore[assignment]
         operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
@@ -867,8 +852,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
         key: Any  # must be "hashable"
         value: Any
         return all(
-            key in target
-            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            key in target and is_candidate_subset_of_target(candidate=val, target=target[key])
             for key, val in candidate.items()
         )
 
@@ -876,10 +860,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
         subitem: Any
         superitem: Any
         return all(
-            any(
-                is_candidate_subset_of_target(subitem, superitem)
-                for superitem in target
-            )
+            any(is_candidate_subset_of_target(subitem, superitem) for superitem in target)
             for subitem in candidate
         )
 
@@ -926,9 +907,7 @@ def convert_ndarray_to_datetime_dtype_best_effort(
         Boolean flag -- True, if conversion was performed; False, otherwise.
         Output "np.ndarray" (converted, if necessary).
     """
-    if is_ndarray_datetime_dtype(
-        data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy
-    ):
+    if is_ndarray_datetime_dtype(data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy):
         return True, False, data
 
     value: Any
@@ -956,9 +935,7 @@ def convert_ndarray_datetime_to_float_dtype_utc_timezone(
     Note: Conversion of "datetime.datetime" to "float" uses "UTC" TimeZone to normalize all "datetime.datetime" values.
     """
     value: Any
-    return np.asarray(
-        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
-    )
+    return np.asarray([value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data])
 
 
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
@@ -999,8 +976,8 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
     """
-    convert_decimal_to_float_vectorized: Callable[[np.ndarray], np.ndarray] = (
-        np.vectorize(pyfunc=convert_decimal_to_float)
+    convert_decimal_to_float_vectorized: Callable[[np.ndarray], np.ndarray] = np.vectorize(
+        pyfunc=convert_decimal_to_float
     )
     return convert_decimal_to_float_vectorized(data)
 
@@ -1152,9 +1129,7 @@ def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     return potential_type
 
 
-def pandas_series_between_inclusive(
-    series: pd.Series, min_value: int, max_value: int
-) -> pd.Series:
+def pandas_series_between_inclusive(series: pd.Series, min_value: int, max_value: int) -> pd.Series:
     """
     As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
     """

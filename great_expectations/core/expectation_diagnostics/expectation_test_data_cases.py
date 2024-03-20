@@ -35,17 +35,13 @@ class TestBackend:
             self.backend in allowed_backend_names
         ), f"backend must be one of {allowed_backend_names}, not {self.backend}"
         if self.backend != "sqlalchemy":
-            assert (
-                self.dialects is None
-            ), f"You may not specify dialects for backend {self.backend}"
+            assert self.dialects is None, f"You may not specify dialects for backend {self.backend}"
         else:
             assert (
                 isinstance(self.dialects, list) and len(self.dialects) > 0
             ), "dialects must be a list for backend sqlalchemy"
             bad_dialects = [
-                dialect
-                for dialect in self.dialects
-                if dialect not in allowed_sql_dialects
+                dialect for dialect in self.dialects if dialect not in allowed_sql_dialects
             ]
             assert (
                 bad_dialects == []

@@ -136,8 +136,7 @@ class EvaluationParameterParser:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
-                Literal("urn:great_expectations:")
-                + Word(alphas, f"{alphanums}_$:?=%.&")
+                Literal("urn:great_expectations:") + Word(alphas, f"{alphanums}_$:?=%.&")
             )
             variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
@@ -224,27 +223,19 @@ class EvaluationParameterParser:
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info(
-                    "Evaluation parameter operand successfully parsed as integer."
-                )
+                logger.info("Evaluation parameter operand successfully parsed as integer.")
             except ValueError:
                 logger.info("Parsing evaluation parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info(
-                        "Evaluation parameter operand successfully parsed as float."
-                    )
+                    logger.info("Evaluation parameter operand successfully parsed as float.")
                 except ValueError:
                     logger.info("Parsing evaluation parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info(
-                            "Evaluation parameter operand successfully parsed as datetime."
-                        )
+                        logger.info("Evaluation parameter operand successfully parsed as datetime.")
                     except ValueError as e:
-                        logger.info(
-                            "Parsing evaluation parameter operand as datetime failed."
-                        )
+                        logger.info("Parsing evaluation parameter operand as datetime failed.")
                         raise e
             return evaluated
 
@@ -393,9 +384,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                 if store:
-                    return store.get_query_result(
-                        res["metric_name"], res.get("metric_kwargs", {})
-                    )
+                    return store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
                 return None
             else:
                 logger.error(
@@ -460,9 +449,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
-        exception_message = (
-            f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
-        )
+        exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
             f"Error while evaluating evaluation parameter expression: {e!s}"

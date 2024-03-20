@@ -87,9 +87,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
 
         if regex_expression is None:
-            logger.warning(
-                f"Regex is not supported for dialect {_dialect.dialect.name!s}"
-            )
+            logger.warning(f"Regex is not supported for dialect {_dialect.dialect.name!s}")
             raise NotImplementedError
 
         return regex_expression
@@ -205,15 +203,11 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
-        semantic_type_name_plural = configuration.kwargs.get(
-            "semantic_type_name_plural"
-        )
+        semantic_type_name_plural = configuration.kwargs.get("semantic_type_name_plural")
 
         if result.success:
             if mostly == 1 or mostly is None:
@@ -249,9 +243,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         params = renderer_configuration.params
 
         if not params.regex:
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
 
@@ -293,15 +285,11 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         )
 
         if not params.get("regex"):
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:

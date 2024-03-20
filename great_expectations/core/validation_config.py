@@ -54,9 +54,7 @@ class ValidationConfig(BaseModel):
     """
 
     class Config:
-        arbitrary_types_allowed = (
-            True  # Necessary for compatibility with suite's Marshmallow dep
-        )
+        arbitrary_types_allowed = True  # Necessary for compatibility with suite's Marshmallow dep
         validate_assignment = True
         """
         When serialized, the suite and data fields should be encoded as a set of identifiers.
@@ -143,9 +141,7 @@ class ValidationConfig(BaseModel):
         try:
             suite_identifiers = _IdentifierBundle.parse_obj(suite_dict)
         except ValidationError as e:
-            raise ValueError(
-                "Serialized suite did not contain expected identifiers"
-            ) from e
+            raise ValueError("Serialized suite did not contain expected identifiers") from e
 
         name = suite_identifiers.name
         id = suite_identifiers.id
@@ -156,9 +152,7 @@ class ValidationConfig(BaseModel):
         try:
             config = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
-            raise ValueError(
-                f"Could not find suite with name: {name} and id: {id}"
-            ) from e
+            raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e
 
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
@@ -168,9 +162,7 @@ class ValidationConfig(BaseModel):
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
         except ValidationError as e:
-            raise ValueError(
-                "Serialized data did not contain expected identifiers"
-            ) from e
+            raise ValueError("Serialized data did not contain expected identifiers") from e
 
         ds_name = data_identifiers.datasource.name
         asset_name = data_identifiers.asset.name
@@ -215,9 +207,7 @@ class ValidationConfig(BaseModel):
             batch_request_options=batch_definition_options,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(
-            self.suite, evaluation_parameters
-        )
+        results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
 
         (
             expectation_suite_identifier,
@@ -255,9 +245,7 @@ class ValidationConfig(BaseModel):
         else:
             run_time = datetime.datetime.now(tz=datetime.timezone.utc)
             run_id = RunIdentifier(run_time=run_time)
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=self.suite.name
-            )
+            expectation_suite_identifier = ExpectationSuiteIdentifier(name=self.suite.name)
             validation_result_id = ValidationResultIdentifier(
                 batch_identifier=validator.active_batch_id,
                 expectation_suite_identifier=expectation_suite_identifier,

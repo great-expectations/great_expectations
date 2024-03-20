@@ -41,9 +41,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
     # ^^^ Docs <> Source Code mismatch
 
     path_glob_filter: Optional[Union[bool, str]] = Field(None, alias="pathGlobFilter")
-    recursive_file_lookup: Optional[Union[bool, str]] = Field(
-        None, alias="recursiveFileLookup"
-    )
+    recursive_file_lookup: Optional[Union[bool, str]] = Field(None, alias="recursiveFileLookup")
     modified_before: Optional[Union[bool, str]] = Field(None, alias="modifiedBefore")
     modified_after: Optional[Union[bool, str]] = Field(None, alias="modifiedAfter")
 
@@ -71,9 +69,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
-        None, alias="schema"
-    )
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(None, alias="schema")
     # sep: Optional[str] = None,
     sep: Union[str, None] = None
     # encoding: Optional[str] = None,
@@ -111,9 +107,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # maxColumns: Optional[Union[int, str]] = None,
     max_columns: Optional[Union[int, str]] = Field(None, alias="maxColumns")
     # maxCharsPerColumn: Optional[Union[int, str]] = None,
-    max_chars_per_column: Optional[Union[int, str]] = Field(
-        None, alias="maxCharsPerColumn"
-    )
+    max_chars_per_column: Optional[Union[int, str]] = Field(None, alias="maxCharsPerColumn")
     # maxMalformedLogPerPartition: Optional[Union[int, str]] = None,
     max_malformed_log_per_partition: Optional[Union[int, str]] = Field(
         None, alias="maxMalformedLogPerPartition"
@@ -121,15 +115,11 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # mode: Optional[str] = None,
     mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
     # columnNameOfCorruptRecord: Optional[str] = None,
-    column_name_of_corrupt_record: Optional[str] = Field(
-        None, alias="columnNameOfCorruptRecord"
-    )
+    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
     # multiLine: Optional[Union[bool, str]] = None,
     multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
     # charToEscapeQuoteEscaping: Optional[str] = None,
-    char_to_escape_quote_escaping: Optional[str] = Field(
-        None, alias="charToEscapeQuoteEscaping"
-    )
+    char_to_escape_quote_escaping: Optional[str] = Field(None, alias="charToEscapeQuoteEscaping")
     # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
     # enforceSchema: Optional[Union[bool, str]] = None,
@@ -367,13 +357,9 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
-        None, alias="schema"
-    )
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(None, alias="schema")
     # primitivesAsString: Optional[Union[bool, str]] = None,
-    primitives_as_string: Optional[Union[bool, str]] = Field(
-        None, alias="primitivesAsString"
-    )
+    primitives_as_string: Optional[Union[bool, str]] = Field(None, alias="primitivesAsString")
     # prefersDecimal: Optional[Union[bool, str]] = None,
     prefers_decimal: Optional[Union[bool, str]] = Field(None, alias="prefersDecimal")
     # allowComments: Optional[Union[bool, str]] = None,
@@ -383,9 +369,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
         None, alias="allowUnquotedFieldNames"
     )
     # allowSingleQuotes: Optional[Union[bool, str]] = None,
-    allow_single_quotes: Optional[Union[bool, str]] = Field(
-        None, alias="allowSingleQuotes"
-    )
+    allow_single_quotes: Optional[Union[bool, str]] = Field(None, alias="allowSingleQuotes")
     # allowNumericLeadingZero: Optional[Union[bool, str]] = None,
     allow_numeric_leading_zero: Optional[Union[bool, str]] = Field(
         None, alias="allowNumericLeadingZero"
@@ -397,9 +381,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # mode: Optional[str] = None,
     mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
     # columnNameOfCorruptRecord: Optional[str] = None,
-    column_name_of_corrupt_record: Optional[str] = Field(
-        None, alias="columnNameOfCorruptRecord"
-    )
+    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
     # dateFormat: Optional[str] = None,
     date_format: Optional[str] = Field(None, alias="dateFormat")
     # timestampFormat: Optional[str] = None,
@@ -415,9 +397,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
     # dropFieldIfAllNull: Optional[Union[bool, str]] = None,
-    drop_field_if_all_null: Optional[Union[bool, str]] = Field(
-        None, alias="dropFieldIfAllNull"
-    )
+    drop_field_if_all_null: Optional[Union[bool, str]] = Field(None, alias="dropFieldIfAllNull")
     # encoding: Optional[str] = None,
     encoding: Optional[str] = None
     # locale: Optional[str] = None,

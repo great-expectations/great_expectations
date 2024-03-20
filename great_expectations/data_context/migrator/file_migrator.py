@@ -75,9 +75,7 @@ class FileMigrator:
 
     def _scaffold_filesystem(self) -> FileDataContext:
         path = pathlib.Path.cwd().absolute()
-        target_context = cast(
-            FileDataContext, FileDataContext.create(project_root_dir=str(path))
-        )
+        target_context = cast(FileDataContext, FileDataContext.create(project_root_dir=str(path)))
         logger.info("Scaffolded necessary directories for a file-backed context")
 
         return target_context
@@ -105,12 +103,8 @@ class FileMigrator:
             target_store=target_store,
         )
 
-    def _migrate_store(
-        self, store_name: str, source_store: Store, target_store: Store
-    ) -> None:
-        logger.info(
-            f"Migrating key-value pairs from {store_name} ({source_store.__class__})."
-        )
+    def _migrate_store(self, store_name: str, source_store: Store, target_store: Store) -> None:
+        logger.info(f"Migrating key-value pairs from {store_name} ({source_store.__class__}).")
         for key in source_store.list_keys():
             source_obj = source_store.get(key)
             target_store.add(key=key, value=source_obj)

@@ -265,12 +265,8 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
         merge_schema: Optional[Union[bool, str]] = None,
-        datetime_rebase_mode: Optional[
-            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
-        ] = None,
-        int_96_rebase_mode: Optional[
-            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
-        ] = None,
+        datetime_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = None,
+        int_96_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = None,
         # Parquet Specific Options ^^^
         # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
@@ -302,12 +298,8 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
         merge_schema: Optional[Union[bool, str]] = None,
-        datetime_rebase_mode: Optional[
-            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
-        ] = None,
-        int_96_rebase_mode: Optional[
-            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
-        ] = None,
+        datetime_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = None,
+        int_96_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = None,
         # Parquet Specific Options ^^^
         # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html

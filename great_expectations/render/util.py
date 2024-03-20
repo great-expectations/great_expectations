@@ -61,9 +61,7 @@ def num_to_str(  # noqa: C901
     try:
         d = local_context.create_decimal(s)
     except decimal.InvalidOperation:
-        raise TypeError(
-            f"num_to_str received an invalid value: {f} of type {type(f).__name__}."
-        )
+        raise TypeError(f"num_to_str received an invalid value: {f} of type {type(f).__name__}.")
     if no_scientific:
         result = format(d, "f")
     elif use_locale:
@@ -218,9 +216,7 @@ def parse_row_condition_string_pandas_engine(
             }
         else:
             params[f"row_condition__{i}"] = param_value
-            condition_string = condition_string.replace(
-                condition, f"$row_condition__{i}"
-            )
+            condition_string = condition_string.replace(condition, f"$row_condition__{i}")
 
     template_str += condition_string.lower()
 
@@ -238,13 +234,9 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
         Tuple of strings to use for the at least condition and the at most condition.
     """
     at_least_str = (
-        "greater than"
-        if params.get("strict_min") is True
-        else "greater than or equal to"
+        "greater than" if params.get("strict_min") is True else "greater than or equal to"
     )
-    at_most_str = (
-        "less than" if params.get("strict_max") is True else "less than or equal to"
-    )
+    at_most_str = "less than" if params.get("strict_max") is True else "less than or equal to"
 
     return at_least_str, at_most_str
 
@@ -396,16 +388,12 @@ def _convert_unexpected_indices_to_df(
     domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
-        unexpected_index_df: pd.DataFrame = pd.DataFrame(
-            unexpected_index_list, dtype="string"
-        )
+        unexpected_index_df: pd.DataFrame = pd.DataFrame(unexpected_index_list, dtype="string")
         unexpected_index_df = unexpected_index_df.fillna(value="null")
         first_unexpected_index = unexpected_index_list[0]
         if isinstance(first_unexpected_index, dict):
             domain_column_name_list = list(
-                set(first_unexpected_index.keys()).difference(
-                    set(unexpected_index_column_names)
-                )
+                set(first_unexpected_index.keys()).difference(set(unexpected_index_column_names))
             )
         else:
             raise TypeError(
@@ -425,15 +413,13 @@ def _convert_unexpected_indices_to_df(
         return pd.DataFrame()
 
     # 1. groupby on domain columns, and turn id/pk into list
-    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(
-        domain_column_name_list
-    ).agg(lambda y: list(y))
+    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(domain_column_name_list).agg(
+        lambda y: list(y)
+    )
 
     # 2. add count
     col_to_count: str = unexpected_index_column_names[0]
-    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(
-        lambda x: len(x)
-    )
+    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(lambda x: len(x))
 
     # 3. ensure index is a string
     all_unexpected_indices.index = all_unexpected_indices.index.map(str)
@@ -445,9 +431,7 @@ def _convert_unexpected_indices_to_df(
         )
 
     # 5. only keep the rows we are rendering
-    filtered_unexpected_indices = all_unexpected_indices.head(
-        len(partial_unexpected_counts)
-    )
+    filtered_unexpected_indices = all_unexpected_indices.head(len(partial_unexpected_counts))
     return filtered_unexpected_indices
 
 

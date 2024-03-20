@@ -83,9 +83,7 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -101,9 +99,7 @@ def column_aggregate_value(
 
         return wrapper
     else:
-        raise ValueError(
-            "column_aggregate_value decorator only supports PandasExecutionEngine"
-        )
+        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")
 
 
 def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: C901
@@ -124,9 +120,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
     """
-    partial_fn_type: MetricPartialFunctionTypes = (
-        MetricPartialFunctionTypes.AGGREGATE_FN
-    )
+    partial_fn_type: MetricPartialFunctionTypes = MetricPartialFunctionTypes.AGGREGATE_FN
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
@@ -169,9 +163,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: 
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -234,9 +226,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: 
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
@@ -324,7 +314,5 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         return dependencies
 
 
-class ColumnMetricProvider(
-    ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider
-):
+class ColumnMetricProvider(ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider):
     _DeprecatedMetaMetricProvider__alias = ColumnAggregateMetricProvider

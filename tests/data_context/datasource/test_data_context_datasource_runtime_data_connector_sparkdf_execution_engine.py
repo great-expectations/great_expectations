@@ -148,9 +148,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
     context = data_context_with_datasource_spark_engine
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -203,10 +201,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers
 
 
 ###################################
@@ -518,7 +513,4 @@ def test_file_path_get_validator_successful_specification_sparkdf_engine_named_a
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers

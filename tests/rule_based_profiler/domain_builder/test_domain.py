@@ -208,9 +208,8 @@ def test_semantic_domain_equivalence():
         # noinspection PyUnusedLocal
         domain_d.to_json_dict()
 
-    assert (
-        "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
-        in str(excinfo.value)
+    assert "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes" in str(
+        excinfo.value
     )
 
     domain_e = Domain(
@@ -230,9 +229,8 @@ def test_semantic_domain_equivalence():
         # noinspection PyUnusedLocal
         domain_e.to_json_dict()
 
-    assert (
-        "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
-        in str(excinfo.value)
+    assert "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes" in str(
+        excinfo.value
     )
 
 

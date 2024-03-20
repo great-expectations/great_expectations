@@ -66,9 +66,7 @@ def sql_execution_engine_with_mini_taxi_loaded(sa, mini_taxi_df):
         con=sqlite_engine,
         index=False,
     )
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     return execution_engine
 
 
@@ -81,8 +79,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
     spark_df = spark_session.createDataFrame(
         [
             tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
+                None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist()
             )
             for record in pandas_df.to_records(index=False)
         ],
@@ -96,9 +93,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_table_name(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_table_name(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with `table_name`
     batch_data = SqlAlchemyBatchData(
@@ -110,9 +105,7 @@ def sql_execution_engine_with_mini_taxi_table_name(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_query(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_query(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with query
     batch_data = SqlAlchemyBatchData(
@@ -124,9 +117,7 @@ def sql_execution_engine_with_mini_taxi_query(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_selectable(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with Selectable
     batch_data = SqlAlchemyBatchData(

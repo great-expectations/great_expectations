@@ -28,9 +28,7 @@ class CustomListSorter(Sorter):
     ) -> None:
         super().__init__(name=name, orderby=orderby)
 
-        self._reference_list = self._validate_reference_list(
-            reference_list=reference_list
-        )
+        self._reference_list = self._validate_reference_list(reference_list=reference_list)
 
     @staticmethod
     def _validate_reference_list(

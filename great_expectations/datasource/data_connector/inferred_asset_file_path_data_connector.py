@@ -116,16 +116,13 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         )
 
         data_asset_names: List[str] = [
-            batch_definition.data_asset_name
-            for batch_definition in batch_definition_list
+            batch_definition.data_asset_name for batch_definition in batch_definition_list
         ]
 
         return list(set(data_asset_names))
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -135,9 +132,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return PathBatchSpec(batch_spec)
 

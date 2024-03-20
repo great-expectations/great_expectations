@@ -96,9 +96,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             table = sa.Table(table_name, meta, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
-            if {str(col.name).lower() for col in table.columns} != (
-                set(key_columns) | {"value"}
-            ):
+            if {str(col.name).lower() for col in table.columns} != (set(key_columns) | {"value"}):
                 raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
@@ -184,9 +182,7 @@ class DatabaseStoreBackend(StoreBackend):
         return engine
 
     @staticmethod
-    def _get_sqlalchemy_key_pair_auth_url(
-        drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
+    def _get_sqlalchemy_key_pair_auth_url(drivername: str, credentials: dict) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -208,9 +204,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
-                    password=private_key_passphrase.encode()
-                    if private_key_passphrase
-                    else None,
+                    password=private_key_passphrase.encode() if private_key_passphrase else None,
                     backend=default_backend(),
                 )
             except ValueError as e:

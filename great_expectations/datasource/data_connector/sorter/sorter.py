@@ -38,9 +38,9 @@ class Sorter:
             if len(list(batch_definition.batch_identifiers.values())) == 0:
                 batch_identifier_values = [None]
             elif isinstance(list(batch_definition.batch_identifiers.values())[0], dict):
-                batch_identifier_values = list(
-                    batch_definition.batch_identifiers.values()
-                )[0].values()
+                batch_identifier_values = list(batch_definition.batch_identifiers.values())[
+                    0
+                ].values()
             else:
                 batch_identifier_values = batch_definition.batch_identifiers.values()
 

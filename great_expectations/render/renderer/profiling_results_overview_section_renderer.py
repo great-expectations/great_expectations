@@ -78,9 +78,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "Number of observations",
-                            "tooltip": {
-                                "content": "expect_table_row_count_to_be_between"
-                            },
+                            "tooltip": {"content": "expect_table_row_count_to_be_between"},
                             "params": {"tooltip_text": "Number of observations"},
                         },
                     }
@@ -317,9 +315,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         type_evrs = cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_be_in_type_list"
-        ) + cls._find_all_evrs_by_type(
-            evrs.results, "expect_column_values_to_be_of_type"
-        )
+        ) + cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:
@@ -327,10 +323,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         for evr in type_evrs:
             column = evr.expectation_config.kwargs["column"]
-            if (
-                evr.expectation_config.expectation_type
-                == "expect_column_values_to_be_in_type_list"
-            ):
+            if evr.expectation_config.expectation_type == "expect_column_values_to_be_in_type_list":
                 if evr.expectation_config.kwargs["type_list"] is None:
                     column_types[column] = "unknown"
                     continue

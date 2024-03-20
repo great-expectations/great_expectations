@@ -99,9 +99,7 @@ class BatchManager:
         """
         active_batch_data_id: Optional[str] = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
-            logger.warning(
-                "ID of active Batch and ID of active loaded BatchData differ."
-            )
+            logger.warning("ID of active Batch and ID of active loaded BatchData differ.")
 
         return self._active_batch_id
 

@@ -78,14 +78,11 @@ def test_simple_sematic_filter_defaults_to_all_columns(empty_data_context):
         batch_ids=batch_ids,
         column_names=["pickup_datetime", "dropoff_datetime", "store_and_fwd_flag"],
     )
-    assert (
-        semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map
-        == {
-            "pickup_datetime": SemanticDomainTypes.DATETIME,
-            "dropoff_datetime": SemanticDomainTypes.TEXT,
-            "store_and_fwd_flag": SemanticDomainTypes.TEXT,
-        }
-    )
+    assert semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map == {
+        "pickup_datetime": SemanticDomainTypes.DATETIME,
+        "dropoff_datetime": SemanticDomainTypes.TEXT,
+        "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+    }
 
     # Ensure that the data types are read correctly without column_names listed
     semantic_type_filter = SimpleSemanticTypeFilter(

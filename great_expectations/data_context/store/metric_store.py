@@ -33,20 +33,14 @@ class MetricStore(Store):
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 if "table_name" not in store_backend:
-                    store_backend["table_name"] = store_backend.get(
-                        "table_name", "ge_metrics"
-                    )
+                    store_backend["table_name"] = store_backend.get("table_name", "ge_metrics")
                 if "key_columns" not in store_backend:
                     store_backend["key_columns"] = store_backend.get(
                         "key_columns",
@@ -76,13 +70,9 @@ class EvaluationParameterStore(MetricStore):
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, DatabaseStoreBackend):

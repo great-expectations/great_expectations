@@ -57,17 +57,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.parametrize(
@@ -106,18 +102,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            query=query,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        query=query,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -148,17 +140,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
         context=context,
     )
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -194,15 +182,11 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
         context=context,
     )
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            query=query,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        query=query,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed

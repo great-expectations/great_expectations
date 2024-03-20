@@ -62,9 +62,9 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 )
                 # pull in needed config substitutions using the `_config_provider`
                 # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
-                boto3_options: dict = self.dict(
-                    config_provider=self._config_provider
-                ).get("boto3_options", {})
+                boto3_options: dict = self.dict(config_provider=self._config_provider).get(
+                    "boto3_options", {}
+                )
                 try:
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
@@ -145,6 +145,4 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             )
         )
 
-        logger.info(
-            f"{self.data_connector_type.__name__} created for '{data_asset.name}'"
-        )
+        logger.info(f"{self.data_connector_type.__name__} created for '{data_asset.name}'")

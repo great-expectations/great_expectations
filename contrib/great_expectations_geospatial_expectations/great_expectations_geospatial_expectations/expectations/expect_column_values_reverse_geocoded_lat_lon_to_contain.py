@@ -48,9 +48,7 @@ class ColumnValuesReverseGeocodedLatLonContain(ColumnMapMetricProvider):
         reverse_geocoded_column = column.apply(geopandas.tools.reverse_geocode)
 
         # check if lowercase reverse geocoded string contains word
-        return reverse_geocoded_column.apply(
-            lambda x: word in x["address"].values[0].lower()
-        )
+        return reverse_geocoded_column.apply(lambda x: word in x["address"].values[0].lower())
 
 
 # This class defines the Expectation itself
@@ -71,9 +69,7 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
             More info here: https://geopandas.org/en/stable/docs/reference/api/geopandas.tools.reverse_geocode.html
     """
 
-    def validate_configuration(
-        cls, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(cls, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -203,7 +199,9 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         )
 
         if params["mostly"] is None:
-            template_str = "values must be lat lon and contain $word when reverse geocoded by $provider"
+            template_str = (
+                "values must be lat lon and contain $word when reverse geocoded by $provider"
+            )
         else:
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
