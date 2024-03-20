@@ -64,28 +64,30 @@ def fds_data_asset_with_event_type_partitioner(
 
 
 @pytest.fixture
-def batch_config(
+def batch_definition(
     fds_data_asset: DataAsset,
 ) -> BatchDefinition:
-    batch_config = BatchDefinition(name="test_batch_config")
-    batch_config.set_data_asset(fds_data_asset)
-    return batch_config
+    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition.set_data_asset(fds_data_asset)
+    return batch_definition
 
 
 @pytest.fixture
-def batch_config_with_event_type_partitioner(
+def batch_definition_with_event_type_partitioner(
     fds_data_asset_with_event_type_partitioner: DataAsset,
 ) -> BatchDefinition:
     partitioner = PartitionerColumnValue(column_name="event_type")
-    batch_config = BatchDefinition(name="test_batch_config", partitioner=partitioner)
-    batch_config.set_data_asset(fds_data_asset_with_event_type_partitioner)
-    return batch_config
+    batch_definition = BatchDefinition(name="test_batch_definition", partitioner=partitioner)
+    batch_definition.set_data_asset(fds_data_asset_with_event_type_partitioner)
+    return batch_definition
 
 
 @pytest.fixture
-def validator(fds_data_context: AbstractDataContext, batch_config: BatchDefinition) -> Validator:
+def validator(
+    fds_data_context: AbstractDataContext, batch_definition: BatchDefinition
+) -> Validator:
     return Validator(
-        batch_config=batch_config,
+        batch_definition=batch_definition,
         batch_request_options=None,
         result_format=ResultFormat.SUMMARY,
     )
@@ -153,11 +155,11 @@ def test_validate_expectation_failure(validator: Validator, failing_expectation:
 @pytest.mark.unit
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
-    batch_config_with_event_type_partitioner: BatchDefinition,
+    batch_definition_with_event_type_partitioner: BatchDefinition,
 ):
     desired_event_type = "start"
     validator = Validator(
-        batch_config=batch_config_with_event_type_partitioner,
+        batch_definition=batch_definition_with_event_type_partitioner,
         batch_request_options={"event_type": desired_event_type},
     )
 

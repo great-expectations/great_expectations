@@ -184,10 +184,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
-    batch_configs: List[BatchDefinition] = Field(default_factory=list)
+    batch_definitions: List[BatchDefinition] = Field(default_factory=list)
 
     # non-field private attributes
-    _save_batch_config: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
+    _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
@@ -253,90 +253,90 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_config(
+    def add_batch_definition(
         self, name: str, partitioner: Optional[Partitioner] = None
     ) -> BatchDefinition:
-        """Add a BatchConfig to this DataAsset.
-        BatchConfig names must be unique within a DataAsset.
+        """Add a BatchDefinition to this DataAsset.
+        BatchDefinition names must be unique within a DataAsset.
 
-        If the DataAsset is tied to a DataContext, the BatchConfig will be persisted.
+        If the DataAsset is tied to a DataContext, the BatchDefinition will be persisted.
 
         Args:
-            name (str): Name of the new batch config.
-            partitioner: Optional Partitioner to partition this BatchConfig
+            name (str): Name of the new batch definition.
+            partitioner: Optional Partitioner to partition this BatchDefinition
 
         Returns:
-            BatchDefinition: The new batch config.
+            BatchDefinition: The new batch definition.
         """
-        batch_config_names = {bc.name for bc in self.batch_configs}
-        if name in batch_config_names:
+        batch_definition_names = {bc.name for bc in self.batch_definitions}
+        if name in batch_definition_names:
             raise ValueError(
-                f'"{name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'  # noqa: E501
+                f'"{name}" already exists (all existing batch_definition names are {", ".join(batch_definition_names)})'  # noqa: E501
             )
 
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_config = BatchDefinition(name=name, partitioner=partitioner)
-        batch_config.set_data_asset(self)
-        self.batch_configs.append(batch_config)
-        self.update_batch_config_field_set()
+        batch_definition = BatchDefinition(name=name, partitioner=partitioner)
+        batch_definition.set_data_asset(self)
+        self.batch_definitions.append(batch_definition)
+        self.update_batch_definition_field_set()
         if self.datasource.data_context:
             try:
-                batch_config = self.datasource.add_batch_config(batch_config)
+                batch_definition = self.datasource.add_batch_definition(batch_definition)
             except Exception:
-                self.batch_configs.remove(batch_config)
-                self.update_batch_config_field_set()
+                self.batch_definitions.remove(batch_definition)
+                self.update_batch_definition_field_set()
                 raise
-        self.update_batch_config_field_set()
-        return batch_config
+        self.update_batch_definition_field_set()
+        return batch_definition
 
     @public_api
-    def delete_batch_config(self, batch_config: BatchDefinition) -> None:
-        """Delete a batch config.
+    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+        """Delete a batch definition.
 
         Args:
-            batch_config (BatchDefinition): BatchConfig to delete.
+            batch_definition (BatchDefinition): BatchDefinition to delete.
         """
-        batch_config_names = {bc.name for bc in self.batch_configs}
-        if batch_config not in self.batch_configs:
+        batch_definition_names = {bc.name for bc in self.batch_definitions}
+        if batch_definition not in self.batch_definitions:
             raise ValueError(
-                f'"{batch_config.name}" does not exist (all existing batch_config names are {batch_config_names})'  # noqa: E501
+                f'"{batch_definition.name}" does not exist (all existing batch_definition names are {batch_definition_names})'  # noqa: E501
             )
 
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        self.batch_configs.remove(batch_config)
+        self.batch_definitions.remove(batch_definition)
         if self.datasource.data_context:
             try:
-                self.datasource.delete_batch_config(batch_config)
+                self.datasource.delete_batch_definition(batch_definition)
             except Exception:
-                self.batch_configs.append(batch_config)
+                self.batch_definitions.append(batch_definition)
                 raise
 
-        self.update_batch_config_field_set()
+        self.update_batch_definition_field_set()
 
-    def update_batch_config_field_set(self) -> None:
-        """Ensure that we have __fields_set__ set correctly for batch_configs to ensure we serialize IFF needed."""  # noqa: E501
+    def update_batch_definition_field_set(self) -> None:
+        """Ensure that we have __fields_set__ set correctly for batch_definitions to ensure we serialize IFF needed."""  # noqa: E501
 
-        has_batch_configs = len(self.batch_configs) > 0
-        if "batch_configs" in self.__fields_set__ and not has_batch_configs:
-            self.__fields_set__.remove("batch_configs")
-        elif "batch_configs" not in self.__fields_set__ and has_batch_configs:
-            self.__fields_set__.add("batch_configs")
+        has_batch_definitions = len(self.batch_definitions) > 0
+        if "batch_definitions" in self.__fields_set__ and not has_batch_definitions:
+            self.__fields_set__.remove("batch_definitions")
+        elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
+            self.__fields_set__.add("batch_definitions")
 
-    def get_batch_config(self, batch_config_name: str) -> BatchDefinition:
-        batch_configs = [
-            batch_config
-            for batch_config in self.batch_configs
-            if batch_config.name == batch_config_name
+    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition:
+        batch_definitions = [
+            batch_definition
+            for batch_definition in self.batch_definitions
+            if batch_definition.name == batch_definition_name
         ]
-        if len(batch_configs) == 0:
-            raise KeyError(f"BatchDefinition {batch_config_name} not found")
-        elif len(batch_configs) > 1:
-            raise KeyError(f"Multiple keys for {batch_config_name} found")
-        return batch_configs[0]
+        if len(batch_definitions) == 0:
+            raise KeyError(f"BatchDefinition {batch_definition_name} not found")
+        elif len(batch_definitions) > 1:
+            raise KeyError(f"Multiple keys for {batch_definition_name} found")
+        return batch_definitions[0]
 
     def _batch_request_options_are_valid(
         self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
@@ -533,46 +533,50 @@ class Datasource(
         return asset_of_intended_type
 
     @pydantic.validator(_ASSETS_KEY, each_item=True)
-    def _update_batch_configs(cls, data_asset: DataAsset) -> DataAsset:
-        for batch_config in data_asset.batch_configs:
-            batch_config.set_data_asset(data_asset)
+    def _update_batch_definitions(cls, data_asset: DataAsset) -> DataAsset:
+        for batch_definition in data_asset.batch_definitions:
+            batch_definition.set_data_asset(data_asset)
         return data_asset
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def add_batch_config(self, batch_config: BatchDefinition) -> BatchDefinition:
-        asset_name = batch_config.data_asset.name
+    def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
+        asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
-            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            # CachedDatasourceDict will return self; only add batch definition if this is a remote
+            # copy
             assert isinstance(loaded_datasource, Datasource)
             loaded_asset = loaded_datasource.get_asset(asset_name)
-            loaded_asset.batch_configs.append(batch_config)
-            loaded_asset.update_batch_config_field_set()
+            loaded_asset.batch_definitions.append(batch_definition)
+            loaded_asset.update_batch_definition_field_set()
         updated_datasource = self.data_context.update_datasource(loaded_datasource)
         assert isinstance(updated_datasource, Datasource)
 
-        output = updated_datasource.get_asset(asset_name).get_batch_config(batch_config.name)
-        output.set_data_asset(batch_config.data_asset)
+        output = updated_datasource.get_asset(asset_name).get_batch_definition(
+            batch_definition.name
+        )
+        output.set_data_asset(batch_definition.data_asset)
         return output
 
-    def delete_batch_config(self, batch_config: BatchDefinition) -> None:
-        asset_name = batch_config.data_asset.name
+    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+        asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
-            # CachedDatasourceDict will return self; only add batch config if this is a remote copy
+            # CachedDatasourceDict will return self; only add batch definition if this is a remote
+            # copy
             assert isinstance(loaded_datasource, Datasource)
             loaded_asset = loaded_datasource.get_asset(asset_name)
-            loaded_asset.batch_configs.remove(batch_config)
-            loaded_asset.update_batch_config_field_set()
+            loaded_asset.batch_definitions.remove(batch_definition)
+            loaded_asset.update_batch_definition_field_set()
         updated_datasource = self.data_context.update_datasource(loaded_datasource)
         assert isinstance(updated_datasource, Datasource)
 
@@ -1031,10 +1035,10 @@ class Batch:
             raise ValueError(
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_config = self.data_asset.add_batch_config(
+        batch_definition = self.data_asset.add_batch_definition(
             name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
         )
         return V1Validator(
-            batch_config=batch_config,
+            batch_definition=batch_definition,
             batch_request_options=self.batch_request.options,
         )

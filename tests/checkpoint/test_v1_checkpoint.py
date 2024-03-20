@@ -180,10 +180,10 @@ class TestCheckpointSerialization:
 
         ds_name = "my_datasource"
         asset_name = "my_asset"
-        batch_config_name_1 = "my_batch1"
+        batch_definition_name_1 = "my_batch1"
         suite_name_1 = "my_suite1"
         validation_config_name_1 = "my_validation1"
-        batch_config_name_2 = "my_batch2"
+        batch_definition_name_2 = "my_batch2"
         suite_name_2 = "my_suite2"
         validation_config_name_2 = "my_validation2"
         cp_name = "my_checkpoint"
@@ -191,11 +191,11 @@ class TestCheckpointSerialization:
         ds = context.sources.add_pandas(ds_name)
         asset = ds.add_csv_asset(asset_name, "my_file.csv")
 
-        bc1 = asset.add_batch_config(batch_config_name_1)
+        bc1 = asset.add_batch_definition(batch_definition_name_1)
         suite1 = ExpectationSuite(suite_name_1)
         vc1 = ValidationConfig(name=validation_config_name_1, data=bc1, suite=suite1)
 
-        bc2 = asset.add_batch_config(batch_config_name_2)
+        bc2 = asset.add_batch_definition(batch_definition_name_2)
         suite2 = ExpectationSuite(suite_name_2)
         vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
 
@@ -254,11 +254,11 @@ class TestCheckpointSerialization:
         assert cp.validation_definitions[0].asset.name == asset_name
 
         assert cp.validation_definitions[0].name == validation_config_name_1
-        assert cp.validation_definitions[0].batch_definition.name == batch_config_name_1
+        assert cp.validation_definitions[0].batch_definition.name == batch_definition_name_1
         assert cp.validation_definitions[0].suite.name == suite_name_1
 
         assert cp.validation_definitions[1].name == validation_config_name_2
-        assert cp.validation_definitions[1].batch_definition.name == batch_config_name_2
+        assert cp.validation_definitions[1].batch_definition.name == batch_definition_name_2
         assert cp.validation_definitions[1].suite.name == suite_name_2
 
         # Check that all validation_definitions and nested suites have been assigned IDs during serialization  # noqa: E501

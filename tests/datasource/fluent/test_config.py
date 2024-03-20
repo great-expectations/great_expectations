@@ -31,8 +31,8 @@ from great_expectations.datasource.fluent.config import (
 )
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
-    _BATCH_CONFIG_NAME_KEY,
-    _BATCH_CONFIGS_KEY,
+    _BATCH_DEFINITION_NAME_KEY,
+    _BATCH_DEFINITIONS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -85,7 +85,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "table_name": "another_table",
                     "name": "with_partitioner",
                     "type": "table",
-                    "batch_configs": [
+                    "batch_definitions": [
                         {
                             "name": "with_partitioner",
                             "partitioner": {
@@ -123,9 +123,9 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",  # noqa: E501
                     "sep": "|",
                     "names": ["col1", "col2"],
-                    "batch_configs": [
+                    "batch_definitions": [
                         {
-                            "name": "my_batch_config",
+                            "name": "my_batch_definition",
                         }
                     ],
                     "batch_metadata": {
@@ -353,26 +353,30 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
             no_ids[ds_name]["assets"][asset_name].pop("id", None)
 
-            if _BATCH_CONFIGS_KEY in asset_config:
-                with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
-                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
-                    for batch_config in with_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY]
+            if _BATCH_DEFINITIONS_KEY in asset_config:
+                with_ids[ds_name]["assets"][asset_name][_BATCH_DEFINITIONS_KEY] = {
+                    batch_definition[_BATCH_DEFINITION_NAME_KEY]: batch_definition
+                    for batch_definition in with_ids[ds_name]["assets"][asset_name][
+                        _BATCH_DEFINITIONS_KEY
+                    ]
                 }
-                for batch_config in with_ids[ds_name]["assets"][asset_name][
-                    _BATCH_CONFIGS_KEY
+                for batch_definition in with_ids[ds_name]["assets"][asset_name][
+                    _BATCH_DEFINITIONS_KEY
                 ].values():
                     batch_asset_id = uuid.uuid4()
                     all_ids.append(str(batch_asset_id))
-                    batch_config["id"] = str(batch_asset_id)
+                    batch_definition["id"] = str(batch_asset_id)
 
-                no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY] = {
-                    batch_config[_BATCH_CONFIG_NAME_KEY]: batch_config
-                    for batch_config in no_ids[ds_name]["assets"][asset_name][_BATCH_CONFIGS_KEY]
+                no_ids[ds_name]["assets"][asset_name][_BATCH_DEFINITIONS_KEY] = {
+                    batch_definition[_BATCH_DEFINITION_NAME_KEY]: batch_definition
+                    for batch_definition in no_ids[ds_name]["assets"][asset_name][
+                        _BATCH_DEFINITIONS_KEY
+                    ]
                 }
-                for batch_config in no_ids[ds_name]["assets"][asset_name][
-                    _BATCH_CONFIGS_KEY
+                for batch_definition in no_ids[ds_name]["assets"][asset_name][
+                    _BATCH_DEFINITIONS_KEY
                 ].values():
-                    batch_config.pop("id", None)
+                    batch_definition.pop("id", None)
 
     no_ids = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
         config={
@@ -438,21 +442,21 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
     ],
 )
-def test_batch_configs_are_assigned_data_assets(
+def test_batch_definitions_are_assigned_data_assets(
     inject_engine_lookup_double, load_method: Callable, input_
 ):
     loaded: GxConfig = load_method(input_)
     assert loaded
 
-    batch_configs: List[BatchDefinition] = []
+    batch_definitions: List[BatchDefinition] = []
     assert loaded.datasources
     for datasource in loaded.datasources:
         for data_asset in datasource.assets:
-            batch_configs.extend(data_asset.batch_configs)
-    assert len(batch_configs) > 0
-    for batch_config in batch_configs:
-        assert batch_config.data_asset is not None
-        assert batch_config in batch_config.data_asset.batch_configs
+            batch_definitions.extend(data_asset.batch_definitions)
+    assert len(batch_definitions) > 0
+    for batch_definition in batch_definitions:
+        assert batch_definition.data_asset is not None
+        assert batch_definition in batch_definition.data_asset.batch_definitions
 
 
 @pytest.mark.unit
@@ -503,9 +507,9 @@ def test_catch_bad_top_level_config(
                 "name": "unknown partitioner",
                 "type": "table",
                 "table_name": "pool",
-                "batch_configs": [
+                "batch_definitions": [
                     {
-                        "name": "unknown_partitioner_batch_config",
+                        "name": "unknown_partitioner_batch_definition",
                         "partitioner": {
                             "method_name": "not_a_valid_method_name",
                             "column_name": "foo",
@@ -518,7 +522,7 @@ def test_catch_bad_top_level_config(
                 "assets",
                 0,
                 "TableAsset",
-                "batch_configs",
+                "batch_definitions",
                 0,
                 "partitioner",
                 "method_name",
@@ -748,7 +752,7 @@ def test_partitioners_deserialization(inject_engine_lookup_double, from_all_conf
     table_asset: TableAsset = from_all_config.get_datasource(datasource_name="my_pg_ds").get_asset(
         asset_name="with_partitioner"
     )
-    partitioner = table_asset.batch_configs[0].partitioner
+    partitioner = table_asset.batch_definitions[0].partitioner
     assert isinstance(partitioner, PartitionerYearAndMonth)
     assert partitioner.method_name == "partition_on_year_and_month"
 

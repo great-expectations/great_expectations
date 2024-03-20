@@ -29,8 +29,8 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
-    _BATCH_CONFIG_NAME_KEY,
-    _BATCH_CONFIGS_KEY,
+    _BATCH_DEFINITION_NAME_KEY,
+    _BATCH_DEFINITIONS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -95,8 +95,8 @@ class GxConfig(FluentBaseModel):
         _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
-    _EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION: ClassVar[Set[str]] = {
-        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
+    _EXCLUDE_FROM_BATCH_DEFINITION_SERIALIZATION: ClassVar[Set[str]] = {
+        _BATCH_DEFINITION_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     class Config:
@@ -358,15 +358,15 @@ class GxConfig(FluentBaseModel):
                         for data_asset_config in data_assets
                     }
                     for data_asset in data_assets_config_as_dict.values():
-                        if _BATCH_CONFIGS_KEY in data_asset:
-                            data_asset[_BATCH_CONFIGS_KEY] = {
-                                batch_config[
-                                    _BATCH_CONFIG_NAME_KEY
+                        if _BATCH_DEFINITIONS_KEY in data_asset:
+                            data_asset[_BATCH_DEFINITIONS_KEY] = {
+                                batch_definition[
+                                    _BATCH_DEFINITION_NAME_KEY
                                 ]: _exclude_fields_from_serialization(
-                                    source_dict=batch_config,
-                                    exclusions=self._EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION,
+                                    source_dict=batch_definition,
+                                    exclusions=self._EXCLUDE_FROM_BATCH_DEFINITION_SERIALIZATION,
                                 )
-                                for batch_config in data_asset[_BATCH_CONFIGS_KEY]
+                                for batch_definition in data_asset[_BATCH_DEFINITIONS_KEY]
                             }
                     datasource_config["assets"] = data_assets_config_as_dict
 
@@ -406,13 +406,13 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
                 data_asset_config: dict
                 for data_asset_name, data_asset_config in data_assets.items():
                     data_asset_config[_DATA_ASSET_NAME_KEY] = data_asset_name
-                    if _BATCH_CONFIGS_KEY in data_asset_config:
-                        batch_config_list = (
-                            _convert_batch_configs_from_yaml_to_internal_object_representation(
-                                data_asset_config[_BATCH_CONFIGS_KEY]
+                    if _BATCH_DEFINITIONS_KEY in data_asset_config:
+                        batch_definition_list = (
+                            _convert_batch_definitions_from_yaml_to_internal_object_representation(
+                                data_asset_config[_BATCH_DEFINITIONS_KEY]
                             )
                         )
-                        data_asset_config[_BATCH_CONFIGS_KEY] = batch_config_list
+                        data_asset_config[_BATCH_DEFINITIONS_KEY] = batch_definition_list
 
                 datasource_config[_ASSETS_KEY] = list(data_assets.values())
 
@@ -423,12 +423,12 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
     return config
 
 
-def _convert_batch_configs_from_yaml_to_internal_object_representation(
-    batch_configs: Dict[str, Dict],
+def _convert_batch_definitions_from_yaml_to_internal_object_representation(
+    batch_definitions: Dict[str, Dict],
 ) -> List[Dict]:
     for (
-        batch_config_name,
-        batch_config,
-    ) in batch_configs.items():
-        batch_config[_BATCH_CONFIG_NAME_KEY] = batch_config_name
-    return list(batch_configs.values())
+        batch_definition_name,
+        batch_definition,
+    ) in batch_definitions.items():
+        batch_definition[_BATCH_DEFINITION_NAME_KEY] = batch_definition_name
+    return list(batch_definitions.values())

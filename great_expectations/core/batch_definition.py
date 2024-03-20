@@ -47,7 +47,7 @@ class BatchDefinition(pydantic.BaseModel):
         )
 
     def save(self) -> None:
-        self.data_asset._save_batch_config(self)
+        self.data_asset._save_batch_definition(self)
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder

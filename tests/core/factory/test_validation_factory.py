@@ -48,7 +48,7 @@ def validation_config_json(validation_config: ValidationConfig) -> str:
                     "name": "test-asset",
                     "id": "10b7e57d-958b-4d28-aa1d-e89bc0401eea",
                 },
-                "batch_config": {
+                "batch_definition": {
                     "name": "test-batch-config",
                     "id": "bcd13e3e-3e3e-4e3e-8e3e-3e3e3e3e3e3e",
                 },

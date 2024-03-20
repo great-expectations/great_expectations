@@ -436,7 +436,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
     ],
 )
 @pytest.mark.sqlite
-def test_success_with_partitioners_from_batch_configs(
+def test_success_with_partitioners_from_batch_definitions(
     empty_data_context,
     month: int,
     expected: int,
@@ -452,12 +452,12 @@ def test_success_with_partitioners_from_batch_configs(
         name="query_asset",
         query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
     ).add_sorters(["year"])
-    batch_config = asset.add_batch_config(
+    batch_definition = asset.add_batch_definition(
         name="whatevs",
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
     )
     validator = Validator(
-        batch_config=batch_config,
+        batch_definition=batch_definition,
         batch_request_options={"year": 2020, "month": month},
     )
     result = validator.validate_expectation(gxe.ExpectTableRowCountToEqual(value=expected))

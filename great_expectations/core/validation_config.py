@@ -186,7 +186,7 @@ class ValidationConfig(BaseModel):
             ) from e
 
         try:
-            batch_definition = asset.get_batch_config(batch_definition_name)
+            batch_definition = asset.get_batch_definition(batch_definition_name)
         except KeyError as e:
             raise ValueError(
                 f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501
@@ -203,7 +203,7 @@ class ValidationConfig(BaseModel):
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
-            batch_config=self.batch_definition,
+            batch_definition=self.batch_definition,
             batch_request_options=batch_definition_options,
             result_format=result_format,
         )
