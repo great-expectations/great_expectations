@@ -1,3 +1,5 @@
+@import "sass_variables.scss";
+
 :root {
   --navbar-background-color: #F9F9FB;
 }
@@ -38,6 +40,9 @@
 
     .menu__list-item:has(.version-dropdown) {
       order: 1;
+    }
+    .menu__list-item:has(.header-cloud-link) {
+      order: 2;
     }
   }
 }
@@ -124,5 +129,17 @@
   color: #FFF;
   background-color: #DE550A;
 }
+
+
+@media (max-width: $mobile-breakpoint) {
+  .navbar-sidebar .header-cloud-link {
+    display: flex;
+    justify-content: center;
+    margin: 0.75rem;
+    padding: 0.25rem;
+    box-shadow: 0 3px 6px -1px var(--orange-300);
+  }
+}
+
 
 
