@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -8,11 +8,11 @@ yaml = YAMLHandler()
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml">
 datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -81,7 +81,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 sampling_method: _sample_using_random
                 sampling_kwargs:
                     p: 1.0e-1
-"""  # noqa: E501
+"""
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -91,11 +91,11 @@ CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
@@ -155,7 +155,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert 24 <= len(batch_list) <= 744  # number of hours in a 31-day month
 
 # Here is a BatchRequest naming a configured data_asset partitioned by passenger_count.
-# This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.  # noqa: E501
+# This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="by_num_riders",
@@ -163,7 +163,7 @@ batch_request = BatchRequest(
 )
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.  # noqa: E501
+# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name: str = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -171,9 +171,9 @@ assert len(batch_list) == 6
 
 # Here is a BatchRequest naming a configured data_asset partitioned by passenger_count.
 # In addition, a randomly sampled fraction of each partition's batch data is obtained.
-# Finally, a randomly sampled fraction of each partition's batch data is selected and returned as the final batch list.  # noqa: E501
-# This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.  # noqa: E501
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py batch_request">  # noqa: E501
+# Finally, a randomly sampled fraction of each partition's batch data is selected and returned as the final batch list.
+# This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py batch_request">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="by_num_riders_random_sample",
@@ -182,11 +182,11 @@ batch_request = BatchRequest(
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.  # noqa: E501
+# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name: str = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py assertions">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py assertions">
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data

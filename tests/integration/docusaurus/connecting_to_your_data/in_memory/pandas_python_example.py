@@ -7,7 +7,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config">
 datasource_config = {
     "name": "example_datasource",
     "class_name": "Datasource",
@@ -26,11 +26,11 @@ datasource_config = {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py add_datasource">
 context.add_datasource(**datasource_config)
 # </snippet>
 
@@ -41,7 +41,7 @@ df = pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]], columns=["a", "b", "c"])
 batch_request = RuntimeBatchRequest(
     datasource_name="example_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you  # noqa: E501
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
     runtime_parameters={"batch_data": df},  # df is your dataframe
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )

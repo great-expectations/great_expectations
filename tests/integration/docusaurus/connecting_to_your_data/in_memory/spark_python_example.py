@@ -31,7 +31,7 @@ data_context_config = DataContextConfig(
 )
 context = get_context(project_config=data_context_config)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config">
 datasource_config = {
     "name": "my_spark_dataframe",
     "class_name": "Datasource",
@@ -45,26 +45,26 @@ datasource_config = {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py add datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py add datasource">
 context.add_datasource(**datasource_config)
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a dataframe
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py batch request">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py batch request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_spark_dataframe",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you  # noqa: E501
+    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
     batch_identifiers={"batch_id": "default_identifier"},
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())

@@ -1,5 +1,5 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml">  # noqa: E501
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
@@ -80,7 +80,7 @@ assert "yellow_tripdata_2019-01" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml each file own data asset">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml each file own data asset">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -112,7 +112,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -154,7 +154,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml add an InferredAssetDataConnector to a Datasource configuration">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml add an InferredAssetDataConnector to a Datasource configuration">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -189,7 +189,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -235,7 +235,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml basic configuration with more than one Data Asset">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml basic configuration with more than one Data Asset">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -267,7 +267,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -308,7 +308,7 @@ assert "yellow_tripdata" in set(
     ]
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py get_validator">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py get_validator">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -324,7 +324,7 @@ validator = context.get_validator(
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -346,7 +346,7 @@ assert validator.active_batch_definition.batch_identifiers == {
 }
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the inside">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the inside">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -377,7 +377,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the inside">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the inside">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -425,7 +425,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the outside">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the outside">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -459,7 +459,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the outside">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the outside">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -512,7 +512,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml redundant information in the naming convention">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml redundant information in the naming convention">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -545,7 +545,7 @@ test_yaml = context.test_yaml_config(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py python datasource_config redundant information in the naming convention">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py python datasource_config redundant information in the naming convention">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

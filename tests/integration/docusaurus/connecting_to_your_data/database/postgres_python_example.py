@@ -15,7 +15,7 @@ load_data_into_test_database(
 
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config">
 datasource_config = {
     "name": "my_postgres_datasource",
     "class_name": "Datasource",
@@ -40,11 +40,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py add_datasource">
 context.add_datasource(**datasource_config)
 # </snippet>
 

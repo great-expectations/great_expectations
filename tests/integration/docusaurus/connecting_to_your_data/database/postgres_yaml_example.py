@@ -1,4 +1,4 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py imports">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -17,11 +17,11 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py get_context">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py datasource_yaml">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py datasource_yaml">
 datasource_yaml = r"""
 name: my_postgres_datasource
 class_name: Datasource
@@ -46,16 +46,16 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a query
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with query">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with query">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -72,7 +72,7 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with table">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with table">
 batch_request = BatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_inferred_data_connector_name",

@@ -328,6 +328,7 @@ extend-exclude = [
 ]
 "tests/integration/docusaurus/*.py" = [
     "F841", # local variable is assigned to but never used - ignored for code used in snippets
+    "E501", # may affect how code is displayed in the docs
 ]
 
 [tool.ruff.lint.flake8-type-checking]

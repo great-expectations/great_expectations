@@ -1,7 +1,7 @@
 # ruff: noqa: PTH118
 import os
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -9,11 +9,11 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py get_context">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py datasource_yaml">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py datasource_yaml">
 datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
@@ -61,11 +61,11 @@ data_dir_path = os.path.join("..", "data")
 
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
@@ -92,7 +92,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 assert batch_list[0].data.dataframe.shape[0] == 10000
 
-# Here is a BatchRequest naming a configured data_asset representing an un-partitioned (flat) filename structure.  # noqa: E501
+# Here is a BatchRequest naming a configured data_asset representing an un-partitioned (flat) filename structure.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="configured_data_connector_name",
@@ -107,7 +107,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 12
 assert batch_list[0].data.dataframe.shape[0] == 10000
 
-# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.  # noqa: E501
+# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -117,7 +117,7 @@ batch_request = BatchRequest(
 )
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.  # noqa: E501
+# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
 batch_request.data_connector_query["custom_filter_function"] = (
     lambda batch_identifiers: batch_identifiers["name"] == "yellow"
@@ -128,7 +128,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 9
 assert batch_list[0].data.dataframe.shape[0] == 10000
 
-# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.  # noqa: E501
+# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies one batch, which is useful for data analysis.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -144,7 +144,7 @@ batch_request = BatchRequest(
 )
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.  # noqa: E501
+# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
 batch_request.data_connector_query["batch_filter_parameters"] = {
     "year": "2020",
@@ -155,11 +155,11 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 assert batch_list[0].data.dataframe.shape[0] == 10000
 
-# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.  # noqa: E501
+# Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies one batch, which is useful for data analysis.
-# In addition, the resulting batch is split according to "passenger_count" column with the focus on two-passenger rides.  # noqa: E501
-# Moreover, a randomly sampled fraction of this subset of the batch data is obtained and returned as the final result.  # noqa: E501
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_request">  # noqa: E501
+# In addition, the resulting batch is split according to "passenger_count" column with the focus on two-passenger rides.
+# Moreover, a randomly sampled fraction of this subset of the batch data is obtained and returned as the final result.
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_request">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="configured_data_connector_name",
@@ -192,27 +192,27 @@ batch_request = BatchRequest(
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.  # noqa: E501
+# In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters">
 batch_request.data_connector_query["batch_filter_parameters"] = {
     "year": "2020",
     "month": "01",
 }
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count">
 batch_request.batch_spec_passthrough["partitioner_method"] = "partition_on_column_value"
 batch_request.batch_spec_passthrough["partitioner_kwargs"] = {
     "column_name": "passenger_count",
     "batch_identifiers": {"passenger_count": 2},
 }
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sample_using_random 10 pct">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sample_using_random 10 pct">
 batch_request.batch_spec_passthrough["sampling_method"] = "sample_using_random"
 batch_request.batch_spec_passthrough["sampling_kwargs"] = {"p": 1.0e-1}
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sampling batch size">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sampling batch size">
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 assert batch_list[0].data.dataframe.shape[0] < 200

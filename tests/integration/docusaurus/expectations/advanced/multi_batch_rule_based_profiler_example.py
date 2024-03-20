@@ -120,7 +120,7 @@ expectation_configurations: List[ExpectationConfiguration] = result.expectation_
 
 print(expectation_configurations)
 
-# Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.  # noqa: E501
+# Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
 row_count_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.16.7"},

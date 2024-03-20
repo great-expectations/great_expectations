@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py imports">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -11,11 +11,11 @@ yaml = YAMLHandler()
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py get_context">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = r"""
 name: my_azure_datasource
 class_name: Datasource
@@ -54,16 +54,16 @@ datasource_yaml = datasource_yaml.replace(
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py test_yaml_config">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py add_datasource">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a BatchRequest naming a data_asset
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py batch_request">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="my_azure_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -75,7 +75,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py validator_creation">  # noqa: E501
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py validator_creation">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 # </snippet>
