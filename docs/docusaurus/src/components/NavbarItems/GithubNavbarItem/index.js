@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
+
 export default function GithubNavbarItem({ owner, repository }) {
 
     const [starsCount, setStarsCount] = useState('0')
@@ -8,15 +9,19 @@ export default function GithubNavbarItem({ owner, repository }) {
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true)
 
     useEffect(() => {
-        fetch(`https://api.github.com/repos/${owner}/${repository}`)
-            .then(response => response.json())
-            .then(data => {
-                setStarsCount(formatCompactNumber(data.stargazers_count))
-                setForksCount(formatCompactNumber(data.forks_count))
-                setShowGithubBadgeInfo(true)
-            }).catch( _ => {
-                setShowGithubBadgeInfo(false)
-            })
+        if(window.innerWidth > 996){
+            fetch(`https://api.github.com/repos/${owner}/${repository}`)
+                .then(response => response.json())
+                .then(data => {
+                    setStarsCount(formatCompactNumber(data.stargazers_count))
+                    setForksCount(formatCompactNumber(data.forks_count))
+                    setShowGithubBadgeInfo(true)
+                }).catch( _ => {
+                    setShowGithubBadgeInfo(false)
+                })
+        } else {
+            setShowGithubBadgeInfo(false)
+        }
     }, []);
 
     function formatCompactNumber(number) {
