@@ -40,14 +40,14 @@ METHOD_SHOULD_RAISE_ERROR: Final[set] = {
 class GxInvalidDatasourceWarning(GxDatasourceWarning):
     """
     A warning that the Datasource configuration is invalid and will must be updated before it can used.
-    """
+    """  # noqa: E501
 
 
 class InvalidAsset(DataAsset):
     """
     A DataAsset that is invalid.
     The DataAsset itself may be valid, but it is classified as invalid because its parent Datasource or sibling assets are invalid.
-    """
+    """  # noqa: E501
 
     type: str = "invalid"
     name: str = "invalid"
@@ -69,11 +69,11 @@ class InvalidAsset(DataAsset):
     def test_connection(self) -> None:
         if datasource := getattr(self, "datasource", None):
             raise TestConnectionError(
-                f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"
+                f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
             ) from datasource.config_error
-        # the asset should always have a datasource, but if it doesn't, we should still raise an error
+        # the asset should always have a datasource, but if it doesn't, we should still raise an error  # noqa: E501
         raise TestConnectionError(
-            "This Asset configuration is invalid and cannot be used. Please fix the error and try again"
+            "This Asset configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         )
 
     @override
@@ -94,9 +94,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> NoReturn:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> NoReturn:
         self._raise_type_error()
 
     @override
@@ -104,9 +102,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_request_options_keys(
-        self, partitioner: Partitioner | None = None
-    ) -> NoReturn:
+    def get_batch_request_options_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 
@@ -123,7 +119,7 @@ class InvalidAssetTypeLookup(TypeLookup):
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
         if isinstance(key, str):
             return InvalidAsset
-        # if a type is passed, normally we would return the type name but that doesn't make sense here
+        # if a type is passed, normally we would return the type name but that doesn't make sense here  # noqa: E501
         # for an InvalidAsset
         raise NotImplementedError(
             f"Looking up the `type` name for {InvalidAsset.__name__} is not supported"
@@ -141,7 +137,7 @@ class InvalidDatasource(Datasource):
     why it was considered invalid.
 
     Any errors raised should raise `from self.config_error`.
-    """
+    """  # noqa: E501
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [InvalidAsset]
@@ -164,7 +160,7 @@ class InvalidDatasource(Datasource):
     @override
     def test_connection(self, test_assets: bool = True) -> None:
         raise TestConnectionError(
-            "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"
+            "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         ) from self.config_error
 
     @override
@@ -174,7 +170,7 @@ class InvalidDatasource(Datasource):
         Don't raise an error because the users may want to inspect the asset config.
         """
         warnings.warn(
-            f"The {self.name} Datasource configuration is invalid and cannot be used. Please fix the error and try again",
+            f"The {self.name} Datasource configuration is invalid and cannot be used. Please fix the error and try again",  # noqa: E501
             GxInvalidDatasourceWarning,
         )
         return super().get_asset(asset_name)
@@ -185,7 +181,7 @@ class InvalidDatasource(Datasource):
         Raise from the original config error that caused the Datasource to be invalid.
         """
         error = TypeError(
-            f"{self.name} Datasource is configuration is invalid and cannot be used. Please fix the error and try again"
+            f"{self.name} Datasource is configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         )
         raise error from self.config_error
 

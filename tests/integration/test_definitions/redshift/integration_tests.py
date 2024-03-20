@@ -4,7 +4,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 redshift_integration_tests = []
 
 connecting_to_your_data = [
-    # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
+    # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name = "redshift_python_example",
     #     user_flow_script= "docs/docusaurus/docs/snippets/redshift_python_example.py",
@@ -80,7 +80,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.REDSHIFT],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_redshift",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -123,7 +123,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.REDSHIFT],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_redshift",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",

@@ -53,9 +53,9 @@ datasource_config["data_connectors"]["configured_data_connector_name"]["azure_op
 datasource_config["data_connectors"]["configured_data_connector_name"]["container"] = (
     "superconductive-public"
 )
-datasource_config["data_connectors"]["configured_data_connector_name"][
-    "name_starts_with"
-] = "data/taxi_yellow_tripdata_samples/"
+datasource_config["data_connectors"]["configured_data_connector_name"]["name_starts_with"] = (
+    "data/taxi_yellow_tripdata_samples/"
+)
 
 context.test_yaml_config(yaml.dump(datasource_config))
 
@@ -74,9 +74,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "taxi_data"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.

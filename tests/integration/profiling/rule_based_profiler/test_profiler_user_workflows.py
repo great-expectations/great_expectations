@@ -113,10 +113,8 @@ def bobster_validator(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
-    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
-    context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""  # noqa: E501
+    context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
@@ -144,7 +142,7 @@ def quentin_validator(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
-    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
+    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""  # noqa: E501
     context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
@@ -178,7 +176,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     Batches created in the multibatch_generic_csv_generator fixture should be available using the
     multibatch_generic_csv_generator_context
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
+    """  # noqa: E501
 
     context = alice_columnar_table_single_batch_context
 
@@ -189,9 +187,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
-    file_list: List[str] = [
-        alice_columnar_table_single_batch["sample_data_relative_path"]
-    ]
+    file_list: List[str] = [alice_columnar_table_single_batch["sample_data_relative_path"]]
 
     assert (
         data_connector._get_data_reference_list_from_cache_by_data_asset_name(
@@ -236,12 +232,12 @@ def test_alice_profiler_user_workflow_single_batch(
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -263,9 +259,7 @@ def test_alice_profiler_user_workflow_single_batch(
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         result.expectation_configurations
@@ -288,7 +282,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     Batches created in the multibatch_generic_csv_generator fixture should be available using the
     multibatch_generic_csv_generator_context
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
+    """  # noqa: E501
 
     context = bobby_columnar_table_multi_batch_deterministic_data_context
 
@@ -352,7 +346,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 13.08s
 @pytest.mark.big
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(  # noqa: E501
     caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
@@ -366,12 +360,12 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -397,14 +391,9 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
-    assert (
-        result.expectation_configurations
-        == fixture_expectation_suite.expectation_configurations
-    )
+    assert result.expectation_configurations == fixture_expectation_suite.expectation_configurations
 
     profiled_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
         profiler.get_fully_qualified_parameter_names_by_domain()
@@ -499,23 +488,19 @@ class HasStaticDefaultProfiler(Protocol):
 
 # An expectations default profiler config is a static variable. Setting it to a custom value will
 # actually overwrite the default. This will cause other tests in this session to fail that depend
-# on the default value. This decorator stores the default value and restores it at the end of this test.
+# on the default value. This decorator stores the default value and restores it at the end of this test.  # noqa: E501
 # We shouldn't be overwriting the default and that is ticketed:
 # https://superconductive.atlassian.net/browse/GREAT-1127
 @contextlib.contextmanager
 def restore_profiler_config(
     expectation: Type[HasStaticDefaultProfiler],
 ) -> Iterator[None]:
-    original_default_profiler_config = copy.deepcopy(
-        expectation.default_profiler_config
-    )
+    original_default_profiler_config = copy.deepcopy(expectation.default_profiler_config)
     try:
         yield
     finally:
         expectation.default_profiler_config = original_default_profiler_config
-        expectation.default_kwarg_values["profiler_config"] = (
-            original_default_profiler_config
-        )
+        expectation.default_kwarg_values["profiler_config"] = original_default_profiler_config
 
 
 @pytest.mark.skipif(
@@ -531,9 +516,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     # Load data context
-    data_context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    data_context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
@@ -543,12 +526,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -568,16 +551,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
         result.expectation_configurations[0].to_json_dict()["kwargs"]
     )
-    min_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "min_value"
-        ]
-    )
-    max_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "max_value"
-        ]
-    )
+    min_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "min_value"
+    ]
+    max_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "max_value"
+    ]
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
@@ -620,12 +599,12 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -649,19 +628,17 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict: Dict[
         str, dict
     ] = {
-        expectation_configuration_dict["kwargs"][
-            "column"
-        ]: expectation_configuration_dict["kwargs"]
+        expectation_configuration_dict["kwargs"]["column"]: expectation_configuration_dict["kwargs"]
         for expectation_configuration_dict in [
             expectation_configuration.to_json_dict()
             for expectation_configuration in result.expectation_configurations
         ]
     }
-    expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
+    expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[  # noqa: E501
         str, List[List[Number]]
     ] = {
         column_name: expectation_kwargs["quantile_ranges"]["value_ranges"]
-        for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()
+        for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()  # noqa: E501
     }
 
     assert (
@@ -680,7 +657,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     for (
         column_name,
         column_quantiles,
-    ) in expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column.items():
+    ) in expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column.items():  # noqa: E501
         paired_quantiles = zip(
             column_quantiles,
             quentin_columnar_table_multi_batch["test_configuration"][
@@ -694,5 +671,5 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     desired=value_ranges[1][idx],
                     rtol=RTOL,
                     atol=ATOL,
-                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",  # noqa: E501
                 )

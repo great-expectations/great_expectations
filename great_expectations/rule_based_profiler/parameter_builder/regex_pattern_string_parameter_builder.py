@@ -46,7 +46,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     Detects the domain REGEX from a set of candidate REGEX strings by computing the
     column_values.match_regex_format.unexpected_count metric for each candidate format and returning the format that
     has the lowest unexpected_count ratio.
-    """
+    """  # noqa: E501
 
     # list of candidate strings that are most commonly used
     # source: https://regexland.com/most-common-regular-expressions/
@@ -58,10 +58,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
         r"^\s+",  # leading space
         r"\s+$",  # trailing space
-        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)  # noqa: E501
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
-        r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
-        r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
+        r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address  # noqa: E501
+        r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID  # noqa: E501
     }
 
     def __init__(  # noqa: PLR0913
@@ -71,9 +71,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -88,7 +86,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
@@ -138,7 +136,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         the configured threshold.
 
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
-        """
+        """  # noqa: E501
         metric_computation_result: MetricComputationResult
 
         metric_computation_result = self.get_metrics(
@@ -157,14 +155,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # This should never happen.
         if len(metric_computation_result.attributed_resolved_metrics) != 1:
             raise gx_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'  # noqa: E501
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = (
-            metric_computation_result.attributed_resolved_metrics[0]
-        )
+        attributed_resolved_metrics = metric_computation_result.attributed_resolved_metrics[0]
 
         metric_values: MetricValues
 
@@ -175,7 +171,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 message=f"Result of metric computations for {self.__class__.__name__} is empty."
             )
 
-        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
+        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).  # noqa: E501
         metric_values = metric_values[:, 0]
 
         nonnull_count: int
@@ -184,7 +180,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         else:
             nonnull_count = sum(metric_values)
 
-        # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
+        # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.  # noqa: E501
         candidate_regexes: Union[
             List[str],
             Set[str],
@@ -217,7 +213,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
             match_regex_metric_value_kwargs_list.append(match_regex_metric_value_kwargs)
 
-        # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
+        # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.  # noqa: E501
         metric_computation_result = self.get_metrics(
             metric_name=f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
@@ -233,10 +229,8 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        for (
-            attributed_resolved_metrics
-        ) in metric_computation_result.attributed_resolved_metrics:
-            # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
+        for attributed_resolved_metrics in metric_computation_result.attributed_resolved_metrics:
+            # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).  # noqa: E501
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_regex_unexpected_count: int
@@ -248,11 +242,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
                 nonnull_count + NP_EPSILON
             )
-            regex_string_success_ratios[
-                attributed_resolved_metrics.metric_attributes["regex"]
-            ] = success_ratio
+            regex_string_success_ratios[attributed_resolved_metrics.metric_attributes["regex"]] = (
+                success_ratio
+            )
 
-        # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._threshold,
@@ -270,9 +264,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
         # dict of sorted regex and ratios for all evaluated candidates
         sorted_regex_candidates_and_ratios: dict = (
-            ParameterBuilder._get_sorted_candidates_and_ratios(
-                regex_string_success_ratios
-            )
+            ParameterBuilder._get_sorted_candidates_and_ratios(regex_string_success_ratios)
         )
 
         return Attributes(

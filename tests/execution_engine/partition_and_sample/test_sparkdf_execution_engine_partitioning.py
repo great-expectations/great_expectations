@@ -150,7 +150,7 @@ def test_partition_on_date_parts_single_date_parts(
      date_parts that is a string, DatePart enum objects, mixed case string.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: SparkDataPartitioner = SparkDataPartitioner()
     column_name: str = "timestamp"
     result: pyspark.DataFrame = data_partitioner.partition_on_date_parts(
@@ -179,7 +179,7 @@ def test_partition_on_date_parts_multiple_date_parts(
      date parts that are strings, DatePart enum objects, a mixture and mixed case.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: SparkDataPartitioner = SparkDataPartitioner()
     column_name: str = "timestamp"
     result: pyspark.DataFrame = data_partitioner.partition_on_date_parts(
@@ -213,7 +213,7 @@ def test_named_date_part_methods(
 ):
     """Test that a partially pre-filled version of partition_on_date_parts() was called with the appropriate params.
     For example, partition_on_year.
-    """
+    """  # noqa: E501
     data_partitioner: SparkDataPartitioner = SparkDataPartitioner()
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
@@ -261,13 +261,11 @@ def test_named_date_part_methods(
 def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name: str):
     data_partitioner: SparkDataPartitioner = SparkDataPartitioner()
 
-    partitioner_method_name_with_prefix = (
-        f"{underscore_prefix}{partitioner_method_name}"
-    )
+    partitioner_method_name_with_prefix = f"{underscore_prefix}{partitioner_method_name}"
 
-    assert data_partitioner.get_partitioner_method(
-        partitioner_method_name_with_prefix
-    ) == getattr(data_partitioner, partitioner_method_name)
+    assert data_partitioner.get_partitioner_method(partitioner_method_name_with_prefix) == getattr(
+        data_partitioner, partitioner_method_name
+    )
 
 
 def test_get_batch_empty_partitioner(
@@ -293,7 +291,7 @@ def test_get_batch_empty_partitioner_tsv(
 ):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
-    # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
+    # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)  # noqa: E501
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
             path=os.path.join(  # noqa: PTH118
@@ -315,7 +313,7 @@ def test_get_batch_empty_partitioner_parquet(
     test_folder_connection_path_parquet, basic_spark_df_execution_engine
 ):
     # Note: reader method and reader_options are not needed, because
-    # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
+    # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.  # noqa: E501
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
             path=os.path.join(  # noqa: PTH118
@@ -356,9 +354,7 @@ def test_get_batch_with_partition_on_whole_table_filesystem(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_partition_on_whole_table_s3(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_whole_table_s3(spark_session, basic_spark_df_execution_engine):
     # noinspection PyUnusedLocal
     def mocked_get_reader_function(*args, **kwargs):
         # noinspection PyUnusedLocal,PyShadowingNames
@@ -467,9 +463,7 @@ def test_get_batch_with_partition_on_whole_table_gcs(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_partition_on_column_value(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_column_value(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -517,9 +511,7 @@ def test_get_batch_with_partition_on_converted_datetime(
     assert len(partitioned_df.columns) == 10
 
 
-def test_get_batch_with_partition_on_divided_integer(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_divided_integer(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -539,9 +531,7 @@ def test_get_batch_with_partition_on_divided_integer(
     assert min_result.collect()[0]["min(id)"] == 50
 
 
-def test_get_batch_with_partition_on_mod_integer(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_mod_integer(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -625,9 +615,7 @@ def test_get_batch_with_partition_on_hashed_column_incorrect_hash_function_name(
         ).dataframe
 
 
-def test_get_batch_with_partition_on_hashed_column(
-    test_sparkdf, basic_spark_df_execution_engine
-):
+def test_get_batch_with_partition_on_hashed_column(test_sparkdf, basic_spark_df_execution_engine):
     partitioned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,

@@ -22,9 +22,7 @@ class BatchInspector:
     It uses MetricRetriever objects to retrieve metrics.
     """
 
-    def __init__(
-        self, context: AbstractDataContext, metric_retrievers: list[MetricRetriever]
-    ):
+    def __init__(self, context: AbstractDataContext, metric_retrievers: list[MetricRetriever]):
         self._context = context
         self._metric_retrievers = metric_retrievers
 

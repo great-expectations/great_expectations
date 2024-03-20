@@ -43,12 +43,10 @@ class StoreBackend(metaclass=ABCMeta):
             suppress_store_backend_id: skip construction of a StoreBackend.store_backend_id
             manually_initialize_store_backend_id: UUID as a string to use if the store_backend_id is not already set
             store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
-        """
+        """  # noqa: E501
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
-        self._manually_initialize_store_backend_id = (
-            manually_initialize_store_backend_id
-        )
+        self._manually_initialize_store_backend_id = manually_initialize_store_backend_id
         self._store_name = store_name
 
     @property
@@ -59,9 +57,7 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(
-        self, suppress_warning: bool = False
-    ) -> Optional[str]:
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[str]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -76,14 +72,12 @@ class StoreBackend(metaclass=ABCMeta):
         if self._suppress_store_backend_id:
             if not suppress_warning:
                 logger.warning(
-                    f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
+                    f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."  # noqa: E501
                 )
             return None
         try:
             try:
-                ge_store_backend_id_file_contents = self.get(
-                    key=self.STORE_BACKEND_ID_KEY
-                )
+                ge_store_backend_id_file_contents = self.get(key=self.STORE_BACKEND_ID_KEY)
                 store_backend_id_file_parser = self.STORE_BACKEND_ID_PREFIX + pp.Word(
                     f"{pp.hexnums}-"
                 )
@@ -105,11 +99,11 @@ class StoreBackend(metaclass=ABCMeta):
         except Exception as e:
             if not suppress_warning:
                 logger.warning(
-                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"
+                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"  # noqa: E501
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
-    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext
+    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext  # noqa: E501
     @property
     def store_backend_id(self):
         return self._construct_store_backend_id(suppress_warning=False)
@@ -199,7 +193,7 @@ class StoreBackend(metaclass=ABCMeta):
             for key_element in key:
                 if not isinstance(key_element, str):
                     raise TypeError(
-                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(
+                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(  # noqa: E501
                             self.__class__.__name__,
                             str,
                             type(key_element),
@@ -207,11 +201,7 @@ class StoreBackend(metaclass=ABCMeta):
                     )
         else:
             raise TypeError(
-                "Keys in {} must be instances of {}, not {}".format(
-                    self.__class__.__name__,
-                    tuple,
-                    type(key),
-                )
+                f"Keys in {self.__class__.__name__} must be instances of {tuple}, not {type(key)}"
             )
 
     def _validate_value(self, value) -> None:  # noqa: B027 # no abstract decorator

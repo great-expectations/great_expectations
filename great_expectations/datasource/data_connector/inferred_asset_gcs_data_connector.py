@@ -51,7 +51,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         gcs_options: Options passed to the GCS Storage Client.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -92,17 +92,13 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_file(
-                        filename=filename
-                    )
+                credentials = google.service_account.Credentials.from_service_account_file(
+                    filename=filename
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_info(
-                        info=info
-                    )
+                credentials = google.service_account.Credentials.from_service_account_info(
+                    info=info
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
@@ -121,15 +117,11 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
             "prefix": self._prefix,
@@ -148,9 +140,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

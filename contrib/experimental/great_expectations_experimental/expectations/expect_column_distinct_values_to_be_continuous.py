@@ -132,9 +132,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        include_column_name = include_column_name if include_column_name is not None else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -170,9 +168,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
@@ -195,9 +191,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        include_column_name = include_column_name if include_column_name is not None else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -275,18 +269,14 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         if datetime_format is not None:
             observed_set = set(
                 map(
-                    lambda x: datetime.strptime(x, datetime_format).strftime(
-                        "%Y-%m-%d"
-                    ),
+                    lambda x: datetime.strptime(x, datetime_format).strftime("%Y-%m-%d"),
                     observed_value_counts.index,
                 )
             )
         else:
             observed_set = set(observed_value_counts.index)
 
-        expected_set = set(
-            self._expected_list(observed_min, observed_max, configuration)
-        )
+        expected_set = set(self._expected_list(observed_min, observed_max, configuration))
 
         return {
             "success": expected_set == observed_set,

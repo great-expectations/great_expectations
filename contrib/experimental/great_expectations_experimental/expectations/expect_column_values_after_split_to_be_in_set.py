@@ -14,9 +14,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def are_values_after_split_in_value_set(
-    val: str, delimiter: str, value_set: List[str]
-) -> bool:
+def are_values_after_split_in_value_set(val: str, delimiter: str, value_set: List[str]) -> bool:
     all_split_values = [v.strip() for v in val.split(delimiter)]
 
     for val in all_split_values:
@@ -40,9 +38,7 @@ class ColumnValuesAfterSplitInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, delimiter, value_set, **kwargs):
         value_set = set(value_set)
-        return column.apply(
-            lambda x: are_values_after_split_in_value_set(x, delimiter, value_set)
-        )
+        return column.apply(lambda x: are_values_after_split_in_value_set(x, delimiter, value_set))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)

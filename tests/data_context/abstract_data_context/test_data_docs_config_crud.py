@@ -69,19 +69,13 @@ class TestAddDataDocsSite:
                 site_name=new_site_name, site_config=new_site_config
             )
 
-        assert "Data Docs Site `local_site` already exists in the Data Context." in str(
-            e.value
-        )
+        assert "Data Docs Site `local_site` already exists in the Data Context." in str(e.value)
 
 
 class TestListDataDocsSites:
     @pytest.mark.unit
-    def test_list_data_docs_sites(
-        self, ephemeral_context_with_defaults: EphemeralDataContext
-    ):
-        site_names = [
-            d for d in ephemeral_context_with_defaults.list_data_docs_sites().keys()
-        ]
+    def test_list_data_docs_sites(self, ephemeral_context_with_defaults: EphemeralDataContext):
+        site_names = [d for d in ephemeral_context_with_defaults.list_data_docs_sites().keys()]
         assert site_names == ["local_site"]
 
 
@@ -102,16 +96,11 @@ class TestUpdateDataDocsSite:
         updated_site_config = copy.deepcopy(new_site_config)
         updated_site_config["store_backend"]["base_directory"] = "/my_updated_site/"
 
-        ephemeral_context_with_defaults.update_data_docs_site(
-            new_site_name, updated_site_config
-        )
+        ephemeral_context_with_defaults.update_data_docs_site(new_site_name, updated_site_config)
 
         # Check the updated site config
         sites = ephemeral_context_with_defaults.variables.data_docs_sites
-        assert (
-            sites[new_site_name]["store_backend"]["base_directory"]
-            == "/my_updated_site/"
-        )
+        assert sites[new_site_name]["store_backend"]["base_directory"] == "/my_updated_site/"
 
     @pytest.mark.unit
     def test_update_data_docs_site_persists(
@@ -152,17 +141,14 @@ class TestUpdateDataDocsSite:
                 site_name="missing", site_config=new_site_config
             )
 
-        assert (
-            "Data Docs Site `missing` does not already exist in the Data Context."
-            in str(e.value)
+        assert "Data Docs Site `missing` does not already exist in the Data Context." in str(
+            e.value
         )
 
 
 class TestDeleteDataDocsSite:
     @pytest.mark.unit
-    def test_delete_data_docs_site(
-        self, ephemeral_context_with_defaults: EphemeralDataContext
-    ):
+    def test_delete_data_docs_site(self, ephemeral_context_with_defaults: EphemeralDataContext):
         # Check fixture configuration
         existing_site_name = "local_site"
         assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
@@ -170,9 +156,7 @@ class TestDeleteDataDocsSite:
         ephemeral_context_with_defaults.delete_data_docs_site(existing_site_name)
 
         # Check that the site is no longer present
-        assert (
-            existing_site_name not in ephemeral_context_with_defaults.get_site_names()
-        )
+        assert existing_site_name not in ephemeral_context_with_defaults.get_site_names()
 
     @pytest.mark.unit
     def test_delete_data_docs_site_persists(
@@ -200,7 +184,6 @@ class TestDeleteDataDocsSite:
         with pytest.raises(gx_exceptions.InvalidKeyError) as e:
             ephemeral_context_with_defaults.delete_data_docs_site("missing")
 
-        assert (
-            "Data Docs Site `missing` does not already exist in the Data Context."
-            in str(e.value)
+        assert "Data Docs Site `missing` does not already exist in the Data Context." in str(
+            e.value
         )

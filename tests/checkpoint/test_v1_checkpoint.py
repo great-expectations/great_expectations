@@ -123,7 +123,7 @@ class TestCheckpointSerialization:
                         "notify_on": "all",
                         "renderer": {
                             "class_name": "MicrosoftTeamsRenderer",
-                            "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                            "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
                         },
                         "teams_webhook": "teams_webhook",
                         "type": "microsoft",
@@ -141,9 +141,7 @@ class TestCheckpointSerialization:
         expected_actions: dict,
         request: pytest.FixtureRequest,
     ):
-        actions = (
-            request.getfixturevalue(action_fixture_name) if action_fixture_name else []
-        )
+        actions = request.getfixturevalue(action_fixture_name) if action_fixture_name else []
         cp = Checkpoint(
             name="my_checkpoint",
             validation_definitions=validation_configs,
@@ -239,7 +237,7 @@ class TestCheckpointSerialization:
                     "notify_on": "all",
                     "renderer": {
                         "class_name": "MicrosoftTeamsRenderer",
-                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
                     },
                     "teams_webhook": "teams_webhook",
                     "type": "microsoft",
@@ -263,7 +261,7 @@ class TestCheckpointSerialization:
         assert cp.validation_definitions[1].batch_definition.name == batch_config_name_2
         assert cp.validation_definitions[1].suite.name == suite_name_2
 
-        # Check that all validation_definitions and nested suites have been assigned IDs during serialization
+        # Check that all validation_definitions and nested suites have been assigned IDs during serialization  # noqa: E501
         self._assert_valid_uuid(id=cp.validation_definitions[0].id)
         self._assert_valid_uuid(id=cp.validation_definitions[1].id)
         self._assert_valid_uuid(id=cp.validation_definitions[0].suite.id)
@@ -271,9 +269,7 @@ class TestCheckpointSerialization:
 
     def _assert_valid_uuid(self, id: str | None) -> None:
         if not id:
-            pytest.fail(
-                "id is None when it should be a valid UUID generated from a Store."
-            )
+            pytest.fail("id is None when it should be a valid UUID generated from a Store.")
 
         try:
             uuid.UUID(id)

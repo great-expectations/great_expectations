@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
-# TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
+# TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.  # noqa: E501
 def instantiate_class_from_config(  # noqa: C901, PLR0912
     config, runtime_environment, config_defaults=None
 ):
@@ -57,7 +57,7 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
     class_name = config.pop("class_name", None)
     if class_name is None:
         logger.warning(
-            "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
+            "Instantiating class from config without an explicit class_name is dangerous. Consider adding "  # noqa: E501
             f"an explicit class_name for {config.get('name')}"
         )
         try:
@@ -143,7 +143,7 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
 
     Returns:
         string of variable name e.g. SOME_VAR or None if not parsable. If there are multiple substitution variables this currently returns the first e.g. $SOME_$TRING -> $SOME_
-    """
+    """  # noqa: E501
     substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName(
         "substitution_variable_name"
     )
@@ -188,21 +188,21 @@ class PasswordMasker:
 
         Returns:
             url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
-        """
+        """  # noqa: E501
         if url.startswith("DefaultEndpointsProtocol"):
             return cls._obfuscate_azure_blobstore_connection_string(url)
         elif sa is not None and use_urlparse is False:
             try:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
-            # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
+            # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL  # noqa: E501
             except Exception as e:
                 logger.warning(
                     f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}"
                 )
         else:
             warnings.warn(
-                "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
+                "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."  # noqa: E501
             )
         return cls._mask_db_url_no_sa(url=url)
 
@@ -216,13 +216,13 @@ class PasswordMasker:
             matched: re.Match[str] | None = azure_conn_str_re.match(url)
             if not matched:
                 raise StoreConfigurationError(
-                    f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "
+                    f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "  # noqa: E501
                 )
-            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
+            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"  # noqa: E501
             return res
         except Exception as e:
             raise StoreConfigurationError(
-                f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+                f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"  # noqa: E501
             )
 
     @classmethod
@@ -246,9 +246,7 @@ class PasswordMasker:
         )
 
         if replace_prefix is not None:
-            masked_url = masked_url.replace(
-                replace_prefix["temporary"], replace_prefix["original"]
-            )
+            masked_url = masked_url.replace(replace_prefix["temporary"], replace_prefix["original"])
 
         return masked_url
 

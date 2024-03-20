@@ -39,7 +39,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
 
     This nonparameteric estimator calculates quantiles given a MetricValues vector of length N, the q-th quantile of
         the vector is the value q of the way from the minimum to the maximum in a sorted copy of the MetricValues.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -64,7 +64,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
-        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
+        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(  # noqa: E501
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,  # type: ignore[union-attr] # configuration could be None
             round_decimals=self.configuration.round_decimals,  # type: ignore[union-attr] # configuration could be None
             domain=domain,

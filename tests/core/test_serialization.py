@@ -87,9 +87,7 @@ def checkpoint_config_with_schema_spark(
                     "data_connector_name": "my_data_connector",
                     "data_asset_name": "users",
                     "data_connector_query": {"partition_index": -1},
-                    "batch_spec_passthrough": {
-                        "reader_options": {"schema": spark_schema}
-                    },
+                    "batch_spec_passthrough": {"reader_options": {"schema": spark_schema}},
                 },
                 id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
             ),
@@ -202,9 +200,7 @@ def data_connector_config_spark(spark_session) -> DataConnectorConfig:
 
 
 @pytest.fixture
-def datas_connector_config_with_schema_spark(
-    spark_session, spark_schema
-) -> DataConnectorConfig:
+def datas_connector_config_with_schema_spark(spark_session, spark_schema) -> DataConnectorConfig:
     return DataConnectorConfig(
         class_name="ConfiguredAssetFilesystemDataConnector",
         module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
@@ -557,7 +553,7 @@ def test_checkpoint_config_deepcopy():
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
-    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""
+    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""  # noqa: E501
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config
 
@@ -590,9 +586,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                             "data_connector_query": {
                                 "partition_index": -1,
                             },
-                            "batch_spec_passthrough": {
-                                "reader_options": {"header": True}
-                            },
+                            "batch_spec_passthrough": {"reader_options": {"header": True}},
                             "datasource_name": "my_datasource",
                         },
                         "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
@@ -692,7 +686,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -739,7 +733,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -786,7 +780,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -833,7 +827,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_with_schema",
         ),
@@ -863,7 +857,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_without_schema",
         ),
@@ -884,9 +878,9 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
     observed_dump = dataConnectorConfigSchema.dump(obj=data_connector_config)
     assert observed_dump == expected_serialized_data_connector_config
     observed_load = dataConnectorConfigSchema.load(observed_dump)
-    assert dataConnectorConfigSchema.dump(
-        observed_load
-    ) == dataConnectorConfigSchema.dump(data_connector_config)
+    assert dataConnectorConfigSchema.dump(observed_load) == dataConnectorConfigSchema.dump(
+        data_connector_config
+    )
 
 
 @pytest.mark.parametrize(

@@ -10,7 +10,9 @@ from great_expectations.types import DictDot
 if TYPE_CHECKING:
     import numpy as np
 
-NUM_HISTOGRAM_BINS: int = 10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+NUM_HISTOGRAM_BINS: int = (
+    10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+)
 
 
 @dataclass(frozen=True)
@@ -22,7 +24,7 @@ class NumericRangeEstimationResult(DictDot):
     In particular, "estimation_histogram" is "numpy.ndarray" of shape [2, NUM_HISTOGRAM_BINS + 1], containing
     [0] "histogram": (integer array of dimension [NUM_HISTOGRAM_BINS + 1] padded with 0 at right edge) histogram values;
     [1] "bin_edges": (float array of dimension [NUM_HISTOGRAM_BINS + 1]) binning edges.
-    """
+    """  # noqa: E501
 
     estimation_histogram: np.ndarray
     value_range: Union[np.ndarray, List[np.float64]]

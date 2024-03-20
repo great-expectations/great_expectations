@@ -7,9 +7,7 @@ try:
     from prophet import Prophet
     from prophet.serialize import model_from_json
 except ImportError:
-    logger.warning(
-        "Unable to import Prophet. Please install prophet to use this Expectation."
-    )
+    logger.warning("Unable to import Prophet. Please install prophet to use this Expectation.")
     model_from_json = None
 
 

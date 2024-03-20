@@ -98,7 +98,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         However, if "max_unexpected_ratio" is eased to above 0.2, then the tolerances will be met and Domain emitted.
         Alternatively, if "min_max_unexpected_values_proportion" is lowered to 0.66, Domain will also be emitted.
-        """
+        """  # noqa: E501
         super().__init__(
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
@@ -114,9 +114,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         self._map_metric_name = map_metric_name
         self._max_unexpected_values = max_unexpected_values
         self._max_unexpected_ratio = max_unexpected_ratio
-        self._min_max_unexpected_values_proportion = (
-            min_max_unexpected_values_proportion
-        )
+        self._min_max_unexpected_values_proportion = min_max_unexpected_values_proportion
 
     @property
     def map_metric_name(self) -> str:
@@ -149,8 +147,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             List of domains that match the desired tolerance limits.
-        """
-        # Obtain map_metric_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        """  # noqa: E501
+        # Obtain map_metric_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         map_metric_name: str = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.map_metric_name,
@@ -159,7 +157,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        # Obtain max_unexpected_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain max_unexpected_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         max_unexpected_values: int = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_unexpected_values,
@@ -168,26 +166,22 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_unexpected_ratio: Optional[float] = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.max_unexpected_ratio,
-                expected_return_type=None,
-                variables=variables,
-                parameters=None,
-            )
+        # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        max_unexpected_ratio: Optional[float] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_unexpected_ratio,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
         )
 
-        # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        min_max_unexpected_values_proportion: float = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.min_max_unexpected_values_proportion,
-                expected_return_type=float,
-                variables=variables,
-                parameters=None,
-            )
+        # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        min_max_unexpected_values_proportion: float = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.min_max_unexpected_values_proportion,
+            expected_return_type=float,
+            variables=variables,
+            parameters=None,
         )
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
@@ -211,7 +205,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             1.0 * sum(table_row_counts.values()) / num_batch_ids
         ) + NP_EPSILON
 
-        # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.
+        # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.  # noqa: E501
         if max_unexpected_ratio is None:
             max_unexpected_ratio = max_unexpected_values / mean_table_row_count_as_float
 
@@ -223,15 +217,13 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             )
         )
 
-        candidate_column_names: List[str] = (
-            self._get_column_names_satisfying_tolerance_limits(
-                validator=validator,
-                num_batch_ids=num_batch_ids,
-                metric_configurations_by_column_name=metric_configurations_by_column_name,
-                mean_table_row_count_as_float=mean_table_row_count_as_float,
-                max_unexpected_ratio=max_unexpected_ratio,
-                min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
-            )
+        candidate_column_names: List[str] = self._get_column_names_satisfying_tolerance_limits(
+            validator=validator,
+            num_batch_ids=num_batch_ids,
+            metric_configurations_by_column_name=metric_configurations_by_column_name,
+            mean_table_row_count_as_float=mean_table_row_count_as_float,
+            max_unexpected_ratio=max_unexpected_ratio,
+            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
         )
 
         column_name: str
@@ -263,7 +255,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             Dictionary of the form {
                 column_name: List[MetricConfiguration],
             }
-        """
+        """  # noqa: E501
         column_name: str
         batch_id: str
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
@@ -306,16 +298,16 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         Returns:
             List of column names satisfying tolerance limits.
-        """
+        """  # noqa: E501
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
-        resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
-        ] = get_resolved_metrics_by_key(
-            validator=validator,
-            metric_configurations_by_key=metric_configurations_by_column_name,
-            runtime_configuration=runtime_configuration,
+        resolved_metrics_by_column_name: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = (
+            get_resolved_metrics_by_key(
+                validator=validator,
+                metric_configurations_by_key=metric_configurations_by_column_name,
+                runtime_configuration=runtime_configuration,
+            )
         )
 
         metric_value: Any
@@ -334,7 +326,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
                 metric_value_ratio <= max_unexpected_ratio
                 for metric_value_ratio in metric_value_ratios
             ]
-            for column_name, metric_value_ratios in intra_batch_unexpected_ratios_by_column_name.items()
+            for column_name, metric_value_ratios in intra_batch_unexpected_ratios_by_column_name.items()  # noqa: E501
         }
 
         inter_batch_adherence_by_column_name: Dict[str, float] = {
@@ -347,9 +339,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         inter_batch_unexpected_values_proportion: float
         candidate_column_names: List[str] = [
             column_name
-            for column_name, inter_batch_unexpected_values_proportion in inter_batch_adherence_by_column_name.items()
-            if inter_batch_unexpected_values_proportion
-            >= min_max_unexpected_values_proportion
+            for column_name, inter_batch_unexpected_values_proportion in inter_batch_adherence_by_column_name.items()  # noqa: E501
+            if inter_batch_unexpected_values_proportion >= min_max_unexpected_values_proportion
         ]
 
         return candidate_column_names

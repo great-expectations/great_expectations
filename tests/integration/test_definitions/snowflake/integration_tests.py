@@ -71,7 +71,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_snowflake",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -80,7 +80,7 @@ partition_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),
@@ -100,7 +100,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_snowflake",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
@@ -109,7 +109,7 @@ partition_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),

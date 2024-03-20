@@ -32,10 +32,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
         },
         runtime_environment={"x": 1},
     )
-    assert (
-        fake_configurable_wrapper_object.fake_configurable_object.a
-        == "default_value_for_a"
-    )
+    assert fake_configurable_wrapper_object.fake_configurable_object.a == "default_value_for_a"
 
     fake_configurable_wrapper_object = instantiate_class_from_config(
         config={
@@ -50,10 +47,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
         },
         runtime_environment={"x": 1},
     )
-    assert (
-        fake_configurable_wrapper_object.fake_configurable_object.a
-        == "not_the_default_value"
-    )
+    assert fake_configurable_wrapper_object.fake_configurable_object.a == "not_the_default_value"
 
 
 @pytest.mark.unit
@@ -195,17 +189,13 @@ def test_instantiate_class_from_config_with_config_defaults():
             False,
         ),
         (
-            ProgressBarsConfig(
-                globally=True, profilers=False, metric_calculations=False
-            ),
+            ProgressBarsConfig(globally=True, profilers=False, metric_calculations=False),
             True,
             False,
             False,
         ),
         (
-            ProgressBarsConfig(
-                globally=False, profilers=True, metric_calculations=True
-            ),
+            ProgressBarsConfig(globally=False, profilers=True, metric_calculations=True),
             False,
             True,
             True,

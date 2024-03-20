@@ -25,7 +25,7 @@ def _is_sqlalchemy_metric_selectable(
     :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
     columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
     unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
-    """
+    """  # noqa: E501
     # noinspection PyUnresolvedReferences
     return (
         hasattr(map_metric_provider, "condition_metric_name")

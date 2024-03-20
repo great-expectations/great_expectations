@@ -22,9 +22,7 @@ if pyspark_types:
         pytest.param(
             [pyspark_types.StructField("f1", pyspark_types.StringType(), True)],
             {
-                "fields": [
-                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
-                ],
+                "fields": [{"metadata": {}, "name": "f1", "nullable": True, "type": "string"}],
                 "type": "struct",
             },
             id="fields_list",
@@ -34,9 +32,7 @@ if pyspark_types:
                 [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
             ),
             {
-                "fields": [
-                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
-                ],
+                "fields": [{"metadata": {}, "name": "f1", "nullable": True, "type": "string"}],
                 "type": "struct",
             },
             id="struct_type",
@@ -47,13 +43,9 @@ else:
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "fields_or_struct_type,serialized_output", struct_type_test_params
-)
+@pytest.mark.parametrize("fields_or_struct_type,serialized_output", struct_type_test_params)
 def test_serializable_struct_type(
-    fields_or_struct_type: pyspark_types.StructType
-    | list[pyspark_types.StructField]
-    | None,
+    fields_or_struct_type: pyspark_types.StructType | list[pyspark_types.StructField] | None,
     serialized_output: dict,
     skip_if_spark_not_selected: None,
 ):
@@ -69,9 +61,7 @@ def test_serializable_struct_type(
     struct_type_test_params,
 )
 def test_serializable_struct_type_validate(
-    fields_or_struct_type: pyspark_types.StructType
-    | list[pyspark_types.StructField]
-    | None,
+    fields_or_struct_type: pyspark_types.StructType | list[pyspark_types.StructField] | None,
     serialized_output: dict,
     skip_if_spark_not_selected: None,
 ):

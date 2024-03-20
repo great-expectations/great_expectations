@@ -16,7 +16,7 @@ except ImportError:
     SparkDFExecutionEngine = None
     # TODO: review logging more detail here
     logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."  # noqa: E501
     )
 
 # module level markers
@@ -40,11 +40,9 @@ def test_spark_config_datasource(spark_session_v012):
         name="my spark datasource",
         spark_config=spark_config,
     )
-    # a warning is raised because passing unmodifiable config options results in restarting spark context
+    # a warning is raised because passing unmodifiable config options results in restarting spark context  # noqa: E501
     with pytest.warns(RuntimeWarning):
-        execution_engine: SparkDFExecutionEngine = (
-            spark_datasource.get_execution_engine()
-        )
+        execution_engine: SparkDFExecutionEngine = spark_datasource.get_execution_engine()
     spark_session: pyspark.SparkSession = execution_engine.spark
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
@@ -72,9 +70,7 @@ def test_spark_config_execution_engine_block_config(spark_session):
 
     assert not sc_stopped
 
-    current_spark_config: List[tuple] = (
-        execution_engine.spark.sparkContext.getConf().getAll()
-    )
+    current_spark_config: List[tuple] = execution_engine.spark.sparkContext.getConf().getAll()
     assert ("spark.sql.catalogImplementation", "hive") in current_spark_config
     assert (
         "spark.app.name",

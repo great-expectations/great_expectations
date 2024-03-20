@@ -47,7 +47,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
 
-    """
+    """  # noqa: E501
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
     parameter_values_for_fully_qualified_parameter_names_by_domain: Optional[
@@ -65,7 +65,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         """
         Returns:
             This `RuleBasedProfilerResult` as dictionary (JSON-serializable for `RuleBasedProfilerResult` objects).
-        """
+        """  # noqa: E501
         domain: Domain
         fully_qualified_parameter_names: List[str]
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
@@ -82,17 +82,17 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=fully_qualified_parameter_names
                     ),
                 }
-                for domain, fully_qualified_parameter_names in self.fully_qualified_parameter_names_by_domain.items()
+                for domain, fully_qualified_parameter_names in self.fully_qualified_parameter_names_by_domain.items()  # noqa: E501
             ],
             "parameter_values_for_fully_qualified_parameter_names_by_domain": [
                 {
                     "domain_id": domain.id,
                     "domain": domain.to_json_dict(),
-                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(  # noqa: E501
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
-                for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
+                for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()  # noqa: E501
             ],
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()

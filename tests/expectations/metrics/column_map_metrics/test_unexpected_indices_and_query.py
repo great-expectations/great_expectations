@@ -26,7 +26,7 @@ from tests.expectations.test_util import get_table_columns_metric
 def animal_table_df() -> pd.DataFrame:
     """
     Returns: pandas dataframe that contains example data for unexpected_index_column_names metric tests
-    """
+    """  # noqa: E501
     df = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -84,7 +84,7 @@ def _build_table_columns_and_unexpected(
 
         Tuple with MetricConfigurations corresponding to unexpected_condition and table_columns metric, as well as metrics dict.
 
-    """
+    """  # noqa: E501
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     # get table_columns_metric
@@ -185,9 +185,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
 
 
 @pytest.mark.unit
-def test_pd_unexpected_index_list_metric_with_id_pk(
-    metric_value_kwargs_complete, animal_table_df
-):
+def test_pd_unexpected_index_list_metric_with_id_pk(metric_value_kwargs_complete, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
@@ -372,9 +370,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
 
 
 @pytest.mark.unit
-def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
-    sa, animal_table_df
-):
+def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(sa, animal_table_df):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -561,9 +557,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
 
 
 @pytest.mark.spark
-def test_spark_unexpected_index_list_metric_without_id_pk(
-    spark_session, animal_table_df
-):
+def test_spark_unexpected_index_list_metric_without_id_pk(spark_session, animal_table_df):
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
@@ -638,9 +632,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
 
 
 @pytest.mark.big
-def test_pd_unexpected_index_query_metric_with_id_pk(
-    animal_table_df, metric_value_kwargs_complete
-):
+def test_pd_unexpected_index_query_metric_with_id_pk(animal_table_df, metric_value_kwargs_complete):
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
     engine: PandasExecutionEngine = build_pandas_engine(df=df)

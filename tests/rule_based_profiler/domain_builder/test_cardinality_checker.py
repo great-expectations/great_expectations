@@ -3,7 +3,7 @@ from typing import Union
 import pytest
 
 from great_expectations.exceptions import ProfilerConfigurationError
-from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # noqa: E501
     AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
@@ -19,9 +19,7 @@ def test_cardinality_checker_instantiation_valid_cardinality_limit_mode_paramete
         cardinality_limit_mode=CardinalityLimitMode.MANY
     )
     assert cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.MANY.value
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit
-    )
+    assert isinstance(cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == AbsoluteCardinalityLimit(
         name="MANY", max_unique_values=10000
     )
@@ -31,79 +29,50 @@ def test_cardinality_checker_instantiation_valid_cardinality_limit_mode_paramete
     cardinality_checker: CardinalityChecker = CardinalityChecker(
         cardinality_limit_mode=CardinalityLimitMode.REL_1
     )
-    assert (
-        cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.REL_1.value
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit
-    )
+    assert cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.REL_1.value
+    assert isinstance(cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == RelativeCardinalityLimit(
         name="REL_1", max_proportion_unique=0.01
     )
 
 
 def test_cardinality_checker_instantiation_valid_cardinality_limit_mode_parameter_str_absolute():
-    cardinality_checker: CardinalityChecker = CardinalityChecker(
-        cardinality_limit_mode="VERY_MANY"
-    )
-    assert (
-        cardinality_checker.cardinality_limit_mode
-        == CardinalityLimitMode.VERY_MANY.value
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit
-    )
+    cardinality_checker: CardinalityChecker = CardinalityChecker(cardinality_limit_mode="VERY_MANY")
+    assert cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.VERY_MANY.value
+    assert isinstance(cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == AbsoluteCardinalityLimit(
         name="VERY_MANY", max_unique_values=100000
     )
 
 
 def test_cardinality_checker_instantiation_valid_cardinality_limit_mode_parameter_str_relative():
-    cardinality_checker: CardinalityChecker = CardinalityChecker(
-        cardinality_limit_mode="REL_0_1"
-    )
-    assert (
-        cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.REL_0_1.value
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit
-    )
+    cardinality_checker: CardinalityChecker = CardinalityChecker(cardinality_limit_mode="REL_0_1")
+    assert cardinality_checker.cardinality_limit_mode == CardinalityLimitMode.REL_0_1.value
+    assert isinstance(cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == RelativeCardinalityLimit(
         name="REL_0_1", max_proportion_unique=0.001
     )
 
 
 def test_cardinality_checker_instantiation_valid_max_unique_values_parameter():
-    cardinality_checker: CardinalityChecker = CardinalityChecker(
-        max_unique_values=12345
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit
-    )
+    cardinality_checker: CardinalityChecker = CardinalityChecker(max_unique_values=12345)
+    assert isinstance(cardinality_checker.cardinality_limit_mode, AbsoluteCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == AbsoluteCardinalityLimit(
         name="CUSTOM_ABS_12345", max_unique_values=12345
     )
 
 
 def test_cardinality_checker_instantiation_valid_max_proportion_unique_parameter_float():
-    cardinality_checker: CardinalityChecker = CardinalityChecker(
-        max_proportion_unique=0.42
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit
-    )
+    cardinality_checker: CardinalityChecker = CardinalityChecker(max_proportion_unique=0.42)
+    assert isinstance(cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == RelativeCardinalityLimit(
         name="CUSTOM_REL_0.42", max_proportion_unique=0.42
     )
 
 
 def test_cardinality_checker_instantiation_valid_max_proportion_unique_parameter_int():
-    cardinality_checker: CardinalityChecker = CardinalityChecker(
-        max_proportion_unique=1
-    )
-    assert isinstance(
-        cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit
-    )
+    cardinality_checker: CardinalityChecker = CardinalityChecker(max_proportion_unique=1)
+    assert isinstance(cardinality_checker.cardinality_limit_mode, RelativeCardinalityLimit)
     assert cardinality_checker.cardinality_limit_mode == RelativeCardinalityLimit(
         name="CUSTOM_REL_1", max_proportion_unique=1
     )
@@ -144,8 +113,7 @@ def test_cardinality_checker_instantiation_invalid_multiple_parameters():
 
 @pytest.mark.parametrize(
     "input_cardinality_limit_mode",
-    [member for member in CardinalityLimitMode]
-    + [member.name for member in CardinalityLimitMode],
+    [member for member in CardinalityLimitMode] + [member.name for member in CardinalityLimitMode],
 )
 def test_exhaustively_cardinality_within_limit_for_all_supported_cardinality_limits(
     input_cardinality_limit_mode,
@@ -162,9 +130,9 @@ def test_exhaustively_cardinality_within_limit_for_all_supported_cardinality_lim
 
     # Set up passing and failing cardinality measured values
     cardinality_limit: float
-    cardinality_limit_mode: Union[
-        AbsoluteCardinalityLimit, RelativeCardinalityLimit
-    ] = cardinality_checker.cardinality_limit_mode
+    cardinality_limit_mode: Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit] = (
+        cardinality_checker.cardinality_limit_mode
+    )
     if isinstance(cardinality_limit_mode, AbsoluteCardinalityLimit):
         cardinality_limit = cardinality_limit_mode.max_unique_values
         if cardinality_limit > 0:

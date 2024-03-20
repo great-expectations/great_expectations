@@ -99,9 +99,7 @@ def test_azure_pandas_url_with_nested_blob():
 def test_azure_pandas_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
-    url = AzureUrl(
-        "my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+"
-    )
+    url = AzureUrl("my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+")
     assert url.account_name == "my_account"
     assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"
@@ -139,9 +137,7 @@ def test_azure_spark_url_with_nested_blob():
 def test_azure_spark_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
-    url = AzureUrl(
-        "my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+"
-    )
+    url = AzureUrl("my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+")
     assert url.account_name == "my_account"
     assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"

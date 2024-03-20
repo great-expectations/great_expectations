@@ -240,7 +240,7 @@ Invalid result values were found when trying to instantiate an ExpectationValida
 - Great Expectations enables caching by default.
 - Please ensure that caching behavior is consistent between the underlying Dataset (e.g. Spark) and Great Expectations.
 Result: {}
-"""
+"""  # noqa: E501
         self.message = template.format(json.dumps(result_dict, indent=2))
         super().__init__(self.message)
 
@@ -252,7 +252,7 @@ class ConfigNotFoundError(DataContextError):
         self.message = """Error: No gx directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
-"""
+"""  # noqa: E501
         super().__init__(self.message)
 
 
@@ -269,9 +269,7 @@ No module named `{}` could be found in your plugins directory.
 
         colored_template = f"<red>{template}</red>"
         module_snippet = f"</red><yellow>{module_name}</yellow><red>"
-        self.cli_colored_message = colored_template.format(
-            module_snippet, module_snippet
-        )
+        self.cli_colored_message = colored_template.format(module_snippet, module_snippet)
         super().__init__(self.message)
 
 
@@ -308,9 +306,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
         module_snippet = f"</red><yellow>{module_name}</yellow><red>"
         class_snippet = f"</red><yellow>{class_name}</yellow><red>"
         if class_name_changes.get(class_name):
-            new_class_snippet = (
-                f"</red><yellow>{class_name_changes.get(class_name)}</yellow><red>"
-            )
+            new_class_snippet = f"</red><yellow>{class_name_changes.get(class_name)}</yellow><red>"
             self.cli_colored_message = colored_template.format(
                 module_snippet, class_snippet, class_snippet, new_class_snippet
             )
@@ -326,8 +322,8 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
         # noinspection PyUnresolvedReferences
-        module_spec: Optional[importlib.machinery.ModuleSpec] = (
-            importlib.util.find_spec(module_name, package=package_name)
+        module_spec: Optional[importlib.machinery.ModuleSpec] = importlib.util.find_spec(
+            module_name, package=package_name
         )
         if not module_spec:
             if not package_name:
@@ -335,21 +331,19 @@ class ClassInstantiationError(GreatExpectationsError):
             self.message = f"""No module named "{package_name + module_name}" could be found in the repository.  \
 Please make sure that the file, corresponding to this package and module, exists and that dynamic loading of code \
 modules, templates, and assets is supported in your execution environment.  This error is unrecoverable.
-            """
+            """  # noqa: E501
         else:
             self.message = f"""The module "{module_name}" exists; however, the system is unable to create an instance \
 of the class "{class_name}", searched for inside this module.  Please make sure that the class named "{class_name}" is \
 properly defined inside its intended module and declared correctly by the calling entity.  This error is unrecoverable.
-            """
+            """  # noqa: E501
         super().__init__(self.message)
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name) -> None:
         self.data_asset_name = data_asset_name
-        self.message = (
-            f"No expectation suite found for data_asset_name {data_asset_name}"
-        )
+        self.message = f"No expectation suite found for data_asset_name {data_asset_name}"
         super().__init__(self.message)
 
 
@@ -374,9 +368,7 @@ class BatchSpecError(DataContextError):
 
 class DatasourceError(DataContextError):
     def __init__(self, datasource_name: str, message: str) -> None:
-        self.message = (
-            f"Cannot initialize datasource {datasource_name}, error: {message}"
-        )
+        self.message = f"Cannot initialize datasource {datasource_name}, error: {message}"
         super().__init__(self.message)
 
 
@@ -471,7 +463,7 @@ class GXCloudError(GreatExpectationsError):
 class GXCloudConfigurationError(GreatExpectationsError):
     """
     Error finding and verifying the required configuration values when preparing to connect to GX Cloud
-    """
+    """  # noqa: E501
 
 
 class DatabaseConnectionError(GreatExpectationsError):

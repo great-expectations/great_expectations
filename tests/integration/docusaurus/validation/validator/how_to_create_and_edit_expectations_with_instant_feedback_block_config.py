@@ -57,9 +57,7 @@ validator.expect_column_values_to_not_be_null(column="vendor_id")
 
 # this snippet is only for users who are not using a jupyter notebook
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation_no_jupyter">
-expectation_validation_result = validator.expect_column_values_to_not_be_null(
-    column="vendor_id"
-)
+expectation_validation_result = validator.expect_column_values_to_not_be_null(column="vendor_id")
 print(expectation_validation_result)
 # </snippet>
 
