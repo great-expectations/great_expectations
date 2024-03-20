@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from itertools import chain
 from typing import TYPE_CHECKING, List, Optional, Sequence
 
@@ -12,6 +13,9 @@ from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     MetricTypes,
 )
+
+logger = logging.getLogger(__name__)
+
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -44,12 +48,14 @@ class MetricListMetricRetriever(MetricRetriever):
         )
         metrics_result.extend(table_metrics)
 
-        if (
-            not self._column_metrics_in_metric_list(metric_list)
-            or MetricTypes.TABLE_COLUMN_TYPES not in metric_list
-        ):
+        if not self._column_metrics_in_metric_list(metric_list):
             # if no column metrics are present in the metric list, we can return the table metrics
-            # also check that table column types are present in the metric list.
+            return metrics_result
+
+        if MetricTypes.TABLE_COLUMN_TYPES not in metric_list:
+            logger.warning(
+                "TABLE_COLUMN_TYPES metric is required to compute column metrics. Skipping column metrics."
+            )
             return metrics_result
 
         table_column_types = list(
