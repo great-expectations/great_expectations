@@ -39,7 +39,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_config import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,

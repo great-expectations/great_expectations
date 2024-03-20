@@ -21,7 +21,7 @@ from typing import (  # TODO: revert use of cast
 import pytest
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.batch_config import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext

@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.batch_config import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,

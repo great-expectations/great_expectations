@@ -13,7 +13,7 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
-from great_expectations.core.batch_config import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,

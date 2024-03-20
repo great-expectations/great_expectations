@@ -5,7 +5,7 @@ from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
-from great_expectations.core.batch_config import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
