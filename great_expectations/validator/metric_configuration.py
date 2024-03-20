@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
@@ -18,7 +18,7 @@ class MetricConfiguration:
     be used to evaluate Expectations or to summarize the result of the Validation.
 
     Args:
-        metric_name (str): name of the Metric defined by the current MetricConfiguration.
+        metric_name (str or MetricTypes enum): name of the Metric defined by the current MetricConfiguration.
         metric_domain_kwargs (dict): provides information on where the Metric can be calculated. For instance, a
             MapCondition metric can include the name of the column that the Metric is going to be run on.
         metric_value_kwargs (optional[dict]): Optional kwargs that define values specific to each Metric.  For instance,
@@ -28,7 +28,7 @@ class MetricConfiguration:
 
     def __init__(
         self,
-        metric_name: str | MetricTypes,
+        metric_name: Union[str, MetricTypes],
         metric_domain_kwargs: dict,
         metric_value_kwargs: Optional[dict] = None,
     ) -> None:

@@ -54,7 +54,7 @@ class MetricRetriever(abc.ABC):
     def get_metrics(
         self,
         batch_request: BatchRequest,
-        metrics_list: Optional[List[MetricTypes]] = None,
+        metric_list: Optional[List[MetricTypes]] = None,
     ) -> Sequence[Metric]:
         raise NotImplementedError
 
