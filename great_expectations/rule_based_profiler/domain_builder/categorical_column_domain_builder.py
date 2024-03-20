@@ -309,7 +309,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         if validator is None:
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."  # noqa: E501
+                message=f"Error: Failed to obtain Validator {self.__class__.__name__}"
+                " (Validator is required for cardinality checks)."
             )
 
         candidate_column_names: List[str] = self._column_names_meeting_cardinality_limit(
