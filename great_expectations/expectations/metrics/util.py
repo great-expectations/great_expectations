@@ -156,7 +156,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         # Databricks
-        if dialect.name == 'databricks':
+        if dialect.name == "databricks":
             if positive:
                 return sqlalchemy.BinaryExpression(
                     column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
