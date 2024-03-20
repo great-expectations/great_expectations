@@ -6,6 +6,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     List,
+    Optional,
     Sequence,
 )
 
@@ -50,7 +51,11 @@ class MetricRetriever(abc.ABC):
         return self._validator
 
     @abc.abstractmethod
-    def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
+    def get_metrics(
+        self,
+        batch_request: BatchRequest,
+        metric_list: Optional[List[MetricTypes]] = None,
+    ) -> Sequence[Metric]:
         raise NotImplementedError
 
     def _generate_metric_id(self) -> uuid.UUID:
@@ -58,11 +63,16 @@ class MetricRetriever(abc.ABC):
 
     def _get_metric_from_computed_metrics(
         self,
-        metric_name: str,
+        metric_name: str | MetricTypes,
         computed_metrics: _MetricsDict,
         aborted_metrics: _AbortedMetricsInfoDict,
         metric_lookup_key: _MetricKey | None = None,
     ) -> tuple[Any, MetricException | None]:
+        # look up is done by string
+        # TODO: update to be MetricTypes once MetricListMetricRetriever implementation is complete.
+        if isinstance(metric_name, MetricTypes):
+            metric_name = metric_name.value
+
         if metric_lookup_key is None:
             metric_lookup_key = (
                 metric_name,
@@ -91,7 +101,7 @@ class MetricRetriever(abc.ABC):
         return value, metric_exception
 
     def _generate_table_metric_configurations(
-        self, table_metric_names: list[str]
+        self, table_metric_names: list[str | MetricTypes]
     ) -> list[MetricConfiguration]:
         table_metric_configs = [
             MetricConfiguration(
