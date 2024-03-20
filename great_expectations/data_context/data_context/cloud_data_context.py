@@ -150,6 +150,7 @@ class CloudDataContext(SerializableDataContext):
         init_analytics(
             user_id=self._get_cloud_user_id(),
             data_context_id=uuid.UUID(self._data_context_id),
+            organization_id=self.ge_cloud_config.organization_id,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
         )
