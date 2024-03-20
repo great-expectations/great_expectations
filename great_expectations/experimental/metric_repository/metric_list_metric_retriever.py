@@ -36,8 +36,6 @@ class MetricListMetricRetriever(MetricRetriever):
 
         if not metric_list:
             raise ValueError("metric_list cannot be empty")
-        if not self._all_table_metrics_in_metric_list(metric_list):
-            raise ValueError("metric_list must contain TableMetrics.")
 
         self._check_valid_metric_types(metric_list)
 
@@ -46,7 +44,12 @@ class MetricListMetricRetriever(MetricRetriever):
         )
         metrics_result.extend(table_metrics)
 
-        if not self._column_metrics_in_metric_list(metric_list):
+        if (
+            not self._column_metrics_in_metric_list(metric_list)
+            or MetricTypes.TABLE_COLUMN_TYPES not in metric_list
+        ):
+            # if no column metrics are present in the metric list, we can return the table metrics
+            # also check that table column types are present in the metric list.
             return metrics_result
 
         table_column_types = list(
@@ -229,25 +232,6 @@ class MetricListMetricRetriever(MetricRetriever):
         """
         for metric in metric_list:
             if metric not in MetricTypes:
-                return False
-        return True
-
-    def _all_table_metrics_in_metric_list(self, metric_list: List[MetricTypes]) -> bool:
-        """Ensure that Row Count, Column Names and Column Types are present in the metric list.
-
-        Args:
-            metric_list (List[MetricTypes]): List of metrics to compute.
-
-        Returns:
-            bool: True if the metric_list contains all TableMetrics.
-        """
-        table_metrics: List[MetricTypes] = [
-            MetricTypes.TABLE_ROW_COUNT,
-            MetricTypes.TABLE_COLUMNS,
-            MetricTypes.TABLE_COLUMN_TYPES,
-        ]
-        for metric in table_metrics:
-            if metric not in metric_list:
                 return False
         return True
 
