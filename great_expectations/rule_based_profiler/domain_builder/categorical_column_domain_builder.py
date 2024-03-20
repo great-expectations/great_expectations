@@ -347,8 +347,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         batch_ids = batch_ids or []
 
         cardinality_limit_mode: Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit] = (
-            self.cardinality_checker.cardinality_limit_mode
-        )  # type: ignore[union-attr] # could be None
+            self.cardinality_checker.cardinality_limit_mode  # type: ignore[union-attr] # could be None
+        )
 
         batch_id: str
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
