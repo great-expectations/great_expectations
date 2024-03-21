@@ -64,7 +64,7 @@ To view all the code used in the examples, see [how_to_configure_credentials.py]
 
 GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers.
 
-<Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'GCP Secrets Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
+<Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'Google Cloud Secret Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
 
 <TabItem value="aws">
 
@@ -122,7 +122,7 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
 
 <TabItem value="gcp">
 
-Configure your Great Expectations project to substitute variables from the GCP Secrets Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
+Configure your Great Expectations project to substitute variables from the Google Cloud Secret Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
 
 Secrets store substitution uses keywords and retrieves secrets from the secrets store for values matching the following regex ``^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets``. If the values you provide don't match the keywords, the values aren't substituted.
 

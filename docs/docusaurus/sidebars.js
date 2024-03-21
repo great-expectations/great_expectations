@@ -96,12 +96,12 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'AWS secrets manager',
+              label: 'AWS Secrets Manager',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=aws',
             },
             {
               type: 'link',
-              label: 'GCP secrets manager',
+              label: 'Google Cloud Secret Manager',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=gcp',
             },
             {
