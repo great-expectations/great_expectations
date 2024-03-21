@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+from great_expectations import expectations as gxe
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
@@ -345,6 +346,7 @@ class TestCheckpointResult:
     column_name = "passenger_count"
     datasource_name: str = "my_pandas_datasource"
     asset_name: str = "my_asset"
+    batch_definition_name: str = "my_batch_def"
     validation_definition_name: str = "my_validation_def"
     checkpoint_name: str = "my_checkpoint"
 
@@ -432,8 +434,21 @@ class TestCheckpointResult:
         assert result.success is True
 
     @pytest.mark.unit
-    def test_checkpoint_run_with_runtime_params(self):
-        pass
+    def test_checkpoint_run_passes_through_runtime_params(
+        self, validation_definition: ValidationConfig
+    ):
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        batch_parameters = {"my_param": "my_value"}
+        expectation_parameters = {"my_other_param": "my_other_value"}
+        _ = checkpoint.run(
+            batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
+        )
+
+        validation_definition.run.assert_called_with(
+            batch_definition_options=batch_parameters, evaluation_parameters=expectation_parameters
+        )
 
     @pytest.mark.unit
     def test_checkpoint_run_with_actions(self):
@@ -505,3 +520,94 @@ class TestCheckpointResult:
 
         expected = {"success": True, "success_percent": 100.0}
         assert actual == expected
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_filesytem_e2e(self, tmp_path: pathlib.Path):
+        with working_directory(tmp_path):
+            context = gx.get_context(mode="file")
+
+        ds = context.sources.add_pandas(self.datasource_name)
+        csv_path = (
+            pathlib.Path(__file__).parent.parent
+            / "test_sets"
+            / "quickstart"
+            / "yellow_tripdata_sample_2022-01.csv"
+        )
+        assert csv_path.exists()
+        asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
+
+        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        suite = ExpectationSuite(
+            name=self.suite_name,
+            expectations=[
+                gxe.ExpectColumnValuesToBeBetween(
+                    column=self.column_name, min_value=0, max_value=10
+                ),
+                gxe.ExpectColumnMeanToBeBetween(
+                    column=self.column_name,
+                    min_value=0,
+                    max_value=1,
+                ),
+            ],
+        )
+
+        validation_definition = ValidationConfig(
+            name=self.validation_definition_name, data=batch_definition, suite=suite
+        )
+
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        result = checkpoint.run()
+
+        assert result.success is False
+        assert result.describe_dict() == {
+            "success": False,
+            "success_percent": 0.0,
+            "validation_results": [
+                {
+                    "expectations": [
+                        {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "kwargs": {
+                                "batch_id": f"{self.datasource_name}-{self.asset_name}",
+                                "column": self.column_name,
+                                "max_value": 10.0,
+                                "min_value": 0.0,
+                            },
+                            "result": {
+                                "element_count": 100000,
+                                "missing_count": 0,
+                                "missing_percent": 0.0,
+                                "partial_unexpected_counts": [],
+                                "partial_unexpected_index_list": [],
+                                "partial_unexpected_list": [],
+                                "unexpected_count": 0,
+                                "unexpected_percent": 0.0,
+                                "unexpected_percent_nonmissing": 0.0,
+                                "unexpected_percent_total": 0.0,
+                            },
+                            "success": True,
+                        },
+                        {
+                            "expectation_type": "expect_column_mean_to_be_between",
+                            "kwargs": {
+                                "batch_id": f"{self.datasource_name}-{self.asset_name}",
+                                "column": self.column_name,
+                                "max_value": 1.0,
+                                "min_value": 0.0,
+                            },
+                            "result": {"observed_value": 1.54471},
+                            "success": False,
+                        },
+                    ],
+                    "statistics": {
+                        "evaluated_expectations": 2,
+                        "success_percent": 50.0,
+                        "successful_expectations": 1,
+                        "unsuccessful_expectations": 1,
+                    },
+                    "success": False,
+                },
+            ],
+        }
