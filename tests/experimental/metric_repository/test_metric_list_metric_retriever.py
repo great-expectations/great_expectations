@@ -236,7 +236,7 @@ def test_get_metrics_full_list(mocker: MockerFixture):
     ]
 
 
-def test_column_metrics_not_returned_of_column_types_missing(mocker: MockerFixture, caplog):
+def test_column_metrics_not_returned_if_column_types_missing(mocker: MockerFixture, caplog):
     mock_context = mocker.Mock(spec=CloudDataContext)
     mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
