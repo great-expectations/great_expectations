@@ -207,8 +207,8 @@ class CheckpointResult(BaseModel):
         return self.checkpoint_config.name
 
     def describe_dict(self) -> dict:
+        success_count = sum(1 for r in self.run_results.values() if r.success)
         run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
-        success_count = sum(1 for r in run_result_descriptions if r["success"])
 
         return {
             "success": success_count == len(run_result_descriptions),
