@@ -66,14 +66,24 @@ def construct_url(
     organization_id: str,
     resource_name: str,
     id: Optional[str] = None,
+    v1: bool = False
 ) -> str:
-    url = urljoin(
-        base_url,
-        f"organizations/{organization_id}/{hyphen(resource_name)}",
-    )
-    if id:
-        url = f"{url}/{id}"
-    return url
+    if not v1:
+        url = urljoin(
+            base_url,
+            f"organizations/{organization_id}/{hyphen(resource_name)}",
+        )
+        if id:
+            url = f"{url}/{id}"
+        return url
+    else:
+        url = urljoin(
+            base_url,
+            f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
+        )
+        if id:
+            url = f"{url}/{id}"
+        return url
 
 
 def construct_json_payload(
@@ -516,12 +526,21 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         protocol: Optional[Any] = None,
     ) -> str:
         id = key[1]
-        url = construct_url(
-            base_url=self.ge_cloud_base_url,
-            organization_id=self.ge_cloud_credentials["organization_id"],
-            resource_name=self.ge_cloud_resource_name,
-            id=id,
-        )
+        if key[0] == GXCloudRESTResource.EXPECTATION_SUITE:
+            url = construct_url(
+                base_url=self.ge_cloud_base_url,
+                organization_id=self.ge_cloud_credentials["organization_id"],
+                resource_name=self.ge_cloud_resource_name,
+                id=id,
+                v1=True
+            )
+        else:
+            url = construct_url(
+                base_url=self.ge_cloud_base_url,
+                organization_id=self.ge_cloud_credentials["organization_id"],
+                resource_name=self.ge_cloud_resource_name,
+                id=id,
+            )
         return url
 
     def remove_key(self, key):
