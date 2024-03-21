@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
@@ -181,3 +180,24 @@ class Checkpoint(BaseModel):
     @public_api
     def save(self) -> None:
         raise NotImplementedError
+
+
+class CheckpointResult(BaseModel):
+    run_id: RunIdentifier
+    run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+    checkpoint_config: Checkpoint
+    validation_result_url: Optional[str] = None
+    success: Optional[bool] = None
+
+    @root_validator
+    def _root_validate_success(cls, values: dict) -> dict:
+        run_results = values["run_results"]
+        if len(run_results) == 0:
+            raise ValueError("CheckpointResult must contain at least one run result")
+
+        values["success"] = all(result.success for result in run_results.values())
+        return values
+
+    @property
+    def name(self) -> str:
+        return self.checkpoint_config.name
