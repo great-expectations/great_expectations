@@ -249,6 +249,37 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
     return at_least_str, at_most_str
 
 
+def _get_value_to_render(value_: Any) -> Any:
+    if value_ is not None and value_ != "":
+        return value_
+    if value_ == "":
+        return "EMPTY"
+    return "null"
+
+
+def _get_header_row(all_unexpected_in_samples: bool) -> list[str]:
+    # Check to see if we have *all* of the unexpected values accounted for. If so,
+    # we show counts. If not then we show Sampled Unexpected Values only.
+    if all_unexpected_in_samples:
+        header_row = ["Unexpected Value", "Count"]
+    else:
+        header_row = ["Sampled Unexpected Values"]
+    return header_row
+
+
+def _are_all_unexpected_values_in_samples(
+    partial_unexpected_counts: list[dict], unexpected_count: int
+) -> bool:
+    total_count: int = 0
+
+    for unexpected_count_dict in partial_unexpected_counts:
+        count: int | None = unexpected_count_dict.get("count")
+        if count:
+            total_count += count
+
+    return total_count == unexpected_count
+
+
 def build_count_table(
     partial_unexpected_counts: list[dict], unexpected_count: int
 ) -> tuple[list[str], list[list[Any]]]:
@@ -265,37 +296,20 @@ def build_count_table(
 
     """
     table_rows: list[list[str | int | None]] = []
-    total_count: int = 0
+    all_unexpected_in_samples: bool = _are_all_unexpected_values_in_samples(
+        partial_unexpected_counts, unexpected_count
+    )
 
     for unexpected_count_dict in partial_unexpected_counts:
-        count: int | None = unexpected_count_dict.get("count")
-        if count:
-            total_count += count
-
-    def _get_value(value_: Any) -> Any:
-        if value_ is not None and value_ != "":
-            return value_
-        if value_ == "":
-            return "EMPTY"
-        return "null"
-
-    all_unexpected_in_samples: bool = total_count == unexpected_count
-
-    for unexpected_count_dict in partial_unexpected_counts:
-        value = _get_value(unexpected_count_dict.get("value"))
+        value = _get_value_to_render(unexpected_count_dict.get("value"))
         count = unexpected_count_dict.get("count")
         if all_unexpected_in_samples:
             table_rows.append([value, count])
         else:
-            # Since accurate counts are not available, we show Sampled Unexpected Values only.
+            # Since accurate counts for the full dataset are not available, we show Sampled Unexpected Values only.
             table_rows.append([value])
 
-    # Check to see if we have *all* of the unexpected values accounted for. If so,
-    # we show counts. If not then we show Sampled Unexpected Values only.
-    if all_unexpected_in_samples:
-        header_row = ["Unexpected Value", "Count"]
-    else:
-        header_row = ["Sampled Unexpected Values"]
+    header_row = _get_header_row(all_unexpected_in_samples)
     return header_row, table_rows
 
 
