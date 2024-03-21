@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -8,6 +9,9 @@ from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
@@ -18,9 +22,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.core.expectation_validation_result import (
-        ExpectationSuiteValidationResult,
-    )
     from great_expectations.data_context.store.validation_config_store import (
         ValidationConfigStore,
     )
@@ -189,6 +190,9 @@ class CheckpointResult(BaseModel):
     validation_result_url: Optional[str] = None
     success: Optional[bool] = None
 
+    class Config:
+        arbitrary_types_allowed = True
+
     @root_validator
     def _root_validate_success(cls, values: dict) -> dict:
         run_results = values["run_results"]
@@ -201,3 +205,21 @@ class CheckpointResult(BaseModel):
     @property
     def name(self) -> str:
         return self.checkpoint_config.name
+
+    def describe_dict(self) -> dict:
+        run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
+        success_count = len([r for r in run_result_descriptions if r["success"]])
+
+        return {
+            "success": success_count == len(run_result_descriptions),
+            "success_percent": success_count / len(run_result_descriptions) * 100,
+            "validation_results": run_result_descriptions,
+        }
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this ExpectationSuiteValidationResult"""
+        return json.dumps(self.describe_dict(), indent=4)
+
+
+CheckpointResult.update_forward_refs()

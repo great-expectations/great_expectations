@@ -335,35 +335,76 @@ class TestCheckpointSerialization:
         assert expected_error in str(e.value)
 
 
-def test_checkpoint_run(in_memory_context: EphemeralDataContext):
-    context = in_memory_context
+class TestCheckpointResult:
+    suite_name: str = "my_suite"
+    column_name = "passenger_count"
+    datasource_name = "my_pandas_datasource"
+    asset_name = "my_asset"
+    batch_definition_name = "my_batch_def"
+    validation_definition_name = "my_validation_def"
+    checkpoint_name = "my_checkpoint"
 
-    ds = context.sources.add_pandas("my_pandas_datasource")
-    csv_path = (
-        pathlib.Path(__file__).parent.parent
-        / "test_sets"
-        / "quickstart"
-        / "yellow_tripdata_sample_2022-01.csv"
-    )
-    assert csv_path.exists()
-    asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
-    batch_definition = asset.add_batch_config("my_batch_def")
+    @pytest.fixture
+    def suite(self) -> ExpectationSuite:
+        return ExpectationSuite(
+            name=self.suite_name,
+            expectations=[
+                ExpectColumnValuesToBeBetween(column=self.column_name, min_value=0, max_value=100)
+            ],
+        )
 
-    suite = ExpectationSuite(
-        name="my_suite",
-        expectations=[
-            ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=100)
-        ],
-    )
+    @pytest.fixture
+    def batch_definition(self, in_memory_context: EphemeralDataContext) -> BatchConfig:
+        context = in_memory_context
 
-    validation_definition = ValidationConfig(
-        name="my_validation_def", data=batch_definition, suite=suite
-    )
+        ds = context.sources.add_pandas(self.datasource_name)
+        csv_path = (
+            pathlib.Path(__file__).parent.parent
+            / "test_sets"
+            / "quickstart"
+            / "yellow_tripdata_sample_2022-01.csv"
+        )
+        assert csv_path.exists()
+        asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
 
-    checkpoint = Checkpoint(
-        name="my_checkpoint", validation_definitions=[validation_definition], actions=[]
-    )
+        return asset.add_batch_config(self.batch_definition_name)
 
-    result = checkpoint.run()
+    @pytest.fixture
+    def validation_definition(
+        self, suite: ExpectationSuite, batch_definition: BatchConfig
+    ) -> ValidationConfig:
+        return ValidationConfig(
+            name=self.validation_definition_name, data=batch_definition, suite=suite
+        )
 
-    assert result.__dict__ == {}
+    @pytest.mark.big
+    def test_checkpoint_run(self, validation_definition: ValidationConfig):
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        result = checkpoint.run()
+
+        assert result.name == self.checkpoint_name
+
+        run_results = result.run_results
+        assert len(run_results) == len(checkpoint.validation_definitions)
+
+        validation_result = tuple(run_results.values())[0]
+        assert validation_result.success is True
+        assert len(validation_result.results) == 1 and validation_result.results[0].success is True
+
+        assert result.checkpoint_config == checkpoint
+        assert result.validation_result_url is None
+        assert result.success is True
+
+    @pytest.mark.big
+    def test_checkpoint_run_with_actions(self):
+        pass
+
+    @pytest.mark.big
+    def test_checkpoint_run_with_runtime_params(self):
+        pass
+
+    @pytest.mark.unit
+    def test_result_describe(self, mocker: pytest.MockFixture):
+        pass
