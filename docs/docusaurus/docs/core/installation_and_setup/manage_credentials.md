@@ -1,5 +1,7 @@
 ---
 title: Manage credentials
+toc_min_heading_level: 3
+toc_max_heading_level: 3
 ---
 
 import TabItem from '@theme/TabItem';
@@ -62,7 +64,7 @@ To view all the code used in the examples, see [how_to_configure_credentials.py]
 
 GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers.
 
-<Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'GCP Secret Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
+<Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'GCP Secrets Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
 
 <TabItem value="aws">
 

@@ -96,8 +96,18 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Secrets manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager',
+              label: 'AWS secrets manager',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=aws',
+            },
+            {
+              type: 'link',
+              label: 'GCP secrets manager',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=gcp',
+            },
+            {
+              type: 'link',
+              label: 'Azure Key Vault',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=azure',
             },
           ]
         },
