@@ -1,0 +1,654 @@
+{
+    "title": "CSVAsset",
+    "description": "Read a comma-separated values (csv) file into DataFrame.\n\nAlso supports optionally iterating or breaking of the file\ninto chunks.\n\nAdditional help can be found in the online docs for\n`IO Tools <https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "csv",
+            "enum": [
+                "csv"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "batch_definitions": {
+            "title": "Batch Definitions",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchDefinition"
+            }
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
+        },
+        "connect_options": {
+            "title": "Connect Options",
+            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+            "type": "object"
+        },
+        "sep": {
+            "title": "Sep",
+            "type": "string"
+        },
+        "delimiter": {
+            "title": "Delimiter",
+            "type": "string"
+        },
+        "header": {
+            "title": "Header",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "enum": [
+                        "infer"
+                    ],
+                    "type": "string"
+                }
+            ]
+        },
+        "names": {
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "enum": [
+                        false
+                    ],
+                    "type": "boolean"
+                }
+            ]
+        },
+        "usecols": {
+            "title": "Usecols",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "squeeze": {
+            "title": "Squeeze",
+            "type": "boolean"
+        },
+        "prefix": {
+            "title": "Prefix",
+            "type": "string"
+        },
+        "mangle_dupe_cols": {
+            "title": "Mangle Dupe Cols",
+            "default": true,
+            "type": "boolean"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "engine": {
+            "title": "Engine",
+            "enum": [
+                "c",
+                "python",
+                "pyarrow",
+                "python-fwf"
+            ],
+            "type": "string"
+        },
+        "converters": {
+            "title": "Converters"
+        },
+        "true_values": {
+            "title": "True Values"
+        },
+        "false_values": {
+            "title": "False Values"
+        },
+        "skipinitialspace": {
+            "title": "Skipinitialspace",
+            "default": false,
+            "type": "boolean"
+        },
+        "skiprows": {
+            "title": "Skiprows",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "skipfooter": {
+            "title": "Skipfooter",
+            "default": 0,
+            "type": "integer"
+        },
+        "nrows": {
+            "title": "Nrows",
+            "type": "integer"
+        },
+        "na_values": {
+            "title": "Na Values"
+        },
+        "keep_default_na": {
+            "title": "Keep Default Na",
+            "default": true,
+            "type": "boolean"
+        },
+        "na_filter": {
+            "title": "Na Filter",
+            "default": true,
+            "type": "boolean"
+        },
+        "verbose": {
+            "title": "Verbose",
+            "default": false,
+            "type": "boolean"
+        },
+        "skip_blank_lines": {
+            "title": "Skip Blank Lines",
+            "default": true,
+            "type": "boolean"
+        },
+        "parse_dates": {
+            "title": "Parse Dates"
+        },
+        "infer_datetime_format": {
+            "title": "Infer Datetime Format",
+            "default": false,
+            "type": "boolean"
+        },
+        "keep_date_col": {
+            "title": "Keep Date Col",
+            "default": false,
+            "type": "boolean"
+        },
+        "date_parser": {
+            "title": "Date Parser"
+        },
+        "dayfirst": {
+            "title": "Dayfirst",
+            "default": false,
+            "type": "boolean"
+        },
+        "cache_dates": {
+            "title": "Cache Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "thousands": {
+            "title": "Thousands",
+            "type": "string"
+        },
+        "decimal": {
+            "title": "Decimal",
+            "default": ".",
+            "type": "string"
+        },
+        "lineterminator": {
+            "title": "Lineterminator",
+            "type": "string"
+        },
+        "quotechar": {
+            "title": "Quotechar",
+            "default": "\"",
+            "type": "string"
+        },
+        "quoting": {
+            "title": "Quoting",
+            "default": 0,
+            "type": "integer"
+        },
+        "doublequote": {
+            "title": "Doublequote",
+            "default": true,
+            "type": "boolean"
+        },
+        "escapechar": {
+            "title": "Escapechar",
+            "type": "string"
+        },
+        "comment": {
+            "title": "Comment",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
+        "dialect": {
+            "title": "Dialect",
+            "type": "string"
+        },
+        "error_bad_lines": {
+            "title": "Error Bad Lines",
+            "type": "boolean"
+        },
+        "warn_bad_lines": {
+            "title": "Warn Bad Lines",
+            "type": "boolean"
+        },
+        "on_bad_lines": {
+            "title": "On Bad Lines"
+        },
+        "delim_whitespace": {
+            "title": "Delim Whitespace",
+            "default": false,
+            "type": "boolean"
+        },
+        "low_memory": {
+            "title": "Low Memory",
+            "default": true
+        },
+        "memory_map": {
+            "title": "Memory Map",
+            "default": false,
+            "type": "boolean"
+        },
+        "float_precision": {
+            "title": "Float Precision",
+            "enum": [
+                "high",
+                "legacy"
+            ],
+            "type": "string"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "PartitionerColumnValue": {
+            "title": "PartitionerColumnValue",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_column_value",
+                    "enum": [
+                        "partition_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerMultiColumnValue": {
+            "title": "PartitionerMultiColumnValue",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_multi_column_values",
+                    "enum": [
+                        "partition_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
+            ]
+        },
+        "PartitionerDividedInteger": {
+            "title": "PartitionerDividedInteger",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_divided_integer",
+                    "enum": [
+                        "partition_on_divided_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "divisor",
+                "column_name"
+            ]
+        },
+        "PartitionerModInteger": {
+            "title": "PartitionerModInteger",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_mod_integer",
+                    "enum": [
+                        "partition_on_mod_integer"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mod",
+                "column_name"
+            ]
+        },
+        "PartitionerYear": {
+            "title": "PartitionerYear",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year",
+                    "enum": [
+                        "partition_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerYearAndMonth": {
+            "title": "PartitionerYearAndMonth",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year_and_month",
+                    "enum": [
+                        "partition_on_year_and_month"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerYearAndMonthAndDay": {
+            "title": "PartitionerYearAndMonthAndDay",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_year_and_month_and_day",
+                    "enum": [
+                        "partition_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "PartitionerDatetimePart": {
+            "title": "PartitionerDatetimePart",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_date_parts",
+                    "enum": [
+                        "partition_on_date_parts"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "datetime_parts",
+                "column_name"
+            ]
+        },
+        "PartitionerConvertedDatetime": {
+            "title": "PartitionerConvertedDatetime",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_converted_datetime",
+                    "enum": [
+                        "partition_on_converted_datetime"
+                    ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name",
+                "date_format_string"
+            ]
+        },
+        "BatchDefinition": {
+            "title": "BatchDefinition",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "partitioner": {
+                    "title": "Partitioner",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/PartitionerColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYear"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerConvertedDatetime"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ]
+        }
+    }
+}
