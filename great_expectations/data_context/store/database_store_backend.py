@@ -65,7 +65,7 @@ class DatabaseStoreBackend(StoreBackend):
         if engine is not None:
             if credentials is not None:
                 logger.warning(
-                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "
+                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "  # noqa: E501
                     "Ignoring credentials."
                 )
             self.engine = engine
@@ -79,7 +79,7 @@ class DatabaseStoreBackend(StoreBackend):
             self.engine = sa.create_engine(url, **kwargs)
         else:
             raise gx_exceptions.InvalidConfigError(
-                "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
+                "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."  # noqa: E501
             )
 
         meta = sa.MetaData(schema=self._schema_name)
@@ -95,12 +95,10 @@ class DatabaseStoreBackend(StoreBackend):
         cols.append(sa.Column("value", sa.String))
         try:
             table = sa.Table(table_name, meta, autoload_with=self.engine)
-            # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
-            if {str(col.name).lower() for col in table.columns} != (
-                set(key_columns) | {"value"}
-            ):
+            # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table  # noqa: E501
+            if {str(col.name).lower() for col in table.columns} != (set(key_columns) | {"value"}):
                 raise gx_exceptions.StoreBackendError(
-                    f"Unable to use table {table_name}: it exists, but does not have the expected schema."
+                    f"Unable to use table {table_name}: it exists, but does not have the expected schema."  # noqa: E501
                 )
         except sqlalchemy.NoSuchTableError:
             table = sa.Table(table_name, meta, *cols)
@@ -113,15 +111,15 @@ class DatabaseStoreBackend(StoreBackend):
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
-                    f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {e!s}"
+                    f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {e!s}"  # noqa: E501
                 )
         self._table = table
         # Initialize with store_backend_id
         self._store_backend_id = None
         self._store_backend_id = self.store_backend_id
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "table_name": table_name,
             "key_columns": key_columns,
@@ -147,7 +145,7 @@ class DatabaseStoreBackend(StoreBackend):
         Ephemeral store_backend_id for database_store_backend until there is a place to store metadata
         Returns:
             store_backend_id which is a UUID(version=4)
-        """
+        """  # noqa: E501
 
         if not self._store_backend_id:
             store_id = (
@@ -162,7 +160,7 @@ class DatabaseStoreBackend(StoreBackend):
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
-        """
+        """  # noqa: E501
         # Update credentials with anything passed during connection time
         drivername = credentials.pop("drivername")
         create_engine_kwargs = kwargs
@@ -184,9 +182,7 @@ class DatabaseStoreBackend(StoreBackend):
         return engine
 
     @staticmethod
-    def _get_sqlalchemy_key_pair_auth_url(
-        drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
+    def _get_sqlalchemy_key_pair_auth_url(drivername: str, credentials: dict) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -197,7 +193,7 @@ class DatabaseStoreBackend(StoreBackend):
 
         Returns:
             a tuple consisting of a url with the serialized key-pair authentication, and a dictionary of engine kwargs.
-        """
+        """  # noqa: E501
         from cryptography.hazmat.backends import default_backend
         from cryptography.hazmat.primitives import serialization
 
@@ -208,9 +204,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
-                    password=private_key_passphrase.encode()
-                    if private_key_passphrase
-                    else None,
+                    password=private_key_passphrase.encode() if private_key_passphrase else None,
                     backend=default_backend(),
                 )
             except ValueError as e:

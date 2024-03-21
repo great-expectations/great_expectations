@@ -6,8 +6,10 @@ from unittest.mock import Mock  # noqa: TID251
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 
 @pytest.fixture
@@ -50,4 +52,19 @@ def test_build_batch_request(
     assert isinstance(mock_build_batch_request, Mock)
     mock_build_batch_request.assert_called_once_with(
         options=batch_request_options, partitioner=None
+    )
+
+
+@pytest.mark.unit
+def test_identifier_bundle():
+    ds = PandasDatasource(
+        name="pandas_datasource",
+    )
+    asset = ds.add_csv_asset("my_asset", "data.csv")
+    batch_config = asset.add_batch_config("my_batch_config")
+
+    assert batch_config.identifier_bundle() == _EncodedValidationData(
+        datasource=_IdentifierBundle(name="pandas_datasource", id=None),
+        asset=_IdentifierBundle(name="my_asset", id=None),
+        batch_definition=_IdentifierBundle(name="my_batch_config", id=None),
     )

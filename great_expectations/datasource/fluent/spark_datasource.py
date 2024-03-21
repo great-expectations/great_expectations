@@ -59,9 +59,7 @@ logger = logging.getLogger(__name__)
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
 
-SparkConfig: TypeAlias = Dict[
-    StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]
-]
+SparkConfig: TypeAlias = Dict[StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]]
 
 
 class SparkDatasourceError(Exception):
@@ -84,9 +82,9 @@ class _SparkDatasource(Datasource):
             # deprecated-v1.0.0
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
-                "In environments that allow it, the existing Spark context will be reused, adding the "
-                "spark_config options that have been passed. If the Spark context cannot be updated with "
-                "the spark_config, the context will be stopped and restarted with the new spark_config.",
+                "In environments that allow it, the existing Spark context will be reused, adding the "  # noqa: E501
+                "spark_config options that have been passed. If the Spark context cannot be updated with "  # noqa: E501
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",  # noqa: E501
                 category=DeprecationWarning,
             )
         return v
@@ -120,16 +118,14 @@ class _SparkDatasource(Datasource):
         # circular imports require us to import SparkSession and update_forward_refs
         # only when assigning to self._spark for SparkSession isinstance check
         self.update_forward_refs()
-        self._spark: SparkSession = (
-            self.execution_engine_type.get_or_create_spark_session(
-                spark_config=self.spark_config,
-            )
+        self._spark: SparkSession = self.execution_engine_type.get_or_create_spark_session(
+            spark_config=self.spark_config,
         )
         return self._spark
 
     @override
     def get_execution_engine(self) -> SparkDFExecutionEngine:
-        # Method override is required because PrivateAttr _spark won't be passed into Execution Engine
+        # Method override is required because PrivateAttr _spark won't be passed into Execution Engine  # noqa: E501
         # unless it is passed explicitly.
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
@@ -173,9 +169,7 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
-        default=None, exclude=True, repr=False
-    )
+    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -198,18 +192,18 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
-            """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
+            """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""  # noqa: E501
         )
 
     def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
-            """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
+            """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
     @public_api
     @new_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     @override
@@ -231,7 +225,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         if options:
             raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
@@ -253,9 +247,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             df = dataframe
 
         if df is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
 
         self.dataframe = df
 
@@ -290,18 +282,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             )
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
-        execution_engine: SparkDFExecutionEngine = (
-            self.datasource.get_execution_engine()
-        )
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        execution_engine: SparkDFExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -349,7 +335,7 @@ class SparkDatasource(_SparkDatasource):
     @public_api
     @deprecated_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     def add_dataframe_asset(
@@ -368,7 +354,7 @@ class SparkDatasource(_SparkDatasource):
 
         Returns:
             The DataFameAsset that has been added to this datasource.
-        """
+        """  # noqa: E501
         asset: DataFrameAsset = DataFrameAsset(
             name=name,
             batch_metadata=batch_metadata or {},

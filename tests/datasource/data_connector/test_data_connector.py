@@ -19,9 +19,7 @@ yaml = YAMLHandler()
 
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
     basic_data_connector = instantiate_class_from_config(
         yaml.load(
@@ -48,7 +46,7 @@ assets:
     return basic_data_connector
 
 
-# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
+# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>  # noqa: E501
 @pytest.mark.unit
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>

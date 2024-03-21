@@ -83,7 +83,7 @@ class _Partitioner(Protocol):  # noqa: PYI046
                  {"passenger_count": 2}, means the raw passenger count value is in the set:
                  {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
                  This category was only 1 parameter per column.
-        """
+        """  # noqa: E501
 
 
 class _PartitionerDatetime(FluentBaseModel):
@@ -101,9 +101,7 @@ class _PartitionerDatetime(FluentBaseModel):
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(
-                    f"'{part}' must be specified in the batch request options"
-                )
+                raise ValueError(f"'{part}' must be specified in the batch request options")
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -206,9 +204,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
 class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal["partition_on_divided_integer"] = (
-        "partition_on_divided_integer"
-    )
+    method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
 
     @property
     @override
@@ -224,9 +220,7 @@ class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError(
-                "'quotient' must be specified in the batch request options"
-            )
+            raise ValueError("'quotient' must be specified in the batch request options")
         return {self.column_name: options["quotient"]}
 
 
@@ -249,9 +243,7 @@ class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError(
-                "'remainder' must be specified in the batch request options"
-            )
+            raise ValueError("'remainder' must be specified in the batch request options")
         return {self.column_name: options["remainder"]}
 
 
@@ -273,17 +265,13 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(
-                f"'{self.column_name}' must be specified in the batch request options"
-            )
+            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")
         return {self.column_name: options[self.column_name]}
 
 
 class SparkPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal["partition_on_multi_column_values"] = (
-        "partition_on_multi_column_values"
-    )
+    method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
     def columns(self):
@@ -301,7 +289,7 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(
-                f"All column names, {self.column_names}, must be specified in the batch request options. "
+                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}

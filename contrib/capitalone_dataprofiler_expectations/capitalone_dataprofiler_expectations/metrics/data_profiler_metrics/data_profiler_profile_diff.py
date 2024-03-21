@@ -38,8 +38,6 @@ class DataProfilerProfileDiff(DataProfilerProfileMetricProvider):
         profiler_opts.structured_options.multiprocess.is_enabled = False
         new_profile = dp.Profiler(df, options=profiler_opts)
 
-        report_diff = new_profile.diff(
-            first_profile
-        )  # Results in diff of new_prof - first_prof
+        report_diff = new_profile.diff(first_profile)  # Results in diff of new_prof - first_prof
         # Values in this report indicate +/- change from old profile
         return report_diff

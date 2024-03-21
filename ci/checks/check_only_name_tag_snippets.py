@@ -33,7 +33,7 @@ context = gx.get_context()
 # </snippet>
 
 Adherence to this pattern is assertained by the present checker module.
-"""
+"""  # noqa: E501
 
 import pathlib
 import re
@@ -84,9 +84,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
         res = list(
-            set(res_positive.stdout.splitlines()).difference(
-                set(res_negative.stdout.splitlines())
-            )
+            set(res_positive.stdout.splitlines()).difference(set(res_negative.stdout.splitlines()))
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
@@ -108,13 +106,12 @@ def main() -> None:
         )
     )
     excluded_documents = {
-        project_root / file_path
-        for file_path in ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
+        project_root / file_path for file_path in ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
     }
     new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(
-            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'
+            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'  # noqa: E501
         )
         for line in new_violations:
             print(line)

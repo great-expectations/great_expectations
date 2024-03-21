@@ -93,7 +93,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
-    """
+    """  # noqa: E501
 
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None
     max_value: Union[int, EvaluationParameterDict, datetime, None] = None
@@ -170,18 +170,22 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
                 if params.min_value and params.max_value:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 else:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params.min_value and params.max_value:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
                 else:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -193,7 +197,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(  # noqa: C901
+    def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -235,27 +239,29 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
 
                 elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if include_column_name:
             template_str = f"$column {template_str}"

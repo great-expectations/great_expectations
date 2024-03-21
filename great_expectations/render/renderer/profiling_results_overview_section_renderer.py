@@ -20,8 +20,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
     def render(cls, evrs, section_name=None):
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
-        # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
-        # I wonder if we can enable something like jquery chaining for this. That would be concise AND testable.
+        # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.  # noqa: E501
+        # I wonder if we can enable something like jquery chaining for this. That would be concise AND testable.  # noqa: E501
         # Pressing on for now...
         cls._render_header(evrs, content_blocks)
         cls._render_dataset_info(evrs, content_blocks)
@@ -78,9 +78,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "Number of observations",
-                            "tooltip": {
-                                "content": "expect_table_row_count_to_be_between"
-                            },
+                            "tooltip": {"content": "expect_table_row_count_to_be_between"},
                             "params": {"tooltip_text": "Number of observations"},
                         },
                     }
@@ -96,7 +94,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 "Missing cells",
                 cls._get_percentage_missing_cells_str(evrs),
             ],
-            # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
+            # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this  # noqa: E501
         ]
 
         content_blocks.append(
@@ -124,7 +122,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks) -> None:
         column_types = cls._get_column_types(evrs)
-        # TODO: check if we have the information to make this statement. Do all columns have type expectations?
+        # TODO: check if we have the information to make this statement. Do all columns have type expectations?  # noqa: E501
         column_type_counter = Counter(column_types.values())
         table_rows = [
             [type, str(column_type_counter[type])]
@@ -256,7 +254,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         #     render_warning_row(
         #         "$column has $n ($p%) missing values", "Age", 177, 19.9, "Missing"),
         #     render_warning_row(
-        #         "$column has a high cardinality: $n distinct values", "Cabin", 148, None, "Warning"),
+        #         "$column has a high cardinality: $n distinct values", "Cabin", 148, None, "Warning"),  # noqa: E501
         #     render_warning_row(
         #         "$column has $n ($p%) missing values", "Cabin", 687, 77.1, "Missing"),
         #     render_warning_row(
@@ -295,7 +293,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         if len(columns) > len(expect_column_values_to_not_be_null_evrs):
             warnings.warn(
-                "Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations"
+                "Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations"  # noqa: E501
             )
             return "?"
 
@@ -312,14 +310,12 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _get_column_types(cls, evrs):
+    def _get_column_types(cls, evrs):  # noqa: C901
         columns = cls._get_column_list_from_evrs(evrs)
 
         type_evrs = cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_be_in_type_list"
-        ) + cls._find_all_evrs_by_type(
-            evrs.results, "expect_column_values_to_be_of_type"
-        )
+        ) + cls._find_all_evrs_by_type(evrs.results, "expect_column_values_to_be_of_type")
 
         column_types = {}
         for column in columns:
@@ -327,10 +323,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         for evr in type_evrs:
             column = evr.expectation_config.kwargs["column"]
-            if (
-                evr.expectation_config.expectation_type
-                == "expect_column_values_to_be_in_type_list"
-            ):
+            if evr.expectation_config.expectation_type == "expect_column_values_to_be_in_type_list":
                 if evr.expectation_config.kwargs["type_list"] is None:
                     column_types[column] = "unknown"
                     continue
@@ -351,10 +344,10 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 column_types[column] = "bool"
             else:
                 warnings.warn(
-                    "The expected type list is not a subset of any of the profiler type sets: {:s}".format(
-                        str(expected_types)
-                    )
+                    "The expected type list is not a subset of any of the profiler type sets"
+                    f": {expected_types}"
                 )
+
                 column_types[column] = "unknown"
 
         return column_types

@@ -49,9 +49,7 @@ def test_suite_factory_get_raises_error_on_missing_key():
     set_context(context)
 
     # Act
-    with pytest.raises(
-        DataContextError, match=f"ExpectationSuite with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ExpectationSuite with name {name} was not found."):
         factory.get(name=name)
 
     # Assert
@@ -166,9 +164,7 @@ def _test_suite_factory_add_success(context):
     # Arrange
     name = "test-suite"
     suite = ExpectationSuite(name=name)
-    with pytest.raises(
-        DataContextError, match=f"ExpectationSuite with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ExpectationSuite with name {name} was not found."):
         context.suites.get(name)
     # Act
     created_suite = context.suites.add(suite=suite)

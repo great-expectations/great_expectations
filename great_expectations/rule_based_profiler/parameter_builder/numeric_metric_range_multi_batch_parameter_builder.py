@@ -98,7 +98,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     * exact -- uses the minimum and maximum observations for range boundaries.
     * bootstrap -- a statistical resampling technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)").
     * kde -- a statistical technique that fits a gaussian to the distribution and resamples from it.
-    """
+    """  # noqa: E501
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
         "bootstrap",
@@ -146,9 +146,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
         round_decimals: Optional[Union[str, int]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -194,7 +192,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name=metric_name,
@@ -208,9 +206,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             data_context=data_context,
         )
 
-        self._metric_multi_batch_parameter_builder_name = (
-            metric_multi_batch_parameter_builder_name
-        )
+        self._metric_multi_batch_parameter_builder_name = metric_multi_batch_parameter_builder_name
 
         if false_positive_rate is None:
             false_positive_rate = 5.0e-2
@@ -223,15 +219,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._random_seed = random_seed
 
-        self._quantile_statistic_interpolation_method = (
-            quantile_statistic_interpolation_method
-        )
+        self._quantile_statistic_interpolation_method = quantile_statistic_interpolation_method
 
         self._quantile_bias_correction = quantile_bias_correction
 
-        self._quantile_bias_std_error_ratio_threshold = (
-            quantile_bias_std_error_ratio_threshold
-        )
+        self._quantile_bias_std_error_ratio_threshold = quantile_bias_std_error_ratio_threshold
 
         self._bw_method = bw_method
 
@@ -251,13 +243,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 truncate_values_keys: set = set(truncate_values.keys())
                 if (
                     not truncate_values_keys
-                    <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+                    <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS  # noqa: E501
                 ):
                     raise gx_exceptions.ProfilerExecutionError(
                         message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS!s}" \
 detected.
-"""
+"""  # noqa: E501
                     )
 
         self._truncate_values = truncate_values
@@ -337,10 +329,10 @@ detected.
          8. Compute [low, high] for the desired metric using the chosen estimator method.
          9. Return [low, high] for the desired metric as estimated by the specified sampling method.
         10. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
-        """
+        """  # noqa: E501
         parameter_reference: str
         if self.metric_multi_batch_parameter_builder_name:
-            # Obtain metric_multi_batch_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            # Obtain metric_multi_batch_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
             metric_multi_batch_parameter_builder_name: str = (
                 get_parameter_value_and_validate_return_type(
                     domain=domain,
@@ -350,9 +342,7 @@ detected.
                     parameters=parameters,
                 )
             )
-            parameter_reference = (
-                f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
-            )
+            parameter_reference = f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
         else:
             # Compute metric value for each Batch object.
             super().build_parameters(
@@ -372,14 +362,12 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
+        metric_values: MetricValues = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         round_decimals: int
         if (
             self.metric_name
-            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING  # noqa: E501
             and integer_semantic_domain_type(domain=domain)
         ):
             round_decimals = 0
@@ -391,13 +379,11 @@ detected.
                 parameters=parameters,
             )
 
-        numeric_range_estimator: NumericRangeEstimator = (
-            self._build_numeric_range_estimator(
-                round_decimals=round_decimals,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        numeric_range_estimator: NumericRangeEstimator = self._build_numeric_range_estimator(
+            round_decimals=round_decimals,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
         numeric_range_estimation_result: NumericRangeEstimationResult = (
             self._estimate_metric_value_range(
@@ -415,7 +401,7 @@ detected.
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
         )
 
-        # Obtain include_estimator_samples_histogram_in_details from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain include_estimator_samples_histogram_in_details from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         include_estimator_samples_histogram_in_details: bool = (
             get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -427,9 +413,7 @@ detected.
         )
 
         if include_estimator_samples_histogram_in_details:
-            details["estimation_histogram"] = (
-                numeric_range_estimation_result.estimation_histogram
-            )
+            details["estimation_histogram"] = numeric_range_estimation_result.estimation_histogram
 
         return Attributes(
             {
@@ -447,8 +431,8 @@ detected.
     ) -> NumericRangeEstimator:
         """
         Determines "estimator" name and returns appropriate configured "NumericRangeEstimator" subclass instance.
-        """
-        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        """  # noqa: E501
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         estimator: str = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.estimator,
@@ -463,7 +447,7 @@ detected.
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
 {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
-"""
+"""  # noqa: E501
             )
 
         if estimator == "exact":
@@ -475,22 +459,22 @@ detected.
                     {
                         "false_positive_rate": self.false_positive_rate,
                         "round_decimals": round_decimals,
-                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,  # noqa: E501
                     }
                 )
             )
 
-        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.  # noqa: E501
         if datetime_semantic_domain_type(domain=domain):
             logger.info(
-                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'  # noqa: E501
             )
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
                     {
                         "false_positive_rate": self.false_positive_rate,
                         "round_decimals": round_decimals,
-                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,  # noqa: E501
                     }
                 )
             )
@@ -503,9 +487,9 @@ detected.
                         "round_decimals": round_decimals,
                         "n_resamples": self.n_resamples,
                         "random_seed": self.random_seed,
-                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,  # noqa: E501
                         "quantile_bias_correction": self.quantile_bias_correction,
-                        "quantile_bias_std_error_ratio_threshold": self.quantile_bias_std_error_ratio_threshold,
+                        "quantile_bias_std_error_ratio_threshold": self.quantile_bias_std_error_ratio_threshold,  # noqa: E501
                     }
                 )
             )
@@ -518,7 +502,7 @@ detected.
                         "round_decimals": round_decimals,
                         "n_resamples": self.n_resamples,
                         "random_seed": self.random_seed,
-                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,  # noqa: E501
                         "bw_method": self.bw_method,
                     }
                 )
@@ -541,7 +525,7 @@ detected.
         metric, whose values are being estimated.  Thus, for each element in the "R^m" hypercube, an "N"-dimensional
         vector of sample measurements is constructed and given to the estimator to apply its specific algorithm for
         computing the range of values in this vector.  Estimator algorithms differ based on their use of data samples.
-        """
+        """  # noqa: E501
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
             domain=domain,
@@ -554,10 +538,10 @@ detected.
         min_value: Number
         max_value: Number
 
-        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
+        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.  # noqa: E501
         metric_value_shape: tuple = metric_values.shape[1:]
 
-        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.  # noqa: E501
         metric_value_shape_idx: int
         axes: List[np.ndarray] = [
             np.indices(dimensions=(metric_value_shape_idx,))[0]
@@ -565,19 +549,19 @@ detected.
         ]
         metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
-        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
-        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
+        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.  # noqa: E501
+        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.  # noqa: E501
         metric_value_idx: tuple
         metric_value_vector_indices: List[tuple] = [
             (slice(None, None, None),) + metric_value_idx
             for metric_value_idx in metric_value_indices
         ]
 
-        # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
-        # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
+        # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).  # noqa: E501
+        # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.  # noqa: E501
         metric_value_range_shape: tuple = metric_value_shape + (2,)
-        # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).
-        # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.
+        # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).  # noqa: E501
+        # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.  # noqa: E501
         estimation_histogram_shape: tuple = metric_value_shape + (
             2,
             NUM_HISTOGRAM_BINS + 1,
@@ -604,21 +588,19 @@ detected.
                 metric_values=metric_values,
                 metric_value_vector_indices=metric_value_vector_indices,
             ):
-                metric_values = convert_ndarray_decimal_to_float_dtype(
-                    data=metric_values
-                )
+                metric_values = convert_ndarray_decimal_to_float_dtype(data=metric_values)
 
             metric_value_range = np.zeros(shape=metric_value_range_shape)
             estimation_histogram = np.empty(shape=estimation_histogram_shape)
 
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.  # noqa: E501
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
         metric_value_estimation_histogram_idx: tuple
         numeric_range_estimation_result: NumericRangeEstimationResult
         for metric_value_idx in metric_value_vector_indices:
-            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
+            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.  # noqa: E501
             metric_value_vector = metric_values[metric_value_idx]
             if not datetime_detected and np.all(
                 np.isclose(metric_value_vector, metric_value_vector[0])
@@ -630,7 +612,7 @@ detected.
                     max_value=metric_value_vector[0],
                 )
             else:
-                # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
+                # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.  # noqa: E501
                 numeric_range_estimation_result = (
                     numeric_range_estimator.get_numeric_range_estimate(
                         metric_values=metric_value_vector,
@@ -662,18 +644,14 @@ detected.
             # Compute index for metric value estimation histogram.
             metric_value_estimation_histogram_idx = metric_value_idx
 
-            # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
+            # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.  # noqa: E501
             if datetime_detected:
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:  # noqa: PLR5501
                 if round_decimals is None:
-                    metric_value_range[metric_value_range_min_idx] = np.float64(
-                        min_value
-                    )
-                    metric_value_range[metric_value_range_max_idx] = np.float64(
-                        max_value
-                    )
+                    metric_value_range[metric_value_range_min_idx] = np.float64(min_value)
+                    metric_value_range[metric_value_range_max_idx] = np.float64(max_value)
                 else:
                     metric_value_range[metric_value_range_min_idx] = round(
                         np.float64(min_value), round_decimals
@@ -682,12 +660,12 @@ detected.
                         np.float64(max_value), round_decimals
                     )
 
-            # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
+            # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.  # noqa: E501
             estimation_histogram[metric_value_estimation_histogram_idx] = (
                 numeric_range_estimation_result.estimation_histogram
             )
 
-        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).  # noqa: E501
         if metric_value_range.shape[0] == 1:
             metric_value_range = metric_value_range[0]
             estimation_histogram = estimation_histogram[0]
@@ -738,15 +716,13 @@ detected.
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
-        # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        truncate_values: Dict[str, Optional[Number]] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.truncate_values,
-                expected_return_type=dict,
-                variables=variables,
-                parameters=parameters,
-            )
+        # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        truncate_values: Dict[str, Optional[Number]] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.truncate_values,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
         )
 
         distribution_boundary: Optional[Union[int, float]]
@@ -761,7 +737,7 @@ detected.
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the
 [lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
-"""
+"""  # noqa: E501
             )
 
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
@@ -786,7 +762,7 @@ detected.
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> int:
-        # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         round_decimals: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.round_decimals,
@@ -795,13 +771,12 @@ detected.
             parameters=parameters,
         )
         if not (
-            round_decimals is None
-            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+            round_decimals is None or (isinstance(round_decimals, int) and (round_decimals >= 0))
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
-"""
+"""  # noqa: E501
             )
 
         if np.issubdtype(metric_values.dtype, np.integer):

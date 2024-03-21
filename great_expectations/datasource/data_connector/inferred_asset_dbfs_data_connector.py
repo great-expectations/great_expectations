@@ -29,7 +29,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -58,12 +58,8 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         )
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
-        full_path = super()._get_full_file_path(
-            path=path, data_asset_name=data_asset_name
-        )
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
+        full_path = super()._get_full_file_path(path=path, data_asset_name=data_asset_name)
         template_arguments: dict = {
             "path": full_path,
         }

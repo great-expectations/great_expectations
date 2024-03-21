@@ -17,6 +17,8 @@ lint.extend-ignore = [
     "RUF013", # implicit-optional - TODO: enable this for contrib
     # https://numpy.org/devdocs/reference/random/legacy.html
     "NPY002", # these methods are deprecated in numpy 2 but will not be removed
+    # line length is not a priority for contribs
+    "E501",
 ]
 
 [lint.isort]

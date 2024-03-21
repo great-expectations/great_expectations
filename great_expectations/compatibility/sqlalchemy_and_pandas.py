@@ -39,9 +39,7 @@ def execute_pandas_reader_fn(
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
-                **reader_options
-            )
+            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(**reader_options)
     else:
         reader_fn_result = reader_fn(**reader_options)
     return reader_fn_result

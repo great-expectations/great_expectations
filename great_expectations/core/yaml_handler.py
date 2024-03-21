@@ -63,7 +63,7 @@ class YAMLHandler:
 
         Returns:
             The deserialized dictionary form of the input stream.
-        """
+        """  # noqa: E501
         return self._handler.load(stream=stream)
 
     @public_api
@@ -94,7 +94,7 @@ class YAMLHandler:
         Returns:
             If no stream argument is provided, the str that results from ``_handler.dump()``.
             Otherwise, None as the ``_handler.dump()`` works in place and will exercise the handler accordingly.
-        """
+        """  # noqa: E501
         if stream:
             return self._dump(data=data, stream=stream, **kwargs)  # type: ignore[func-returns-value]
         return self._dump_and_return_value(data=data, **kwargs)

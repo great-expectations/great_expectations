@@ -76,7 +76,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
 def test_preserve_comments_in_yml_after_adding_datasource(
     data_context_parameterized_expectation_suite_with_usage_statistics_enabled,
 ):
-    # Skipping this test for now, because the order of the contents of the returned CommentedMap is inconsistent.
+    # Skipping this test for now, because the order of the contents of the returned CommentedMap is inconsistent.  # noqa: E501
     pytest.skip("KNOWN ISSUE")
     config_filepath = os.path.join(  # noqa: PTH118
         data_context_parameterized_expectation_suite_with_usage_statistics_enabled.root_directory,

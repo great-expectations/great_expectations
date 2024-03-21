@@ -48,21 +48,19 @@ class DatasourceDict(UserDict):
     d["my_fds"] = pandas_fds # Underlying DatasourceStore makes a `set()` call
     pandas_fds = d["my_fds"] # Underlying DatasourceStore makes a `get()` call
     ```
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
         context: AbstractDataContext,
         datasource_store: DatasourceStore,
     ):
-        self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
+        self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this  # noqa: E501
         self._datasource_store = datasource_store
         self._in_memory_data_assets: dict[str, DataAsset] = {}
 
     @staticmethod
-    def _get_in_memory_data_asset_name(
-        datasource_name: str, data_asset_name: str
-    ) -> str:
+    def _get_in_memory_data_asset_name(datasource_name: str, data_asset_name: str) -> str:
         return f"{datasource_name}-{data_asset_name}"
 
     @override
@@ -73,7 +71,7 @@ class DatasourceDict(UserDict):
         (__setitem__, __getitem__, etc)
 
         This is generated just-in-time as the contents of the store may have changed.
-        """
+        """  # noqa: E501
         datasources: dict[str, FluentDatasource | BaseDatasource] = {}
 
         configs = self._datasource_store.get_all()
@@ -81,14 +79,10 @@ class DatasourceDict(UserDict):
             try:
                 if isinstance(config, FluentDatasource):
                     name = config.name
-                    datasources[name] = self._init_fluent_datasource(
-                        name=name, ds=config
-                    )
+                    datasources[name] = self._init_fluent_datasource(name=name, ds=config)
                 else:
                     name = config["name"]
-                    datasources[name] = self._init_block_style_datasource(
-                        name=name, config=config
-                    )
+                    datasources[name] = self._init_block_style_datasource(name=name, config=config)
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -118,17 +112,13 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.set_datasource(name=name, ds=ds)
 
-    def _prep_fds_config_for_set(
-        self, name: str, ds: FluentDatasource
-    ) -> FluentDatasource:
+    def _prep_fds_config_for_set(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                    in_memory_asset_name: str = (
-                        DatasourceDict._get_in_memory_data_asset_name(
-                            datasource_name=name,
-                            data_asset_name=asset.name,
-                        )
+                    in_memory_asset_name: str = DatasourceDict._get_in_memory_data_asset_name(
+                        datasource_name=name,
+                        data_asset_name=asset.name,
                     )
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
@@ -137,7 +127,7 @@ class DatasourceDict(UserDict):
         self, name: str, ds: BaseDatasource
     ) -> DatasourceConfig:
         config = ds.config
-        # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config
+        # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config  # noqa: E501
         # There's probably a better way to do this with Marshmallow but this works
         config["name"] = name
         config["class_name"] = ds.__class__.__name__
@@ -162,35 +152,27 @@ class DatasourceDict(UserDict):
             return self._init_fluent_datasource(name=name, ds=ds)
         return self._init_block_style_datasource(name=name, config=ds)
 
-    def _init_fluent_datasource(
-        self, name: str, ds: FluentDatasource
-    ) -> FluentDatasource:
+    def _init_fluent_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         ds._data_context = self._context
         ds._rebuild_asset_data_connectors()
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                    in_memory_asset_name: str = (
-                        DatasourceDict._get_in_memory_data_asset_name(
-                            datasource_name=name,
-                            data_asset_name=asset.name,
-                        )
+                    in_memory_asset_name: str = DatasourceDict._get_in_memory_data_asset_name(
+                        datasource_name=name,
+                        data_asset_name=asset.name,
                     )
-                    cached_data_asset = self._in_memory_data_assets.get(
-                        in_memory_asset_name
-                    )
+                    cached_data_asset = self._in_memory_data_assets.get(in_memory_asset_name)
                     if cached_data_asset:
                         asset.dataframe = cached_data_asset.dataframe
                     else:
-                        # Asset is loaded into cache here (even without df) to enable loading of df at a later
+                        # Asset is loaded into cache here (even without df) to enable loading of df at a later  # noqa: E501
                         # time when DataframeAsset.build_batch_request(dataframe=df) is called
                         self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
-    def _init_block_style_datasource(
-        self, name: str, config: DatasourceConfig
-    ) -> BaseDatasource:
+    def _init_block_style_datasource(self, name: str, config: DatasourceConfig) -> BaseDatasource:
         return self._context._init_block_style_datasource(
             datasource_name=name, datasource_config=config
         )
@@ -202,7 +184,7 @@ class CacheableDatasourceDict(DatasourceDict):
 
     Any retrievals will firstly check an in-memory dictionary before requesting from the store. Other CRUD methods will ensure that
     both cache and store are kept in sync.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,

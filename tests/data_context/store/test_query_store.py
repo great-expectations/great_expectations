@@ -49,14 +49,9 @@ def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
 
 @pytest.mark.filesystem
 def test_basic_query(basic_sqlalchemy_query_store):
-    assert (
-        basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
-    )
+    assert basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
     basic_sqlalchemy_query_store.set("q2", "SELECT DISTINCT PClass FROM ${table_name};")
-    assert (
-        basic_sqlalchemy_query_store.get("q2")
-        == "SELECT DISTINCT PClass FROM ${table_name};"
-    )
+    assert basic_sqlalchemy_query_store.get("q2") == "SELECT DISTINCT PClass FROM ${table_name};"
     res = basic_sqlalchemy_query_store.get_query_result("q1", {"table_name": "titanic"})
     assert res == ["1st", "2nd", "*", "3rd"]
 

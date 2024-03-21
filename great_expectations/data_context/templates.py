@@ -48,7 +48,7 @@ config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 # Datasources tell Great Expectations where your data lives and how to get it.
 # Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {{}}
-"""
+"""  # noqa: E501
 
 CONFIG_VARIABLES_INTRO = """
 # This config file supports variable substitution which enables: 1) keeping
@@ -70,36 +70,22 @@ CONFIG_VARIABLES_INTRO = """
 
 """
 
-CONFIG_VARIABLES_TEMPLATE = (
-    f"{CONFIG_VARIABLES_INTRO}instance_id: {uuid.uuid4()!s}{os.linesep}"
-)
+CONFIG_VARIABLES_TEMPLATE = f"{CONFIG_VARIABLES_INTRO}instance_id: {uuid.uuid4()!s}{os.linesep}"
 
 # Create yaml strings
 # NOTE: .replace("\n", "\n  ")[:-2] is a hack to indent all lines two spaces,
 # and remove the inserted final two spaces.
 EXPECTATIONS_STORE_STRING = yaml.dump(
-    {
-        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "expectations_store"
-        ]
-    }
+    {"expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]}
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
-    {
-        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "validations_store"
-        ]
-    }
+    {"validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]}
 ).replace("\n", "\n  ")[:-2]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
 )
 CHECKPOINT_STORE_STRING = yaml.dump(
-    {
-        "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "checkpoint_store"
-        ]
-    }
+    {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
 ).replace("\n", "\n  ")[:-2]
 PROFILER_STORE_STRING = yaml.dump(
     {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
@@ -171,12 +157,8 @@ anonymous_usage_statistics:
 """
 
 PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (
-    PROJECT_HELP_COMMENT
-    + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_ENABLED
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_ENABLED
 )
 PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
-    PROJECT_HELP_COMMENT
-    + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_DISABLED
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT + ANONYMIZED_USAGE_STATISTICS_DISABLED
 )

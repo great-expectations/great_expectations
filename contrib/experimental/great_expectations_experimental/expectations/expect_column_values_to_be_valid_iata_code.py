@@ -26,11 +26,7 @@ class ColumnValuesToBeValidIataCode(ColumnMapMetricProvider):
             if len(x) != 3:
                 return False
             try:
-                urlopen(
-                    Request(
-                        BASE_API_URL + x, headers={"User-Agent": "great_expectations"}
-                    )
-                )
+                urlopen(Request(BASE_API_URL + x, headers={"User-Agent": "great_expectations"}))
                 return True
             except (URLError, HTTPError):
                 return False

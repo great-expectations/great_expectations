@@ -88,9 +88,7 @@ def fake_expectation_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config(
-                "fake_multicolumn_expectation", {"column_list": []}
-            ),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": []}),
         ),
         (
             FakeColumnMapExpectation,
@@ -109,9 +107,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
     try:
         fake_expectation = fake_expectation_cls(**config.kwargs)
     except Exception:
-        assert (
-            False
-        ), "Validate configuration threw an error when testing default mostly value"
+        assert False, "Validate configuration threw an error when testing default mostly value"
     assert (
         fake_expectation._get_success_kwargs().get("mostly") == 1
     ), "Default mostly success ratio is not 1"
@@ -185,9 +181,7 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
         ),
     ],
 )
-def test_multicolumn_expectation_validation_errors_with_bad_mostly(
-    fake_expectation_cls, config
-):
+def test_multicolumn_expectation_validation_errors_with_bad_mostly(fake_expectation_cls, config):
     with pytest.raises(pydantic.ValidationError):
         fake_expectation_cls(**config)
 
@@ -225,9 +219,7 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
 
 @pytest.mark.unit
 def test_expectation_configuration_property():
-    expectation = gxe.ExpectColumnMaxToBeBetween(
-        column="foo", min_value=0, max_value=10
-    )
+    expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
@@ -241,9 +233,7 @@ def test_expectation_configuration_property():
 
 @pytest.mark.unit
 def test_expectation_configuration_property_recognizes_state_changes():
-    expectation = gxe.ExpectColumnMaxToBeBetween(
-        column="foo", min_value=0, max_value=10
-    )
+    expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     expectation.column = "bar"
     expectation.min_value = 5
@@ -380,7 +370,7 @@ class TestEvaluationParameterOptions:
     """Tests around the evaluation_parameter_options property of Expectations.
 
     Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
-    """
+    """  # noqa: E501
 
     EVALUATION_PARAMETER_MIN = "my_min"
     EVALUATION_PARAMETER_MAX = "my_max"
@@ -388,9 +378,7 @@ class TestEvaluationParameterOptions:
 
     @pytest.mark.unit
     def test_expectation_without_evaluation_parameter(self):
-        expectation = gxe.ExpectColumnValuesToBeBetween(
-            column="foo", min_value=0, max_value=10
-        )
+        expectation = gxe.ExpectColumnValuesToBeBetween(column="foo", min_value=0, max_value=10)
         assert expectation.evaluation_parameter_options == tuple()
 
     @pytest.mark.unit
@@ -400,9 +388,7 @@ class TestEvaluationParameterOptions:
             min_value=0,
             max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
         )
-        assert expectation.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_MAX,
-        )
+        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_MAX,)
 
     @pytest.mark.unit
     def test_expectation_with_multiple_evaluation_parameters(self):
@@ -423,6 +409,4 @@ class TestEvaluationParameterOptions:
             min_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
             max_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},
         )
-        assert expectation.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_VALUE,
-        )
+        assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_VALUE,)

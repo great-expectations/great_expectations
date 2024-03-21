@@ -31,7 +31,7 @@ class BatchManager:
         Args:
             execution_engine: The ExecutionEngine to be used to access cache of loaded Batch objects.
             batch_list: List of Batch objects available from external source (default is None).
-        """
+        """  # noqa: E501
         self._execution_engine: ExecutionEngine = execution_engine
 
         self._active_batch_id: Optional[str] = None
@@ -64,7 +64,7 @@ class BatchManager:
         some reason), then if there is exactly and unambiguously one loaded "BatchData" object, then it will play the
         role of the "active_batch_data_id", which is needed to compute a metric (by the particular ExecutionEngine).
         However, if there is more than one, then "active_batch_data_id" becomes ambiguous, and thus "None" is returned.
-        """
+        """  # noqa: E501
         if self._active_batch_data_id is not None:
             return self._active_batch_data_id
 
@@ -83,7 +83,7 @@ class BatchManager:
 
     @property
     def batch_cache(self) -> Dict[str, AnyBatch]:
-        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
+        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""  # noqa: E501
         return self._batch_cache
 
     @property
@@ -96,12 +96,10 @@ class BatchManager:
         situations, no new "BatchData" objects have been loaded; however, a new "Validator" object was instantiated with
         the list of "Batch" objects, each of whose BatchData has already been loaded (and cached).  Since BatchData IDs
         are from the same name space as Batch IDs, this helps avoid unnecessary loading of data from different backends.
-        """
+        """  # noqa: E501
         active_batch_data_id: Optional[str] = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
-            logger.warning(
-                "ID of active Batch and ID of active loaded BatchData differ."
-            )
+            logger.warning("ID of active Batch and ID of active loaded BatchData differ.")
 
         return self._active_batch_id
 
@@ -149,7 +147,7 @@ class BatchManager:
             try:
                 assert isinstance(
                     batch, (Batch, _get_fluent_batch_class())
-                ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
+                ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."  # noqa: E501
             except AssertionError as e:
                 logger.error(str(e))
 
@@ -159,8 +157,8 @@ class BatchManager:
             )
 
             self._batch_cache[batch.id] = batch
-            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_data_id
-            # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_data_id  # noqa: E501
+            # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.  # noqa: E501
             self._active_batch_id = batch.id
 
     def save_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:

@@ -10,9 +10,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_connecticut_zip(zip: str):
     list_of_dicts_of_connecticut_zips = zipcodes.filter_by(state="CT")
-    list_of_connecticut_zips = [
-        d["zip_code"] for d in list_of_dicts_of_connecticut_zips
-    ]
+    list_of_connecticut_zips = [d["zip_code"] for d in list_of_dicts_of_connecticut_zips]
     if len(zip) > 10:
         return False
     elif type(zip) != str:  # noqa: E721

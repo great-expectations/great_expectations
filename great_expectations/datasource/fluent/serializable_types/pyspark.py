@@ -18,9 +18,7 @@ class SerializableStructType(dict):
         if isinstance(fields_or_struct_type, pyspark.sql.types.StructType):
             self.struct_type = fields_or_struct_type
         else:
-            self.struct_type = pyspark.sql.types.StructType(
-                fields=fields_or_struct_type
-            )
+            self.struct_type = pyspark.sql.types.StructType(fields=fields_or_struct_type)
 
         # Store the serialized version in the keys/values of the instance (parent is dict)
         json_value = self.struct_type.jsonValue()

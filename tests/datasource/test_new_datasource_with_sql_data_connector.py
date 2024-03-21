@@ -101,9 +101,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
         # noinspection PyUnusedLocal
         my_sql_datasource: Optional[  # noqa: F841
             Union[SimpleSqlalchemyDatasource, LegacyDatasource]
-        ] = context.add_datasource(
-            "test_sqlite_db_datasource", **yaml.load(datasource_config)
-        )
+        ] = context.add_datasource("test_sqlite_db_datasource", **yaml.load(datasource_config))
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
@@ -111,11 +109,11 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
 
 
 @pytest.mark.sqlite
-def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(  # noqa: E501
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a  # noqa: E501
     # round-trip to the configuration.
     context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
@@ -155,7 +153,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
 @pytest.mark.sqlite
 def test_basic_instantiation_with_InferredAssetSqlDataConnector_partitioning(sa):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a  # noqa: E501
     # round-trip to the configuration.
     random.seed(0)
 
@@ -197,11 +195,11 @@ data_connectors:
 
 
 @pytest.mark.sqlite
-def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_partitioning_and_sampling(  # noqa: E501
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
-    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a
+    # It tests that partitioner configurations can be saved and loaded to great_expectations.yml by performing a  # noqa: E501
     # round-trip to the configuration.
     context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
@@ -288,43 +286,40 @@ introspection:
         ]
     }
 
-    assert (
-        datasource_with_minimum_config.get_available_data_asset_names_and_types()
-        == {
-            "whole_table": [
-                ("table_containing_id_spacers_for_D", "table"),
-                ("table_full__I", "table"),
-                ("table_partitioned_by_date_column__A", "table"),
-                ("table_partitioned_by_foreign_key__F", "table"),
-                ("table_partitioned_by_incrementing_batch_id__E", "table"),
-                (
-                    "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-                    "table",
-                ),
-                ("table_partitioned_by_multiple_columns__G", "table"),
-                (
-                    "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-                    "table",
-                ),
-                ("table_partitioned_by_timestamp_column__B", "table"),
-                ("table_that_should_be_partitioned_by_random_hash__H", "table"),
-                ("table_with_fk_reference_from_F", "table"),
-                ("view_by_date_column__A", "view"),
-                ("view_by_incrementing_batch_id__E", "view"),
-                (
-                    "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-                    "view",
-                ),
-                ("view_by_multiple_columns__G", "view"),
-                ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
-                ("view_by_timestamp_column__B", "view"),
-                ("view_containing_id_spacers_for_D", "view"),
-                ("view_partitioned_by_foreign_key__F", "view"),
-                ("view_that_should_be_partitioned_by_random_hash__H", "view"),
-                ("view_with_fk_reference_from_F", "view"),
-            ]
-        }
-    )
+    assert datasource_with_minimum_config.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
 
     # Here we should test getting a batch
 
@@ -456,7 +451,7 @@ tables:
                 partitioner_kwargs:
                     column_name: id
                     divisor: 12
-"""
+"""  # noqa: E501
     )
 
     assert datasource_manually_configured.get_available_data_asset_names() == {
@@ -688,7 +683,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise RuntimeDataConnector using SQL query against database table with non-empty ("main") schema name.
+    # Exercise RuntimeDataConnector using SQL query against database table with non-empty ("main") schema name.  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_runtime_data_connector",
@@ -706,7 +701,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
 
-    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_1".
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_1".  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_inferred_data_connector",
@@ -719,7 +714,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_2".
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_2".  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_inferred_data_connector",
@@ -732,7 +727,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_first_data_asset" (implicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_first_data_asset" (implicitly).  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
@@ -745,7 +740,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_second_data_asset" (implicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_second_data_asset" (implicitly).  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
@@ -758,7 +753,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (explicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (explicitly).  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
@@ -771,7 +766,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "main.table_2" (explicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "main.table_2" (explicitly).  # noqa: E501
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",

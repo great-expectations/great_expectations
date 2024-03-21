@@ -28,11 +28,11 @@ def assert_exception_info(
             assert (
                 "exception_traceback" not in result.exception_info
             ) or not result.exception_info["exception_traceback"]
-            assert (
-                "exception_message" not in result.exception_info
-            ) or not result.exception_info["exception_message"]
+            assert ("exception_message" not in result.exception_info) or not result.exception_info[
+                "exception_message"
+            ]
         else:
-            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+            # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in  # noqa: E501
             #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
             for k, v in result["exception_info"].items():
                 assert ("exception_traceback" not in v) or not v["exception_traceback"]
@@ -43,7 +43,7 @@ def assert_exception_info(
         if expected_exception_message:
             assert result["exception_message"] == expected_exception_message
     else:
-        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+        # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in  # noqa: E501
         #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
         for k, v in result["exception_info"].items():
             assert v.get("exception_traceback")
@@ -77,9 +77,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
-        "test_suite"
-    )
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -98,9 +96,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -113,9 +109,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -154,18 +148,14 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_table
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
 
@@ -183,9 +173,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
-        "test_suite"
-    )
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -194,7 +182,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
+        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations  # noqa: E501
     }
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -204,9 +192,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -219,9 +205,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -258,24 +242,20 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
-        result: ExpectationValidationResult = (
-            validator.expect_column_values_to_not_be_null(**expectation_parameters)
+        result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+            **expectation_parameters
         )
     assert e.value.message == expected_exception_message
 
-    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.  # noqa: E501
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_table
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
     result: ExpectationValidationResult = validator.expect_table_row_count_to_equal(
         **expectation_parameters
     )
@@ -295,9 +275,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
-        "test_suite"
-    )
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -306,7 +284,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
+        "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations  # noqa: E501
     }
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -316,9 +294,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
         "value": 4,
@@ -331,9 +307,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -363,29 +337,19 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 2
 
-    # Confirm that even though an exception occurred in one expectation, the other expectation is validated properly.
+    # Confirm that even though an exception occurred in one expectation, the other expectation is validated properly.  # noqa: E501
 
-    results = sorted(
-        results, key=lambda element: element.expectation_config["expectation_type"]
-    )
+    results = sorted(results, key=lambda element: element.expectation_config["expectation_type"])
 
     result: ExpectationValidationResult
 
     result = results[0]
-    assert (
-        result.expectation_config["expectation_type"]
-        == "expect_column_values_to_not_be_null"
-    )
+    assert result.expectation_config["expectation_type"] == "expect_column_values_to_not_be_null"
     assert not result.success
-    assert_exception_info(
-        result=result, expected_exception_message=expected_exception_message
-    )
+    assert_exception_info(result=result, expected_exception_message=expected_exception_message)
 
     result = results[1]
-    assert (
-        result.expectation_config["expectation_type"]
-        == "expect_table_row_count_to_equal"
-    )
+    assert result.expectation_config["expectation_type"] == "expect_table_row_count_to_equal"
     assert result.success
     assert_exception_info(result=result, expected_exception_message=None)
 
@@ -396,23 +360,17 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert not result.success
-    assert_exception_info(
-        result=result, expected_exception_message=expected_exception_message
-    )
+    assert_exception_info(result=result, expected_exception_message=expected_exception_message)
 
-    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.  # noqa: E501
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_table
     )
-    expectation_parameters = dict(
-        **expectation_arguments_without_meta, **expectation_meta
-    )
+    expectation_parameters = dict(**expectation_arguments_without_meta, **expectation_meta)
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
     assert_exception_info(result=result, expected_exception_message=None)
@@ -445,9 +403,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -508,9 +464,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
@@ -550,9 +504,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         kwargs=expectation_arguments_without_meta,
     )
 
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
@@ -657,9 +609,7 @@ def test_result_format_configured_with_set_default_override(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="spark_datasource",
@@ -736,9 +686,7 @@ def test_result_format_configured_with_set_default_override(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
     )
-    suite.add_expectation_configuration(
-        expectation_configuration=expectation_configuration
-    )
+    suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
     validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,

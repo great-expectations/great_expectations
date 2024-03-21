@@ -28,20 +28,20 @@ class _ConfigurationSubstitutor:
     should be defined herein.
     """
 
-    AWS_PATTERN = r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
-    AWS_SSM_PATTERN = r"^secret\|arn:aws:ssm:([a-z\-0-9]+):([0-9]{12}):parameter\/([a-zA-Z0-9\/_\+=\.@\-]+)"
-
-    GCP_PATTERN = (
-        r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+    AWS_PATTERN = r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"  # noqa: E501
+    AWS_SSM_PATTERN = (
+        r"^secret\|arn:aws:ssm:([a-z\-0-9]+):([0-9]{12}):parameter\/([a-zA-Z0-9\/_\+=\.@\-]+)"
     )
-    AZURE_PATTERN = r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+
+    GCP_PATTERN = r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+    AZURE_PATTERN = (
+        r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+    )
 
     def __init__(self) -> None:
-        # Using the @lru_cache decorator on method calls can create memory leaks - an attr is preferred here.
+        # Using the @lru_cache decorator on method calls can create memory leaks - an attr is preferred here.  # noqa: E501
         # Ref: https://stackoverflow.com/a/68550238
-        self._secret_store_cache = lru_cache(maxsize=None)(
-            self._substitute_value_from_secret_store
-        )
+        self._secret_store_cache = lru_cache(maxsize=None)(self._substitute_value_from_secret_store)
 
     def substitute_all_config_variables(
         self,
@@ -69,10 +69,7 @@ class _ConfigurationSubstitutor:
                 for k, v in data.items()
             }
         elif isinstance(data, list):
-            return [
-                self.substitute_all_config_variables(v, replace_variables_dict)
-                for v in data
-            ]
+            return [self.substitute_all_config_variables(v, replace_variables_dict) for v in data]
         return self.substitute_config_variable(
             data, replace_variables_dict, dollar_sign_escape_string
         )
@@ -108,7 +105,7 @@ class _ConfigurationSubstitutor:
                 is not desired.
 
         :return: a string with values substituted, or the same object if template_str is not a string.
-        """
+        """  # noqa: E501
 
         if template_str is None:
             return template_str
@@ -133,7 +130,7 @@ class _ConfigurationSubstitutor:
                 raise gx_exceptions.MissingConfigVariableError(
                     f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
     Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-    See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",
+    See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",  # noqa: E501
                     missing_config_variable=config_variable_name,
                 )
 
@@ -165,7 +162,7 @@ class _ConfigurationSubstitutor:
 
         :return: a string with the value substituted by the secret from the secret store,
                 or the same object if value is not a string.
-        """
+        """  # noqa: E501
         if isinstance(value, str):
             if re.match(self.AWS_PATTERN, value):
                 return self._substitute_value_from_aws_secrets_manager(value)
@@ -201,13 +198,13 @@ class _ConfigurationSubstitutor:
         :return: a string with the value substituted by the secret from the AWS Secrets Manager store
 
         :raises: ImportError, ValueError
-        """
+        """  # noqa: E501
         regex = re.compile(
             rf"{self.AWS_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
         if not aws.boto3:
             logger.error(
-                "boto3 is not installed, please install great_expectations with aws_secrets extra > "
+                "boto3 is not installed, please install great_expectations with aws_secrets extra > "  # noqa: E501
                 "pip install great_expectations[aws_secrets]"
             )
             raise ImportError("Could not import boto3")
@@ -233,7 +230,7 @@ class _ConfigurationSubstitutor:
         else:
             secret_response = client.get_secret_value(SecretId=secret_name)
         # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.  # noqa: E501
         if "SecretString" in secret_response:
             secret = secret_response["SecretString"]
         else:
@@ -266,13 +263,13 @@ class _ConfigurationSubstitutor:
         :return: a string with the value substituted by the secret from the AWS Secrets Manager store
 
         :raises: ImportError, ValueError
-        """
+        """  # noqa: E501
         regex = re.compile(
             rf"{self.AWS_SSM_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
         if not aws.boto3:
             logger.error(
-                "boto3 is not installed, please install great_expectations with aws_secrets extra > "
+                "boto3 is not installed, please install great_expectations with aws_secrets extra > "  # noqa: E501
                 "pip install great_expectations[aws_secrets]"
             )
             raise ImportError("Could not import boto3")
@@ -297,11 +294,9 @@ class _ConfigurationSubstitutor:
                 Name=secret_name, WithDecryption=True, Version=secret_version
             )
         else:
-            secret_response = client.get_parameter(
-                Name=secret_name, WithDecryption=True
-            )
+            secret_response = client.get_parameter(Name=secret_name, WithDecryption=True)
         # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.  # noqa: E501
         secret = secret_response["Parameter"]["Value"]
 
         if secret_key:
@@ -329,13 +324,11 @@ class _ConfigurationSubstitutor:
 
         :return: a string with the value substituted by the secret from the GCP Secret Manager store
         :raises: ImportError, ValueError
-        """
-        regex = re.compile(
-            rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
-        )
+        """  # noqa: E501
+        regex = re.compile(rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$")
         if not google.secretmanager:
             logger.error(
-                "secretmanager is not installed, please install great_expectations with gcp extra > "
+                "secretmanager is not installed, please install great_expectations with gcp extra > "  # noqa: E501
                 "pip install great_expectations[gcp]"
             )
             raise ImportError("Could not import secretmanager from google.cloud")
@@ -354,9 +347,7 @@ class _ConfigurationSubstitutor:
             secret_version = "latest"
         name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
         try:
-            secret = client.access_secret_version(name=name)._pb.payload.data.decode(
-                "utf-8"
-            )
+            secret = client.access_secret_version(name=name)._pb.payload.data.decode("utf-8")
         except AttributeError:
             secret = client.access_secret_version(name=name).payload.data.decode(
                 "utf-8"
@@ -386,18 +377,14 @@ class _ConfigurationSubstitutor:
 
         :return: a string with the value substituted by the secret from the Azure Key Vault store
         :raises: ImportError, ValueError
-        """
-        regex = re.compile(
-            rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
-        )
+        """  # noqa: E501
+        regex = re.compile(rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$")
         if not azure.SecretClient:  # type: ignore[truthy-function] # False if NotImported
             logger.error(
-                "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
+                "SecretClient is not installed, please install great_expectations with azure_secrets extra > "  # noqa: E501
                 "pip install great_expectations[azure_secrets]"
             )
-            raise ImportError(
-                "Could not import SecretClient from azure.keyvault.secrets"
-            )
+            raise ImportError("Could not import SecretClient from azure.keyvault.secrets")
         matches = regex.match(value)
 
         if not matches:
