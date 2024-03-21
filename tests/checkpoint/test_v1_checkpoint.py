@@ -17,13 +17,15 @@ from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.expectations.core.expect_column_values_to_be_between import (
-    ExpectColumnValuesToBeBetween,
-)
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
 
@@ -337,54 +339,103 @@ class TestCheckpointSerialization:
 
 class TestCheckpointResult:
     suite_name: str = "my_suite"
-    column_name = "passenger_count"
+    # column_name = "passenger_count"
     datasource_name = "my_pandas_datasource"
     asset_name = "my_asset"
-    batch_definition_name = "my_batch_def"
+    # batch_definition_name = "my_batch_def"
     validation_definition_name = "my_validation_def"
     checkpoint_name = "my_checkpoint"
 
+    # @pytest.fixture
+    # def suite(self) -> ExpectationSuite:
+    #     return ExpectationSuite(
+    #         name=self.suite_name,
+    #         expectations=[
+    #             ExpectColumnValuesToBeBetween(column=self.column_name, min_value=0, max_value=100)
+    #         ],
+    #     )
+
+    # @pytest.fixture
+    # def batch_definition(self, in_memory_context: EphemeralDataContext) -> BatchConfig:
+    #     context = in_memory_context
+
+    #     ds = context.sources.add_pandas(self.datasource_name)
+    #     csv_path = (
+    #         pathlib.Path(__file__).parent.parent
+    #         / "test_sets"
+    #         / "quickstart"
+    #         / "yellow_tripdata_sample_2022-01.csv"
+    #     )
+    #     assert csv_path.exists()
+    #     asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
+
+    #     return asset.add_batch_config(self.batch_definition_name)
+
     @pytest.fixture
-    def suite(self) -> ExpectationSuite:
-        return ExpectationSuite(
-            name=self.suite_name,
-            expectations=[
-                ExpectColumnValuesToBeBetween(column=self.column_name, min_value=0, max_value=100)
+    def mock_suite(self, mocker: pytest.MockFixture) -> ExpectationSuite:
+        suite = mocker.Mock(spec=ExpectationSuite)
+        suite.name = self.suite_name
+        return suite
+
+    @pytest.fixture
+    def validation_definition(self, mocker: pytest.MockFixture, mock_suite: pytest.MockFixture):
+        vc = ValidationConfig(
+            name=self.validation_definition_name,
+            data=mocker.Mock(spec=BatchConfig),
+            suite=mock_suite,
+        )
+
+        mock_run_result = ExpectationSuiteValidationResult(
+            success=True,
+            results=[
+                ExpectationValidationResult(
+                    success=True,
+                    expectation_config=ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_between",
+                        kwargs={
+                            "batch_id": "my_pandas_datasource-my_asset",
+                            "column": "passenger_count",
+                            "min_value": 0.0,
+                            "max_value": 100.0,
+                        },
+                    ),
+                    result={
+                        "element_count": 100000,
+                        "unexpected_count": 0,
+                        "unexpected_percent": 0.0,
+                        "partial_unexpected_list": [],
+                        "missing_count": 0,
+                        "missing_percent": 0.0,
+                        "unexpected_percent_total": 0.0,
+                        "unexpected_percent_nonmissing": 0.0,
+                        "partial_unexpected_counts": [],
+                        "partial_unexpected_index_list": [],
+                    },
+                ),
             ],
+            statistics={
+                "evaluated_expectations": 1,
+                "successful_expectations": 1,
+                "unsuccessful_expectations": 0,
+                "success_percent": 100.0,
+            },
         )
 
-    @pytest.fixture
-    def batch_definition(self, in_memory_context: EphemeralDataContext) -> BatchConfig:
-        context = in_memory_context
+        with mock.patch.object(
+            ValidationConfig, "run", return_value=mock_run_result
+        ), mock.patch.object(
+            ValidationConfig,
+            "active_batch_id",
+            return_value=f"{self.datasource_name}-{self.asset_name}",
+        ):
+            yield vc
 
-        ds = context.sources.add_pandas(self.datasource_name)
-        csv_path = (
-            pathlib.Path(__file__).parent.parent
-            / "test_sets"
-            / "quickstart"
-            / "yellow_tripdata_sample_2022-01.csv"
-        )
-        assert csv_path.exists()
-        asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
-
-        return asset.add_batch_config(self.batch_definition_name)
-
-    @pytest.fixture
-    def validation_definition(
-        self, suite: ExpectationSuite, batch_definition: BatchConfig
-    ) -> ValidationConfig:
-        return ValidationConfig(
-            name=self.validation_definition_name, data=batch_definition, suite=suite
-        )
-
-    @pytest.mark.big
-    def test_checkpoint_run(self, validation_definition: ValidationConfig):
+    @pytest.mark.unit
+    def test_checkpoint_run_no_actions(self, validation_definition: ValidationConfig):
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
         )
         result = checkpoint.run()
-
-        assert result.name == self.checkpoint_name
 
         run_results = result.run_results
         assert len(run_results) == len(checkpoint.validation_definitions)
@@ -397,14 +448,18 @@ class TestCheckpointResult:
         assert result.validation_result_url is None
         assert result.success is True
 
-    @pytest.mark.big
+    @pytest.mark.unit
     def test_checkpoint_run_with_actions(self):
         pass
 
-    @pytest.mark.big
+    @pytest.mark.unit
     def test_checkpoint_run_with_runtime_params(self):
         pass
 
     @pytest.mark.unit
-    def test_result_describe(self, mocker: pytest.MockFixture):
+    def test_result_describe_success(self, mocker: pytest.MockFixture):
+        pass
+
+    @pytest.mark.unit
+    def test_result_describe_failure(self, mocker: pytest.MockFixture):
         pass

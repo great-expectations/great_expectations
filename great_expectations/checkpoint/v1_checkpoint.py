@@ -208,7 +208,7 @@ class CheckpointResult(BaseModel):
 
     def describe_dict(self) -> dict:
         run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
-        success_count = len([r for r in run_result_descriptions if r["success"]])
+        success_count = sum(1 for r in run_result_descriptions if r["success"])
 
         return {
             "success": success_count == len(run_result_descriptions),
@@ -218,7 +218,7 @@ class CheckpointResult(BaseModel):
 
     @public_api
     def describe(self) -> str:
-        """JSON string description of this ExpectationSuiteValidationResult"""
+        """JSON string description of this CheckpointResult"""
         return json.dumps(self.describe_dict(), indent=4)
 
 
