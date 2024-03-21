@@ -152,24 +152,31 @@ class Checkpoint(BaseModel):
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
         for validation_definition in self.validation_definitions:
-            key = self._build_result_key(validation_definition=validation_definition, run_id=run_id)
             validation_result = validation_definition.run(
                 batch_definition_options=batch_parameters,
                 evaluation_parameters=expectation_parameters,
+            )
+            key = self._build_result_key(
+                validation_definition=validation_definition,
+                run_id=run_id,
+                batch_identifier=validation_result.batch_id,
             )
             run_results[key] = validation_result
 
         return run_results
 
     def _build_result_key(
-        self, validation_definition: ValidationConfig, run_id: RunIdentifier
+        self,
+        validation_definition: ValidationConfig,
+        run_id: RunIdentifier,
+        batch_identifier: Optional[str] = None,
     ) -> ValidationResultIdentifier:
         return ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 name=validation_definition.suite.name
             ),
             run_id=run_id,
-            batch_identifier=validation_definition.active_batch_id,
+            batch_identifier=batch_identifier,
         )
 
     def _run_actions(
@@ -209,14 +216,15 @@ class CheckpointResult(BaseModel):
     def describe_dict(self) -> CheckpointDescriptionDict:
         success_count = sum(1 for r in self.run_results.values() if r.success)
         run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
+        num_results = len(run_result_descriptions)
 
         return {
-            "success": success_count == len(run_result_descriptions),
+            "success": success_count == num_results,
             "statistics": {
-                "evaluated_validations": len(run_result_descriptions),
-                "success_percent": success_count / len(run_result_descriptions) * 100,
+                "evaluated_validations": num_results,
+                "success_percent": success_count / num_results * 100,
                 "successful_validations": success_count,
-                "unsuccessful_validations": len(run_result_descriptions) - success_count,
+                "unsuccessful_validations": num_results - success_count,
             },
             "validation_results": run_result_descriptions,
         }
@@ -227,6 +235,7 @@ class CheckpointResult(BaseModel):
         return json.dumps(self.describe_dict(), indent=4)
 
 
+# Necessary due to cyclic dependencies between Checkpoint and CheckpointResult
 CheckpointResult.update_forward_refs()
 
 

@@ -406,13 +406,7 @@ class TestCheckpointResult:
             },
         )
 
-        with mock.patch.object(
-            ValidationConfig, "run", return_value=mock_run_result
-        ), mock.patch.object(
-            ValidationConfig,
-            "active_batch_id",
-            return_value=f"{self.datasource_name}-{self.asset_name}",
-        ):
+        with mock.patch.object(ValidationConfig, "run", return_value=mock_run_result):
             yield vc
 
     @pytest.mark.unit

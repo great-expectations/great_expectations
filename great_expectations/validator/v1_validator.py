@@ -81,6 +81,7 @@ class Validator:
                 "unsuccessful_expectations": statistics.unsuccessful_expectations,
                 "success_percent": statistics.success_percent,
             },
+            batch_id=self.active_batch_id,
         )
 
     @property

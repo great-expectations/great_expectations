@@ -194,22 +194,6 @@ class ValidationConfig(BaseModel):
 
         return batch_definition
 
-    @property
-    def active_batch_id(self) -> str | None:
-        validator = self._build_validator()
-        return validator.active_batch_id
-
-    def _build_validator(
-        self,
-        batch_definition_options: Optional[BatchRequestOptions] = None,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
-    ) -> Validator:
-        return Validator(
-            batch_config=self.batch_definition,
-            batch_request_options=batch_definition_options,
-            result_format=result_format,
-        )
-
     @public_api
     def run(
         self,
@@ -218,9 +202,12 @@ class ValidationConfig(BaseModel):
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
-        validator = self._build_validator(
-            batch_definition_options=batch_definition_options, result_format=result_format
+        validator = Validator(
+            batch_config=self.batch_definition,
+            batch_request_options=batch_definition_options,
+            result_format=result_format,
         )
+
         results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
 
         (
