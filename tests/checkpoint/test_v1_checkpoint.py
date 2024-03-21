@@ -33,11 +33,6 @@ from great_expectations.expectations.expectation_configuration import Expectatio
 from tests.test_utils import working_directory
 
 
-@pytest.fixture
-def in_memory_context() -> EphemeralDataContext:
-    return gx.get_context(mode="ephemeral")
-
-
 @pytest.mark.unit
 def test_checkpoint_no_validation_definitions_raises_error():
     with pytest.raises(ValueError) as e:
@@ -47,6 +42,10 @@ def test_checkpoint_no_validation_definitions_raises_error():
 
 
 class TestCheckpointSerialization:
+    @pytest.fixture
+    def in_memory_context(self) -> EphemeralDataContext:
+        return gx.get_context(mode="ephemeral")
+
     @pytest.fixture
     def validation_config_1(
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
