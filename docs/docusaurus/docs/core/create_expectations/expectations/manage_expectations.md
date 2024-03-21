@@ -3,11 +3,13 @@ sidebar_label: 'Manage Expectations'
 title: 'Manage Expectations'
 description: Create and manage individual Expectations in Python with GX Core.
 ---
-import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
-import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installation.md';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
+import PrereqPythonInstalled from '../../_core_components/prerequisites/_python_installation.md';
+import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installation.md';
+import PrereqPreconfiguredDataContext from '../../_core_components/prerequisites/_preconfigured_data_context.md';
+import PrereqPreconfiguredDataSourceAndAsset from '../../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
 An Expectation is a verifiable assertion about your data. Expectations make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. 
 
@@ -15,8 +17,8 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 - <PrereqPythonInstalled/>
 - <PrereqGxInstalled/>.
-- Recommended. [A preconfigured Data Context](/core/installation_and_setup/manage_data_contexts.md).
-- Recommended. [A preconfigured Data Source and Data Asset connected to your data](/core/manage_and_access_data/connect_to_data/connect_to_data.md).
+- Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
+- Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
 
 ## Create an Expectation
 
