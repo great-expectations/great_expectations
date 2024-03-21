@@ -730,7 +730,7 @@
                     [20]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values", "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
@@ -1275,7 +1275,7 @@
                     ]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values", "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
@@ -2389,7 +2389,7 @@
                       [39.0]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values", "Count"
+                    "Sampled Unexpected Values"
                   ]
                 }
               ],
