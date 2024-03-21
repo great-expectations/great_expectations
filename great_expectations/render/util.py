@@ -298,7 +298,8 @@ def build_count_table(
         if all_unexpected_in_samples:
             table_rows.append([value, count])
         else:
-            # Since accurate counts for the full dataset are not available, we show Sampled Unexpected Values only.
+            # Since accurate counts for the full dataset are not available,
+            # we show Sampled Unexpected Values only.
             table_rows.append([value])
 
     header_row = _get_header_row(all_unexpected_in_samples)
