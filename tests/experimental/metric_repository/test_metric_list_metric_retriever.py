@@ -291,10 +291,7 @@ def test_column_metrics_not_returned_of_column_types_missing(mocker: MockerFixtu
             exception=None,
         ),
     ]
-    assert (
-        "TABLE_COLUMN_TYPES metric is required to compute column metrics. Skipping column metrics."
-        in caplog.text
-    )
+    assert "TABLE_COLUMN_TYPES metric is required to compute column metrics." in caplog.text
 
 
 def test_get_metrics_metrics_missing(mocker: MockerFixture):
