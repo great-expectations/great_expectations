@@ -7,10 +7,10 @@ import Tabs from '@theme/Tabs';
 
 import InProgress from '../_core_components/_in_progress.md'
 
-To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely, outside of version control. With GX 1.0 you can store you access credentials in a YAML file that exists outside of version control, or as environment variables.  GX 1,0 also supports third party secrets managers for Amazon Web Services, Google Cloud Platform, and Microsoft Azure. 
+To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely, outside of version control. With GX 1.0 you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers. 
 
 <Tabs 
-  queryString="credential-style" 
+  queryString="credential_style" 
   groupId="credentials" 
   defaultValue='yaml' 
   values={
@@ -25,272 +25,198 @@ To access a deployment environment or a data storage system you must provide you
 
 1. To store your database password and connection string as environment variables, run ``export ENV_VAR_NAME=env_var_value`` in a terminal or add the commands to your ``~/.bashrc`` file. For example:
 
-```bash title="Terminal" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
-```
+    ```bash title="Terminal" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+    ```
 
-2. Run the following code to use the values in the `connection_string` parameter when you add a `datasource` to a Data Context:
+2. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
 
-```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
-```
+    ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
+    ```
 
 </TabItem>
   
 <TabItem value="yaml" label="YAML file">
 
-YAML files make variables more visible, are easier to edit, and allow for modularization. For example, you can create one file for development and testing and another for production.
+YAML files make variables more visible, are easier to edit, and allow for modularization. For example, you can create a YAML file for development and testing and another for production.
 
-The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using  ``FileSystemDataContexts``.
+The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using ``FileSystemDataContexts``.
 
 To view all the code used in the examples, see [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py).
 
 1. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
-  ```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
-  ```
+    ```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+    ```
     To store values that include the dollar sign character ``$``, escape them using a backslash ``\`` to avoid substitution issues. For example, in the previous example for Postgres credentials you'd set ``password: pa\$sword`` if your password is ``pa$sword``. You can also have multiple substitutions for the same item. For example ``database_string: ${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}``.
 
 
-2. Run the following code to use the values in the `connection_string` parameter when you add a `datasource` to a Data Context:
+2. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
 
-  ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
-  ```
+    ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+    ```
 
 </TabItem>
 
   
 <TabItem value="secrets_manager" label="Secrets manager">
 
-Select one of the following secret manager applications:
+GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers.
 
 <Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'GCP Secret Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
 
 <TabItem value="aws">
 
-Configure your Great Expectations project to substitute variables from the AWS Secrets Manager.
+Configure your Great Expectations project to substitute variables from the AWS Secrets Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
 
-## Prerequisites
+Secrets store substitution uses keywords and retrieves secrets from the secrets store for values starting with ``secret|arn:aws:secretsmanager``. If the values you provide don't match the keywords, the values aren't substituted.
 
-<Prerequisites>
+1. Optional. Run the following code to install the ``great_expectations`` package with the ``aws_secrets`` requirement:
 
-- An AWS Secrets Manager instance. See [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html).
+    ```bash
+    pip install 'great_expectations[aws_secrets]'
+    ```
 
-</Prerequisites>
+2. Provide an arn of the secret to substitute your value by a secret in AWS Secrets Manager. For example:
 
-:::warning
+    ``secret|arn:aws:secretsmanager:123456789012:secret:my_secret-1zAyu6``
 
-Secrets store substitution uses the configurations from your ``config_variables.yml`` file **after** all other types of substitution are applied from environment variables.
+    The last seven characters of the arn are automatically generated by AWS and are not mandatory to retrieve the secret. For example, ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret`` retrieves the same secret. The latest version of the secret is returned by default.
 
-The secrets store substitution works based on keywords. It tries to retrieve secrets from the secrets store for the following values:
+3. Optional. To get a specific version of the secret you want to retrieve, specify its version UUID. For example,``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000``.
 
-- AWS: values starting with ``secret|arn:aws:secretsmanager`` if the values you provide don't match with the keywords above, the values won't be substituted.
+4. Optional. To retrieve a specific secret value for a JSON string, use ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret|key`` or 
+``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000|key``.
 
-:::
+5. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
-## Setup
+    ```yaml
+    # We can configure a single connection string
+    my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
 
-To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
+    # Or each component of the connection string separately
+    drivername: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|drivername
+    host: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|host
+    port: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|port
+    username: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|username
+    password: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|password
+    database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|database
+    ```
 
-```bash
-pip install 'great_expectations[aws_secrets]'
-```
+6. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
 
-In order to substitute your value by a secret in AWS Secrets Manager, you need to provide an arn of the secret like this one:
-``secret|arn:aws:secretsmanager:123456789012:secret:my_secret-1zAyu6``
+    ```python 
+    # We can use a single connection string
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${my_aws_creds}"
+    )
 
-:::note
-
-The last 7 characters of the arn are automatically generated by AWS and are not mandatory to retrieve the secret, thus ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret`` will retrieve the same secret.
-
-:::
-
-You will get the latest version of the secret by default.
-
-You can get a specific version of the secret you want to retrieve by specifying its version UUID like this: ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000``
-
-If your secret value is a JSON string, you can retrieve a specific value like this:
-``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret|key``
-
-Or like this:
-``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000|key``
-
-**Example config_variables.yml:**
-
-```yaml
-# We can configure a single connection string
-my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
-
-# Or each component of the connection string separately
-drivername: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|drivername
-host: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|host
-port: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|port
-username: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|username
-password: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|password
-database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|database
-```
-
-Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
-
-```python 
-# We can use a single connection string
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${my_aws_creds}"
-)
-
-# Or each component of the connection string separately
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
-)
-```
+    # Or each component of the connection string separately
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    )
+    ```
 
 </TabItem>
 
 <TabItem value="gcp">
 
-Configure your Great Expectations project to substitute variables from the GCP Secrets Manager.
+Configure your Great Expectations project to substitute variables from the GCP Secrets Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
 
-## Prerequisites
+Secrets store substitution uses keywords and retrieves secrets from the secrets store for values matching the following regex ``^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets``. If the values you provide don't match the keywords, the values aren't substituted.
 
-<Prerequisites>
+1. Optional. Run the following code to install the ``great_expectations`` package with the ``gcp`` requirement:
 
-- Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
+    ```bash
+    pip install 'great_expectations[gcp]'
+    ```
 
-</Prerequisites>
+2. Provide the name of the secret you want to substitute in GCP Secret Manager. For example, ``secret|projects/project_id/secrets/my_secret``. 
 
-:::warning
+    The latest version of the secret is returned by default.
 
-Secrets store substitution uses the configurations from your ``config_variables.yml`` project config **after** substitutions are applied from environment variables.
+3. Optional. To get a specific version of the secret, specify its version id. For example, ``secret|projects/project_id/secrets/my_secret/versions/1``.
 
-The secrets store substitution works based on keywords. It tries to retrieve secrets from the secrets store for the following values :
+4. Optional. To retrieve a specific secret value for a JSON string, use ``secret|projects/project_id/secrets/my_secret|key`` or ``secret|projects/project_id/secrets/my_secret/versions/1|key``.
 
-- GCP: values matching the following regex ``^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets`` if the values you provide don't match with the keywords above, the values won't be substituted.
+5. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
-:::
+    ```yaml
+    # We can configure a single connection string
+    my_gcp_creds: secret|projects/${PROJECT_ID}/secrets/dev_db_credentials|connection_string
 
-## Setup
+    # Or each component of the connection string separately
+    drivername: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DRIVERNAME
+    host: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_HOST
+    port: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PORT
+    username: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_USERNAME
+    password: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PASSWORD
+    database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
+    ```
 
-To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
+6. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
 
-```bash
-pip install 'great_expectations[gcp]'
-```
+    ```python 
+    # We can use a single connection string 
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${my_gcp_creds}"
+    )
 
-In order to substitute your value by a secret in GCP Secret Manager, you need to provide a name of the secret like this one:
-``secret|projects/project_id/secrets/my_secret``
-
-You will get the latest version of the secret by default.
-
-You can get a specific version of the secret you want to retrieve by specifying its version id like this: ``secret|projects/project_id/secrets/my_secret/versions/1``
-
-If your secret value is a JSON string, you can retrieve a specific value like this:
-``secret|projects/project_id/secrets/my_secret|key``
-
-Or like this:
-``secret|projects/project_id/secrets/my_secret/versions/1|key``
-
-**Example config_variables.yml:**
-
-```yaml
-# We can configure a single connection string
-my_gcp_creds: secret|projects/${PROJECT_ID}/secrets/dev_db_credentials|connection_string
-
-# Or each component of the connection string separately
-drivername: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DRIVERNAME
-host: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_HOST
-port: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PORT
-username: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_USERNAME
-password: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PASSWORD
-database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
-```
-
-Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
-
-```python 
-# We can use a single connection string 
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${my_gcp_creds}"
-)
-
-# Or each component of the connection string separately
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
-)
-```
+    # Or each component of the connection string separately
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    )
+    ```
 
 </TabItem>
 
 <TabItem value="azure">
 
-Configure your Great Expectations project to substitute variables from the Azure Key Vault.
+Configure your Great Expectations project to substitute variables from the Azure Key Vault. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
 
-## Prerequisites
+Secrets store substitution uses keywords and retrieves secrets from the secrets store for values matching the following regex ``^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net``. If the values you provide don't match the keywords, the values aren't substituted.
 
-<Prerequisites>
+1. Optional. Run the following code to install the ``great_expectations`` package with the ``azure_secrets`` requirement:
 
-- GX 1.0. See [Install GX 1.0](/core/installation_and_setup/install_gx.md).
-- A secrets manager and secrets stored in an [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview).
+    ```bash
+    pip install 'great_expectations[azure_secrets]'
+    ```
 
-</Prerequisites>
+2. Provide the name of the secret you want to substitute in Azure Key Vault. For example, ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret``. 
 
-:::warning
+    The latest version of the secret is returned by default.
 
-Secrets store substitution uses the configurations from your ``config_variables.yml`` file **after** all other types of substitution are applied from environment variables.
+3. Optional. To get a specific version of the secret, specify its version id (32 lowercase alphanumeric characters). For example, ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab``.
 
-The secrets store substitution works based on keywords. It tries to retrieve secrets from the secrets store for the following values :
+4. Optional. To retrieve a specific secret value for a JSON string, use ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret|key`` or ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|key``.
 
-- Azure : values matching the following regex ``^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net`` if the values you provide don't match with the keywords above, the values won't be substituted.
+5. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
-:::
+    ```yaml
+    # We can configure a single connection string
+    my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
 
-## Setup
+    # Or each component of the connection string separately
+    drivername: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
+    host: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
+    port: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|port
+    username: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|username
+    password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|password
+    database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|database
+    ```
 
-To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
+6. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
 
-```bash
-pip install 'great_expectations[azure_secrets]'
-```
+    ```python 
+    # We can use a single connection string
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${my_azure_creds}"
+    )
 
-In order to substitute your value by a secret in Azure Key Vault, you need to provide a name of the secret like this one:
-``secret|https://my-vault-name.vault.azure.net/secrets/my-secret``
-
-You will get the latest version of the secret by default.
-
-You can get a specific version of the secret you want to retrieve by specifying its version id (32 lowercase alphanumeric characters) like this: ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab``
-
-If your secret value is a JSON string, you can retrieve a specific value like this:
-``secret|https://my-vault-name.vault.azure.net/secrets/my-secret|key``
-
-Or like this:
-``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|key``
-
-
-**Example config_variables.yml:**
-
-```yaml
-# We can configure a single connection string
-my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
-
-# Or each component of the connection string separately
-drivername: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
-host: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
-port: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|port
-username: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|username
-password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|password
-database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|database
-```
-
-Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
-
-```python 
-# We can use a single connection string
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${my_gcp_creds}"
-)
-
-# Or each component of the connection string separately
-pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
-)
-```
+    # Or each component of the connection string separately
+    pg_datasource = context.sources.add_or_update_sql(
+        name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+    )
+    ```
 
 </TabItem>
 
