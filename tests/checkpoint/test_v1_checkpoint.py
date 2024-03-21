@@ -518,7 +518,15 @@ class TestCheckpointResult:
         validation_results = actual.pop("validation_results")
         assert len(validation_results) == 1
 
-        expected = {"success": True, "success_percent": 100.0}
+        expected = {
+            "success": True,
+            "statistics": {
+                "evaluated_validations": 1,
+                "success_percent": 100.0,
+                "successful_validations": 1,
+                "unsuccessful_validations": 0,
+            },
+        }
         assert actual == expected
 
     @pytest.mark.filesystem
@@ -563,7 +571,12 @@ class TestCheckpointResult:
         assert result.success is False
         assert result.describe_dict() == {
             "success": False,
-            "success_percent": 0.0,
+            "statistics": {
+                "evaluated_validations": 1,
+                "success_percent": 0.0,
+                "successful_validations": 0,
+                "unsuccessful_validations": 1,
+            },
             "validation_results": [
                 {
                     "expectations": [

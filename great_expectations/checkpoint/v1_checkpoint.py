@@ -232,5 +232,12 @@ CheckpointResult.update_forward_refs()
 
 class CheckpointDescriptionDict(TypedDict):
     success: bool
-    success_percent: float
+    statistics: CheckpointDescriptionStatistics
     validation_results: List[Dict[str, Any]]
+
+
+class CheckpointDescriptionStatistics(TypedDict):
+    evaluated_validations: int
+    success_percent: float
+    successful_validations: int
+    unsuccessful_validations: int
