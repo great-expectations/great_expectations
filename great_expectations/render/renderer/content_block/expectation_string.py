@@ -108,11 +108,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                             }
                         },
                     },
-                    "styling": {
-                        "parent": {
-                            "classes": ["hide-succeeded-validation-target-child"]
-                        }
-                    },
+                    "styling": {"parent": {"classes": ["hide-succeeded-validation-target-child"]}},
                 }
             )
         else:

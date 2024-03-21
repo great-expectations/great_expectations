@@ -11,7 +11,7 @@ import pytest
 from packaging.version import Version
 
 from great_expectations.datasource.fluent import (
-    _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
+    _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed  # noqa: E501
     _SCHEMAS_DIR,
     DataAsset,
     Datasource,
@@ -93,7 +93,7 @@ def test_vcs_schemas_match(  # noqa: C901
         Args:
             schema_as_dict: source dictionary (will be modified "in-situ")
 
-        """
+        """  # noqa: E501
         key: str
         value: Any
 
@@ -156,7 +156,7 @@ def test_no_orphaned_schemas():
         if schema.stem not in all_schemas:
             orphans.append(schema)
 
-    assert not orphans, f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"
+    assert not orphans, f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"  # noqa: E501
 
 
 if __name__ == "__main__":

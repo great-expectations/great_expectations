@@ -972,13 +972,13 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "domain_builder": {
                         "class_name": "TableDomainBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                     },
                     "parameter_builders": [
                         {
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
-                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                             "single_batch_mode": False,
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
@@ -993,7 +993,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 {
                                     "replace_nan_with_zero": True,
                                     "name": "table_row_count_range",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
@@ -1004,11 +1004,11 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_multi_batch_parameter_builder_name": "table_row_count",
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
-                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
-                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",  # noqa: E501
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",  # noqa: E501
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",  # noqa: E501
                                     "random_seed": "$variables.random_seed",
-                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
+                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",  # noqa: E501
                                     "round_decimals": "$variables.round_decimals",
                                     "evaluation_parameter_builder_configs": [
                                         {
@@ -1018,7 +1018,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "class_name": "MetricMultiBatchParameterBuilder",
                                             "evaluation_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": None,
                                             "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
@@ -1028,7 +1028,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 },
                             ],
                             "expectation_type": "expect_table_row_count_to_be_between",
-                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                             "meta": {
                                 "profiler_details": "$parameter.table_row_count_range.details"
                             },
@@ -1057,7 +1057,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "domain_builder": {
                         "exclude_column_name_suffixes": ["_id", "_ID"],
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",  # noqa: E501
                         "allowed_semantic_types_passthrough": ["logic"],
                         "exclude_column_names": sorted(
                             [
@@ -1076,7 +1076,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
                             "name": "column_distinct_values_count",
-                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "single_batch_mode": False,
@@ -1088,9 +1088,9 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "min_value": "$parameter.column_distinct_values_count_range.value[0]",
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                             "meta": {
-                                "profiler_details": "$parameter.column_distinct_values_count_range.details"
+                                "profiler_details": "$parameter.column_distinct_values_count_range.details"  # noqa: E501
                             },
                             "expectation_type": "expect_column_unique_value_count_to_be_between",
                             "max_value": "$parameter.column_distinct_values_count_range.value[1]",
@@ -1101,7 +1101,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 {
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
-                                    "metric_multi_batch_parameter_builder_name": "column_distinct_values_count",
+                                    "metric_multi_batch_parameter_builder_name": "column_distinct_values_count",  # noqa: E501
                                     "estimator": "$variables.estimator",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "name": "column_distinct_values_count_range",
@@ -1109,13 +1109,13 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "column.distinct_values.count",
                                     "enforce_numeric_metric": True,
-                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
-                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",  # noqa: E501
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",  # noqa: E501
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",  # noqa: E501
                                     "replace_nan_with_zero": True,
                                     "n_resamples": "$variables.n_resamples",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
-                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",  # noqa: E501
                                     "truncate_values": "$variables.truncate_values",
                                     "evaluation_parameter_builder_configs": [
                                         {
@@ -1125,7 +1125,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "class_name": "MetricMultiBatchParameterBuilder",
                                             "evaluation_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": "$domain.domain_kwargs",
                                             "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
@@ -1149,7 +1149,7 @@ def quentin_expected_expectation_suite(
     quentin_expected_rule_based_profiler_configuration,
 ) -> Callable:
     def _expectation_suite(name: str) -> ExpectationSuite:
-        expected_expect_table_row_count_to_be_between_expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+        expected_expect_table_row_count_to_be_between_expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(  # noqa: E501
             **{
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "kwargs": {
@@ -1169,7 +1169,7 @@ def quentin_expected_expectation_suite(
             },
         )
 
-        expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list: List[
+        expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list: List[  # noqa: E501
             ExpectationConfiguration
         ] = [
             ExpectationConfiguration(
@@ -1334,12 +1334,9 @@ def quentin_expected_expectation_suite(
             ),
         ]
 
-        expected_expectation_configurations: List[ExpectationConfiguration] = (
-            [
-                expected_expect_table_row_count_to_be_between_expectation_configuration,
-            ]
-            + expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list
-        )
+        expected_expectation_configurations: List[ExpectationConfiguration] = [
+            expected_expect_table_row_count_to_be_between_expectation_configuration,
+        ] + expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list
 
         expectation_suite_name: str = "my_suite"
 
@@ -1360,7 +1357,7 @@ def quentin_expected_expectation_suite(
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
-                    "comment": "Created by effective Rule-Based Profiler of VolumeDataAssistant with the configuration included.\n",
+                    "comment": "Created by effective Rule-Based Profiler of VolumeDataAssistant with the configuration included.\n",  # noqa: E501
                 }
             ]
         }
@@ -1376,9 +1373,7 @@ def quentin_expected_expectation_suite(
 def bobby_volume_data_assistant_result(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> VolumeDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1398,9 +1393,7 @@ def bobby_volume_data_assistant_result(
 def bobby_volume_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> VolumeDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1540,7 +1533,7 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
     # TODO: <Alex>TODO: 12/5/2022</Alex>
     Comparison with raw "numpy.ndarray" objects requires tedius inspections of structures and sub-structures of result.
     For now, remove raw values from test (they are non-serialized version of values access through "PARAMETER_KEY" key).
-    """
+    """  # noqa: E501
     domain: Domain
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     # noinspection PyTypeChecker
@@ -1551,7 +1544,7 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
                 parameter_values_for_fully_qualified_parameter_names.items(),
             )
         )
-        for domain, parameter_values_for_fully_qualified_parameter_names in actual_metrics_by_domain.items()
+        for domain, parameter_values_for_fully_qualified_parameter_names in actual_metrics_by_domain.items()  # noqa: E501
     }
 
     assert metrics_by_domain_serialized == expected_metrics_by_domain
@@ -1577,9 +1570,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     root_dir: str = context.root_directory
 
     expectation_suite_name: str = "test_suite"
-    context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     notebook_path = pathlib.Path(root_dir, "run_volume_data_assistant.ipynb")
 
@@ -1607,7 +1598,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         "data_asset_name": "my_reports",
     }
 
-    """
+    """  # noqa: E501
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
@@ -1630,7 +1621,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     implicit_invocation_code: str = """
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(batch_request=batch_request)
-    """
+    """  # noqa: E501
 
     notebook_code: str
     if implicit:
@@ -1647,13 +1638,11 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     with open(notebook_path, "w") as f:
         nbformat.write(nb, f)
 
-    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
-        notebook_path=notebook_path
-    )
+    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(notebook_path=notebook_path)
 
     # Run notebook
-    ep: nbconvert.preprocessors.ExecutePreprocessor = (
-        nbconvert.preprocessors.ExecutePreprocessor(timeout=180, kernel_name="python3")
+    ep: nbconvert.preprocessors.ExecutePreprocessor = nbconvert.preprocessors.ExecutePreprocessor(
+        timeout=180, kernel_name="python3"
     )
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
@@ -1661,17 +1650,9 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 def test_volume_data_assistant_result_serialization(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    volume_data_assistant_result_as_dict: dict = (
-        bobby_volume_data_assistant_result.to_dict()
-    )
-    assert (
-        set(volume_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
-    )
-    assert (
-        bobby_volume_data_assistant_result.to_json_dict()
-        == volume_data_assistant_result_as_dict
-    )
+    volume_data_assistant_result_as_dict: dict = bobby_volume_data_assistant_result.to_dict()
+    assert set(volume_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
+    assert bobby_volume_data_assistant_result.to_json_dict() == volume_data_assistant_result_as_dict
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
@@ -1701,9 +1682,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
-            batch_id
-        ]
+        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[batch_id]
         is not None
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
         for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
@@ -1743,9 +1722,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in data_assistant_result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         data_assistant_result.expectation_configurations
@@ -1773,13 +1750,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 
     data_assistant_result.citation.pop("citation_date", None)
     expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
-    assert (
-        data_assistant_result.citation
-        == expected_expectation_suite.meta["citations"][0]
-    )
+    assert data_assistant_result.citation == expected_expectation_suite.meta["citations"][0]
 
-    actual_expectation_suite: ExpectationSuite = (
-        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    actual_expectation_suite: ExpectationSuite = data_assistant_result.get_expectation_suite(
+        expectation_suite_name="my_suite"
     )
     actual_expectation_suite.meta.pop("great_expectations_version", None)
     expected_expectation_suite.meta.pop("great_expectations_version", None)
@@ -1796,9 +1770,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     quentin_expected_expectation_suite,
     quentin_expected_rule_based_profiler_configuration,
 ):
-    data_assistant_result: DataAssistantResult = (
-        quentin_implicit_invocation_result_frozen_time
-    )
+    data_assistant_result: DataAssistantResult = quentin_implicit_invocation_result_frozen_time
 
     registered_data_assistant_name: str = "volume_data_assistant"
 
@@ -1814,27 +1786,23 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in data_assistant_result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         data_assistant_result.expectation_configurations
         == expected_expectation_suite.expectation_configurations
     )
 
-    data_assistant_result_profiler_config_as_json_dict: dict = (
-        deep_filter_properties_iterable(
-            properties=data_assistant_result.profiler_config.to_json_dict(),
-            delete_fields={"random_seed"},
-        )
+    data_assistant_result_profiler_config_as_json_dict: dict = deep_filter_properties_iterable(
+        properties=data_assistant_result.profiler_config.to_json_dict(),
+        delete_fields={"random_seed"},
     )
-    data_assistant_result_profiler_config_as_json_dict["rules"][
-        "categorical_columns_rule"
-    ]["domain_builder"]["exclude_semantic_types"] = sorted(
-        data_assistant_result_profiler_config_as_json_dict["rules"][
-            "categorical_columns_rule"
-        ]["domain_builder"]["exclude_semantic_types"]
+    data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+        "domain_builder"
+    ]["exclude_semantic_types"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+            "domain_builder"
+        ]["exclude_semantic_types"]
     )
     quentin_expected_rule_based_profiler_configuration_as_json_dict = (
         deep_filter_properties_iterable(
@@ -1857,13 +1825,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result.citation.pop("citation_date", None)
     expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
-    assert (
-        data_assistant_result.citation
-        == expected_expectation_suite.meta["citations"][0]
-    )
+    assert data_assistant_result.citation == expected_expectation_suite.meta["citations"][0]
 
-    actual_expectation_suite: ExpectationSuite = (
-        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    actual_expectation_suite: ExpectationSuite = data_assistant_result.get_expectation_suite(
+        expectation_suite_name="my_suite"
     )
     actual_expectation_suite.meta.pop("great_expectations_version", None)
     expected_expectation_suite.meta.pop("great_expectations_version", None)
@@ -1874,7 +1839,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.slow  # 3.03s
-def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(  # noqa: E501
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     quentin_expected_metrics_by_domain,
@@ -1918,8 +1883,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     quentin_expected_metrics_by_domain = dict(
         filter(
             lambda element: not any(
-                element[0].is_superset(other=domain_key)
-                for domain_key in expected_excluded_domains
+                element[0].is_superset(other=domain_key) for domain_key in expected_excluded_domains
             ),
             quentin_expected_metrics_by_domain.items(),
         )
@@ -1952,20 +1916,16 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     for expectation_configuration in data_assistant_result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         data_assistant_result.expectation_configurations
         == expected_expectation_suite.expectation_configurations
     )
 
-    data_assistant_result_profiler_config_as_json_dict: dict = (
-        deep_filter_properties_iterable(
-            properties=data_assistant_result.profiler_config.to_json_dict(),
-            delete_fields={"random_seed"},
-        )
+    data_assistant_result_profiler_config_as_json_dict: dict = deep_filter_properties_iterable(
+        properties=data_assistant_result.profiler_config.to_json_dict(),
+        delete_fields={"random_seed"},
     )
     quentin_expected_rule_based_profiler_configuration_as_json_dict: dict = (
         deep_filter_properties_iterable(
@@ -1976,12 +1936,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             delete_fields={"random_seed"},
         )
     )
-    data_assistant_result_profiler_config_as_json_dict["rules"][
-        "categorical_columns_rule"
-    ]["domain_builder"]["exclude_column_names"] = sorted(
-        data_assistant_result_profiler_config_as_json_dict["rules"][
-            "categorical_columns_rule"
-        ]["domain_builder"]["exclude_column_names"]
+    data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+        "domain_builder"
+    ]["exclude_column_names"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+            "domain_builder"
+        ]["exclude_column_names"]
     )
     quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
         "categorical_columns_rule"
@@ -1990,12 +1950,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             "categorical_columns_rule"
         ]["domain_builder"]["exclude_column_names"]
     )
-    data_assistant_result_profiler_config_as_json_dict["rules"][
-        "categorical_columns_rule"
-    ]["domain_builder"]["exclude_semantic_types"] = sorted(
-        data_assistant_result_profiler_config_as_json_dict["rules"][
-            "categorical_columns_rule"
-        ]["domain_builder"]["exclude_semantic_types"]
+    data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+        "domain_builder"
+    ]["exclude_semantic_types"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"]["categorical_columns_rule"][
+            "domain_builder"
+        ]["exclude_semantic_types"]
     )
     assert sorted(
         data_assistant_result_profiler_config_as_json_dict,
@@ -2010,13 +1970,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result.citation.pop("citation_date", None)
     expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
-    assert (
-        data_assistant_result.citation
-        == expected_expectation_suite.meta["citations"][0]
-    )
+    assert data_assistant_result.citation == expected_expectation_suite.meta["citations"][0]
 
-    actual_expectation_suite: ExpectationSuite = (
-        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    actual_expectation_suite: ExpectationSuite = data_assistant_result.get_expectation_suite(
+        expectation_suite_name="my_suite"
     )
     actual_expectation_suite.meta.pop("great_expectations_version", None)
     expected_expectation_suite.meta.pop("great_expectations_version", None)
@@ -2027,7 +1984,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.slow  # 3.30s
-def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(  # noqa: E501
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: FileDataContext = quentin_columnar_table_multi_batch_data_context
@@ -2052,7 +2009,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @pytest.mark.slow  # 3.31s
-def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(  # noqa: E501
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: FileDataContext = quentin_columnar_table_multi_batch_data_context
@@ -2071,9 +2028,9 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         },
     )
     assert (
-        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"]["variables"][
+            "false_positive_rate"
+        ]
         == 1.0e-1
     )
 
@@ -2097,16 +2054,14 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
-    data_assistant_result: DataAssistantResult = (
-        quentin_implicit_invocation_result_actual_time
-    )
+    data_assistant_result: DataAssistantResult = quentin_implicit_invocation_result_actual_time
 
     # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.profiler_execution_time > 0.0
 
 
 @pytest.mark.slow  # 3.46s
-def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
+def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(  # noqa: E501
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -2126,7 +2081,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
         list(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY].keys())
         == expected_batch_ids
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
-        for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
+        for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()  # noqa: E501
     )
 
 
@@ -2134,13 +2089,9 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
-    new_cell: str = (
-        "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
-    )
+    new_cell: str = "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
 
     with pytest.raises(nbconvert.preprocessors.CellExecutionError):
         run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -2161,9 +2112,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics()"
 
@@ -2184,9 +2133,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
@@ -2207,9 +2154,7 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
@@ -2232,15 +2177,11 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
-    new_cell: str = (
-        f"data_assistant_result.plot_expectations_and_metrics(theme={theme})"
-    )
+    new_cell: str = f"data_assistant_result.plot_expectations_and_metrics(theme={theme})"
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,
@@ -2350,8 +2291,8 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         },
         "axisX": {"titleColor": x_axis_title_color},
     }
-    plot_result: PlotResult = (
-        bobby_volume_data_assistant_result.plot_expectations_and_metrics(theme=theme)
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_expectations_and_metrics(
+        theme=theme
     )
 
     # ensure a config has been added to each chart
@@ -2362,34 +2303,24 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 
     # ensure the theme elements were updated for each chart
     assert all(chart.config.font == font for chart in plot_result.charts)
-    assert all(
-        chart.config.title["color"] == title_color for chart in plot_result.charts
-    )
-    assert all(
-        chart.config.title["fontSize"] == title_font_size
-        for chart in plot_result.charts
-    )
+    assert all(chart.config.title["color"] == title_color for chart in plot_result.charts)
+    assert all(chart.config.title["fontSize"] == title_font_size for chart in plot_result.charts)
     assert all(chart.config.point["size"] == point_size for chart in plot_result.charts)
     assert all(
-        chart.config.axisY["labelColor"] == y_axis_label_color
-        for chart in plot_result.charts
+        chart.config.axisY["labelColor"] == y_axis_label_color for chart in plot_result.charts
     )
     assert all(
-        chart.config.axisY["labelAngle"] == y_axis_label_angle
-        for chart in plot_result.charts
+        chart.config.axisY["labelAngle"] == y_axis_label_angle for chart in plot_result.charts
     )
     assert all(
-        chart.config.axisX["titleColor"] == x_axis_title_color
-        for chart in plot_result.charts
+        chart.config.axisX["titleColor"] == x_axis_title_color for chart in plot_result.charts
     )
 
 
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = (
-        bobby_volume_data_assistant_result.plot_expectations_and_metrics()
-    )
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_expectations_and_metrics()
 
     expected_tooltip: List[alt.Tooltip] = [
         alt.Tooltip(
@@ -2454,9 +2385,7 @@ def test_volume_data_assistant_plot_return_tooltip(
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
 
@@ -2474,16 +2403,12 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
 
 
 @pytest.mark.slow  # 12.09s
-def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
+def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(  # noqa: E501
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
-    new_cell: str = (
-        "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
-    )
+    new_cell: str = "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,

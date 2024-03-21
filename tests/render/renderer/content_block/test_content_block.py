@@ -58,9 +58,7 @@ if TYPE_CHECKING:
     ],
 )
 @pytest.mark.unit
-def test__render_expectation_notes_with_notes(
-    expectation: Expectation, expected: list[dict]
-):
+def test__render_expectation_notes_with_notes(expectation: Expectation, expected: list[dict]):
     config = expectation.configuration
     content = ContentBlockRenderer._render_expectation_notes(config)
     notes_block = content.collapse[0]
@@ -70,8 +68,6 @@ def test__render_expectation_notes_with_notes(
 
 @pytest.mark.unit
 def test__render_expectation_notes_without_notes():
-    expectation = gxe.ExpectColumnValuesToBeBetween(
-        column="foo", min_value=1, max_value=10
-    )
+    expectation = gxe.ExpectColumnValuesToBeBetween(column="foo", min_value=1, max_value=10)
     config = expectation.configuration
     assert ContentBlockRenderer._render_expectation_notes(config) is None

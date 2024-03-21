@@ -39,9 +39,7 @@ def generate_time_series_data_and_plot(
                     "cutpoint": size,
                 }
             ],
-            weekday_dummy_params=[
-                weekly_seasonality * x for x in [0, 0.5, 3.5, 4, 5, -3, -3.5]
-            ],
+            weekday_dummy_params=[weekly_seasonality * x for x in [0, 0.5, 3.5, 4, 5, -3, -3.5]],
             annual_seasonality_params=[],
             holiday_alpha=1000,
             outlier_alpha=outlier_alpha,
@@ -59,9 +57,7 @@ def generate_time_series_data_and_plot(
                 }
             ],
             hourly_seasonality=hourly_seasonality,
-            weekday_dummy_params=[
-                weekly_seasonality * x for x in [0, 0.5, 3.5, 4, 5, -3, -3.5]
-            ],
+            weekday_dummy_params=[weekly_seasonality * x for x in [0, 0.5, 3.5, 4, 5, -3, -3.5]],
             annual_seasonality_params=[],
             holiday_alpha=1000,
             outlier_alpha=outlier_alpha,

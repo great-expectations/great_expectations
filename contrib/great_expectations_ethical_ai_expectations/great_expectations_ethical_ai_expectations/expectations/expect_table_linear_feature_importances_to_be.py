@@ -66,9 +66,7 @@ class TableModelingRidgeFeatureImportances(TableMetricProvider):
         runtime_configuration=None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -137,9 +135,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
         "meta": None,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -167,9 +163,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
                 isinstance(n_features, int) or n_features is None
             ), "n_features must be an integer"
             if columns is not None:
-                assert (
-                    isinstance(columns, tuple) or isinstance(columns, list)
-                ) and all(
+                assert (isinstance(columns, tuple) or isinstance(columns, list)) and all(
                     isinstance(i, str) for i in columns
                 ), "columns must be a tuple or list of string column names"
             assert (

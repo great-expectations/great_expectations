@@ -45,9 +45,7 @@ def construct_file_migrator() -> Callable:
 
 
 @pytest.mark.big
-def test_migrate_scaffolds_filesystem(
-    tmp_path: pathlib.Path, file_migrator: FileMigrator
-):
+def test_migrate_scaffolds_filesystem(tmp_path: pathlib.Path, file_migrator: FileMigrator):
     # Construct and run migrator
     tmp_path.mkdir(exist_ok=True)
     with working_directory(str(tmp_path)):
@@ -92,9 +90,7 @@ def test_migrate_transfers_store_contents(
 
     # Check proper filesystem interaction
     root = pathlib.Path(migrated_context.root_directory)
-    expectations_dir = root.joinpath(
-        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value
-    )
+    expectations_dir = root.joinpath(DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value)
     contents = sorted(str(f.stem) for f in expectations_dir.glob("*.json"))
 
     assert contents == suite_names

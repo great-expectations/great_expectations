@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import warnings
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
@@ -23,7 +23,6 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import Batch
-    from great_expectations.data_asset import DataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class ValidationOperator:
     It defines the signature of the public run method. This method and the validation_operator_config property are the
     only contract re operators' API. Everything else is up to the implementors
     of validation operator classes that will be the descendants of this base class.
-    """
+    """  # noqa: E501
 
     def __init__(self) -> None:
         self._validation_operator_config = None
@@ -69,7 +68,7 @@ class ValidationOperator:
                 "notify_on": self.notify_on,
             },
         }
-        """
+        """  # noqa: E501
 
         raise NotImplementedError
 
@@ -184,7 +183,7 @@ class ActionListValidationOperator(ValidationOperator):
                 }
             },
         }
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -208,8 +207,8 @@ class ActionListValidationOperator(ValidationOperator):
 
         self.action_list = action_list
         self.actions = OrderedDict()
-        # For a great expectations cloud context it's important that we store the validation result before we send
-        # notifications. That's because we want to provide a link to the validation result and the validation result
+        # For a great expectations cloud context it's important that we store the validation result before we send  # noqa: E501
+        # notifications. That's because we want to provide a link to the validation result and the validation result  # noqa: E501
         # page won't get created until we run the store action.
         store_action_detected = False
         notify_before_store: Optional[str] = None
@@ -224,16 +223,13 @@ class ActionListValidationOperator(ValidationOperator):
                 )
 
             if "class_name" in action_config["action"]:
-                if (
-                    action_config["action"]["class_name"]
-                    == "StoreValidationResultAction"
-                ):
+                if action_config["action"]["class_name"] == "StoreValidationResultAction":
                     store_action_detected = True
                 elif (
                     action_config["action"]["class_name"].endswith("NotificationAction")
                     and not store_action_detected
                 ):
-                    # We currently only support SlackNotifications but setting this for any notification.
+                    # We currently only support SlackNotifications but setting this for any notification.  # noqa: E501
                     notify_before_store = action_config["action"]["class_name"]
 
             config = action_config["action"]
@@ -252,8 +248,8 @@ class ActionListValidationOperator(ValidationOperator):
             self.actions[action_config["name"]] = new_action
         if notify_before_store and self._using_cloud_context:
             warnings.warn(
-                f"The checkpoints action_list configuration has a notification, {notify_before_store}"
-                "configured without a StoreValidationResultAction configured. This means the notification can't"
+                f"The checkpoints action_list configuration has a notification, {notify_before_store}"  # noqa: E501
+                "configured without a StoreValidationResultAction configured. This means the notification can't"  # noqa: E501
                 "provide a link the validation result. Please move all notification actions after "
                 "StoreValidationResultAction in your configuration."
             )
@@ -282,7 +278,7 @@ class ActionListValidationOperator(ValidationOperator):
             }
         return self._validation_operator_config
 
-    def run(  # noqa: PLR0913
+    def run(  # noqa: C901, PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -379,7 +375,7 @@ class ActionListValidationOperator(ValidationOperator):
 
     def _run_actions(  # noqa: PLR0913
         self,
-        batch: Union[Batch, DataAsset],
+        batch: Batch,
         expectation_suite_identifier: ExpectationSuiteIdentifier,
         expectation_suite,
         batch_validation_result,
@@ -430,9 +426,9 @@ class ActionListValidationOperator(ValidationOperator):
                 if isinstance(action_result, GXCloudResourceRef):
                     transformed_result = {
                         "id": action_result.id,
-                        "validation_result_url": action_result.response["data"][
-                            "attributes"
-                        ]["validation_result"]["display_url"],
+                        "validation_result_url": action_result.response["data"]["attributes"][
+                            "validation_result"
+                        ]["display_url"],
                     }
                 elif action_result is None:
                     transformed_result = {}
@@ -441,9 +437,7 @@ class ActionListValidationOperator(ValidationOperator):
 
                 # add action_result
                 batch_actions_results[action["name"]] = transformed_result
-                batch_actions_results[action["name"]]["class"] = action["action"][
-                    "class_name"
-                ]
+                batch_actions_results[action["name"]]["class"] = action["action"]["class_name"]
 
             except Exception as e:
                 logger.exception(f"Error running action with name {action['name']}")
@@ -452,9 +446,7 @@ class ActionListValidationOperator(ValidationOperator):
         return batch_actions_results
 
 
-class WarningAndFailureExpectationSuitesValidationOperator(
-    ActionListValidationOperator
-):
+class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
     """
     WarningAndFailureExpectationSuitesValidationOperator is a validation operator
     that accepts a list batches of data assets (or the information necessary to fetch these batches).
@@ -579,7 +571,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             }
         }
 
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -751,7 +743,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
                 raise ValueError(
-                    "base_expectation_suite_name must be configured in the validation operator or passed at runtime"
+                    "base_expectation_suite_name must be configured in the validation operator or passed at runtime"  # noqa: E501
                 )
             base_expectation_suite_name = self.base_expectation_suite_name
 
@@ -763,8 +755,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=base_expectation_suite_name
-                + self.expectation_suite_name_suffixes[0]
+                name=base_expectation_suite_name + self.expectation_suite_name_suffixes[0]
             )
 
             failure_validation_result_id = ValidationResultIdentifier(
@@ -785,9 +776,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             # so that methods like this can catch and handle a single error type.
             except Exception:
                 logger.debug(
-                    "Failure expectation suite not found: {}".format(
-                        failure_expectation_suite_identifier
-                    )
+                    f"Failure expectation suite not found: {failure_expectation_suite_identifier}"
                 )
 
             if failure_expectation_suite:
@@ -795,9 +784,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=result_format if result_format else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
@@ -815,8 +802,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     break
 
             warning_expectation_suite_identifier = ExpectationSuiteIdentifier(
-                name=base_expectation_suite_name
-                + self.expectation_suite_name_suffixes[1]
+                name=base_expectation_suite_name + self.expectation_suite_name_suffixes[1]
             )
 
             warning_validation_result_id = ValidationResultIdentifier(
@@ -832,9 +818,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 ].get(warning_expectation_suite_identifier)
             except Exception:
                 logger.debug(
-                    "Warning expectation suite not found: {}".format(
-                        warning_expectation_suite_identifier
-                    )
+                    f"Warning expectation suite not found: {warning_expectation_suite_identifier}"
                 )
 
             if warning_expectation_suite:
@@ -842,9 +826,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
                     run_id,
-                    result_format=result_format
-                    if result_format
-                    else self.result_format,
+                    result_format=result_format if result_format else self.result_format,
                     evaluation_parameters=evaluation_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result
@@ -881,8 +863,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 slack_query = self._build_slack_query(
                     validation_operator_result=validation_operator_result
                 )
-                send_slack_notification(
-                    query=slack_query, slack_webhook=self.slack_webhook
-                )
+                send_slack_notification(query=slack_query, slack_webhook=self.slack_webhook)
 
         return validation_operator_result

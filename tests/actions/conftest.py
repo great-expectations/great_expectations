@@ -140,12 +140,8 @@ def validation_result_suite_id():
 def validation_result_suite_extended_id():
     return ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
-        run_id=RunIdentifier(
-            run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"
-        ),
-        batch_identifier=BatchIdentifier(
-            batch_identifier="1234", data_asset_name="asset"
-        ),
+        run_id=RunIdentifier(run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"),
+        batch_identifier=BatchIdentifier(batch_identifier="1234", data_asset_name="asset"),
     )
 
 

@@ -28,9 +28,7 @@ class ColumnValuesMatchRegex(ColumnMapMetricProvider):
     def _sqlalchemy(cls, column, regex, _dialect, **kwargs):
         regex_expression = get_dialect_regex_expression(column, regex, _dialect)
         if regex_expression is None:
-            logger.warning(
-                f"Regex is not supported for dialect {_dialect.dialect.name!s}"
-            )
+            logger.warning(f"Regex is not supported for dialect {_dialect.dialect.name!s}")
             raise NotImplementedError
 
         return regex_expression

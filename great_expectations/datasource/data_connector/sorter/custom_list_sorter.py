@@ -18,7 +18,7 @@ class CustomListSorter(Sorter):
     """
     CustomListSorter
         - The CustomListSorter is able to sort partitions values according to a user-provided custom list.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -28,9 +28,7 @@ class CustomListSorter(Sorter):
     ) -> None:
         super().__init__(name=name, orderby=orderby)
 
-        self._reference_list = self._validate_reference_list(
-            reference_list=reference_list
-        )
+        self._reference_list = self._validate_reference_list(reference_list=reference_list)
 
     @staticmethod
     def _validate_reference_list(
@@ -43,7 +41,7 @@ class CustomListSorter(Sorter):
         for item in reference_list:
             if not isinstance(item, str):
                 raise gx_exceptions.SorterError(
-                    f"Items in reference list for CustomListSorter must have string type (actual type is `{type(item)!s}`)."
+                    f"Items in reference list for CustomListSorter must have string type (actual type is `{type(item)!s}`)."  # noqa: E501
                 )
         return reference_list
 

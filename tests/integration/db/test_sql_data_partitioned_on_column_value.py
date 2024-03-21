@@ -6,7 +6,7 @@ from tests.integration.db.taxi_data_utils import (
     _is_dialect_athena,
     loaded_table,
 )
-from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCasesBase,
     TaxiPartitioningTestCasesColumnValue,
     TaxiTestData,

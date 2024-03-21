@@ -16,9 +16,7 @@ def test_profiler_store_raises_error_with_invalid_value(
     empty_profiler_store: ProfilerStore,
 ):
     with pytest.raises(TypeError):
-        empty_profiler_store.set(
-            key="my_first_profiler", value="this is not a profiler"
-        )
+        empty_profiler_store.set(key="my_first_profiler", value="this is not a profiler")
 
 
 @pytest.mark.unit
@@ -28,9 +26,7 @@ def test_profiler_store_set_adds_valid_key(
     profiler_key: ConfigurationIdentifier,
 ):
     assert len(empty_profiler_store.list_keys()) == 0
-    empty_profiler_store.set(
-        key=profiler_key, value=profiler_config_with_placeholder_args
-    )
+    empty_profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
     assert len(empty_profiler_store.list_keys()) == 1
 
 

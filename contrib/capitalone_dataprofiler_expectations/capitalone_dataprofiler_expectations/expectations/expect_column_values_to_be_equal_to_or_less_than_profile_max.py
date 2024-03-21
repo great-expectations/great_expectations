@@ -34,9 +34,7 @@ class ColumnValuesLessThanOrEqualToProfileMax(ColumnMapMetricProvider):
     def _pandas(cls: Any, column: str, profile: Any, **kwargs) -> np.ndarray:
         columnPresent = (
             column.name
-            in profile["global_stats"][
-                "profile_schema"
-            ]  # checks to ensure column exists
+            in profile["global_stats"]["profile_schema"]  # checks to ensure column exists
         )
         transpose = np.array(column).T  # Turns column into a row format for return
         if not (columnPresent):  # Err column in user DF not present in input profile
@@ -171,7 +169,5 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
 
 if __name__ == "__main__":
     # ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin().print_diagnostic_checklist()
-    diagnostics_report = (
-        ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
-    )
+    diagnostics_report = ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
     print(diagnostics_report.generate_checklist())

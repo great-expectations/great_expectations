@@ -26,14 +26,12 @@ def assert_how_to_buttons(
 ):
     """Helper function to assert presence or non-presence of how-to buttons and related content in various
     Data Docs pages.
-    """
+    """  # noqa: E501
 
     # these are simple checks for presence of certain page elements
     show_walkthrough_button = "Show Walkthrough"
     walkthrough_modal = "Great Expectations Walkthrough"
-    cta_footer = (
-        "To continue exploring Great Expectations check out one of these tutorials..."
-    )
+    cta_footer = "To continue exploring Great Expectations check out one of these tutorials..."
     how_to_edit_suite_button = "How to Edit This Suite"
     how_to_edit_suite_modal = "How to Edit This Expectation Suite"
     action_card = "Actions"
@@ -57,9 +55,7 @@ def assert_how_to_buttons(
 
     data_docs_site_dir = os.path.join(  # noqa: PTH118
         context._context_root_directory,
-        context._project_config.data_docs_sites["local_site"]["store_backend"][
-            "base_directory"
-        ],
+        context._project_config.data_docs_sites["local_site"]["store_backend"]["base_directory"],
     )
 
     page_paths_dict = {
@@ -128,6 +124,4 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
 
     profiling_site_section_builder = site_section_builders["profiling"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)
-    assert profiling_site_section_builder.run_name_filter == {
-        "equals": "custom_profiling_filter"
-    }
+    assert profiling_site_section_builder.run_name_filter == {"equals": "custom_profiling_filter"}

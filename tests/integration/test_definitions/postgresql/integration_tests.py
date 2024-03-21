@@ -87,7 +87,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_postgres",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -130,7 +130,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_postgres",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",

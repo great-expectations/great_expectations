@@ -49,9 +49,7 @@ class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
             except ValueError:
                 return False
 
-        tz_udf = F.udf(
-            lambda x: is_in_timezone(x, timezone), pyspark.types.BooleanType()
-        )
+        tz_udf = F.udf(lambda x: is_in_timezone(x, timezone), pyspark.types.BooleanType())
 
         return tz_udf(column)
 

@@ -69,9 +69,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -86,9 +86,7 @@ batch_request = BatchRequest(
     data_asset_name="yellow_tripdata",
 )
 
-context.add_or_update_expectation_suite(
-    expectation_suite_name="<MY EXPECTATION SUITE NAME>"
-)
+context.add_or_update_expectation_suite(expectation_suite_name="<MY EXPECTATION SUITE NAME>")
 
 validator = context.get_validator(
     batch_request=batch_request,
@@ -131,9 +129,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET>/", "superconductive-docs-test"
-)
+datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-docs-test")
 datasource_yaml = datasource_yaml.replace(
     "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
@@ -170,12 +166,12 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "bucket"
-] = "superconductive-docs-test"
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "prefix"
-] = "data/taxi_yellow_tripdata_samples/"
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["bucket"] = (
+    "superconductive-docs-test"
+)
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["prefix"] = (
+    "data/taxi_yellow_tripdata_samples/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -246,9 +242,9 @@ datasource_config = {
 # </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -337,9 +333,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -421,9 +417,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_two_data_assets/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_two_data_assets/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -514,9 +510,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/nested_directories_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/nested_directories_data_asset/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),
@@ -566,9 +562,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>/", "../data/nested_directories_complex/"
-)
+datasource_yaml = datasource_yaml.replace("<MY DIRECTORY>/", "../data/nested_directories_complex/")
 
 test_yaml = context.test_yaml_config(
     datasource_yaml,
@@ -609,9 +603,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/nested_directories_complex/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/nested_directories_complex/"
+)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config),

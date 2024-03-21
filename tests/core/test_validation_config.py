@@ -15,6 +15,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -124,9 +125,7 @@ class TestValidationRun:
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run()
 
@@ -149,13 +148,9 @@ class TestValidationRun:
         validation_config: ValidationConfig,
     ):
         validation_config.suite.add_expectation(
-            gxe.ExpectColumnMaxToBeBetween(
-                column="foo", max_value={"$PARAMETER": "max_value"}
-            )
+            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value={"$PARAMETER": "max_value"})
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run(
             batch_definition_options={"year": 2024},
@@ -206,9 +201,7 @@ class TestValidationRun:
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run()
 
@@ -241,9 +234,7 @@ class TestValidationRun:
         cloud_validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
         )
-        mock_validator.graph_validate.return_value = [
-            ExpectationValidationResult(success=True)
-        ]
+        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         cloud_validation_config.run()
 
@@ -360,7 +351,7 @@ class TestValidationConfigSerialization:
             "id": validation_id,
         }
 
-        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one
+        # If the suite id is missing, the ExpectationsStore is reponsible for generating and persisting a new one  # noqa: E501
         if suite_id is None:
             self._assert_contains_valid_uuid(actual["suite"])
 
@@ -603,3 +594,23 @@ class TestValidationConfigSerialization:
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
             ValidationConfig.parse_obj(serialized_config)
+
+
+@pytest.mark.unit
+def test_identifier_bundle_with_existing_id(validation_config: ValidationConfig):
+    validation_config.id = "fa34fbb7-124d-42ff-9760-e410ee4584a0"
+
+    assert validation_config.identifier_bundle() == _IdentifierBundle(
+        name="my_validation", id="fa34fbb7-124d-42ff-9760-e410ee4584a0"
+    )
+
+
+@pytest.mark.unit
+def test_identifier_bundle_no_id(validation_config: ValidationConfig):
+    validation_config.id = None
+
+    actual = validation_config.identifier_bundle()
+    expected = {"name": "my_validation", "id": mock.ANY}
+
+    assert actual.dict() == expected
+    assert actual.id is not None

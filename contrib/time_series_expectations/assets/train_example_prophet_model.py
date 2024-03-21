@@ -13,9 +13,7 @@ import pandas as pd
 from prophet import Prophet
 from prophet.serialize import model_to_json
 
-df = pd.read_csv(
-    "data/daily__size_180__trend_0__weekly_seasonality_0__outliers_1000.csv"
-)
+df = pd.read_csv("data/daily__size_180__trend_0__weekly_seasonality_0__outliers_1000.csv")
 
 m = Prophet(
     growth="flat",

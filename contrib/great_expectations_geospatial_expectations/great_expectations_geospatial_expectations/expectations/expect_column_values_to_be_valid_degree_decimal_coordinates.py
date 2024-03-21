@@ -43,9 +43,7 @@ class ColumnValuesCoordinatesDegreeDecimal(ColumnMapMetricProvider):
     @staticmethod
     def _point_in_bounds(point, bounds):
         try:
-            result = bounds.intersects(
-                Point(float(eval(point)[1]), float(eval(point)[0]))
-            )
+            result = bounds.intersects(Point(float(eval(point)[1]), float(eval(point)[0])))
         except TypeError:
             try:
                 result = bounds.intersects(Point(float(point[1]), float(point[0])))

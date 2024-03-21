@@ -55,7 +55,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     See Also:
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
-    """
+    """  # noqa: E501
 
     value: Union[int, EvaluationParameterDict]
 
@@ -79,9 +79,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="value", param_type=RendererValueType.NUMBER
-        )
+        renderer_configuration.add_param(name="value", param_type=RendererValueType.NUMBER)
         renderer_configuration.template_str = "Must have exactly $value columns."
         return renderer_configuration
 

@@ -69,9 +69,7 @@ class _FieldDetails(NamedTuple):
     default_value: Any
     type_annotation: Type
 
-def _get_field_details(
-    model: Type[pydantic.BaseModel], field_name: str
-) -> _FieldDetails: ...
+def _get_field_details(model: Type[pydantic.BaseModel], field_name: str) -> _FieldDetails: ...
 
 class _SourceFactories:
     type_lookup: ClassVar[TypeLookup]

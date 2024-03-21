@@ -60,7 +60,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.MSSQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MSSQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MSSQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_mssql",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -103,7 +103,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.MSSQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_mssql",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",

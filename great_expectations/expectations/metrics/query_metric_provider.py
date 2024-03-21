@@ -35,12 +35,10 @@ class QueryMetricProvider(MetricProvider):
     @classmethod
     def _get_query_from_metric_value_kwargs(cls, metric_value_kwargs: dict) -> str:
         query_param = cls.query_param_name
-        query: str | None = metric_value_kwargs.get(
+        query: str | None = metric_value_kwargs.get(query_param) or cls.default_kwarg_values.get(
             query_param
-        ) or cls.default_kwarg_values.get(query_param)
+        )
         if not query:
-            raise ValueError(
-                f"Must provide `{query_param}` to `{cls.__name__}` metric."
-            )
+            raise ValueError(f"Must provide `{query_param}` to `{cls.__name__}` metric.")
 
         return query

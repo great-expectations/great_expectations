@@ -35,9 +35,7 @@ def test_id_dict_structure():
             "b2": 5,
         },
     }
-    nested_id_dictionary: IDDict = deep_convert_properties_iterable_to_id_dict(
-        source=data
-    )
+    nested_id_dictionary: IDDict = deep_convert_properties_iterable_to_id_dict(source=data)
     assert isinstance(nested_id_dictionary, IDDict)
     assert isinstance(nested_id_dictionary["a0"], int)
     assert isinstance(nested_id_dictionary["a1"], IDDict)

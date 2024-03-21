@@ -67,7 +67,7 @@ class DomainBuilder(ABC, Builder):
 
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
-        """
+        """  # noqa: E501
         self.set_batch_list_if_null_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
@@ -127,12 +127,12 @@ class DomainBuilder(ABC, Builder):
             for batch_id in batch_ids  # type: ignore[union-attr] # could be None
         }
 
-        resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], MetricValue]
-        ] = get_resolved_metrics_by_key(
-            validator=validator,  # type: ignore[arg-type] # could be None
-            metric_configurations_by_key=metric_configurations_by_batch_id,
-            runtime_configuration=runtime_configuration,
+        resolved_metrics_by_batch_id: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = (
+            get_resolved_metrics_by_key(
+                validator=validator,  # type: ignore[arg-type] # could be None
+                metric_configurations_by_key=metric_configurations_by_batch_id,
+                runtime_configuration=runtime_configuration,
+            )
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]

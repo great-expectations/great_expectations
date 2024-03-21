@@ -64,9 +64,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 
@@ -81,9 +79,7 @@ batch_request = BatchRequest(
     data_asset_name="public.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 

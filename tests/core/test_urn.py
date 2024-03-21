@@ -33,7 +33,7 @@ def test_ge_validations_urn():
 
 @pytest.mark.unit
 def test_ge_metrics_urn():
-    urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value:column=mycol"
+    urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value:column=mycol"  # noqa: E501
     res = ge_urn.parseString(urn)
 
     assert res["urn_type"] == "metrics"
@@ -44,7 +44,9 @@ def test_ge_metrics_urn():
     assert kwargs_dict == {"column": ["mycol"]}
 
     # No kwargs is ok
-    urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value"
+    urn = (
+        "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value"
+    )
     res = ge_urn.parseString(urn)
 
     assert res["urn_type"] == "metrics"
@@ -91,7 +93,5 @@ def test_invalid_urn():
 
     # Cannot have too many parts
     with pytest.raises(ParseException) as e:
-        ge_urn.parseString(
-            "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo"
-        )
+        ge_urn.parseString("urn:great_expectations:validations:foo:bar:baz:bin:barg:boo")
     assert "urn:great_expectations:validations:foo:bar:baz:bin:barg:boo" in e.value.line

@@ -76,12 +76,12 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     value_pairs_set: List[Tuple[Any, Any]]
-    ignore_row_if: Literal[
-        "both_values_are_missing", "either_value_is_missing", "neither"
-    ] = "both_values_are_missing"
+    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
+        "both_values_are_missing"
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

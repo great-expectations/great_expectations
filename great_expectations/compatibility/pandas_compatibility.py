@@ -43,7 +43,7 @@ def execute_pandas_to_datetime(  # noqa: PLR0913
 
     Returns:
         Datetime converted output.
-    """
+    """  # noqa: E501
     if is_version_less_than(pd.__version__, "2.0.0"):
         return pd.to_datetime(
             arg=arg,

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
+from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (  # noqa: E501
     _is_sqlalchemy_metric_selectable,
 )
 
@@ -43,7 +43,7 @@ def _pandas_column_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -54,7 +54,7 @@ def _pandas_column_map_condition_values(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -91,7 +91,7 @@ def _pandas_column_map_condition_values(
     return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
-# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
+# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>  # noqa: E501
 def _pandas_column_map_series_and_domain_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -100,7 +100,7 @@ def _pandas_column_map_series_and_domain_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -122,7 +122,7 @@ def _pandas_column_map_series_and_domain_values(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_series_and_domain_values).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -185,7 +185,7 @@ def _pandas_column_map_condition_value_counts(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_condition_value_counts).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -217,9 +217,7 @@ def _pandas_column_map_condition_value_counts(
     except ValueError:
         try:
             value_counts = (
-                domain_values[boolean_mapped_unexpected_values]
-                .apply(tuple)
-                .value_counts()
+                domain_values[boolean_mapped_unexpected_values].apply(tuple).value_counts()
             )
         except ValueError:
             pass
@@ -244,7 +242,7 @@ def _sqlalchemy_column_map_condition_values(
     """
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
-    """
+    """  # noqa: E501
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
@@ -253,7 +251,7 @@ def _sqlalchemy_column_map_condition_values(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_sqlalchemy_column_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -263,13 +261,9 @@ def _sqlalchemy_column_map_condition_values(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    query = sa.select(sa.column(column_name).label("unexpected_values")).where(
-        unexpected_condition
-    )
+    query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         if hasattr(selectable, "subquery"):
             query = query.select_from(selectable.subquery())
@@ -290,10 +284,7 @@ def _sqlalchemy_column_map_condition_values(
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
 
-    return [
-        val.unexpected_values
-        for val in execution_engine.execute_query(query).fetchall()
-    ]
+    return [val.unexpected_values for val in execution_engine.execute_query(query).fetchall()]
 
 
 def _sqlalchemy_column_map_condition_value_counts(
@@ -307,7 +298,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     """
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
-    """
+    """  # noqa: E501
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
@@ -316,7 +307,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_sqlalchemy_column_map_condition_value_counts).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -328,15 +319,9 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    query = (
-        sa.select(column, sa.func.count(column))
-        .where(unexpected_condition)
-        .group_by(column)
-    )
+    query = sa.select(column, sa.func.count(column)).where(unexpected_condition).group_by(column)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
@@ -351,7 +336,7 @@ def _spark_column_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""  # noqa: E501
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
@@ -360,7 +345,7 @@ def _spark_column_map_condition_values(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_values).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -383,12 +368,12 @@ def _spark_column_map_condition_values(
     if result_format["result_format"] == "COMPLETE":
         rows = filtered.select(
             F.col(column_name).alias(column_name)
-        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
+        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
     else:
         rows = (
             filtered.select(
                 F.col(column_name).alias(column_name)
-            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
+            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name  # noqa: E501
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
@@ -411,7 +396,7 @@ def _spark_column_map_condition_value_counts(
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_value_counts).
-"""
+"""  # noqa: E501
         )
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
@@ -421,9 +406,7 @@ def _spark_column_map_condition_value_counts(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    df: pyspark.DataFrame = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    df: pyspark.DataFrame = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)

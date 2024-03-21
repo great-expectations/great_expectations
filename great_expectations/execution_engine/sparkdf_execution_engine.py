@@ -89,8 +89,8 @@ def apply_dateutil_parse(column):
 @deprecated_argument(
     argument_name="force_reuse_spark_context",
     version="1.0",
-    message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "
-    "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "
+    message="The force_reuse_spark_context attribute is no longer part of any Spark Datasource classes. "  # noqa: E501
+    "The existing Spark context will be reused if possible. If a spark_config is passed that doesn't match "  # noqa: E501
     "the existing config, the context will be stopped and restarted in local environments only.",
 )
 @public_api
@@ -191,7 +191,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             expectation_completeness: Moderate
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     recognized_batch_definition_keys = {"limit"}
 
@@ -227,9 +227,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # deprecated-v1.0.0
             warnings.warn(
                 "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
-                "In environments that allow it, the existing Spark context will be reused, adding the "
-                "spark_config options that have been passed. If the Spark context cannot be updated with "
-                "the spark_config, the context will be stopped and restarted with the new spark_config.",
+                "In environments that allow it, the existing Spark context will be reused, adding the "  # noqa: E501
+                "spark_config options that have been passed. If the Spark context cannot be updated with "  # noqa: E501
+                "the spark_config, the context will be stopped and restarted with the new spark_config.",  # noqa: E501
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
@@ -247,11 +247,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @property
     def dataframe(self) -> pyspark.DataFrame:
-        """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
+        """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""  # noqa: E501
         if self.batch_manager.active_batch_data is None:
-            raise ValueError(
-                "Batch has not been loaded - please run load_batch() to load a batch."
-            )
+            raise ValueError("Batch has not been loaded - please run load_batch() to load a batch.")
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
@@ -266,7 +264,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         Returns:
             SparkSession
-        """
+        """  # noqa: E501
         spark_config = spark_config or {}
 
         spark_session: pyspark.SparkSession
@@ -308,11 +306,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         )
 
         if stopped:
-            spark_session = (
-                SparkDFExecutionEngine._start_spark_session_with_spark_config(
-                    spark_session=spark_session,
-                    spark_config=spark_config,
-                )
+            spark_session = SparkDFExecutionEngine._start_spark_session_with_spark_config(
+                spark_session=spark_session,
+                spark_config=spark_config,
             )
 
         return spark_session
@@ -355,7 +351,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         Returns:
             SparkSession, Boolean specifying if SparkSession is stopped
-        """
+        """  # noqa: E501
         stopped = False
         warning_messages = []
         for key, value in spark_config.items():
@@ -368,27 +364,20 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 # Py4J Java Error can be raised if the option has not been set on the context at all
                 except py4j.protocol.Py4JJavaError:
                     current_value = None
-                if key != "spark.app.name" and (
-                    current_value != value or current_value is None
-                ):
+                if key != "spark.app.name" and (current_value != value or current_value is None):
                     # attempts to update the runtime config
                     spark_session.conf.set(key, value)
-                elif (
-                    key == "spark.app.name"
-                    and spark_session.sparkContext.appName != value
-                ):
+                elif key == "spark.app.name" and spark_session.sparkContext.appName != value:
                     spark_session.sparkContext.appName = value
-            # attribute error can be raised for connect sessions that haven't implemented a conf for sparkContext method
-            # analysis exception can be raised in environments that don't allow updating config of that option
+            # attribute error can be raised for connect sessions that haven't implemented a conf for sparkContext method  # noqa: E501
+            # analysis exception can be raised in environments that don't allow updating config of that option  # noqa: E501
             except (
                 pyspark.PySparkAttributeError,
                 pyspark.AnalysisException,
             ):
-                if SparkDFExecutionEngine._session_is_not_stoppable(
-                    spark_session=spark_session
-                ):
+                if SparkDFExecutionEngine._session_is_not_stoppable(spark_session=spark_session):
                     warning_messages.append(
-                        f"Passing spark_config option `{key}` had no effect, because in this environment "
+                        f"Passing spark_config option `{key}` had no effect, because in this environment "  # noqa: E501
                         "it is not modifiable and the Spark Session cannot be restarted."
                     )
                 else:
@@ -416,7 +405,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(
-                "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
+                "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"  # noqa: E501
             )
 
         if self._persist:
@@ -443,7 +432,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         path formats for accessing all other supported cloud storage services (AWS S3 and Google Cloud Storage).
         Moreover, these formats (encapsulated in S3BatchSpec and GCSBatchSpec) extend PathBatchSpec (common to them).
         Therefore, at the present time, all cases with the exception of Azure Blob Storage, are handled generically.
-        """
+        """  # noqa: E501
 
         batch_data: Any
         reader_method: str
@@ -458,7 +447,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             if isinstance(batch_data, str):
                 raise gx_exceptions.ExecutionEngineError(
                     f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
-illegal.  Please check your config."""
+illegal.  Please check your config."""  # noqa: E501
                 )
             batch_spec.batch_data = "SparkDataFrame"
 
@@ -467,7 +456,7 @@ illegal.  Please check your config."""
             reader_options = batch_spec.reader_options or {}
             path = batch_spec.path
             azure_url = AzureUrl(path)
-            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
+            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)  # noqa: E501
             try:
                 credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
@@ -476,9 +465,7 @@ illegal.  Please check your config."""
                         "fs.wasb.impl",
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
-                    self.spark.conf.set(
-                        f"fs.azure.account.key.{storage_account_url}", credential
-                    )
+                    self.spark.conf.set(f"fs.azure.account.key.{storage_account_url}", credential)
                 reader = self.spark.read.options(**reader_options)
                 reader_fn = self._get_reader_fn(
                     reader=reader,
@@ -535,7 +522,7 @@ illegal.  Please check your config."""
             # pyspark will raise an AnalysisException error if path is incorrect
             except pyspark.AnalysisException:
                 raise ExecutionEngineError(
-                    f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
+                    f"""Unable to read in batch from the following path: {path}. Please check your configuration."""  # noqa: E501
                 )
 
         else:
@@ -545,9 +532,7 @@ illegal.  Please check your config."""
                 """
             )
 
-        batch_data = self._apply_partitioning_and_sampling_methods(
-            batch_spec, batch_data
-        )
+        batch_data = self._apply_partitioning_and_sampling_methods(batch_spec, batch_data)
         typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
@@ -572,14 +557,12 @@ illegal.  Please check your config."""
 
         sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
         if sampler_method_name:
-            sampling_fn: Callable = self._data_sampler.get_sampler_method(
-                sampler_method_name
-            )
+            sampling_fn: Callable = self._data_sampler.get_sampler_method(sampler_method_name)
             batch_data = sampling_fn(batch_data, batch_spec)
 
         return batch_data
 
-    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
+    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>  # noqa: E501
     @staticmethod
     def guess_reader_method_from_path(path: str):
         """
@@ -592,18 +575,14 @@ illegal.  Please check your config."""
         Returns:
             A dictionary entry of format {'reader_method': reader_method}
 
-        """
+        """  # noqa: E501
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
-        elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
-        ):
+        elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return "parquet"
 
-        raise ExecutionEngineError(
-            f"Unable to determine reader method from path: {path}"
-        )
+        raise ExecutionEngineError(f"Unable to determine reader method from path: {path}")
 
     @overload
     def _get_reader_fn(
@@ -611,9 +590,7 @@ illegal.  Please check your config."""
     ) -> Callable: ...
 
     @overload
-    def _get_reader_fn(
-        self, reader, reader_method: None = ..., path: str = ...
-    ) -> Callable: ...
+    def _get_reader_fn(self, reader, reader_method: None = ..., path: str = ...) -> Callable: ...
 
     def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
@@ -626,7 +603,7 @@ illegal.  Please check your config."""
         Returns:
             ReaderMethod to use for the filepath
 
-        """
+        """  # noqa: E501
         if reader_method is None and path is None:
             raise ExecutionEngineError(
                 "Unable to determine spark reader function without reader_method or path"
@@ -658,12 +635,12 @@ illegal.  Please check your config."""
 
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
-        """
+        """  # noqa: E501
         """
         # TODO: <Alex>Docusaurus run fails, unless "pyspark.DataFrame" type hint above is enclosed in quotes.
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
-        """
+        """  # noqa: E501
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -674,9 +651,7 @@ illegal.  Please check your config."""
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.batch_manager.active_batch_data:
-                data = cast(
-                    SparkDFBatchData, self.batch_manager.active_batch_data
-                ).dataframe
+                data = cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
@@ -704,9 +679,7 @@ illegal.  Please check your config."""
                 )
 
         # Filtering by filter_conditions
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
-            "filter_conditions", []
-        )
+        filter_conditions: List[RowCondition] = domain_kwargs.get("filter_conditions", [])
         if len(filter_conditions) > 0:
             filter_condition = self._combine_row_conditions(filter_conditions)
             data = data.filter(filter_condition.condition)
@@ -727,20 +700,14 @@ illegal.  Please check your config."""
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
-                ignore_condition = (
-                    F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
-                )
+                ignore_condition = F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
                 data = data.filter(~ignore_condition)
             elif ignore_row_if == "either_value_is_missing":
-                ignore_condition = (
-                    F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
-                )
+                ignore_condition = F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
-                    raise ValueError(
-                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -748,22 +715,16 @@ illegal.  Please check your config."""
             column_list = domain_kwargs["column_list"]
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
-                conditions = [
-                    F.col(column_name).isNull() for column_name in column_list
-                ]
+                conditions = [F.col(column_name).isNull() for column_name in column_list]
                 ignore_condition = reduce(lambda a, b: a & b, conditions)
                 data = data.filter(~ignore_condition)
             elif ignore_row_if == "any_value_is_missing":
-                conditions = [
-                    F.col(column_name).isNull() for column_name in column_list
-                ]
+                conditions = [F.col(column_name).isNull() for column_name in column_list]
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "never":
-                    raise ValueError(
-                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -787,9 +748,7 @@ illegal.  Please check your config."""
             condition.condition_type == RowConditionParserType.SPARK_SQL
             for condition in row_conditions
         ), "All row conditions must have type SPARK_SQL"
-        conditions: List[str] = [
-            row_condition.condition for row_condition in row_conditions
-        ]
+        conditions: List[str] = [row_condition.condition for row_condition in row_conditions]
         joined_condition: str = " AND ".join(conditions)
         return RowCondition(
             condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
@@ -823,12 +782,12 @@ illegal.  Please check your config."""
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the Domain within the compute domain
-        """
+        """  # noqa: E501
         """
         # TODO: <Alex>Docusaurus run fails, unless "pyspark.DataFrame" type hint above is enclosed in quotes.
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
-        """
+        """  # noqa: E501
         table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -837,8 +796,8 @@ illegal.  Please check your config."""
 
         data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-        partitioned_domain_kwargs: PartitionDomainKwargs = (
-            self._partition_domain_kwargs(domain_kwargs, domain_type, accessor_keys)
+        partitioned_domain_kwargs: PartitionDomainKwargs = self._partition_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
         )
 
         return (
@@ -901,7 +860,7 @@ illegal.  Please check your config."""
 
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
-        """
+        """  # noqa: E501
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[pyspark.Row]
@@ -918,9 +877,7 @@ illegal.  Please check your config."""
                 bundled_metric_configuration.metric_configuration
             )
             metric_fn: Any = bundled_metric_configuration.metric_fn
-            compute_domain_kwargs: dict = (
-                bundled_metric_configuration.compute_domain_kwargs or {}
-            )
+            compute_domain_kwargs: dict = bundled_metric_configuration.compute_domain_kwargs or {}
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
@@ -944,12 +901,10 @@ illegal.  Please check your config."""
             res = df.agg(*aggregate["column_aggregates"]).collect()
 
             logger.debug(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"  # noqa: E501
             )
 
-            assert (
-                len(res) == 1
-            ), "all bundle-computed metrics must be single-value statistics"
+            assert len(res) == 1, "all bundle-computed metrics must be single-value statistics"
             assert len(aggregate["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
@@ -957,11 +912,9 @@ illegal.  Please check your config."""
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(aggregate["metric_ids"]):
-                # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
-                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
-                resolved_metrics[metric_id] = convert_to_json_serializable(
-                    data=res[0][idx]
-                )
+                # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,  # noqa: E501
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.  # noqa: E501
+                resolved_metrics[metric_id] = convert_to_json_serializable(data=res[0][idx])
 
         return resolved_metrics
 

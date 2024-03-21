@@ -42,9 +42,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
         output = [True]  # first value is automatically in order
         for i in range(1, column_length):
-            if (
-                column_lower[i] and column_lower[i - 1]
-            ):  # make sure we aren't comparing Nones
+            if column_lower[i] and column_lower[i - 1]:  # make sure we aren't comparing Nones
                 output.append(compare_function(column_lower[i - 1], column_lower[i]))
             else:
                 output.append(None)

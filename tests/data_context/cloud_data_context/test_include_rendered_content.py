@@ -21,7 +21,7 @@ from great_expectations.validator.validator import Validator
 
 
 @pytest.mark.xfail(
-    reason="add_or_update not responsible for rendered content - rewrite test for new suites factory"
+    reason="add_or_update not responsible for rendered content - rewrite test for new suites factory"  # noqa: E501
 )
 @pytest.mark.cloud
 @responses.activate
@@ -52,9 +52,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         "great_expectations.data_context.data_context.CloudDataContext.get_expectation_suite",
         return_value=empty_expectation_suite,
     ):
-        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
-            "test_suite"
-        )
+        expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite("test_suite")
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
@@ -81,12 +79,8 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
                         {
                             "value": {
                                 "template": "Must have exactly $value rows.",
-                                "params": {
-                                    "value": {"schema": {"type": "number"}, "value": 10}
-                                },
-                                "schema": {
-                                    "type": "com.superconductive.rendered.string"
-                                },
+                                "params": {"value": {"schema": {"type": "number"}, "value": 10}},
+                                "schema": {"type": "com.superconductive.rendered.string"},
                             },
                             "value_type": "StringValueType",
                             "name": "atomic.prescriptive.summary",
@@ -106,12 +100,12 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
 ) -> None:
     """
     All CloudDataContexts should save an ExpectationValidationResult with rendered_content by default.
-    """
+    """  # noqa: E501
     context = empty_cloud_context_fluent
     context.config.include_rendered_content.globally = True
 
     df = pd.DataFrame([1, 2, 3, 4, 5])
-    suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
     data_asset = context.sources.pandas_default.add_dataframe_asset(
         name="my_dataframe_asset",
@@ -129,7 +123,5 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     for rendered_content in expectation_validation_result.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)
 
-    for (
-        rendered_content
-    ) in expectation_validation_result.expectation_config.rendered_content:
+    for rendered_content in expectation_validation_result.expectation_config.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)

@@ -274,7 +274,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, dict):
         new_dict = {}
         for key in data:
-            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
+            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string  # noqa: E501
             new_dict[str(key)] = convert_to_json_serializable(data[key])
 
         return new_dict
@@ -288,8 +288,8 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     if isinstance(data, (np.ndarray, pd.Index)):
         # test_obj[key] = test_obj[key].tolist()
-        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        # to the number of digits for which the string representation will equal the float representation
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
         return [convert_to_json_serializable(x) for x in data.tolist()]
 
     if isinstance(data, np.int64):
@@ -333,7 +333,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
     if data is None:
         # No problem to encode json
         return data
@@ -367,9 +367,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return convert_to_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     # SQLAlchemy serialization
     if LegacyRow and isinstance(data, LegacyRow):
@@ -397,9 +395,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return data.to_json_dict()
 
     # Unable to serialize (unrecognized data type).
-    raise TypeError(
-        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
-    )
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")
 
 
 def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
@@ -434,8 +430,8 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
 
     if isinstance(data, (np.ndarray, pd.Index)):
         # test_obj[key] = test_obj[key].tolist()
-        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        # to the number of digits for which the string representation will equal the float representation
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
         _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
         return
 
@@ -458,7 +454,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         return
 
     # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
     if data is None:
         # No problem to encode json
         return
@@ -490,9 +486,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return ensure_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     if isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
@@ -522,7 +516,7 @@ def substitute_all_strftime_format_strings(
     """
     This utility function will iterate over input data and for all strings, replace any strftime format
     elements using either the provided datetime_obj or the current datetime
-    """
+    """  # noqa: E501
 
     datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
     if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
@@ -532,8 +526,7 @@ def substitute_all_strftime_format_strings(
         }
     elif isinstance(data, list):
         return [
-            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
-            for el in data
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj) for el in data
         ]
     elif isinstance(data, str):
         return datetime_obj.strftime(data)
@@ -547,7 +540,7 @@ def parse_string_to_datetime(
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
-            """
+            """  # noqa: E501
         )
 
     if not datetime_format_string:
@@ -557,7 +550,7 @@ def parse_string_to_datetime(
         raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{type(datetime_format_string)!s}").
-            """
+            """  # noqa: E501
         )
 
     return datetime.datetime.strptime(  # noqa: DTZ007
@@ -599,14 +592,12 @@ class AzureUrl:
     )
 
     def __init__(self, url: str) -> None:
-        search = re.search(
-            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
-        )
+        search = re.search(AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url)
         if search is None:
             search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
-            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"  # noqa: E501
             self._protocol = search.group(1)
             self._account_name = search.group(2)
             self._container = search.group(3)
@@ -776,8 +767,8 @@ def get_or_create_spark_application(
 
     # deprecated-v1.0.0
     warnings.warn(
-        "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "
-        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
+        "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "  # noqa: E501
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",  # noqa: E501
         category=DeprecationWarning,
     )
     if force_reuse_spark_context is not None:
@@ -785,8 +776,8 @@ def get_or_create_spark_application(
         warnings.warn(
             "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
             "In environments that allow it, the existing Spark context will be reused, adding the "
-            "spark_config options that have been passed. If the Spark context cannot be updated with "
-            "the spark_config, the context will be stopped and restarted with the new spark_config.",
+            "spark_config options that have been passed. If the Spark context cannot be updated with "  # noqa: E501
+            "the spark_config, the context will be stopped and restarted with the new spark_config.",  # noqa: E501
             category=DeprecationWarning,
         )
     return SparkDFExecutionEngine.get_or_create_spark_session(
@@ -804,13 +795,13 @@ def get_or_create_spark_session(
 
     Returns:
         SparkSession
-    """
+    """  # noqa: E501
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
     # deprecated-v1.0.0
     warnings.warn(
         "Utility method get_or_create_spark_session() is deprecated and will be removed in v1.0.0. "
-        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",  # noqa: E501
         category=DeprecationWarning,
     )
 
@@ -819,9 +810,7 @@ def get_or_create_spark_session(
     )
 
 
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
+def get_sql_dialect_floating_point_infinity_value(schema: str, negative: bool = False) -> float:
     res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:

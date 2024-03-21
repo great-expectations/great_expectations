@@ -19,10 +19,10 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_pair_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.column_pair_condition_partial import (  # noqa: E501
     column_pair_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
     multicolumn_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import (
@@ -98,10 +98,7 @@ def test__base_metric_provider__registration(mock_registry):
 
     CustomMetricProvider()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 1
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "custom_metric" in mock_registry._registered_metrics.keys()
 
 
@@ -151,10 +148,7 @@ def test__table_metric_provider__registration(mock_registry):
 
     CustomTableMetricProvider()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 1
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "table.custom_metric" in mock_registry._registered_metrics.keys()
 
 
@@ -164,7 +158,7 @@ def test__column_map_metric__registration(mock_registry):
     The actual logic for this lives in the private method: `_register_metric_functions`, which is invoked from within `__new__` for the ancestor class `MetricProvider`.
 
     Since _register_metric_functions is private, we don't want to test it directly. Instead, we declare a custom ColumnMapMetricProvider, and test that the correct metrics are registered.
-    """
+    """  # noqa: E501
     registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "column_values.equal_seven" not in key
@@ -189,10 +183,7 @@ def test__column_map_metric__registration(mock_registry):
 
     CustomColumnValuesEqualSeven()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 8
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 8
 
     new_keys = [
         "column_values.equal_seven.condition",
@@ -233,10 +224,7 @@ def test__column_pair_map_metric__registration(mock_registry):
 
     CustomColumnPairValuesEqualSeven()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 7
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 7
 
     for key in mock_registry._registered_metrics.keys():
         if "column_pair_values.equal_seven" in key:
@@ -290,10 +278,7 @@ def test__multicolumn_map_metric__registration(mock_registry):
 
     CustomMultiColumnValuesEqualSeven()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 7
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 7
 
     new_keys = [
         "multicolumn_values.equal_seven.condition",
@@ -343,8 +328,5 @@ def test__query_metric_provider__registration(mock_registry):
 
     CustomQueryMetricProvider()
 
-    assert (
-        len(mock_registry._registered_metrics.keys())
-        == prev_registered_metric_key_count + 1
-    )
+    assert len(mock_registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "query.custom_metric" in mock_registry._registered_metrics.keys()

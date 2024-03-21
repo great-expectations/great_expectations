@@ -36,7 +36,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
             },
             slice(3, None, None),
             [3, 4, 5, 6, 7, 8, 9],
-            id="batch_slice: str (without square brackets, forward traversal at start); (start, stop=None, step=None)",
+            id="batch_slice: str (without square brackets, forward traversal at start); (start, stop=None, step=None)",  # noqa: E501
         ),
         pytest.param(
             {
@@ -124,7 +124,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
             },
             slice(None, None, 2),
             [0, 2, 4, 6, 8],
-            id="batch_slice: str (full forward traversal with step=2); (start=None, stop=None, step=2)",
+            id="batch_slice: str (full forward traversal with step=2); (start=None, stop=None, step=2)",  # noqa: E501
         ),
         pytest.param(
             {
