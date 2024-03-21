@@ -141,7 +141,7 @@ class Checkpoint(BaseModel):
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
-            validation_result_url=None,  # Need to plumb from actions
+            validation_result_url=None,  # TODO: Need to plumb from actions
         )
 
     def _run_validation_definitions(
@@ -194,7 +194,7 @@ class CheckpointResult(BaseModel):
         arbitrary_types_allowed = True
 
     @root_validator
-    def _root_validate_success(cls, values: dict) -> dict:
+    def _root_validate_result(cls, values: dict) -> dict:
         run_results = values["run_results"]
         if len(run_results) == 0:
             raise ValueError("CheckpointResult must contain at least one run result")

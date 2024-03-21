@@ -441,6 +441,17 @@ class TestCheckpointResult:
         pass  # TBD
 
     @pytest.mark.unit
+    def test_result_init_no_run_results_raises_error(self, mocker: pytest.MockFixture):
+        with pytest.raises(ValueError) as e:
+            CheckpointResult(
+                run_id=mocker.Mock(spec=RunIdentifier),
+                run_results={},
+                checkpoint_config=mocker.Mock(spec=Checkpoint),
+            )
+
+        assert "CheckpointResult must contain at least one run result" in str(e.value)
+
+    @pytest.mark.unit
     def test_result_describe(self, mocker: pytest.MockFixture):
         result = CheckpointResult(
             run_id=mocker.Mock(spec=RunIdentifier),
