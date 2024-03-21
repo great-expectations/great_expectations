@@ -9,7 +9,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class DictionarySorter(Sorter):
 
         Returns:
             None
-        """
+        """  # noqa: E501
         super().__init__(name=name, orderby=orderby)
         if order_keys_by is None or order_keys_by == "asc":
             reverse_keys = False
@@ -50,22 +50,16 @@ class DictionarySorter(Sorter):
         self._key_reference_list = key_reference_list
 
     @override
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_keys: list[Any] | None
         if self._key_reference_list is None:
-            batch_keys = sorted(
-                batch_identifiers[self.name].keys(), reverse=self.reverse_keys
-            )
+            batch_keys = sorted(batch_identifiers[self.name].keys(), reverse=self.reverse_keys)
         else:
             batch_keys = [
-                key
-                for key in self.key_reference_list
-                if key in batch_identifiers[self.name].keys()
+                key for key in self.key_reference_list if key in batch_identifiers[self.name].keys()
             ]
-        batch_values: list[Any] = [
-            batch_identifiers[self.name][key] for key in batch_keys
-        ]
+        batch_values: list[Any] = [batch_identifiers[self.name][key] for key in batch_keys]
         return batch_values
 
     @override

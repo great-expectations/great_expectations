@@ -45,9 +45,9 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     )
     def _sqlalchemy_window(cls, column, _table, **kwargs):
         # Will - 20210126
-        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
-        # the column we will be performing the expectation on, and the query is performed against it.
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table  # noqa: E501
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with  # noqa: E501
+        # the column we will be performing the expectation on, and the query is performed against it.  # noqa: E501
         dialect = kwargs.get("_dialect")
         sql_engine = kwargs.get("_sqlalchemy_engine")
         execution_engine = kwargs.get("_execution_engine")
@@ -60,7 +60,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 dialect_name = ""
         if sql_engine and dialect and dialect_name == "mysql":
             temp_table_name = generate_temporary_table_name()
-            temp_table_stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS SELECT tmp.{column.name} FROM {_table} tmp"
+            temp_table_stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS SELECT tmp.{column.name} FROM {_table} tmp"  # noqa: E501
             execution_engine.execute_query_in_transaction(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)

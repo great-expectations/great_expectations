@@ -48,7 +48,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
 
     Returns:
         A list of dictionaries that represents contributor package manifests
-    """
+    """  # noqa: E501
     payload: List[dict] = []
     root = os.getcwd()  # noqa: PTH109
     for path in package_paths:
@@ -58,21 +58,17 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
             _run_pip("install -r requirements.txt")
             package_path: str = ".great_expectations_package.json"
 
-            package: GreatExpectationsContribPackageManifest = read_package_from_file(
-                package_path
-            )
+            package: GreatExpectationsContribPackageManifest = read_package_from_file(package_path)
             sync_package(package, package_path)
 
             # Serialize to dict to append to payload
             json_data: dict = package.to_json_dict()
             payload.append(json_data)
             logger.info(
-                f"Successfully serialized {package.package_name} to dict and appended to manifest list"
+                f"Successfully serialized {package.package_name} to dict and appended to manifest list"  # noqa: E501
             )
         except Exception as e:
-            logger.error(
-                f"Something went wrong when syncing {path} and serializing to dict: {e}"
-            )
+            logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")
         finally:
             # Always ensure we revert back to the project root
             os.chdir(root)
@@ -112,9 +108,7 @@ if __name__ == "__main__":
         os.chdir(root)
         package_paths = gather_all_contrib_package_paths()
         payload = gather_all_package_manifests(package_paths)
-        assert (
-            len(payload) > 0
-        ), "Something went wrong; there should packages in the payload!"
+        assert len(payload) > 0, "Something went wrong; there should packages in the payload!"
         write_results_to_disk(
             os.path.join(pwd, "./package_manifests--staging.json"),  # noqa: PTH118
             payload,

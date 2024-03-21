@@ -9,13 +9,13 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
     FilePathDataConnector,
     file_get_unfiltered_batch_definition_list_fn,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
         get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -47,13 +47,13 @@ class DBFSDataConnector(FilesystemDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         super().__init__(
@@ -63,7 +63,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -81,13 +81,13 @@ class DBFSDataConnector(FilesystemDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.
@@ -108,7 +108,7 @@ class DBFSDataConnector(FilesystemDataConnector):
 
         Returns:
             Instantiated "DBFSDataConnector" object
-        """
+        """  # noqa: E501
         return DBFSDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
@@ -116,7 +116,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -131,7 +131,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             raise ValueError(
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
-"""
+"""  # noqa: E501
             )
 
         template_arguments: dict = {

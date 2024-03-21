@@ -13,8 +13,8 @@ except ImportError:
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -77,7 +77,7 @@ def test_batch_data_pandas_execution_engine_unknown_datasource(
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name="non_existent_datasource",
                 data_connector_name="test_runtime_data_connector",
@@ -98,7 +98,7 @@ def test_batch_data_pandas_execution_engine_unknown_data_connector(
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
                 data_connector_name="non_existent_data_connector",
@@ -114,7 +114,7 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    # both batch_identifiers and runtime_parameters parameters must be present, not just one or the other
+    # both batch_identifiers and runtime_parameters parameters must be present, not just one or the other  # noqa: E501
     with pytest.raises(ValueError):
         datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -148,7 +148,7 @@ def test_batch_data_pandas_execution_engine_incorrect_batch_identifiers(
         # runtime_parameters are not configured in the DataConnector
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
                 data_connector_name="test_runtime_data_connector",
@@ -169,7 +169,7 @@ def test_batch_data_pandas_execution_engine_all_keys_present_for_batch_identifie
         "custom_key_0": "custom_value_0",
     }
 
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -200,7 +200,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
     }
 
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.  # noqa: E501
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -216,7 +216,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -244,7 +244,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_one_illegal_
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -324,10 +324,7 @@ def test_batch_data_pandas_execution_engine_get_batch_definition_list_from_batch
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_basics(
@@ -361,8 +358,8 @@ def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_
     )
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
-    batch: Batch = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+    batch: Batch = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_from_batch_definition(  # noqa: E501
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",
@@ -378,7 +375,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset(
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_identifiers = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -402,10 +399,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset(
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
@@ -413,7 +407,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_identifiers = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -441,15 +435,12 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
     assert my_batch_1.data.dataframe.shape == (2, 2)
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
     assert my_batch_1.data.dataframe["col2"].values[1] == 4
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
     # second batch request
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
     batch_identifiers = {"day": 2, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -474,10 +465,7 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
     assert my_batch_2.data.dataframe.shape == (2, 2)
     assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
     assert my_batch_2.data.dataframe["col2"].values[1] == 8
-    assert (
-        my_batch_2.batch_markers["pandas_data_fingerprint"]
-        == "548e148ff5a8e932a3a2a1d0d8ff7f84"
-    )
+    assert my_batch_2.batch_markers["pandas_data_fingerprint"] == "548e148ff5a8e932a3a2a1d0d8ff7f84"
 
 
 ###################################
@@ -516,7 +504,7 @@ def test_file_path_pandas_execution_engine_batch_list_from_batch_request_success
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_success_no_headers(
+def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_success_no_headers(  # noqa: E501
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers: Dict[str, int] = {
@@ -549,7 +537,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_not_supported_file_directory(
+def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_not_supported_file_directory(  # noqa: E501
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
     taxi_test_file_directory,
 ):
@@ -573,12 +561,12 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     with pytest.raises((IsADirectoryError, pd.errors.ParserError)):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
 
-def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_file_path(
+def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_file_path(  # noqa: E501
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     batch_identifiers = {
@@ -599,12 +587,12 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
 
-def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_reader_method(
+def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_reader_method(  # noqa: E501
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers: Dict[str, int] = {
@@ -626,7 +614,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -635,7 +623,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -657,19 +645,16 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset(
     assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_file_endswith_upcase(
+def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_file_endswith_upcase(  # noqa: E501
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
     taxi_test_file_upcase,
 ):
     batch_identifiers = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -691,10 +676,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_
     assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
@@ -702,7 +684,7 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers: dict = {"day": 1, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -729,14 +711,11 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
     assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
     assert my_batch_1.data.dataframe.shape == (10000, 18)
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_1.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
 
     # second batch request
     batch_identifiers: dict = {"day": 2, "month": 12}
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -760,7 +739,4 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_b
     assert isinstance(my_batch_2.data.dataframe, pd.DataFrame)
     assert my_batch_2.data.dataframe.shape == (10000, 18)
     assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
-    assert (
-        my_batch_2.batch_markers["pandas_data_fingerprint"]
-        == "c4f929e6d4fab001fedc9e075bf4b612"
-    )
+    assert my_batch_2.batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"

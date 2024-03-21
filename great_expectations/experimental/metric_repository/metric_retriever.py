@@ -15,6 +15,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     MetricException,
     MetricTypes,
+    TableMetric,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.exception_info import ExceptionInfo
@@ -37,7 +38,7 @@ if TYPE_CHECKING:
 class MetricRetriever(abc.ABC):
     """A MetricRetriever is responsible for retrieving metrics for a batch of data. It is an ABC that contains base logic and
     methods share by both the ColumnDescriptiveMetricsMetricReceiver and MetricListMetricRetriver.
-    """
+    """  # noqa: E501
 
     def __init__(self, context: AbstractDataContext):
         self._context = context
@@ -75,12 +76,12 @@ class MetricRetriever(abc.ABC):
         elif metric_lookup_key in aborted_metrics:
             exception = aborted_metrics[metric_lookup_key]
             exception_info = exception["exception_info"]
-            exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            exception_type = (
+                "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            )
             if isinstance(exception_info, ExceptionInfo):
                 exception_message = exception_info.exception_message
-                metric_exception = MetricException(
-                    type=exception_type, message=exception_message
-                )
+                metric_exception = MetricException(type=exception_type, message=exception_message)
         else:
             metric_exception = MetricException(
                 type="Not found",
@@ -117,7 +118,7 @@ class MetricRetriever(abc.ABC):
         )
         assert isinstance(
             validator.active_batch, Batch
-        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"  # noqa: E501
         batch_id = validator.active_batch.id
         return batch_id, computed_metrics, aborted_metrics
 
@@ -166,13 +167,32 @@ class MetricRetriever(abc.ABC):
         )
         assert isinstance(
             validator.active_batch, Batch
-        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"  # noqa: E501
         batch_id = validator.active_batch.id
         column_names = domain_builder.get_effective_column_names(
             validator=validator,
             batch_ids=[batch_id],
         )
         return column_names
+
+    def _get_table_metrics(
+        self,
+        batch_request: BatchRequest,
+        metric_name: MetricTypes | str,
+        metric_type: type[Metric],
+    ) -> Metric:
+        metric_configs = self._generate_table_metric_configurations([metric_name])
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
+            batch_request, metric_configs
+        )
+        value, exception = self._get_metric_from_computed_metrics(
+            metric_name=metric_name,
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        return metric_type(
+            batch_id=batch_id, metric_name=metric_name, value=value, exception=exception
+        )
 
     def _get_column_metrics(
         self,
@@ -189,6 +209,7 @@ class MetricRetriever(abc.ABC):
         )
 
         # Convert computed_metrics
+        ColumnMetric.update_forward_refs()
         metrics: list[Metric] = []
         metric_lookup_key: _MetricKey
 
@@ -233,3 +254,54 @@ class MetricRetriever(abc.ABC):
             if metric.metric_name == MetricTypes.TABLE_COLUMNS:
                 column_list = metric.value
         return column_list
+
+    def _get_table_row_count(self, batch_request: BatchRequest) -> Metric:
+        return self._get_table_metrics(
+            batch_request=batch_request,
+            metric_name=MetricTypes.TABLE_ROW_COUNT,
+            metric_type=TableMetric[int],
+        )
+
+    def _get_table_columns(self, batch_request: BatchRequest) -> Metric:
+        return self._get_table_metrics(
+            batch_request=batch_request,
+            metric_name=MetricTypes.TABLE_COLUMNS,
+            metric_type=TableMetric[List[str]],
+        )
+
+    def _get_table_column_types(self, batch_request: BatchRequest) -> Metric:
+        metric_name = MetricTypes.TABLE_COLUMN_TYPES
+
+        metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
+        table_metric_configs = self._generate_table_metric_configurations(
+            table_metric_names=[metric_name]
+        )
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
+            batch_request, table_metric_configs
+        )
+        value, exception = self._get_metric_from_computed_metrics(
+            metric_name=metric_name,
+            metric_lookup_key=metric_lookup_key,
+            computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
+        )
+        raw_column_types: list[dict[str, Any]] = value
+        # If type is not found, don't add empty type field. This can happen if our db introspection fails.  # noqa: E501
+        column_types_converted_to_str: list[dict[str, str]] = []
+        for raw_column_type in raw_column_types:
+            if raw_column_type.get("type"):
+                column_types_converted_to_str.append(
+                    {
+                        "name": raw_column_type["name"],
+                        "type": str(raw_column_type["type"]),
+                    }
+                )
+            else:
+                column_types_converted_to_str.append({"name": raw_column_type["name"]})
+
+        return TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name=metric_name,
+            value=column_types_converted_to_str,
+            exception=exception,
+        )

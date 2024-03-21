@@ -68,9 +68,7 @@ context.test_yaml_config(datasource_yaml)
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
 )["default_inferred_data_connector_name"]
 assert len(available_data_asset_names) == 36
@@ -87,9 +85,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)

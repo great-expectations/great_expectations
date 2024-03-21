@@ -438,7 +438,6 @@ action_list:
       class_name: SlackNotificationAction
       slack_webhook: <YOUR SLACK WEBHOOK URL>
       notify_on: failure
-      notify_with: all
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer

@@ -24,11 +24,11 @@ from great_expectations.exceptions import DataContextError
 
 @pytest.fixture
 def validation_config(mocker: MockerFixture) -> ValidationConfig:
-    data = mocker.Mock(spec=BatchConfig)
+    batch_definition = mocker.Mock(spec=BatchConfig)
     suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationConfig(
         name="test-validation",
-        data=data,
+        data=batch_definition,
         suite=suite,
     )
 
@@ -94,9 +94,7 @@ def test_validation_factory_get_raises_error_on_missing_key(
     factory = ValidationFactory(store=store)
 
     # Act
-    with pytest.raises(
-        DataContextError, match=f"ValidationConfig with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ValidationConfig with name {name} was not found."):
         factory.get(name=name)
 
     # Assert
@@ -237,21 +235,15 @@ def _test_validation_factory_add_success(
 ):
     # Arrange
     name = validation_config.name
-    with pytest.raises(
-        DataContextError, match=f"ValidationConfig with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"ValidationConfig with name {name} was not found."):
         context.validations.get(name)
 
     # Act
-    with mocker.patch.object(
-        ValidationConfig, "json", return_value=validation_config_json
-    ):
+    with mocker.patch.object(ValidationConfig, "json", return_value=validation_config_json):
         created_validation = context.validations.add(validation=validation_config)
 
     # Assert
-    validation_names = {
-        key.to_tuple()[0] for key in context.validation_config_store.list_keys()
-    }
+    validation_names = {key.to_tuple()[0] for key in context.validation_config_store.list_keys()}
     assert created_validation.name in validation_names
 
 
@@ -294,9 +286,7 @@ def _test_validation_factory_delete_success(
     # Arrange
     name = validation_config.name
 
-    with mocker.patch.object(
-        ValidationConfig, "json", return_value=validation_config_json
-    ):
+    with mocker.patch.object(ValidationConfig, "json", return_value=validation_config_json):
         validation_config = context.validations.add(validation=validation_config)
 
     # Act

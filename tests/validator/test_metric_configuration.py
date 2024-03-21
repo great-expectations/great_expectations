@@ -9,7 +9,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 def test_metric_configuration__repr__and__str__(
     table_head_metric_config: MetricConfiguration,
 ) -> None:
-    expected = '{\n  "metric_name": "table.head",\n  "metric_domain_kwargs": {\n    "batch_id": "abc123"\n  },\n  "metric_domain_kwargs_id": "batch_id=abc123",\n  "metric_value_kwargs": {\n    "n_rows": 5\n  },\n  "metric_value_kwargs_id": "n_rows=5",\n  "id": [\n    "table.head",\n    "batch_id=abc123",\n    "n_rows=5"\n  ]\n}'
+    expected = '{\n  "metric_name": "table.head",\n  "metric_domain_kwargs": {\n    "batch_id": "abc123"\n  },\n  "metric_domain_kwargs_id": "batch_id=abc123",\n  "metric_value_kwargs": {\n    "n_rows": 5\n  },\n  "metric_value_kwargs_id": "n_rows=5",\n  "id": [\n    "table.head",\n    "batch_id=abc123",\n    "n_rows=5"\n  ]\n}'  # noqa: E501
     assert table_head_metric_config.__repr__() == expected
     assert table_head_metric_config.__str__() == expected
 

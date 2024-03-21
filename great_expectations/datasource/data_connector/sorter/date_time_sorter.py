@@ -11,28 +11,26 @@ from great_expectations.core.util import datetime_to_int, parse_string_to_dateti
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
 
 class DateTimeSorter(Sorter):
-    def __init__(
-        self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"
-    ) -> None:
+    def __init__(self, name: str, orderby: str = "asc", datetime_format="%Y%m%d") -> None:
         super().__init__(name=name, orderby=orderby)
 
         if datetime_format and not isinstance(datetime_format, str):
             raise gx_exceptions.SorterError(
                 f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{type(datetime_format)!s}").
-                    """
+                    """  # noqa: E501
             )
 
         self._datetime_format = datetime_format
 
     @override
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         partition_value: Any = batch_identifiers[self.name]
         dt: datetime.date = parse_string_to_datetime(

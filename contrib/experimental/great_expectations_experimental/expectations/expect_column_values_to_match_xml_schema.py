@@ -176,9 +176,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str = "values must match the following XML Schema, at least $mostly_pct % of the time: $formatted_xml"
             else:
-                template_str = (
-                    "values must match the following XML Schema: $formatted_xml"
-                )
+                template_str = "values must match the following XML Schema: $formatted_xml"
 
         if include_column_name:
             template_str = "$column " + template_str

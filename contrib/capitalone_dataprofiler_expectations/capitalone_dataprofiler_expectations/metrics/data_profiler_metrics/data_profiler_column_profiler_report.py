@@ -41,9 +41,7 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
             batch_columns_list=metrics["table.columns"],
         )
 
-        profile_report_column_data_stats: dict = metrics[
-            "data_profiler.table_column_infos"
-        ]
+        profile_report_column_data_stats: dict = metrics["data_profiler.table_column_infos"]
         return profile_report_column_data_stats[column_name]
 
     @classmethod

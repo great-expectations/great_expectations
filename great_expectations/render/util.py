@@ -24,7 +24,7 @@ ctx.prec = DEFAULT_PRECISION
 
 
 @public_api
-def num_to_str(
+def num_to_str(  # noqa: C901
     f: float,
     precision: int = DEFAULT_PRECISION,
     use_locale: bool = False,
@@ -46,14 +46,14 @@ def num_to_str(
 
     Returns:
         A string representation of the input float `f`, according to the desired parameters.
-    """
+    """  # noqa: E501
     assert not (use_locale and no_scientific)
     if precision != DEFAULT_PRECISION:
         local_context = decimal.Context()
         local_context.prec = precision
     else:
         local_context = ctx
-    # We cast to string; we want to avoid precision issues, but format everything as though it were a float.
+    # We cast to string; we want to avoid precision issues, but format everything as though it were a float.  # noqa: E501
     # So, if it's not already a float, we will append a decimal point to the string representation
     s = repr(f)
     if not isinstance(f, float):
@@ -61,9 +61,7 @@ def num_to_str(
     try:
         d = local_context.create_decimal(s)
     except decimal.InvalidOperation:
-        raise TypeError(
-            f"num_to_str received an invalid value: {f} of type {type(f).__name__}."
-        )
+        raise TypeError(f"num_to_str received an invalid value: {f} of type {type(f).__name__}.")
     if no_scientific:
         result = format(d, "f")
     elif use_locale:
@@ -147,7 +145,7 @@ def substitute_none_for_missing(
 
     This is helpful for standardizing the input objects for rendering functions.
     The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
-    """
+    """  # noqa: E501
 
     new_kwargs = copy.deepcopy(kwargs)
     for kwarg in kwarg_list:
@@ -218,9 +216,7 @@ def parse_row_condition_string_pandas_engine(
             }
         else:
             params[f"row_condition__{i}"] = param_value
-            condition_string = condition_string.replace(
-                condition, f"$row_condition__{i}"
-            )
+            condition_string = condition_string.replace(condition, f"$row_condition__{i}")
 
     template_str += condition_string.lower()
 
@@ -238,13 +234,9 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
         Tuple of strings to use for the at least condition and the at most condition.
     """
     at_least_str = (
-        "greater than"
-        if params.get("strict_min") is True
-        else "greater than or equal to"
+        "greater than" if params.get("strict_min") is True else "greater than or equal to"
     )
-    at_most_str = (
-        "less than" if params.get("strict_max") is True else "less than or equal to"
-    )
+    at_most_str = "less than" if params.get("strict_max") is True else "less than or equal to"
 
     return at_least_str, at_most_str
 
@@ -321,7 +313,7 @@ def build_count_and_index_table(  # noqa: C901
     )
     if unexpected_index_df.empty:
         raise RenderingError(
-            "GX ran into an issue while building count and index table for rendering. Please check your configuration."
+            "GX ran into an issue while building count and index table for rendering. Please check your configuration."  # noqa: E501
         )
 
     # using default indices for Pandas
@@ -392,24 +384,20 @@ def _convert_unexpected_indices_to_df(
         unexpected_list: if we are using default Pandas output.
     Returns:
         pd.DataFrame that contains indices for unexpected values
-    """
+    """  # noqa: E501
     domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
-        unexpected_index_df: pd.DataFrame = pd.DataFrame(
-            unexpected_index_list, dtype="string"
-        )
+        unexpected_index_df: pd.DataFrame = pd.DataFrame(unexpected_index_list, dtype="string")
         unexpected_index_df = unexpected_index_df.fillna(value="null")
         first_unexpected_index = unexpected_index_list[0]
         if isinstance(first_unexpected_index, dict):
             domain_column_name_list = list(
-                set(first_unexpected_index.keys()).difference(
-                    set(unexpected_index_column_names)
-                )
+                set(first_unexpected_index.keys()).difference(set(unexpected_index_column_names))
             )
         else:
             raise TypeError(
-                f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."
+                f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."  # noqa: E501
             )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
@@ -425,15 +413,13 @@ def _convert_unexpected_indices_to_df(
         return pd.DataFrame()
 
     # 1. groupby on domain columns, and turn id/pk into list
-    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(
-        domain_column_name_list
-    ).agg(lambda y: list(y))
+    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(domain_column_name_list).agg(
+        lambda y: list(y)
+    )
 
     # 2. add count
     col_to_count: str = unexpected_index_column_names[0]
-    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(
-        lambda x: len(x)
-    )
+    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(lambda x: len(x))
 
     # 3. ensure index is a string
     all_unexpected_indices.index = all_unexpected_indices.index.map(str)
@@ -445,9 +431,7 @@ def _convert_unexpected_indices_to_df(
         )
 
     # 5. only keep the rows we are rendering
-    filtered_unexpected_indices = all_unexpected_indices.head(
-        len(partial_unexpected_counts)
-    )
+    filtered_unexpected_indices = all_unexpected_indices.head(len(partial_unexpected_counts))
     return filtered_unexpected_indices
 
 
@@ -463,7 +447,7 @@ def truncate_list_of_indices(indices: list[int | str], max_index: int = 10) -> s
     Returns:
         string of indices that are joined using ` `
 
-    """
+    """  # noqa: E501
     if len(indices) > max_index:
         indices = indices[:max_index]
         indices.append("...")

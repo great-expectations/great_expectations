@@ -108,7 +108,7 @@ class _PandasDataAsset(DataAsset):
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for Pandas DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
+work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
         )
 
     @override
@@ -121,9 +121,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return tuple()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
@@ -137,18 +135,16 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             ),
         )
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -192,7 +188,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         if options:
             raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
@@ -269,9 +265,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             include_exclude=exclude
         )
         # don't check fields that should always be set
-        check_fields: set[str] = self.__fields_set__.copy().difference(
-            _FIELDS_ALWAYS_SET
-        )
+        check_fields: set[str] = self.__fields_set__.copy().difference(_FIELDS_ALWAYS_SET)
         for field in check_fields:
             if isinstance(getattr(self, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
                 exclude_fields[field] = True
@@ -322,33 +316,21 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
-ClipboardAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "clipboard", _PandasDataAsset
-)
+ClipboardAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("clipboard", _PandasDataAsset)
 CSVAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("csv", _PandasDataAsset)
 ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDataAsset)
-FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "feather", _PandasDataAsset
-)
+FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("feather", _PandasDataAsset)
 FWFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("fwf", _PandasDataAsset)
 GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
 HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
 HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
 JSONAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("json", _PandasDataAsset)
 ORCAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("orc", _PandasDataAsset)
-ParquetAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "parquet", _PandasDataAsset
-)
-PickleAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "pickle", _PandasDataAsset
-)
+ParquetAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("parquet", _PandasDataAsset)
+PickleAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("pickle", _PandasDataAsset)
 SQLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql", _PandasDataAsset)
-SQLQueryAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "sql_query", _PandasDataAsset
-)
-SQLTableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
-    "sql_table", _PandasDataAsset
-)
+SQLQueryAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql_query", _PandasDataAsset)
+SQLTableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql_table", _PandasDataAsset)
 SASAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sas", _PandasDataAsset)
 SPSSAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("spss", _PandasDataAsset)
 StataAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("stata", _PandasDataAsset)
@@ -370,10 +352,8 @@ def _short_id() -> str:
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
-    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
-        default=None, exclude=True, repr=False
-    )
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>  # noqa: E501
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -387,19 +367,19 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
-            """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
+            """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""  # noqa: E501
         )
 
     def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
-            """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
+            """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
     @public_api
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     @override
@@ -421,7 +401,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         if options:
             raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
@@ -443,34 +423,28 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             df = dataframe  # type: ignore[assignment]
 
         if df is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
 
         self.dataframe = df
 
         return super().build_batch_request()
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -565,13 +539,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             exclude_assets = {}
             for asset in self.assets:
                 # don't check fields that should always be set
-                check_fields: set[str] = asset.__fields_set__.copy().difference(
-                    _FIELDS_ALWAYS_SET
-                )
+                check_fields: set[str] = asset.__fields_set__.copy().difference(_FIELDS_ALWAYS_SET)
                 for field in check_fields:
-                    if isinstance(
-                        getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
-                    ):
+                    if isinstance(getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
                         exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
@@ -590,16 +560,14 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
 
     @override
-    def _add_asset(
-        self, asset: _DataAssetT, connect_options: dict | None = None
-    ) -> _DataAssetT:
+    def _add_asset(self, asset: _DataAssetT, connect_options: dict | None = None) -> _DataAssetT:
         """Adds an asset to this "_PandasDatasource" object.
 
         The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
 
         Args:
             asset: The DataAsset to be added to this datasource.
-        """
+        """  # noqa: E501
         asset_name: str = asset.name
 
         asset_names: Set[str] = self.get_asset_names()
@@ -610,10 +578,10 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             if in_cloud_context:
-                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
+                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted  # noqa: E501
                 asset_name = f"{asset.type}-{_short_id()}"
                 logger.info(
-                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
+                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"  # noqa: E501
                 )
                 asset.name = asset_name
             elif asset_name in asset_names:
@@ -636,9 +604,7 @@ class PandasDatasource(_PandasDatasource):
     """
 
     # class attributes
-    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
-        DataFrameAsset
-    ]
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [DataFrameAsset]
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
@@ -646,16 +612,14 @@ class PandasDatasource(_PandasDatasource):
 
     @override
     def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
-        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
-        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
+        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""  # noqa: E501
+        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,  # noqa: E501
         # .dict() is called for deeply nested models.
         ds_dict = super().dict(**kwargs)
         if _exclude_default_asset_names:
             assets = ds_dict.pop("assets", None)
             if assets:
-                assets = [
-                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
-                ]
+                assets = [a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME]
                 if assets:
                     ds_dict["assets"] = assets
         return ds_dict
@@ -667,20 +631,18 @@ class PandasDatasource(_PandasDatasource):
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             raise PandasDatasourceError(
-                f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""
+                f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""  # noqa: E501
             )
         if not asset_name:
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _get_batch(
-        self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None
-    ) -> Batch:
+    def _get_batch(self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None) -> Batch:
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
             if not isinstance(dataframe, pd.DataFrame):
                 raise ValueError(
-                    'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
+                    'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'  # noqa: E501
                 )
 
             batch_request = asset.build_batch_request(dataframe=dataframe)
@@ -692,7 +654,7 @@ class PandasDatasource(_PandasDatasource):
     @public_api
     @deprecated_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     def add_dataframe_asset(
@@ -711,7 +673,7 @@ class PandasDatasource(_PandasDatasource):
 
         Returns:
             The DataFameAsset that has been added to this datasource.
-        """
+        """  # noqa: E501
         asset: DataFrameAsset = DataFrameAsset(
             name=name,
             batch_metadata=batch_metadata or {},
@@ -736,7 +698,7 @@ class PandasDatasource(_PandasDatasource):
 
         Returns:
             A Batch using an ephemeral DataFrameAsset.
-        """
+        """  # noqa: E501
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
@@ -1239,7 +1201,7 @@ class PandasDatasource(_PandasDatasource):
 
         Returns:
             A Batch using an ephemeral ORCAsset.
-        """
+        """  # noqa: E501
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
             name=name,
@@ -1290,7 +1252,7 @@ class PandasDatasource(_PandasDatasource):
 
         Returns:
             A Batch using an ephemeral ParquetAsset.
-        """
+        """  # noqa: E501
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
             name=name,
@@ -1341,7 +1303,7 @@ class PandasDatasource(_PandasDatasource):
 
         Returns:
             A Batch using an ephemeral PickleAsset.
-        """
+        """  # noqa: E501
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
             name=name,

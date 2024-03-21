@@ -8,7 +8,7 @@ Usage:
 3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
  API documentation category under Reference, replacing the existing content of this list.
     3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
-"""
+"""  # noqa: E501
 
 import importlib
 import inspect
@@ -34,7 +34,7 @@ API_CROSS_LINK_SUFFIX = "__api_links.mdx"
 
 
 class BlockValueIndentationError(Exception):
-    """An error that is raised when a multiline entry in an `Args:` block is not properly indented."""
+    """An error that is raised when a multiline entry in an `Args:` block is not properly indented."""  # noqa: E501
 
     def __init__(self, block_header, block_contents, line):
         message = (
@@ -48,7 +48,7 @@ class BlockValueIndentationError(Exception):
 
 
 class BlockFormatError(Exception):
-    """An error that is raised when the first line of an `Args:` block does not start with a key: value pair."""
+    """An error that is raised when the first line of an `Args:` block does not start with a key: value pair."""  # noqa: E501
 
     def __init__(self, block_header, block_contents, line):
         message = (
@@ -115,7 +115,7 @@ def get_document_paths(docstring: str) -> typeGenerator[str, None, None]:
 
     # Yields:
         Each url in the `# Documentation` block of the docstring, reformatted as a Docusaurus absolute path.
-    """
+    """  # noqa: E501
     documentation_block = get_block_contents(DOCUMENTATION_TAG, docstring)
     if documentation_block:
         urls = [_.strip() for _ in documentation_block.split("\n")]
@@ -155,7 +155,7 @@ def _get_dictionary_from_block_in_docstring(
         ArgValueIndentationError: An error occurred due to improper indentation of a multiline description.
         ArgBlockFormatError: An error occurred due to an improperly formatted key: value in the first line of the
             specified block in the docstring.
-    """
+    """  # noqa: E501
     block_contents = get_block_contents(block_heading_text, docstring)
     block_dict = {}
     if block_contents:
@@ -163,9 +163,7 @@ def _get_dictionary_from_block_in_docstring(
         base_indent = _get_indentation(arg_lines[0])
         key = None
         for line in arg_lines:
-            if _get_indentation(line) == base_indent and re.search(
-                r" *[a-z|A-Z|_|0-9]+:", line
-            ):
+            if _get_indentation(line) == base_indent and re.search(r" *[a-z|A-Z|_|0-9]+:", line):
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
@@ -175,9 +173,7 @@ def _get_dictionary_from_block_in_docstring(
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:
-                raise BlockValueIndentationError(
-                    block_heading_text, block_contents, line
-                )
+                raise BlockValueIndentationError(block_heading_text, block_contents, line)
     return block_dict
 
 
@@ -193,7 +189,7 @@ def get_args_dictionary(docstring: str) -> dict:
 
     Returns:
         A dictionary of parameter: description pairs according to the provided docstring.
-    """
+    """  # noqa: E501
     return _get_dictionary_from_block_in_docstring(docstring, ARGS_TAG)
 
 
@@ -209,7 +205,7 @@ def get_raises_dictionary(docstring: str) -> dict:
 
     Returns:
         A dictionary of error: description pairs according to the provided docstring.
-    """
+    """  # noqa: E501
     return _get_dictionary_from_block_in_docstring(docstring, RAISES_TAG)
 
 
@@ -227,7 +223,7 @@ def get_block_contents(block_heading_text: str, docstring: str) -> str:
         A string containing the contents of a block if the block is found
         OR
         A blank string.
-    """
+    """  # noqa: E501
     pattern = f" *{block_heading_text} *\n(.*?)(?:(?=\n *\n)|$)"
     block_contents = re.findall(pattern, docstring, re.DOTALL)
     if block_contents:
@@ -250,7 +246,7 @@ def get_paragraph_block_contents(block_heading_text: str, docstring: str) -> str
     Returns:
         Everything between the block_header line in a docstring and either a blank line or the end of the docstring.
 
-    """
+    """  # noqa: E501
     block_contents = get_block_contents(block_heading_text, docstring)
     if block_contents:
         block_contents = re.sub("\n", " ", block_contents)
@@ -272,7 +268,7 @@ def get_yield_or_return_block(docstring: str) -> Tuple[str, str]:
         A tuple consisting of two elements: the heading for the found block and the contents of the found block
         OR
         None if neither a `Yields:` block nor a `Returns:` block is found.
-    """
+    """  # noqa: E501
 
     for block_header in (RETURNS_TAG, YIELDS_TAG):
         block_content = get_paragraph_block_contents(block_header, docstring)
@@ -292,7 +288,7 @@ def remove_block(docstring: str, block_heading: str) -> str:
 
     Returns:
         The original docstring, minus the removed block and it's heading.
-    """
+    """  # noqa: E501
     heading_pattern = f"( *{block_heading} *\n)"
     heading_content = re.findall(heading_pattern, docstring, re.DOTALL)
     block_content = get_block_contents(block_heading, docstring)
@@ -316,7 +312,7 @@ def condense_whitespace(docstring: str) -> str:
 
     Returns:
         A copy of the provided docstring with the excess whitespace condensed.
-    """
+    """  # noqa: E501
     docstring = re.sub("  *", " ", docstring, flags=re.M)
     docstring = re.sub("^ ", "", docstring, flags=re.M)
     docstring = re.sub("\n\n\n+", "\n\n", docstring, flags=re.M)
@@ -337,7 +333,7 @@ def build_relevant_api_reference_files(
 
     Returns:
         A set containing the file paths that were created or appended to.
-    """
+    """  # noqa: E501
     output_paths = set()
     document_paths = get_document_paths(docstring)
     for relevant_path in document_paths:
@@ -362,7 +358,7 @@ def get_whitelisted_methods(
 
     Yields:
         A tuple consisting of the name of a Public API method and a reference to the method itself.
-    """
+    """  # noqa: E501
     methods = dict(inspect.getmembers(imported_class, inspect.isroutine))
     for method_name, class_method in methods.items():
         _synopsis, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
@@ -383,7 +379,7 @@ def parse_method_signature(
         A list containing lists of strings, each of which represents one row in a parameter's table.  The rows are in
         the format [parameter name, parameter typing, parameter default value, parameter description].
 
-    """
+    """  # noqa: E501
     sig_type = ""
     sig_default = ""
     sig_results = []
@@ -438,7 +434,7 @@ def build_relevant_documentation_block(docstring: str) -> List[str]:
     Returns:
         A list of strings, each of which is formatted as a Markdown unordered list entry consisting of a link to
         the corresponding document in the '--Documentation--' block.
-    """
+    """  # noqa: E501
     relevant_documentation_block = []
     for path in get_document_paths(docstring):
         relative_path = Path(f"..{path}.md")
@@ -474,7 +470,7 @@ def build_method_document(  # noqa: C901
         a set consisting of all the cross-linking snippets that were created or edited by this method.
         AND
         a string representing the path to use for the file in the generated Sidebar update.
-    """
+    """  # noqa: E501
     title = f"{qualified_path.rsplit('.', 1)[-1]}.{method_name}"
     method_docstring = inspect.getdoc(method)
     if method_docstring:
@@ -498,7 +494,7 @@ def build_method_document(  # noqa: C901
     if synopsis:
         in_progress_output.extend(["", "### Synopsis", "", synopsis])
 
-    # Add docstring body (docstring contents minus blocks) to document content, if populated in docstring.
+    # Add docstring body (docstring contents minus blocks) to document content, if populated in docstring.  # noqa: E501
     if method_docstring:
         pretty_docstring = prettify_docstring(docstring)
         if pretty_docstring.strip():
@@ -528,9 +524,7 @@ def build_method_document(  # noqa: C901
     return_or_yield_content = get_yield_or_return_block(docstring)
     if return_or_yield_content:
         return_or_yield, content = return_or_yield_content
-        in_progress_output.extend(
-            ["", f"### {return_or_yield.replace(':', '')}", "", content]
-        )
+        in_progress_output.extend(["", f"### {return_or_yield.replace(':', '')}", "", content])
 
     # Add raises block to document content, if found in docstring.
     raises_dict = get_raises_dictionary(docstring)
@@ -558,9 +552,7 @@ def build_method_document(  # noqa: C901
         f.write(output)
 
     # Generate abbreviated line describing the method and linking to its API documentation.
-    abbreviated_output = (
-        f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
-    )
+    abbreviated_output = f"*[.{method_name}(...):]({API_METHODS_FOLDER}{output_file})* {synopsis}"
     sidebar_id = file_path.replace("../docs/", "")
 
     return abbreviated_output, crosslink_snippets, sidebar_id
@@ -585,7 +577,7 @@ def build_class_document(
         AND
         a string representing the sidebar entry for the created documentation. (Category containing a class overview
         page and public method pages.)
-    """
+    """  # noqa: E501
 
     qualified_class_path = f"{import_path}.{class_name}"
     description = pydoc.describe(imported_class)
@@ -605,7 +597,7 @@ def build_class_document(
         f"[See it on GitHub]({github_path})",
     ]
 
-    # Add synopsis line and docstring body (docstring minus `Args:`, `Returns:`, etc blocks) to document content.
+    # Add synopsis line and docstring body (docstring minus `Args:`, `Returns:`, etc blocks) to document content.  # noqa: E501
     if synopsis or class_docstring:
         in_progress_output.extend(["", "## Synopsis"])
     if synopsis:
@@ -642,9 +634,7 @@ def build_class_document(
 
     # Add class methods in the Public API to the document.
     if in_progress_methods:
-        in_progress_output.extend(
-            ["", "## Public Methods (API documentation links)", ""]
-        )
+        in_progress_output.extend(["", "## Public Methods (API documentation links)", ""])
         in_progress_output.extend(in_progress_methods)
 
     # Add links to relevant documentation to the document.
@@ -661,7 +651,7 @@ def build_class_document(
     # Build the sidebar category entry for this class.
     sidebar_class_id = f"{API_CLASSES_FOLDER}{output_file}".replace("/docs/", "")
     sidebar_entry = [
-        f"{{ type: 'category',\n label: 'Class {class_name}',\n link: {{type: 'doc', id: '{sidebar_class_id}'}},\n items: ["
+        f"{{ type: 'category',\n label: 'Class {class_name}',\n link: {{type: 'doc', id: '{sidebar_class_id}'}},\n items: ["  # noqa: E501
     ]
     sidebar_items = [
         # f"{{ type: 'doc', label: '{class_name} (Overview)', id: '{sidebar_class_id}' }}"
@@ -685,7 +675,7 @@ def prettify_docstring(docstring: str) -> str:
 
     Returns:
         A cleaned up version of the provided docstring.
-    """
+    """  # noqa: E501
     new_content = docstring.replace(WHITELISTED_TAG, "")
     for tag in (ARGS_TAG, RETURNS_TAG, YIELDS_TAG, RAISES_TAG, DOCUMENTATION_TAG):
         new_content = remove_block(new_content, tag)
@@ -701,7 +691,7 @@ def remove_existing_api_reference_files(directory_path: Path) -> List[Path]:
 
     Returns:
         A list of paths to files that have been removed because they end in the API_CROSS_LINK_SUFFIX.
-    """
+    """  # noqa: E501
     paths = Path(directory_path).rglob(f"*{API_CROSS_LINK_SUFFIX}")
     output_paths = []
     for api_links_file in paths:
@@ -756,7 +746,7 @@ def check_file_for_whitelisted_elements(file_path: Path) -> bool:
     Returns:
         True if the file contains the tag "--Public API Whitelisted--" OR False if the file does not.
 
-    """
+    """  # noqa: E501
     with open(file_path) as open_file:
         if WHITELISTED_TAG in open_file.read():
             return True
@@ -791,7 +781,7 @@ def gather_classes_to_document(
     Yields:
         A tuple consisting of the class name and a reference for the class itself for all Public API classes in the
         provided module.
-    """
+    """  # noqa: E501
     module = importlib.import_module(import_path)
     imported_classes = dict(inspect.getmembers(module, inspect.isclass))
     for class_name, imported_class in imported_classes.items():
@@ -820,9 +810,7 @@ if __name__ == "__main__":
         removed_cross_link_files = remove_existing_api_reference_files(Path("../docs"))
 
         # Generate the new documentation.
-        for source_file_path in get_relevant_source_files(
-            Path("..", "great_expectations")
-        ):
+        for source_file_path in get_relevant_source_files(Path("..", "great_expectations")):
             github_path = (
                 f"https://github.com/great-expectations/great_expectations/blob/develop"
                 f"{str(source_file_path).replace('..', '')}"
@@ -840,16 +828,16 @@ if __name__ == "__main__":
                     all_snippet_paths.update(snippet_path_update)
                     sidebar_entry.append(sidebar_update)
 
-        # Print the report for documentation to update with cross-links, and the content to paste into the sidebar.
+        # Print the report for documentation to update with cross-links, and the content to paste into the sidebar.  # noqa: E501
         print(
-            "\n\nThe following is the sidebar content for the generated API docs.  Simply paste this section into"
+            "\n\nThe following is the sidebar content for the generated API docs.  Simply paste this section into"  # noqa: E501
             "\n`sidebars.js` and run the auto-format fix indentations context on the file.\n"
         )
         print(",\n".join(sidebar_entry))
         print(
-            "\n\nThe following are the importable snippet files that were generated for cross-linking.  Please verify"
-            "\nthat the corresponding documents are importing these files. (This check will be automated at some"
-            "\npoint and then this list will only include those that have not been imported into the standard"
+            "\n\nThe following are the importable snippet files that were generated for cross-linking.  Please verify"  # noqa: E501
+            "\nthat the corresponding documents are importing these files. (This check will be automated at some"  # noqa: E501
+            "\npoint and then this list will only include those that have not been imported into the standard"  # noqa: E501
             "\ndocumentation.)\n"
         )
         for _ in all_snippet_paths:
@@ -860,15 +848,15 @@ if __name__ == "__main__":
         )
         if cross_links_to_remove_from_docs:
             print(
-                "\n\nThe following are the importable snippet files that were removed at the start of the script and"
-                "\nwere not replaced by a new importable snippet.  Please ensure that import statements for these"
+                "\n\nThe following are the importable snippet files that were removed at the start of the script and"  # noqa: E501
+                "\nwere not replaced by a new importable snippet.  Please ensure that import statements for these"  # noqa: E501
                 "\nfiles are removed from the corresponding documentation."
             )
             for _ in cross_links_to_remove_from_docs:
                 print(_)
         else:
             print(
-                "\n\nAll of the importable snippet files that were removed at the start of the script were replaced"
+                "\n\nAll of the importable snippet files that were removed at the start of the script were replaced"  # noqa: E501
                 "\nby new snippets; they should already be imported in the relevant documentation."
             )
 

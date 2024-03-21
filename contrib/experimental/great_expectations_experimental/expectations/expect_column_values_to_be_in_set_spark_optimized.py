@@ -100,16 +100,12 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
-            "value_set"
-        )
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value("value_set")
         column = configuration.kwargs.get("column")
 
         try:
             assert column is not None, "`column` must be specified"
-            assert (
-                "value_set" in configuration.kwargs or value_set
-            ), "value_set is required"
+            assert "value_set" in configuration.kwargs or value_set, "value_set is required"
             assert isinstance(
                 value_set, (list, set, dict)
             ), "value_set must be a list, set, or dict"

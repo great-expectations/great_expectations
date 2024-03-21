@@ -4,7 +4,6 @@ import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -46,7 +45,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all SetColumnMapMetrics.
 
@@ -71,7 +69,7 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
             Constructed by the `register_metric(...)` function during Expectation execution.
         domain_keys (tuple): A tuple of the keys used to determine the domain of the metric.
         condition_value_keys (tuple): A tuple of the keys used to determine the value of the metric.
-    """
+    """  # noqa: E501
 
     condition_value_keys = ()
 
@@ -88,7 +86,6 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.isin(cls.set_)
 
 
-@public_api
 class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for SetBasedColumnMapExpectations.
 
@@ -115,7 +112,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
-    """
+    """  # noqa: E501
 
     @staticmethod
     def register_metric(
@@ -130,7 +127,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         Returns:
             map_metric: The constructed name of the ephemeral metric.
-        """
+        """  # noqa: E501
         set_snake_name = camel_to_snake(set_camel_name)
         map_metric: str = "column_values.match_" + set_snake_name + "_set"
 
@@ -157,7 +154,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         Raises:
             InvalidExpectationConfigurationError: If no `set_` or `column` specified, or if `mostly` parameter
                 incorrectly defined.
-        """
+        """  # noqa: E501
         super().validate_configuration(configuration)
         try:
             assert (
@@ -194,15 +191,13 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Are all values in column "{column}" in the set {set_!s}?'
         else:  # noqa: PLR5501
             if set_semantic_name is not None:
-                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {set_!s}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {set_!s}?'  # noqa: E501
             else:
-                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {set_!s}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {set_!s}?'  # noqa: E501
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         set_ = cls.set_
@@ -216,14 +211,14 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                     return f'All values in column "{column}" are in the set {set_!s}.'
             else:  # noqa: PLR5501
                 if set_semantic_name is not None:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'  # noqa: E501
                 else:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {set!s}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {set!s}.'  # noqa: E501
         else:  # noqa: PLR5501
             if set_semantic_name is not None:
-                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
+                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'  # noqa: E501
             else:
-                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {set_!s}.'
+                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {set_!s}.'  # noqa: E501
 
     @classmethod
     def _prescriptive_template(
@@ -299,9 +294,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

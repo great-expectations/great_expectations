@@ -3,11 +3,11 @@ import pytest
 
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchMarkers,
     BatchRequest,
     BatchSpec,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
@@ -35,9 +35,7 @@ def test_id_dict_structure():
             "b2": 5,
         },
     }
-    nested_id_dictionary: IDDict = deep_convert_properties_iterable_to_id_dict(
-        source=data
-    )
+    nested_id_dictionary: IDDict = deep_convert_properties_iterable_to_id_dict(source=data)
     assert isinstance(nested_id_dictionary, IDDict)
     assert isinstance(nested_id_dictionary["a0"], int)
     assert isinstance(nested_id_dictionary["a1"], IDDict)
@@ -99,11 +97,11 @@ def test_iddict_is_hashable():
 @pytest.mark.unit
 def test_batch_definition_id():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
+    A = LegacyBatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
     print(A.id)
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
+    B = LegacyBatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
     print(B.id)
 
     assert A.id != B.id
@@ -113,10 +111,10 @@ def test_batch_definition_id():
 def test_batch_definition_instantiation():
     with pytest.raises(TypeError):
         # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
-        A = BatchDefinition("A", "a", "aaa", {"id": "A"})
+        A = LegacyBatchDefinition("A", "a", "aaa", {"id": "A"})
 
     # noinspection PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
+    A = LegacyBatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     print(A.id)
 
@@ -124,15 +122,15 @@ def test_batch_definition_instantiation():
 @pytest.mark.unit
 def test_batch_definition_equality():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
+    A = LegacyBatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
+    B = LegacyBatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
 
     assert A != B
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    A2 = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
+    A2 = LegacyBatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     assert A == A2
 
@@ -146,7 +144,7 @@ def test_batch__str__method():
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
         ),
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",

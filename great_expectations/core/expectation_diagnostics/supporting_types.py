@@ -25,7 +25,7 @@ class Maturity(str, Enum):
 
 @dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
-    """An augmented version of the Expectation.library_metadata object, used within ExpectationDiagnostics"""
+    """An augmented version of the Expectation.library_metadata object, used within ExpectationDiagnostics"""  # noqa: E501
 
     maturity: Maturity
     tags: List[str]
@@ -44,7 +44,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
 
     @classmethod
     def from_legacy_dict(cls, dict):
-        """This method is a temporary adapter to allow typing of legacy library_metadata objects, without needing to immediately clean up every object."""
+        """This method is a temporary adapter to allow typing of legacy library_metadata objects, without needing to immediately clean up every object."""  # noqa: E501
         temp_dict = {}
         for k, v in dict.items():
             # Ignore parameters that don't match the type definition
@@ -52,7 +52,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
                 temp_dict[k] = v
             else:
                 logging.warning(
-                    f"WARNING: Got extra parameter: {k} while instantiating AugmentedLibraryMetadata."
+                    f"WARNING: Got extra parameter: {k} while instantiating AugmentedLibraryMetadata."  # noqa: E501
                     "This parameter will be ignored."
                     "You probably need to clean up a library_metadata object."
                 )
@@ -71,7 +71,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
 
 @dataclass
 class ExpectationDescriptionDiagnostics(SerializableDictDot):
-    """Captures basic descriptive info about an Expectation. Used within the ExpectationDiagnostic object."""
+    """Captures basic descriptive info about an Expectation. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     camel_name: str
     snake_name: str
@@ -81,7 +81,7 @@ class ExpectationDescriptionDiagnostics(SerializableDictDot):
 
 @dataclass
 class RendererTestDiagnostics(SerializableDictDot):
-    """Captures information from executing Renderer test cases. Used within the ExpectationRendererDiagnostics object."""
+    """Captures information from executing Renderer test cases. Used within the ExpectationRendererDiagnostics object."""  # noqa: E501
 
     test_title: str
     rendered_successfully: bool
@@ -92,7 +92,7 @@ class RendererTestDiagnostics(SerializableDictDot):
 
 @dataclass
 class ExpectationRendererDiagnostics(SerializableDictDot):
-    """Captures information about a specific Renderer within an Expectation. Used within the ExpectationDiagnostic object."""
+    """Captures information about a specific Renderer within an Expectation. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     name: str
     is_supported: bool
@@ -102,7 +102,7 @@ class ExpectationRendererDiagnostics(SerializableDictDot):
 
 @dataclass
 class ExpectationMetricDiagnostics(SerializableDictDot):
-    """Captures information about a specific Metric dependency for an Expectation. Used within the ExpectationDiagnostic object."""
+    """Captures information about a specific Metric dependency for an Expectation. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     name: str
     has_question_renderer: bool
@@ -110,7 +110,7 @@ class ExpectationMetricDiagnostics(SerializableDictDot):
 
 @dataclass
 class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
-    """Captures which of the three Execution Engines are supported by an Expectation. Used within the ExpectationDiagnostic object."""
+    """Captures which of the three Execution Engines are supported by an Expectation. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     PandasExecutionEngine: bool
     SqlAlchemyExecutionEngine: bool
@@ -127,7 +127,7 @@ class ExpectationErrorDiagnostics(SerializableDictDot):
 
 @dataclass
 class ExpectationTestDiagnostics(SerializableDictDot):
-    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object."""
+    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     test_title: str
     backend: str
@@ -166,7 +166,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
 
 @dataclass
 class ExpectationDiagnosticMaturityMessages(SerializableDictDot):
-    """A holder for ExpectationDiagnosticCheckMessages, grouping them by maturity level. Used within the ExpectationDiagnostic object."""
+    """A holder for ExpectationDiagnosticCheckMessages, grouping them by maturity level. Used within the ExpectationDiagnostic object."""  # noqa: E501
 
     experimental: List[ExpectationDiagnosticCheckMessage]
     beta: List[ExpectationDiagnosticCheckMessage]

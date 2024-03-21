@@ -80,9 +80,7 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
@@ -114,9 +112,7 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
@@ -137,15 +133,8 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
-        assert (
-            serialized_bundle["data_context_variables"].get(
-                "anonymous_usage_statistics"
-            )
-            is None
-        )
+        assert serialized_bundle["data_context_variables"].get("anonymous_usage_statistics") is None

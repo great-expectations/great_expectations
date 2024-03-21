@@ -127,8 +127,10 @@ def test_evaluation_parameter_store_methods(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
@@ -165,23 +167,23 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite.store_evaluation_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
         "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,
+        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
     }
 
 
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -216,9 +218,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -267,9 +267,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.cloud
 def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
@@ -299,9 +297,7 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
@@ -333,9 +329,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,

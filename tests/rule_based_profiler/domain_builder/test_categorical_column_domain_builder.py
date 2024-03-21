@@ -13,7 +13,7 @@ from great_expectations.core.domain import (
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # noqa: E501
     CategoricalColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
@@ -272,9 +272,9 @@ def test_unspecified_cardinality_limit(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        _: List[Domain] = CategoricalColumnDomainBuilder(
-            data_context=data_context
-        ).get_domains(rule_name="my_rule", batch_request=batch_request)
+        _: List[Domain] = CategoricalColumnDomainBuilder(data_context=data_context).get_domains(
+            rule_name="my_rule", batch_request=batch_request
+        )
 
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
@@ -383,9 +383,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
 def test_multi_batch_very_few_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -507,9 +505,7 @@ def test_multi_batch_very_few_cardinality(
 def test_multi_batch_one_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: AbstractDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",

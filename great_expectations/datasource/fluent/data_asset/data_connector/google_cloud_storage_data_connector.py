@@ -17,7 +17,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import google
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         # sorters (list): optional list of sorters for sorting data_references
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
-    """
+    """  # noqa: E501
 
     asset_level_option_keys: ClassVar[tuple[str, ...]] = (
         "gcs_prefix",
@@ -70,7 +70,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_results: Optional[int] = None,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -94,7 +94,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             batching_regex=re.compile(
                 f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
             ),
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -113,7 +113,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_results: Optional[int] = None,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -139,7 +139,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
 
         Returns:
             Instantiated "GoogleCloudStorageDataConnector" object
-        """
+        """  # noqa: E501
         return GoogleCloudStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
@@ -150,7 +150,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             delimiter=delimiter,
             max_results=max_results,
             recursive_file_discovery=recursive_file_discovery,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -179,8 +179,8 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
 
         Returns:
             Customized error message
-        """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        """  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
@@ -193,19 +193,17 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
     # Interface Method
@@ -231,7 +229,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             raise ValueError(
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
-"""
+"""  # noqa: E501
             )
 
         template_arguments: dict = {

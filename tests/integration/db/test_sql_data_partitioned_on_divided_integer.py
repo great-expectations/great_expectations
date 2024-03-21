@@ -4,7 +4,7 @@ from tests.integration.db.taxi_data_utils import (
     _execute_taxi_partitioning_test_cases,
     loaded_table,
 )
-from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (
+from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCasesBase,
     TaxiPartitioningTestCasesDividedInteger,
     TaxiTestData,

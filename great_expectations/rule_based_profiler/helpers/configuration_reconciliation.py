@@ -32,9 +32,7 @@ class ReconciliationDirectives(SerializableDictDot):
     variables: ReconciliationStrategy = ReconciliationStrategy.UPDATE
     domain_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
     parameter_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    expectation_configuration_builder: ReconciliationStrategy = (
-        ReconciliationStrategy.UPDATE
-    )
+    expectation_configuration_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
 
     @override
     def to_dict(self) -> dict:
@@ -71,7 +69,7 @@ def reconcile_rule_variables(
     :param variables_config: variables configuration override, supplied in dictionary (configuration) form
     :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
     :return: reconciled variables configuration, returned in dictionary (configuration) form
-    """
+    """  # noqa: E501
     effective_variables_config: dict = convert_variables_to_dict(variables=variables)
     if variables_config:
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:

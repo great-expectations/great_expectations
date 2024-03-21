@@ -9,9 +9,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequest,
     IDDict,
+    LegacyBatchDefinition,
     RuntimeBatchRequest,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -31,9 +31,7 @@ yaml = YAMLHandler()
 @pytest.fixture
 def basic_pandas_datasource_v013(tmp_path_factory) -> Datasource:
     base_directory: str = str(
-        tmp_path_factory.mktemp(
-            "basic_pandas_datasource_v013_filesystem_data_connector"
-        )
+        tmp_path_factory.mktemp("basic_pandas_datasource_v013_filesystem_data_connector")
     )
 
     basic_datasource: Datasource = instantiate_class_from_config(
@@ -69,7 +67,7 @@ data_connectors:
             group_names:
             - letter
             - number
-    """,
+    """,  # noqa: E501
         ),
         runtime_environment={"name": "my_datasource"},
         config_defaults={"module_name": "great_expectations.datasource"},
@@ -157,7 +155,7 @@ data_connectors:
             group_names:
             - letter
             - number
-    """,
+    """,  # noqa: E501
         ),
         runtime_environment={"name": "my_datasource"},
         config_defaults={"module_name": "great_expectations.datasource"},
@@ -176,9 +174,7 @@ data_connectors:
         "alex_20200819_1300.csv",
     ]
 
-    create_files_in_directory(
-        directory=base_directory, file_name_list=sample_file_names
-    )
+    create_files_in_directory(directory=base_directory, file_name_list=sample_file_names)
 
     return sample_datasource
 
@@ -207,7 +203,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     )
 
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
@@ -223,7 +219,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
     assert isinstance(batch.data.dataframe, pd.DataFrame)
-    assert batch.batch_definition == BatchDefinition(
+    assert batch.batch_definition == LegacyBatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
@@ -235,36 +231,32 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         ),
     )
 
-    batch_list: List[Batch] = (
-        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="B1",
-                data_connector_query={
-                    "batch_filter_parameters": {
-                        "letter": "B",
-                        "number": "1",
-                    }
-                },
-            )
+    batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="B1",
+            data_connector_query={
+                "batch_filter_parameters": {
+                    "letter": "B",
+                    "number": "1",
+                }
+            },
         )
     )
     assert len(batch_list) == 0
 
-    batch_list: List[Batch] = (
-        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="Titanic",
-                data_connector_query={
-                    "batch_filter_parameters": {
-                        "letter": "B",
-                        "number": "1",
-                    }
-                },
-            )
+    batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="Titanic",
+            data_connector_query={
+                "batch_filter_parameters": {
+                    "letter": "B",
+                    "number": "1",
+                }
+            },
         )
     )
     assert len(batch_list) == 1
@@ -272,7 +264,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             "my_datasource",
             "_pipeline",
             "_pipeline",
@@ -289,9 +281,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     datasource_name: str = "my_datasource"
     data_connector_name: str = "my_filesystem_data_connector"
     data_asset_name: str = "Titanic"
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../test_sets/Titanic.csv"
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../test_sets/Titanic.csv")
     base_directory: str = basic_pandas_datasource_v013.data_connectors[
         data_connector_name
     ].base_directory
@@ -315,10 +305,8 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         # }
     }
     batch_request = BatchRequest(**batch_request)
-    batch_list: List[Batch] = (
-        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=batch_request
-        )
+    batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_request=batch_request
     )
 
     assert len(batch_list) == 1
@@ -328,10 +316,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     assert batch.batch_spec is not None
     assert isinstance(batch.data.dataframe, pd.DataFrame)
     assert batch.data.dataframe.shape[0] == 1313
-    assert (
-        batch.batch_markers["pandas_data_fingerprint"]
-        == "3aaabc12402f987ff006429a7756f5cf"
-    )
+    assert batch.batch_markers["pandas_data_fingerprint"] == "3aaabc12402f987ff006429a7756f5cf"
 
 
 @pytest.mark.filesystem
@@ -353,10 +338,8 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    batch_list: List[Batch] = (
-        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-            batch_request=batch_request
-        )
+    batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_request=batch_request
     )
 
     assert len(batch_list) == 1
@@ -368,10 +351,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
     assert isinstance(batch.data.dataframe, pd.DataFrame)
     assert batch.data.dataframe.shape == (2, 2)
     assert batch.data.dataframe["col2"].values[1] == 4
-    assert (
-        batch.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
-    )
+    assert batch.batch_markers["pandas_data_fingerprint"] == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
 
 
 @pytest.mark.filesystem
@@ -396,15 +376,13 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(  # noqa: F841
             batch_request=batch_request
         )
 
 
 @pytest.mark.filesystem
-def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(  # noqa: E501
     basic_pandas_datasource_v013,
 ):
     data_connector_name: str = "test_runtime_data_connector"
@@ -427,15 +405,13 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+        batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(  # noqa: F841
             batch_request=batch_request
         )
 
 
 @pytest.mark.spark
-def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(  # noqa: E501
     basic_spark_datasource,
 ):
     data_connector_name: str = "test_runtime_data_connector"
@@ -458,9 +434,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = basic_spark_datasource.get_batch_list_from_batch_request(
+        batch_list: List[Batch] = basic_spark_datasource.get_batch_list_from_batch_request(  # noqa: F841
             batch_request=batch_request
         )
 
@@ -488,9 +462,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[  # noqa: F841
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+    batch_list: List[Batch] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(  # noqa: F841
         batch_request=batch_request
     )
 
@@ -499,15 +471,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "my_filesystem_data_connector": ["Titanic"],
     }
 
-    available_data_asset_names: dict = (
-        basic_pandas_datasource_v013.get_available_data_asset_names(
-            data_connector_names=data_connector_names
-        )
+    available_data_asset_names: dict = basic_pandas_datasource_v013.get_available_data_asset_names(
+        data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -521,15 +489,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "my_filesystem_data_connector": ["Titanic"],
     }
 
-    available_data_asset_names: dict = (
-        basic_pandas_datasource_v013.get_available_data_asset_names(
-            data_connector_names=data_connector_names
-        )
+    available_data_asset_names: dict = basic_pandas_datasource_v013.get_available_data_asset_names(
+        data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -537,15 +501,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"my_filesystem_data_connector": ["Titanic"]}
 
-    available_data_asset_names: dict = (
-        basic_pandas_datasource_v013.get_available_data_asset_names(
-            data_connector_names=data_connector_names
-        )
+    available_data_asset_names: dict = basic_pandas_datasource_v013.get_available_data_asset_names(
+        data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -553,15 +513,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"my_filesystem_data_connector": ["Titanic"]}
 
-    available_data_asset_names: dict = (
-        basic_pandas_datasource_v013.get_available_data_asset_names(
-            data_connector_names=data_connector_names
-        )
+    available_data_asset_names: dict = basic_pandas_datasource_v013.get_available_data_asset_names(
+        data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -569,15 +525,11 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 
     expected_data_asset_names: dict = {"test_runtime_data_connector": [data_asset_name]}
 
-    available_data_asset_names: dict = (
-        basic_pandas_datasource_v013.get_available_data_asset_names(
-            data_connector_names=data_connector_names
-        )
+    available_data_asset_names: dict = basic_pandas_datasource_v013.get_available_data_asset_names(
+        data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -586,9 +538,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
 def test_get_available_data_asset_names_with_single_partition_file_data_connector(
     sample_datasource_v013_with_single_partition_file_data_connector,
 ):
-    datasource: Datasource = (
-        sample_datasource_v013_with_single_partition_file_data_connector
-    )
+    datasource: Datasource = sample_datasource_v013_with_single_partition_file_data_connector
     data_connector_names: Optional[Union[List, str]] = None
 
     # Call "get_batch_list_from_batch_request()" to fill up the caches
@@ -621,9 +571,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
@@ -641,66 +589,50 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = ["my_filesystem_data_connector"]
 
-    expected_data_asset_names: dict = {
-        "my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]
-    }
+    expected_data_asset_names: dict = {"my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]}
 
     available_data_asset_names: dict = datasource.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = "my_filesystem_data_connector"
 
-    expected_data_asset_names: dict = {
-        "my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]
-    }
+    expected_data_asset_names: dict = {"my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]}
 
     available_data_asset_names: dict = datasource.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
     data_connector_names = ["my_filesystem_data_connector"]
 
-    expected_data_asset_names: dict = {
-        "my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]
-    }
+    expected_data_asset_names: dict = {"my_filesystem_data_connector": ["DEFAULT_ASSET_NAME"]}
 
     available_data_asset_names: dict = datasource.get_available_data_asset_names(
         data_connector_names=data_connector_names
     )
 
-    assert set(available_data_asset_names.keys()) == set(
-        expected_data_asset_names.keys()
-    )
+    assert set(available_data_asset_names.keys()) == set(expected_data_asset_names.keys())
     for connector_name, asset_list in available_data_asset_names.items():
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
 
 @pytest.mark.filesystem
 def test__data_source_batch_spec_passthrough(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test__data_source_v013_batch_spec_passthrough")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test__data_source_v013_batch_spec_passthrough"))
     with open(
         os.path.join(base_directory, "csv_with_extra_header_rows.csv"),  # noqa: PTH118
         "w",
@@ -817,9 +749,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         "data_asset_name": data_asset_name,
     }
 
-    batch = basic_datasource.get_batch_list_from_batch_request(
-        BatchRequest(**batch_request)
-    )
+    batch = basic_datasource.get_batch_list_from_batch_request(BatchRequest(**batch_request))
     # check that the batch_spec_passthrough has worked
     assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
@@ -967,9 +897,7 @@ class TestAttrAccess:
             getattr(basic_pandas_datasource_v013, attr_name)
 
     @pytest.mark.unit
-    def test_other_attrs_raise_attribute_error(
-        self, basic_pandas_datasource_v013: Datasource
-    ):
+    def test_other_attrs_raise_attribute_error(self, basic_pandas_datasource_v013: Datasource):
         with pytest.raises(AttributeError):
             _ = basic_pandas_datasource_v013.foo_bar
 
