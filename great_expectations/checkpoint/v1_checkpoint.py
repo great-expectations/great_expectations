@@ -43,9 +43,6 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationConfig]
     actions: List[ValidationAction]
-    result_format: (
-        Any  # TODO(cdkini): Add type and confirm with team that we want this here (vs run())
-    )
     id: Union[str, None] = None
 
     class Config:
@@ -138,7 +135,7 @@ class Checkpoint(BaseModel):
             expectation_parameters=expectation_parameters,
             run_id=run_id,
         )
-        self._run_actions()
+        self._run_actions(run_results=run_results)
 
         return CheckpointResult(
             run_id=run_id,
@@ -162,6 +159,8 @@ class Checkpoint(BaseModel):
             )
             run_results[key] = validation_result
 
+        return run_results
+
     def _build_result_key(
         self, validation_definition: ValidationConfig, run_id: RunIdentifier
     ) -> ValidationResultIdentifier:
@@ -173,8 +172,11 @@ class Checkpoint(BaseModel):
             batch_identifier=validation_definition.active_batch_id,
         )
 
-    def _run_actions(self):
-        pass  # TBD
+    def _run_actions(
+        self, run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+    ) -> None:
+        # TODO: Open to implement once actions are updated to run on aggregated results
+        pass
 
     @public_api
     def save(self) -> None:
