@@ -212,7 +212,12 @@ class CheckpointResult(BaseModel):
 
         return {
             "success": success_count == len(run_result_descriptions),
-            "success_percent": success_count / len(run_result_descriptions) * 100,
+            "statistics": {
+                "evaluated_validations": len(run_result_descriptions),
+                "success_percent": success_count / len(run_result_descriptions) * 100,
+                "successful_validations": success_count,
+                "unsuccessful_validations": len(run_result_descriptions) - success_count,
+            },
             "validation_results": run_result_descriptions,
         }
 
