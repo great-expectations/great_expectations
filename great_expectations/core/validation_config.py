@@ -207,7 +207,6 @@ class ValidationConfig(BaseModel):
             batch_request_options=batch_definition_options,
             result_format=result_format,
         )
-
         results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
 
         (

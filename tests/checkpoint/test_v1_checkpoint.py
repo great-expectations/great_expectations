@@ -445,10 +445,6 @@ class TestCheckpointResult:
         )
 
     @pytest.mark.unit
-    def test_checkpoint_run_with_actions(self):
-        pass  # TBD
-
-    @pytest.mark.unit
     def test_result_init_no_run_results_raises_error(self, mocker: pytest.MockFixture):
         with pytest.raises(ValueError) as e:
             CheckpointResult(
