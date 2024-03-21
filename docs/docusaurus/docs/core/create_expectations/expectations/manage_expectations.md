@@ -15,7 +15,7 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
 ## Prerequisites
 
-- <PrereqPythonInstalled/>
+- <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
