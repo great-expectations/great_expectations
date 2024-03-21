@@ -58,7 +58,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name="core/expectation_suites/_examples/create_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python" name="core/expectation_suites/_examples/create_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -84,7 +84,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/get_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/get_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -116,7 +116,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -156,7 +156,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/add_expectations_to_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -182,7 +182,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/get_a_specific_expectation_from_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -217,7 +217,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py full example code"
 ```
 
 </TabItem>
@@ -248,7 +248,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/edit_all_expectations_in_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
@@ -278,7 +278,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py full example code"
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_in_an_expectation_suite.py full example code"
 ```
 
 </TabItem>
