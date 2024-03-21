@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
@@ -206,7 +206,7 @@ class CheckpointResult(BaseModel):
     def name(self) -> str:
         return self.checkpoint_config.name
 
-    def describe_dict(self) -> dict:
+    def describe_dict(self) -> CheckpointDescriptionDict:
         success_count = sum(1 for r in self.run_results.values() if r.success)
         run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
 
@@ -223,3 +223,9 @@ class CheckpointResult(BaseModel):
 
 
 CheckpointResult.update_forward_refs()
+
+
+class CheckpointDescriptionDict(TypedDict):
+    success: bool
+    success_percent: float
+    validation_results: List[Dict[str, Any]]
