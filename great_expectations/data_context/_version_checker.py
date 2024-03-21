@@ -35,9 +35,7 @@ class _VersionChecker:
         else:
             pypi_version = self._get_latest_version_from_pypi()
             if not pypi_version:
-                logger.debug(
-                    "Could not compare with latest PyPI version; skipping check."
-                )
+                logger.debug("Could not compare with latest PyPI version; skipping check.")
                 return True
 
         if self._is_using_outdated_release(pypi_version):
@@ -54,13 +52,9 @@ class _VersionChecker:
         except json.JSONDecodeError as jsonError:
             logger.debug(f"Failed to parse PyPI API response into JSON: {jsonError}")
         except requests.HTTPError as http_err:
-            logger.debug(
-                f"An HTTP error occurred when trying to hit PyPI API: {http_err}"
-            )
+            logger.debug(f"An HTTP error occurred when trying to hit PyPI API: {http_err}")
         except requests.Timeout as timeout_exc:
-            logger.debug(
-                f"Failed to hit the PyPI API due a timeout error: {timeout_exc}"
-            )
+            logger.debug(f"Failed to hit the PyPI API due a timeout error: {timeout_exc}")
 
         if not response_json:
             return None
@@ -69,9 +63,7 @@ class _VersionChecker:
         info = response_json.get("info", {})
         pkg_version = info.get("version")
         if not pkg_version:
-            logger.debug(
-                "Successfully hit PyPI API but payload structure is not as expected."
-            )
+            logger.debug("Successfully hit PyPI API but payload structure is not as expected.")
             return None
 
         pypi_version = version.Version(pkg_version)

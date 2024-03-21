@@ -38,7 +38,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import is_library_loadable
-from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
 
@@ -97,21 +96,15 @@ def test_StoreAction(mock_context):
 
     action.run(
         validation_result_suite_identifier=ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
-        validation_result_suite=ExpectationSuiteValidationResult(
-            success=False, results=[]
-        ),
+        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
         data_asset=None,
     )
 
-    expected_run_id = RunIdentifier(
-        run_name="prod_20190801", run_time="20190926T134241.000000Z"
-    )
+    expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
 
     assert len(fake_in_memory_store.list_keys()) == 1
     stored_identifier = fake_in_memory_store.list_keys()[0]
@@ -121,9 +114,7 @@ def test_StoreAction(mock_context):
 
     assert fake_in_memory_store.get(
         ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                name="default_expectations"
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
             run_id=expected_run_id,
             batch_identifier="1234",
         )
@@ -373,9 +364,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = True
@@ -403,9 +392,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
     # only if validation_result_suite.success = False
@@ -420,9 +407,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
         data_asset=None,
-    ) == {
-        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
-    }
+    ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     validation_result_suite.success = True
     notify_on = "failure"
@@ -623,7 +608,7 @@ def test_EmailAction(
 @pytest.mark.unit
 def test_api_action_create_payload(mock_context):
     mock_validation_results = []
-    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
+    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'  # noqa: E501
     api_notification_action = APINotificationAction(url="http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
@@ -645,7 +630,7 @@ def test_api_action_run(
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(url="http://www.example.com")
     response = api_notification_action.run(
-        validation_result_suite, validation_result_suite_id, file_data_asset
+        validation_result_suite, validation_result_suite_id, data_asset=None
     )
     assert response == "Successfully Posted results to API, status code - 200"
 
@@ -816,7 +801,7 @@ class TestActionSerialization:
         # we've properly implemented the Pydantic discriminated union feature.
         class DummyClassWithActionChild(BaseModel):
             class Config:
-                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy
+                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy  # noqa: E501
                 json_encoders = {Renderer: lambda r: r.serialize()}
 
             action: Union[

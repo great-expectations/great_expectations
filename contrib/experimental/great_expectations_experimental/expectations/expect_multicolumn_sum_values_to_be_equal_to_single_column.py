@@ -52,9 +52,7 @@ class MulticolumnValuesSumValuesEqualToSingleColumn(MulticolumnMapMetricProvider
         columns_to_sum = column_list[:-1]
         column_to_equal = column_list[-1]
 
-        sum_columns = functools.reduce(
-            operator.add, [F.col(column) for column in columns_to_sum]
-        )
+        sum_columns = functools.reduce(operator.add, [F.col(column) for column in columns_to_sum])
         sum_columns += additional_value
         equal_column = F.col(column_to_equal)
 

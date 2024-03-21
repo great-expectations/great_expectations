@@ -25,7 +25,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
     RegExParser,
 )
 
-# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
 # TODO: <Alex>ALEX</Alex>
@@ -48,14 +48,12 @@ def file_get_unfiltered_batch_definition_list_fn(
 
     Returns:
         A list of batch definitions from the data connector based on the batch request.
-    """
+    """  # noqa: E501
 
     # Use a combination of a list and set to preserve iteration order
     batch_definition_list: list[LegacyBatchDefinition] = list()
     batch_definition_set = set()
-    for (
-        batch_definition
-    ) in data_connector._get_batch_definition_list_from_data_references_cache():
+    for batch_definition in data_connector._get_batch_definition_list_from_data_references_cache():
         if (
             data_connector._batch_definition_matches_batch_request(
                 batch_definition=batch_definition, batch_request=batch_request
@@ -118,7 +116,7 @@ class FilePathDataConnector(DataConnector):
         # sorters: A list of sorters for sorting data references.
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
-    """
+    """  # noqa: E501
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
 
@@ -128,7 +126,7 @@ class FilePathDataConnector(DataConnector):
         data_asset_name: str,
         batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -143,8 +141,8 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = (
-            self._ensure_regex_groups_include_data_reference_key(regex=batching_regex)
+        self._batching_regex: re.Pattern = self._ensure_regex_groups_include_data_reference_key(
+            regex=batching_regex
         )
         self._regex_parser: RegExParser = RegExParser(
             regex_pattern=self._batching_regex,
@@ -153,14 +151,12 @@ class FilePathDataConnector(DataConnector):
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
-        self._get_unfiltered_batch_definition_list_fn = (
-            get_unfiltered_batch_definition_list_fn
-        )
+        self._get_unfiltered_batch_definition_list_fn = get_unfiltered_batch_definition_list_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[LegacyBatchDefinition] | None] = {}
 
-    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
     # TODO: <Alex>ALEX</Alex>
     # @property
     # def sorters(self) -> Optional[dict]:
@@ -169,9 +165,7 @@ class FilePathDataConnector(DataConnector):
 
     # Interface Method
     @override
-    def get_batch_definition_list(
-        self, batch_request: BatchRequest
-    ) -> List[LegacyBatchDefinition]:
+    def get_batch_definition_list(self, batch_request: BatchRequest) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -188,12 +182,12 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of BatchDefinition objects that match BatchRequest
 
-        """
+        """  # noqa: E501
         batch_definition_list: List[LegacyBatchDefinition] = (
             self._get_unfiltered_batch_definition_list_fn(self, batch_request)
         )
 
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # if self.sorters:
         #     batch_definition_list = self._sort_batch_definition_list(
@@ -225,9 +219,7 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     @override
-    def build_batch_spec(
-        self, batch_definition: LegacyBatchDefinition
-    ) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -237,9 +229,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
     # Interface Method
@@ -250,7 +240,7 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             number of data_references known by this DataConnector.
-        """
+        """  # noqa: E501
         total_references: int = len(self._get_data_references_cache())
         return total_references
 
@@ -274,7 +264,7 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             number of matched data_references known by this DataConnector.
-        """
+        """  # noqa: E501
         return len(self.get_matched_data_references())
 
     # Interface Method
@@ -286,7 +276,7 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         return self._get_data_references(matched=False)
 
     # Interface Method
@@ -297,7 +287,7 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             number of unmached data_references known by this DataConnector.
-        """
+        """  # noqa: E501
         return len(self.get_unmatched_data_references())
 
     def _get_data_references(self, matched: bool) -> List[str]:
@@ -307,20 +297,16 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
         ) -> bool:
             return (
-                (batch_definition_list is not None)
-                if matched
-                else (batch_definition_list is None)
+                (batch_definition_list is not None) if matched else (batch_definition_list is None)
             )
 
-        data_reference_mapped_element: Tuple[
-            str, Union[List[LegacyBatchDefinition], None]
-        ]
+        data_reference_mapped_element: Tuple[str, Union[List[LegacyBatchDefinition], None]]
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -350,7 +336,7 @@ class FilePathDataConnector(DataConnector):
 
         Returns:
             dict -- dictionary of "BatchSpec" properties
-        """
+        """  # noqa: E501
         group_names: List[str] = self._regex_parser.get_all_group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
@@ -361,16 +347,14 @@ class FilePathDataConnector(DataConnector):
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""
+"""  # noqa: E501
             )
 
         path = self._get_full_file_path(path=path)
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
-    def _ensure_regex_groups_include_data_reference_key(
-        self, regex: re.Pattern
-    ) -> re.Pattern:
+    def _ensure_regex_groups_include_data_reference_key(self, regex: re.Pattern) -> re.Pattern:
         """
         Args:
             regex: regex pattern for filtering data references; if reserved group name "path" (FILE_PATH_BATCH_SPEC_KEY)
@@ -378,7 +362,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         Returns:
             Potentially modified Regular Expression pattern (with enclosing FILE_PATH_BATCH_SPEC_KEY reserved group)
-        """
+        """  # noqa: E501
         regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -401,7 +385,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         It examines every "data_reference" handle and converts it to zero or more "BatchDefinition" objects, based on
         partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
         implementations).  Type of each "data_reference" is storage dependent.
-        """
+        """  # noqa: E501
         if len(self._data_references_cache) == 0:
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
@@ -410,13 +394,11 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                         data_reference=data_reference
                     )
                 )
-                self._data_references_cache[data_reference] = (
-                    mapped_batch_definition_list
-                )
+                self._data_references_cache[data_reference] = mapped_batch_definition_list
 
         return self._data_references_cache
 
-    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
     # TODO: <Alex>ALEX</Alex>
     # def _sort_batch_definition_list(
     #     self, batch_definition_list: List[BatchDefinition]
@@ -477,15 +459,11 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, data_reference: str
     ) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._regex_parser.get_matches(
-            target=data_reference
-        )
+        matches: Optional[re.Match] = self._regex_parser.get_matches(target=data_reference)
         if matches is None:
             return None
 
-        num_all_matched_group_values: int = (
-            self._regex_parser.get_num_all_matched_group_values()
-        )
+        num_all_matched_group_values: int = self._regex_parser.get_num_all_matched_group_values()
 
         # Check for `(?P<name>)` named group syntax
         defined_group_name_to_group_index_mapping: Dict[str, int] = (

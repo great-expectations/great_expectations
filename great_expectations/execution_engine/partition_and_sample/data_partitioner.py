@@ -78,7 +78,7 @@ class DataPartitioner(abc.ABC):
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. DataPartitioner.date_part.MONTH
-    """
+    """  # noqa: E501
 
     date_part: ClassVar[Type[DatePart]] = DatePart
 
@@ -91,9 +91,7 @@ class DataPartitioner(abc.ABC):
         Returns:
             partitioner method.
         """
-        partitioner_method_name = self._get_partitioner_method_name(
-            partitioner_method_name
-        )
+        partitioner_method_name = self._get_partitioner_method_name(partitioner_method_name)
 
         return getattr(self, partitioner_method_name)
 
@@ -145,9 +143,7 @@ class DataPartitioner(abc.ABC):
             (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
             for dp in date_parts
         ):
-            raise gx_exceptions.InvalidConfigError(
-                "date_parts should be of type DatePart or str."
-            )
+            raise gx_exceptions.InvalidConfigError("date_parts should be of type DatePart or str.")
 
     @staticmethod
     def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
@@ -163,7 +159,7 @@ class DataPartitioner(abc.ABC):
             [DatePart(date_part_string) for date_part_string in date_part_strings]
         except ValueError as e:
             raise gx_exceptions.InvalidConfigError(
-                f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"
+                f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"  # noqa: E501
             )
 
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
@@ -190,7 +186,5 @@ class DataPartitioner(abc.ABC):
                 for date_part in date_parts
             }
         else:
-            self._verify_all_strings_are_valid_date_parts(
-                list(column_batch_identifiers.keys())
-            )
+            self._verify_all_strings_are_valid_date_parts(list(column_batch_identifiers.keys()))
             return column_batch_identifiers

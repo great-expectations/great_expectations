@@ -52,9 +52,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
             raise ValueError("min_value cannot be greater than max_value")
 
         if geocoder not in ["nominatim", "pickpoint", "openmapquest"]:
-            raise NotImplementedError(
-                "The geocoder is not implemented for this method."
-            )
+            raise NotImplementedError("The geocoder is not implemented for this method.")
 
         # find the reference shape with the geocoder.
         if geocoder is not None:

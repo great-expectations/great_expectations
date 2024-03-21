@@ -47,9 +47,7 @@ batch_request = RuntimeBatchRequest(
 )
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.

@@ -61,7 +61,7 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
 ####################################
 
 
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_available_data_asset(
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_available_data_asset(  # noqa: E501
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     expected_available_data_asset_names: Dict[List[str]] = {
@@ -84,9 +84,9 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
         "custom_key_0": "custom_value_0",
     }
 
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
         "runtime_parameters": {
@@ -114,9 +114,9 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
         "custom_key_0": "custom_value_0",
     }
 
-    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).  # noqa: E501
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
         "runtime_parameters": {
@@ -147,9 +147,9 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
     }
 
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.  # noqa: E501
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
         "runtime_parameters": {
@@ -163,7 +163,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -177,7 +177,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration  are not accepted.  In this test, a single illegal key is present.
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
         "runtime_parameters": {
@@ -191,7 +191,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
         # noinspection PyUnusedLocal
         batch_list: List[  # noqa: F841
             Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(  # noqa: E501
             batch_request=batch_request
         )
 
@@ -208,7 +208,7 @@ def test_set_data_asset_name_for_runtime_query_data(
 
     # set : my_runtime_data_asset
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_runtime_data_asset",
         "runtime_parameters": {
@@ -236,7 +236,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     }
 
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
         "runtime_parameters": {
@@ -268,7 +268,7 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset(
     batch_identifiers: Dict[str, Union[str, int]] = {"day": 2, "month": 12}
 
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
         "runtime_parameters": {
@@ -300,7 +300,7 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
     batch_identifiers: Dict[str, Union[str, int]] = {"day": 1, "month": 12}
 
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
         "runtime_parameters": {
@@ -328,7 +328,7 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
     batch_identifiers: Dict[str, Union[str, int]] = {"day": 2, "month": 12}
 
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
         "runtime_parameters": {
@@ -361,7 +361,7 @@ def test_get_batch_definitions_and_get_batch_basics_from_query(
     data_asset_name: str = "test_asset_1"
 
     batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,  # noqa: E501
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "runtime_parameters": {

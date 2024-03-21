@@ -109,7 +109,7 @@ class DataContext:
             return self._datasources[datasource_name]
         except KeyError as exc:
             raise LookupError(
-                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
+                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"  # noqa: E501
             ) from exc
 
     def _save_project_config(self) -> None: ...
@@ -125,9 +125,7 @@ def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
 class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions]
-    ) -> BatchRequest:
+    def build_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
@@ -190,9 +188,7 @@ class TestMetaDatasource:
     ):
         expected_method_name = "add_my_test"
 
-        ds_factory_method_initial = getattr(
-            context_sources_cleanup, expected_method_name, None
-        )
+        ds_factory_method_initial = getattr(context_sources_cleanup, expected_method_name, None)
         assert ds_factory_method_initial is None, "Check test cleanup"
 
         class MyTestDatasource(Datasource):
@@ -203,11 +199,11 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        ds_factory_method_final = getattr(
-            context_sources_cleanup, expected_method_name, None
-        )
+        ds_factory_method_final = getattr(context_sources_cleanup, expected_method_name, None)
 
-        assert ds_factory_method_final, f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
+        assert (
+            ds_factory_method_final
+        ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test_registered_sources_factory_method_has_correct_signature(
         self, context_sources_cleanup: _SourceFactories
@@ -243,9 +239,7 @@ class TestMetaDatasource:
             assert param_name in ds_factory_method_sig.parameters
             print("✅")
 
-    def test__new__updates_asset_type_lookup(
-        self, context_sources_cleanup: _SourceFactories
-    ):
+    def test__new__updates_asset_type_lookup(self, context_sources_cleanup: _SourceFactories):
         class FooAsset(DummyDataAsset):
             type: str = "foo"
 
@@ -264,9 +258,7 @@ class TestMetaDatasource:
         asset_types = FooBarDatasource.asset_types
         assert asset_types, "No asset types have been declared"
 
-        registered_type_names = [
-            FooBarDatasource._type_lookup.get(t) for t in asset_types
-        ]
+        registered_type_names = [FooBarDatasource._type_lookup.get(t) for t in asset_types]
         for type_, name in zip(asset_types, registered_type_names):
             print(f"`{type_.__name__}` registered as '{name}'")
             assert name, f"{type.__name__} could not be retrieved"
@@ -292,9 +284,7 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
-    def test_ds_execution_engine_type_not_defined(
-        self, empty_sources: _SourceFactories
-    ):
+    def test_ds_execution_engine_type_not_defined(self, empty_sources: _SourceFactories):
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
@@ -306,7 +296,7 @@ class TestMisconfiguredMetaDatasource:
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
         with pytest.raises(
             TypeRegistrationError,
-            match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",
+            match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",  # noqa: E501
         ):
 
             class MissingTypeAsset(DataAsset):
@@ -436,9 +426,7 @@ def test_add_datasource(context_with_fluent_datasource):
 
 @pytest.mark.unit
 @pytest.mark.parametrize("use_positional_arg", [True, False])
-def test_add_datasource_with_datasource_object(
-    context_with_fluent_datasource, use_positional_arg
-):
+def test_add_datasource_with_datasource_object(context_with_fluent_datasource, use_positional_arg):
     context, config_file_path, data_dir = context_with_fluent_datasource
     new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
     new_datasource.name = "new_datasource"
@@ -517,9 +505,7 @@ def test_update_datasource_with_datasource_object(
     if use_positional_arg:
         datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
     else:
-        datasource.add_csv_asset(
-            name="csv_asset", batching_regex=r"(?P<file_name>.*).csv"
-        )
+        datasource.add_csv_asset(name="csv_asset", batching_regex=r"(?P<file_name>.*).csv")
 
     context.sources.update_pandas_filesystem(datasource=datasource)
     assert_fluent_datasource_content(
@@ -542,9 +528,7 @@ def test_update_datasource_with_datasource_object(
 
 @pytest.mark.unit
 @pytest.mark.parametrize("use_positional_arg", [True, False])
-def test_add_or_update_datasource_using_add(
-    context_with_fluent_datasource, use_positional_arg
-):
+def test_add_or_update_datasource_using_add(context_with_fluent_datasource, use_positional_arg):
     context, config_file_path, data_dir = context_with_fluent_datasource
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
@@ -579,9 +563,7 @@ def test_add_or_update_datasource_using_add(
 
 @pytest.mark.unit
 @pytest.mark.parametrize("use_positional_arg", [True, False])
-def test_add_or_update_datasource_using_update(
-    context_with_fluent_datasource, use_positional_arg
-):
+def test_add_or_update_datasource_using_update(context_with_fluent_datasource, use_positional_arg):
     context, config_file_path, data_dir = context_with_fluent_datasource
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()

@@ -128,7 +128,7 @@ def deprecated_argument(
         argument_name: Name of the argument to associate with the deprecation note.
         version: Version number when the method was deprecated.
         message: Optional deprecation message.
-    """
+    """  # noqa: E501
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
@@ -209,13 +209,7 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
     docstring = ""
     if len(split_docstring) == 2:  # noqa: PLR2004
         short_description, docstring = split_docstring
-        docstring = (
-            f"{short_description.strip()}\n"
-            "\n"
-            f"{text}\n"
-            "\n"
-            f"{dedent(docstring)}"
-        )
+        docstring = f"{short_description.strip()}\n" "\n" f"{text}\n" "\n" f"{dedent(docstring)}"
     elif len(split_docstring) == 1:
         short_description = split_docstring[0]
         docstring = f"{short_description.strip()}\n" "\n" f"{text}\n"
@@ -251,9 +245,7 @@ def _add_text_below_function_docstring_argument(
     return func
 
 
-def _add_text_below_string_docstring_argument(
-    docstring: str, argument_name: str, text: str
-) -> str:
+def _add_text_below_string_docstring_argument(docstring: str, argument_name: str, text: str) -> str:
     """Add text below an argument in a docstring.
 
     Note: Can be used for rst directives.
@@ -273,9 +265,7 @@ def _add_text_below_string_docstring_argument(
 
     arg_list = list(param.arg_name for param in parsed_docstring.params)
     if argument_name not in arg_list:
-        raise ValueError(
-            f"Please specify an existing argument, you specified {argument_name}."
-        )
+        raise ValueError(f"Please specify an existing argument, you specified {argument_name}.")
 
     for param in parsed_docstring.params:
         if param.arg_name == argument_name:
@@ -287,9 +277,7 @@ def _add_text_below_string_docstring_argument(
     # Returns: includes an additional ":\n" that we need to strip out.
     if parsed_docstring.returns:
         if parsed_docstring.returns.description:
-            parsed_docstring.returns.description = (
-                parsed_docstring.returns.description.strip(":\n")
-            )
+            parsed_docstring.returns.description = parsed_docstring.returns.description.strip(":\n")
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included (for Sphinx html rendering).

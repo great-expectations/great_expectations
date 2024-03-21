@@ -39,9 +39,7 @@ class NotImported:
         return False
 
 
-def is_version_greater_or_equal(
-    version: str | Version, compare_version: str | Version
-) -> bool:
+def is_version_greater_or_equal(version: str | Version, compare_version: str | Version) -> bool:
     """Check if the version is greater or equal to the compare_version.
 
     Args:
@@ -59,9 +57,7 @@ def is_version_greater_or_equal(
     return version >= compare_version
 
 
-def is_version_less_than(
-    version: str | Version, compare_version: str | Version
-) -> bool:
+def is_version_less_than(version: str | Version, compare_version: str | Version) -> bool:
     """Check if the version is less than the compare_version.
 
     Args:

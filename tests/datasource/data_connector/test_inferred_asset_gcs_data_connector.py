@@ -59,9 +59,7 @@ def expected_config_dict():
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
-def test_instantiation_without_args(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
-):
+def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -181,7 +179,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         prefix="",
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -225,7 +223,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
     my_data_connector._refresh_data_references_cache()
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name
+    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -371,13 +369,11 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="my_inferred_asset_filesystem_data_connector",
-                data_asset_name="some_bucket",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
         )
     )
 
@@ -492,9 +488,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -551,9 +545,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -564,9 +556,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
 )
-def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path(mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -612,14 +602,10 @@ default_regex:
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/beta_here/beta-202002.txt", "beta")
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/gamma-202005.csv", "gamma")
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"
     )

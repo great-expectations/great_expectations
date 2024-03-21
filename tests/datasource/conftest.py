@@ -21,9 +21,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import get_sqlite_connection_url
 
 
-def create_partitions_for_table(
-    glue_client, database_name: str, table_name: str, partitions: dict
-):
+def create_partitions_for_table(glue_client, database_name: str, table_name: str, partitions: dict):
     """
     This function is used to create partitions for a table in the Glue Data Catalog. It
     will create one partition per combination of partition values. Example: if we define

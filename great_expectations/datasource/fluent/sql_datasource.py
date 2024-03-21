@@ -149,7 +149,7 @@ class _Partitioner(Protocol):
                  {"passenger_count": 2}, means the raw passenger count value is in the set:
                  {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
                  This category was only 1 parameter per column.
-        """
+        """  # noqa: E501
 
     def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
         """Creates all valid batch requests options for sql_asset
@@ -167,9 +167,7 @@ def _partitioner_and_sql_asset_to_batch_identifier_data(
     partitioner: _Partitioner, asset: _SQLAsset
 ) -> list[dict]:
     execution_engine = asset.datasource.get_execution_engine()
-    sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner(
-        execution_engine.dialect_name
-    )
+    sqlalchemy_data_partitioner = SqlAlchemyDataPartitioner(execution_engine.dialect_name)
     return sqlalchemy_data_partitioner.get_data_for_batch_identifiers(
         execution_engine=execution_engine,
         selectable=asset.as_selectable(),
@@ -202,9 +200,7 @@ class _PartitionerDatetime(FluentBaseModel):
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(
-                    f"'{part}' must be specified in the batch request options"
-                )
+                raise ValueError(f"'{part}' must be specified in the batch request options")
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -316,9 +312,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
 class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
     column_name: str
-    method_name: Literal["partition_on_divided_integer"] = (
-        "partition_on_divided_integer"
-    )
+    method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
 
     @property
     @override
@@ -334,9 +328,7 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError(
-                "'quotient' must be specified in the batch request options"
-            )
+            raise ValueError("'quotient' must be specified in the batch request options")
         return {self.column_name: options["quotient"]}
 
 
@@ -359,9 +351,7 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError(
-                "'remainder' must be specified in the batch request options"
-            )
+            raise ValueError("'remainder' must be specified in the batch request options")
         return {self.column_name: options["remainder"]}
 
 
@@ -383,9 +373,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(
-                f"'{self.column_name}' must be specified in the batch request options"
-            )
+            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")
         return {self.column_name: options[self.column_name]}
 
     @override
@@ -399,9 +387,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    method_name: Literal["partition_on_multi_column_values"] = (
-        "partition_on_multi_column_values"
-    )
+    method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
     def columns(self):
@@ -419,7 +405,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(
-                f"All column names, {self.column_names}, must be specified in the batch request options. "
+                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
@@ -443,9 +429,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
     @override
@@ -467,7 +451,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     ) -> Dict[str, Any]:
         if "datetime" not in options:
             raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
+                "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
             )
         return {self.column_name: options["datetime"]}
 
@@ -500,31 +484,27 @@ class _SQLAsset(DataAsset):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     name: str
-    _partitioner_implementation_map: Dict[
-        Type[Partitioner], Optional[Type[SqlPartitioner]]
-    ] = pydantic.PrivateAttr(
-        default={
-            PartitionerYear: SqlPartitionerYear,
-            PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
-            PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
-            PartitionerColumnValue: SqlPartitionerColumnValue,
-            PartitionerDatetimePart: SqlPartitionerDatetimePart,
-            PartitionerDividedInteger: SqlPartitionerDividedInteger,
-            PartitionerModInteger: SqlPartitionerModInteger,
-            PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
-            PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
-        }
+    _partitioner_implementation_map: Dict[Type[Partitioner], Optional[Type[SqlPartitioner]]] = (
+        pydantic.PrivateAttr(
+            default={
+                PartitionerYear: SqlPartitionerYear,
+                PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
+                PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
+                PartitionerColumnValue: SqlPartitionerColumnValue,
+                PartitionerDatetimePart: SqlPartitionerDatetimePart,
+                PartitionerDividedInteger: SqlPartitionerDividedInteger,
+                PartitionerModInteger: SqlPartitionerModInteger,
+                PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
+                PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
+            }
+        )
     )
 
-    def get_partitioner_implementation(
-        self, abstract_partitioner: Partitioner
-    ) -> SqlPartitioner:
-        PartitionerClass = self._partitioner_implementation_map.get(
-            type(abstract_partitioner)
-        )
+    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SqlPartitioner:
+        PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if not PartitionerClass:
             raise ValueError(
-                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "
+                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "  # noqa: E501
             )
         assert PartitionerClass is not None
         return PartitionerClass(**abstract_partitioner.dict())
@@ -545,9 +525,7 @@ class _SQLAsset(DataAsset):
         pass
 
     @staticmethod
-    def _matches_request_options(
-        candidate: Dict, requested_options: BatchRequestOptions
-    ) -> bool:
+    def _matches_request_options(candidate: Dict, requested_options: BatchRequestOptions) -> bool:
         for k, v in requested_options.items():
             if isinstance(candidate[k], (datetime, date)):
                 candidate[k] = str(candidate[k])
@@ -556,9 +534,7 @@ class _SQLAsset(DataAsset):
                 return False
         return True
 
-    def _fully_specified_batch_requests(
-        self, batch_request: BatchRequest
-    ) -> List[BatchRequest]:
+    def _fully_specified_batch_requests(self, batch_request: BatchRequest) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
 
         if batch_request.partitioner is None:
@@ -592,9 +568,7 @@ class _SQLAsset(DataAsset):
         return batch_requests
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
         """A list of batches that match the BatchRequest.
 
         Args:
@@ -608,9 +582,7 @@ class _SQLAsset(DataAsset):
 
         batch_list: List[Batch] = []
         if batch_request.partitioner:
-            sql_partitioner = self.get_partitioner_implementation(
-                batch_request.partitioner
-            )
+            sql_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
         else:
             sql_partitioner = None
         batch_spec_kwargs: dict[str, str | dict | None]
@@ -633,12 +605,8 @@ class _SQLAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = self._create_batch_spec(batch_spec_kwargs)
-            execution_engine: SqlAlchemyExecutionEngine = (
-                self.datasource.get_execution_engine()
-            )
-            data, markers = execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
+            execution_engine: SqlAlchemyExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -691,13 +659,11 @@ class _SQLAsset(DataAsset):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         if options is not None and not self._batch_request_options_are_valid(
             options=options, partitioner=partitioner
         ):
-            allowed_keys = set(
-                self.get_batch_request_options_keys(partitioner=partitioner)
-            )
+            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -754,7 +720,7 @@ class _SQLAsset(DataAsset):
 
         Returns:
             A dictionary that will be passed to self._create_batch_spec(**returned_dict)
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def _create_batch_spec(self, batch_spec_kwargs: dict) -> BatchSpec:
@@ -820,11 +786,7 @@ class TableAsset(_SQLAsset):
 
     @property
     def qualified_name(self) -> str:
-        return (
-            f"{self.schema_name}.{self.table_name}"
-            if self.schema_name
-            else self.table_name
-        )
+        return f"{self.schema_name}.{self.table_name}" if self.schema_name else self.table_name
 
     @pydantic.validator("table_name", pre=True, always=True)
     def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
@@ -881,12 +843,10 @@ class TableAsset(_SQLAsset):
                 # don't need to fetch any data, just want to make sure the table is accessible
                 connection.execute(sa.select(1, table).limit(1))
         except Exception as query_error:
-            LOGGER.info(
-                f"{self.name} `.test_connection()` query failed: {query_error!r}"
-            )
+            LOGGER.info(f"{self.name} `.test_connection()` query failed: {query_error!r}")
             raise TestConnectionError(
                 f"Attempt to connect to table: {self.qualified_name} failed because the test query "
-                f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"
+                f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"  # noqa: E501
             ) from query_error
 
     @override
@@ -908,9 +868,7 @@ class TableAsset(_SQLAsset):
         }
 
     @override
-    def _create_batch_spec(
-        self, batch_spec_kwargs: dict
-    ) -> SqlAlchemyDatasourceBatchSpec:
+    def _create_batch_spec(self, batch_spec_kwargs: dict) -> SqlAlchemyDatasourceBatchSpec:
         return SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
 
     @staticmethod
@@ -932,7 +890,7 @@ class TableAsset(_SQLAsset):
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     """
     Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
-    """
+    """  # noqa: E501
     from great_expectations.datasource.fluent.sources import _SourceFactories
 
     connector: str = connection_string.split("://")[0].split("+")[0]
@@ -959,7 +917,7 @@ def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
         )
 
 
-# This improves our error messages by providing a more specific type for pydantic to validate against
+# This improves our error messages by providing a more specific type for pydantic to validate against  # noqa: E501
 # It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
 # https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
 AssetTypes = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
@@ -1017,11 +975,10 @@ class SQLDatasource(Datasource):
             try:
                 self._engine = self._create_engine()
             except Exception as e:
-                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine due to the "
-                    f"following exception: {e!s}"
+                    "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
         return self._engine
@@ -1074,7 +1031,7 @@ class SQLDatasource(Datasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         try:
             engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
@@ -1110,7 +1067,7 @@ class SQLDatasource(Datasource):
             The table asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
             eg, it could be a TableAsset or a SqliteTableAsset.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._TableAsset(
             name=name,
@@ -1141,7 +1098,7 @@ class SQLDatasource(Datasource):
             The query asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
             eg, it could be a QueryAsset or a SqliteQueryAsset.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._QueryAsset(
             name=name,

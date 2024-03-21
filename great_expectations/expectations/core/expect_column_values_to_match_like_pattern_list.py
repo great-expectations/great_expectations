@@ -70,7 +70,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     like_pattern_list: Union[List[str], EvaluationParameterDict]
     match_on: Literal["any", "all"] = "any"
@@ -80,9 +80,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         cls, like_pattern_list: list[str] | EvaluationParameterDict
     ) -> list[str] | EvaluationParameterDict:
         if len(like_pattern_list) < 1:
-            raise ValueError(
-                "At least one like_pattern must be supplied in the like_pattern_list."
-            )
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         return like_pattern_list
 
@@ -122,14 +120,9 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
             ["column", "like_pattern_list", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
 
-        if (
-            not params.get("like_pattern_list")
-            or len(params.get("like_pattern_list")) == 0
-        ):
+        if not params.get("like_pattern_list") or len(params.get("like_pattern_list")) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["like_pattern_list"]):
@@ -141,9 +134,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         template_str = "Values must match the following like patterns: " + values_string
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."

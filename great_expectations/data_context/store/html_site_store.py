@@ -102,7 +102,7 @@ class HtmlSiteStore:
             bug_risk: Moderate
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     _key_class = SiteSectionIdentifier
 
@@ -112,23 +112,20 @@ class HtmlSiteStore:
         store_backend_module_name = store_backend.get(
             "module_name", "great_expectations.data_context.store"
         )
-        store_backend_class_name = store_backend.get(
-            "class_name", "TupleFilesystemStoreBackend"
-        )
+        store_backend_class_name = store_backend.get("class_name", "TupleFilesystemStoreBackend")
         verify_dynamic_loading_support(module_name=store_backend_module_name)
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
         if not issubclass(store_class, (TupleStoreBackend, GXCloudStoreBackend)):
             raise DataContextError(
-                f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"
+                f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"  # noqa: E501
             )
         if "filepath_template" in store_backend or (
-            "fixed_length_key" in store_backend
-            and store_backend["fixed_length_key"] is True
+            "fixed_length_key" in store_backend and store_backend["fixed_length_key"] is True
         ):
             logger.warning(
-                "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
+                "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "  # noqa: E501
                 "filepaths will be selected based on the type of asset rendered."
             )
 
@@ -242,16 +239,16 @@ class HtmlSiteStore:
 
         # NOTE: Instead of using the filesystem as the source of record for keys,
         # this class tracks keys separately in an internal set.
-        # This means that keys are stored for a specific session, but can't be fetched after the original
+        # This means that keys are stored for a specific session, but can't be fetched after the original  # noqa: E501
         # HtmlSiteStore instance leaves scope.
-        # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
+        # Doing it this way allows us to prevent namespace collisions among keys while still having multiple  # noqa: E501
         # backends that write to the same directory structure.
-        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it  # noqa: E501
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()  # type: ignore[var-annotated]
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -318,19 +315,13 @@ class HtmlSiteStore:
                 return store_backend.get_public_url_for_key(key)
         else:  # noqa: PLR5501
             if only_if_exists:
-                return (
-                    store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)
-                    else None
-                )
+                return store_backend.get_url_for_key(key) if store_backend.has_key(key) else None
             else:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
-            raise TypeError(
-                f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}"
-            )
+            raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")
 
         for key_class in self.store_backends.keys():
             try:
@@ -387,7 +378,7 @@ class HtmlSiteStore:
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
-        """
+        """  # noqa: E501
         file_exclusions: list[str] = [".DS_Store"]
         dir_exclusions: list[str] = []
 
@@ -397,7 +388,7 @@ class HtmlSiteStore:
                 os.path.join("..", "..", "render", "view", "static"),  # noqa: PTH118
             )
 
-        # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
+        # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)  # noqa: E501
         # the static files. If the unzipping is successful, that means that Great Expectations is
         # installed into a zip file (see PEP 273) and we need to run this function again
         if ".zip" in static_assets_source_dir.lower():
@@ -439,15 +430,11 @@ class HtmlSiteStore:
                         else:
                             # fallback
                             logger.warning(
-                                "Unable to automatically determine content_type for {}".format(
-                                    source_name
-                                )
+                                f"Unable to automatically determine content_type for {source_name}"
                             )
                             content_type = "text/html; charset=utf8"
 
-                    if not isinstance(
-                        self.store_backends["static_assets"], GXCloudStoreBackend
-                    ):
+                    if not isinstance(self.store_backends["static_assets"], GXCloudStoreBackend):
                         self.store_backends["static_assets"].set(
                             store_key,
                             f.read(),
@@ -480,9 +467,7 @@ class HtmlSiteStore:
             if is_zipfile(zip_filename):
                 with ZipFile(zip_filename) as zipfile:
                     static_files_to_extract = [
-                        file
-                        for file in zipfile.namelist()
-                        if file.startswith(path_in_zip)
+                        file for file in zipfile.namelist() if file.startswith(path_in_zip)
                     ]
                     zipfile.extractall(unzip_directory, static_files_to_extract)
                 return True

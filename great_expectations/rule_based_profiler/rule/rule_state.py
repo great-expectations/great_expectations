@@ -19,7 +19,7 @@ class RuleState:
     with currently loaded configuration of "Rule" components ("DomainBuilder" object, "ParameterBuilder" objects, and
     "ExpectationConfigurationBuilder" objects).  Using "RuleState" with corresponding flags is sufficient for generating
     outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -35,7 +35,7 @@ class RuleState:
             domains: List of Domain objects, which DomainBuilder of associated Rule generated.
             variables: attribute name/value pairs (part of state, relevant for associated Rule).
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
-        """
+        """  # noqa: E501
         self._rule = rule
 
         if domains is None:
@@ -146,7 +146,7 @@ class RuleState:
             raise gx_exceptions.ProfilerConfigurationError(
                 f"""Error: Domain\n{domain}\nalready exists.  In order to add it, either pass "allow_duplicates=True" \
 or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{domain.id}" as argument first.
-"""
+"""  # noqa: E501
             )
 
         self.domains.append(domain)
@@ -171,7 +171,7 @@ or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{d
                 f"""Error: ParameterContainer for Domain\n{domain}\nalready exists.  In order to overwrite it, either \
 pass "overwrite=True" or call "RuleState.remove_parameter_container_from_domain()" with Domain having ID equal to \
 "{domain.id}" as argument first.
-"""
+"""  # noqa: E501
             )
 
         parameter_container = ParameterContainer(parameter_nodes=None)

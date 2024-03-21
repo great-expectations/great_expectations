@@ -2,7 +2,7 @@
 An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
 
 The only requirement from an action is for it to have a take_action method.
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 
@@ -86,7 +86,7 @@ class ValidationAction(BaseModel):
 
     Through a Checkpoint, one can orchestrate the validation of data and configure notifications, data documentation updates,
     and other actions to take place after the validation result is produced.
-    """
+    """  # noqa: E501
 
     class Config:
         arbitrary_types_allowed = True
@@ -105,9 +105,7 @@ class ValidationAction(BaseModel):
     def run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
@@ -128,7 +126,7 @@ class ValidationAction(BaseModel):
 
         Returns:
             A Dict describing the result of the Action.
-        """
+        """  # noqa: E501
         return self._run(
             validation_result_suite=validation_result_suite,
             validation_result_suite_identifier=validation_result_suite_identifier,
@@ -142,9 +140,7 @@ class ValidationAction(BaseModel):
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -166,7 +162,7 @@ class ValidationAction(BaseModel):
 
         Returns:
             A Dict describing the result of the Action.
-        """
+        """  # noqa: E501
         return NotImplementedError
 
 
@@ -233,7 +229,7 @@ class SlackNotificationAction(DataDocsAction):
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with: List of DataDocs site names to display  in Slack messages. Defaults to all.
         show_failed_expectations: Shows a list of failed expectation types.
-    """
+    """  # noqa: E501
 
     type: Literal["slack"] = "slack"
 
@@ -268,9 +264,7 @@ class SlackNotificationAction(DataDocsAction):
             else:
                 assert slack_token and slack_channel
         except AssertionError:
-            raise ValueError(
-                "Please provide either slack_webhook or slack_token and slack_channel"
-            )
+            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")
 
         return values
 
@@ -278,9 +272,7 @@ class SlackNotificationAction(DataDocsAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -290,7 +282,7 @@ class SlackNotificationAction(DataDocsAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -299,7 +291,7 @@ class SlackNotificationAction(DataDocsAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
 
@@ -325,9 +317,9 @@ class SlackNotificationAction(DataDocsAction):
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
             and validation_result_suite_identifier.id
         ):
-            # To send a notification with a link to the validation result, we need to have created the validation
-            # result in cloud. If the user has configured the store action after the notification action, they will
-            # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.
+            # To send a notification with a link to the validation result, we need to have created the validation  # noqa: E501
+            # result in cloud. If the user has configured the store action after the notification action, they will  # noqa: E501
+            # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.  # noqa: E501
             if (
                 "store_validation_result" in payload
                 and "validation_result_url" in payload["store_validation_result"]
@@ -355,9 +347,7 @@ class SlackNotificationAction(DataDocsAction):
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(
-                            blocks, query, result
-                        )
+                        result = self._send_notifications_in_batches(blocks, query, result)
                     else:
                         result = self._get_slack_result(query)
 
@@ -367,8 +357,7 @@ class SlackNotificationAction(DataDocsAction):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
         split_text = [
-            text[position : position + chunk_size]
-            for position in range(0, chunks, chunk_size)
+            text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
         ]
         for batch in split_text:
             query["text"] = batch
@@ -405,7 +394,7 @@ class PagerdutyAlertAction(ValidationAction):
         routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
-    """
+    """  # noqa: E501
 
     type: Literal["pagerduty"] = "pagerduty"
 
@@ -418,7 +407,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _root_validate_deps(cls, values: dict) -> dict:
         if not importlib.util.find_spec("pypd"):
             raise DataContextError(
-                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'
+                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'  # noqa: E501
             )
 
         return values
@@ -427,9 +416,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -440,7 +427,7 @@ class PagerdutyAlertAction(ValidationAction):
         logger.debug("PagerdutyAlertAction.run")
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -449,7 +436,7 @@ class PagerdutyAlertAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
 
@@ -472,7 +459,7 @@ class PagerdutyAlertAction(ValidationAction):
                     "dedup_key": expectation_suite_name,
                     "event_action": "trigger",
                     "payload": {
-                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
+                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",  # noqa: E501
                         "severity": self.severity,
                         "source": "Great Expectations",
                     },
@@ -513,7 +500,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             ```
         microsoft_teams_webhook: Incoming Microsoft Teams webhook to which to send notifications.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
-    """
+    """  # noqa: E501
 
     type: Literal["microsoft"] = "microsoft"
 
@@ -522,9 +509,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     renderer: MicrosoftTeamsRenderer = Field(default_factory=MicrosoftTeamsRenderer)
 
     @validator("renderer", pre=True)
-    def _validate_renderer(
-        cls, renderer: dict | MicrosoftTeamsRenderer
-    ) -> MicrosoftTeamsRenderer:
+    def _validate_renderer(cls, renderer: dict | MicrosoftTeamsRenderer) -> MicrosoftTeamsRenderer:
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, MicrosoftTeamsRenderer):
@@ -538,9 +523,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -550,7 +533,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -559,7 +542,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
         validation_success = validation_result_suite.success
@@ -614,7 +597,7 @@ class OpsgenieAlertAction(ValidationAction):
         priority: Specifies the priority of the alert (P1 - P5).
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
         tags: Tags to include in the alert
-    """
+    """  # noqa: E501
 
     type: Literal["opsgenie"] = "opsgenie"
 
@@ -640,9 +623,7 @@ class OpsgenieAlertAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -652,7 +633,7 @@ class OpsgenieAlertAction(ValidationAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -661,7 +642,7 @@ class OpsgenieAlertAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
 
@@ -687,9 +668,7 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(
-                description, expectation_suite_name, settings
-            )
+            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
@@ -742,7 +721,7 @@ class EmailAction(ValidationAction):
         use_ssl: Optional. Use of SSL to send the email (using either TLS or SSL is highly recommended).
         notify_on: "Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
-    """
+    """  # noqa: E501
 
     type: Literal["email"] = "email"
 
@@ -791,9 +770,7 @@ class EmailAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -803,7 +780,7 @@ class EmailAction(ValidationAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -812,7 +789,7 @@ class EmailAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
 
@@ -834,9 +811,7 @@ class EmailAction(ValidationAction):
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 
-            receiver_emails_list = list(
-                map(lambda x: x.strip(), self.receiver_emails.split(","))
-            )
+            receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
 
             # this will actually send the email
             email_result = send_email(
@@ -876,7 +851,7 @@ class StoreValidationResultAction(ValidationAction):
         target_store_name: The name of the store where the actions will store the validation result.
     Raises:
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
-    """
+    """  # noqa: E501
 
     type: Literal["store_validation_result"] = "store_validation_result"
 
@@ -905,9 +880,7 @@ class StoreValidationResultAction(ValidationAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -936,15 +909,13 @@ def store_validation_results(  # noqa: PLR0913
     validation_result_store: ValidationsStore,
     suite_validation_result: ExpectationSuiteValidationResult,
     suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
-    expectation_suite_identifier: Optional[
-        ExpectationSuiteIdentifier | GXCloudIdentifier
-    ] = None,
+    expectation_suite_identifier: Optional[ExpectationSuiteIdentifier | GXCloudIdentifier] = None,
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     cloud_mode: bool = False,
 ) -> bool | GXCloudResourceRef:
     """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
     This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
-    """
+    """  # noqa: E501
     checkpoint_id = None
     if cloud_mode and checkpoint_identifier:
         checkpoint_id = checkpoint_identifier.id
@@ -986,7 +957,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
     Args:
         site_names: Optional. A list of the names of sites to update.
-    """
+    """  # noqa: E501
 
     type: Literal["update_data_docs"] = "update_data_docs"
 
@@ -996,9 +967,7 @@ class UpdateDataDocsAction(DataDocsAction):
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1008,7 +977,7 @@ class UpdateDataDocsAction(DataDocsAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
             )
             return
 
@@ -1017,13 +986,13 @@ class UpdateDataDocsAction(DataDocsAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(  # noqa: E501
                     type(validation_result_suite_identifier)
                 )
             )
 
         # TODO Update for RenderedDataDocs
-        # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
+        # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below  # noqa: E501
         self._build_data_docs(
             site_names=self.site_names,
             resource_identifiers=[
@@ -1065,7 +1034,7 @@ class SNSNotificationAction(ValidationAction):
     Args:
         sns_topic_arn: The SNS Arn to publish messages to.
         sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.name.
-    """
+    """  # noqa: E501
 
     type: Literal["sns"] = "sns"
 
@@ -1086,17 +1055,15 @@ class SNSNotificationAction(ValidationAction):
 
         if validation_result_suite is None:
             logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "  # noqa: E501
             )
 
         if self.sns_message_subject is None:
-            logger.warning(
-                "No message subject was passed checking for expectation_suite_name"
-            )
+            logger.warning("No message subject was passed checking for expectation_suite_name")
             if expectation_suite_identifier is None:
                 subject = validation_result_suite_identifier.run_id
                 logger.warning(
-                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
+                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."  # noqa: E501
                 )
             else:
                 subject = expectation_suite_identifier.name
@@ -1132,27 +1099,19 @@ class APINotificationAction(ValidationAction):
         elif "active_batch_definition" in validation_result_suite.meta:
             data_asset_name = (
                 validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta[
-                    "active_batch_definition"
-                ].data_asset_name
+                if validation_result_suite.meta["active_batch_definition"].data_asset_name
                 else "__no_data_asset_name__"
             )
         else:
             data_asset_name = "__no_data_asset_name__"
 
         validation_results: list = validation_result_suite.get("results")
-        validation_results_serializable: list = convert_to_json_serializable(
-            validation_results
-        )
+        validation_results_serializable: list = convert_to_json_serializable(validation_results)
 
-        payload = self.create_payload(
-            data_asset_name, suite_name, validation_results_serializable
-        )
+        payload = self.create_payload(data_asset_name, suite_name, validation_results_serializable)
 
         response = self.send_results(payload)
-        return (
-            f"Successfully Posted results to API, status code - {response.status_code}"
-        )
+        return f"Successfully Posted results to API, status code - {response.status_code}"
 
     def send_results(self, payload) -> requests.Response:
         try:
@@ -1163,9 +1122,7 @@ class APINotificationAction(ValidationAction):
             raise e
 
     @staticmethod
-    def create_payload(
-        data_asset_name, suite_name, validation_results_serializable
-    ) -> str:
+    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:
         payload = json.dumps(
             {
                 "test_suite_name": suite_name,

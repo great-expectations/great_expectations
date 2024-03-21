@@ -37,14 +37,12 @@ class ColumnPairValuesDiffCustomPercentageOrLess(ColumnPairMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, percentage, **kwargs):
-        return F.when(
-            F.abs(column_A - column_B) <= F.abs(column_A * percentage), True
-        ).otherwise(False)
+        return F.when(F.abs(column_A - column_B) <= F.abs(column_A * percentage), True).otherwise(
+            False
+        )
 
 
-class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
-    ColumnPairMapExpectation
-):
+class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpectation):
     """Expect two columns to have a row-wise difference of three."""
 
     map_metric = "column_pair_values.diff_custom_percentage"
@@ -125,8 +123,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         # Check if both columns are provided and values of mostly and percentage are correct
         try:
             assert (
-                "column_A" in configuration.kwargs
-                and "column_B" in configuration.kwargs
+                "column_A" in configuration.kwargs and "column_B" in configuration.kwargs
             ), "both columns must be provided"
             assert 0 <= mostly <= 1, "Mostly must be between 0 and 1"
             assert percentage >= 0, "Percentage must be positive"

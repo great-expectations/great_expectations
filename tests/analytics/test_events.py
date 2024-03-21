@@ -13,9 +13,7 @@ from great_expectations.analytics.events import (
 @pytest.mark.parametrize(
     "event, expected_properties",
     [
-        pytest.param(
-            DataContextInitializedEvent(), {}, id="DataContextInitializedEvent"
-        ),
+        pytest.param(DataContextInitializedEvent(), {}, id="DataContextInitializedEvent"),
         pytest.param(
             ExpectationSuiteExpectationCreatedEvent(
                 expectation_id="157abeb6-ffa8-4520-8239-649cf6ca9489",
