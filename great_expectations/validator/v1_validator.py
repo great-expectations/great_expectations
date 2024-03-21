@@ -100,10 +100,8 @@ class Validator:
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
-        processed_expectation_configs = (
-            self._wrapped_validator.process_expectations_for_validation(
-                expectation_configs, evaluation_parameters
-            )
+        processed_expectation_configs = self._wrapped_validator.process_expectations_for_validation(
+            expectation_configs, evaluation_parameters
         )
 
         results = self._wrapped_validator.graph_validate(

@@ -41,9 +41,7 @@ config = DataContextConfig(
     anonymous_usage_statistics=config_file["anonymous_usage_statistics"],
     checkpoint_store_name=config_file["checkpoint_store_name"],
     store_backend_defaults=S3StoreBackendDefaults(
-        default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"][
-            "bucket"
-        ]
+        default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"]["bucket"]
     ),
 )
 context_gx = get_context(project_config=config)
@@ -62,9 +60,7 @@ validator = context_gx.get_validator(
     expectation_suite_name=expectation_suite_name,
 )
 print(validator.head())
-validator.expect_column_values_to_not_be_null(
-    column="passenger_count"
-)  ## add some test
+validator.expect_column_values_to_not_be_null(column="passenger_count")  ## add some test
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 checkpoint_config = {

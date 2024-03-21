@@ -47,13 +47,7 @@ def replace_code_in_notebook(
             "Either both or neither of the string replacement arguments (to/from) are required."
         )
 
-    if (
-        nb is None
-        or not nb
-        or "cells" not in nb
-        or not nb["cells"]
-        or len(nb["cells"]) == 0
-    ):
+    if nb is None or not nb or "cells" not in nb or not nb["cells"] or len(nb["cells"]) == 0:
         return None
 
     idx: int
@@ -67,15 +61,12 @@ def replace_code_in_notebook(
         return None
 
     for idx, cell in cells_of_interest_dict.items():
-        cell["source"] = cell["source"].replace(
-            string_to_be_replaced, replacement_string
-        )
+        cell["source"] = cell["source"].replace(string_to_be_replaced, replacement_string)
 
     nb["cells"] = list(
         filter(
             lambda cell: not (
-                (cell["cell_type"] == "code")
-                and (cell["source"].find(string_to_be_replaced) != -1)
+                (cell["cell_type"] == "code") and (cell["source"].find(string_to_be_replaced) != -1)
             ),
             nb["cells"],
         )
@@ -105,13 +96,7 @@ def find_code_in_notebook(
     nb: NotebookNode,
     search_string: str,
 ) -> Optional[Dict[int, dict]]:
-    if (
-        nb is None
-        or not nb
-        or "cells" not in nb
-        or not nb["cells"]
-        or len(nb["cells"]) == 0
-    ):
+    if nb is None or not nb or "cells" not in nb or not nb["cells"] or len(nb["cells"]) == 0:
         return None
 
     idx: int
@@ -120,9 +105,7 @@ def find_code_in_notebook(
     indices: List[int] = [
         idx
         for idx, cell in enumerate(nb["cells"])
-        if (
-            (cell["cell_type"] == "code") and (cell["source"].find(search_string) != -1)
-        )
+        if ((cell["cell_type"] == "code") and (cell["source"].find(search_string) != -1))
     ]
 
     if len(indices) == 0:

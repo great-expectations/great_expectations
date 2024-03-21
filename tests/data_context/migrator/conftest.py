@@ -18,9 +18,7 @@ from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 
 class StubUsageStats:
-    def __init__(
-        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
+    def __init__(self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig):
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
 
     @property
@@ -132,10 +130,7 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {
-            datasource_name: DummyDatasource()
-            for datasource_name in self._datasource_names
-        }
+        return {datasource_name: DummyDatasource() for datasource_name in self._datasource_names}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -168,13 +163,9 @@ def stub_base_data_context() -> StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
-    StubBaseDataContext
-):
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
     return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
-            enabled=False
-        )
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=False)
     )
 
 
@@ -284,7 +275,5 @@ def stub_serialized_configuration_bundle(
 ) -> dict:
     """Configuration bundle based on StubBaseDataContext."""
     assert "data_context_id" in serialized_configuration_bundle
-    serialized_configuration_bundle["data_context_id"] = (
-        StubBaseDataContext.DATA_CONTEXT_ID
-    )
+    serialized_configuration_bundle["data_context_id"] = StubBaseDataContext.DATA_CONTEXT_ID
     return serialized_configuration_bundle

@@ -67,7 +67,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     like_pattern: Union[str, EvaluationParameterDict]
 
@@ -110,14 +110,8 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
             ["column", "like_pattern", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+        mostly_str = "" if params.get("mostly") is None else ", at least $mostly_pct % of the time"
         like_pattern = params.get("like_pattern")  # noqa: F841
 
         template_str = f"Values must match like pattern $like_pattern {mostly_str}: "

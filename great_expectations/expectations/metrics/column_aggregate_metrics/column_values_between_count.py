@@ -105,14 +105,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True)
         ) or (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True)
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=True
@@ -120,14 +116,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False)
         ) or (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=False
@@ -135,14 +127,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True)
         ) or (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True)
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=True
@@ -150,14 +138,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False)
         ) or (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=False

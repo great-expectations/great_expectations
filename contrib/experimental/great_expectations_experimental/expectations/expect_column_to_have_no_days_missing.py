@@ -31,18 +31,14 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
             selectable,
             _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
 
         # get all unique dates from timestamp
         query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
-        all_unique_dates = [
-            i[0] for i in execution_engine.execute_query(query).fetchall()
-        ]
+        all_unique_dates = [i[0] for i in execution_engine.execute_query(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings
         if all_unique_dates and isinstance(all_unique_dates[0], date):

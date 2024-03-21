@@ -7,9 +7,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-ROMAN_NUMERAL_REGEX = (
-    r"^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$"
-)
+ROMAN_NUMERAL_REGEX = r"^(?=[MDCLXVI])M*(C[MD]|D?C{0,3})(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$"
 
 
 # This class defines a Metric to support your Expectation.

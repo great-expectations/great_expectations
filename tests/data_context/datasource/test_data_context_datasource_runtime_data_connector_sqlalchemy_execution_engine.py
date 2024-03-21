@@ -104,9 +104,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sqlalchemy_engi
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -146,9 +144,7 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
     context = data_context_with_datasource_sqlalchemy_engine
     context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_validator(
             batch_request=RuntimeBatchRequest(
@@ -182,7 +178,4 @@ def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers

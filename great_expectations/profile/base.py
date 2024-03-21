@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.data_asset import DataAsset
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_suite import ExpectationSuite
@@ -48,9 +47,7 @@ class OrderedProfilerCardinality(OrderedEnum):
     UNIQUE = 7
 
     @classmethod
-    def get_basic_column_cardinality(
-        cls, num_unique=0, pct_unique=0
-    ) -> OrderedProfilerCardinality:
+    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0) -> OrderedProfilerCardinality:
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
@@ -62,7 +59,7 @@ class OrderedProfilerCardinality(OrderedEnum):
 
         Returns:
             The column cardinality
-        """
+        """  # noqa: E501
         if pct_unique == 1.0:
             cardinality = cls.UNIQUE
         elif num_unique == 1:
@@ -111,8 +108,7 @@ profiler_data_types_with_mapping = {
     "INT": list(ProfilerTypeMapping.INT_TYPE_NAMES),
     "FLOAT": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
     "NUMERIC": (
-        list(ProfilerTypeMapping.INT_TYPE_NAMES)
-        + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
+        list(ProfilerTypeMapping.INT_TYPE_NAMES) + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
     ),
     "STRING": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
     "BOOLEAN": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
@@ -156,21 +152,11 @@ class Profiler(metaclass=abc.ABCMeta):
         """
         pass
 
-    def profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
-    ) -> ExpectationSuite:
+    def profile(self, item_to_profile: Any, suite_name: Optional[str] = None) -> ExpectationSuite:
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
         return expectation_suite
 
     @abc.abstractmethod
-    def _profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
-    ) -> ExpectationSuite:
+    def _profile(self, item_to_profile: Any, suite_name: Optional[str] = None) -> ExpectationSuite:
         pass
-
-
-class DataAssetProfiler:
-    @classmethod
-    def validate(cls, data_asset) -> bool:
-        return isinstance(data_asset, DataAsset)

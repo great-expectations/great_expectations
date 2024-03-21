@@ -32,7 +32,7 @@ def unique_proportion(_metrics):
         f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
 
-    # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
+    # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)  # noqa: E501
     if total_values > 0 and total_values != null_count:
         return unique_values / (total_values - null_count)
     else:

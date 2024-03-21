@@ -10,9 +10,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_north_dakota_zip(zip: str):
     list_of_dicts_of_north_dakota_zips = zipcodes.filter_by(state="ND")
-    list_of_north_dakota_zips = [
-        d["zip_code"] for d in list_of_dicts_of_north_dakota_zips
-    ]
+    list_of_north_dakota_zips = [d["zip_code"] for d in list_of_dicts_of_north_dakota_zips]
     if len(zip) > 10:
         return False
     elif type(zip) != str:  # noqa: E721

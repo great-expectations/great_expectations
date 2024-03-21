@@ -63,9 +63,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    method_name: Literal["partition_on_converted_datetime"] = (
-        "partition_on_converted_datetime"
-    )
+    method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
     @override
@@ -87,7 +85,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     ) -> Dict[str, Any]:
         if "datetime" not in options:
             raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
+                "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
             )
         return {self.column_name: options["datetime"]}
 

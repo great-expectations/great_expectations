@@ -49,13 +49,9 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
-    base_directory_rel_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
+    base_directory_rel_path = pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     base_directory_abs_path = (
-        pathlib.Path(__file__)
-        .parent.joinpath(base_directory_rel_path)
-        .resolve(strict=True)
+        pathlib.Path(__file__).parent.joinpath(base_directory_rel_path).resolve(strict=True)
     )
     pandas_filesystem_datasource = PandasFilesystemDatasource(
         name="pandas_filesystem_datasource",
@@ -153,17 +149,14 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("asset")[0]
-            for t in PandasFilesystemDatasource.asset_types
+            t.__name__.lower().split("asset")[0] for t in PandasFilesystemDatasource.asset_types
         }
         print(asset_class_names)
 
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_exists_and_is_functional(
-        self, asset_class: Type[_FilePathDataAsset]
-    ):
+    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[_FilePathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -222,7 +215,7 @@ class TestDynamicPandasAssets:
         These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
-        """
+        """  # noqa: E501
         with pytest.raises(pydantic.ValidationError) as exc_info:
             asset_class(
                 name="test",
@@ -547,16 +540,12 @@ def test_get_batch_list_from_partially_specified_batch_request(
     file_name: PathStr
     all_files: list[str] = [
         file_name.stem
-        for file_name in list(
-            pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir()
-        )
+        for file_name in list(pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir())
     ]
     # assert there are files that are not csv files
     assert any(not file_name.endswith("csv") for file_name in all_files)
     # assert there are 12 files from 2018
-    files_for_2018 = [
-        file_name for file_name in all_files if file_name.find("2018") >= 0
-    ]
+    files_for_2018 = [file_name for file_name in all_files if file_name.find("2018") >= 0]
     assert len(files_for_2018) == 12
 
     asset = pandas_filesystem_datasource.add_csv_asset(
@@ -574,12 +563,9 @@ def test_get_batch_list_from_partially_specified_batch_request(
         year: str
         month: str
 
-    expected_year_month = {
-        YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)
-    }
+    expected_year_month = {YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)}
     batch_year_month = {
-        YearMonth(year=batch.metadata["year"], month=batch.metadata["month"])
-        for batch in batches
+        YearMonth(year=batch.metadata["year"], month=batch.metadata["month"]) for batch in batches
     }
     assert expected_year_month == batch_year_month
 
@@ -621,9 +607,7 @@ def test_pandas_sorter(
     file_name: PathStr
     all_files: list[str] = [
         file_name.stem
-        for file_name in list(
-            pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir()
-        )
+        for file_name in list(pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir())
     ]
     # assert there are 12 files for each year
     for year in years:
@@ -710,9 +694,7 @@ def test_pandas_slice_batch_count(
 def bad_batching_regex_config(
     csv_path: pathlib.Path,
 ) -> tuple[re.Pattern, TestConnectionError]:
-    batching_regex = re.compile(
-        r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    )
+    batching_regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
         "No file at base_directory path "
         f'"{csv_path.resolve()}" matched regular expressions pattern '
@@ -791,9 +773,7 @@ def test_csv_asset_batch_metadata(
 
     batch_request = asset.build_batch_request()
 
-    batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(
-        batch_request
-    )
+    batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(batch_request)
 
     substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
     substituted_batch_metadata.update(

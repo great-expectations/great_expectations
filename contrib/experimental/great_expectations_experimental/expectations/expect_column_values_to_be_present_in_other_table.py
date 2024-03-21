@@ -208,9 +208,7 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
 
         foreign_key_column: str = configuration.kwargs.get("foreign_key_column")
         foreign_table: str = configuration.kwargs.get("foreign_table")
-        foreign_table_key_column: str = configuration.kwargs.get(
-            "foreign_table_key_column"
-        )
+        foreign_table_key_column: str = configuration.kwargs.get("foreign_table_key_column")
 
         template_str = "All values in column $foreign_key_column are present in column $foreign_table_key_column of table $foreign_table."
 
@@ -249,16 +247,12 @@ class ExpectColumnValuesToBePresentInOtherTable(QueryExpectation):
         if result_dict is None:
             return None
 
-        unexpected_index_list: Optional[List[dict]] = result_dict.get(
-            "unexpected_index_list"
-        )
+        unexpected_index_list: Optional[List[dict]] = result_dict.get("unexpected_index_list")
         # Don't render table if we don't have unexpected_values
         if not unexpected_index_list:
             return None
 
-        unexpected_index_df: pd.DataFrame = pd.DataFrame(
-            unexpected_index_list, dtype="string"
-        )
+        unexpected_index_df: pd.DataFrame = pd.DataFrame(unexpected_index_list, dtype="string")
 
         # extract column name from unexpected values
         column_name: str = list(unexpected_index_list[0].keys())[0].upper()

@@ -131,9 +131,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
         context=context,
     )
 
-    result = validator.expect_column_values_to_be_in_type_list(
-        "col", type_list=["Int32Dtype"]
-    )
+    result = validator.expect_column_values_to_be_in_type_list("col", type_list=["Int32Dtype"])
     assert result == ExpectationValidationResult(
         success=True,
         expectation_config={

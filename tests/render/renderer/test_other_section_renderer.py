@@ -11,9 +11,7 @@ from great_expectations.self_check.util import expectationSuiteValidationResultS
 @pytest.fixture(scope="module")
 def datetime_column_evrs():
     """hand-crafted EVRS for datetime columns"""
-    with open(
-        file_relative_path(__file__, "../fixtures/datetime_column_evrs.json")
-    ) as infile:
+    with open(file_relative_path(__file__, "../fixtures/datetime_column_evrs.json")) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )

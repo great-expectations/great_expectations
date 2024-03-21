@@ -16,9 +16,7 @@ except ImportError:
 @pytest.mark.skipif(Polygon is None, reason="Requires shapely.geometry.Polygon")
 def test_serialization_of_shapely_polygon():
     polygon = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
-    assert (
-        convert_to_json_serializable(polygon) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
-    )
+    assert convert_to_json_serializable(polygon) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
 
 
 @pytest.mark.unit
@@ -28,10 +26,7 @@ def test_serialization_of_shapely_polygon():
 )
 def test_serialization_of_shapely_multipolygon():
     multi_polygon = MultiPolygon([Polygon([(1, 2), (3, 4), (5, 6)])])
-    assert (
-        convert_to_json_serializable(multi_polygon)
-        == "MULTIPOLYGON (((1 2, 3 4, 5 6, 1 2)))"
-    )
+    assert convert_to_json_serializable(multi_polygon) == "MULTIPOLYGON (((1 2, 3 4, 5 6, 1 2)))"
 
 
 @pytest.mark.unit

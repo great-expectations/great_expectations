@@ -84,9 +84,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -100,7 +98,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name="column.distinct_values",
@@ -126,7 +124,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
+        """  # noqa: E501
         # Build the list of unique values for each Batch object.
         super().build_parameters(
             domain=domain,
@@ -136,7 +134,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             runtime_configuration=runtime_configuration,
         )
 
-        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
+        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.  # noqa: E501
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.raw_fully_qualified_parameter_name,
@@ -144,10 +142,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
-            attributed_metric_values=parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-            ]
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+            )
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
@@ -191,9 +191,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[V]], Set[V]] = list(
-        itertools.chain.from_iterable(collection)
-    )
+    flattened: Union[List[Set[V]], Set[V]] = list(itertools.chain.from_iterable(collection))
     element: V
     if all(isinstance(element, set) for element in flattened):
         flattened = set().union(*flattened)
@@ -202,13 +200,12 @@ def _get_unique_values_from_nested_collection_of_sets(
     In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
-    """
+    """  # noqa: E501
     unique_values: Set[V] = set(
         sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(
                 lambda element: not (
-                    (element is None)
-                    or (isinstance(element, float) and np.isnan(element))
+                    (element is None) or (isinstance(element, float) and np.isnan(element))
                 ),
                 set(flattened),
             )

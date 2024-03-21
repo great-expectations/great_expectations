@@ -56,9 +56,7 @@ def test_config_provider_substitution_raises_error(
 
 def test_config_str_validation():
     with pytest.raises(pydantic.ValidationError, match="ConfigStr"):
-        m = MyClass(
-            normal_field="normal", secret_field="secret", config_field="invalid config"
-        )
+        m = MyClass(normal_field="normal", secret_field="secret", config_field="invalid config")
         print(m)
 
 
@@ -83,9 +81,7 @@ def test_as_union_file_type(input_value, expected):
     assert str(m.my_field) == expected
 
 
-def test_config_substitution(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
+def test_config_substitution(monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider):
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -95,10 +91,7 @@ def test_config_substitution(
         config_field_w_default=r"hello-${MY_ENV_VAR}",  # type: ignore[arg-type]
     )
     assert m.config_field.get_config_value(env_config_provider) == "success"
-    assert (
-        m.config_field_w_default.get_config_value(env_config_provider)
-        == "hello-success"
-    )
+    assert m.config_field_w_default.get_config_value(env_config_provider) == "hello-success"
 
 
 def test_config_substitution_dict(
