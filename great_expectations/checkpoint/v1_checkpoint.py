@@ -7,6 +7,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.compatibility.pydantic import BaseModel, validator
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )

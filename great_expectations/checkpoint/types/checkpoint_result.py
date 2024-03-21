@@ -83,7 +83,7 @@ class CheckpointResult(SerializableDictDot):
         self._checkpoint_config = checkpoint_config
         if success is None:
             self._success = all(
-                run_result["validation_result"].success  # type: ignore[union-attr] # no `.success` attr for ExpectationSuiteValidationResult | dict | str
+                run_result.success  # type: ignore[union-attr] # no `.success` attr for ExpectationSuiteValidationResult | dict | str
                 for run_result in run_results.values()
             )
         else:
@@ -353,7 +353,7 @@ class CheckpointResult(SerializableDictDot):
             "run_results": convert_to_json_serializable(
                 data=recursively_convert_to_json_serializable(test_obj=self.run_results)
             ),
-            "checkpoint_config": self.checkpoint_config.to_json_dict(),
+            "checkpoint_config": self.checkpoint_config,
             "success": convert_to_json_serializable(data=self.success),
         }
         if not self.validation_result_url:
@@ -384,25 +384,11 @@ class CheckpointResult(SerializableDictDot):
         return result
 
     def __repr__(self):
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
         serializable_dict: dict = self.to_json_dict()
         return json.dumps(serializable_dict, indent=2)
 
     @override
     def __str__(self) -> str:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
         return self.__repr__()
 
 

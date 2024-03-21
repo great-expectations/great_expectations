@@ -21,7 +21,15 @@ from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
+from great_expectations.expectations.core.expect_column_values_to_be_between import (
+    ExpectColumnValuesToBeBetween,
+)
 from tests.test_utils import working_directory
+
+
+@pytest.fixture
+def in_memory_context() -> EphemeralDataContext:
+    return gx.get_context(mode="ephemeral")
 
 
 @pytest.mark.unit
@@ -33,10 +41,6 @@ def test_checkpoint_no_validation_definitions_raises_error():
 
 
 class TestCheckpointSerialization:
-    @pytest.fixture
-    def in_memory_context(self) -> EphemeralDataContext:
-        return gx.get_context(mode="ephemeral")
-
     @pytest.fixture
     def validation_config_1(
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
@@ -329,3 +333,37 @@ class TestCheckpointSerialization:
             Checkpoint.parse_obj(serialized_checkpoint)
 
         assert expected_error in str(e.value)
+
+
+def test_checkpoint_run(in_memory_context: EphemeralDataContext):
+    context = in_memory_context
+
+    ds = context.sources.add_pandas("my_pandas_datasource")
+    csv_path = (
+        pathlib.Path(__file__).parent.parent
+        / "test_sets"
+        / "quickstart"
+        / "yellow_tripdata_sample_2022-01.csv"
+    )
+    assert csv_path.exists()
+    asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
+    batch_definition = asset.add_batch_config("my_batch_def")
+
+    suite = ExpectationSuite(
+        name="my_suite",
+        expectations=[
+            ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=100)
+        ],
+    )
+
+    validation_definition = ValidationConfig(
+        name="my_validation_def", data=batch_definition, suite=suite
+    )
+
+    checkpoint = Checkpoint(
+        name="my_checkpoint", validation_definitions=[validation_definition], actions=[]
+    )
+
+    result = checkpoint.run()
+
+    assert result.__dict__ == {}
