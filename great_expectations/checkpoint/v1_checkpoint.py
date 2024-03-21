@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -7,12 +8,20 @@ from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
     from great_expectations.data_context.store.validation_config_store import (
         ValidationConfigStore,
     )
@@ -34,6 +43,9 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationConfig]
     actions: List[ValidationAction]
+    result_format: (
+        Any  # TODO(cdkini): Add type and confirm with team that we want this here (vs run())
+    )
     id: Union[str, None] = None
 
     class Config:
@@ -120,7 +132,49 @@ class Checkpoint(BaseModel):
         batch_parameters: Dict[str, Any] | None = None,
         expectation_parameters: Dict[str, Any] | None = None,
     ) -> CheckpointResult:
-        raise NotImplementedError
+        run_id = RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
+        run_results = self._run_validation_definitions(
+            batch_parameters=batch_parameters,
+            expectation_parameters=expectation_parameters,
+            run_id=run_id,
+        )
+        self._run_actions()
+
+        return CheckpointResult(
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self,
+            validation_result_url=None,  # Need to plumb from actions
+        )
+
+    def _run_validation_definitions(
+        self,
+        batch_parameters: Dict[str, Any] | None,
+        expectation_parameters: Dict[str, Any] | None,
+        run_id: RunIdentifier,
+    ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
+        run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
+        for validation_definition in self.validation_definitions:
+            key = self._build_result_key(validation_definition=validation_definition, run_id=run_id)
+            validation_result = validation_definition.run(
+                batch_definition_options=batch_parameters,
+                evaluation_parameters=expectation_parameters,
+            )
+            run_results[key] = validation_result
+
+    def _build_result_key(
+        self, validation_definition: ValidationConfig, run_id: RunIdentifier
+    ) -> ValidationResultIdentifier:
+        return ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                name=validation_definition.suite.name
+            ),
+            run_id=run_id,
+            batch_identifier=validation_definition.active_batch_id,
+        )
+
+    def _run_actions(self):
+        pass  # TBD
 
     @public_api
     def save(self) -> None:
