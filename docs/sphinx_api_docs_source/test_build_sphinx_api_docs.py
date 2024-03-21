@@ -2,6 +2,10 @@ from docs.sphinx_api_docs_source.conf import convert_code_blocks
 from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
 import pytest
 
+from bs4 import (
+    BeautifulSoup,
+)
+
 def test_convert_code_blocks():
     name = "great_expectations.checkpoint.StoreMetricsAction"
     lines = [
@@ -76,10 +80,6 @@ def test_convert_code_blocks():
 ])
 
 def test_apply_markdown_adjustments(input_string, output_string, html_file_path):
-    from bs4 import (
-        BeautifulSoup,
-    )
-
     soup = BeautifulSoup(input_string, "html.parser")
 
     apply_markdown_adjustments(soup, html_file_path, input_string)
