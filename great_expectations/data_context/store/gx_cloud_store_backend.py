@@ -336,6 +336,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             attributes_value=value,
             organization_id=organization_id,
         )
+        if self._is_v1_resource:
+            data = data.dict()
 
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
