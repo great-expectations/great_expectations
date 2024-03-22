@@ -21,7 +21,7 @@ continuous data or categorical classes and their associated weights.
 
 * A partition is defined by an ordered list of points that define intervals on the real number line. Note that partition
   intervals do not need to be uniform.
-* Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i <= x < upper_bound_i.
+* Each bin in a partition is partially open: a data element x is in bin i if lower_bound_i &lt;= x &lt; upper_bound_i.
 * However, following the behavior of `numpy.histogram`, a data element x is in the largest bin k if x == upper_bound_k.
 * A partition object can also include `tail_weights` which extend from `-Infinity` to the lowest bound, and from the
   highest bound to `+Infinity`.
