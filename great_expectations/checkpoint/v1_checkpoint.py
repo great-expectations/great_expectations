@@ -36,8 +36,11 @@ class Checkpoint(BaseModel):
     to be taken after the validation step.
 
     Args:
+        name: The name of the checkpoint.
         validation_definitions: List of validation definitions to be run.
         actions: List of actions to be taken after the validation definitions are run.
+        result_format: The format in which to return the results of the validation definitions. Default is ResultFormat.SUMMARY.
+        id: An optional unique identifier for the checkpoint.
 
     """  # noqa: E501
 
@@ -58,11 +61,11 @@ class Checkpoint(BaseModel):
             "validation_definitions": [
                 {
                     "name": "my_first_validation",
-                    "id": "a758816-64c8-46cb-8f7e-03c12cea1d67"
+                    "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"
                 },
                 {
                     "name": "my_second_validation",
-                    "id": "1339js16-64c8-46cb-8f7e-03c12cea1d67"
+                    "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"
                 },
             ],
             "actions": [
@@ -75,6 +78,9 @@ class Checkpoint(BaseModel):
                         "class_name": "SlackRenderer",
                     }
                 }
+            ],
+            "result_format": "SUMMARY",
+            "id": "b758816-64c8-46cb-8f7e-03c12cea1d67"
         """  # noqa: E501
 
         arbitrary_types_allowed = (

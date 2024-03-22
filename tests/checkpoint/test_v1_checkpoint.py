@@ -409,6 +409,7 @@ class TestCheckpointResult:
                 "unsuccessful_expectations": 0,
                 "success_percent": 100.0,
             },
+            batch_id=f"{self.datasource_name}-{self.asset_name}",
         )
 
         with mock.patch.object(ValidationConfig, "run", return_value=mock_run_result):
