@@ -1,5 +1,4 @@
-Expectation Diagnostics and Testing
-===================================
+# Expectation Diagnostics and Testing
 
 The [run_diagnostics method on Expectation](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/expectation.py) calls several other helper methods (`_get_augmented_library_metadata`, `_get_examples`, `_get_description_diagnostics`, `_get_expectation_configuration_from_examples`, `_get_metric_diagnostics_list`, `_get_execution_engine_diagnostics`, `_get_test_results`, `_get_renderer_diagnostics`, `_get_maturity_checklist`, `_get_coverage_score`, and `_get_final_maturity_level`) to piece together an [ExpectationDiagnostics](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/expectation_diagnostics/expectation_diagnostics.py) object. If you need to modify any of those, there is a good chance you will need to modify some of the dataclass objects in [expectation_test_data_cases.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/expectation_diagnostics/expectation_test_data_cases.py) or [supporting_types.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/expectation_diagnostics/supporting_types.py)
 
