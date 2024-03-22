@@ -537,21 +537,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         protocol: Optional[Any] = None,
     ) -> str:
         id = key[1]
-        if key[0] == GXCloudRESTResource.EXPECTATION_SUITE:
-            url = self.construct_versioned_url(
-                base_url=self.ge_cloud_base_url,
-                organization_id=self.ge_cloud_credentials["organization_id"],
-                resource_name=self.ge_cloud_resource_name,
-                id=id,
-                v1=True,
-            )
-        else:
-            url = self.construct_versioned_url(
-                base_url=self.ge_cloud_base_url,
-                organization_id=self.ge_cloud_credentials["organization_id"],
-                resource_name=self.ge_cloud_resource_name,
-                id=id,
-            )
+        url = self.construct_versioned_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=self.ge_cloud_credentials["organization_id"],
+            resource_name=self.ge_cloud_resource_name,
+            id=id,
+        )
         return url
 
     def remove_key(self, key):
@@ -775,11 +766,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                     "Type of parameter attributes_value is unsupported in GX V1."
                 )
 
-            return cls.construct_json_payload_v1(
+            return cls._construct_json_payload_v1(
                 organization_id=organization_id, payload=payload
             )
         else:
-            return cls.construct_json_payload_v0(
+            return cls._construct_json_payload_v0(
                 resource_type=resource_type,
                 organization_id=organization_id,
                 attributes_key=attributes_key,
@@ -788,7 +779,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @classmethod
-    def construct_json_payload_v0(
+    def _construct_json_payload_v0(
         cls,
         resource_type: str,
         organization_id: str,
@@ -809,7 +800,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return data
 
     @classmethod
-    def construct_json_payload_v1(
+    def _construct_json_payload_v1(
         cls,
         organization_id: str,
         payload: dict,
