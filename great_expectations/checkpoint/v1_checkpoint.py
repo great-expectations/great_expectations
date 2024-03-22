@@ -12,6 +12,7 @@ from great_expectations.compatibility.pydantic import BaseModel, root_validator,
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
@@ -43,6 +44,7 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationConfig]
     actions: List[ValidationAction]
+    result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
     class Config:
@@ -133,6 +135,7 @@ class Checkpoint(BaseModel):
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
             expectation_parameters=expectation_parameters,
+            result_format=self.result_format,
             run_id=run_id,
         )
         self._run_actions(run_results=run_results)
@@ -148,6 +151,7 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None,
         expectation_parameters: Dict[str, Any] | None,
+        result_format: ResultFormat,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
@@ -155,6 +159,7 @@ class Checkpoint(BaseModel):
             validation_result = validation_definition.run(
                 batch_definition_options=batch_parameters,
                 evaluation_parameters=expectation_parameters,
+                result_format=result_format,
             )
             key = self._build_result_key(
                 validation_definition=validation_definition,

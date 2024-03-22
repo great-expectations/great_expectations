@@ -22,6 +22,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -174,6 +175,7 @@ class TestCheckpointSerialization:
                 },
             ],
             "actions": expected_actions,
+            "result_format": ResultFormat.SUMMARY,
             "id": cp.id,
         }
 
@@ -255,6 +257,7 @@ class TestCheckpointSerialization:
                     "type": "microsoft",
                 },
             ],
+            "result_format": ResultFormat.SUMMARY,
             "id": None,
         }
 
@@ -459,7 +462,9 @@ class TestCheckpointResult:
         )
 
         validation_definition.run.assert_called_with(
-            batch_definition_options=batch_parameters, evaluation_parameters=expectation_parameters
+            batch_definition_options=batch_parameters,
+            evaluation_parameters=expectation_parameters,
+            result_format=ResultFormat.SUMMARY,
         )
 
     @pytest.mark.unit
