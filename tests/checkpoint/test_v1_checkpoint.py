@@ -520,6 +520,7 @@ class TestCheckpointResult:
                     },
                 ],
             },
+            batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
         ):
             actual = result.describe_dict()
 
