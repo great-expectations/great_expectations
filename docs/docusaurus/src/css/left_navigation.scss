@@ -76,3 +76,19 @@ nav.menu {
   height: 0.75rem;
   width: 0.75rem;
 }
+.menu__link--sublist {
+  position: relative;
+}
+
+li.menu__list-item {
+  .menu__link--sublist-caret:after {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) rotateZ(0);
+    left: 0;
+  }
+
+  &--collapsed .menu__link--sublist-caret:after {
+    transform: translateY(-50%) rotateZ(-90deg);
+  }
+}

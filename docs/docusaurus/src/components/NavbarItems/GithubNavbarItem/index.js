@@ -7,9 +7,10 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0')
     const [forksCount, setForksCount] = useState('0')
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true)
+    const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        if(window.innerWidth > 996){
+        if(window.innerWidth > MOBILE_BREAKPOINT){
             fetch(`https://api.github.com/repos/${owner}/${repository}`)
                 .then(response => response.json())
                 .then(data => {
