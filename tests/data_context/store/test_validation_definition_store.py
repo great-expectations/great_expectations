@@ -101,7 +101,7 @@ def test_add_cloud(
 
     mock_put.assert_called_once_with(
         mock.ANY,  # requests Session
-        f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/validation-configs/{id}",
+        f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/validation-definitions/{id}",
         json={
             "data": {
                 "type": "validation_definition",
