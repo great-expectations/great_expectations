@@ -2443,7 +2443,7 @@ class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
 
         As such, this override of parent behavior is meant to keep ALL values provided
         to the config in the output dict. To get rid of this function, we need to
-        explicitly name all possible values in CheckpoingValidationConfigSchema as
+        explicitly name all possible values in CheckpoingValidationDefinitionSchema as
         schema fields.
         """
         data = super().dump(obj, many=many)

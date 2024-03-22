@@ -246,7 +246,7 @@ class TestValidationRun:
         assert value.success is True
 
 
-class TestValidationConfigSerialization:
+class TestValidationDefinitionSerialization:
     ds_name = "my_ds"
     asset_name = "my_asset"
     batch_definition_name = "my_batch_definition"

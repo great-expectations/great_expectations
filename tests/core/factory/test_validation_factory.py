@@ -94,7 +94,9 @@ def test_validation_factory_get_raises_error_on_missing_key(
     factory = ValidationFactory(store=store)
 
     # Act
-    with pytest.raises(DataContextError, match=f"ValidationConfig with name {name} was not found."):
+    with pytest.raises(
+        DataContextError, match=f"ValidationDefinition with name {name} was not found."
+    ):
         factory.get(name=name)
 
     # Assert
@@ -133,7 +135,7 @@ def test_validation_factory_add_raises_for_duplicate_key(
     # Act
     with pytest.raises(
         DataContextError,
-        match=f"Cannot add ValidationConfig with name {name} because it already exists.",
+        match=f"Cannot add ValidationDefinition with name {name} because it already exists.",
     ):
         factory.add(validation=validation_config)
 
@@ -175,7 +177,7 @@ def test_validation_factory_delete_raises_for_missing_validation(
     # Act
     with pytest.raises(
         DataContextError,
-        match=f"Cannot delete ValidationConfig with name {name} because it cannot be found.",
+        match=f"Cannot delete ValidationDefinition with name {name} because it cannot be found.",
     ):
         factory.delete(validation=validation_config)
 
@@ -235,7 +237,9 @@ def _test_validation_factory_add_success(
 ):
     # Arrange
     name = validation_config.name
-    with pytest.raises(DataContextError, match=f"ValidationConfig with name {name} was not found."):
+    with pytest.raises(
+        DataContextError, match=f"ValidationDefinition with name {name} was not found."
+    ):
         context.validations.get(name)
 
     # Act
@@ -295,7 +299,7 @@ def _test_validation_factory_delete_success(
     # Assert
     with pytest.raises(
         DataContextError,
-        match=f"ValidationConfig with name {name} was not found.",
+        match=f"ValidationDefinition with name {name} was not found.",
     ):
         context.validations.get(name)
 
