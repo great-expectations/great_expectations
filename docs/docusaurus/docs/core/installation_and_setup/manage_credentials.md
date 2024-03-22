@@ -63,17 +63,11 @@ Select one of the following secret manager applications:
   }>
 
   <TabItem value="yaml" label="YAML file">
-
-- An existing File Data Context.  To create a new File Data Context, see [Initialize a new Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
-
-
+    - An existing File Data Context.  To create a new File Data Context, see [Initialize a new Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
   </TabItem>
 
   <TabItem value="environment_variables" label="Environment variables">
-
-- The ability to set environment variables.
-
-
+    - The ability to set environment variables.
   </TabItem>
 
   <TabItem value="secrets_manager" label="Secrets manager">
