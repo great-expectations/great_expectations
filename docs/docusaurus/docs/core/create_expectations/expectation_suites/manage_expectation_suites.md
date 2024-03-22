@@ -11,6 +11,8 @@ import PrereqGxInstalled from '../../_core_components/prerequisites/_gx_installa
 import PrereqPreconfiguredDataContext from '../../_core_components/prerequisites/_preconfigured_data_context.md';
 import PrereqPreconfiguredDataSourceAndAsset from '../../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
+import StepRequestADataContext from '../../_core_components/common_steps/_request_a_data_context.md';
+
 An Expectation Suite contains a group of Expectations that describe the same set of data.  All the Expectations that you apply to your data are grouped into an Expectation Suite.
 
 ## Prerequisites
@@ -31,7 +33,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
   ```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py imports"
   ```
 
-2. [Get a Data Context](/core/installation_and_setup/manage_data_contexts.md).
+2. <StepRequestADataContext/>.
 
   In this example the variable `context` is your Data Context.
 
@@ -45,14 +47,14 @@ An Expectation Suite contains a group of Expectations that describe the same set
   ```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py add snippet to Data Context"
   ```
 
-:::tip
+  :::tip
 
-You can add an Expectation Suite to your Data Context at the same time as you create the Expectation Suite with the following code:
+  You can add an Expectation Suite to your Data Context at the same time as you create the Expectation Suite with the following code:
 
-```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py create and add Expectation Suite to Data Context"
-```
+  ```python title="Python code" name="core/expectation_suites/_examples/create_an_expectation_suite.py create and add Expectation Suite to Data Context"
+  ```
 
-:::
+  :::
 
 </TabItem>
 
@@ -71,7 +73,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="procedure" label="Procedure">
 
-1. [Get a Data Context](/core/installation_and_setup/manage_data_contexts.md).
+1. <StepRequestADataContext/>.
 
   In this example the variable `context` is your Data Context.
 
@@ -91,6 +93,38 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 </Tabs>
 
+## Rename an Expectation Suite
+
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
+
+1. Get the Expectation Suite to rename.  This could be an [existing Expectation Suite you retrieve from your Data Context](#get-an-existing-expectation-suite) or a [new Expectation Suite](#create-an-expectation-suite) that you have referenced earlier in your code.
+
+  In this example the variable `suite` is your Expectation Suite.
+
+2. Change the `name` attribute of the Expectation Suite:
+
+  ```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py edit attribute"
+  ``` 
+
+3. Save the changes to the Expectation Suite:
+
+  ```python title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py save the Expectation Suite"
+  ``` 
+
+  The `suite.save()` method will save all changes to the Expectation Suite, including changes that you have made to any Expectations within the Expectation Suite.  If you have unsaved changes to Expectations in the Expectation Suite that you do not wish to keep, you should rename the Expectation Suite in a new Python session.
+
+</TabItem>
+
+<TabItem value="sample_code" label="Sample code">
+
+```python showLineNumbers title="Python code" name="core/expectation_suites/_examples/edit_an_expectation_suite.py full example code"
+```
+
+</TabItem>
+
+</Tabs>
 
 ## Delete an Expectation Suite
 
@@ -98,11 +132,11 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="procedure" label="Procedure">
 
-1. [Get a Data Context](/core/installation_and_setup/manage_data_contexts.md).
+1. <StepRequestADataContext/>.
 
   In this example the variable `context` is your Data Context.
 
-2. Get the Expectation Suite to delete from the Data Context:
+2. Get the Expectation Suite to delete:
 
   ```python title="Python code" name="core/expectation_suites/_examples/delete_an_expectation_suite.py get Expectation Suite"
   ```
@@ -123,14 +157,13 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 </Tabs>
 
-
 ## Add Expectations to an Expectation Suite
 
 <Tabs>
 
 <TabItem value="procedure" label="Procedure">
 
-1. [Create a new](#create-a-new-expectation-suite) or [get an existing](#get-an-existing-expectation-suite) Expectation Suite.
+1. [Create a new](#create-an-expectation-suite) or [get an existing](#get-an-existing-expectation-suite) Expectation Suite.
 
   In this example the variable `suite` is your Expectation Suite.
 
@@ -195,11 +228,11 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
 <TabItem value="procedure" label="Procedure">
 
-1. [Get the Expectation to edit](#get-a-specific-expectation-from-an-expectation-suite) from its Expectation Suite.
+1. [Get the Expectation to edit](#get-an-expectation-from-an-expectation-suite) from its Expectation Suite.
 
   In this example the variable `expectation` is the Expectation you want to edit.
 
-2. [Modify the Expectation](/core/create_expectations/expectations/manage_expectations.md#modify-an-expectation-in-an-expecatation-suite):
+2. [Modify the Expectation](/core/create_expectations/expectations/manage_expectations.md#modify-an-expectation):
 
   ```python title="Python code" name="core/expectation_suites/_examples/edit_a_single_expectation.py edit attribute"
   ```
@@ -265,7 +298,7 @@ You can add an Expectation Suite to your Data Context at the same time as you cr
 
   In this example the variable `suite` is the Expectation Suite containing the Expectation to delete.
 
-3. [Get the Expectation to delete from its Expectation Suite](#get-a-specific-expectation-from-an-expectation-suite).
+3. [Get the Expectation to delete from its Expectation Suite](#get-an-expectation-from-an-expectation-suite).
 
   In this example the variable `expectation` is the Expectation to delete.
 
