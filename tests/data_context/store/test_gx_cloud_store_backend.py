@@ -192,6 +192,20 @@ def test_construct_url(
             },
             id="with nested kwargs",
         ),
+        pytest.param(
+            "expectation_suite",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            {"suite": {"expectations": []}},
+            {},
+            {
+                "data": {
+                    "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                    "suite": {"expectations": []},
+                },
+            },
+            id="V1 expectation suite",
+        ),
     ],
 )
 def test_construct_json_payload(
@@ -212,6 +226,22 @@ def test_construct_json_payload(
         )
         == expected
     )
+
+
+@pytest.mark.cloud
+def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attributes_value_type():
+    v1_resource = "expectation_suite"
+    organization_id = "de5b9ca6-caf7-43c8-a820-5540ec6df9b2"
+    attributes_value_of_legacy_type = "a string"
+    with pytest.raises(
+        TypeError, match="Type of parameter attributes_value is unsupported in GX V1."
+    ):
+        GXCloudStoreBackend.construct_versioned_payload(
+            resource_type=v1_resource,
+            organization_id=organization_id,
+            attributes_key="",
+            attributes_value=attributes_value_of_legacy_type,
+        )
 
 
 def test_set(
