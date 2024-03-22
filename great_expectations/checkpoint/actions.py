@@ -913,7 +913,7 @@ def store_validation_results(  # noqa: PLR0913
     checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     cloud_mode: bool = False,
 ) -> bool | GXCloudResourceRef:
-    """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationDefinition.
+    """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationDefinitions.
     This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
     """  # noqa: E501
     checkpoint_id = None
