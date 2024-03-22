@@ -29,7 +29,15 @@ YAML files make variables more visible, are easier to edit, and allow for modula
 
 The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments using ``FileSystemDataContexts``.
 
-To view all the code used in the examples, see [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py).
+<Tabs
+  queryString="yaml"
+  groupId="yaml"
+  defaultValue='procedure'
+  values={[
+  {label: 'Procedure', value:'procedure'},
+  {label: 'Sample code', value:'sample'},
+  ]}>
+<TabItem value="procedure">
 
 1. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
@@ -42,6 +50,18 @@ To view all the code used in the examples, see [how_to_configure_credentials.py]
 
     ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
     ```
+
+</TabItem>
+<TabItem value="sample">
+
+```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
+```
+
+```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
+```
+
+</TabItem>
+</Tabs>
 
 ## Secrets manager
 
