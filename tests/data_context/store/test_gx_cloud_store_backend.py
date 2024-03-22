@@ -25,8 +25,6 @@ from great_expectations.data_context.cloud_constants import (
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
-    construct_json_payload,
-    construct_url,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 
@@ -74,6 +72,14 @@ def construct_ge_cloud_store_backend(
             "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource/8746e25c-de4d-450d-967b-df0d5546590d",
             id="with id",
         ),
+        pytest.param(
+            "https://app.test.greatexpectations.io",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "expectation_suites",
+            "8746e25c-de4d-450d-967b-df0d5546590d",
+            "https://app.test.greatexpectations.io/api/v1/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/expectation-suites/8746e25c-de4d-450d-967b-df0d5546590d",
+            id="expectation-suites V1",
+        ),
     ],
 )
 def test_construct_url(
@@ -84,7 +90,7 @@ def test_construct_url(
     expected: str,
 ) -> None:
     assert (
-        construct_url(
+        GXCloudStoreBackend.construct_versioned_url(
             base_url=base_url,
             organization_id=organization_id,
             resource_name=resource_name,
@@ -197,7 +203,7 @@ def test_construct_json_payload(
     expected: dict,
 ) -> None:
     assert (
-        construct_json_payload(
+        GXCloudStoreBackend.construct_versioned_payload(
             resource_type=resource_type,
             organization_id=organization_id,
             attributes_key=attributes_key,

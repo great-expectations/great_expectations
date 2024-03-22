@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABCMeta
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
 from typing_extensions import TypedDict
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
@@ -38,72 +40,60 @@ class ErrorPayload(TypedDict):
     errors: List[ErrorDetail]
 
 
-class PayloadDataField(TypedDict):
+class PayloadDataFieldV0(TypedDict):
     attributes: dict
     id: str
     type: str
 
 
-class ResponsePayload(TypedDict):
-    data: PayloadDataField | list[PayloadDataField]
+class ResponsePayloadV0(TypedDict):
+    data: PayloadDataFieldV0 | list[PayloadDataFieldV0]
 
 
-AnyPayload = Union[ResponsePayload, ErrorPayload]
+class ResponsePayloadV1(pydantic.BaseModel):
+    """Basic shape of response returned from GXCloud backend."""
+
+    class Config:
+        extra = pydantic.Extra.forbid
+
+    data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
 
 
-class RequestPayloadDataField(TypedDict):
+class PayloadDataFieldV1(pydantic.BaseModel):
+    class Config:
+        extra = pydantic.Extra.allow
+
+    id: str
+
+
+AnyPayload = Union[ResponsePayloadV0, ErrorPayload]  # todo: update this to include V1
+
+
+class RequestPayloadDataFieldV0(TypedDict):
     attributes: dict
     id: NotRequired[str]
     type: str
 
 
-class RequestPayload(TypedDict):
-    data: RequestPayloadDataField
+class RequestPayloadV0(TypedDict):
+    data: RequestPayloadDataFieldV0
 
 
-def construct_url(
-    base_url: str,
-    organization_id: str,
-    resource_name: str,
-    id: Optional[str] = None,
-    v1: bool = False
-) -> str:
-    if not v1:
-        url = urljoin(
-            base_url,
-            f"organizations/{organization_id}/{hyphen(resource_name)}",
-        )
-        if id:
-            url = f"{url}/{id}"
-        return url
-    else:
-        url = urljoin(
-            base_url,
-            f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
-        )
-        if id:
-            url = f"{url}/{id}"
-        return url
+class RequestPayloadV1(pydantic.BaseModel):
+    """Basic shape of request expected by GXCloud backend."""
+
+    class Config:
+        extra = pydantic.Extra.forbid
+
+    data: dict
 
 
-def construct_json_payload(
-    resource_type: str,
-    organization_id: str,
-    attributes_key: str,
-    attributes_value: Any,
-    **kwargs: dict,
-) -> RequestPayload:
-    data: RequestPayload = {
-        "data": {
-            "type": resource_type,
-            "attributes": {
-                "organization_id": organization_id,
-                attributes_key: attributes_value,
-                **kwargs,
-            },
-        }
-    }
-    return data
+RequestPayload = Union[RequestPayloadV0, RequestPayloadV1]
+
+
+class EndpointVersion(str, Enum):
+    V0 = "V0"
+    V1 = "V1"
 
 
 def get_user_friendly_error_message(
@@ -172,6 +162,27 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
+    _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
+        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
+        GXCloudRESTResource.DATASOURCE: EndpointVersion.V0,
+        GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
+        GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
+        GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
+        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: EndpointVersion.V0,
+        GXCloudRESTResource.PROFILER: EndpointVersion.V0,
+        GXCloudRESTResource.RENDERED_DATA_DOC: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_CONFIG: EndpointVersion.V0,
+    }
+    # we want to support looking up EndpointVersion from either GXCloudRESTResource
+    # or a pluralized version of it, as defined by RESOURCE_PLURALITY_LOOKUP_DICT.
+    for key, value in RESOURCE_PLURALITY_LOOKUP_DICT.items():
+        # try to set the pluralized GXCloudRESTResource to the same endpoint as its singular,
+        # with a fallback default of EndpointVersion.V0.
+        _ENDPOINT_VERSION_LOOKUP[value] = _ENDPOINT_VERSION_LOOKUP.get(
+            key, EndpointVersion.V0
+        )
+
     def __init__(  # noqa: PLR0913
         self,
         ge_cloud_credentials: Dict,
@@ -238,7 +249,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @override
     def _get(  # type: ignore[override]
         self, key: Tuple[GXCloudRESTResource, str | None, str | None]
-    ) -> ResponsePayload:
+    ) -> ResponsePayloadV0:
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
@@ -258,18 +269,18 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
 
-        return cast(ResponsePayload, payload)
+        return cast(ResponsePayloadV0, payload)
 
     @override
-    def _get_all(self) -> ResponsePayload:  # type: ignore[override]
-        url = construct_url(
+    def _get_all(self) -> ResponsePayloadV0:  # type: ignore[override]
+        url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
         )
 
         payload = self._send_get_request_to_api(url=url)
-        return cast(ResponsePayload, payload)
+        return cast(ResponsePayloadV0, payload)
 
     def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
         try:
@@ -313,14 +324,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        data = construct_json_payload(
+        data = self.construct_versioned_payload(
             resource_type=resource_type.value,
             attributes_key=attributes_key,
             attributes_value=value,
             organization_id=organization_id,
         )
 
-        url = construct_url(
+        url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=organization_id,
             resource_name=self.ge_cloud_resource_name,
@@ -421,7 +432,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         kwargs = kwargs if self.validate_set_kwargs(kwargs) else {}
-        data = construct_json_payload(
+        data = self.construct_versioned_payload(
             resource_type=resource_type,
             attributes_key=attributes_key,
             attributes_value=value,
@@ -429,7 +440,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             **kwargs,
         )
 
-        url = construct_url(
+        url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=organization_id,
             resource_name=resource_name,
@@ -488,7 +499,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def list_keys(
         self, prefix: Tuple = ()
     ) -> List[Tuple[GXCloudRESTResource, str, str]]:
-        url = construct_url(
+        url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
@@ -527,15 +538,15 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> str:
         id = key[1]
         if key[0] == GXCloudRESTResource.EXPECTATION_SUITE:
-            url = construct_url(
+            url = self.construct_versioned_url(
                 base_url=self.ge_cloud_base_url,
                 organization_id=self.ge_cloud_credentials["organization_id"],
                 resource_name=self.ge_cloud_resource_name,
                 id=id,
-                v1=True
+                v1=True,
             )
         else:
-            url = construct_url(
+            url = self.construct_versioned_url(
                 base_url=self.ge_cloud_base_url,
                 organization_id=self.ge_cloud_credentials["organization_id"],
                 resource_name=self.ge_cloud_resource_name,
@@ -566,7 +577,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                     }
                 }
 
-                url = construct_url(
+                url = self.construct_versioned_url(
                     base_url=self.ge_cloud_base_url,
                     organization_id=self.ge_cloud_credentials["organization_id"],
                     resource_name=self.ge_cloud_resource_name,
@@ -577,7 +588,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 return True
             # delete by name
             elif resource_object_name:
-                url = construct_url(
+                url = self.construct_versioned_url(
                     base_url=self.ge_cloud_base_url,
                     organization_id=self.ge_cloud_credentials["organization_id"],
                     resource_name=self.ge_cloud_resource_name,
@@ -605,9 +616,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _get_one_or_none_from_response_data(
         self,
-        response_data: list[PayloadDataField] | PayloadDataField,
+        response_data: list[PayloadDataFieldV0] | PayloadDataFieldV0,
         key: tuple[GXCloudRESTResource, str | None, str | None],
-    ) -> PayloadDataField | None:
+    ) -> PayloadDataFieldV0 | None:
         """
         GET requests to cloud can either return response data that is a single object (get by id) or a
         list of objects with length >= 0 (get by name). This method takes this response data and returns a single
@@ -711,3 +722,96 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise TypeError(
                 f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
             )
+
+    @classmethod
+    def construct_versioned_url(
+        cls,
+        base_url: str,
+        organization_id: str,
+        resource_name: str,
+        id: Optional[str] = None,
+    ) -> str:
+        """Construct the correct url for a given resource."""
+        version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_name, EndpointVersion.V0)
+
+        if version == EndpointVersion.V1:
+            url = urljoin(
+                base_url,
+                f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
+            )
+            if id:
+                url = f"{url}/{id}"
+        else:  # default to EndpointVersion.V0
+            url = urljoin(
+                base_url,
+                f"organizations/{organization_id}/{hyphen(resource_name)}",
+            )
+            if id:
+                url = f"{url}/{id}"
+        return url
+
+    @classmethod
+    def construct_versioned_payload(
+        cls,
+        resource_type: str,
+        organization_id: str,
+        attributes_key: str,
+        attributes_value: Union[dict, Any],
+        **kwargs: dict,
+    ) -> RequestPayload:
+        """Construct the correct payload for the cloud backend.
+
+        Arguments `resource_type`, `attributes_key`, and `attributes_value` of type Any are deprecated
+        in GX V1, and are only required for resources still using V0 endpoints.
+        """
+        version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_type, EndpointVersion.V0)
+        if version == EndpointVersion.V1:
+            if isinstance(attributes_value, dict):
+                payload = {**attributes_value, **kwargs}
+            elif attributes_value is None:
+                payload = kwargs
+            else:
+                raise TypeError(
+                    "Type of parameter attributes_value is unsupported in GX V1."
+                )
+
+            return cls.construct_json_payload_v1(
+                organization_id=organization_id, payload=payload
+            )
+        else:
+            return cls.construct_json_payload_v0(
+                resource_type=resource_type,
+                organization_id=organization_id,
+                attributes_key=attributes_key,
+                attributes_value=attributes_value,
+                **kwargs,
+            )
+
+    @classmethod
+    def construct_json_payload_v0(
+        cls,
+        resource_type: str,
+        organization_id: str,
+        attributes_key: str,
+        attributes_value: Any,
+        **kwargs: dict,
+    ) -> RequestPayloadV0:
+        data: RequestPayloadV0 = {
+            "data": {
+                "type": resource_type,
+                "attributes": {
+                    "organization_id": organization_id,
+                    attributes_key: attributes_value,
+                    **kwargs,
+                },
+            }
+        }
+        return data
+
+    @classmethod
+    def construct_json_payload_v1(
+        cls,
+        organization_id: str,
+        payload: dict,
+    ) -> RequestPayloadV1:
+        return RequestPayloadV1(data={"organization_id": organization_id, **payload})

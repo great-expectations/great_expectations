@@ -39,8 +39,6 @@ from great_expectations.data_context.migrator.configuration_bundle import (
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
-    construct_json_payload,
-    construct_url,
     get_user_friendly_error_message,
 )
 
@@ -336,12 +334,12 @@ class CloudMigrator:
         attributes_key: str,
         attributes_value: dict,
     ) -> MigrationResponse:
-        url = construct_url(
+        url = GXCloudStoreBackend.construct_versioned_url(
             base_url=self._cloud_base_url,
             organization_id=self._cloud_organization_id,
             resource_name=resource_name,
         )
-        data = construct_json_payload(
+        data = GXCloudStoreBackend.construct_versioned_payload(
             resource_type=resource_type,
             organization_id=self._cloud_organization_id,
             attributes_key=attributes_key,
