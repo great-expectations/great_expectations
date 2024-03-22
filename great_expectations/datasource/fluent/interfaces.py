@@ -41,6 +41,7 @@ from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
 )
@@ -50,7 +51,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
-from great_expectations.validator.v1_validator import ResultFormat
 
 logger = logging.getLogger(__name__)
 

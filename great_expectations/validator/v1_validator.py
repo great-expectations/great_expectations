@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -8,6 +7,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
@@ -19,13 +19,6 @@ if TYPE_CHECKING:
         Expectation,
         ExpectationConfiguration,
     )
-
-
-class ResultFormat(str, Enum):
-    BOOLEAN_ONLY = "BOOLEAN_ONLY"
-    BASIC = "BASIC"
-    SUMMARY = "SUMMARY"
-    COMPLETE = "COMPLETE"
 
 
 class Validator:

@@ -15,6 +15,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -42,7 +43,6 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.validator.v1_validator import (
     OldValidator,
-    ResultFormat,
 )
 
 if TYPE_CHECKING:
