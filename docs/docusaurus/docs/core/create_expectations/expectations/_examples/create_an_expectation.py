@@ -7,15 +7,15 @@ The <snippet> tags are used to insert the corresponding code into the
  reviewing this script.
 """
 # <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py full example code">
-# 1. Import the GX Core library's `expectations` module.
-# <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py imports">
+# <snippet name="core/create_expectations/expectations/_examples/create_an_expectation.py import the expectations module">
 import great_expectations.expectations as gxe
-
 # </snippet>
-# 2. Initialize an Expectation
-# <snippet name="tests/integration/docusaurus/core/expectations/create_an_expectation.py initialize Expectations">
+
+# highlight-start
+# <snippet name="core/create_expectations/expectations/_examples/create_an_expectation.py create the expectation">
 expectation = gxe.ExpectColumnValuesToBeInSet(
     column="passenger_count", value_set=[1, 2, 3, 4, 5]
 )
 # </snippet>
+# highlight-end
 # </snippet>

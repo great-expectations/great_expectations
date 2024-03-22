@@ -280,6 +280,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Rename an Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite',
+            },
+            {
+              type: 'link',
               label: 'Delete an Expectation Suite',
               href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },

@@ -3,26 +3,27 @@ title: QueryMetricProvider
 sidebar_label: QueryMetricProvider
 ---
 
-
 <section class="sphinx-api-doc" id="querymetricprovider">
 
 <dl class="py class">
 <dt class="sig sig-object py" id="great_expectations.expectations.metrics.query_metric_provider.QueryMetricProvider">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.query_metric_provider.</span></span><span class="sig-name descname"><span class="pre">QueryMetricProvider</span></span><a class="headerlink" href="#great_expectations.expectations.metrics.query_metric_provider.QueryMetricProvider" title="Permalink to this definition">#</a></dt>
-<dd><p>Base class for all Query Metrics, which define metrics to construct SQL queries.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.expectations.metrics.query_metric_provider.</span></span><span class="sig-name descname"><span class="pre">QueryMetricProvider</span></span><a class="headerlink" href="#great_expectations.expectations.metrics.query_metric_provider.QueryMetricProvider" title="Permalink to this definition">#</a>
+</dt>
+<dd>
+<p>Base class for all Query Metrics, which define metrics to construct SQL queries.</p>
 <blockquote>
-<div><p>An example of this is <cite>query.table</cite>,
-which takes in a SQL query &amp; target table name, and returns the result of that query.</p>
-<p>In some cases, subclasses of MetricProvider, such as QueryMetricProvider, will already
-have correct values that may simply be inherited by Metric classes.</p>
+<div>
+<p>An example of this is <cite>query.table</cite>, which takes in a SQL query &amp; target table name, and returns the result of that query.</p>
+<p>In some cases, subclasses of MetricProvider, such as QueryMetricProvider, will already have correct values that may simply be inherited by Metric classes.</p>
 <dl class="simple">
-<dt>-Relevant Documentation Links
--</dt><dd><ul class="simple">
+<dt>-Relevant Documentation Links-</dt>
+<dd><ul class="simple">
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations">How To Create Custom Query Expectations</a></p></li>
 </ul>
 </dd>
 </dl>
-</div></blockquote>
+</div>
+</blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
