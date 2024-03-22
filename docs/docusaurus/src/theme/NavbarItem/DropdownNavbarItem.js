@@ -137,6 +137,7 @@ function DropdownNavbarItemMobile({
     </li>
   );
 }
+
 export default function DropdownNavbarItem({mobile = false, ...props}) {
   const Comp = mobile ? DropdownNavbarItemMobile : DropdownNavbarItemDesktop;
   return <Comp {...props} />;
