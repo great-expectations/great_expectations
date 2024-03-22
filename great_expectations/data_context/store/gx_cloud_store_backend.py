@@ -10,7 +10,6 @@ from urllib.parse import urljoin
 import requests
 from typing_extensions import TypedDict
 
-from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
@@ -50,26 +49,14 @@ class ResponsePayloadV0(TypedDict):
     data: PayloadDataFieldV0 | list[PayloadDataFieldV0]
 
 
-class PayloadDataFieldV1(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.allow
-
-    id: str
+class ResponsePayloadV1(TypedDict):
+    data: dict | list[dict]
 
 
-class ResponsePayloadV1(pydantic.BaseModel):
-    """Basic shape of response returned from GXCloud backend."""
-
-    class Config:
-        extra = pydantic.Extra.forbid
-
-    data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
+ResponsePayload = Union[ResponsePayloadV0, dict]
 
 
-ResponsePayload = Union[ResponsePayloadV0, dict]  # return ResponsePayloadV1 as dict
-
-
-AnyPayload = Union[ResponsePayloadV0, ErrorPayload]  # todo: update this to include V1
+AnyPayload = Union[ResponsePayloadV0, ResponsePayloadV1, ErrorPayload]
 
 
 class RequestPayloadDataFieldV0(TypedDict):
@@ -82,12 +69,7 @@ class RequestPayloadV0(TypedDict):
     data: RequestPayloadDataFieldV0
 
 
-class RequestPayloadV1(pydantic.BaseModel):
-    """Basic shape of request expected by GXCloud backend."""
-
-    class Config:
-        extra = pydantic.Extra.forbid
-
+class RequestPayloadV1(TypedDict):
     data: dict
 
 
@@ -288,10 +270,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             response.raise_for_status()
             response_json: dict = response.json()
-            if self._is_v1_resource:
-                return ResponsePayloadV1.parse_obj(response_json).dict()
-            else:
-                return response_json
+            return response_json
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
@@ -308,10 +287,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendTransientError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
-        except pydantic.ValidationError as validation_err:
-            raise StoreBackendError(
-                f"Expected GX V1 response but received something else: {validation_err.errors()}"
-            ) from validation_err
 
     @override
     def _move(self) -> None:  # type: ignore[override]
@@ -333,8 +308,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             attributes_value=value,
             organization_id=organization_id,
         )
-        if self._is_v1_resource:
-            data = data.dict()
 
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
@@ -554,6 +527,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             # prefer deletion by id if id present
             if id:
+                # this is the wrong shape for V1, but it doesn't matter, since the
+                # server doesn't look at JSON payload on delete operations.
                 data = {
                     "data": {
                         "type": self.ge_cloud_resource_type,
@@ -599,9 +574,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _get_one_or_none_from_response_data(
         self,
-        response_data: list[PayloadDataFieldV0] | PayloadDataFieldV0,
+        response_data: list[dict] | dict,
         key: tuple[GXCloudRESTResource, str | None, str | None],
-    ) -> PayloadDataFieldV0 | None:
+    ) -> dict | None:
         """
         GET requests to cloud can either return response data that is a single object (get by id) or a
         list of objects with length >= 0 (get by name). This method takes this response data and returns a single
@@ -789,7 +764,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id: str,
         payload: dict,
     ) -> RequestPayloadV1:
-        return RequestPayloadV1(data={"organization_id": organization_id, **payload})
+        return {
+            "data": {
+                **payload,
+                "organization_id": organization_id,
+            }
+        }
 
     @property
     def _is_v1_resource(self) -> bool:
