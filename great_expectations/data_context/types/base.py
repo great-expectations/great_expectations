@@ -2428,7 +2428,7 @@ class CheckpointValidationDefinition(AbstractConfig):
             setattr(self, k, v)
 
 
-class CheckpointValidationConfigSchema(AbstractConfigSchema):
+class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2497,7 +2497,7 @@ class CheckpointConfigSchema(Schema):
     evaluation_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
     validations = fields.List(
-        cls_or_instance=fields.Nested(CheckpointValidationConfigSchema),
+        cls_or_instance=fields.Nested(CheckpointValidationDefinitionSchema),
         required=False,
         allow_none=True,
     )
