@@ -50,6 +50,13 @@ class ResponsePayloadV0(TypedDict):
     data: PayloadDataFieldV0 | list[PayloadDataFieldV0]
 
 
+class PayloadDataFieldV1(pydantic.BaseModel):
+    class Config:
+        extra = pydantic.Extra.allow
+
+    id: str
+
+
 class ResponsePayloadV1(pydantic.BaseModel):
     """Basic shape of response returned from GXCloud backend."""
 
@@ -60,13 +67,6 @@ class ResponsePayloadV1(pydantic.BaseModel):
 
 
 ResponsePayload = Union[ResponsePayloadV0, ResponsePayloadV1]
-
-
-class PayloadDataFieldV1(pydantic.BaseModel):
-    class Config:
-        extra = pydantic.Extra.allow
-
-    id: str
 
 
 AnyPayload = Union[ResponsePayloadV0, ErrorPayload]  # todo: update this to include V1
