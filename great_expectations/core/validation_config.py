@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
-class ValidationConfig(BaseModel):
+class ValidationDefinition(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
 

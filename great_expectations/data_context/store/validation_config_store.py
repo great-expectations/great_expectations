@@ -12,7 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.validation_config import ValidationConfig
+    from great_expectations.core.validation_config import ValidationDefinition
 
 
 class ValidationConfigStore(Store):
@@ -58,18 +58,18 @@ class ValidationConfigStore(Store):
             data["suite"] = data["suite"].to_json_dict()
             return data
 
-        # In order to enable the custom json_encoders in ValidationConfig, we need to set `models_as_dict` off  # noqa: E501
+        # In order to enable the custom json_encoders in ValidationDefinition, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
         return value.json(models_as_dict=False, indent=2, sort_keys=True)
 
     @override
     def deserialize(self, value):
-        from great_expectations.core.validation_config import ValidationConfig
+        from great_expectations.core.validation_config import ValidationDefinition
 
-        return ValidationConfig.parse_raw(value)
+        return ValidationDefinition.parse_raw(value)
 
     @override
-    def _add(self, key: DataContextKey, value: ValidationConfig, **kwargs):
+    def _add(self, key: DataContextKey, value: ValidationDefinition, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value.id = str(uuid.uuid4())

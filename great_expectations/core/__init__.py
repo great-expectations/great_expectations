@@ -18,7 +18,7 @@ from .expectation_validation_result import (
 from .id_dict import IDDict
 from .run_identifier import RunIdentifier, RunIdentifierSchema
 from .urn import ge_urn
-from .validation_config import ValidationConfig
+from .validation_config import ValidationDefinition
 
 __all__ = [
     "Domain",
@@ -31,7 +31,7 @@ __all__ = [
     "IDDict",
     "RunIdentifier",
     "RunIdentifierSchema",
-    "ValidationConfig",
+    "ValidationDefinition",
     "expectationSuiteSchema",
     "expectationSuiteValidationResultSchema",
     "expectationValidationResultSchema",

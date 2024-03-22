@@ -17,7 +17,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_config import ValidationDefinition
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -62,14 +62,14 @@ def ephemeral_context():
 
 
 @pytest.fixture
-def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConfig:
+def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationDefinition:
     context = ephemeral_context
     batch_definition = (
         context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_config(BATCH_DEFINITION_NAME)
     )
-    return ValidationConfig(
+    return ValidationDefinition(
         name="my_validation",
         data=batch_definition,
         suite=ExpectationSuite(name="my_suite"),
@@ -79,13 +79,13 @@ def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConf
 @pytest.fixture
 def cloud_validation_config(
     empty_cloud_data_context: CloudDataContext,
-) -> ValidationConfig:
+) -> ValidationDefinition:
     batch_definition = (
         empty_cloud_data_context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_config(BATCH_DEFINITION_NAME)
     )
-    return ValidationConfig(
+    return ValidationDefinition(
         name="my_validation",
         data=batch_definition,
         suite=ExpectationSuite(name="my_suite"),
@@ -93,7 +93,7 @@ def cloud_validation_config(
 
 
 @pytest.mark.unit
-def test_validation_config_data_properties(validation_config: ValidationConfig):
+def test_validation_config_data_properties(validation_config: ValidationDefinition):
     assert validation_config.data.name == BATCH_DEFINITION_NAME
     assert validation_config.batch_definition.name == BATCH_DEFINITION_NAME
     assert validation_config.asset.name == ASSET_NAME
@@ -120,7 +120,7 @@ class TestValidationRun:
     def test_passes_simple_data_to_validator(
         self,
         mock_validator: MagicMock,
-        validation_config: ValidationConfig,
+        validation_config: ValidationDefinition,
     ):
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
@@ -145,7 +145,7 @@ class TestValidationRun:
         self,
         mock_build_batch_request,
         mock_validator: MagicMock,
-        validation_config: ValidationConfig,
+        validation_config: ValidationDefinition,
     ):
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value={"$PARAMETER": "max_value"})
@@ -172,7 +172,7 @@ class TestValidationRun:
     def test_returns_expected_data(
         self,
         mock_validator: MagicMock,
-        validation_config: ValidationConfig,
+        validation_config: ValidationDefinition,
     ):
         graph_validate_results = [ExpectationValidationResult(success=True)]
         mock_validator.graph_validate.return_value = graph_validate_results
@@ -196,7 +196,7 @@ class TestValidationRun:
         self,
         mock_validations_store_set: MagicMock,
         mock_validator: MagicMock,
-        validation_config: ValidationConfig,
+        validation_config: ValidationDefinition,
     ):
         validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
@@ -229,7 +229,7 @@ class TestValidationRun:
         self,
         mock_validations_store_set: MagicMock,
         mock_validator: MagicMock,
-        cloud_validation_config: ValidationConfig,
+        cloud_validation_config: ValidationDefinition,
     ):
         cloud_validation_config.suite.add_expectation(
             gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
@@ -320,7 +320,7 @@ class TestValidationConfigSerialization:
         batch_definition.id = batch_definition_id
         validation_config_suite.id = suite_id
 
-        validation_config = ValidationConfig(
+        validation_config = ValidationDefinition(
             name=self.validation_config_name,
             data=batch_definition,
             suite=validation_config_suite,
@@ -400,7 +400,7 @@ class TestValidationConfigSerialization:
             "id": None,
         }
 
-        validation_config = ValidationConfig.parse_obj(serialized_config)
+        validation_config = ValidationDefinition.parse_obj(serialized_config)
         assert validation_config.name == self.validation_config_name
         assert validation_config.data == batch_definition
         assert validation_config.suite == validation_config_suite
@@ -473,7 +473,7 @@ class TestValidationConfigSerialization:
         self, serialized_config: dict, error_substring: str
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
-            ValidationConfig.parse_obj(serialized_config)
+            ValidationDefinition.parse_obj(serialized_config)
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
@@ -593,11 +593,11 @@ class TestValidationConfigSerialization:
         error_substring: str,
     ):
         with pytest.raises(ValueError, match=f"{error_substring}*."):
-            ValidationConfig.parse_obj(serialized_config)
+            ValidationDefinition.parse_obj(serialized_config)
 
 
 @pytest.mark.unit
-def test_identifier_bundle_with_existing_id(validation_config: ValidationConfig):
+def test_identifier_bundle_with_existing_id(validation_config: ValidationDefinition):
     validation_config.id = "fa34fbb7-124d-42ff-9760-e410ee4584a0"
 
     assert validation_config.identifier_bundle() == _IdentifierBundle(
@@ -606,7 +606,7 @@ def test_identifier_bundle_with_existing_id(validation_config: ValidationConfig)
 
 
 @pytest.mark.unit
-def test_identifier_bundle_no_id(validation_config: ValidationConfig):
+def test_identifier_bundle_no_id(validation_config: ValidationDefinition):
     validation_config.id = None
 
     actual = validation_config.identifier_bundle()

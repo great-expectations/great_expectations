@@ -24,7 +24,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_config import ValidationDefinition
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -75,13 +75,13 @@ class TestCheckpointSerialization:
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
     ):
         name = "my_first_validation"
-        vc = ValidationConfig(
+        vc = ValidationDefinition(
             name=name,
             data=mocker.Mock(spec=BatchConfig),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
-            ValidationConfig,
+            ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
@@ -92,13 +92,13 @@ class TestCheckpointSerialization:
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
     ):
         name = "my_second_validation"
-        vc = ValidationConfig(
+        vc = ValidationDefinition(
             name=name,
             data=mocker.Mock(spec=BatchConfig),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
-            ValidationConfig,
+            ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
@@ -107,9 +107,9 @@ class TestCheckpointSerialization:
     @pytest.fixture
     def validation_configs(
         self,
-        validation_config_1: ValidationConfig,
-        validation_config_2: ValidationConfig,
-    ) -> list[ValidationConfig]:
+        validation_config_1: ValidationDefinition,
+        validation_config_2: ValidationDefinition,
+    ) -> list[ValidationDefinition]:
         return [validation_config_1, validation_config_2]
 
     @pytest.mark.parametrize(
@@ -149,7 +149,7 @@ class TestCheckpointSerialization:
     @pytest.mark.unit
     def test_checkpoint_serialization(
         self,
-        validation_configs: list[ValidationConfig],
+        validation_configs: list[ValidationDefinition],
         action_fixture_name: str | None,
         expected_actions: dict,
         request: pytest.FixtureRequest,
@@ -207,11 +207,11 @@ class TestCheckpointSerialization:
 
         bc1 = asset.add_batch_config(batch_config_name_1)
         suite1 = ExpectationSuite(suite_name_1)
-        vc1 = ValidationConfig(name=validation_config_name_1, data=bc1, suite=suite1)
+        vc1 = ValidationDefinition(name=validation_config_name_1, data=bc1, suite=suite1)
 
         bc2 = asset.add_batch_config(batch_config_name_2)
         suite2 = ExpectationSuite(suite_name_2)
-        vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
+        vc2 = ValidationDefinition(name=validation_config_name_2, data=bc2, suite=suite2)
 
         validation_definitions = [vc1, vc2]
         cp = Checkpoint(
@@ -369,7 +369,7 @@ class TestCheckpointResult:
     def validation_definition(
         self, mock_suite: pytest.MockFixture, mock_batch_def: pytest.MockFixture
     ):
-        vc = ValidationConfig(
+        vc = ValidationDefinition(
             name=self.validation_definition_name,
             data=mock_batch_def,
             suite=mock_suite,
@@ -412,11 +412,11 @@ class TestCheckpointResult:
             batch_id=f"{self.datasource_name}-{self.asset_name}",
         )
 
-        with mock.patch.object(ValidationConfig, "run", return_value=mock_run_result):
+        with mock.patch.object(ValidationDefinition, "run", return_value=mock_run_result):
             yield vc
 
     @pytest.mark.unit
-    def test_checkpoint_run_no_actions(self, validation_definition: ValidationConfig):
+    def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
         )
@@ -435,7 +435,7 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_actions(
-        self, validation_definition: ValidationConfig, actions: list[ValidationAction]
+        self, validation_definition: ValidationDefinition, actions: list[ValidationAction]
     ):
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
@@ -451,7 +451,7 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
-        self, validation_definition: ValidationConfig
+        self, validation_definition: ValidationDefinition
     ):
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
@@ -574,7 +574,7 @@ class TestCheckpointResult:
             ],
         )
 
-        validation_definition = ValidationConfig(
+        validation_definition = ValidationDefinition(
             name=self.validation_definition_name, data=batch_definition, suite=suite
         )
 

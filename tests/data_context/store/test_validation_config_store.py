@@ -7,7 +7,7 @@ import pytest
 
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_config import ValidationDefinition
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ValidationConfigStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
@@ -54,14 +54,14 @@ def cloud_backed_store(cloud_details: CloudDetails):
 @pytest.fixture
 def validation_config(
     in_memory_runtime_context: EphemeralDataContext,
-) -> ValidationConfig:
+) -> ValidationDefinition:
     context = in_memory_runtime_context
     batch_config = (
         context.sources.add_pandas("my_datasource")
         .add_csv_asset("my_asset", "data.csv")
         .add_batch_config("my_batch_config")
     )
-    return ValidationConfig(
+    return ValidationDefinition(
         name="my_validation",
         data=batch_config,
         suite=ExpectationSuite(name="my_suite"),
@@ -70,7 +70,7 @@ def validation_config(
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
-def test_add(request, store_fixture: str, validation_config: ValidationConfig):
+def test_add(request, store_fixture: str, validation_config: ValidationDefinition):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
 
     key = StringKey(key="my_validation")
@@ -83,7 +83,9 @@ def test_add(request, store_fixture: str, validation_config: ValidationConfig):
 
 
 @pytest.mark.cloud
-def test_add_cloud(cloud_backed_store: ValidationConfigStore, validation_config: ValidationConfig):
+def test_add_cloud(
+    cloud_backed_store: ValidationConfigStore, validation_config: ValidationDefinition
+):
     store = cloud_backed_store
 
     id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
