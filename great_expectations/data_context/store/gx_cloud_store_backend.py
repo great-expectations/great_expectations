@@ -66,7 +66,7 @@ class ResponsePayloadV1(pydantic.BaseModel):
     data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
 
 
-ResponsePayload = Union[ResponsePayloadV0, ResponsePayloadV1]
+ResponsePayload = Union[ResponsePayloadV0, dict]  # return ResponsePayloadV1 as dict
 
 
 AnyPayload = Union[ResponsePayloadV0, ErrorPayload]  # todo: update this to include V1
@@ -259,11 +259,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # Requests using query params may return {"data": []} if the object doesn't exist
         # We need to validate that even if we have a 200, there are contents to support existence
-        if self._is_v1_resource:
-            has_data = bool(payload.data)
-        else:
-            has_data = bool(payload.get("data"))
-        if not has_data:
+        response_has_data = bool(payload.get("data"))
+        if not response_has_data:
             raise StoreBackendError(
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
@@ -283,7 +280,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _send_get_request_to_api(
         self, url: str, params: dict | None = None
-    ) -> ResponsePayloadV0 | ResponsePayloadV1:
+    ) -> ResponsePayloadV0 | dict:
         try:
             response = self._session.get(
                 url=url,
@@ -292,7 +289,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             response_json: dict = response.json()
             if self._is_v1_resource:
-                return ResponsePayloadV1.parse_obj(response_json)
+                return ResponsePayloadV1.parse_obj(response_json).dict()
             else:
                 return response_json
         except json.JSONDecodeError as jsonError:
