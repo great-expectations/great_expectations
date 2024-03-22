@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, cast
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
-from great_expectations.core.validation_config import ValidationDefinition
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.store.validation_config_store import (
+    from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
 

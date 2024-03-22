@@ -146,7 +146,7 @@ if TYPE_CHECKING:
         DataDocsSiteConfigTypedDict,
         StoreConfigTypedDict,
     )
-    from great_expectations.data_context.store.validation_config_store import (
+    from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
@@ -330,7 +330,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        self._validations: ValidationFactory = ValidationFactory(store=self.validation_config_store)
+        self._validations: ValidationFactory = ValidationFactory(
+            store=self.validation_definition_store
+        )
 
     def _init_analytics(self) -> None:
         init_analytics(
@@ -607,9 +609,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.validations_store_name]
 
     @property
-    def validation_config_store(self) -> ValidationDefinitionStore:
-        # Purposely not exposing validation_config_store_name as a user-configurable property
-        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value]
+    def validation_definition_store(self) -> ValidationDefinitionStore:
+        # Purposely not exposing validation_definition_store_name as a user-configurable property
+        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value]
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:

@@ -12,7 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.validation_config import ValidationDefinition
+    from great_expectations.core.validation_definition import ValidationDefinition
 
 
 class ValidationDefinitionStore(Store):
@@ -22,7 +22,7 @@ class ValidationDefinitionStore(Store):
         """Given a name and optional ID, build the correct key for use in the ValidationDefinitionStore."""  # noqa: E501
         if self.cloud_mode:
             return GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.VALIDATION_CONFIG,
+                resource_type=GXCloudRESTResource.VALIDATION_DEFINITION,
                 id=id,
                 resource_name=name,
             )
@@ -46,10 +46,10 @@ class ValidationDefinitionStore(Store):
             validation_data = response_data
 
         id: str = validation_data["id"]
-        validation_config_dict: dict = validation_data["attributes"]["validation_config"]
-        validation_config_dict["id"] = id
+        validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
+        validation_definition_dict["id"] = id
 
-        return validation_config_dict
+        return validation_definition_dict
 
     @override
     def serialize(self, value):
@@ -64,7 +64,7 @@ class ValidationDefinitionStore(Store):
 
     @override
     def deserialize(self, value):
-        from great_expectations.core.validation_config import ValidationDefinition
+        from great_expectations.core.validation_definition import ValidationDefinition
 
         return ValidationDefinition.parse_raw(value)
 

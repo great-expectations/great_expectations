@@ -15,7 +15,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.validation_config import ValidationDefinition
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -23,7 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.store.validation_config_store import (
+    from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
 
@@ -99,19 +99,19 @@ class Checkpoint(BaseModel):
             raise ValueError("Checkpoint must contain at least one validation definition")
 
         if isinstance(validation_definitions[0], dict):
-            validation_config_store = project_manager.get_validation_config_store()
+            validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
                 for v in validation_definitions
             ]
-            return cls._deserialize_identifier_bundles_to_validation_configs(
-                identifier_bundles=identifier_bundles, store=validation_config_store
+            return cls._deserialize_identifier_bundles_to_validation_definitions(
+                identifier_bundles=identifier_bundles, store=validation_definition_store
             )
 
         return cast(List[ValidationDefinition], validation_definitions)
 
     @classmethod
-    def _deserialize_identifier_bundles_to_validation_configs(
+    def _deserialize_identifier_bundles_to_validation_definitions(
         cls, identifier_bundles: list[_IdentifierBundle], store: ValidationDefinitionStore
     ) -> list[ValidationDefinition]:
         validation_definitions: list[ValidationDefinition] = []

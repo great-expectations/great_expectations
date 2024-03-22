@@ -56,11 +56,11 @@ stores:
       suppress_store_backend_id: true
       base_directory: profilers/
 
-  validation_config_store:
+  validation_definition_store:
     class_name: ValidationDefinitionStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: validation_configs/
+      base_directory: validation_definitions/
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store

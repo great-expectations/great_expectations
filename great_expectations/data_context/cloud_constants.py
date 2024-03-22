@@ -31,4 +31,4 @@ class GXCloudRESTResource(str, Enum):
     PROFILER = "profiler"
     RENDERED_DATA_DOC = "rendered_data_doc"
     VALIDATION_RESULT = "validation_result"
-    VALIDATION_CONFIG = "validation_config"
+    VALIDATION_DEFINITION = "validation_definition"

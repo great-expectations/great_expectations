@@ -388,10 +388,10 @@ def get_validations_with_batch_request_as_dict(
         if "batch_request" in value:
             value["batch_request"] = get_batch_request_as_dict(batch_request=value["batch_request"])
 
-    return convert_validations_list_to_checkpoint_validation_configs(validations)
+    return convert_validations_list_to_checkpoint_validation_definitions(validations)
 
 
-def convert_validations_list_to_checkpoint_validation_configs(
+def convert_validations_list_to_checkpoint_validation_definitions(
     validations: list[dict] | list[CheckpointValidationDefinition] | None,
 ) -> list[CheckpointValidationDefinition]:
     # We accept both dicts and rich config types but all internal usage should use the latter

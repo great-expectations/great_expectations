@@ -21,7 +21,7 @@ from great_expectations.checkpoint.configurator import (
 )
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    convert_validations_list_to_checkpoint_validation_configs,
+    convert_validations_list_to_checkpoint_validation_definitions,
     does_batch_request_in_validations_contain_batch_data,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
@@ -149,7 +149,7 @@ class BaseCheckpoint(ConfigPeer):
                 "Must associate Checkpoint with a DataContext before running; please add using context.checkpoints.add"  # noqa: E501
             )
 
-        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
+        validations = convert_validations_list_to_checkpoint_validation_definitions(validations)
 
         if sum(bool(x) for x in [self._validator is not None, validator is not None]) > 1:
             raise gx_exceptions.CheckpointError(
@@ -209,7 +209,7 @@ class BaseCheckpoint(ConfigPeer):
         )
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = convert_validations_list_to_checkpoint_validation_configs(
+        validations = convert_validations_list_to_checkpoint_validation_definitions(
             substituted_runtime_config.get("validations") or []
         )
 
@@ -520,7 +520,7 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> None:
-        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
+        validations = convert_validations_list_to_checkpoint_validation_definitions(validations)
 
         if validator:
             if batch_request or _does_validation_contain_batch_request(validations=validations):
@@ -669,7 +669,7 @@ constructor arguments.
                 )
             return validator.convert_to_checkpoint_validations_list()
 
-        return convert_validations_list_to_checkpoint_validation_configs(validations)
+        return convert_validations_list_to_checkpoint_validation_definitions(validations)
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(
