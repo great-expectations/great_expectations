@@ -87,27 +87,27 @@ module.exports = {
             {
               type: 'link',
               label: 'Environment variables',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=environment_variables',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
             },
             {
               type: 'link',
               label: 'YAML file',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=yaml',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
             },
             {
               type: 'link',
               label: 'AWS Secrets Manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=aws',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?secrets_manager=aws',
             },
             {
               type: 'link',
               label: 'Google Cloud Secret Manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=gcp',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?secrets_manager=gcp',
             },
             {
               type: 'link',
               label: 'Azure Key Vault',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?credential_style=secrets_manager&manager=azure',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials?secrets_manager=azure',
             },
           ]
         },

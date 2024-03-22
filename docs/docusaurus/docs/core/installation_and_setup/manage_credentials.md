@@ -11,19 +11,7 @@ import InProgress from '../_core_components/_in_progress.md'
 
 To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely, outside of version control. With GX 1.0 you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers. 
 
-<Tabs 
-  queryString="credential_style" 
-  groupId="credentials" 
-  defaultValue='yaml' 
-  values={
-   [
-    {label: 'Environment variables', value:'environment_variables'},
-    {label: 'YAML file', value:'yaml'},
-    {label: 'Secrets manager', value:'secrets_manager'},
-   ]
-  }>
-
-<TabItem value="environment_variables" label="Environment variables">
+## Environment variables
 
 1. To store your database password and connection string as environment variables, run ``export ENV_VAR_NAME=env_var_value`` in a terminal or add the commands to your ``~/.bashrc`` file. For example:
 
@@ -35,9 +23,7 @@ To access a deployment environment or a data storage system you must provide you
     ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string"
     ```
 
-</TabItem>
-  
-<TabItem value="yaml" label="YAML file">
+## YAML file
 
 YAML files make variables more visible, are easier to edit, and allow for modularization. For example, you can create a YAML file for development and testing and another for production.
 
@@ -57,15 +43,19 @@ To view all the code used in the examples, see [how_to_configure_credentials.py]
     ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
     ```
 
-</TabItem>
-
-  
-<TabItem value="secrets_manager" label="Secrets manager">
+## Secrets manager
 
 GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers.
 
-<Tabs queryString="manager" groupId="manager" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'Google Cloud Secret Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
-
+<Tabs
+  queryString="secrets_manager"
+  groupId="manage-credentials"
+  defaultValue='aws'
+  values={[
+  {label: 'AWS Secrets Manager', value:'aws'},
+  {label: 'Google Cloud Secret Manager', value:'gcp'},
+  {label: 'Azure Key Vault', value:'azure'},
+  ]}>
 <TabItem value="aws">
 
 Configure your Great Expectations project to substitute variables from the AWS Secrets Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
@@ -119,7 +109,6 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
     ```
 
 </TabItem>
-
 <TabItem value="gcp">
 
 Configure your Great Expectations project to substitute variables from the Google Cloud Secret Manager. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
@@ -170,7 +159,6 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
     ```
 
 </TabItem>
-
 <TabItem value="azure">
 
 Configure your Great Expectations project to substitute variables from the Azure Key Vault. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
@@ -221,11 +209,6 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
     ```
 
 </TabItem>
-
-</Tabs>
-
-</TabItem>
-
 </Tabs>
 
 ## Next steps
