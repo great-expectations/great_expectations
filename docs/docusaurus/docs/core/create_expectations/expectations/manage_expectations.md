@@ -220,4 +220,4 @@ class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
 ## Next steps
 
 - Create Custom SQL Expectations
-- Manage Expectation Suites
+- [Manage Expectation Suites](/core/create_expectations/expectation_suites/manage_expectation_suites.md)
