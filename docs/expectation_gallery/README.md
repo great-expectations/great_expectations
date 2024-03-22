@@ -1,9 +1,8 @@
-README
-======
+# README
 
 ## Accepting pull requests
 
-Before ANY pull request introducing a new Expectation is accepted, be sure to checkout the contributor's branch locally (using the [GitHub CLI tool](https://cli.github.com) with `gh pr checkout {PR-NUMBER}`) and run the `build_gallery.py` script against that new Expectation!
+Before ANY pull request introducing a new Expectation is accepted, be sure to check out the contributor's branch locally (using the [GitHub CLI tool](https://cli.github.com) with `gh pr checkout {PR-NUMBER}`) and run the `build_gallery.py` script against that new Expectation!
 
 ```
 source venv/bin/activate
@@ -23,14 +22,14 @@ This will happen if the `CamelCaseName` (Expectation class name) and `snake_case
 
 ### Newly merged Expectation is missing from the staging Expectation Gallery
 
-> <https://staging-great-expectations.netlify.app/expectations>
+> &lt;https://staging-great-expectations.netlify.app/expectations&gt;
 
-If you have [manually triggered the expectation_gallery pipeline](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#manually-triggered-pipeline) or the [morning cron job against develop](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#the-build_gallerypy-script-in-ci) has completed, visit <https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=14>, click the "run" in question, click the `build_gallery_staging` stage, then click `Show gallery tracebacks`. If there is no traceback for your Expectation, [re-deploy the staging site on Netlify](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#re-deploy-the-staging-site).
+If you have [manually triggered the expectation_gallery pipeline](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#manually-triggered-pipeline) or the [morning cron job against develop](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#the-build_gallerypy-script-in-ci) has completed, visit &lt;https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=14&gt;, click the "run" in question, click the `build_gallery_staging` stage, then click `Show gallery tracebacks`. If there is no traceback for your Expectation, [re-deploy the staging site on Netlify](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#re-deploy-the-staging-site).
 
-If there is a traceback for your Expectation, try to resolve it in your current branch or in a new branch. See [info about gallery-tracebacks.txt](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#gallery-tracebackstxt).
+If there is a traceback for your Expectation, try to resolve it in your current branch or a new branch. See [info about gallery-tracebacks.txt](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/1-the-build_gallery.py-script.md#gallery-tracebackstxt).
 
 ### The production Expectation Gallery is out of date
 
-> <https://greatexpectations.io/expectations>
+> &lt;https://greatexpectations.io/expectations&gt;
 
 You must [manually promote staging to prod](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#manually-promote-staging-to-prod).

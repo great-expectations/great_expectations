@@ -20,7 +20,7 @@ If you’ve noticed an issue in the documentation, or have recommendations for i
 
 1. Go to the topic file in the [GitHub Great Expectations docs repository](https://github.com/great-expectations/great_expectations/tree/develop/docs) you want to edit. 
 
-    The topic URL includes the topic file name. For example, the URL for the Great Expectations Quickstart is <https://docs.greatexpectations.io/docs/tutorials/quickstart/>. The URL indicates the topic is located in the `tutorials` folder, and it's named `quickstart`.
+    The topic URL includes the topic file name. For example, the URL for the Great Expectations Quickstart is https://docs.greatexpectations.io/docs/tutorials/quickstart. The URL indicates the topic is located in the `tutorials` folder, and it's named `quickstart`.
 
 2. Click the file and then click **Edit this file**.
 

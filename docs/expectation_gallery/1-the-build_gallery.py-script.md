@@ -139,7 +139,7 @@ grep "to evaluate_json" testing-times.txt
 
 The script is run in Azure Pipelines against every core and contributed Expectation, in every backend that we officially test in (pandas, spark, sqlite, postgresql, mysql, mssql, trino, redshift, bigquery, snowflake). The script is run automatically once a day against the develop branch. See the [cron schedule in azure-pipelines-expectation-gallery.yml](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/azure-pipelines-expectation-gallery.yml#L10-L16).
 
-The resulting JSON file is pushed up to S3 at <https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json> and the [Algolia indicies](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#algolia-index-names) for the staging site are updated.
+The resulting JSON file is pushed up to S3 at &lt;https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json&gt; and the [Algolia indicies](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#algolia-index-names) for the staging site are updated.
 
 In the `expectation_gallery` pipeline, there are additional stages after the invocation(s) of `build_gallery.py` to show useful summary output, leveraging the trick mentioned in the [previous section](#full-loggingdebug-output-of-the-build_gallerypy-script).
 
@@ -189,7 +189,7 @@ cat expectation_library_v2--staging.json
 
 You can manually trigger the `expectation_gallery` pipeline in Azure Pipeline against a branch you are working on.
 
-- Visit <https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=14> while logged into Azure Pipelines
+- Visit &lt;https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=14&gt; while logged into Azure Pipelines
     - Click the "Run pipeline" button
     - In the "Branch/tag" dropdown, select your branch
     - Click the "Run" button

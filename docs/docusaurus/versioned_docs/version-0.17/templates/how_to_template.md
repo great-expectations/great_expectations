@@ -1,12 +1,12 @@
 ---
-title: TEMPLATE How to guide {stub}
+title: TEMPLATE How to guide stub
 ---
 import Prerequisites from '../components/_prerequisites.jsx'
 import NextSteps from '../guides/connecting_to_your_data/components/next_steps.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you {do something.} {That something is important or useful, because of some reason.}
+This guide will help you `do something`. `That something is important or useful, because of some reason`.
 
 <Prerequisites>
 
@@ -29,14 +29,14 @@ To qualify as a step, the things within it must either:
 
 ### 1. First do this
 
-Run this code to {do a thing}.
+Run this code to `do a thing`.
 
 ```python title="Python" name="docs/docusaurus/docs/oss/templates/script_example.py first import"
 ```
 
 ### 2. Next do this.
 
-{Concise description of what the user is going to do}.
+`Concise description of what the user is going to do`.
 
 ```python title="Python" name="docs/docusaurus/docs/oss/templates/script_example.py assert"
 ```
@@ -47,7 +47,7 @@ Run this code to {do a thing}.
 When using Great Expectations there are sometimes choices to be made that do not warrant a separate how to guide. Use tabs to represent these.
 :::
 
-Next, do {concise description of what the user is going to do} using either {choice in tab 1} or {choice in tab 2}.
+Next, do `oncise description of what the user is going to do` using either `choice in tab 1` or `choice in tab 2`.
 
 <Tabs
   groupId="tab1-or-tab2"
@@ -76,7 +76,7 @@ Run this code in Python.
 </Tabs>
 
 Congratulations!
-You successfully {did the thing this guide is about}.
+You successfully `did the thing this guide is about`.
 
 ## Additional Notes
 
@@ -96,7 +96,7 @@ To view the full scripts used in this page, see them on GitHub:
 Include them only if it makes sense.
 :::
 
-Now that you've {done a thing}, you'll want to work on these {other things}:
+Now that you've `done a thing`, you'll want to work on these `other things`:
 
 - [How to xxx](#)
 - [How to yyy](#)
