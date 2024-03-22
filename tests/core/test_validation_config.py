@@ -153,7 +153,7 @@ class TestValidationRun:
         mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run(
-            batch_definition_options={"year": 2024},
+            batch_parameters={"year": 2024},
             evaluation_parameters={"max_value": 9000},
             result_format=ResultFormat.COMPLETE,
         )
