@@ -2410,7 +2410,7 @@ class DataContextConfig(BaseYamlConfig):
         return self.__repr__()
 
 
-class CheckpointValidationConfig(AbstractConfig):
+class CheckpointValidationDefinition(AbstractConfig):
     def __init__(
         self,
         id: str | None = None,
@@ -2573,7 +2573,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[List[CheckpointValidationDefinition]] = None,
         default_validation_id: Optional[str] = None,
         commented_map: Optional[CommentedMap] = None,
         id: Optional[str] = None,
@@ -2626,11 +2626,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(self) -> List[CheckpointValidationDefinition]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[CheckpointValidationConfig]) -> None:
+    def validations(self, value: List[CheckpointValidationDefinition]) -> None:
         self._validations = value
 
     @property
