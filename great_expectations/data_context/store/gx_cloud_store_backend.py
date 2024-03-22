@@ -177,9 +177,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     for key, value in RESOURCE_PLURALITY_LOOKUP_DICT.items():
         # try to set the pluralized GXCloudRESTResource to the same endpoint as its singular,
         # with a fallback default of EndpointVersion.V0.
-        _ENDPOINT_VERSION_LOOKUP[value] = _ENDPOINT_VERSION_LOOKUP.get(
-            key, EndpointVersion.V0
-        )
+        _ENDPOINT_VERSION_LOOKUP[value] = _ENDPOINT_VERSION_LOOKUP.get(key, EndpointVersion.V0)
 
     def __init__(  # noqa: PLR0913
         self,
@@ -482,9 +480,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     @override
-    def list_keys(
-        self, prefix: Tuple = ()
-    ) -> List[Tuple[GXCloudRESTResource, str, str]]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -726,8 +722,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> RequestPayload:
         """Construct the correct payload for the cloud backend.
 
-        Arguments `resource_type`, `attributes_key`, and `attributes_value` of type Any are deprecated
-        in GX V1, and are only required for resources still using V0 endpoints.
+        Arguments `resource_type`, `attributes_key`, and `attributes_value` of type Any are
+        deprecated in GX V1, and are only required for resources still using V0 endpoints.
         """
         version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_type, EndpointVersion.V0)
         if version == EndpointVersion.V1:
@@ -736,13 +732,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             elif attributes_value is None:
                 payload = kwargs
             else:
-                raise TypeError(
-                    "Type of parameter attributes_value is unsupported in GX V1."
-                )
+                raise TypeError("Type of parameter attributes_value is unsupported in GX V1.")
 
-            return cls._construct_json_payload_v1(
-                organization_id=organization_id, payload=payload
-            )
+            return cls._construct_json_payload_v1(organization_id=organization_id, payload=payload)
         else:
             return cls._construct_json_payload_v0(
                 resource_type=resource_type,
