@@ -59,7 +59,9 @@ function DropdownNavbarItemDesktop({
         aria-haspopup="true"
         aria-expanded={showDropdown}
         role="button"
-        href={props.to ? undefined : '#'}
+        href={'#'}
+          // The href is overwritten to prevent default redirect when clicking on the label of the dropdown
+          // With the new href the user will stay in the current page even if they click it
         className={clsx('navbar__link', className)}
         {...props}
         onClick={props.to ? undefined : (e) => e.preventDefault()}
