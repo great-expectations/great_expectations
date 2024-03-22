@@ -9,7 +9,7 @@ from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_config import ValidationDefinition
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import ValidationConfigStore
+from great_expectations.data_context.store import ValidationDefinitionStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
@@ -21,13 +21,13 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def ephemeral_store():
-    return ValidationConfigStore(store_name="ephemeral_validation_config_store")
+    return ValidationDefinitionStore(store_name="ephemeral_validation_config_store")
 
 
 @pytest.fixture
 def file_backed_store(tmp_path):
     base_directory = tmp_path / "base_dir"
-    return ValidationConfigStore(
+    return ValidationDefinitionStore(
         store_name="file_backed_validation_config_store",
         store_backend={
             "class_name": "TupleFilesystemStoreBackend",
@@ -38,7 +38,7 @@ def file_backed_store(tmp_path):
 
 @pytest.fixture
 def cloud_backed_store(cloud_details: CloudDetails):
-    return ValidationConfigStore(
+    return ValidationDefinitionStore(
         store_name="cloud_backed_validation_config_store",
         store_backend={
             "class_name": "GXCloudStoreBackend",
@@ -71,7 +71,7 @@ def validation_config(
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
 def test_add(request, store_fixture: str, validation_config: ValidationDefinition):
-    store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+    store: ValidationDefinitionStore = request.getfixturevalue(store_fixture)
 
     key = StringKey(key="my_validation")
 
@@ -84,7 +84,7 @@ def test_add(request, store_fixture: str, validation_config: ValidationDefinitio
 
 @pytest.mark.cloud
 def test_add_cloud(
-    cloud_backed_store: ValidationConfigStore, validation_config: ValidationDefinition
+    cloud_backed_store: ValidationDefinitionStore, validation_config: ValidationDefinition
 ):
     store = cloud_backed_store
 
@@ -133,14 +133,14 @@ def test_add_cloud(
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
 def test_get_key(request, store_fixture: str):
-    store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+    store: ValidationDefinitionStore = request.getfixturevalue(store_fixture)
 
     name = "my_validation"
     assert store.get_key(name=name) == StringKey(key=name)
 
 
 @pytest.mark.cloud
-def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
+def test_get_key_cloud(cloud_backed_store: ValidationDefinitionStore):
     key = cloud_backed_store.get_key(name="my_validation")
     assert key.resource_type == GXCloudRESTResource.VALIDATION_CONFIG
     assert key.resource_name == "my_validation"
@@ -201,7 +201,7 @@ _VALIDATION_CONFIG = {
     ],
 )
 def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
-    actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+    actual = ValidationDefinitionStore.gx_cloud_response_json_to_object_dict(response_json)
     expected = {**_VALIDATION_CONFIG, "id": _VALIDATION_ID}
     assert actual == expected
 
@@ -241,4 +241,4 @@ def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
 )
 def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
     with pytest.raises(ValueError, match=f"{error_substring}*."):
-        ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+        ValidationDefinitionStore.gx_cloud_response_json_to_object_dict(response_json)

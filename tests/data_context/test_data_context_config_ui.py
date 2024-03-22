@@ -203,7 +203,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -338,7 +338,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "bucket": "custom_default_bucket_name",
                 "class_name": "TupleS3StoreBackend",
@@ -583,7 +583,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "project": "my_default_project",
@@ -730,7 +730,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "bucket": "custom_default_bucket_name",
                 "class_name": "TupleGCSStoreBackend",
@@ -872,7 +872,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -1065,7 +1065,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -1307,7 +1307,7 @@ def test_override_general_defaults(
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
         },
         "checkpoint_S3_store": {
             "class_name": "CheckpointStore",
@@ -1449,7 +1449,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
             },
         },
         "validation_config_store": {
-            "class_name": "ValidationConfigStore",
+            "class_name": "ValidationDefinitionStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -1571,7 +1571,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
             "validation_config_store": {
-                "class_name": "ValidationConfigStore",
+                "class_name": "ValidationDefinitionStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
         },

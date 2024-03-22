@@ -57,7 +57,7 @@ stores:
       base_directory: profilers/
 
   validation_config_store:
-    class_name: ValidationConfigStore
+    class_name: ValidationDefinitionStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: validation_configs/

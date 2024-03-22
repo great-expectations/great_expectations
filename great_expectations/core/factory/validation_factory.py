@@ -10,13 +10,13 @@ from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+        ValidationDefinitionStore,
     )
 
 
 # TODO: Add analytics as needed
 class ValidationFactory(Factory[ValidationDefinition]):
-    def __init__(self, store: ValidationConfigStore) -> None:
+    def __init__(self, store: ValidationDefinitionStore) -> None:
         self._store = store
 
     @public_api

@@ -24,7 +24,7 @@ from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+        ValidationDefinitionStore,
     )
 
 
@@ -112,7 +112,7 @@ class Checkpoint(BaseModel):
 
     @classmethod
     def _deserialize_identifier_bundles_to_validation_configs(
-        cls, identifier_bundles: list[_IdentifierBundle], store: ValidationConfigStore
+        cls, identifier_bundles: list[_IdentifierBundle], store: ValidationDefinitionStore
     ) -> list[ValidationDefinition]:
         validation_definitions: list[ValidationDefinition] = []
         for id_bundle in identifier_bundles:

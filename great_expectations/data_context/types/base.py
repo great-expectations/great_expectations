@@ -1626,7 +1626,7 @@ class DataContextConfigDefaults(enum.Enum):
         },
     }
     DEFAULT_VALIDATION_CONFIG_STORE = {
-        "class_name": "ValidationConfigStore",
+        "class_name": "ValidationDefinitionStore",
         "store_backend": {
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": DEFAULT_VALIDATION_CONFIG_STORE_BASE_DIRECTORY_RELATIVE_NAME,
@@ -1797,7 +1797,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             self.validation_config_store_name: {
-                "class_name": "ValidationConfigStore",
+                "class_name": "ValidationDefinitionStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": validation_config_store_bucket_name,
@@ -1921,7 +1921,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             self.validation_config_store_name: {
-                "class_name": "ValidationConfigStore",
+                "class_name": "ValidationDefinitionStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
@@ -2051,7 +2051,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             self.validation_config_store_name: {
-                "class_name": "ValidationConfigStore",
+                "class_name": "ValidationDefinitionStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
                     "project": validation_config_store_project_name,
@@ -2164,7 +2164,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             self.validation_config_store_name: {
-                "class_name": "ValidationConfigStore",
+                "class_name": "ValidationDefinitionStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
                     "credentials": validation_config_store_credentials,

@@ -59,7 +59,7 @@ def test_base_context(clear_env_vars):
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
-            "validation_config_store": {"class_name": "ValidationConfigStore"},
+            "validation_config_store": {"class_name": "ValidationDefinitionStore"},
         },
         validations_store_name="validation_result_store",
         data_docs_sites={},

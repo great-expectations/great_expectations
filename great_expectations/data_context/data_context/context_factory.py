@@ -39,7 +39,7 @@ if TYPE_CHECKING:
         ValidationsStore,
     )
     from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+        ValidationDefinitionStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
     from great_expectations.datasource.datasource_dict import DatasourceDict
@@ -103,7 +103,7 @@ class ProjectManager:
     def get_validations_store(self) -> ValidationsStore:
         return self._project.validations_store
 
-    def get_validation_config_store(self) -> ValidationConfigStore:
+    def get_validation_config_store(self) -> ValidationDefinitionStore:
         return self._project.validation_config_store
 
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:

@@ -17,7 +17,7 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store.validation_config_store import (
-    ValidationConfigStore,
+    ValidationDefinitionStore,
 )
 from great_expectations.exceptions import DataContextError
 
@@ -67,7 +67,7 @@ def test_validation_factory_get_uses_store_get(
 ):
     # Arrange
     name = validation_config.name
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     store.get.return_value = validation_config
@@ -88,7 +88,7 @@ def test_validation_factory_get_raises_error_on_missing_key(
 ):
     # Arrange
     name = validation_config.name
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
     store.get.return_value = validation_config
     factory = ValidationFactory(store=store)
@@ -106,7 +106,7 @@ def test_validation_factory_add_uses_store_add(
     mocker: MockerFixture, validation_config: ValidationDefinition
 ):
     # Arrange
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
     factory = ValidationFactory(store=store)
@@ -126,7 +126,7 @@ def test_validation_factory_add_raises_for_duplicate_key(
 ):
     # Arrange
     name = validation_config.name
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = True
     factory = ValidationFactory(store=store)
 
@@ -147,7 +147,7 @@ def test_validation_factory_delete_uses_store_remove_key(
     validation_config: ValidationDefinition,
 ):
     # Arrange
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
     factory = ValidationFactory(store=store)
@@ -168,7 +168,7 @@ def test_validation_factory_delete_raises_for_missing_validation(
 ):
     # Arrange
     name = validation_config.name
-    store = mocker.Mock(spec=ValidationConfigStore)
+    store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
     factory = ValidationFactory(store=store)
 

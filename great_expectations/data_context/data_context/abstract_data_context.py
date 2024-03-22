@@ -147,7 +147,7 @@ if TYPE_CHECKING:
         StoreConfigTypedDict,
     )
     from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+        ValidationDefinitionStore,
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
@@ -552,7 +552,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     def validations(self) -> ValidationFactory:
         if not self._validations:
             raise gx_exceptions.DataContextError(
-                "DataContext requires a configured ValidationConfigStore to persist Validations."
+                "DataContext requires a configured ValidationDefinitionStore to persist "
+                "Validations."
             )
         return self._validations
 
@@ -606,7 +607,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.validations_store_name]
 
     @property
-    def validation_config_store(self) -> ValidationConfigStore:
+    def validation_config_store(self) -> ValidationDefinitionStore:
         # Purposely not exposing validation_config_store_name as a user-configurable property
         return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value]
 
