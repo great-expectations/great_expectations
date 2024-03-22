@@ -1,7 +1,7 @@
 ---
 title: Manage credentials
-toc_min_heading_level: 3
-toc_max_heading_level: 3
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 
 import InProgress from '../_core_components/_in_progress.md'
 
-To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely, outside of version control. With GX 1.0 you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers. 
+To access a deployment environment or a data storage system you must provide your access credentials. These access credentials must be stored securely outside of version control. With GX 1.0 you can store you access credentials as environment variables, in a YAML file that exists outside of version control, or in a third-party secrets manager. GX 1.0 supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers. 
 
 ## Environment variables
 
@@ -45,7 +45,7 @@ To view all the code used in the examples, see [how_to_configure_credentials.py]
 
 ## Secrets manager
 
-GX 1.0 supports the Amazon Web Services, Google Cloud Platform, and Microsoft Azure secrets managers.
+GX 1.0 supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.
 
 <Tabs
   queryString="secrets_manager"
