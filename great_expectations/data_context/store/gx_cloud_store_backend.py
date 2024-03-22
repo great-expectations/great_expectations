@@ -4,7 +4,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -57,6 +57,9 @@ class ResponsePayloadV1(pydantic.BaseModel):
         extra = pydantic.Extra.forbid
 
     data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
+
+
+ResponsePayload = Union[ResponsePayloadV0, ResponsePayloadV1]
 
 
 class PayloadDataFieldV1(pydantic.BaseModel):
@@ -241,7 +244,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @override
     def _get(  # type: ignore[override]
         self, key: Tuple[GXCloudRESTResource, str | None, str | None]
-    ) -> ResponsePayloadV0:
+    ) -> ResponsePayload:
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
@@ -256,15 +259,19 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # Requests using query params may return {"data": []} if the object doesn't exist
         # We need to validate that even if we have a 200, there are contents to support existence
-        if not bool(payload.get("data")):
+        if self._is_v1_resource:
+            has_data = bool(payload.data)
+        else:
+            has_data = bool(payload.get("data"))
+        if not has_data:
             raise StoreBackendError(
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
 
-        return cast(ResponsePayloadV0, payload)
+        return payload
 
     @override
-    def _get_all(self) -> ResponsePayloadV0:  # type: ignore[override]
+    def _get_all(self) -> ResponsePayload:  # type: ignore[override]
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -272,9 +279,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         payload = self._send_get_request_to_api(url=url)
-        return cast(ResponsePayloadV0, payload)
+        return payload
 
-    def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
+    def _send_get_request_to_api(
+        self, url: str, params: dict | None = None
+    ) -> ResponsePayloadV0 | ResponsePayloadV1:
         try:
             response = self._session.get(
                 url=url,
@@ -282,7 +291,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             response.raise_for_status()
             response_json: dict = response.json()
-            return response_json
+            if self._is_v1_resource:
+                return ResponsePayloadV1.parse_obj(response_json)
+            else:
+                return response_json
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
@@ -299,6 +311,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendTransientError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
             )
+        except pydantic.ValidationError as validation_err:
+            raise StoreBackendError(
+                f"Expected GX V1 response but received something else: {validation_err.errors()}"
+            ) from validation_err
 
     @override
     def _move(self) -> None:  # type: ignore[override]
@@ -398,7 +414,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         value: Any,
         **kwargs,
     ) -> Union[bool, GXCloudResourceRef]:
-        # Each resource type has corresponding attribute key to include in POST body
+        # Each V0 resource type has corresponding attribute key to include in POST body
         resource = key[0]
         id: str = key[1]
 
@@ -497,7 +513,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             for resource in response_json["data"]:
                 id: str = resource["id"]
 
-                resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
+                if self._is_v1_resource:
+                    resource_dict = resource
+                else:
+                    resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
                 resource_name: str = resource_dict.get("name", "")
 
                 key = (resource_type, id, resource_name)
@@ -772,3 +791,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         payload: dict,
     ) -> RequestPayloadV1:
         return RequestPayloadV1(data={"organization_id": organization_id, **payload})
+
+    @property
+    def _is_v1_resource(self) -> bool:
+        return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
