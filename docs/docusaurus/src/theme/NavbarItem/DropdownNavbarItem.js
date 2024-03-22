@@ -100,7 +100,7 @@ function DropdownNavbarItemMobile({
   });
   // Expand/collapse if any item active after a navigation
   useEffect(() => {
-    if (containsActive) {
+    if (containsActive && !(props.label && props.label.includes('Version '))) {
       setCollapsed(!containsActive);
     }
   }, [localPathname, containsActive, setCollapsed]);
