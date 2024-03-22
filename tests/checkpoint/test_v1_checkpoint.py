@@ -42,6 +42,28 @@ def test_checkpoint_no_validation_definitions_raises_error():
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
 
 
+@pytest.fixture
+def slack_action():
+    return SlackNotificationAction(
+        slack_webhook="slack_webhook",
+    )
+
+
+@pytest.fixture
+def teams_action():
+    return MicrosoftTeamsNotificationAction(
+        teams_webhook="teams_webhook",
+    )
+
+
+@pytest.fixture
+def actions(
+    slack_action: SlackNotificationAction,
+    teams_action: MicrosoftTeamsNotificationAction,
+) -> list[ValidationAction]:
+    return [slack_action, teams_action]
+
+
 class TestCheckpointSerialization:
     @pytest.fixture
     def in_memory_context(self) -> EphemeralDataContext:
@@ -88,26 +110,6 @@ class TestCheckpointSerialization:
         validation_config_2: ValidationConfig,
     ) -> list[ValidationConfig]:
         return [validation_config_1, validation_config_2]
-
-    @pytest.fixture
-    def slack_action(self):
-        return SlackNotificationAction(
-            slack_webhook="slack_webhook",
-        )
-
-    @pytest.fixture
-    def teams_action(self):
-        return MicrosoftTeamsNotificationAction(
-            teams_webhook="teams_webhook",
-        )
-
-    @pytest.fixture
-    def actions(
-        self,
-        slack_action: SlackNotificationAction,
-        teams_action: MicrosoftTeamsNotificationAction,
-    ) -> list[ValidationAction]:
-        return [slack_action, teams_action]
 
     @pytest.mark.parametrize(
         "action_fixture_name, expected_actions",
@@ -426,6 +428,22 @@ class TestCheckpointResult:
         assert result.checkpoint_config == checkpoint
         assert result.validation_result_url is None
         assert result.success is True
+
+    @pytest.mark.unit
+    def test_checkpoint_run_actions(
+        self, validation_definition: ValidationConfig, actions: list[ValidationAction]
+    ):
+        validation_definitions = [validation_definition]
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=validation_definitions,
+            actions=actions,
+        )
+
+        with mock.patch.object(ValidationAction, "run") as mock_run:
+            _ = checkpoint.run()
+
+        assert mock_run.call_count == len(actions)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
