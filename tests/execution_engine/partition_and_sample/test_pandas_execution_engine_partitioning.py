@@ -9,7 +9,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -182,7 +182,7 @@ def test_partition_on_date_parts_single_date_parts(
      date_parts that is a string, DatePart enum objects, mixed case string.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "timestamp"
     result: pd.DataFrame = data_partitioner.partition_on_date_parts(
@@ -212,7 +212,7 @@ def test_partition_on_date_parts_multiple_date_parts(
      date parts that are strings, DatePart enum objects, a mixture and mixed case.
      To match our interface it should accept a dateutil parseable string as the batch identifier
      or a datetime and also fail when parameters are invalid.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "timestamp"
     result: pd.DataFrame = data_partitioner.partition_on_date_parts(
@@ -247,7 +247,7 @@ def test_named_date_part_methods(
 ):
     """Test that a partially pre-filled version of partition_on_date_parts() was called with the appropriate params.
     For example, partition_on_year.
-    """
+    """  # noqa: E501
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
@@ -296,21 +296,17 @@ def test_named_date_part_methods(
 def test_get_partitioner_method(underscore_prefix: str, partitioner_method_name: str):
     data_partitioner: PandasDataPartitioner = PandasDataPartitioner()
 
-    partitioner_method_name_with_prefix = (
-        f"{underscore_prefix}{partitioner_method_name}"
-    )
+    partitioner_method_name_with_prefix = f"{underscore_prefix}{partitioner_method_name}"
 
-    assert data_partitioner.get_partitioner_method(
-        partitioner_method_name_with_prefix
-    ) == getattr(data_partitioner, partitioner_method_name)
+    assert data_partitioner.get_partitioner_method(partitioner_method_name_with_prefix) == getattr(
+        data_partitioner, partitioner_method_name
+    )
 
 
 @pytest.mark.unit
 def test_get_batch_with_partition_on_whole_table_runtime(test_df):
     partitioned_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df, partitioner_method="_partition_on_whole_table"
-        )
+        RuntimeDataBatchSpec(batch_data=test_df, partitioner_method="_partition_on_whole_table")
     )
     assert partitioned_df.dataframe.shape == (120, 10)
 
@@ -335,9 +331,7 @@ def test_get_batch_with_partition_on_whole_table_filesystem(
 def test_get_batch_with_partition_on_whole_table_s3(
     batch_with_partition_on_whole_table_s3, test_df_small
 ):
-    df = PandasExecutionEngine().get_batch_data(
-        batch_spec=batch_with_partition_on_whole_table_s3
-    )
+    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_with_partition_on_whole_table_s3)
     assert df.dataframe.shape == test_df_small.shape
 
 
@@ -362,7 +356,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
             "group_names": ["index"],
         },
     )
-    batch_def = BatchDefinition(
+    batch_def = LegacyBatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
@@ -378,7 +372,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
     assert test_df.dataframe.shape == expected_df.shape
 
     # if key does not exist
-    batch_def_no_key = BatchDefinition(
+    batch_def_no_key = LegacyBatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
@@ -390,9 +384,7 @@ def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_dat
     )
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
-            batch_spec=my_data_connector.build_batch_spec(
-                batch_definition=batch_def_no_key
-            )
+            batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def_no_key)
         )
 
 

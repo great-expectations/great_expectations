@@ -159,10 +159,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
 {test_dir}/
     .ge_store_backend_id
 """
-    assert (
-        gen_directory_tree_str(project_path)
-        == initialized_directory_tree_with_store_backend_id
-    )
+    assert gen_directory_tree_str(project_path) == initialized_directory_tree_with_store_backend_id
 
     assert persistent_expectations_store.store_backend_id is not None
 
@@ -179,10 +176,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
         == persistent_expectations_store_duplicate.store_backend_id
     )
     # Check no change to filesystem
-    assert (
-        gen_directory_tree_str(project_path)
-        == initialized_directory_tree_with_store_backend_id
-    )
+    assert gen_directory_tree_str(project_path) == initialized_directory_tree_with_store_backend_id
 
 
 @pytest.mark.cloud
@@ -398,9 +392,7 @@ def _test_update_expectation_raises_error_for_missing_expectation(context):
     suite = ExpectationSuite(suite_name, expectations=[])
     context.suites.add(suite)
     # Act
-    with pytest.raises(
-        KeyError, match="Cannot update Expectation because it was not found."
-    ):
+    with pytest.raises(KeyError, match="Cannot update Expectation because it was not found."):
         store.update_expectation(suite=suite, expectation=expectation)
     # Assert
     updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))
@@ -466,9 +458,7 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    suite = ExpectationSuite(
-        suite_name, expectations=[existing_expectation.configuration]
-    )
+    suite = ExpectationSuite(suite_name, expectations=[existing_expectation.configuration])
     context.suites.add(suite)
     # Act
     nonexistent_expectation = gxe.ExpectColumnValuesToBeInSet(
@@ -478,9 +468,7 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
         value_set=[1, 2, 3],
         result_format="BASIC",
     )
-    with pytest.raises(
-        KeyError, match="Cannot delete Expectation because it was not found."
-    ):
+    with pytest.raises(KeyError, match="Cannot delete Expectation because it was not found."):
         store.delete_expectation(suite=suite, expectation=nonexistent_expectation)
     # Assert
     updated_suite_dict = store.get(key=store.get_key(name=suite.name, id=suite.id))

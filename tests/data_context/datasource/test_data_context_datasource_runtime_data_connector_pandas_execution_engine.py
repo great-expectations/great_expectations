@@ -109,9 +109,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
     context = data_context_with_datasource_pandas_engine
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -168,10 +166,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine_named_a
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers
 
 
 @pytest.mark.unit
@@ -183,7 +178,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
 
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
-    """
+    """  # noqa: E501
     context = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
@@ -210,7 +205,7 @@ def test_get_validator_wrong_type_pandas_engine(
 
     context.add_expectation_suite("my_expectations")
 
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
+    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()  # noqa: E501
     # data_connector_name should be a dict not an int
     with pytest.raises(TypeError):
         context.get_validator(
@@ -235,9 +230,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_pandas_engine(
 
     context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidBatchRequestError
-    ):
+    with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
         context.get_validator(
             batch_request=RuntimeBatchRequest(
@@ -446,7 +439,4 @@ def test_file_path_get_validator_successful_specification_pandas_engine_named_as
         expectation_suite_name="my_expectations",
     )
     assert isinstance(my_validator, Validator)
-    assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
-        == batch_identifiers
-    )
+    assert my_validator.active_batch.batch_definition.batch_identifiers == batch_identifiers

@@ -8,7 +8,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
  import great_expectations as gx
  context = gx.get_context()
  context.test_yaml_config(my_config)
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 
@@ -188,43 +188,33 @@ class _YamlConfigValidator:
                     config=config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_checkpoint_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                    )
+                instantiated_class = self._test_instantiation_of_checkpoint_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_data_connector_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                        runtime_environment=runtime_environment,
-                    )
+                instantiated_class = self._test_instantiation_of_data_connector_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
-                instantiated_class = (
-                    self._test_instantiation_of_profiler_from_yaml_config(
-                        name=name,
-                        class_name=class_name,
-                        config=config_with_substitutions,
-                    )
+                instantiated_class = self._test_instantiation_of_profiler_from_yaml_config(
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
                 )
             else:
-                instantiated_class = (
-                    self._test_instantiation_of_misc_class_from_yaml_config(
-                        name=name,
-                        config=config_with_substitutions,
-                        runtime_environment=runtime_environment,
-                    )
+                instantiated_class = self._test_instantiation_of_misc_class_from_yaml_config(
+                    name=name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
 
             if pretty_print:
-                print(
-                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
-                )
+                print(f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n")
 
             return instantiated_class
 
@@ -268,9 +258,7 @@ class _YamlConfigValidator:
         # we need to account for `runtime_environment` values that may have been passed.
         config_values.update(runtime_environment)
 
-        return config_provider.substitute_config(
-            config=yaml_config, config_values=config_values
-        )
+        return config_provider.substitute_config(config=yaml_config, config_values=config_values)
 
     def _load_config_string_as_commented_map(self, config_str: str) -> CommentedMap:
         substituted_config: CommentedMap = yaml.load(config_str)
@@ -409,9 +397,7 @@ class _YamlConfigValidator:
         Attempts to match config to the relevant class/parent and update usage stats payload.
         See `test_yaml_config` for more details.
         """
-        print(
-            "\tNo matching class found. Attempting to instantiate class from the raw config..."
-        )
+        print("\tNo matching class found. Attempting to instantiate class from the raw config...")
         instantiated_class = instantiate_class_from_config(
             config=config,
             runtime_environment={

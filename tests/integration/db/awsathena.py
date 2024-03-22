@@ -11,12 +11,12 @@ yaml = YAMLHandler()
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
     raise ValueError(
-        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"  # noqa: E501
     )
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
 if not ATHENA_STAGING_S3:
     raise ValueError(
-        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"  # noqa: E501
     )
 
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"

@@ -3,13 +3,11 @@ from __future__ import annotations
 import logging
 from typing import Tuple
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class TableMetricProvider(MetricProvider):
     """Base class for all Table Metrics, which define metrics to be calculated across a complete table.
 
@@ -27,7 +25,7 @@ class TableMetricProvider(MetricProvider):
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
-    """
+    """  # noqa: E501
 
     domain_keys: Tuple[str, ...] = (
         "batch_id",

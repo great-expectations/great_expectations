@@ -6,7 +6,7 @@ import pytest
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.interfaces import Batch
-from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (
+from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (  # noqa: E501
     ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metrics import (

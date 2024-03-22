@@ -41,9 +41,7 @@ def _assert_checkpoint_equality(actual: Checkpoint, expected: Checkpoint):
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(
-    checkpoint_dict: dict, mocker: MockerFixture
-):
+def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict, mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
@@ -76,9 +74,7 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(
     set_context(context)
 
     # Act
-    with pytest.raises(
-        DataContextError, match=f"Checkpoint with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         factory.get(name=name)
 
     # Assert
@@ -195,9 +191,7 @@ def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
     checkpoint = Checkpoint(name=name)
-    with pytest.raises(
-        DataContextError, match=f"Checkpoint with name {name} was not found."
-    ):
+    with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
 
     # Act

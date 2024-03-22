@@ -145,7 +145,7 @@ class TypeLookup(
         AssertionError: Should fail
         >>> print(tuple in t)
         False
-        """
+        """  # noqa: E501
         txn_exc: Union[Exception, None] = None
 
         backup_data = copy.copy(self.data)

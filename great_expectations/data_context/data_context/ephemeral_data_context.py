@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class EphemeralDataContext(AbstractDataContext):
-    """Subclass of AbstractDataContext that uses runtime values to generate a temporary or in-memory DataContext."""
+    """Subclass of AbstractDataContext that uses runtime values to generate a temporary or in-memory DataContext."""  # noqa: E501
 
     def __init__(
         self,
@@ -51,9 +51,7 @@ class EphemeralDataContext(AbstractDataContext):
     def _init_project_config(
         self, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
-        project_config = EphemeralDataContext.get_or_create_data_context_config(
-            project_config
-        )
+        project_config = EphemeralDataContext.get_or_create_data_context_config(project_config)
         return self._apply_global_config_overrides(project_config)
 
     @override

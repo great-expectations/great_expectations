@@ -266,14 +266,10 @@ def test_find_expectation_indexes(
     assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
 
     with pytest.raises(InvalidExpectationConfigurationError):
-        domain_success_runtime_suite.remove_expectation(
-            "not an expectation", match_type="runtime"
-        )
+        domain_success_runtime_suite.remove_expectation("not an expectation", match_type="runtime")
 
     with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(
-            exp1, match_type="not a match_type"
-        )
+        domain_success_runtime_suite.remove_expectation(exp1, match_type="not a match_type")
 
 
 @pytest.mark.cloud
@@ -297,9 +293,7 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
     with pytest.raises(InvalidExpectationConfigurationError) as err:
-        ge_cloud_suite.find_expectation_indexes(
-            expectation_configuration={"foo": "bar"}
-        )
+        ge_cloud_suite.find_expectation_indexes(expectation_configuration={"foo": "bar"})
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
@@ -342,18 +336,14 @@ def test_remove_expectation(
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
-    assert domain_success_runtime_suite.find_expectation_indexes(
-        exp1, match_type="domain"
-    ) == [0]
+    assert domain_success_runtime_suite.find_expectation_indexes(exp1, match_type="domain") == [0]
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
 
 
 @pytest.mark.filesystem
 def test_remove_expectation_without_necessary_args(single_expectation_suite):
     with pytest.raises(TypeError) as err:
-        single_expectation_suite.remove_expectation(
-            expectation_configuration=None, id=None
-        )
+        single_expectation_suite.remove_expectation(expectation_configuration=None, id=None)
     assert str(err.value) == "Must provide either expectation_configuration or id"
 
 
@@ -440,9 +430,9 @@ def test_add_expectation_with_ge_cloud_id(
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
     """
-    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-        0
-    ].id
+    expectation_ge_cloud_id = (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[0].id
+    )
     # updated expectation does not have ge_cloud_id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -457,24 +447,19 @@ def test_add_expectation_with_ge_cloud_id(
         updated_expectation, overwrite_existing=True
     )
     assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-            0
-        ].id
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[0].id
         == expectation_ge_cloud_id
     )
     # make sure expectation config was actually updated
-    assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
-            0
-        ].kwargs["value_set"]
-        == [
-            11,
-            22,
-            33,
-            44,
-            55,
-        ]
-    )
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+        0
+    ].kwargs["value_set"] == [
+        11,
+        22,
+        33,
+        44,
+        55,
+    ]
 
 
 @pytest.mark.filesystem
@@ -486,9 +471,7 @@ def test_remove_all_expectations_of_type(
         expectation.expectation_type == expectation_type
         for expectation in suite_with_table_and_column_expectations.expectations
     )
-    suite_with_table_and_column_expectations.remove_all_expectations_of_type(
-        expectation_type
-    )
+    suite_with_table_and_column_expectations.remove_all_expectations_of_type(expectation_type)
     assert not any(
         expectation.expectation_type == expectation_type
         for expectation in suite_with_table_and_column_expectations.expectations

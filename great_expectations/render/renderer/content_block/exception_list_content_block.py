@@ -61,9 +61,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, render_object, **kwargs):
-        return super().render(
-            render_object=render_object, exception_list_content_block=True
-        )
+        return super().render(render_object=render_object, exception_list_content_block=True)
 
     @classmethod
     def _missing_content_block_fn(
@@ -97,9 +95,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                             "params": {
                                 "column": column,
                                 "expectation_type": result.expectation_config.expectation_type,
-                                "exception_message": result.exception_info[
-                                    "exception_message"
-                                ],
+                                "exception_message": result.exception_info["exception_message"],
                             },
                             "styling": styling,
                         },

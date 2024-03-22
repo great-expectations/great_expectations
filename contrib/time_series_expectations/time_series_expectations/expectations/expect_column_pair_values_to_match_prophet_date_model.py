@@ -75,9 +75,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
             check_if_value_is_in_model_forecast_bounds, pyspark.types.BooleanType()
         )
 
-        result = check_if_value_is_in_model_forecast_bounds_udf(
-            F.struct(column_A, column_B)
-        )
+        result = check_if_value_is_in_model_forecast_bounds_udf(F.struct(column_A, column_B))
 
         return result
 

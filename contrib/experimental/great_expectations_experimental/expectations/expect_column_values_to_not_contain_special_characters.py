@@ -53,18 +53,14 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                     return False
             return True
 
-        return column.apply(
-            not_contain_special_character, args=(list(string.punctuation))
-        )
+        return column.apply(not_contain_special_character, args=(list(string.punctuation)))
 
     # This method defines the business logic for evaluating the metric when using a SparkExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
             special_characters = [
-                char
-                for char in list(string.punctuation)
-                if char not in allowed_characters
+                char for char in list(string.punctuation) if char not in allowed_characters
             ]
 
             for c in special_characters:

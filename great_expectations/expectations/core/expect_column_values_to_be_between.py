@@ -79,7 +79,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -126,7 +126,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @override
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: C901 - too complex
         cls,
         renderer_configuration: RendererConfiguration,
     ):
@@ -161,7 +161,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                template_str += (
+                    f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                )
             elif not params.min_value:
                 template_str += f"values must be {at_most_str} $max_value"
             else:
@@ -221,14 +223,12 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
             mostly_str = ""
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 mostly_str = ", at least $mostly_pct % of the time"
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
+                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."  # noqa: E501
 
             elif params["min_value"] is None:
                 template_str += f"values must be {at_most_str} $max_value{mostly_str}."

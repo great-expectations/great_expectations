@@ -12,3 +12,7 @@
     color: var(--link-hover-color);
   }
 }
+
+.breadcrumbs:has(li:only-child) {
+  display: none;
+}

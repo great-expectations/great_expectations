@@ -245,9 +245,7 @@ def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attribut
 
 
 def test_set(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -264,16 +262,12 @@ def test_set(
             ),
         ],
     )
-    my_simple_checkpoint_config_serialized = (
-        my_simple_checkpoint_config.get_schema_class()().dump(
-            my_simple_checkpoint_config
-        )
+    my_simple_checkpoint_config_serialized = my_simple_checkpoint_config.get_schema_class()().dump(
+        my_simple_checkpoint_config
     )
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(
-            ("checkpoint", None, None), my_simple_checkpoint_config_serialized
-        )
+        store_backend.set(("checkpoint", None, None), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
@@ -318,9 +312,7 @@ def test_set(
 
 
 def test_list_keys(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -335,9 +327,7 @@ def test_list_keys(
 
 @responses.activate
 def test_list_keys_with_empty_payload_from_backend(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ):
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.DATASOURCE)
 
@@ -354,13 +344,9 @@ def test_list_keys_with_empty_payload_from_backend(
 
 @responses.activate
 def test_has_key_with_empty_payload_from_backend(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ):
-    store_backend = construct_ge_cloud_store_backend(
-        GXCloudRESTResource.EXPECTATION_SUITE
-    )
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.EXPECTATION_SUITE)
 
     name = "my_nonexistent_suite"
     responses.add(
@@ -377,13 +363,9 @@ def test_has_key_with_empty_payload_from_backend(
 
 @responses.activate
 def test_get_with_empty_payload_from_backend(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ):
-    store_backend = construct_ge_cloud_store_backend(
-        GXCloudRESTResource.EXPECTATION_SUITE
-    )
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.EXPECTATION_SUITE)
 
     name = "my_nonexistent_suite"
     responses.add(
@@ -401,9 +383,7 @@ def test_get_with_empty_payload_from_backend(
 
 
 def test_get_all(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.DATASOURCE)
 
@@ -417,9 +397,7 @@ def test_get_all(
 
 
 def test_remove_key_with_only_id(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -449,9 +427,7 @@ def test_remove_key_with_only_id(
 
 
 def test_remove_key_with_id_and_name(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -478,9 +454,7 @@ def test_remove_key_with_id_and_name(
 
 
 def test_remove_key_with_only_name(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -497,9 +471,7 @@ def test_remove_key_with_only_name(
 
 
 def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 
@@ -524,9 +496,7 @@ def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
 def test_allowed_set_kwargs(
     resource_type: GXCloudRESTResource,
     expected_set_kwargs: Set[str],
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(resource_type)
     actual = store_backend.allowed_set_kwargs
@@ -562,20 +532,14 @@ def test_allowed_set_kwargs(
 def test_validate_set_kwargs(
     kwargs: dict,
     expected: Union[bool, None],
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
-    store_backend = construct_ge_cloud_store_backend(
-        GXCloudRESTResource.VALIDATION_RESULT
-    )
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.VALIDATION_RESULT)
     assert store_backend.validate_set_kwargs(kwargs) == expected
 
 
 def test_config_property_and_defaults(
-    construct_ge_cloud_store_backend: Callable[
-        [GXCloudRESTResource], GXCloudStoreBackend
-    ],
+    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
 

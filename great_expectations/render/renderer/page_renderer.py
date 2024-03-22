@@ -52,9 +52,7 @@ class ValidationResultsPageRenderer(Renderer):
         """
         super().__init__()
         if column_section_renderer is None:
-            column_section_renderer = {
-                "class_name": "ValidationResultsColumnSectionRenderer"
-            }
+            column_section_renderer = {"class_name": "ValidationResultsColumnSectionRenderer"}
         module_name = "great_expectations.render.renderer.column_section_renderer"
         self._column_section_renderer = instantiate_class_from_config(
             config=column_section_renderer,
@@ -106,7 +104,7 @@ class ValidationResultsPageRenderer(Renderer):
 
         # Add datasource key to batch_kwargs if missing
         if "datasource" not in batch_kwargs:
-            # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
+            # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern  # noqa: E501
             if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
@@ -143,12 +141,8 @@ class ValidationResultsPageRenderer(Renderer):
             **{
                 "renderer_type": "ValidationResultsPageRenderer",
                 "page_title": page_title,
-                "batch_kwargs": batch_kwargs
-                if "batch_kwargs" in validation_results.meta
-                else None,
-                "batch_spec": batch_kwargs
-                if "batch_spec" in validation_results.meta
-                else None,
+                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
+                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
                 "expectation_suite_name": expectation_suite_name,
                 "sections": sections,
                 "utm_medium": "validation-results-page",
@@ -353,8 +347,7 @@ class ValidationResultsPageRenderer(Renderer):
             suite_meta is not None
             and "notes" in suite_meta
             and "format" in suite_meta["notes"]
-            and suite_meta["notes"]["format"]
-            == LegacyDiagnosticRendererType.META_PROPERTIES
+            and suite_meta["notes"]["format"] == LegacyDiagnosticRendererType.META_PROPERTIES
         ):
             return suite_meta["notes"]["content"]
         else:
@@ -369,9 +362,7 @@ class ValidationResultsPageRenderer(Renderer):
             + ["expectations"]
             + str(expectation_suite_name).split(".")
         )
-        expectation_suite_path = (
-            f"{os.path.join(*expectation_suite_path_components)}.html"  # noqa: PTH118
-        )
+        expectation_suite_path = f"{os.path.join(*expectation_suite_path_components)}.html"  # noqa: PTH118
         # TODO: deprecate dual batch api support in 0.14
         batch_kwargs = (
             validation_results.meta.get("batch_kwargs", {})
@@ -387,9 +378,7 @@ class ValidationResultsPageRenderer(Renderer):
             )
         else:
             success = "Failed"
-            html_success_icon = (
-                '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
-            )
+            html_success_icon = '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
 
         return RenderedHeaderContent(
             **{
@@ -408,7 +397,7 @@ class ValidationResultsPageRenderer(Renderer):
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
+                            "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501
                             "params": {
                                 "suite_title": "Expectation Suite:",
                                 "data_asset": "Data asset:",
@@ -451,9 +440,7 @@ class ValidationResultsPageRenderer(Renderer):
         elif isinstance(run_id, dict):
             run_name = run_id.get("run_name") or "__none__"
             try:
-                run_time = str(
-                    parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
-                )
+                run_time = str(parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ"))
             except (ValueError, TypeError):
                 run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
@@ -616,9 +603,7 @@ class ValidationResultsPageRenderer(Renderer):
             if statistics.get(key) is not None:
                 if key == "success_percent":
                     # table_rows.append([value, "{0:.2f}%".format(statistics[key])])
-                    table_rows.append(
-                        [value, f"{num_to_str(statistics[key], precision=4)}%"]
-                    )
+                    table_rows.append([value, f"{num_to_str(statistics[key], precision=4)}%"])
                 else:
                     table_rows.append([value, statistics[key]])
 
@@ -654,9 +639,7 @@ class ExpectationSuitePageRenderer(Renderer):
     def __init__(self, column_section_renderer=None) -> None:
         super().__init__()
         if column_section_renderer is None:
-            column_section_renderer = {
-                "class_name": "ExpectationSuiteColumnSectionRenderer"
-            }
+            column_section_renderer = {"class_name": "ExpectationSuiteColumnSectionRenderer"}
         module_name = "great_expectations.render.renderer.column_section_renderer"
         self._column_section_renderer = instantiate_class_from_config(
             config=column_section_renderer,
@@ -686,9 +669,7 @@ class ExpectationSuitePageRenderer(Renderer):
             self._render_expectation_suite_info(expectations),
         ]
 
-        table_level_expectations_content_block = self._render_table_level_expectations(
-            columns
-        )
+        table_level_expectations_content_block = self._render_table_level_expectations(columns)
         if table_level_expectations_content_block is not None:
             overview_content_blocks.append(table_level_expectations_content_block)
 
@@ -766,9 +747,9 @@ class ExpectationSuitePageRenderer(Renderer):
     def _render_expectation_suite_info(cls, expectations):
         expectation_suite_name = expectations.name
         # TODO: Deprecate "great_expectations.__version__"
-        ge_version = expectations.meta.get(
-            "great_expectations_version"
-        ) or expectations.meta.get("great_expectations.__version__")
+        ge_version = expectations.meta.get("great_expectations_version") or expectations.meta.get(
+            "great_expectations.__version__"
+        )
 
         return RenderedTableContent(
             **{
@@ -802,9 +783,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(
-        cls, expectations: ExpectationSuite
-    ) -> TextContent:
+    def _render_expectation_suite_notes(cls, expectations: ExpectationSuite) -> TextContent:
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -816,9 +795,9 @@ class ExpectationSuitePageRenderer(Renderer):
 
         content += [
             # TODO: Leaving these two paragraphs as placeholders for later development.
-            # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",
+            # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",  # noqa: E501
             # "{name}, {name}, and {name} have also contributed additions and revisions.",
-            f"This Expectation suite currently contains {total_expectations} total Expectations across {total_columns} columns.",
+            f"This Expectation suite currently contains {total_expectations} total Expectations across {total_columns} columns.",  # noqa: E501
         ]
 
         notes = expectations.notes
@@ -873,19 +852,15 @@ class ExpectationSuitePageRenderer(Renderer):
 
 
 class ProfilingResultsPageRenderer(Renderer):
-    def __init__(
-        self, overview_section_renderer=None, column_section_renderer=None
-    ) -> None:
+    def __init__(self, overview_section_renderer=None, column_section_renderer=None) -> None:
         super().__init__()
         if overview_section_renderer is None:
-            overview_section_renderer = {
-                "class_name": "ProfilingResultsOverviewSectionRenderer"
-            }
+            overview_section_renderer = {"class_name": "ProfilingResultsOverviewSectionRenderer"}
         if column_section_renderer is None:
-            column_section_renderer = {
-                "class_name": "ProfilingResultsColumnSectionRenderer"
-            }
-        module_name = "great_expectations.render.renderer.profiling_results_overview_section_renderer"
+            column_section_renderer = {"class_name": "ProfilingResultsColumnSectionRenderer"}
+        module_name = (
+            "great_expectations.render.renderer.profiling_results_overview_section_renderer"
+        )
         self._overview_section_renderer = instantiate_class_from_config(
             config=overview_section_renderer,
             runtime_environment={},
@@ -936,7 +911,7 @@ class ProfilingResultsPageRenderer(Renderer):
 
         # add datasource key to batch_kwargs if missing
         if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
-            # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
+            # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern  # noqa: E501
             if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
@@ -948,9 +923,7 @@ class ProfilingResultsPageRenderer(Renderer):
         columns = self._group_evrs_by_column(validation_results)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-        column_types = self._overview_section_renderer._get_column_types(
-            validation_results
-        )
+        column_types = self._overview_section_renderer._get_column_types(validation_results)
 
         data_asset_name = batch_kwargs.get("data_asset_name")
         # Determine whether we have a custom run_name
@@ -983,12 +956,8 @@ class ProfilingResultsPageRenderer(Renderer):
                 "page_title": page_title,
                 "expectation_suite_name": expectation_suite_name,
                 "utm_medium": "profiling-results-page",
-                "batch_kwargs": batch_kwargs
-                if "batch_kwargs" in validation_results.meta
-                else None,
-                "batch_spec": batch_kwargs
-                if "batch_spec" in validation_results.meta
-                else None,
+                "batch_kwargs": batch_kwargs if "batch_kwargs" in validation_results.meta else None,
+                "batch_spec": batch_kwargs if "batch_spec" in validation_results.meta else None,
                 "sections": [
                     self._overview_section_renderer.render(
                         validation_results, section_name="Overview"

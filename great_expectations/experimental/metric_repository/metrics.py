@@ -24,10 +24,18 @@ if TYPE_CHECKING:
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 
-class MetricTypes(str, enum.Enum):
+class MetricTypesMeta(enum.EnumMeta):
+    """Metaclass definition for MetricTypes that allows for membership checking."""
+
+    def __contains__(cls, item):
+        return item in cls.__members__.values()
+
+
+class MetricTypes(str, enum.Enum, metaclass=MetricTypesMeta):
     """Represents Metric types in OSS that are used for ColumnDescriptiveMetrics and MetricRepository.
+
     More Metric types will be added in the future.
-    """
+    """  # noqa: E501
 
     # Table metrics
     TABLE_COLUMNS = "table.columns"
@@ -102,9 +110,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     def _get_properties(cls):
         """in pydandic v2 we can use computed_field.
         https://docs.pydantic.dev/latest/usage/computed_fields/"""
-        properties = [
-            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
-        ]
+        properties = [prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)]
         return properties
 
     @override
@@ -121,7 +127,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     ) -> Dict[str, Any]:
         """Override the dict function to include @property fields, in pydandic v2 we can use computed_field.
         https://docs.pydantic.dev/latest/usage/computed_fields/
-        """
+        """  # noqa: E501
         attribs = super().dict(
             include=include,
             exclude=exclude,
@@ -189,7 +195,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # Metrics with parameters (aka metric_value_kwargs)
 # This is where the concrete metric types are defined that
 # bring together a domain type, value type and any parameters (aka metric_value_kwargs)
-# If a metric has parameters, it should be defined here. If it doesn't, you can use the generic types above, for
+# If a metric has parameters, it should be defined here. If it doesn't, you can use the generic types above, for  # noqa: E501
 # example, ColumnMetric[float] or TableMetric[list[str]].
 
 # TODO: Add metrics here for all Column Descriptive Metrics
@@ -199,7 +205,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[float, str] = Field(
-        description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
+        description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"  # noqa: E501
     )
 
     @property
@@ -216,7 +222,5 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
 class MetricRun(MetricRepositoryBaseModel):
     """Collection of Metric objects produced during the same execution run."""
 
-    data_asset_id: Union[uuid.UUID, None] = Field(
-        description="Data asset id", default=None
-    )
+    data_asset_id: Union[uuid.UUID, None] = Field(description="Data asset id", default=None)
     metrics: Sequence[Metric]

@@ -61,9 +61,7 @@ if TYPE_CHECKING:
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     include_rendered_content: bool,
 ):
     run_checkpoint_and_data_doc(
@@ -97,9 +95,7 @@ def test_run_checkpoint_and_data_doc(
     ],
 )
 def test_batch_head(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     fetch_all: bool | str,
     n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
@@ -120,7 +116,7 @@ class TestQueryAssets:
         passenger_count_value = 5
         asset = datasource.add_query_asset(
             name="query_asset",
-            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
         ).add_sorters(["year"])
         validator = context.get_validator(
             batch_request=asset.build_batch_request(
@@ -137,9 +133,7 @@ class TestQueryAssets:
 
     def test_partitioner_filtering(self, empty_data_context):
         context = empty_data_context
-        datasource = sqlite_datasource(
-            context, "../../test_cases_for_sql_data_connector.db"
-        )
+        datasource = sqlite_datasource(context, "../../test_cases_for_sql_data_connector.db")
 
         asset = datasource.add_query_asset(
             name="trip_asset_partition_by_event_type",
@@ -164,9 +158,7 @@ class TestQueryAssets:
     [
         pytest.param(
             pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path(
-                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-                )
+                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
             ),
             r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
             False,
@@ -174,35 +166,27 @@ class TestQueryAssets:
         ),
         pytest.param(
             pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path(
-                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-                )
+                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
             ),
             r"bad_yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
             True,
             id="bad filename",
         ),
         pytest.param(
-            pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path("..", "..", "..", "test_sets")
-            ),
+            pathlib.Path(__file__).parent.joinpath(pathlib.Path("..", "..", "..", "test_sets")),
             r"taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
             False,
             id="good path",
         ),
         pytest.param(
-            pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path("..", "..", "..", "test_sets")
-            ),
+            pathlib.Path(__file__).parent.joinpath(pathlib.Path("..", "..", "..", "test_sets")),
             r"bad_taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
             True,
             id="bad path",
         ),
         pytest.param(
             pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path(
-                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-                )
+                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
             ),
             MATCH_ALL_PATTERN,
             False,
@@ -219,13 +203,9 @@ def test_filesystem_data_asset_batching_regex(
     filesystem_datasource.base_directory = base_directory
     if raises_test_connection_error:
         with pytest.raises(TestConnectionError):
-            filesystem_datasource.add_csv_asset(
-                name="csv_asset", batching_regex=batching_regex
-            )
+            filesystem_datasource.add_csv_asset(name="csv_asset", batching_regex=batching_regex)
     else:
-        filesystem_datasource.add_csv_asset(
-            name="csv_asset", batching_regex=batching_regex
-        )
+        filesystem_datasource.add_csv_asset(name="csv_asset", batching_regex=batching_regex)
 
 
 @pytest.mark.sqlite
@@ -409,7 +389,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
 
     asset = datasource.add_query_asset(
         "query_asset",
-        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
+        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",  # noqa: E501
     )
     partitioner = PartitionerColumnValue(column_name="pickup_date")
     asset.add_sorters(["pickup_date"])
@@ -466,13 +446,11 @@ def test_success_with_partitioners_from_batch_configs(
     The test is parameterized just to ensure that the partitioner is actually doing something.
     """
     context = empty_data_context
-    datasource = sqlite_datasource(
-        context, "yellow_tripdata_sample_2020_all_months_combined.db"
-    )
+    datasource = sqlite_datasource(context, "yellow_tripdata_sample_2020_all_months_combined.db")
     passenger_count_value = 5
     asset = datasource.add_query_asset(
         name="query_asset",
-        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",
+        query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
     ).add_sorters(["year"])
     batch_config = asset.add_batch_config(
         name="whatevs",
@@ -482,17 +460,13 @@ def test_success_with_partitioners_from_batch_configs(
         batch_config=batch_config,
         batch_request_options={"year": 2020, "month": month},
     )
-    result = validator.validate_expectation(
-        gxe.ExpectTableRowCountToEqual(value=expected)
-    )
+    result = validator.validate_expectation(gxe.ExpectTableRowCountToEqual(value=expected))
     assert result.success
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_simple_checkpoint_run(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
 ):
     context, _datasource, _data_asset, batch_request = datasource_test_data
     expectation_suite_name = "my_expectation_suite"
@@ -584,9 +558,7 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     ],
 )
 @pytest.mark.sqlite
-def test_asset_specified_metadata(
-    empty_data_context, add_asset_method, add_asset_kwarg
-):
+def test_asset_specified_metadata(empty_data_context, add_asset_method, add_asset_kwarg):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
     asset_specified_metadata = {"pipeline_name": "my_pipeline"}
@@ -608,9 +580,7 @@ def test_asset_specified_metadata(
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_batch_request_error_messages(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
 ) -> None:
     _, _, _, batch_request = datasource_test_data
     # DataAsset.build_batch_request() infers datasource_name and data_asset_name
@@ -671,9 +641,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     context = empty_file_context
 
     datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
-    dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(
-        name="my_df_asset"
-    )
+    dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 

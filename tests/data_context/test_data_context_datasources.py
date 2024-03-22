@@ -110,9 +110,7 @@ def test_get_datasource_retrieves_from_cache(
     name = context.list_datasources()[0]["name"]
 
     # If the value is in the cache, no store methods should be invoked
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
-    ) as mock_get:
+    with mock.patch("great_expectations.data_context.store.DatasourceStore.get") as mock_get:
         context.get_datasource(name)
 
     assert not mock_get.called
@@ -139,9 +137,7 @@ def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
     assert mock_get.called
 
     # Subsequent GET will retrieve from the cache
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
-    ) as mock_get:
+    with mock.patch("great_expectations.data_context.store.DatasourceStore.get") as mock_get:
         context.get_datasource(name)
 
     assert not mock_get.called
@@ -221,9 +217,7 @@ def test_BaseDataContext_update_datasource_fails_when_datsource_does_not_exist(
 
 @pytest.mark.unit
 def test_list_datasources() -> None:
-    project_config = DataContextConfig(
-        store_backend_defaults=InMemoryStoreBackendDefaults()
-    )
+    project_config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults())
     project_config.datasources = {
         "my_datasource_name": {
             "class_name": "Datasource",
@@ -253,9 +247,7 @@ def test_get_available_data_assets_names(empty_data_context) -> None:
     assert len(empty_data_context.get_available_data_asset_names()) == 1
 
     data_asset_names = dict(
-        empty_data_context.get_available_data_asset_names(
-            datasource_names=datasource_name
-        )
+        empty_data_context.get_available_data_asset_names(datasource_names=datasource_name)
     )
 
     assert asset_name in data_asset_names[datasource_name]

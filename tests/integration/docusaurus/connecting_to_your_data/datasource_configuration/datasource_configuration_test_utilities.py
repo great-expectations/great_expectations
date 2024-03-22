@@ -30,9 +30,7 @@ def _gather_key_paths_from_dict(
             else:
                 next_path = [key]
             if value:
-                new_key_paths, new_full_paths = _gather_key_paths_from_dict(
-                    value, next_path
-                )
+                new_key_paths, new_full_paths = _gather_key_paths_from_dict(value, next_path)
                 key_paths.extend(new_key_paths)
                 full_paths.extend(new_full_paths)
             else:
@@ -63,12 +61,8 @@ def is_subset(subset, superset, test_mode=True):
     # print(subset_full_paths)
     # print("")
 
-    subset_items = [
-        _get_items_by_path(subset, key_path) for key_path in subset_key_paths
-    ]
-    superset_items = [
-        _get_items_by_path(superset, key_path) for key_path in superset_key_paths
-    ]
+    subset_items = [_get_items_by_path(subset, key_path) for key_path in subset_key_paths]
+    superset_items = [_get_items_by_path(superset, key_path) for key_path in superset_key_paths]
     # key_paths that point to empty values should only be checked to see if they exist as key_paths in the superset
     # empty_paths = [x[0] for x in subset_items if not x[1]]
     subset_items = [x for x in subset_items if x[1]]

@@ -53,13 +53,11 @@ def test_taxi_trips_benchmark(
     the expectations being used by this benchmark. Instead of changing this benchmark's data/expectations, please
     consider adding a new benchmark (or at least rename this benchmark to provide clarity that results are not directly
     comparable because of the data change).
-    """
+    """  # noqa: E501
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
 
     html_dir = (
-        os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath)
-        if write_data_docs
-        else None
+        os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath) if write_data_docs else None
     )
 
     checkpoint = taxi_benchmark_util.create_checkpoint(
@@ -116,8 +114,7 @@ def test_taxi_trips_benchmark(
 
     for run_result in result.run_results.values():
         actual_results = [
-            result.to_json_dict()
-            for result in run_result["validation_result"]["results"]
+            result.to_json_dict() for result in run_result["validation_result"]["results"]
         ]
         assert len(expected_results) == len(actual_results)
         for expected_result, actual_result in zip(expected_results, actual_results):
@@ -151,7 +148,7 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
             E           assert True == False
             E             +True
             E             -False
-    """
+    """  # noqa: E501
     if isinstance(expected, Mapping):
         for expected_key in expected.keys():
             assert expected_key in actual.keys(), description_for_error_reporting
@@ -167,14 +164,10 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
 def _skip_if_bigquery_performance_tests_not_enabled(
     pytestconfig: _pytest.config.Config,
 ):
-    if not pytestconfig.getoption("bigquery") or not pytestconfig.getoption(
-        "performance_tests"
-    ):
-        pytest.skip(
-            "This test requires --bigquery and --performance-tests flags to run."
-        )
+    if not pytestconfig.getoption("bigquery") or not pytestconfig.getoption("performance_tests"):
+        pytest.skip("This test requires --bigquery and --performance-tests flags to run.")
 
 
 if __name__ == "__main__":
-    # For profiling, it can be useful to support running this script directly instead of using pytest to run.
+    # For profiling, it can be useful to support running this script directly instead of using pytest to run.  # noqa: E501
     sys.exit(pytest.main(sys.argv))

@@ -25,7 +25,7 @@ class MetricConfiguration:
         metric_value_kwargs (optional[dict]): Optional kwargs that define values specific to each Metric.  For instance,
             a Metric that partitions a column can define the method of partitioning (`uniform` bins) and the number of
             bins (`n_bins`) as `metric_value_kwargs`.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -139,16 +139,13 @@ class MetricConfiguration:
         if "column" in self._metric_domain_kwargs:
             return MetricDomainTypes.COLUMN
 
-        if (
-            "column_A" in self._metric_domain_kwargs
-            and "column_B" in self._metric_domain_kwargs
-        ):
+        if "column_A" in self._metric_domain_kwargs and "column_B" in self._metric_domain_kwargs:
             return MetricDomainTypes.COLUMN_PAIR
 
         if "column_list" in self._metric_domain_kwargs:
             return MetricDomainTypes.MULTICOLUMN
 
-        # TODO: <Alex>Determining "domain_type" of "MetricConfiguration" using heuristics defaults to "TABLE".</Alex>
+        # TODO: <Alex>Determining "domain_type" of "MetricConfiguration" using heuristics defaults to "TABLE".</Alex>  # noqa: E501
         return MetricDomainTypes.TABLE
 
     @property

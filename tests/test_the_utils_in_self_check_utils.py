@@ -121,9 +121,7 @@ def test_generate_table_name_with_expectation(
         ),
     ],
 )
-def test_check_if_valid_dataset_name(
-    dataset_name: str, expected_output: str, expectation
-):
+def test_check_if_valid_dataset_name(dataset_name: str, expected_output: str, expectation):
     """Test for helper method that ensures table names are valid for tests
     Args:
         dataset_name(str): candidate dataset_name.

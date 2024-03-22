@@ -59,9 +59,7 @@ class ColumnKolmogorovSmirnovTestPValueGreaterThan(TableMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 

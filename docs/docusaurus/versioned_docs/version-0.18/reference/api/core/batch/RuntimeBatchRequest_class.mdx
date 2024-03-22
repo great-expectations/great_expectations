@@ -8,15 +8,18 @@ import CodeBlock from '@theme/CodeBlock';
 
 <dl class="py class">
 <dt class="sig sig-object py" id="great_expectations.core.batch.RuntimeBatchRequest">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.core.batch.</span></span><span class="sig-name descname"><span class="pre">RuntimeBatchRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_connector_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_identifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec_passthrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.core.batch.RuntimeBatchRequest" title="Permalink to this definition">#</a></dt>
-<dd><p>A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.core.batch.</span></span><span class="sig-name descname"><span class="pre">RuntimeBatchRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_connector_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_identifiers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec_passthrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.core.batch.RuntimeBatchRequest" title="Permalink to this definition">#</a>
+</dt>
+<dd>
+<p>A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.</p>
 <p>Instead of serving as a description of what data Great Expectations should
 fetch, a RuntimeBatchRequest serves as a wrapper for data that is passed in
 at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with
 user-provided identifiers for uniquely identifying the data.</p>
 <dl class="simple">
 <dt>-Relevant Documentation Links
--</dt><dd><ul class="simple">
+-</dt>
+<dd><ul class="simple">
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/batch_request/#runtimedataconnector-and-runtimebatchrequest">Batch Request</a></p></li>
 <li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector/">How To Configure A Runtimedataconnector</a></p></li>
 </ul>
@@ -42,16 +45,20 @@ the ExecutionEngine will use to obtain a specific set of data</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>BatchRequest</p>
+<dd class="field-even">
+<p>BatchRequest</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="great_expectations.core.batch.RuntimeBatchRequest.to_json_dict">
-<span class="sig-name descname"><span class="pre">to_json_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JSONValues</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#great_expectations.core.batch.RuntimeBatchRequest.to_json_dict" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a JSON-serializable dict representation of this BatchRequestBase.</p>
+<span class="sig-name descname"><span class="pre">to_json_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">JSONValues</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#great_expectations.core.batch.RuntimeBatchRequest.to_json_dict" title="Permalink to this definition">#</a>
+</dt>
+<dd>
+<p>Returns a JSON-serializable dict representation of this BatchRequestBase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A JSON-serializable dict representation of this BatchRequestBase.</p>
+<dd class="field-odd">
+<p>A JSON-serializable dict representation of this BatchRequestBase.</p>
 </dd>
 </dl>
 </dd></dl>

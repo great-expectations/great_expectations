@@ -147,9 +147,9 @@ def test_HtmlSiteStore_S3_backend(aws_credentials):
     # paths below should include the batch_parameters
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)[
+            "Contents"
+        ]
     } == {
         "test/prefix/expectations/asset/quarantine.html",
         "test/prefix/index.html",

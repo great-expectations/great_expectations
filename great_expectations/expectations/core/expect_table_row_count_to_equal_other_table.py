@@ -63,7 +63,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     See Also:
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
-    """
+    """  # noqa: E501
 
     other_table_name: str
 
@@ -144,7 +144,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         return RenderedStringTemplateContent(
             content_block_type="string_template",
             string_template={
-                "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",
+                "template": "Row Count: $self_table_row_count<br>Other Table Row Count: $other_table_row_count",  # noqa: E501
                 "params": {
                     "self_table_row_count": self_table_row_count,
                     "other_table_row_count": other_table_row_count,
@@ -159,27 +159,23 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(execution_engine, runtime_configuration)
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine, runtime_configuration
         )
 
         configuration = self.configuration
         kwargs = configuration.kwargs if configuration else {}
         other_table_name = kwargs.get("other_table_name")
 
-        # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
+        # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name  # noqa: E501
         table_row_count_metric_config_other: Optional[MetricConfiguration] = deepcopy(
-            validation_dependencies.get_metric_configuration(
-                metric_name="table.row_count"
-            )
+            validation_dependencies.get_metric_configuration(metric_name="table.row_count")
         )
         assert (
             table_row_count_metric_config_other
         ), "table_row_count_metric_config_other should not be None"
 
-        table_row_count_metric_config_other.metric_domain_kwargs["table"] = (
-            other_table_name
-        )
+        table_row_count_metric_config_other.metric_domain_kwargs["table"] = other_table_name
         # rename original "table.row_count" metric to "table.row_count.self"
         table_row_count_metric = validation_dependencies.get_metric_configuration(
             metric_name="table.row_count"
@@ -189,9 +185,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             metric_name="table.row_count.self",
             metric_configuration=table_row_count_metric,
         )
-        validation_dependencies.remove_metric_configuration(
-            metric_name="table.row_count"
-        )
+        validation_dependencies.remove_metric_configuration(metric_name="table.row_count")
         # add a new metric dependency named "table.row_count.other" with modified metric config
         validation_dependencies.set_metric_configuration(
             "table.row_count.other", table_row_count_metric_config_other
