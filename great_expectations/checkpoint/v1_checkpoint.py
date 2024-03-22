@@ -163,7 +163,7 @@ class Checkpoint(BaseModel):
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
         for validation_definition in self.validation_definitions:
             validation_result = validation_definition.run(
-                batch_definition_options=batch_parameters,
+                batch_parameters=batch_parameters,
                 evaluation_parameters=expectation_parameters,
                 result_format=result_format,
             )

@@ -463,7 +463,7 @@ class TestCheckpointResult:
         )
 
         validation_definition.run.assert_called_with(
-            batch_definition_options=batch_parameters,
+            batch_parameters=batch_parameters,
             evaluation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
         )
