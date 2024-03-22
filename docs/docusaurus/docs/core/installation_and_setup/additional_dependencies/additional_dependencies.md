@@ -108,7 +108,7 @@ Azure Blob Storage stores unstructured data on the Microsoft cloud data storage 
 
   :::info 
   
-  If you do not want to store your credentials as environment variables, you can [store them in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md?credential-style=yaml) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
+  If you do not want to store your credentials as environment variables, you can [store them in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md#yaml-file) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
   
   :::
 
