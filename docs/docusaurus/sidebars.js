@@ -80,9 +80,26 @@ module.exports = {
           ]
         },
         {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_credentials',
-          label: '🚧 Manage credentials'
+          type: 'category',
+          label: 'Manage credentials',
+          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
+          items: [
+            {
+              type: 'link',
+              label: 'Environment variables',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
+            },
+            {
+              type: 'link',
+              label: 'YAML file',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
+            },
+            {
+              type: 'link',
+              label: 'Secrets manager',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
+            },
+          ]
         },
         {
           type: 'doc',

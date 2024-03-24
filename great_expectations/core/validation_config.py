@@ -18,6 +18,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -30,7 +31,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource.new_datasource import (
     BaseDatasource as LegacyDatasource,
 )
-from great_expectations.validator.v1_validator import ResultFormat, Validator
+from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
@@ -198,13 +199,13 @@ class ValidationConfig(BaseModel):
     def run(
         self,
         *,
-        batch_definition_options: Optional[BatchRequestOptions] = None,
+        batch_parameters: Optional[BatchRequestOptions] = None,
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
             batch_config=self.batch_definition,
-            batch_request_options=batch_definition_options,
+            batch_request_options=batch_parameters,
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, evaluation_parameters)

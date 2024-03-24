@@ -8,19 +8,30 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+from great_expectations import expectations as gxe
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
+from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
 
@@ -30,6 +41,28 @@ def test_checkpoint_no_validation_definitions_raises_error():
         Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
+
+
+@pytest.fixture
+def slack_action():
+    return SlackNotificationAction(
+        slack_webhook="slack_webhook",
+    )
+
+
+@pytest.fixture
+def teams_action():
+    return MicrosoftTeamsNotificationAction(
+        teams_webhook="teams_webhook",
+    )
+
+
+@pytest.fixture
+def actions(
+    slack_action: SlackNotificationAction,
+    teams_action: MicrosoftTeamsNotificationAction,
+) -> list[ValidationAction]:
+    return [slack_action, teams_action]
 
 
 class TestCheckpointSerialization:
@@ -78,26 +111,6 @@ class TestCheckpointSerialization:
         validation_config_2: ValidationConfig,
     ) -> list[ValidationConfig]:
         return [validation_config_1, validation_config_2]
-
-    @pytest.fixture
-    def slack_action(self):
-        return SlackNotificationAction(
-            slack_webhook="slack_webhook",
-        )
-
-    @pytest.fixture
-    def teams_action(self):
-        return MicrosoftTeamsNotificationAction(
-            teams_webhook="teams_webhook",
-        )
-
-    @pytest.fixture
-    def actions(
-        self,
-        slack_action: SlackNotificationAction,
-        teams_action: MicrosoftTeamsNotificationAction,
-    ) -> list[ValidationAction]:
-        return [slack_action, teams_action]
 
     @pytest.mark.parametrize(
         "action_fixture_name, expected_actions",
@@ -162,6 +175,7 @@ class TestCheckpointSerialization:
                 },
             ],
             "actions": expected_actions,
+            "result_format": ResultFormat.SUMMARY,
             "id": cp.id,
         }
 
@@ -243,6 +257,7 @@ class TestCheckpointSerialization:
                     "type": "microsoft",
                 },
             ],
+            "result_format": ResultFormat.SUMMARY,
             "id": None,
         }
 
@@ -329,3 +344,298 @@ class TestCheckpointSerialization:
             Checkpoint.parse_obj(serialized_checkpoint)
 
         assert expected_error in str(e.value)
+
+
+class TestCheckpointResult:
+    suite_name: str = "my_suite"
+    column_name = "passenger_count"
+    datasource_name: str = "my_pandas_datasource"
+    asset_name: str = "my_asset"
+    batch_definition_name: str = "my_batch_def"
+    validation_definition_name: str = "my_validation_def"
+    checkpoint_name: str = "my_checkpoint"
+
+    @pytest.fixture
+    def mock_suite(self, mocker: pytest.MockFixture):
+        suite = mocker.Mock(spec=ExpectationSuite)
+        suite.name = self.suite_name
+        return suite
+
+    @pytest.fixture
+    def mock_batch_def(self, mocker: pytest.MockFixture):
+        return mocker.Mock(spec=BatchConfig)
+
+    @pytest.fixture
+    def validation_definition(
+        self, mock_suite: pytest.MockFixture, mock_batch_def: pytest.MockFixture
+    ):
+        vc = ValidationConfig(
+            name=self.validation_definition_name,
+            data=mock_batch_def,
+            suite=mock_suite,
+        )
+
+        mock_run_result = ExpectationSuiteValidationResult(
+            success=True,
+            results=[
+                ExpectationValidationResult(
+                    success=True,
+                    expectation_config=ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_between",
+                        kwargs={
+                            "batch_id": f"{self.datasource_name}-{self.asset_name}",
+                            "column": self.column_name,
+                            "min_value": 0.0,
+                            "max_value": 100.0,
+                        },
+                    ),
+                    result={
+                        "element_count": 100000,
+                        "unexpected_count": 0,
+                        "unexpected_percent": 0.0,
+                        "partial_unexpected_list": [],
+                        "missing_count": 0,
+                        "missing_percent": 0.0,
+                        "unexpected_percent_total": 0.0,
+                        "unexpected_percent_nonmissing": 0.0,
+                        "partial_unexpected_counts": [],
+                        "partial_unexpected_index_list": [],
+                    },
+                ),
+            ],
+            statistics={
+                "evaluated_expectations": 1,
+                "successful_expectations": 1,
+                "unsuccessful_expectations": 0,
+                "success_percent": 100.0,
+            },
+            batch_id=f"{self.datasource_name}-{self.asset_name}",
+        )
+
+        with mock.patch.object(ValidationConfig, "run", return_value=mock_run_result):
+            yield vc
+
+    @pytest.mark.unit
+    def test_checkpoint_run_no_actions(self, validation_definition: ValidationConfig):
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        result = checkpoint.run()
+
+        run_results = result.run_results
+        assert len(run_results) == len(checkpoint.validation_definitions)
+
+        validation_result = tuple(run_results.values())[0]
+        assert validation_result.success is True
+        assert len(validation_result.results) == 1 and validation_result.results[0].success is True
+
+        assert result.checkpoint_config == checkpoint
+        assert result.validation_result_url is None
+        assert result.success is True
+
+    @pytest.mark.unit
+    def test_checkpoint_run_actions(
+        self, validation_definition: ValidationConfig, actions: list[ValidationAction]
+    ):
+        validation_definitions = [validation_definition]
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=validation_definitions,
+            actions=actions,
+        )
+
+        with mock.patch.object(ValidationAction, "run") as mock_run:
+            _ = checkpoint.run()
+
+        assert mock_run.call_count == len(actions)
+
+    @pytest.mark.unit
+    def test_checkpoint_run_passes_through_runtime_params(
+        self, validation_definition: ValidationConfig
+    ):
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        batch_parameters = {"my_param": "my_value"}
+        expectation_parameters = {"my_other_param": "my_other_value"}
+        _ = checkpoint.run(
+            batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
+        )
+
+        validation_definition.run.assert_called_with(
+            batch_parameters=batch_parameters,
+            evaluation_parameters=expectation_parameters,
+            result_format=ResultFormat.SUMMARY,
+        )
+
+    @pytest.mark.unit
+    def test_result_init_no_run_results_raises_error(self, mocker: pytest.MockFixture):
+        with pytest.raises(ValueError) as e:
+            CheckpointResult(
+                run_id=mocker.Mock(spec=RunIdentifier),
+                run_results={},
+                checkpoint_config=mocker.Mock(spec=Checkpoint),
+            )
+
+        assert "CheckpointResult must contain at least one run result" in str(e.value)
+
+    @pytest.mark.unit
+    def test_result_describe(self, mocker: pytest.MockFixture):
+        result = CheckpointResult(
+            run_id=mocker.Mock(spec=RunIdentifier),
+            run_results={
+                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, success=True
+                ),
+            },
+            checkpoint_config=mocker.Mock(spec=Checkpoint),
+        )
+
+        with mock.patch.object(
+            ExpectationSuiteValidationResult,
+            "describe_dict",
+            return_value={
+                "success": True,
+                "statistics": {
+                    "evaluated_expectations": 1,
+                    "successful_expectations": 1,
+                    "unsuccessful_expectations": 0,
+                    "success_percent": 100.0,
+                },
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "success": True,
+                        "kwargs": {
+                            "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                            "mostly": 0.95,
+                            "column": "passenger_count",
+                            "min_value": 0.0,
+                            "max_value": 6.0,
+                        },
+                        "result": {
+                            "element_count": 100000,
+                            "unexpected_count": 1,
+                            "unexpected_percent": 0.001,
+                            "partial_unexpected_list": [7.0],
+                            "unexpected_percent_total": 0.001,
+                            "unexpected_percent_nonmissing": 0.001,
+                            "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                            "partial_unexpected_index_list": [48422],
+                        },
+                    },
+                ],
+            },
+            batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
+        ):
+            actual = result.describe_dict()
+
+        validation_results = actual.pop("validation_results")
+        assert len(validation_results) == 1
+
+        expected = {
+            "success": True,
+            "statistics": {
+                "evaluated_validations": 1,
+                "success_percent": 100.0,
+                "successful_validations": 1,
+                "unsuccessful_validations": 0,
+            },
+        }
+        assert actual == expected
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_filesytem_e2e(self, tmp_path: pathlib.Path):
+        with working_directory(tmp_path):
+            context = gx.get_context(mode="file")
+
+        ds = context.sources.add_pandas(self.datasource_name)
+        csv_path = (
+            pathlib.Path(__file__).parent.parent
+            / "test_sets"
+            / "quickstart"
+            / "yellow_tripdata_sample_2022-01.csv"
+        )
+        assert csv_path.exists()
+        asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
+
+        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        suite = ExpectationSuite(
+            name=self.suite_name,
+            expectations=[
+                gxe.ExpectColumnValuesToBeBetween(
+                    column=self.column_name, min_value=0, max_value=10
+                ),
+                gxe.ExpectColumnMeanToBeBetween(
+                    column=self.column_name,
+                    min_value=0,
+                    max_value=1,
+                ),
+            ],
+        )
+
+        validation_definition = ValidationConfig(
+            name=self.validation_definition_name, data=batch_definition, suite=suite
+        )
+
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+        )
+        result = checkpoint.run()
+
+        assert result.success is False
+        assert result.describe_dict() == {
+            "success": False,
+            "statistics": {
+                "evaluated_validations": 1,
+                "success_percent": 0.0,
+                "successful_validations": 0,
+                "unsuccessful_validations": 1,
+            },
+            "validation_results": [
+                {
+                    "expectations": [
+                        {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "kwargs": {
+                                "batch_id": f"{self.datasource_name}-{self.asset_name}",
+                                "column": self.column_name,
+                                "max_value": 10.0,
+                                "min_value": 0.0,
+                            },
+                            "result": {
+                                "element_count": 100000,
+                                "missing_count": 0,
+                                "missing_percent": 0.0,
+                                "partial_unexpected_counts": [],
+                                "partial_unexpected_index_list": [],
+                                "partial_unexpected_list": [],
+                                "unexpected_count": 0,
+                                "unexpected_percent": 0.0,
+                                "unexpected_percent_nonmissing": 0.0,
+                                "unexpected_percent_total": 0.0,
+                            },
+                            "success": True,
+                        },
+                        {
+                            "expectation_type": "expect_column_mean_to_be_between",
+                            "kwargs": {
+                                "batch_id": f"{self.datasource_name}-{self.asset_name}",
+                                "column": self.column_name,
+                                "max_value": 1.0,
+                                "min_value": 0.0,
+                            },
+                            "result": {"observed_value": 1.54471},
+                            "success": False,
+                        },
+                    ],
+                    "statistics": {
+                        "evaluated_expectations": 2,
+                        "success_percent": 50.0,
+                        "successful_expectations": 1,
+                        "unsuccessful_expectations": 1,
+                    },
+                    "success": False,
+                },
+            ],
+        }
