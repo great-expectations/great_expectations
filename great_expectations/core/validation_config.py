@@ -23,6 +23,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -215,13 +216,18 @@ class ValidationConfig(BaseModel):
             validation_result_id,
         ) = self._get_expectation_suite_and_validation_result_ids(validator)
 
-        store_validation_results(
+        ref = store_validation_results(
             validation_result_store=self._validation_results_store,
             suite_validation_result=results,
             suite_validation_result_identifier=validation_result_id,
             expectation_suite_identifier=expectation_suite_identifier,
             cloud_mode=self._validation_results_store.cloud_mode,
         )
+
+        # TODO(cdkini): Don't love the placement but this gets the URL from Cloud
+        if isinstance(ref, GXCloudResourceRef):
+            result_url = ref.response["data"]["attributes"]["validation_result"]["display_url"]
+            results.result_url = result_url
 
         return results
 

@@ -8,7 +8,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
-from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -150,7 +150,7 @@ class Checkpoint(BaseModel):
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
-            validation_result_url=None,  # TODO: Need to plumb from actions
+            validation_result_urls=[result.result_url for result in run_results.values()],
         )
 
     def _run_validation_definitions(
@@ -210,7 +210,7 @@ class CheckpointResult(BaseModel):
     run_id: RunIdentifier
     run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
     checkpoint_config: Checkpoint
-    validation_result_url: Optional[str] = None
+    validation_result_urls: List[Optional[str]] = Field(default_factory=list)
     success: Optional[bool] = None
 
     class Config:

@@ -514,6 +514,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResult | dict] = None,
         batch_id: Optional[str] = None,
+        result_url: Optional[str] = None,
         id: Optional[str] = None,
     ) -> None:
         self.success = success
@@ -531,6 +532,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         ensure_json_serializable(meta)  # We require meta information to be serializable.
         self.meta = meta
         self.batch_id = batch_id
+        self.result_url = result_url
         self._metrics: dict = {}
 
     def __eq__(self, other):
