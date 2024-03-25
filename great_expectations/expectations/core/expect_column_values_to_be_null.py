@@ -250,4 +250,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             unexpected_index_query=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
             ),
+            unexpected_rows=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+            ),
         )
