@@ -492,10 +492,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             for resource in response_json["data"]:
                 id: str = resource["id"]
 
-                if self._is_v1_resource:
-                    resource_dict = resource
-                else:
-                    resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
+                resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
                 resource_name: str = resource_dict.get("name", "")
 
                 key = (resource_type, id, resource_name)
@@ -781,11 +778,3 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @property
     def _is_v1_resource(self) -> bool:
         return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
-
-    def _ensure_response_type(self, response: dict) -> ResponsePayload:
-        """Typeguard"""
-        if self._is_v1_resource:
-            cast(ResponsePayloadV1, response)
-        else:
-            cast(ResponsePayloadV0, response)
-        return response
