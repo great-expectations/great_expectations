@@ -222,7 +222,9 @@ class ValidationConfig(BaseModel):
         )
 
         if isinstance(ref, GXCloudResourceRef):
-            results.result_url = self._validation_results_store.get_result_url(ref)
+            results.result_url = self._validation_results_store.parse_result_url_from_gx_cloud_ref(
+                ref
+            )
 
         return results
 
