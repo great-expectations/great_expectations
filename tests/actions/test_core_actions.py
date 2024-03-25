@@ -696,7 +696,7 @@ class TestActionSerialization:
         ids=[k.__name__ for k in ACTION_INIT_PARAMS],
     )
     @pytest.mark.unit
-    def test_action_serialization_and_deserialization(
+    def test_action_serialization(
         self,
         mock_context,
         action_class: Type[ValidationAction],
@@ -709,3 +709,15 @@ class TestActionSerialization:
         actual = json.loads(json_dict)
 
         assert actual == expected
+
+    @pytest.mark.parametrize(
+        "action_class, serialized_action",
+        [(k, v) for k, v in SERIALIZED_ACTIONS.items()],
+        ids=[k.__name__ for k in SERIALIZED_ACTIONS],
+    )
+    @pytest.mark.unit
+    def test_action_deserialization(
+        self, action_class: Type[ValidationAction], serialized_action: dict
+    ):
+        actual = action_class.parse_obj(serialized_action)
+        assert isinstance(actual, action_class)
