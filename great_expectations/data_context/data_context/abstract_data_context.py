@@ -79,7 +79,7 @@ from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
-    CheckpointValidationConfig,
+    CheckpointValidationDefinition,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
@@ -146,8 +146,8 @@ if TYPE_CHECKING:
         DataDocsSiteConfigTypedDict,
         StoreConfigTypedDict,
     )
-    from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+    from great_expectations.data_context.store.validation_definition_store import (
+        ValidationDefinitionStore,
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
@@ -330,11 +330,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        self._validations: ValidationFactory = ValidationFactory(store=self.validation_config_store)
+        self._validation_definitions: ValidationFactory = ValidationFactory(
+            store=self.validation_definition_store
+        )
 
     def _init_analytics(self) -> None:
         init_analytics(
+            user_id=None,
             data_context_id=uuid.UUID(self._data_context_id),
+            organization_id=None,
             oss_id=self._get_oss_id(),
         )
 
@@ -550,11 +554,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def validations(self) -> ValidationFactory:
-        if not self._validations:
+        if not self._validation_definitions:
             raise gx_exceptions.DataContextError(
-                "DataContext requires a configured ValidationConfigStore to persist Validations."
+                "DataContext requires a configured ValidationDefinitionStore to persist "
+                "Validations."
             )
-        return self._validations
+        return self._validation_definitions
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -606,9 +611,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.validations_store_name]
 
     @property
-    def validation_config_store(self) -> ValidationConfigStore:
-        # Purposely not exposing validation_config_store_name as a user-configurable property
-        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_CONFIG_STORE_NAME.value]
+    def validation_definition_store(self) -> ValidationDefinitionStore:
+        # Purposely not exposing validation_definition_store_name as a user-configurable property
+        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value]
 
     @property
     def checkpoint_store_name(self) -> Optional[str]:
@@ -1287,7 +1292,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
+        validations: list[CheckpointValidationDefinition] | list[dict] | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1342,7 +1347,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
+        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1483,7 +1488,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
+        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1545,7 +1550,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
+        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,

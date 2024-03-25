@@ -887,13 +887,11 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
-        output = store_validation_results(
-            self._target_store,
+        output = self._target_store.store_validation_results(
             validation_result_suite,
             validation_result_suite_identifier,
             expectation_suite_identifier,
             checkpoint_identifier,
-            self._using_cloud_context,
         )
 
         if isinstance(output, GXCloudResourceRef) and isinstance(
@@ -903,33 +901,6 @@ class StoreValidationResultAction(ValidationAction):
 
         if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
             return output
-
-
-def store_validation_results(  # noqa: PLR0913
-    validation_result_store: ValidationsStore,
-    suite_validation_result: ExpectationSuiteValidationResult,
-    suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
-    expectation_suite_identifier: Optional[ExpectationSuiteIdentifier | GXCloudIdentifier] = None,
-    checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-    cloud_mode: bool = False,
-) -> bool | GXCloudResourceRef:
-    """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
-    This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
-    """  # noqa: E501
-    checkpoint_id = None
-    if cloud_mode and checkpoint_identifier:
-        checkpoint_id = checkpoint_identifier.id
-
-    expectation_suite_id = None
-    if isinstance(expectation_suite_identifier, GXCloudIdentifier):
-        expectation_suite_id = expectation_suite_identifier.id
-
-    return validation_result_store.set(
-        key=suite_validation_result_identifier,
-        value=suite_validation_result,
-        checkpoint_id=checkpoint_id,
-        expectation_suite_id=expectation_suite_id,
-    )
 
 
 @public_api
