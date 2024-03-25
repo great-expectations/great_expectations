@@ -235,7 +235,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @override
     def _get(  # type: ignore[override]
         self, key: Tuple[GXCloudRESTResource, str | None, str | None]
-    ) -> ResponsePayload:
+    ) -> dict:
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
