@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
@@ -637,7 +637,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             meta=self.meta,
         )
 
-    def describe_dict(self) -> dict:
+    def describe_dict(self) -> dict[str, Any]:
         data = {
             "success": self.success,
             "statistics": self.statistics,
