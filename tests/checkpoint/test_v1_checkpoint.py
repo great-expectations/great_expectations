@@ -369,7 +369,7 @@ class TestCheckpointResult:
     def validation_definition(
         self, mock_suite: pytest.MockFixture, mock_batch_def: pytest.MockFixture
     ):
-        vc = ValidationDefinition(
+        validation_definition = ValidationDefinition(
             name=self.validation_definition_name,
             data=mock_batch_def,
             suite=mock_suite,
@@ -413,7 +413,7 @@ class TestCheckpointResult:
         )
 
         with mock.patch.object(ValidationDefinition, "run", return_value=mock_run_result):
-            yield vc
+            yield validation_definition
 
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):

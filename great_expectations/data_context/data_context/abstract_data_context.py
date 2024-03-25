@@ -330,7 +330,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        self._validations: ValidationFactory = ValidationFactory(
+        self._validation_definitions: ValidationFactory = ValidationFactory(
             store=self.validation_definition_store
         )
 
@@ -552,12 +552,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def validations(self) -> ValidationFactory:
-        if not self._validations:
+        if not self._validation_definitions:
             raise gx_exceptions.DataContextError(
                 "DataContext requires a configured ValidationDefinitionStore to persist "
                 "Validations."
             )
-        return self._validations
+        return self._validation_definitions
 
     @property
     def expectations_store_name(self) -> Optional[str]:
