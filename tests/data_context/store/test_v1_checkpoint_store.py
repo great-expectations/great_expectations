@@ -1,0 +1,273 @@
+from __future__ import annotations
+
+import json
+from typing import TYPE_CHECKING
+from unittest import mock
+
+import pytest
+
+from great_expectations import set_context
+from great_expectations.checkpoint.actions import SlackNotificationAction
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.store import ValidationConfigStore
+from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+
+if TYPE_CHECKING:
+    from tests.datasource.fluent._fake_cloud_api import CloudDetails
+
+
+@pytest.fixture
+def ephemeral_store():
+    return V1CheckpointStore(store_name="ephemeral_checkpoint_store")
+
+
+@pytest.fixture
+def file_backed_store(tmp_path):
+    base_directory = tmp_path / "base_dir"
+    return ValidationConfigStore(
+        store_name="file_backed_checkpoint_store",
+        store_backend={
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": base_directory,
+        },
+    )
+
+
+@pytest.fixture
+def cloud_backed_store(cloud_details: CloudDetails):
+    return V1CheckpointStore(
+        store_name="cloud_backed_checkpoint_store",
+        store_backend={
+            "class_name": "GXCloudStoreBackend",
+            "ge_cloud_resource_type": GXCloudRESTResource.CHECKPOINT,
+            "ge_cloud_credentials": {
+                "access_token": cloud_details.access_token,
+                "organization_id": cloud_details.org_id,
+            },
+        },
+    )
+
+
+@pytest.fixture
+def mock_cp_json() -> dict:
+    return {
+        "name": "my_checkpoint",
+        "validation_definitions": [
+            {"name": "my_first_validation", "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"},
+            {"name": "my_second_validation", "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"},
+        ],
+        "actions": [
+            {
+                "name": "my_slack_action",
+                "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
+                "notify_on": "all",
+                "notify_with": ["my_data_docs_site"],
+                "renderer": {
+                    "class_name": "SlackRenderer",
+                },
+            }
+        ],
+        "result_format": "SUMMARY",
+        "id": None,
+    }
+
+
+@pytest.fixture
+def mock_cp_dict(mocker, mock_cp_json: dict) -> dict:
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(context)
+
+    data = BatchConfig(name="my_batch_config")
+    suite = ExpectationSuite(name="my_suite")
+
+    return {
+        "name": mock_cp_json["name"],
+        "validation_definitions": [
+            ValidationConfig(**mock_cp_json["validation_definitions"][0], data=data, suite=suite),
+            ValidationConfig(**mock_cp_json["validation_definitions"][1], data=data, suite=suite),
+        ],
+        "actions": [
+            SlackNotificationAction(**mock_cp_json["actions"][0]),
+        ],
+        "result_format": mock_cp_json["result_format"],
+        "id": mock_cp_json["id"],
+    }
+
+
+@pytest.fixture
+def checkpoint(
+    mocker: pytest.MockFixture, mock_cp_json: dict, mock_cp_dict: dict
+) -> ValidationConfig:
+    cp = mocker.Mock(spec=Checkpoint, id=None)
+    cp.json.return_value = json.dumps(mock_cp_json)
+    cp.dict.return_value = mock_cp_dict
+    return cp
+
+
+@pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
+@pytest.mark.unit
+def test_add(mocker, request, store_fixture: str, checkpoint: Checkpoint):
+    store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+    key = StringKey(key="my_checkpoint")
+
+    assert not checkpoint.id
+    store.add(key=key, value=checkpoint)
+
+    assert checkpoint.id
+
+
+@pytest.mark.cloud
+def test_add_cloud(mocker, cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint):
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(context)
+    store = cloud_backed_store
+
+    id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
+    name = "my_checkpoint"
+    key = GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.CHECKPOINT,
+        id=id,
+        resource_name=name,
+    )
+
+    with mock.patch("requests.Session.put", autospec=True) as mock_put:
+        store.add(key=key, value=checkpoint)
+
+    mock_put.assert_called_once_with(
+        mock.ANY,  # requests Session
+        f"https://api.greatexpectations.io/organizations/12345678-1234-5678-1234-567812345678/checkpoints/{id}",
+        json={
+            "data": {
+                "type": "checkpoint",
+                "id": id,
+                "attributes": {
+                    "organization_id": "12345678-1234-5678-1234-567812345678",
+                    "checkpoint": {
+                        "name": name,
+                        "id": None,
+                    },
+                },
+            }
+        },
+    )
+
+
+# @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
+# @pytest.mark.unit
+# def test_get_key(request, store_fixture: str):
+#     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+
+#     name = "my_validation"
+#     assert store.get_key(name=name) == StringKey(key=name)
+
+
+# @pytest.mark.cloud
+# def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
+#     key = cloud_backed_store.get_key(name="my_validation")
+#     assert key.resource_type == GXCloudRESTResource.VALIDATION_CONFIG
+#     assert key.resource_name == "my_validation"
+
+
+# _VALIDATION_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
+# _VALIDATION_CONFIG = {
+#     "name": "my_validation",
+#     "data": {
+#         "datasource": {
+#             "name": "my_datasource",
+#             "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
+#         },
+#         "asset": {
+#             "name": "my_asset",
+#             "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
+#         },
+#         "batch_config": {
+#             "name": "my_batch_config",
+#             "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
+#         },
+#     },
+#     "suite": {
+#         "name": "my_suite",
+#         "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
+#     },
+# }
+
+
+# @pytest.mark.cloud
+# @pytest.mark.parametrize(
+#     "response_json",
+#     [
+#         pytest.param(
+#             {
+#                 "data": {
+#                     "id": _VALIDATION_ID,
+#                     "attributes": {
+#                         "validation_config": _VALIDATION_CONFIG,
+#                     },
+#                 }
+#             },
+#             id="single_validation_config",
+#         ),
+#         pytest.param(
+#             {
+#                 "data": [
+#                     {
+#                         "id": _VALIDATION_ID,
+#                         "attributes": {
+#                             "validation_config": _VALIDATION_CONFIG,
+#                         },
+#                     }
+#                 ]
+#             },
+#             id="list_with_single_validation_config",
+#         ),
+#     ],
+# )
+# def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
+#     actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+#     expected = {**_VALIDATION_CONFIG, "id": _VALIDATION_ID}
+#     assert actual == expected
+
+
+# @pytest.mark.cloud
+# @pytest.mark.parametrize(
+#     "response_json, error_substring",
+#     [
+#         pytest.param(
+#             {
+#                 "data": [],
+#             },
+#             "Cannot parse empty data",
+#             id="empty_list",
+#         ),
+#         pytest.param(
+#             {
+#                 "data": [
+#                     {
+#                         "id": _VALIDATION_ID,
+#                         "attributes": {
+#                             "validation_config": _VALIDATION_CONFIG,
+#                         },
+#                     },
+#                     {
+#                         "id": _VALIDATION_ID,
+#                         "attributes": {
+#                             "validation_config": _VALIDATION_CONFIG,
+#                         },
+#                     },
+#                 ],
+#             },
+#             "Cannot parse multiple items",
+#             id="list_with_multiple_validation_configs",
+#         ),
+#     ],
+# )
+# def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
+#     with pytest.raises(ValueError, match=f"{error_substring}*."):
+#         ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
