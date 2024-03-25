@@ -210,7 +210,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return payload
 
     @override
-    def _get_all(self) -> dict:
+    def _get_all(self) -> list[dict]:
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
