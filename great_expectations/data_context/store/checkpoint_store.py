@@ -288,6 +288,5 @@ class V1CheckpointStore(Store):
     @override
     def _add(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
         if not self.cloud_mode:
-            # this logic should move to the store backend, but is implemented here for now
             value.id = str(uuid.uuid4())
         return super()._add(key=key, value=value, **kwargs)

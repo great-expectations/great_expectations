@@ -9,13 +9,12 @@ import pytest
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import SlackNotificationAction
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import ValidationConfigStore
 from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
@@ -31,7 +30,7 @@ def ephemeral_store():
 @pytest.fixture
 def file_backed_store(tmp_path):
     base_directory = tmp_path / "base_dir"
-    return ValidationConfigStore(
+    return V1CheckpointStore(
         store_name="file_backed_checkpoint_store",
         store_backend={
             "class_name": "TupleFilesystemStoreBackend",
@@ -56,7 +55,7 @@ def cloud_backed_store(cloud_details: CloudDetails):
 
 
 @pytest.fixture
-def mock_cp_json() -> dict:
+def mock_checkpoint_json() -> dict:
     return {
         "name": "my_checkpoint",
         "validation_definitions": [
@@ -80,41 +79,45 @@ def mock_cp_json() -> dict:
 
 
 @pytest.fixture
-def mock_cp_dict(mocker, mock_cp_json: dict) -> dict:
+def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
     context = mocker.Mock(spec=AbstractDataContext)
     set_context(context)
 
-    data = BatchConfig(name="my_batch_config")
+    data = BatchDefinition(name="my_batch_config")
     suite = ExpectationSuite(name="my_suite")
 
     return {
-        "name": mock_cp_json["name"],
+        "name": mock_checkpoint_json["name"],
         "validation_definitions": [
-            ValidationConfig(**mock_cp_json["validation_definitions"][0], data=data, suite=suite),
-            ValidationConfig(**mock_cp_json["validation_definitions"][1], data=data, suite=suite),
+            ValidationDefinition(
+                **mock_checkpoint_json["validation_definitions"][0], data=data, suite=suite
+            ),
+            ValidationDefinition(
+                **mock_checkpoint_json["validation_definitions"][1], data=data, suite=suite
+            ),
         ],
         "actions": [
-            SlackNotificationAction(**mock_cp_json["actions"][0]),
+            SlackNotificationAction(**mock_checkpoint_json["actions"][0]),
         ],
-        "result_format": mock_cp_json["result_format"],
-        "id": mock_cp_json["id"],
+        "result_format": mock_checkpoint_json["result_format"],
+        "id": mock_checkpoint_json["id"],
     }
 
 
 @pytest.fixture
 def checkpoint(
-    mocker: pytest.MockFixture, mock_cp_json: dict, mock_cp_dict: dict
-) -> ValidationConfig:
+    mocker: pytest.MockFixture, mock_checkpoint_json: dict, mock_checkpoint_dict: dict
+) -> V1CheckpointStore:
     cp = mocker.Mock(spec=Checkpoint, id=None)
-    cp.json.return_value = json.dumps(mock_cp_json)
-    cp.dict.return_value = mock_cp_dict
+    cp.json.return_value = json.dumps(mock_checkpoint_json)
+    cp.dict.return_value = mock_checkpoint_dict
     return cp
 
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
 def test_add(request, store_fixture: str, checkpoint: Checkpoint):
-    store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+    store: V1CheckpointStore = request.getfixturevalue(store_fixture)
     key = StringKey(key="my_checkpoint")
 
     assert not checkpoint.id
@@ -187,7 +190,7 @@ def test_get_key(request, store_fixture: str):
 
 
 @pytest.mark.cloud
-def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
+def test_get_key_cloud(cloud_backed_store: V1CheckpointStore):
     key = cloud_backed_store.get_key(name="my_checkpoint")
     assert key.resource_type == GXCloudRESTResource.CHECKPOINT
     assert key.resource_name == "my_checkpoint"
