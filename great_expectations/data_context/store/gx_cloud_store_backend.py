@@ -49,11 +49,15 @@ class ResponsePayloadV0(TypedDict):
     data: PayloadDataFieldV0 | list[PayloadDataFieldV0]
 
 
+class PayloadDataFieldV1(TypedDict):
+    id: str
+
+
 class ResponsePayloadV1(TypedDict):
-    data: dict | list[dict]
+    data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
 
 
-ResponsePayload = Union[ResponsePayloadV0, dict]
+ResponsePayload = Union[ResponsePayloadV0, ResponsePayloadV1]
 
 
 AnyPayload = Union[ResponsePayloadV0, ResponsePayloadV1, ErrorPayload]
@@ -69,8 +73,12 @@ class RequestPayloadV0(TypedDict):
     data: RequestPayloadDataFieldV0
 
 
+class RequestPayloadDataFieldV1(TypedDict):
+    id: NotRequired[str]
+
+
 class RequestPayloadV1(TypedDict):
-    data: dict
+    data: RequestPayloadDataFieldV1
 
 
 RequestPayload = Union[RequestPayloadV0, RequestPayloadV1]
