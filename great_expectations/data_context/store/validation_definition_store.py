@@ -12,17 +12,17 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.validation_config import ValidationConfig
+    from great_expectations.core.validation_definition import ValidationDefinition
 
 
-class ValidationConfigStore(Store):
+class ValidationDefinitionStore(Store):
     _key_class = StringKey
 
     def get_key(self, name: str, id: str | None = None) -> GXCloudIdentifier | StringKey:
-        """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""  # noqa: E501
+        """Given a name and optional ID, build the correct key for use in the ValidationDefinitionStore."""  # noqa: E501
         if self.cloud_mode:
             return GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.VALIDATION_CONFIG,
+                resource_type=GXCloudRESTResource.VALIDATION_DEFINITION,
                 id=id,
                 resource_name=name,
             )
@@ -46,10 +46,10 @@ class ValidationConfigStore(Store):
             validation_data = response_data
 
         id: str = validation_data["id"]
-        validation_config_dict: dict = validation_data["attributes"]["validation_config"]
-        validation_config_dict["id"] = id
+        validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
+        validation_definition_dict["id"] = id
 
-        return validation_config_dict
+        return validation_definition_dict
 
     @override
     def serialize(self, value):
@@ -58,18 +58,18 @@ class ValidationConfigStore(Store):
             data["suite"] = data["suite"].to_json_dict()
             return data
 
-        # In order to enable the custom json_encoders in ValidationConfig, we need to set `models_as_dict` off  # noqa: E501
+        # In order to enable the custom json_encoders in ValidationDefinition, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
         return value.json(models_as_dict=False, indent=2, sort_keys=True)
 
     @override
     def deserialize(self, value):
-        from great_expectations.core.validation_config import ValidationConfig
+        from great_expectations.core.validation_definition import ValidationDefinition
 
-        return ValidationConfig.parse_raw(value)
+        return ValidationDefinition.parse_raw(value)
 
     @override
-    def _add(self, key: DataContextKey, value: ValidationConfig, **kwargs):
+    def _add(self, key: DataContextKey, value: ValidationDefinition, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value.id = str(uuid.uuid4())

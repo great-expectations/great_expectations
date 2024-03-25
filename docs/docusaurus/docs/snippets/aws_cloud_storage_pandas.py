@@ -31,7 +31,7 @@ pop_stores = [
     "evaluation_parameter_store",
     "validations_store",
     "profiler_store",
-    "validation_config_store",
+    "validation_definition_store",
 ]
 for store in pop_stores:
     stores.pop(store)
@@ -111,7 +111,7 @@ pop_stores = [
     "expectations_store",
     "expectations_S3_store",
     "profiler_store",
-    "validation_config_store",
+    "validation_definition_store",
 ]
 for store in pop_stores:
     stores.pop(store)

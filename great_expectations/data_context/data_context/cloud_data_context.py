@@ -53,7 +53,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 )
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    CheckpointValidationConfig,
+    CheckpointValidationDefinition,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -760,7 +760,7 @@ class CloudDataContext(SerializableDataContext):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
