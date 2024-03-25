@@ -1,18 +1,28 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+import datetime as dt
+import json
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
-from great_expectations.compatibility.pydantic import BaseModel, validator
+from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+)
+from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.validation_config_store import (
         ValidationConfigStore,
     )
@@ -26,14 +36,18 @@ class Checkpoint(BaseModel):
     to be taken after the validation step.
 
     Args:
+        name: The name of the checkpoint.
         validation_definitions: List of validation definitions to be run.
         actions: List of actions to be taken after the validation definitions are run.
+        result_format: The format in which to return the results of the validation definitions. Default is ResultFormat.SUMMARY.
+        id: An optional unique identifier for the checkpoint.
 
     """  # noqa: E501
 
     name: str
     validation_definitions: List[ValidationConfig]
     actions: List[ValidationAction]
+    result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
     class Config:
@@ -47,11 +61,11 @@ class Checkpoint(BaseModel):
             "validation_definitions": [
                 {
                     "name": "my_first_validation",
-                    "id": "a758816-64c8-46cb-8f7e-03c12cea1d67"
+                    "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"
                 },
                 {
                     "name": "my_second_validation",
-                    "id": "1339js16-64c8-46cb-8f7e-03c12cea1d67"
+                    "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"
                 },
             ],
             "actions": [
@@ -64,6 +78,9 @@ class Checkpoint(BaseModel):
                         "class_name": "SlackRenderer",
                     }
                 }
+            ],
+            "result_format": "SUMMARY",
+            "id": "b758816-64c8-46cb-8f7e-03c12cea1d67"
         """  # noqa: E501
 
         arbitrary_types_allowed = (
@@ -120,8 +137,132 @@ class Checkpoint(BaseModel):
         batch_parameters: Dict[str, Any] | None = None,
         expectation_parameters: Dict[str, Any] | None = None,
     ) -> CheckpointResult:
-        raise NotImplementedError
+        run_id = RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
+        run_results = self._run_validation_definitions(
+            batch_parameters=batch_parameters,
+            expectation_parameters=expectation_parameters,
+            result_format=self.result_format,
+            run_id=run_id,
+        )
+        self._run_actions(run_results=run_results)
+
+        return CheckpointResult(
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self,
+            validation_result_url=None,  # TODO: Need to plumb from actions
+        )
+
+    def _run_validation_definitions(
+        self,
+        batch_parameters: Dict[str, Any] | None,
+        expectation_parameters: Dict[str, Any] | None,
+        result_format: ResultFormat,
+        run_id: RunIdentifier,
+    ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
+        run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}
+        for validation_definition in self.validation_definitions:
+            validation_result = validation_definition.run(
+                batch_parameters=batch_parameters,
+                evaluation_parameters=expectation_parameters,
+                result_format=result_format,
+            )
+            key = self._build_result_key(
+                validation_definition=validation_definition,
+                run_id=run_id,
+                batch_identifier=validation_result.batch_id,
+            )
+            run_results[key] = validation_result
+
+        return run_results
+
+    def _build_result_key(
+        self,
+        validation_definition: ValidationConfig,
+        run_id: RunIdentifier,
+        batch_identifier: Optional[str] = None,
+    ) -> ValidationResultIdentifier:
+        return ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                name=validation_definition.suite.name
+            ),
+            run_id=run_id,
+            batch_identifier=batch_identifier,
+        )
+
+    def _run_actions(
+        self, run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+    ) -> None:
+        # NOTE: Currently runs each action for each result (currently v0.18 checkpoint behavior)
+        #       This will be changed to run on the aggregate result in v1.0.
+        for identifier, result in run_results.items():
+            for action in self.actions:
+                action.run(
+                    validation_result_suite_identifier=identifier, validation_result_suite=result
+                )
 
     @public_api
     def save(self) -> None:
         raise NotImplementedError
+
+
+class CheckpointResult(BaseModel):
+    run_id: RunIdentifier
+    run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+    checkpoint_config: Checkpoint
+    validation_result_url: Optional[str] = None
+    success: Optional[bool] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @root_validator
+    def _root_validate_result(cls, values: dict) -> dict:
+        run_results = values["run_results"]
+        if len(run_results) == 0:
+            raise ValueError("CheckpointResult must contain at least one run result")
+
+        values["success"] = all(result.success for result in run_results.values())
+        return values
+
+    @property
+    def name(self) -> str:
+        return self.checkpoint_config.name
+
+    def describe_dict(self) -> CheckpointDescriptionDict:
+        success_count = sum(1 for r in self.run_results.values() if r.success)
+        run_result_descriptions = [r.describe_dict() for r in self.run_results.values()]
+        num_results = len(run_result_descriptions)
+
+        return {
+            "success": success_count == num_results,
+            "statistics": {
+                "evaluated_validations": num_results,
+                "success_percent": success_count / num_results * 100,
+                "successful_validations": success_count,
+                "unsuccessful_validations": num_results - success_count,
+            },
+            "validation_results": run_result_descriptions,
+        }
+
+    @public_api
+    def describe(self) -> str:
+        """JSON string description of this CheckpointResult"""
+        return json.dumps(self.describe_dict(), indent=4)
+
+
+# Necessary due to cyclic dependencies between Checkpoint and CheckpointResult
+CheckpointResult.update_forward_refs()
+
+
+class CheckpointDescriptionDict(TypedDict):
+    success: bool
+    statistics: CheckpointDescriptionStatistics
+    validation_results: List[Dict[str, Any]]
+
+
+class CheckpointDescriptionStatistics(TypedDict):
+    evaluated_validations: int
+    success_percent: float
+    successful_validations: int
+    unsuccessful_validations: int

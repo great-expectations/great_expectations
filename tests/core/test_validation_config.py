@@ -9,12 +9,13 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_config import ValidationConfig
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -42,7 +43,6 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.validator.v1_validator import (
     OldValidator,
-    ResultFormat,
 )
 
 if TYPE_CHECKING:
@@ -67,7 +67,7 @@ def validation_config(ephemeral_context: EphemeralDataContext) -> ValidationConf
     batch_definition = (
         context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
-        .add_batch_config(BATCH_DEFINITION_NAME)
+        .add_batch_definition(BATCH_DEFINITION_NAME)
     )
     return ValidationConfig(
         name="my_validation",
@@ -83,7 +83,7 @@ def cloud_validation_config(
     batch_definition = (
         empty_cloud_data_context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
-        .add_batch_config(BATCH_DEFINITION_NAME)
+        .add_batch_definition(BATCH_DEFINITION_NAME)
     )
     return ValidationConfig(
         name="my_validation",
@@ -153,7 +153,7 @@ class TestValidationRun:
         mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
 
         validation_config.run(
-            batch_definition_options={"year": 2024},
+            batch_parameters={"year": 2024},
             evaluation_parameters={"max_value": 9000},
             result_format=ResultFormat.COMPLETE,
         )
@@ -257,12 +257,12 @@ class TestValidationConfigSerialization:
     def validation_config_data(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-    ) -> tuple[PandasDatasource, CSVAsset, BatchConfig]:
+    ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
         context = in_memory_runtime_context
 
         ds = context.sources.add_pandas(self.ds_name)
         asset = ds.add_csv_asset(self.asset_name, "data.csv")
-        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        batch_definition = asset.add_batch_definition(self.batch_definition_name)
 
         return ds, asset, batch_definition
 
@@ -310,7 +310,7 @@ class TestValidationConfigSerialization:
         batch_definition_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
     ):
         pandas_ds, csv_asset, batch_definition = validation_config_data
@@ -369,7 +369,7 @@ class TestValidationConfigSerialization:
     def test_validation_config_deserialization_success(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
     ):
         context = in_memory_runtime_context
@@ -587,7 +587,7 @@ class TestValidationConfigSerialization:
     )
     def test_validation_config_deserialization_non_existant_resource(
         self,
-        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_config_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_config_suite: ExpectationSuite,
         serialized_config: dict,
         error_substring: str,

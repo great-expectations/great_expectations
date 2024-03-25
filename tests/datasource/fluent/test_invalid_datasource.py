@@ -24,15 +24,15 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     # we don't care about overriding these methods for InvalidDatasource
     "copy",
     "delete_asset",
-    "delete_batch_config",
+    "delete_batch_definition",
     "dict",
     "get_asset_names",
     "get_assets_as_dict",
-    "get_batch_config",  # DataAsset
+    "get_batch_definition",  # DataAsset
     "get_execution_engine",
     "json",
     "parse_order_by_sorters",
-    "update_batch_config_field_set",  # DataAsset
+    "update_batch_definition_field_set",  # DataAsset
     "yaml",
 }
 DATASOURCE_PUBLIC_METHODS: Final[list[str]] = [
