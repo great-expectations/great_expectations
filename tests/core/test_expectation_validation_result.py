@@ -249,7 +249,6 @@ def test_expectation_suite_validation_result_returns_expected_shape(
     # act
     description = svr.describe()
     # assert
-
     assert description == json.dumps(
         {
             "success": True,
