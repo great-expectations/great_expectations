@@ -202,10 +202,10 @@ class ExpectationsStore(Store):
                     cloud_suite=cloud_suite,
                 )
             return result
-        except gx_exceptions.StoreBackendError:
+        except gx_exceptions.StoreBackendError as exc:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.name} already exists."
-            )
+            ) from exc
 
     def _update(self, key, value, **kwargs):
         if not self.cloud_mode:

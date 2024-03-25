@@ -56,7 +56,10 @@ def get_user_friendly_error_message(
 
     try:
         error_json: ErrorPayload = http_exc.response.json()
-        errors = error_json.get("errors")
+        if isinstance(error_json, list):
+            errors = error_json
+        else:
+            errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
 
@@ -265,6 +268,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             attributes_key=attributes_key,
             attributes_value=value,
             organization_id=organization_id,
+            resource_id=id or None,  # filter out empty string
         )
 
         url = self.construct_versioned_url(
@@ -274,7 +278,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         if id:
-            data["data"]["id"] = id
             url = urljoin(f"{url}/", id)
 
         try:
@@ -666,12 +669,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id: str,
         attributes_key: str,
         attributes_value: Union[dict, Any],
+        resource_id: str | None = None,
         **kwargs: dict,
     ) -> dict:
         """Construct the correct payload for the cloud backend.
 
-        Arguments `resource_type`, `attributes_key`, and `attributes_value` of type Any are
-        deprecated in GX V1, and are only required for resources still using V0 endpoints.
+        Arguments `resource_type`, `attributes_key`, `resource_id`, and `attributes_value` of type Any
+        are deprecated in GX V1, and are only required for resources still using V0 endpoints.
         """
         version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_type, EndpointVersion.V0)
         if version == EndpointVersion.V1:
@@ -682,13 +686,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             else:
                 raise TypeError("Type of parameter attributes_value is unsupported in GX V1.")
 
-            return cls._construct_json_payload_v1(organization_id=organization_id, payload=payload)
+            return cls._construct_json_payload_v1(payload=payload)
         else:
             return cls._construct_json_payload_v0(
                 resource_type=resource_type,
                 organization_id=organization_id,
                 attributes_key=attributes_key,
                 attributes_value=attributes_value,
+                resource_id=resource_id,
                 **kwargs,
             )
 
@@ -699,6 +704,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id: str,
         attributes_key: str,
         attributes_value: Any,
+        resource_id: str | None,
         **kwargs: dict,
     ) -> dict:
         data = {
@@ -711,18 +717,18 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 },
             }
         }
+        if resource_id:
+            data["data"]["id"] = resource_id
         return data
 
     @classmethod
     def _construct_json_payload_v1(
         cls,
-        organization_id: str,
         payload: dict,
     ) -> dict:
         return {
             "data": {
-                **payload,
-                "organization_id": organization_id,
+                "suite": payload,
             }
         }
 
