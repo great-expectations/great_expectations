@@ -789,12 +789,6 @@ def test_update_checkpoint_success(
 
     action_list = [
         {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
             "name": "update_data_docs",
             "action": {
                 "class_name": "UpdateDataDocsAction",

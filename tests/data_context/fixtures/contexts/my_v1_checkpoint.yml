@@ -8,9 +8,6 @@ validations:
         index: -1
     expectation_suite_name: users.delivery
     action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

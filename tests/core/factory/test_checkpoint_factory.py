@@ -23,12 +23,6 @@ def checkpoint_dict():
                 "batch_request": None,
             },
         ],
-        "action_list": [
-            {
-                "action": {"class_name": "StoreValidationResultAction"},
-                "name": "store_validation_result",
-            },
-        ],
     }
 
 

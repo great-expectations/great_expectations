@@ -18,10 +18,6 @@ def checkpoint(
             "batch_request": None,
             "action_list": [
                 {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
                     "name": "update_data_docs",
                     "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
                 },

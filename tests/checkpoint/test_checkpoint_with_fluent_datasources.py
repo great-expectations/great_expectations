@@ -295,14 +295,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "batch_request": {
@@ -324,14 +316,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "Titanic_1911",
                 },
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[],
             ),
             "7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
@@ -341,14 +325,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
@@ -367,14 +343,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                 name="my_checkpoint",
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",

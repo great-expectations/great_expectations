@@ -1596,10 +1596,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
     DEFAULT_ACTION_LIST = [
         {
-            "name": "store_validation_result",
-            "action": {"class_name": "StoreValidationResultAction"},
-        },
-        {
             "name": "update_data_docs",
             "action": {"class_name": "UpdateDataDocsAction"},
         },

@@ -1101,12 +1101,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_template_checkpoint",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1139,12 +1133,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_nested_checkpoint_template_1",
         expectation_suite_name="suite_from_template_1",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1187,12 +1175,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_nested_checkpoint_template_2",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1225,12 +1207,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1662,12 +1638,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_template_checkpoint",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1700,12 +1670,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_nested_checkpoint_template_1",
         expectation_suite_name="suite_from_template_1",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1748,12 +1712,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_nested_checkpoint_template_2",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1786,12 +1744,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {

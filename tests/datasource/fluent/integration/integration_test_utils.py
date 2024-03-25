@@ -59,10 +59,6 @@ def run_checkpoint_and_data_doc(
         "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
         "action_list": [
             ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(class_name="UpdateDataDocsAction"),
             ),

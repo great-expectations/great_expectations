@@ -43,10 +43,6 @@ context.add_or_update_checkpoint(
             "expectation_suite_name": "my_expectation_suite",
             "action_list": [
                 {
-                    "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
                     "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
                     "action": {"class_name": "UpdateDataDocsAction"},
                 },
@@ -76,11 +72,6 @@ typed_results = {
     "run_results": {
         validation_result_id_type: {
             "validation_result": type(validation_result_id["validation_result"]),
-            "actions_results": {
-                "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
-                    "class": "StoreValidationResultAction"
-                }
-            },
         }
     },
     "checkpoint_config": CheckpointConfig,
@@ -93,11 +84,6 @@ results = {
     "run_results": {
         ValidationResultIdentifier: {
             "validation_result": ExpectationSuiteValidationResult,
-            "actions_results": {
-                "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
-                    "class": "StoreValidationResultAction"
-                }
-            },
         }
     },
     "checkpoint_config": CheckpointConfig,
@@ -145,10 +131,6 @@ context.add_or_update_checkpoint(
             },
             "expectation_suite_name": "my_expectation_suite",
             "action_list": [
-                {
-                    "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
                 {
                     "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
                     "action": {"class_name": "UpdateDataDocsAction"},
@@ -204,10 +186,6 @@ context.add_or_update_checkpoint(
     ],
     expectation_suite_name="my_expectation_suite",
     action_list=[
-        {
-            "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
-            "action": {"class_name": "StoreValidationResultAction"},
-        },
         {
             "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
             "action": {"class_name": "UpdateDataDocsAction"},
@@ -268,10 +246,6 @@ assert second_batch_identifiers == {
 context.add_or_update_checkpoint(
     name="my_base_checkpoint",
     action_list=[
-        {
-            "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
-            "action": {"class_name": "StoreValidationResultAction"},
-        },
         {
             "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
             "action": {"class_name": "UpdateDataDocsAction"},
@@ -427,9 +401,6 @@ validations:
         month: "01"
     expectation_suite_name: my_expectation_suite
 action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction

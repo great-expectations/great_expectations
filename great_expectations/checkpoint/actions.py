@@ -32,14 +32,11 @@ from great_expectations.checkpoint.util import (
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
-    PrivateAttr,
     root_validator,
     validator,
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.store.validations_store import ValidationsStore
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -59,7 +56,6 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -831,76 +827,6 @@ class EmailAction(ValidationAction):
             return {"email_result": email_result}
         else:
             return {"email_result": ""}
-
-
-# TODO: This action is slated for deletion in favor of using ValidationResult.run()
-@public_api
-class StoreValidationResultAction(ValidationAction):
-    """Store a validation result in the ValidationsStore.
-    Typical usage example:
-        ```yaml
-        - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          # name of the store where the actions will store validation results
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
-        ```
-    Args:
-        data_context: GX Data Context.
-        target_store_name: The name of the store where the actions will store the validation result.
-    Raises:
-        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
-    """  # noqa: E501
-
-    type: Literal["store_validation_result"] = "store_validation_result"
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    _target_store: ValidationsStore = PrivateAttr()
-
-    def __init__(
-        self,
-        data_context: AbstractDataContext,
-        target_store_name: Optional[str] = None,
-    ) -> None:
-        super().__init__(type="store_validation_result")
-        if target_store_name is None:
-            target_store = data_context.stores[data_context.validations_store_name]
-        else:
-            target_store = data_context.stores[target_store_name]
-
-        if not isinstance(target_store, ValidationsStore):
-            raise ValueError("target_store must be a ValidationsStore")
-
-        self._target_store = target_store
-
-    @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
-        payload=None,
-        expectation_suite_identifier=None,
-        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-    ):
-        logger.debug("StoreValidationResultAction.run")
-        output = self._target_store.store_validation_results(
-            validation_result_suite,
-            validation_result_suite_identifier,
-            expectation_suite_identifier,
-            checkpoint_identifier,
-        )
-
-        if isinstance(output, GXCloudResourceRef) and isinstance(
-            validation_result_suite_identifier, GXCloudIdentifier
-        ):
-            validation_result_suite_identifier.id = output.id
-
-        if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
-            return output
 
 
 @public_api

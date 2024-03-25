@@ -1,10 +1,9 @@
 import json
 import logging
-from typing import Type, Union
+from typing import Type
 from unittest import mock
 
 import pytest
-from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from requests import Session
 
@@ -17,26 +16,20 @@ from great_expectations.checkpoint.actions import (
     PagerdutyAlertAction,
     SlackNotificationAction,
     SNSNotificationAction,
-    StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
-from great_expectations.compatibility.pydantic import BaseModel, Field, ValidationError
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
 )
-from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import is_library_loadable
 
 logger = logging.getLogger(__name__)
@@ -70,55 +63,6 @@ class MockCloudResponse:
         self.status_code = status_code
         self.text = "test_text"
         self.content = json.dumps({"ok": "True"})
-
-
-@pytest.mark.big
-@freeze_time("09/26/2019 13:42:41")
-def test_StoreAction(mock_context):
-    fake_in_memory_store = ValidationsStore(
-        store_backend={
-            "class_name": "InMemoryStoreBackend",
-        }
-    )
-    stores = {"fake_in_memory_store": fake_in_memory_store}
-
-    class Object:
-        cloud_mode = False
-
-    data_context = Object()
-    data_context.stores = stores
-
-    action = StoreValidationResultAction(
-        data_context=data_context,
-        target_store_name="fake_in_memory_store",
-    )
-    assert fake_in_memory_store.list_keys() == []
-
-    action.run(
-        validation_result_suite_identifier=ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
-            run_id=RunIdentifier(run_name="prod_20190801"),
-            batch_identifier="1234",
-        ),
-        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
-        data_asset=None,
-    )
-
-    expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
-
-    assert len(fake_in_memory_store.list_keys()) == 1
-    stored_identifier = fake_in_memory_store.list_keys()[0]
-    assert stored_identifier.batch_identifier == "1234"
-    assert stored_identifier.expectation_suite_identifier.name == "default_expectations"
-    assert stored_identifier.run_id == expected_run_id
-
-    assert fake_in_memory_store.get(
-        ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(name="default_expectations"),
-            run_id=expected_run_id,
-            batch_identifier="1234",
-        )
-    ) == ExpectationSuiteValidationResult(success=False, results=[])
 
 
 @pytest.mark.big
@@ -765,61 +709,3 @@ class TestActionSerialization:
         actual = json.loads(json_dict)
 
         assert actual == expected
-
-    @pytest.mark.parametrize(
-        "action_class, serialized_action",
-        [(k, v) for k, v in SERIALIZED_ACTIONS.items()],
-        ids=[k.__name__ for k in SERIALIZED_ACTIONS],
-    )
-    @pytest.mark.unit
-    def test_action_deserialization(
-        self, action_class: Type[ValidationAction], serialized_action: dict
-    ):
-        actual = action_class.parse_obj(serialized_action)
-        assert isinstance(actual, action_class)
-
-    @pytest.mark.parametrize(
-        "action_class, init_params",
-        [(k, v) for k, v in ACTION_INIT_PARAMS.items()],
-        ids=[k.__name__ for k in ACTION_INIT_PARAMS],
-    )
-    @pytest.mark.unit
-    def test_action_deserialization_within_parent_class(
-        self, action_class: ValidationAction, init_params: dict
-    ):
-        """
-        The matter of deserializing an Action into the relevant subclass is the responsibility of
-        the Checkpoint in production code.
-
-        In order to test Actions alone, we utilize a dummy class with a single field to ensure
-        properly implementation of Pydantic discriminated unions.
-
-        Ref: https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
-        """
-
-        # This somewhat feels like we're testing Pydantic code but it's the only way to ensure that
-        # we've properly implemented the Pydantic discriminated union feature.
-        class DummyClassWithActionChild(BaseModel):
-            class Config:
-                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy  # noqa: E501
-                json_encoders = {Renderer: lambda r: r.serialize()}
-
-            action: Union[
-                APINotificationAction,
-                EmailAction,
-                MicrosoftTeamsNotificationAction,
-                OpsgenieAlertAction,
-                PagerdutyAlertAction,
-                SlackNotificationAction,
-                SNSNotificationAction,
-                StoreValidationResultAction,
-                UpdateDataDocsAction,
-            ] = Field(..., discriminator="type")
-
-        action = action_class(**init_params)
-        instance = DummyClassWithActionChild(action=action)
-
-        json_dict = instance.json()
-        parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
-
-        assert isinstance(parsed_action.action, action_class)

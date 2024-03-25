@@ -26,18 +26,11 @@ class ActionDict(TypedDict):
 
 
 class ActionDicts:
-    STORE_VALIDATION_RESULT: ClassVar[ActionDict] = {
-        "name": "store_validation_result",
-        "action": {"class_name": "StoreValidationResultAction"},
-    }
     UPDATE_DATA_DOCS: ClassVar[ActionDict] = {
         "name": "update_data_docs",
         "action": {"class_name": "UpdateDataDocsAction"},
     }
-    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
-        STORE_VALIDATION_RESULT,
-        UPDATE_DATA_DOCS,
-    )
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (UPDATE_DATA_DOCS,)
 
     @staticmethod
     def build_slack_action(webhook, notify_on, notify_with) -> ActionDict:

@@ -334,10 +334,6 @@ def _add_checkpoint(
             validations=validations,
             action_list=[
                 ActionDict(
-                    name="store_validation_result",
-                    action=ActionDetails(class_name="StoreValidationResultAction"),
-                ),
-                ActionDict(
                     name="update_data_docs",
                     action=ActionDetails(class_name="UpdateDataDocsAction"),
                 ),

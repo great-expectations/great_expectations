@@ -6,7 +6,6 @@ from .actions import (
     PagerdutyAlertAction,
     SlackNotificationAction,
     SNSNotificationAction,
-    StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
 )

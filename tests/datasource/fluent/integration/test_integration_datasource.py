@@ -11,7 +11,6 @@ import pytest
 import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import (
     PartitionerColumnValue,
@@ -477,12 +476,6 @@ def test_simple_checkpoint_run(
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
     )
     result = checkpoint.run()
     assert result["success"]
@@ -495,12 +488,6 @@ def test_simple_checkpoint_run(
                 "expectation_suite_name": expectation_suite_name,
                 "batch_request": batch_request,
             }
-        ],
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
         ],
     )
     result = checkpoint.run()
@@ -531,12 +518,6 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
     )
     result = checkpoint.run()
     assert result["success"]

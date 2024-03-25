@@ -222,10 +222,6 @@ checkpoint: Checkpoint = Checkpoint(
     batch_request=my_batch_request,
     expectation_suite_name="test_suite",
     action_list=[
-        {
-            "name": "store_validation_result",
-            "action": {"class_name": "StoreValidationResultAction"},
-        },
         {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
     ],
     runtime_configuration={

@@ -1259,10 +1259,6 @@ def test_override_general_defaults(
                 "class_name": "ActionListValidationOperator",
                 "action_list": [
                     {
-                        "name": "custom_store_validation_result",
-                        "action": {"class_name": "CustomStoreValidationResultAction"},
-                    },
-                    {
                         "name": "update_data_docs",
                         "action": {"class_name": "UpdateDataDocsAction"},
                     },
@@ -1354,10 +1350,6 @@ def test_override_general_defaults(
         "custom_action_list_operator": {
             "class_name": "ActionListValidationOperator",
             "action_list": [
-                {
-                    "name": "custom_store_validation_result",
-                    "action": {"class_name": "CustomStoreValidationResultAction"},
-                },
                 {
                     "name": "update_data_docs",
                     "action": {"class_name": "UpdateDataDocsAction"},
