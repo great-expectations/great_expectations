@@ -4,7 +4,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -23,9 +23,6 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,52 +34,6 @@ class ErrorDetail(TypedDict):
 
 class ErrorPayload(TypedDict):
     errors: List[ErrorDetail]
-
-
-class PayloadDataFieldV0(TypedDict):
-    attributes: dict
-    id: str
-    type: str
-
-
-class ResponsePayloadV0(TypedDict):
-    data: PayloadDataFieldV0 | list[PayloadDataFieldV0]
-
-
-class PayloadDataFieldV1(TypedDict):
-    id: str
-
-
-class ResponsePayloadV1(TypedDict):
-    data: PayloadDataFieldV1 | list[PayloadDataFieldV1]
-
-
-ResponsePayload = Union[ResponsePayloadV0, ResponsePayloadV1]
-
-
-AnyPayload = Union[ResponsePayloadV0, ResponsePayloadV1, ErrorPayload]
-
-
-class RequestPayloadDataFieldV0(TypedDict):
-    attributes: dict
-    id: NotRequired[str]
-    type: str
-
-
-class RequestPayloadV0(TypedDict):
-    data: RequestPayloadDataFieldV0
-
-
-class RequestPayloadDataFieldV1(TypedDict):
-    id: NotRequired[str]
-    organization_id: str
-
-
-class RequestPayloadV1(TypedDict):
-    data: RequestPayloadDataFieldV1
-
-
-RequestPayload = Union[RequestPayloadV0, RequestPayloadV1]
 
 
 class EndpointVersion(str, Enum):
@@ -256,10 +207,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
 
-        return cast(ResponsePayload, payload)
+        return payload
 
     @override
-    def _get_all(self) -> ResponsePayload:  # type: ignore[override]
+    def _get_all(self) -> dict:
         url = self.construct_versioned_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -267,7 +218,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         payload = self._send_get_request_to_api(url=url)
-        return cast(ResponsePayload, payload)
+        return payload
 
     def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
         try:
@@ -716,7 +667,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key: str,
         attributes_value: Union[dict, Any],
         **kwargs: dict,
-    ) -> RequestPayload:
+    ) -> dict:
         """Construct the correct payload for the cloud backend.
 
         Arguments `resource_type`, `attributes_key`, and `attributes_value` of type Any are
@@ -749,8 +700,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key: str,
         attributes_value: Any,
         **kwargs: dict,
-    ) -> RequestPayloadV0:
-        data: RequestPayloadV0 = {
+    ) -> dict:
+        data = {
             "data": {
                 "type": resource_type,
                 "attributes": {
@@ -767,7 +718,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         cls,
         organization_id: str,
         payload: dict,
-    ) -> RequestPayloadV1:
+    ) -> dict:
         return {
             "data": {
                 **payload,
