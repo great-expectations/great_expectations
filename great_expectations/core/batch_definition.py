@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
-class BatchConfig(pydantic.BaseModel):
+class BatchDefinition(pydantic.BaseModel):
     """Configuration for a batch of data.
 
     References the DataAsset to be used, and any additional parameters needed to fetch the data.
@@ -47,7 +47,7 @@ class BatchConfig(pydantic.BaseModel):
         )
 
     def save(self) -> None:
-        self.data_asset._save_batch_config(self)
+        self.data_asset._save_batch_definition(self)
 
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
