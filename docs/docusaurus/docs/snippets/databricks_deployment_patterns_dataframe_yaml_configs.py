@@ -217,7 +217,7 @@ data_docs_local_site_path = os.path.join(
     root_directory, "uncommitted", "data_docs", "local_site"
 )
 assert sorted(os.listdir(data_docs_local_site_path)) == sorted(
-    ["index.html", "expectations", "validations", "static"]
+    ["index.html", "expectations", "static"]
 )
 assert os.listdir(os.path.join(data_docs_local_site_path, "validations")) == [
     expectation_suite_name

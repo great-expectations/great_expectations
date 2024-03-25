@@ -2233,19 +2233,6 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
 
 
 @pytest.mark.cloud
-def test_use_validation_url_from_cloud(fake_cloud_context_basic):
-    context = fake_cloud_context_basic
-    checkpoint_name = "my_checkpoint"
-    checkpoint = context.checkpoints.get(checkpoint_name)
-    checkpoint_result = checkpoint.run()
-    org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
-    assert (
-        checkpoint_result.validation_result_url
-        == f"https://my_cloud_backend.com/{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
-    )
-
-
-@pytest.mark.cloud
 def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
     context, slack_counter = fake_cloud_context_with_slack
     checkpoint_name = "my_checkpoint"

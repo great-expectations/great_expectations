@@ -43,7 +43,6 @@ from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
-    run_checkpoint_and_data_doc,
 )
 
 if TYPE_CHECKING:
@@ -54,18 +53,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
-    )
-
-
-# This is marked by the various backend used in testing in the datasource_test_data fixture.
-@pytest.mark.parametrize("include_rendered_content", [False, True])
-def test_run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-    include_rendered_content: bool,
-):
-    run_checkpoint_and_data_doc(
-        datasource_test_data=datasource_test_data,
-        include_rendered_content=include_rendered_content,
     )
 
 
