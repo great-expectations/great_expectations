@@ -106,7 +106,7 @@ class ValidationAction(BaseModel):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
+        data_asset=None,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,

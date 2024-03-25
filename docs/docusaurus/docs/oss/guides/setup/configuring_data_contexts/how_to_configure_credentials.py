@@ -64,7 +64,7 @@ pg_datasource = context.sources.add_or_update_postgres(
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
 
-# Alternately, the full connection string can be added as an environment Variable
+# Alternately, the full connection string can be added as an environment variable
 pg_datasource = context.sources.add_or_update_postgres(
     name="my_postgres_db", connection_string="${POSTGRES_CONNECTION_STRING}"
 )

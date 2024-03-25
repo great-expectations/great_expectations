@@ -60,6 +60,13 @@ import LinkCard from '@site/src/components/LinkCard';
   />
   <LinkCard 
     topIcon 
+    label="Rename an Expectation Suite"
+    description="Modify the name of a new or existing Expectation Suite and save the new value."
+    to="/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite" 
+    icon="/img/expectation_icon.svg" 
+  />
+  <LinkCard 
+    topIcon 
     label="Delete an Expectation Suite"
     description="Permanently remove an Expectation Suite from a Data Context"
     to="/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite" 

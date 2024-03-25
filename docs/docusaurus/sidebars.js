@@ -80,9 +80,26 @@ module.exports = {
           ]
         },
         {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_credentials',
-          label: '🚧 Manage credentials'
+          type: 'category',
+          label: 'Manage credentials',
+          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
+          items: [
+            {
+              type: 'link',
+              label: 'Environment variables',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
+            },
+            {
+              type: 'link',
+              label: 'YAML file',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
+            },
+            {
+              type: 'link',
+              label: 'Secrets manager',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
+            },
+          ]
         },
         {
           type: 'doc',
@@ -277,6 +294,11 @@ module.exports = {
               type: 'link',
               label: 'Get an existing Expectation Suite',
               href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Rename an Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite',
             },
             {
               type: 'link',
