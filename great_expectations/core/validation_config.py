@@ -224,7 +224,6 @@ class ValidationConfig(BaseModel):
             cloud_mode=self._validation_results_store.cloud_mode,
         )
 
-        # TODO(cdkini): Don't love the placement but this gets the URL from Cloud
         if isinstance(ref, GXCloudResourceRef):
             result_url = ref.response["data"]["attributes"]["validation_result"]["display_url"]
             results.result_url = result_url
