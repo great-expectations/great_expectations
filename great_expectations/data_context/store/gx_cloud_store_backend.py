@@ -4,7 +4,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -278,6 +278,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             response.raise_for_status()
             response_json: dict = response.json()
+            if self._is_v1_resource:
+                cast(ResponsePayloadV1, response_json)
+            else:
+                cast(ResponsePayloadV0, response_json)
             return response_json
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
