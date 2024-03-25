@@ -202,5 +202,6 @@ class ValidationsStore(Store):
             expectation_suite_id=expectation_suite_id,
         )
 
-    def parse_result_url_from_gx_cloud_ref(self, ref: GXCloudResourceRef) -> str | None:
+    @staticmethod
+    def parse_result_url_from_gx_cloud_ref(ref: GXCloudResourceRef) -> str | None:
         return ref.response["data"]["attributes"]["validation_result"]["display_url"]
