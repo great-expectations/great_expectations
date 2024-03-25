@@ -363,7 +363,7 @@ class TestCheckpointResult:
 
     @pytest.fixture
     def mock_batch_def(self, mocker: pytest.MockFixture):
-        return mocker.Mock(spec=BatchConfig)
+        return mocker.Mock(spec=BatchDefinition)
 
     @pytest.fixture
     def validation_definition(
