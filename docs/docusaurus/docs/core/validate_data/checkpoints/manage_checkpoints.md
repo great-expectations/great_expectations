@@ -6,6 +6,10 @@ import InProgress from '../_core_components/_in_progress.md';
 
 <InProgress/>
 
-## Add Actions to a Checkpoint
+## Create a Checkpoint
 
-<InProgress/>
+## Get a Checkpoint
+
+## Update a Checkpoint
+
+## Delete a Checkpoint

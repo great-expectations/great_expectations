@@ -354,7 +354,7 @@ module.exports = {
         },
         {
           type: 'doc',
-          id: 'core/validate_data/manage_checkpoints',
+          id: 'core/validate_data/checkpoints/manage_checkpoints',
           label: 'Manage Checkpoints'
         },
       ]
