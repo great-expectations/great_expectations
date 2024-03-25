@@ -638,11 +638,15 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )
 
     def describe_dict(self) -> dict:
-        return {
+        data = {
             "success": self.success,
             "statistics": self.statistics,
             "expectations": [expectation.describe_dict() for expectation in self.results],
         }
+        if self.result_url:
+            data["result_url"] = self.result_url
+
+        return data
 
     @public_api
     def describe(self) -> str:
