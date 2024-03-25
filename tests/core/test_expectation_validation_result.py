@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 import pytest
@@ -153,7 +155,16 @@ def test_expectation_validation_result_describe_returns_expected_description_wit
 
 
 @pytest.mark.unit
-def test_expectation_suite_validation_result_returns_expected_shape():
+@pytest.mark.parametrize(
+    "validation_result_url",
+    [
+        "https://app.greatexpectations.io/organizations/my-org/data-assets/6f6d390b-a52b-41d1-b5c0-a1d57a6b4618/validations/expectation-suites/a0af0eb5-90ab-4219-ab60-482eee0a8b32/results/e77ce5e4-b71b-4f86-9c3b-f82385aab660",
+        None,
+    ],
+)
+def test_expectation_suite_validation_result_returns_expected_shape(
+    validation_result_url: str | None,
+):
     # arrange
     svr = ExpectationSuiteValidationResult(
         success=True,
@@ -233,60 +244,65 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                 }
             ),
         ],
+        result_url=validation_result_url,
     )
     # act
     description = svr.describe()
     # assert
-    assert description == json.dumps(
-        {
-            "success": True,
-            "statistics": {
-                "evaluated_expectations": 2,
-                "successful_expectations": 2,
-                "unsuccessful_expectations": 0,
-                "success_percent": 100.0,
-            },
-            "expectations": [
-                {
-                    "expectation_type": "expect_column_values_to_be_between",
-                    "success": True,
-                    "kwargs": {
-                        "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                        "mostly": 0.95,
-                        "column": "passenger_count",
-                        "min_value": 0.0,
-                        "max_value": 6.0,
-                    },
-                    "result": {
-                        "element_count": 100000,
-                        "unexpected_count": 1,
-                        "unexpected_percent": 0.001,
-                        "partial_unexpected_list": [7.0],
-                        "missing_count": 0,
-                        "missing_percent": 0.0,
-                        "unexpected_percent_total": 0.001,
-                        "unexpected_percent_nonmissing": 0.001,
-                        "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
-                        "partial_unexpected_index_list": [48422],
-                    },
-                },
-                {
-                    "expectation_type": "expect_column_values_to_not_be_null",
-                    "success": True,
-                    "kwargs": {
-                        "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                        "column": "trip_distance",
-                    },
-                    "result": {
-                        "element_count": 100000,
-                        "unexpected_count": 0,
-                        "unexpected_percent": 0.0,
-                        "partial_unexpected_list": [],
-                        "partial_unexpected_counts": [],
-                        "partial_unexpected_index_list": [],
-                    },
-                },
-            ],
+    expected = {
+        "success": True,
+        "statistics": {
+            "evaluated_expectations": 2,
+            "successful_expectations": 2,
+            "unsuccessful_expectations": 0,
+            "success_percent": 100.0,
         },
+        "expectations": [
+            {
+                "expectation_type": "expect_column_values_to_be_between",
+                "success": True,
+                "kwargs": {
+                    "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                    "mostly": 0.95,
+                    "column": "passenger_count",
+                    "min_value": 0.0,
+                    "max_value": 6.0,
+                },
+                "result": {
+                    "element_count": 100000,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 0.001,
+                    "partial_unexpected_list": [7.0],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.001,
+                    "unexpected_percent_nonmissing": 0.001,
+                    "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                    "partial_unexpected_index_list": [48422],
+                },
+            },
+            {
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "success": True,
+                "kwargs": {
+                    "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                    "column": "trip_distance",
+                },
+                "result": {
+                    "element_count": 100000,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "partial_unexpected_counts": [],
+                    "partial_unexpected_index_list": [],
+                },
+            },
+        ],
+    }
+    if validation_result_url:
+        expected["result_url"] = validation_result_url
+
+    assert description == json.dumps(
+        expected,
         indent=4,
     )
