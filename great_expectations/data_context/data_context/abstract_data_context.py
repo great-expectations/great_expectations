@@ -553,7 +553,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._checkpoints
 
     @property
-    def validations(self) -> ValidationDefinitionFactory:
+    def validation_definitions(self) -> ValidationDefinitionFactory:
         if not self._validation_definitions:
             raise gx_exceptions.DataContextError(
                 "DataContext requires a configured ValidationDefinitionStore to persist "
