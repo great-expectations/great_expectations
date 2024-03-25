@@ -5,7 +5,6 @@ import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
@@ -96,6 +95,8 @@ class Checkpoint(BaseModel):
     def _validate_validation_definitions(
         cls, validation_definitions: list[ValidationConfig] | list[dict]
     ) -> list[ValidationConfig]:
+        from great_expectations import project_manager
+
         if len(validation_definitions) == 0:
             raise ValueError("Checkpoint must contain at least one validation definition")
 

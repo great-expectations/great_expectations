@@ -29,6 +29,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.v1_checkpoint import Checkpoint as V1Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -280,12 +281,12 @@ class V1CheckpointStore(Store):
 
     @override
     def deserialize(self, value):
-        from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+        from great_expectations.checkpoint.v1_checkpoint import Checkpoint as V1Checkpoint
 
-        return Checkpoint.parse_raw(value)
+        return V1Checkpoint.parse_raw(value)
 
     @override
-    def _add(self, key: DataContextKey, value: Checkpoint, **kwargs):
+    def _add(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value.id = str(uuid.uuid4())
