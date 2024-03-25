@@ -1133,15 +1133,17 @@ def test_adding_partitioner_persists_results(
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
     ).add_query_asset(
         name="my_asset", query="select * from table", order_by=["year"]
-    ).add_batch_config(name="my_batch_config", partitioner=PartitionerYear(column_name="my_col"))
+    ).add_batch_definition(
+        name="my_batch_definition", partitioner=PartitionerYear(column_name="my_col")
+    )
 
     final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
         gx_yaml.read_text(),
     )["fluent_datasources"]
 
-    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_configs"]["my_batch_config"][
-        "partitioner"
-    ]
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_definitions"][
+        "my_batch_definition"
+    ]["partitioner"]
 
 
 @pytest.mark.postgresql
