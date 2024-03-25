@@ -191,14 +191,14 @@ def test_validation_definition_factory_delete_raises_for_missing_validation(
 def test_validation_definition_factory_is_initialized_with_context_filesystem(
     empty_data_context: FileDataContext,
 ):
-    assert isinstance(empty_data_context.validations, ValidationDefinitionFactory)
+    assert isinstance(empty_data_context.validation_definitions, ValidationDefinitionFactory)
 
 
 @pytest.mark.cloud
 def test_validation_definition_factory_is_initialized_with_context_cloud(
     empty_cloud_data_context: CloudDataContext,
 ):
-    assert isinstance(empty_cloud_data_context.validations, ValidationDefinitionFactory)
+    assert isinstance(empty_cloud_data_context.validation_definitions, ValidationDefinitionFactory)
 
 
 @pytest.mark.filesystem
@@ -242,11 +242,11 @@ def _test_validation_definition_factory_add_success(
     with pytest.raises(
         DataContextError, match=f"ValidationDefinition with name {name} was not found."
     ):
-        context.validations.get(name)
+        context.validation_definitions.get(name)
 
     # Act
     with mocker.patch.object(ValidationDefinition, "json", return_value=validation_definition_json):
-        created_validation = context.validations.add(validation=validation_definition)
+        created_validation = context.validation_definitions.add(validation=validation_definition)
 
     # Assert
     validation_names = {
@@ -295,17 +295,17 @@ def _test_validation_definition_factory_delete_success(
     name = validation_definition.name
 
     with mocker.patch.object(ValidationDefinition, "json", return_value=validation_definition_json):
-        validation_definition = context.validations.add(validation=validation_definition)
+        validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    context.validations.delete(validation_definition)
+    context.validation_definitions.delete(validation_definition)
 
     # Assert
     with pytest.raises(
         DataContextError,
         match=f"ValidationDefinition with name {name} was not found.",
     ):
-        context.validations.get(name)
+        context.validation_definitions.get(name)
 
 
 class TestValidationDefinitionFactoryAnalytics:
