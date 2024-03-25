@@ -81,6 +81,7 @@ class Checkpoint(BaseModel):
             ],
             "result_format": "SUMMARY",
             "id": "b758816-64c8-46cb-8f7e-03c12cea1d67"
+        }
         """  # noqa: E501
 
         arbitrary_types_allowed = (
