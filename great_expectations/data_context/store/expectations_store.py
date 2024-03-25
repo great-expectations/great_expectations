@@ -45,7 +45,6 @@ class ExpectationsStore(Store):
         data_context=None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.  # noqa: E501
         self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -104,11 +103,8 @@ class ExpectationsStore(Store):
         else:
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
-        suite_dict: Dict = suite_data["attributes"]["suite"]
+        suite_dict: Dict = suite_data["suite"]
         suite_dict["id"] = ge_cloud_suite_id
-
-        # Temporary fork to account for pre-V1 configs
-        suite_dict.pop("ge_cloud_id", None)
 
         return suite_dict
 
@@ -198,11 +194,7 @@ class ExpectationsStore(Store):
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
 
-                suite_kwargs = result.response["data"]["attributes"]["suite"]
-
-                # Temporary fork to account for pre-V1 configs
-                if "ge_cloud_id" in suite_kwargs and "id" not in suite_kwargs:
-                    suite_kwargs["id"] = suite_kwargs.pop("ge_cloud_id")
+                suite_kwargs = result.response["data"]["suite"]
 
                 cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
@@ -220,17 +212,12 @@ class ExpectationsStore(Store):
             # this logic should move to the store backend, but is implemented here for now
             value: ExpectationSuite = self._add_ids_on_update(value)
         try:
-            # todo: `update` should return the updated object
-            super()._update(key=key, value=value, **kwargs)
+            result = super()._update(key=key, value=value, **kwargs)
 
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
-                # todo: add back this logic when `update` returns the updated object
-                # result = cast(GXCloudResourceRef, result)
-                # cloud_suite = ExpectationSuite(
-                #     **result.response["data"]["attributes"]["suite"]
-                # )
-                _suite_identifier, cloud_suite = self._refresh_suite(value)
+                result = cast(GXCloudResourceRef, result)
+                cloud_suite = ExpectationSuite(**result.response["data"]["suite"])
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
