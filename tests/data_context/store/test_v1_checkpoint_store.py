@@ -177,115 +177,114 @@ def test_add_cloud(cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint
     )
 
 
-# @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
-# @pytest.mark.unit
-# def test_get_key(request, store_fixture: str):
-#     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
+@pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
+@pytest.mark.unit
+def test_get_key(request, store_fixture: str):
+    store: V1CheckpointStore = request.getfixturevalue(store_fixture)
 
-#     name = "my_validation"
-#     assert store.get_key(name=name) == StringKey(key=name)
-
-
-# @pytest.mark.cloud
-# def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
-#     key = cloud_backed_store.get_key(name="my_validation")
-#     assert key.resource_type == GXCloudRESTResource.VALIDATION_CONFIG
-#     assert key.resource_name == "my_validation"
+    name = "my_checkpoint"
+    assert store.get_key(name=name) == StringKey(key=name)
 
 
-# _VALIDATION_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
-# _VALIDATION_CONFIG = {
-#     "name": "my_validation",
-#     "data": {
-#         "datasource": {
-#             "name": "my_datasource",
-#             "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
-#         },
-#         "asset": {
-#             "name": "my_asset",
-#             "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
-#         },
-#         "batch_config": {
-#             "name": "my_batch_config",
-#             "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
-#         },
-#     },
-#     "suite": {
-#         "name": "my_suite",
-#         "id": "8r2g816-64c8-46cb-8f7e-03c12cea1d67",
-#     },
-# }
+@pytest.mark.cloud
+def test_get_key_cloud(cloud_backed_store: ValidationConfigStore):
+    key = cloud_backed_store.get_key(name="my_checkpoint")
+    assert key.resource_type == GXCloudRESTResource.CHECKPOINT
+    assert key.resource_name == "my_checkpoint"
 
 
-# @pytest.mark.cloud
-# @pytest.mark.parametrize(
-#     "response_json",
-#     [
-#         pytest.param(
-#             {
-#                 "data": {
-#                     "id": _VALIDATION_ID,
-#                     "attributes": {
-#                         "validation_config": _VALIDATION_CONFIG,
-#                     },
-#                 }
-#             },
-#             id="single_validation_config",
-#         ),
-#         pytest.param(
-#             {
-#                 "data": [
-#                     {
-#                         "id": _VALIDATION_ID,
-#                         "attributes": {
-#                             "validation_config": _VALIDATION_CONFIG,
-#                         },
-#                     }
-#                 ]
-#             },
-#             id="list_with_single_validation_config",
-#         ),
-#     ],
-# )
-# def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
-#     actual = ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
-#     expected = {**_VALIDATION_CONFIG, "id": _VALIDATION_ID}
-#     assert actual == expected
+_CHECKPOINT_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
+_CHECKPOINT_CONFIG = {
+    "name": "my_checkpoint",
+    "validation_definitions": [
+        {"name": "my_first_validation", "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"},
+        {"name": "my_second_validation", "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"},
+    ],
+    "actions": [
+        {
+            "name": "my_slack_action",
+            "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
+            "notify_on": "all",
+            "notify_with": ["my_data_docs_site"],
+            "renderer": {
+                "class_name": "SlackRenderer",
+            },
+        }
+    ],
+    "result_format": "SUMMARY",
+    "id": _CHECKPOINT_ID,
+}
 
 
-# @pytest.mark.cloud
-# @pytest.mark.parametrize(
-#     "response_json, error_substring",
-#     [
-#         pytest.param(
-#             {
-#                 "data": [],
-#             },
-#             "Cannot parse empty data",
-#             id="empty_list",
-#         ),
-#         pytest.param(
-#             {
-#                 "data": [
-#                     {
-#                         "id": _VALIDATION_ID,
-#                         "attributes": {
-#                             "validation_config": _VALIDATION_CONFIG,
-#                         },
-#                     },
-#                     {
-#                         "id": _VALIDATION_ID,
-#                         "attributes": {
-#                             "validation_config": _VALIDATION_CONFIG,
-#                         },
-#                     },
-#                 ],
-#             },
-#             "Cannot parse multiple items",
-#             id="list_with_multiple_validation_configs",
-#         ),
-#     ],
-# )
-# def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
-#     with pytest.raises(ValueError, match=f"{error_substring}*."):
-#         ValidationConfigStore.gx_cloud_response_json_to_object_dict(response_json)
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": _CHECKPOINT_ID,
+                    "attributes": {
+                        "checkpoint_config": _CHECKPOINT_CONFIG,
+                    },
+                }
+            },
+            id="single_checkpoint_config",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": _CHECKPOINT_ID,
+                        "attributes": {
+                            "checkpoint_config": _CHECKPOINT_CONFIG,
+                        },
+                    }
+                ]
+            },
+            id="list_with_single_checkpoint_config",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
+    actual = V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+    expected = {**_CHECKPOINT_CONFIG, "id": _CHECKPOINT_ID}
+    assert actual == expected
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json, error_substring",
+    [
+        pytest.param(
+            {
+                "data": [],
+            },
+            "Cannot parse empty data",
+            id="empty_list",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": _CHECKPOINT_ID,
+                        "attributes": {
+                            "checkpoint_config": _CHECKPOINT_CONFIG,
+                        },
+                    },
+                    {
+                        "id": _CHECKPOINT_ID,
+                        "attributes": {
+                            "checkpoint_config": _CHECKPOINT_CONFIG,
+                        },
+                    },
+                ],
+            },
+            "Cannot parse multiple items",
+            id="list_with_multiple_checkpoint_configs",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
+    with pytest.raises(ValueError, match=f"{error_substring}*."):
+        V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
