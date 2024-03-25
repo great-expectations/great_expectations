@@ -236,7 +236,7 @@ class V1CheckpointStore(Store):
     _key_class = StringKey
 
     def get_key(self, name: str, id: str | None = None) -> GXCloudIdentifier | StringKey:
-        """Given a name and optional ID, build the correct key for use in the ValidationConfigStore."""  # noqa: E501
+        """Given a name and optional ID, build the correct key for use in the CheckpointStore."""
         if self.cloud_mode:
             return GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
