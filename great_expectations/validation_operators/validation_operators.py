@@ -196,6 +196,7 @@ class ActionListValidationOperator(ValidationOperator):
         ]
         self.result_format = result_format
 
+        action_list = action_list or []
         self.action_list = action_list
         self.actions = OrderedDict()
         # For a great expectations cloud context it's important that we store the validation result before we send  # noqa: E501

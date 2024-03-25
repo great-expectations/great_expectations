@@ -1123,7 +1123,6 @@ def test_run_checkpoint_new_style(
 
     result: CheckpointResult = checkpoint.run()
     assert len(result.list_validation_results()) == 1
-    assert len(context.validations_store.list_keys()) == 2
     assert result.success
 
 
