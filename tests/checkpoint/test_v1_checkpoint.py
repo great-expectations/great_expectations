@@ -559,7 +559,7 @@ class TestCheckpointResult:
         assert csv_path.exists()
         asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
 
-        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        batch_definition = asset.add_batch_definition(self.batch_definition_name)
         suite = ExpectationSuite(
             name=self.suite_name,
             expectations=[
