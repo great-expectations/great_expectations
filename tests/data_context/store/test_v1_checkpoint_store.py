@@ -113,7 +113,7 @@ def checkpoint(
 
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
-def test_add(mocker, request, store_fixture: str, checkpoint: Checkpoint):
+def test_add(request, store_fixture: str, checkpoint: Checkpoint):
     store: ValidationConfigStore = request.getfixturevalue(store_fixture)
     key = StringKey(key="my_checkpoint")
 
@@ -124,9 +124,7 @@ def test_add(mocker, request, store_fixture: str, checkpoint: Checkpoint):
 
 
 @pytest.mark.cloud
-def test_add_cloud(mocker, cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint):
-    context = mocker.Mock(spec=AbstractDataContext)
-    set_context(context)
+def test_add_cloud(cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint):
     store = cloud_backed_store
 
     id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
@@ -149,9 +147,29 @@ def test_add_cloud(mocker, cloud_backed_store: V1CheckpointStore, checkpoint: Ch
                 "id": id,
                 "attributes": {
                     "organization_id": "12345678-1234-5678-1234-567812345678",
-                    "checkpoint": {
+                    "checkpoint_config": {
                         "name": name,
                         "id": None,
+                        "result_format": "SUMMARY",
+                        "validation_definitions": [
+                            {
+                                "id": "a58816-64c8-46cb-8f7e-03c12cea1d67",
+                                "name": "my_first_validation",
+                            },
+                            {
+                                "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67",
+                                "name": "my_second_validation",
+                            },
+                        ],
+                        "actions": [
+                            {
+                                "name": "my_slack_action",
+                                "notify_on": "all",
+                                "notify_with": ["my_data_docs_site"],
+                                "renderer": {"class_name": "SlackRenderer"},
+                                "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
+                            },
+                        ],
                     },
                 },
             }

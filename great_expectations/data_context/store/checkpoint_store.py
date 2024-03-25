@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import uuid
@@ -269,12 +270,13 @@ class V1CheckpointStore(Store):
 
     @override
     def serialize(self, value):
-        if self.cloud_mode:
-            return value.dict()
-
         # In order to enable the custom json_encoders in Checkpoint, we need to set `models_as_dict` off  # noqa: E501
         # Ref: https://docs.pydantic.dev/1.10/usage/exporting_models/#serialising-self-reference-or-other-models
-        return value.json(models_as_dict=False, indent=2, sort_keys=True)
+        data = value.json(models_as_dict=False, indent=2, sort_keys=True)
+        if self.cloud_mode:
+            return json.loads(data)
+
+        return data
 
     @override
     def deserialize(self, value):
