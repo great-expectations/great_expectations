@@ -262,7 +262,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _send_get_request_to_api(
         self, url: str, params: dict | None = None
-    ) -> ResponsePayloadV0 | dict:
+    ) -> ResponsePayloadV0 | ResponsePayloadV1:
         try:
             response = self._session.get(
                 url=url,
