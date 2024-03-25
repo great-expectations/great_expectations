@@ -63,7 +63,7 @@ from great_expectations.core.expectation_validation_result import get_metric_kwa
 from great_expectations.core.factory import (
     CheckpointFactory,
     SuiteFactory,
-    ValidationFactory,
+    ValidationDefinitionFactory,
 )
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -330,7 +330,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 context=self,
             )
 
-        self._validation_definitions: ValidationFactory = ValidationFactory(
+        self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
             store=self.validation_definition_store
         )
 
@@ -553,7 +553,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._checkpoints
 
     @property
-    def validations(self) -> ValidationFactory:
+    def validation_definitions(self) -> ValidationDefinitionFactory:
         if not self._validation_definitions:
             raise gx_exceptions.DataContextError(
                 "DataContext requires a configured ValidationDefinitionStore to persist "
