@@ -75,6 +75,7 @@ class RequestPayloadV0(TypedDict):
 
 class RequestPayloadDataFieldV1(TypedDict):
     id: NotRequired[str]
+    organization_id: str
 
 
 class RequestPayloadV1(TypedDict):
@@ -255,7 +256,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
 
-        return payload
+        return cast(ResponsePayload, payload)
 
     @override
     def _get_all(self) -> ResponsePayload:  # type: ignore[override]
@@ -266,11 +267,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         payload = self._send_get_request_to_api(url=url)
-        return payload
+        return cast(ResponsePayload, payload)
 
-    def _send_get_request_to_api(
-        self, url: str, params: dict | None = None
-    ) -> ResponsePayloadV0 | ResponsePayloadV1:
+    def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
         try:
             response = self._session.get(
                 url=url,
@@ -278,10 +277,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             response.raise_for_status()
             response_json: dict = response.json()
-            if self._is_v1_resource:
-                cast(ResponsePayloadV1, response_json)
-            else:
-                cast(ResponsePayloadV0, response_json)
             return response_json
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
@@ -786,3 +781,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @property
     def _is_v1_resource(self) -> bool:
         return self._ENDPOINT_VERSION_LOOKUP.get(self.ge_cloud_resource_type) == EndpointVersion.V1
+
+    def _ensure_response_type(self, response: dict) -> ResponsePayload:
+        """Typeguard"""
+        if self._is_v1_resource:
+            cast(ResponsePayloadV1, response)
+        else:
+            cast(ResponsePayloadV0, response)
+        return response
