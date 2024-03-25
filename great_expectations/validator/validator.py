@@ -1434,6 +1434,7 @@ class Validator:
                     "validation_time": validation_time,
                     "checkpoint_name": checkpoint_name,
                 },
+                batch_id=self.active_batch_id,
             )
 
             self._data_context = validation_data_context
