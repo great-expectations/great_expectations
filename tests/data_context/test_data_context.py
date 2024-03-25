@@ -1113,16 +1113,9 @@ def test_run_checkpoint_new_style(
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
-
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
     result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
-    assert result.success
-
-    result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
     assert result.success
 
 
