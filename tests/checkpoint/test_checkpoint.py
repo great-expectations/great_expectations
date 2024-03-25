@@ -215,7 +215,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(  # noqa: E501
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    store_validation_result_action,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     checkpoint_name: str = "test_checkpoint_name"
@@ -223,9 +222,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     checkpoint_config = CheckpointConfig(
         name=checkpoint_name,
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            store_validation_result_action,
-        ],
         validations=[
             {
                 "batch_request": {
