@@ -118,7 +118,7 @@ def checkpoint(
 @pytest.mark.unit
 def test_add(request, store_fixture: str, checkpoint: Checkpoint):
     store: V1CheckpointStore = request.getfixturevalue(store_fixture)
-    key = StringKey(key="my_checkpoint")
+    key = store.get_key(name="my_checkpoint")
 
     assert not checkpoint.id
     store.add(key=key, value=checkpoint)

@@ -244,7 +244,7 @@ class V1CheckpointStore(Store):
                 id=id,
                 resource_name=name,
             )
-        return StringKey(key=name)
+        return self._key_class(key=name)
 
     @override
     @staticmethod
