@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 # Controls which methods should raise an error when called on an InvalidDatasource
 METHOD_SHOULD_RAISE_ERROR: Final[set] = {
     "get_batch_list_from_batch_request",
-    "add_batch_config",
+    "add_batch_definition",
 }
 
 
@@ -77,7 +77,7 @@ class InvalidAsset(DataAsset):
         )
 
     @override
-    def add_batch_config(self, name: str, partitioner: Any | None = None) -> NoReturn:
+    def add_batch_definition(self, name: str, partitioner: Any | None = None) -> NoReturn:
         self._raise_type_error()
 
     @override

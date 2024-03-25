@@ -90,10 +90,10 @@ CHECKPOINT_STORE_STRING = yaml.dump(
 PROFILER_STORE_STRING = yaml.dump(
     {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
 ).replace("\n", "\n  ")[:-2]
-VALIDATION_CONFIG_STORE_STRING = yaml.dump(
+VALIDATION_DEFINITION_STORE_STRING = yaml.dump(
     {
-        "validation_config_store": DataContextConfigDefaults.DEFAULT_STORES.value[
-            "validation_config_store"
+        "validation_definition_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validation_definition_store"
         ]
     }
 ).replace("\n", "\n  ")[:-2]
@@ -123,7 +123,7 @@ stores:
     {EVALUATION_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {PROFILER_STORE_STRING}
-  {VALIDATION_CONFIG_STORE_STRING}
+  {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
