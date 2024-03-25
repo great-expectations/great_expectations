@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 # TODO: Add analytics as needed
-class ValidationFactory(Factory[ValidationDefinition]):
+class ValidationDefinitionFactory(Factory[ValidationDefinition]):
     def __init__(self, store: ValidationDefinitionStore) -> None:
         self._store = store
 

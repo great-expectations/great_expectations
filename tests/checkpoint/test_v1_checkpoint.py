@@ -85,7 +85,7 @@ class TestCheckpointSerialization:
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield in_memory_context.validations.add(vc)
+            yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
     def validation_definition_2(
@@ -102,7 +102,7 @@ class TestCheckpointSerialization:
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield in_memory_context.validations.add(vc)
+            yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
     def validation_definitions(

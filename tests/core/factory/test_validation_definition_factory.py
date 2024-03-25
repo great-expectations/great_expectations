@@ -5,7 +5,9 @@ from pytest_mock import MockerFixture
 
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.factory.validation_factory import ValidationFactory
+from great_expectations.core.factory.validation_definition_factory import (
+    ValidationDefinitionFactory,
+)
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -62,7 +64,7 @@ def validation_definition_json(validation_definition: ValidationDefinition) -> s
 
 
 @pytest.mark.unit
-def test_validation_factory_get_uses_store_get(
+def test_validation_definition_factory_get_uses_store_get(
     mocker: MockerFixture, validation_definition: ValidationDefinition
 ):
     # Arrange
@@ -71,7 +73,7 @@ def test_validation_factory_get_uses_store_get(
     store.has_key.return_value = True
     key = store.get_key.return_value
     store.get.return_value = validation_definition
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
 
     # Act
     result = factory.get(name=name)
@@ -82,7 +84,7 @@ def test_validation_factory_get_uses_store_get(
 
 
 @pytest.mark.unit
-def test_validation_factory_get_raises_error_on_missing_key(
+def test_validation_definition_factory_get_raises_error_on_missing_key(
     mocker: MockerFixture,
     validation_definition: ValidationDefinition,
 ):
@@ -91,7 +93,7 @@ def test_validation_factory_get_raises_error_on_missing_key(
     store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
     store.get.return_value = validation_definition
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
 
     # Act
     with pytest.raises(
@@ -104,14 +106,14 @@ def test_validation_factory_get_raises_error_on_missing_key(
 
 
 @pytest.mark.unit
-def test_validation_factory_add_uses_store_add(
+def test_validation_definition_factory_add_uses_store_add(
     mocker: MockerFixture, validation_definition: ValidationDefinition
 ):
     # Arrange
     store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
     store.get.return_value = validation_definition
 
     # Act
@@ -122,7 +124,7 @@ def test_validation_factory_add_uses_store_add(
 
 
 @pytest.mark.unit
-def test_validation_factory_add_raises_for_duplicate_key(
+def test_validation_definition_factory_add_raises_for_duplicate_key(
     mocker: MockerFixture,
     validation_definition: ValidationDefinition,
 ):
@@ -130,7 +132,7 @@ def test_validation_factory_add_raises_for_duplicate_key(
     name = validation_definition.name
     store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = True
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
 
     # Act
     with pytest.raises(
@@ -144,7 +146,7 @@ def test_validation_factory_add_raises_for_duplicate_key(
 
 
 @pytest.mark.unit
-def test_validation_factory_delete_uses_store_remove_key(
+def test_validation_definition_factory_delete_uses_store_remove_key(
     mocker: MockerFixture,
     validation_definition: ValidationDefinition,
 ):
@@ -152,7 +154,7 @@ def test_validation_factory_delete_uses_store_remove_key(
     store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
 
     # Act
     factory.delete(validation=validation_definition)
@@ -164,7 +166,7 @@ def test_validation_factory_delete_uses_store_remove_key(
 
 
 @pytest.mark.unit
-def test_validation_factory_delete_raises_for_missing_validation(
+def test_validation_definition_factory_delete_raises_for_missing_validation(
     mocker: MockerFixture,
     validation_definition: ValidationDefinition,
 ):
@@ -172,7 +174,7 @@ def test_validation_factory_delete_raises_for_missing_validation(
     name = validation_definition.name
     store = mocker.Mock(spec=ValidationDefinitionStore)
     store.has_key.return_value = False
-    factory = ValidationFactory(store=store)
+    factory = ValidationDefinitionFactory(store=store)
 
     # Act
     with pytest.raises(
@@ -186,27 +188,27 @@ def test_validation_factory_delete_raises_for_missing_validation(
 
 
 @pytest.mark.filesystem
-def test_validation_factory_is_initialized_with_context_filesystem(
+def test_validation_definition_factory_is_initialized_with_context_filesystem(
     empty_data_context: FileDataContext,
 ):
-    assert isinstance(empty_data_context.validations, ValidationFactory)
+    assert isinstance(empty_data_context.validation_definitions, ValidationDefinitionFactory)
 
 
 @pytest.mark.cloud
-def test_validation_factory_is_initialized_with_context_cloud(
+def test_validation_definition_factory_is_initialized_with_context_cloud(
     empty_cloud_data_context: CloudDataContext,
 ):
-    assert isinstance(empty_cloud_data_context.validations, ValidationFactory)
+    assert isinstance(empty_cloud_data_context.validation_definitions, ValidationDefinitionFactory)
 
 
 @pytest.mark.filesystem
-def test_validation_factory_add_success_filesystem(
+def test_validation_definition_factory_add_success_filesystem(
     empty_data_context: FileDataContext,
     validation_definition: ValidationDefinition,
     validation_definition_json: str,
     mocker: MockerFixture,
 ):
-    _test_validation_factory_add_success(
+    _test_validation_definition_factory_add_success(
         mocker=mocker,
         context=empty_data_context,
         validation_definition=validation_definition,
@@ -215,13 +217,13 @@ def test_validation_factory_add_success_filesystem(
 
 
 @pytest.mark.cloud
-def test_validation_factory_add_success_cloud(
+def test_validation_definition_factory_add_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_definition: ValidationDefinition,
     validation_definition_json: str,
     mocker: MockerFixture,
 ):
-    _test_validation_factory_add_success(
+    _test_validation_definition_factory_add_success(
         mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_definition=validation_definition,
@@ -229,7 +231,7 @@ def test_validation_factory_add_success_cloud(
     )
 
 
-def _test_validation_factory_add_success(
+def _test_validation_definition_factory_add_success(
     mocker: MockerFixture,
     context: AbstractDataContext,
     validation_definition: ValidationDefinition,
@@ -240,11 +242,11 @@ def _test_validation_factory_add_success(
     with pytest.raises(
         DataContextError, match=f"ValidationDefinition with name {name} was not found."
     ):
-        context.validations.get(name)
+        context.validation_definitions.get(name)
 
     # Act
     with mocker.patch.object(ValidationDefinition, "json", return_value=validation_definition_json):
-        created_validation = context.validations.add(validation=validation_definition)
+        created_validation = context.validation_definitions.add(validation=validation_definition)
 
     # Assert
     validation_names = {
@@ -254,13 +256,13 @@ def _test_validation_factory_add_success(
 
 
 @pytest.mark.filesystem
-def test_validation_factory_delete_success_filesystem(
+def test_validation_definition_factory_delete_success_filesystem(
     empty_data_context: FileDataContext,
     validation_definition: ValidationDefinition,
     validation_definition_json: str,
     mocker: MockerFixture,
 ):
-    _test_validation_factory_delete_success(
+    _test_validation_definition_factory_delete_success(
         mocker=mocker,
         context=empty_data_context,
         validation_definition=validation_definition,
@@ -269,13 +271,13 @@ def test_validation_factory_delete_success_filesystem(
 
 
 @pytest.mark.cloud
-def test_validation_factory_delete_success_cloud(
+def test_validation_definition_factory_delete_success_cloud(
     empty_cloud_context_fluent: CloudDataContext,
     validation_definition: ValidationDefinition,
     validation_definition_json: str,
     mocker: MockerFixture,
 ):
-    _test_validation_factory_delete_success(
+    _test_validation_definition_factory_delete_success(
         mocker=mocker,
         context=empty_cloud_context_fluent,
         validation_definition=validation_definition,
@@ -283,7 +285,7 @@ def test_validation_factory_delete_success_cloud(
     )
 
 
-def _test_validation_factory_delete_success(
+def _test_validation_definition_factory_delete_success(
     mocker: MockerFixture,
     context: AbstractDataContext,
     validation_definition: ValidationDefinition,
@@ -293,19 +295,19 @@ def _test_validation_factory_delete_success(
     name = validation_definition.name
 
     with mocker.patch.object(ValidationDefinition, "json", return_value=validation_definition_json):
-        validation_definition = context.validations.add(validation=validation_definition)
+        validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    context.validations.delete(validation_definition)
+    context.validation_definitions.delete(validation_definition)
 
     # Assert
     with pytest.raises(
         DataContextError,
         match=f"ValidationDefinition with name {name} was not found.",
     ):
-        context.validations.get(name)
+        context.validation_definitions.get(name)
 
 
-class TestValidationFactoryAnalytics:
+class TestValidationDefinitionFactoryAnalytics:
     # TODO: Write tests once analytics are in place
     pass
