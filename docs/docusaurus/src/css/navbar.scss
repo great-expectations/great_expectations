@@ -40,6 +40,9 @@
 
     .menu__list-item:has(.version-dropdown) {
       order: 1;
+      margin-top: 0.75rem;
+      border-width: 1px;
+      border-top: 0.5px solid var(--black-15);
     }
     .menu__list-item:has(.header-cloud-link) {
       order: 2;
