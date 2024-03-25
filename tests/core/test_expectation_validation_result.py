@@ -249,60 +249,58 @@ def test_expectation_suite_validation_result_returns_expected_shape(
     # act
     description = svr.describe()
     # assert
-    expected = {
-        "success": True,
-        "statistics": {
-            "evaluated_expectations": 2,
-            "successful_expectations": 2,
-            "unsuccessful_expectations": 0,
-            "success_percent": 100.0,
-        },
-        "expectations": [
-            {
-                "expectation_type": "expect_column_values_to_be_between",
-                "success": True,
-                "kwargs": {
-                    "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                    "mostly": 0.95,
-                    "column": "passenger_count",
-                    "min_value": 0.0,
-                    "max_value": 6.0,
-                },
-                "result": {
-                    "element_count": 100000,
-                    "unexpected_count": 1,
-                    "unexpected_percent": 0.001,
-                    "partial_unexpected_list": [7.0],
-                    "missing_count": 0,
-                    "missing_percent": 0.0,
-                    "unexpected_percent_total": 0.001,
-                    "unexpected_percent_nonmissing": 0.001,
-                    "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
-                    "partial_unexpected_index_list": [48422],
-                },
-            },
-            {
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "success": True,
-                "kwargs": {
-                    "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
-                    "column": "trip_distance",
-                },
-                "result": {
-                    "element_count": 100000,
-                    "unexpected_count": 0,
-                    "unexpected_percent": 0.0,
-                    "partial_unexpected_list": [],
-                    "partial_unexpected_counts": [],
-                    "partial_unexpected_index_list": [],
-                },
-            },
-        ],
-    }
-    if validation_result_url:
-        expected["result_url"] = validation_result_url
 
     assert description == json.dumps(
-        expected,
+        {
+            "success": True,
+            "statistics": {
+                "evaluated_expectations": 2,
+                "successful_expectations": 2,
+                "unsuccessful_expectations": 0,
+                "success_percent": 100.0,
+            },
+            "expectations": [
+                {
+                    "expectation_type": "expect_column_values_to_be_between",
+                    "success": True,
+                    "kwargs": {
+                        "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                        "mostly": 0.95,
+                        "column": "passenger_count",
+                        "min_value": 0.0,
+                        "max_value": 6.0,
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 1,
+                        "unexpected_percent": 0.001,
+                        "partial_unexpected_list": [7.0],
+                        "missing_count": 0,
+                        "missing_percent": 0.0,
+                        "unexpected_percent_total": 0.001,
+                        "unexpected_percent_nonmissing": 0.001,
+                        "partial_unexpected_counts": [{"value": 7.0, "count": 1}],
+                        "partial_unexpected_index_list": [48422],
+                    },
+                },
+                {
+                    "expectation_type": "expect_column_values_to_not_be_null",
+                    "success": True,
+                    "kwargs": {
+                        "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+                        "column": "trip_distance",
+                    },
+                    "result": {
+                        "element_count": 100000,
+                        "unexpected_count": 0,
+                        "unexpected_percent": 0.0,
+                        "partial_unexpected_list": [],
+                        "partial_unexpected_counts": [],
+                        "partial_unexpected_index_list": [],
+                    },
+                },
+            ],
+            "result_url": validation_result_url,
+        },
         indent=4,
     )
