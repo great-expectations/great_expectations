@@ -87,7 +87,7 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
-        "batch_configs",
+        "batch_definitions",
         "batch_metadata",
         "name",
         "order_by",

@@ -16,7 +16,7 @@ from great_expectations.checkpoint.actions import (
 )
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -77,7 +77,7 @@ class TestCheckpointSerialization:
         name = "my_first_validation"
         vc = ValidationConfig(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
@@ -94,7 +94,7 @@ class TestCheckpointSerialization:
         name = "my_second_validation"
         vc = ValidationConfig(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
@@ -194,10 +194,10 @@ class TestCheckpointSerialization:
 
         ds_name = "my_datasource"
         asset_name = "my_asset"
-        batch_config_name_1 = "my_batch1"
+        batch_definition_name_1 = "my_batch1"
         suite_name_1 = "my_suite1"
         validation_config_name_1 = "my_validation1"
-        batch_config_name_2 = "my_batch2"
+        batch_definition_name_2 = "my_batch2"
         suite_name_2 = "my_suite2"
         validation_config_name_2 = "my_validation2"
         cp_name = "my_checkpoint"
@@ -205,11 +205,11 @@ class TestCheckpointSerialization:
         ds = context.sources.add_pandas(ds_name)
         asset = ds.add_csv_asset(asset_name, "my_file.csv")
 
-        bc1 = asset.add_batch_config(batch_config_name_1)
+        bc1 = asset.add_batch_definition(batch_definition_name_1)
         suite1 = ExpectationSuite(suite_name_1)
         vc1 = ValidationConfig(name=validation_config_name_1, data=bc1, suite=suite1)
 
-        bc2 = asset.add_batch_config(batch_config_name_2)
+        bc2 = asset.add_batch_definition(batch_definition_name_2)
         suite2 = ExpectationSuite(suite_name_2)
         vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
 
@@ -269,11 +269,11 @@ class TestCheckpointSerialization:
         assert cp.validation_definitions[0].asset.name == asset_name
 
         assert cp.validation_definitions[0].name == validation_config_name_1
-        assert cp.validation_definitions[0].batch_definition.name == batch_config_name_1
+        assert cp.validation_definitions[0].batch_definition.name == batch_definition_name_1
         assert cp.validation_definitions[0].suite.name == suite_name_1
 
         assert cp.validation_definitions[1].name == validation_config_name_2
-        assert cp.validation_definitions[1].batch_definition.name == batch_config_name_2
+        assert cp.validation_definitions[1].batch_definition.name == batch_definition_name_2
         assert cp.validation_definitions[1].suite.name == suite_name_2
 
         # Check that all validation_definitions and nested suites have been assigned IDs during serialization  # noqa: E501
@@ -363,7 +363,7 @@ class TestCheckpointResult:
 
     @pytest.fixture
     def mock_batch_def(self, mocker: pytest.MockFixture):
-        return mocker.Mock(spec=BatchConfig)
+        return mocker.Mock(spec=BatchDefinition)
 
     @pytest.fixture
     def validation_definition(
@@ -559,7 +559,7 @@ class TestCheckpointResult:
         assert csv_path.exists()
         asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
 
-        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        batch_definition = asset.add_batch_definition(self.batch_definition_name)
         suite = ExpectationSuite(
             name=self.suite_name,
             expectations=[

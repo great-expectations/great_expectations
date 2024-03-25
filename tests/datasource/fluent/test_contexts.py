@@ -112,14 +112,14 @@ def test_partitioners_are_persisted_on_creation(
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
     partitioner = PartitionerYear(column_name="date")
-    my_asset.add_batch_config(name="cloud partitioner test", partitioner=partitioner)
+    my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
     datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
         "datasource_config"
     ]
 
     # partitioners should be present
-    assert datasource_config["assets"][0]["batch_configs"][0]["partitioner"]
+    assert datasource_config["assets"][0]["batch_definitions"][0]["partitioner"]
 
 
 @pytest.mark.filesystem
