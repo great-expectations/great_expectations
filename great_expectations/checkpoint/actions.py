@@ -68,7 +68,7 @@ def _build_renderer(config: dict) -> Renderer:
     renderer = instantiate_class_from_config(
         config=config,
         runtime_environment={},
-        config_defaults={},
+        config_defaults={"module_name": "great_expectations.render.renderer"},
     )
     if not renderer:
         raise ClassInstantiationError(
