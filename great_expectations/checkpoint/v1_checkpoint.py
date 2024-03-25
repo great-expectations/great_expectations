@@ -150,7 +150,6 @@ class Checkpoint(BaseModel):
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
-            validation_result_url=None,  # TODO: Need to plumb from actions
         )
 
     def _run_validation_definitions(
@@ -210,7 +209,6 @@ class CheckpointResult(BaseModel):
     run_id: RunIdentifier
     run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
     checkpoint_config: Checkpoint
-    validation_result_url: Optional[str] = None
     success: Optional[bool] = None
 
     class Config:
