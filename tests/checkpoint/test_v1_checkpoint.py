@@ -635,6 +635,7 @@ class TestCheckpointResult:
                         "unsuccessful_expectations": 1,
                     },
                     "success": False,
+                    "result_url": None,
                 },
             ],
         }
