@@ -11,8 +11,8 @@
 @media (max-width: $mobile-breakpoint) {
     .githubBadge {
         position: absolute;
-        right: var(--ifm-navbar-padding-horizontal);
-        padding-right: 2.5rem;
+        right: calc(var(--ifm-navbar-padding-horizontal) + 2.5rem);
+        padding-right: 0;
     }
 }
 

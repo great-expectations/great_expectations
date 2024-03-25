@@ -103,6 +103,9 @@ function DropdownNavbarItemMobile({
     if (containsActive && !(props.label && props.label.includes('Version '))) {
       setCollapsed(!containsActive);
     }
+    if (containsActive && props.label && props.label.includes('Version ')) {
+      setCollapsed(true);
+    }
   }, [localPathname, containsActive, setCollapsed]);
   return (
     <li
