@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -216,17 +215,14 @@ class ValidationConfig(BaseModel):
             validation_result_id,
         ) = self._get_expectation_suite_and_validation_result_ids(validator)
 
-        ref = store_validation_results(
-            validation_result_store=self._validation_results_store,
+        ref = self._validation_results_store.store_validation_results(
             suite_validation_result=results,
             suite_validation_result_identifier=validation_result_id,
             expectation_suite_identifier=expectation_suite_identifier,
-            cloud_mode=self._validation_results_store.cloud_mode,
         )
 
         if isinstance(ref, GXCloudResourceRef):
-            result_url = ref.response["data"]["attributes"]["validation_result"]["display_url"]
-            results.result_url = result_url
+            results.result_url = self._validation_results_store.get_result_url(ref)
 
         return results
 
