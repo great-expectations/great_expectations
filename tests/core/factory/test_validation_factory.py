@@ -3,7 +3,7 @@ import json
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_factory import ValidationFactory
 from great_expectations.core.validation_definition import ValidationDefinition
@@ -24,7 +24,7 @@ from great_expectations.exceptions import DataContextError
 
 @pytest.fixture
 def validation_definition(mocker: MockerFixture) -> ValidationDefinition:
-    batch_definition = mocker.Mock(spec=BatchConfig)
+    batch_definition = mocker.Mock(spec=BatchDefinition)
     suite = mocker.Mock(spec=ExpectationSuite)
     return ValidationDefinition(
         name="test-validation",
@@ -48,7 +48,7 @@ def validation_definition_json(validation_definition: ValidationDefinition) -> s
                     "name": "test-asset",
                     "id": "10b7e57d-958b-4d28-aa1d-e89bc0401eea",
                 },
-                "batch_config": {
+                "batch_definition": {
                     "name": "test-batch-config",
                     "id": "bcd13e3e-3e3e-4e3e-8e3e-3e3e3e3e3e3e",
                 },

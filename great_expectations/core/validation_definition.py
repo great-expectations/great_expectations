@@ -13,7 +13,7 @@ from great_expectations.compatibility.pydantic import (
     ValidationError,
     validator,
 )
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     expectationSuiteSchema,
@@ -87,11 +87,11 @@ class ValidationDefinition(BaseModel):
         """  # noqa: E501
         json_encoders = {
             ExpectationSuite: lambda e: e.identifier_bundle(),
-            BatchConfig: lambda b: b.identifier_bundle(),
+            BatchDefinition: lambda b: b.identifier_bundle(),
         }
 
     name: str = Field(..., allow_mutation=False)
-    data: BatchConfig = Field(..., allow_mutation=False)
+    data: BatchDefinition = Field(..., allow_mutation=False)
     suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
     _validation_results_store: ValidationsStore = PrivateAttr()
@@ -103,7 +103,7 @@ class ValidationDefinition(BaseModel):
         self._validation_results_store = project_manager.get_validations_store()
 
     @property
-    def batch_definition(self) -> BatchConfig:
+    def batch_definition(self) -> BatchDefinition:
         return self.data
 
     @property
@@ -126,14 +126,14 @@ class ValidationDefinition(BaseModel):
         )
 
     @validator("data", pre=True)
-    def _validate_data(cls, v: dict | BatchConfig):
+    def _validate_data(cls, v: dict | BatchDefinition):
         # Input will be a dict of identifiers if being deserialized or a rich type if being constructed by a user.  # noqa: E501
         if isinstance(v, dict):
             return cls._decode_data(v)
-        elif isinstance(v, BatchConfig):
+        elif isinstance(v, BatchDefinition):
             return v
         raise ValueError(
-            "Data must be a dictionary (if being deserialized) or a BatchConfig object."
+            "Data must be a dictionary (if being deserialized) or a BatchDefinition object."
         )
 
     @classmethod
@@ -158,7 +158,7 @@ class ValidationDefinition(BaseModel):
         return ExpectationSuite(**expectationSuiteSchema.load(config))
 
     @classmethod
-    def _decode_data(cls, data_dict: dict) -> BatchConfig:
+    def _decode_data(cls, data_dict: dict) -> BatchDefinition:
         # Take in raw JSON, ensure it contains appropriate identifiers, and use them to retrieve the actual data.  # noqa: E501
         try:
             data_identifiers = _EncodedValidationData.parse_obj(data_dict)
@@ -187,7 +187,7 @@ class ValidationDefinition(BaseModel):
             ) from e
 
         try:
-            batch_definition = asset.get_batch_config(batch_definition_name)
+            batch_definition = asset.get_batch_definition(batch_definition_name)
         except KeyError as e:
             raise ValueError(
                 f"Could not find batch definition named '{batch_definition_name}' within '{asset_name}' asset and '{ds_name}' datasource."  # noqa: E501
@@ -204,7 +204,7 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
-            batch_config=self.batch_definition,
+            batch_definition=self.batch_definition,
             batch_request_options=batch_parameters,
             result_format=result_format,
         )

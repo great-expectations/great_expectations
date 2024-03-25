@@ -56,14 +56,14 @@ def validation_definition(
     in_memory_runtime_context: EphemeralDataContext,
 ) -> ValidationDefinition:
     context = in_memory_runtime_context
-    batch_config = (
+    batch_definition = (
         context.sources.add_pandas("my_datasource")
         .add_csv_asset("my_asset", "data.csv")
-        .add_batch_config("my_batch_config")
+        .add_batch_definition("my_batch_definition")
     )
     return ValidationDefinition(
         name="my_validation",
-        data=batch_config,
+        data=batch_definition,
         suite=ExpectationSuite(name="my_suite"),
     )
 
@@ -113,7 +113,7 @@ def test_add_cloud(
                         "id": None,
                         "data": {
                             "id": None,
-                            "name": "my_batch_config",
+                            "name": "my_batch_definition",
                             "partitioner": None,
                         },
                         "suite": {
@@ -158,8 +158,8 @@ _VALIDATION_DEFINITION = {
             "name": "my_asset",
             "id": "b5s8816-64c8-46cb-8f7e-03c12cea1d67",
         },
-        "batch_config": {
-            "name": "my_batch_config",
+        "batch_definition": {
+            "name": "my_batch_definition",
             "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67",
         },
     },

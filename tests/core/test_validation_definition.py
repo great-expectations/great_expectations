@@ -9,7 +9,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -67,7 +67,7 @@ def validation_definition(ephemeral_context: EphemeralDataContext) -> Validation
     batch_definition = (
         context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
-        .add_batch_config(BATCH_DEFINITION_NAME)
+        .add_batch_definition(BATCH_DEFINITION_NAME)
     )
     return ValidationDefinition(
         name="my_validation",
@@ -83,7 +83,7 @@ def cloud_validation_definition(
     batch_definition = (
         empty_cloud_data_context.sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
-        .add_batch_config(BATCH_DEFINITION_NAME)
+        .add_batch_definition(BATCH_DEFINITION_NAME)
     )
     return ValidationDefinition(
         name="my_validation",
@@ -257,12 +257,12 @@ class TestValidationDefinitionSerialization:
     def validation_definition_data(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-    ) -> tuple[PandasDatasource, CSVAsset, BatchConfig]:
+    ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
         context = in_memory_runtime_context
 
         ds = context.sources.add_pandas(self.ds_name)
         asset = ds.add_csv_asset(self.asset_name, "data.csv")
-        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        batch_definition = asset.add_batch_definition(self.batch_definition_name)
 
         return ds, asset, batch_definition
 
@@ -310,7 +310,7 @@ class TestValidationDefinitionSerialization:
         batch_definition_id: str | None,
         suite_id: str | None,
         validation_id: str | None,
-        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_definition_suite: ExpectationSuite,
     ):
         pandas_ds, csv_asset, batch_definition = validation_definition_data
@@ -369,7 +369,7 @@ class TestValidationDefinitionSerialization:
     def test_validation_definition_deserialization_success(
         self,
         in_memory_runtime_context: EphemeralDataContext,
-        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_definition_suite: ExpectationSuite,
     ):
         context = in_memory_runtime_context
@@ -587,7 +587,7 @@ class TestValidationDefinitionSerialization:
     )
     def test_validation_definition_deserialization_non_existant_resource(
         self,
-        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchConfig],
+        validation_definition_data: tuple[PandasDatasource, CSVAsset, BatchDefinition],
         validation_definition_suite: ExpectationSuite,
         serialized_config: dict,
         error_substring: str,
