@@ -196,7 +196,7 @@ validation_definition = context.validation_definitions.get(name=definition_name)
 
 2. Determine the attributes to filter on.
 
-  Validation Definitions associate an Expectation Suite with a Batch Definition.  This means that valid attributes to filter on include the the attributes for the Expectation Suite, as well as the attributes for the Batch Definition, the Batch Definition's Data Asset, and the Data Asset's Data Source.
+  Validation Definitions associate an Expectation Suite with a Batch Definition.  This means that valid attributes to filter on include the attributes for the Expectation Suite, as well as the attributes for the Batch Definition, the Batch Definition's Data Asset, and the Data Asset's Data Source.
 
 3. Use a list comprehension to return all Validation Definitions that match the filtered attributes.
 
