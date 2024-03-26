@@ -12,7 +12,7 @@ import PrereqPreconfiguredExpectationSuiteAndExpectations from '../../_core_comp
 
 import StepRequestADataContext from '../../_core_components/common_steps/_request_a_data_context.md';
 
-A Validation Definition is an immutable reference that links a Batch of data to an Expectation Suite. It can be run by itself to validate the referenced data against the associated Expectations for testing or data exploration.  Multiple Validation Definitions can also be provided to a Checkpoint which, when run, executes Actions based on the Validation Results for each provided Validation Definition.
+A Validation Definition is a fixed reference that links a Batch of data to an Expectation Suite. It can be run by itself to validate the referenced data against the associated Expectations for testing or data exploration.  Multiple Validation Definitions can also be provided to a Checkpoint which, when run, executes Actions based on the Validation Results for each provided Validation Definition.
 
 ## Prerequisites
 
@@ -31,7 +31,7 @@ A Validation Definition is an immutable reference that links a Batch of data to 
 
 1. Import the `ValidationDefinition` class from the GX library.
 
-  ```python
+  ```python title="Python"
   from great_expectations.core import ValidationDefinition
   ```
 
@@ -49,14 +49,14 @@ A Validation Definition is an immutable reference that links a Batch of data to 
 
 5. Create a `ValidationDefinition` instance using the Batch Definition, Expectation Suite, and a unique name.
 
-  ```python
+  ```python title="Python"
   definition_name = "My Validation Definition"
   validation_definition = ValidationDefintion(data=batch_definition, suite=suite, name=definition_name)
   ```
 
 6. Optional. Save the Validation Definition to your Data Context.
 
-  ```python
+  ```python title="Python"
   validation_definition = context.validation_definitions.add(validation_definition)
   ```
 
@@ -64,7 +64,7 @@ A Validation Definition is an immutable reference that links a Batch of data to 
 
   You can add a Validation Definition to your Data Context at the same time as you create it with the following code:
 
-  ```python
+  ```python title="Python"
   definition_name = "My second Validation Definition"
   validation_definition = context.validation_definitions.add(ValidationDefinition(data=batch_definition, suite=suite, name=definition_name)) 
   ```
@@ -75,7 +75,7 @@ A Validation Definition is an immutable reference that links a Batch of data to 
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 from great_expectations.core import ValidationDefinition
 
@@ -132,7 +132,7 @@ Validation Definitions can be accessed through `context.validation_definitions`.
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 
 context = gx.get_context()
@@ -160,7 +160,7 @@ for definition in context.validation_definitions:
 
 2. Use the Data Context to request the Validation Definition.
 
-  ```python
+  ```python title="Python"
   definition_name = "My Validation Definition"
   validation_definition = context.validation_definitions.get(name=definition_name)
   ```
@@ -169,7 +169,7 @@ for definition in context.validation_definitions:
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 
 context = gx.get_context()
@@ -202,17 +202,17 @@ validation_definition = context.validation_definitions.get(name=definition_name)
 
   For example, you can retrieve all Validation Definitions that include a specific Expectation Suite by filtering on the Expectation Suite name:
 
-  ```python
+  ```python title="Python"
   existing_expectation_suite_name = "my_expectation_suite"
   validation_definitions_for_suite = [
     definition for definition in context.validation_definitions
-    if definition.expectation_suite.name == existing_expectation_suite_name
+    if definition.suite.name == existing_expectation_suite_name
   ]
   ```
 
   Or you could return all Validation Definitions involving a specific Data Asset by filtering on the Data Source and Data Asset names:
 
-  ```python
+  ```python title="Python"
   existing_data_source_name = "my_data_source"
   existing_data_asset_name = "my_data_asset"
   validation_definitions_for_asset = [
@@ -226,7 +226,7 @@ validation_definition = context.validation_definitions.get(name=definition_name)
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 
 context = gx.get_context()
@@ -270,7 +270,7 @@ validation_definitions_for_asset = [
 
 3.  Use the Data Context to delete the Validation Definition:
 
-  ```python
+  ```python title="Python"
   context.validations.delete(name=validation_definition.name)
   ```
 
@@ -280,7 +280,7 @@ validation_definitions_for_asset = [
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 
 context = gx.get_context()
@@ -304,13 +304,13 @@ context.validation_definitions.delete(validation_definition.name)
 
 <TabItem value="procedure" label="Procedure">
 
-Validation definitions are intended to be immutable references that link a set of data to an Expectation Suite.  As such, they do not include an update method.  However, multiple Validation Definitions with the same Batch Definition and Expectation Suite can exist as long as each has a unique name.
+Validation definitions are intended to be fixed references that link a set of data to an Expectation Suite.  As such, they do not include an update method.  However, multiple Validation Definitions with the same Batch Definition and Expectation Suite can exist as long as each has a unique name.
 
 Although an existing Validation Definition cannot be renamed, a duplicate can be created that has a name different or updated from the original.
 
 1. Import the GX library and `ValidationDefintion` class:
 
-  ```python
+  ```python title="Python"
   import great_expectations as gx
   from great_expectations.core import ValidationDefinition
   ```
@@ -325,14 +325,14 @@ Although an existing Validation Definition cannot be renamed, a duplicate can be
 
 2. Get the Batch Definition and Expectation Suite from the original Validation Definition:
   
-  ```python
+  ```python title="Python"
   original_suite = original_validation_definition.suite
   original_batch = original_validation_definition.batch_definition
   ```
 
 3. Add a new Validation Definition to the Data Context using the same Batch Definition and Expectation Suite as the original:
 
-  ```python
+  ```python title="Python"
   new_definition_name = "my_validation_definition"
   new_validation_definition = ValidationDefintion(
     data=original_batch,
@@ -349,7 +349,7 @@ Although an existing Validation Definition cannot be renamed, a duplicate can be
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 from great_expectations.core import ValidationDefinition
 
@@ -390,24 +390,24 @@ context.validation_definitions.delete(original_validation_definition)
 
 2. Execute the Validation Definition's `run()` method:
 
-  ```python
-  validation_results = validation_definition.run()
+  ```python title="Python"
+  validation_result = validation_definition.run()
   ```
 
   Validation Results are automatically saved in your Data Context when a Validation Definition's `run()` method is called.  For convenience, the `run()` method also returns the Validation Results as an object you can review.
 
 3. Review the Validation Results:
  
-  ```python
-  print(validation_results)
+  ```python title="Python"
+  print(validation_result)
   ```
 
   :::tip
 
   GX Cloud users can view the Validation Results in the GX Cloud UI by following the url provided with:
 
-  ```python
-  print(validation_results.result_url)
+  ```python title="Python"
+  print(validation_result.result_url)
   ```
 
   :::
@@ -416,7 +416,7 @@ context.validation_definitions.delete(original_validation_definition)
 
 <TabItem value="sample_code" label="Sample code">
 
-```python showLineNumbers title="Python" name=""
+```python showLineNumbers title="Python"
 import great_expectations as gx
 
 context = gx.get_context()
@@ -425,13 +425,13 @@ existing_validation_definition_name = "my_validation_definition"
 validation_definition = context.validation_definitions.get(existing_validation_definition_name)
 
 # highlight-next-line
-validation_results = validation_definition.run()
+validation_result = validation_definition.run()
 
 # highlight-next-line
-print(validation_results)
+print(validation_result)
 
 # highlight-next-line
-print(validation_results.results_url)
+print(validation_result.results_url)
 ```
 
 </TabItem>
