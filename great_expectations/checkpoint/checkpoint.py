@@ -21,7 +21,7 @@ from great_expectations.checkpoint.configurator import (
 )
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    convert_validations_list_to_checkpoint_validation_configs,
+    convert_validations_list_to_checkpoint_validation_definitions,
     does_batch_request_in_validations_contain_batch_data,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
@@ -41,7 +41,7 @@ from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    CheckpointValidationConfig,
+    CheckpointValidationDefinition,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -69,13 +69,13 @@ logger = logging.getLogger(__name__)
 
 
 def _does_validation_contain_batch_request(
-    validations: list[CheckpointValidationConfig],
+    validations: list[CheckpointValidationDefinition],
 ) -> bool:
     return any(val.batch_request is not None for val in validations)
 
 
 def _does_validation_contain_expectation_suite_name(
-    validations: list[CheckpointValidationConfig],
+    validations: list[CheckpointValidationDefinition],
 ) -> bool:
     return any(val.expectation_suite_name is not None for val in validations)
 
@@ -109,7 +109,7 @@ class BaseCheckpoint(ConfigPeer):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -149,7 +149,7 @@ class BaseCheckpoint(ConfigPeer):
                 "Must associate Checkpoint with a DataContext before running; please add using context.checkpoints.add"  # noqa: E501
             )
 
-        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
+        validations = convert_validations_list_to_checkpoint_validation_definitions(validations)
 
         if sum(bool(x) for x in [self._validator is not None, validator is not None]) > 1:
             raise gx_exceptions.CheckpointError(
@@ -209,7 +209,7 @@ class BaseCheckpoint(ConfigPeer):
         )
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = convert_validations_list_to_checkpoint_validation_configs(
+        validations = convert_validations_list_to_checkpoint_validation_definitions(
             substituted_runtime_config.get("validations") or []
         )
 
@@ -307,10 +307,10 @@ class BaseCheckpoint(ConfigPeer):
         run_id: str | RunIdentifier | None,
         context: AbstractDataContext,
         idx: int | None = 0,
-        validation_dict: CheckpointValidationConfig | None = None,
+        validation_dict: CheckpointValidationDefinition | None = None,
     ) -> ValidationOperatorResult:
         if validation_dict is None:
-            validation_dict = CheckpointValidationConfig(
+            validation_dict = CheckpointValidationDefinition(
                 id=substituted_runtime_config.get("default_validation_id")
             )
 
@@ -423,7 +423,7 @@ class BaseCheckpoint(ConfigPeer):
     @property
     def validations(
         self,
-    ) -> list[CheckpointValidationConfig]:
+    ) -> list[CheckpointValidationDefinition]:
         try:
             return self.config.validations
         except AttributeError:
@@ -515,12 +515,12 @@ class Checkpoint(BaseCheckpoint):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> None:
-        validations = convert_validations_list_to_checkpoint_validation_configs(validations)
+        validations = convert_validations_list_to_checkpoint_validation_definitions(validations)
 
         if validator:
             if batch_request or _does_validation_contain_batch_request(validations=validations):
@@ -585,7 +585,7 @@ constructor arguments.
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[Union[list[dict], list[CheckpointValidationConfig]]] = None,
+        validations: Optional[Union[list[dict], list[CheckpointValidationDefinition]]] = None,
         id: Optional[str] = None,
         expectation_suite_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -655,9 +655,9 @@ constructor arguments.
 
     @staticmethod
     def _reconcile_validations(
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         validator: Validator | None = None,
-    ) -> list[CheckpointValidationConfig]:
+    ) -> list[CheckpointValidationDefinition]:
         """
         Helper to help resolve logic between validator and validations input
         arguments to `construct_from_config_args`.
@@ -669,7 +669,7 @@ constructor arguments.
                 )
             return validator.convert_to_checkpoint_validations_list()
 
-        return convert_validations_list_to_checkpoint_validation_configs(validations)
+        return convert_validations_list_to_checkpoint_validation_definitions(validations)
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(

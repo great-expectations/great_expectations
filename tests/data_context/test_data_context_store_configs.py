@@ -98,7 +98,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "evaluation_parameter_store",
         "profiler_store",
         "checkpoint_store",
-        "validation_config_store",
+        "validation_definition_store",
     }
 
     context.add_store(
@@ -115,6 +115,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "validations_store",
         "evaluation_parameter_store",
         "profiler_store",
-        "validation_config_store",
+        "validation_definition_store",
         "my_new_validations_store",
     }

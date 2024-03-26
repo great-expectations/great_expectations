@@ -59,8 +59,8 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             "profiler_store": {
                 "class_name": "ProfilerStore",
             },
-            "validation_config_store": {
-                "class_name": "ValidationConfigStore",
+            "validation_definition_store": {
+                "class_name": "ValidationDefinitionStore",
             },
             "validations_store": {
                 "class_name": "ValidationsStore",

@@ -16,7 +16,7 @@ from great_expectations.checkpoint.actions import (
 )
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.batch_config import BatchConfig
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -24,7 +24,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -71,46 +71,46 @@ class TestCheckpointSerialization:
         return gx.get_context(mode="ephemeral")
 
     @pytest.fixture
-    def validation_config_1(
+    def validation_definition_1(
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
     ):
         name = "my_first_validation"
-        vc = ValidationConfig(
+        vc = ValidationDefinition(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
-            ValidationConfig,
+            ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield in_memory_context.validations.add(vc)
+            yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
-    def validation_config_2(
+    def validation_definition_2(
         self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
     ):
         name = "my_second_validation"
-        vc = ValidationConfig(
+        vc = ValidationDefinition(
             name=name,
-            data=mocker.Mock(spec=BatchConfig),
+            data=mocker.Mock(spec=BatchDefinition),
             suite=mocker.Mock(spec=ExpectationSuite),
         )
         with mock.patch.object(
-            ValidationConfig,
+            ValidationDefinition,
             "json",
             return_value=json.dumps({"id": str(uuid.uuid4()), "name": name}),
         ):
-            yield in_memory_context.validations.add(vc)
+            yield in_memory_context.validation_definitions.add(vc)
 
     @pytest.fixture
-    def validation_configs(
+    def validation_definitions(
         self,
-        validation_config_1: ValidationConfig,
-        validation_config_2: ValidationConfig,
-    ) -> list[ValidationConfig]:
-        return [validation_config_1, validation_config_2]
+        validation_definition_1: ValidationDefinition,
+        validation_definition_2: ValidationDefinition,
+    ) -> list[ValidationDefinition]:
+        return [validation_definition_1, validation_definition_2]
 
     @pytest.mark.parametrize(
         "action_fixture_name, expected_actions",
@@ -149,7 +149,7 @@ class TestCheckpointSerialization:
     @pytest.mark.unit
     def test_checkpoint_serialization(
         self,
-        validation_configs: list[ValidationConfig],
+        validation_definitions: list[ValidationDefinition],
         action_fixture_name: str | None,
         expected_actions: dict,
         request: pytest.FixtureRequest,
@@ -157,7 +157,7 @@ class TestCheckpointSerialization:
         actions = request.getfixturevalue(action_fixture_name) if action_fixture_name else []
         cp = Checkpoint(
             name="my_checkpoint",
-            validation_definitions=validation_configs,
+            validation_definitions=validation_definitions,
             actions=actions,
         )
 
@@ -194,24 +194,24 @@ class TestCheckpointSerialization:
 
         ds_name = "my_datasource"
         asset_name = "my_asset"
-        batch_config_name_1 = "my_batch1"
+        batch_definition_name_1 = "my_batch1"
         suite_name_1 = "my_suite1"
-        validation_config_name_1 = "my_validation1"
-        batch_config_name_2 = "my_batch2"
+        validation_definition_name_1 = "my_validation1"
+        batch_definition_name_2 = "my_batch2"
         suite_name_2 = "my_suite2"
-        validation_config_name_2 = "my_validation2"
+        validation_definition_name_2 = "my_validation2"
         cp_name = "my_checkpoint"
 
         ds = context.sources.add_pandas(ds_name)
         asset = ds.add_csv_asset(asset_name, "my_file.csv")
 
-        bc1 = asset.add_batch_config(batch_config_name_1)
+        bc1 = asset.add_batch_definition(batch_definition_name_1)
         suite1 = ExpectationSuite(suite_name_1)
-        vc1 = ValidationConfig(name=validation_config_name_1, data=bc1, suite=suite1)
+        vc1 = ValidationDefinition(name=validation_definition_name_1, data=bc1, suite=suite1)
 
-        bc2 = asset.add_batch_config(batch_config_name_2)
+        bc2 = asset.add_batch_definition(batch_definition_name_2)
         suite2 = ExpectationSuite(suite_name_2)
-        vc2 = ValidationConfig(name=validation_config_name_2, data=bc2, suite=suite2)
+        vc2 = ValidationDefinition(name=validation_definition_name_2, data=bc2, suite=suite2)
 
         validation_definitions = [vc1, vc2]
         cp = Checkpoint(
@@ -226,11 +226,11 @@ class TestCheckpointSerialization:
             "validation_definitions": [
                 {
                     "id": mock.ANY,
-                    "name": validation_config_name_1,
+                    "name": validation_definition_name_1,
                 },
                 {
                     "id": mock.ANY,
-                    "name": validation_config_name_2,
+                    "name": validation_definition_name_2,
                 },
             ],
             "actions": [
@@ -268,12 +268,12 @@ class TestCheckpointSerialization:
         assert cp.validation_definitions[0].data_source.name == ds_name
         assert cp.validation_definitions[0].asset.name == asset_name
 
-        assert cp.validation_definitions[0].name == validation_config_name_1
-        assert cp.validation_definitions[0].batch_definition.name == batch_config_name_1
+        assert cp.validation_definitions[0].name == validation_definition_name_1
+        assert cp.validation_definitions[0].batch_definition.name == batch_definition_name_1
         assert cp.validation_definitions[0].suite.name == suite_name_1
 
-        assert cp.validation_definitions[1].name == validation_config_name_2
-        assert cp.validation_definitions[1].batch_definition.name == batch_config_name_2
+        assert cp.validation_definitions[1].name == validation_definition_name_2
+        assert cp.validation_definitions[1].batch_definition.name == batch_definition_name_2
         assert cp.validation_definitions[1].suite.name == suite_name_2
 
         # Check that all validation_definitions and nested suites have been assigned IDs during serialization  # noqa: E501
@@ -363,13 +363,13 @@ class TestCheckpointResult:
 
     @pytest.fixture
     def mock_batch_def(self, mocker: pytest.MockFixture):
-        return mocker.Mock(spec=BatchConfig)
+        return mocker.Mock(spec=BatchDefinition)
 
     @pytest.fixture
     def validation_definition(
         self, mock_suite: pytest.MockFixture, mock_batch_def: pytest.MockFixture
     ):
-        vc = ValidationConfig(
+        validation_definition = ValidationDefinition(
             name=self.validation_definition_name,
             data=mock_batch_def,
             suite=mock_suite,
@@ -412,11 +412,11 @@ class TestCheckpointResult:
             batch_id=f"{self.datasource_name}-{self.asset_name}",
         )
 
-        with mock.patch.object(ValidationConfig, "run", return_value=mock_run_result):
-            yield vc
+        with mock.patch.object(ValidationDefinition, "run", return_value=mock_run_result):
+            yield validation_definition
 
     @pytest.mark.unit
-    def test_checkpoint_run_no_actions(self, validation_definition: ValidationConfig):
+    def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
         )
@@ -430,12 +430,11 @@ class TestCheckpointResult:
         assert len(validation_result.results) == 1 and validation_result.results[0].success is True
 
         assert result.checkpoint_config == checkpoint
-        assert result.validation_result_url is None
         assert result.success is True
 
     @pytest.mark.unit
     def test_checkpoint_run_actions(
-        self, validation_definition: ValidationConfig, actions: list[ValidationAction]
+        self, validation_definition: ValidationDefinition, actions: list[ValidationAction]
     ):
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
@@ -451,7 +450,7 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
-        self, validation_definition: ValidationConfig
+        self, validation_definition: ValidationDefinition
     ):
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
@@ -559,7 +558,7 @@ class TestCheckpointResult:
         assert csv_path.exists()
         asset = ds.add_csv_asset(self.asset_name, filepath_or_buffer=csv_path)
 
-        batch_definition = asset.add_batch_config(self.batch_definition_name)
+        batch_definition = asset.add_batch_definition(self.batch_definition_name)
         suite = ExpectationSuite(
             name=self.suite_name,
             expectations=[
@@ -574,7 +573,7 @@ class TestCheckpointResult:
             ],
         )
 
-        validation_definition = ValidationConfig(
+        validation_definition = ValidationDefinition(
             name=self.validation_definition_name, data=batch_definition, suite=suite
         )
 
@@ -636,6 +635,7 @@ class TestCheckpointResult:
                         "unsuccessful_expectations": 1,
                     },
                     "success": False,
+                    "result_url": None,
                 },
             ],
         }
