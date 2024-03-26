@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.actions import store_validation_results
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -23,6 +22,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.context_factory import project_manager
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
-class ValidationConfig(BaseModel):
+class ValidationDefinition(BaseModel):
     """
     Responsible for running a suite against data and returning a validation result.
 
@@ -215,13 +215,16 @@ class ValidationConfig(BaseModel):
             validation_result_id,
         ) = self._get_expectation_suite_and_validation_result_ids(validator)
 
-        store_validation_results(
-            validation_result_store=self._validation_results_store,
+        ref = self._validation_results_store.store_validation_results(
             suite_validation_result=results,
             suite_validation_result_identifier=validation_result_id,
             expectation_suite_identifier=expectation_suite_identifier,
-            cloud_mode=self._validation_results_store.cloud_mode,
         )
+
+        if isinstance(ref, GXCloudResourceRef):
+            results.result_url = self._validation_results_store.parse_result_url_from_gx_cloud_ref(
+                ref
+            )
 
         return results
 
@@ -257,9 +260,9 @@ class ValidationConfig(BaseModel):
     def identifier_bundle(self) -> _IdentifierBundle:
         # Utilized as a custom json_encoder
         if not self.id:
-            validation_config_store = project_manager.get_validation_config_store()
-            key = validation_config_store.get_key(name=self.name, id=None)
-            validation_config_store.add(key=key, value=self)
+            validation_definition_store = project_manager.get_validation_definition_store()
+            key = validation_definition_store.get_key(name=self.name, id=None)
+            validation_definition_store.add(key=key, value=self)
 
         # Nested batch definition and suite should be persisted with their respective stores
         self.data.identifier_bundle()

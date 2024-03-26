@@ -18,7 +18,7 @@ from great_expectations.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
     CheckpointConfig,
-    CheckpointValidationConfig,
+    CheckpointValidationDefinition,
     DataConnectorConfig,
     DatasourceConfig,
     ExecutionEngineConfig,
@@ -59,7 +59,7 @@ def checkpoint_config_spark(
         name="my_nested_checkpoint",
         expectation_suite_name="users.delivery",
         validations=[
-            CheckpointValidationConfig(
+            CheckpointValidationDefinition(
                 batch_request={
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_data_connector",
@@ -81,7 +81,7 @@ def checkpoint_config_with_schema_spark(
         name="my_nested_checkpoint",
         expectation_suite_name="users.delivery",
         validations=[
-            CheckpointValidationConfig(
+            CheckpointValidationDefinition(
                 batch_request={
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_data_connector",
@@ -388,7 +388,7 @@ def test_checkpoint_config_deepcopy():
                 name="my_nested_checkpoint",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -428,7 +428,7 @@ def test_checkpoint_config_deepcopy():
                 default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -469,7 +469,7 @@ def test_checkpoint_config_deepcopy():
                 default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -511,7 +511,7 @@ def test_checkpoint_config_deepcopy():
                 name="my_nested_checkpoint",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -553,7 +553,7 @@ def test_checkpoint_config_deepcopy():
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
-    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""  # noqa: E501
+    """CheckpointConfig and nested objects like CheckpointValidationDefinition should be serialized appropriately with/without optional params."""  # noqa: E501
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config
 
