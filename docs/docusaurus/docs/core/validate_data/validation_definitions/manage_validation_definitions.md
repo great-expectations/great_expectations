@@ -75,7 +75,7 @@ A Validation Definition is an immutable reference that links a Batch of data to 
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 from great_expectations.core import ValidationDefinition
 
@@ -132,7 +132,7 @@ Validation Definitions can be accessed through `context.validation_definitions`.
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 
 context = gx.get_context()
@@ -169,7 +169,7 @@ for definition in context.validation_definitions:
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 
 context = gx.get_context()
@@ -226,7 +226,7 @@ validation_definition = context.validation_definitions.get(name=definition_name)
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 
 context = gx.get_context()
@@ -280,7 +280,7 @@ validation_definitions_for_asset = [
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 
 context = gx.get_context()
@@ -349,7 +349,7 @@ Although an existing Validation Definition cannot be renamed, a duplicate can be
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 from great_expectations.core import ValidationDefinition
 
@@ -416,7 +416,7 @@ context.validation_definitions.delete(original_validation_definition)
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name=""
+```python showLineNumbers title="Python" name=""
 import great_expectations as gx
 
 context = gx.get_context()
