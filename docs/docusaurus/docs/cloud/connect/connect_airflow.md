@@ -74,7 +74,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     def run_gx_airflow():
 
         context = gx.get_context()
-        checkpoint = context.checkpoints.get(name = CHECKPOINT_NAME)
+        checkpoint = context.get_checkpoint(name = CHECKPOINT_NAME)
         checkpoint.run()
 
     default_args = {

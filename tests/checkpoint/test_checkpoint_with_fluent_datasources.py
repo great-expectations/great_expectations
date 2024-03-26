@@ -65,7 +65,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
     checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
+    checkpoint: Checkpoint = data_context.get_checkpoint(checkpoint_config.name)
 
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
@@ -99,7 +99,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     )
     checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
+    checkpoint: Checkpoint = data_context.get_checkpoint(checkpoint_config.name)
 
     assert len(data_context.validations_store.list_keys()) == 0
 
@@ -196,7 +196,7 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     }
 
     data_context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = data_context.get_checkpoint(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     assert isinstance(pickle.dumps(result), bytes)
@@ -231,7 +231,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     }
 
     data_context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = data_context.get_checkpoint(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
@@ -273,7 +273,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     }
 
     data_context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = data_context.get_checkpoint(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
@@ -399,7 +399,7 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     data_context.add_checkpoint(**checkpoint_config_dict)
-    checkpoint: Checkpoint = data_context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = data_context.get_checkpoint(name="my_checkpoint")
 
     result: CheckpointResult = checkpoint.run()
 
@@ -716,7 +716,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -747,7 +747,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -779,7 +779,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
@@ -810,7 +810,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": batch_request}],
     )
@@ -843,7 +843,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": batch_request}],
     )
@@ -877,7 +877,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         validations=[{"batch_request": batch_request}],
     )
@@ -971,7 +971,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert not result["success"]
@@ -1044,7 +1044,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert not result["success"]
@@ -1117,7 +1117,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert result["success"] is False
@@ -1208,7 +1208,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.checkpoints.get(name="my_checkpoint")
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert result["success"] is False
@@ -1310,7 +1310,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     suite.add_expectation(expectation)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert (
@@ -1326,7 +1326,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         batch_request=batch_request_1,
         expectation_suite_name="my_new_expectation_suite",
@@ -1385,7 +1385,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     suite.add_expectation(expectation)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert (
@@ -1401,7 +1401,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         batch_request=batch_request_1,
         expectation_suite_name="my_new_expectation_suite",
@@ -1451,7 +1451,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
@@ -1477,7 +1477,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     suite.add_expectation(expectation)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         validations=[
             {
@@ -1544,7 +1544,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
     context.add_checkpoint(**checkpoint_config)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run()
     assert result["success"] is False
     assert len(result.run_results.values()) == 1
@@ -1570,7 +1570,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     suite.add_expectation(expectation)
 
-    checkpoint = context.checkpoints.get("my_checkpoint")
+    checkpoint = context.get_checkpoint("my_checkpoint")
     result = checkpoint.run(
         validations=[
             {
