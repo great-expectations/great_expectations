@@ -73,9 +73,6 @@ validation_operators:
   default:
     class_name: ActionListValidationOperator
     action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -91,10 +88,6 @@ validation_operators:
   action_list_operator:
     class_name: ActionListValidationOperator
     action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validations_store
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

@@ -32,7 +32,6 @@ y: EvaluationParameterStore
 z: ValidationsStore
 aa: ActionListValidationOperator
 bb: store_validation_result
-cc: StoreValidationResultAction
 dd: validations_store
 ee: notify_slack
 ff: SlackNotificationAction

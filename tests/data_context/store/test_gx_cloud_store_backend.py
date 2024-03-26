@@ -217,10 +217,6 @@ def test_set(
         name="my_minimal_simple_checkpoint",
         action_list=[
             ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(class_name="UpdateDataDocsAction"),
             ),
@@ -248,12 +244,6 @@ def test_set(
                                 (
                                     "action_list",
                                     [
-                                        {
-                                            "name": "store_validation_result",
-                                            "action": {
-                                                "class_name": "StoreValidationResultAction",
-                                            },
-                                        },
                                         {
                                             "name": "update_data_docs",
                                             "action": {

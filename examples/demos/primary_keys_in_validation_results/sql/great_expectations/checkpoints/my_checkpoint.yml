@@ -5,9 +5,6 @@ batch_request:
   data_asset_name: visits_asset
   options: {}
 action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction

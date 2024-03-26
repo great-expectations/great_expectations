@@ -663,12 +663,6 @@ def checkpoint_config() -> dict:
                 },
             },
         ],
-        "action_list": [
-            {
-                "action": {"class_name": "StoreValidationResultAction"},
-                "name": "store_validation_result",
-            },
-        ],
     }
     return checkpoint_config
 
@@ -684,7 +678,7 @@ def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
             batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
         ): {
             "validation_result": ExpectationSuiteValidationResult(),
-            "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
+            "actions_results": {},
         }
     }
 

@@ -11,7 +11,6 @@ import pytest
 import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import (
     PartitionerColumnValue,
@@ -44,7 +43,6 @@ from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
-    run_checkpoint_and_data_doc,
 )
 
 if TYPE_CHECKING:
@@ -55,18 +53,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
-    )
-
-
-# This is marked by the various backend used in testing in the datasource_test_data fixture.
-@pytest.mark.parametrize("include_rendered_content", [False, True])
-def test_run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-    include_rendered_content: bool,
-):
-    run_checkpoint_and_data_doc(
-        datasource_test_data=datasource_test_data,
-        include_rendered_content=include_rendered_content,
     )
 
 
@@ -477,12 +463,6 @@ def test_simple_checkpoint_run(
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
     )
     result = checkpoint.run()
     assert result["success"]
@@ -495,12 +475,6 @@ def test_simple_checkpoint_run(
                 "expectation_suite_name": expectation_suite_name,
                 "batch_request": batch_request,
             }
-        ],
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
         ],
     )
     result = checkpoint.run()
@@ -531,12 +505,6 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
     )
     result = checkpoint.run()
     assert result["success"]

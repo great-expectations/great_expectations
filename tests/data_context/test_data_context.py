@@ -1090,12 +1090,6 @@ def test_run_checkpoint_new_style(
         expectation_suite_name="my_expectation_suite",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1119,17 +1113,9 @@ def test_run_checkpoint_new_style(
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
-
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
     result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
-    assert result.success
-
-    result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
-    assert len(context.validations_store.list_keys()) == 2
     assert result.success
 
 
@@ -1363,10 +1349,6 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     checkpoint_config = {
         "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
         "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
             {
                 "name": "update_data_docs",
                 "action": {"class_name": "UpdateDataDocsAction"},

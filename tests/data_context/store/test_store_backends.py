@@ -64,27 +64,9 @@ def basic_data_context_config_for_validation_operator():
         validation_operators={
             "store_val_res_and_extract_eval_params": {
                 "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
             },
             "errors_and_warnings_validation_operator": {
                 "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
             },
         },
     )

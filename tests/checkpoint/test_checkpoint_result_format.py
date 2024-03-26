@@ -7,7 +7,6 @@ import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -48,12 +47,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "name": "my_checkpoint",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
-        ],
         "validations": [],
         "runtime_configuration": {},
     }
@@ -3357,9 +3350,6 @@ batch_request:
   datasource_name: pandas_datasource
   data_asset_name: IN_MEMORY_DATA_ASSET
 action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
     - name: update_data_docs
       action:
         class_name: UpdateDataDocsAction
@@ -3445,12 +3435,6 @@ def test_rendered_content_bool_only_respected(
         runtime_configuration={
             "result_format": result_format,
         },
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
     )
 
     checkpoint_result = checkpoint.run()

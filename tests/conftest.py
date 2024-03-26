@@ -1101,12 +1101,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_simple_template_checkpoint",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1139,12 +1133,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_nested_checkpoint_template_1",
         expectation_suite_name="suite_from_template_1",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1187,12 +1175,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         name="my_nested_checkpoint_template_2",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1225,12 +1207,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1267,7 +1243,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1282,7 +1257,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1302,7 +1276,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1322,7 +1295,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(
@@ -1662,12 +1634,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_simple_template_checkpoint",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1700,12 +1666,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_nested_checkpoint_template_1",
         expectation_suite_name="suite_from_template_1",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1748,12 +1708,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         name="my_nested_checkpoint_template_2",
         action_list=[
             {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
                 "name": "update_data_docs",
                 "action": {
                     "class_name": "UpdateDataDocsAction",
@@ -1786,12 +1740,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
             {
                 "name": "update_data_docs",
                 "action": {
@@ -1827,7 +1775,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
         ],
     )
@@ -1842,7 +1789,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1862,7 +1808,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.UPDATE_DATA_DOCS,
             ActionDicts.build_slack_action(
                 webhook="https://hooks.slack.com/foo/bar",
@@ -1882,7 +1827,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
         action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
             ActionDict(
                 name="update_data_docs",
                 action=ActionDetails(

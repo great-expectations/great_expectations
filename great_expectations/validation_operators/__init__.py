@@ -4,7 +4,6 @@ from great_expectations.checkpoint.actions import (
     OpsgenieAlertAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
-    StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
 )

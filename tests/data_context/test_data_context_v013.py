@@ -426,10 +426,6 @@ def test_in_memory_data_context_configuration(
             "class_name": "ActionListValidationOperator",
             "action_list": [
                 {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
                     "name": "update_data_docs",
                     "action": {"class_name": "UpdateDataDocsAction"},
                 },

@@ -94,10 +94,6 @@ def build_in_code_data_context_project_config(
                 "class_name": "ActionListValidationOperator",
                 "action_list": [
                     {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
-                    },
-                    {
                         "name": "update_data_docs",
                         "action": {"class_name": "UpdateDataDocsAction"},
                     },

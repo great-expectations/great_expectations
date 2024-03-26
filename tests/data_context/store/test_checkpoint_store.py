@@ -71,12 +71,6 @@ def test_checkpoint_store(empty_data_context):
             },
             "action_list": [
                 {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
                     "name": "update_data_docs",
                     "action": {
                         "class_name": "UpdateDataDocsAction",
@@ -134,12 +128,6 @@ def test_checkpoint_store(empty_data_context):
     validations_1: Union[List, Dict] = [
         {
             "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
                 {
                     "name": "update_data_docs",
                     "action": {

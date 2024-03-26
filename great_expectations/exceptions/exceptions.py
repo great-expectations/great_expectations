@@ -284,7 +284,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
-            "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
             "PartitionRequest": "IDDict",
             "PartitionDefinition": "IDDict",

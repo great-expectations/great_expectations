@@ -51,9 +51,6 @@ validation_operators:
     # (and other customizations), read: https://docs.greatexpectations.io/en/latest/reference/validation_operators/action_list_validation_operator.html
     class_name: ActionListValidationOperator
     action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

@@ -227,12 +227,7 @@ def _cloud_config(data_dir):
 
 
 def _checkpoint_config(data_file_name, with_slack):
-    action_list = [
-        {
-            "action": {"class_name": "StoreValidationResultAction"},
-            "name": "store_validation_result",
-        },
-    ]
+    action_list = []
     if with_slack:
         action_list.append(
             {

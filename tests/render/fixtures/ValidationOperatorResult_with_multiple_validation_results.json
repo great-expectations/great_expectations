@@ -774,14 +774,6 @@
     "module_name": "great_expectations.validation_operators",
     "name": "action_list_operator",
     "kwargs": {
-      "action_list": [
-        {
-          "name": "store_validation_result",
-          "action": {
-            "class_name": "StoreValidationResultAction"
-          }
-        }
-      ],
       "result_format": {
         "result_format": "SUMMARY",
         "partial_unexpected_count": 20

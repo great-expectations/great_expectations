@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pickle
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import pytest
 
@@ -12,7 +12,6 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationSuite,
-    ExpectationSuiteValidationResult,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -32,10 +31,6 @@ from great_expectations.datasource.fluent.batch_request import (
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
-
-if TYPE_CHECKING:
-    from great_expectations.core.data_context_key import DataContextKey
-
 
 yaml = YAMLHandler()
 
@@ -70,14 +65,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(  # noqa: E501
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
-    store_validation_result_action,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
     checkpoint_name: str = "test_checkpoint_name"
@@ -85,9 +78,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     checkpoint_config = CheckpointConfig(
         name=checkpoint_name,
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            store_validation_result_action,
-        ],
         validations=[
             {
                 "batch_request": {
@@ -101,21 +91,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.checkpoints.get(checkpoint_config.name)
 
-    assert len(data_context.validations_store.list_keys()) == 0
-
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result: CheckpointResult = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
-
-    validation_result_identifier: DataContextKey = data_context.validations_store.list_keys()[0]
-    validation_result: ExpectationSuiteValidationResult = data_context.validations_store.get(
-        validation_result_identifier
-    )
-
-    assert "checkpoint_name" in validation_result.meta
-    assert validation_result.meta["checkpoint_name"] == checkpoint_name
 
 
 @pytest.mark.filesystem
@@ -141,7 +120,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -170,7 +148,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validator=validator,
     )
 
-    assert len(data_context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -295,14 +272,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "batch_request": {
@@ -324,14 +293,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "Titanic_1911",
                 },
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[],
             ),
             "7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
@@ -341,14 +302,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
             CheckpointConfig(
                 name="my_checkpoint",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
@@ -367,14 +320,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                 name="my_checkpoint",
                 default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
                 expectation_suite_name="my_expectation_suite",
-                action_list=[
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                ],
                 validations=[
                     {
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
@@ -433,7 +378,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -458,7 +402,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -487,7 +430,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -535,7 +477,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ]
     )
 
-    assert len(context.validations_store.list_keys()) == 4
     assert result["success"]
 
 
@@ -573,7 +514,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 2
     assert result["success"]
 
 
@@ -601,7 +541,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -629,7 +568,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -659,7 +597,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -688,7 +625,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -719,7 +655,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -750,7 +685,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -782,7 +716,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.checkpoints.get("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -815,40 +748,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
-@pytest.mark.spark
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_sparkdf(  # noqa: E501
-    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    batch_request: dict = {
-        "datasource_name": "my_spark_dataframes_datasource",
-        "data_asset_name": "my_dataframe_asset",
-    }
-
-    # add checkpoint config
-    checkpoint_config: dict = {
-        "name": "my_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-
-    checkpoint = context.checkpoints.get("my_checkpoint")
-    result = checkpoint.run(
-        validations=[{"batch_request": batch_request}],
-    )
-
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -882,7 +781,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -1633,5 +1531,4 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
