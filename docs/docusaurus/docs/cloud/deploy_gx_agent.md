@@ -45,124 +45,28 @@ You'll need your user access token and organization ID to deploy the GX Agent. A
 
 ## Deploy the GX Agent
 
-The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
-If you're deploying and running the GX Agent within your deployment environment, you can deploy the GX Agent container in any environment where you can run Docker container images or create Kubernetes clusters.
+1. Start the Docker Engine.
 
-To learn how to deploy a Docker container image in a specific deployment environment, see the following documentation:
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Agent:
 
-- [Quickstart: Deploy a container instance in Azure using the Azure CLI](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-quickstart)
-
-- [Build and push a Docker image with Google Cloud Build](https://cloud.google.com/build/docs/build-push-docker-image)
-
-- [Deploy Docker Containers on Amazon ECS](https://aws.amazon.com/getting-started/hands-on/deploy-docker-containers/)
-
-You can deploy the GX Agent in any deployment environment in which you create Kubernetes clusters. For example:
-
-- [Amazon Elastic Kubernetes Service (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html)
-
-- [Microsoft Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/containers/aks-start-here)
-
-- [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs)
-
-- Any Kubernetes cluster version 1.21 or greater which uses standard Kubernetes
-
-<Tabs
-  groupId="deploy-gx-agent"
-  defaultValue='docker'
-  values={[
-  {label: 'Docker', value:'docker'},
-  {label: 'Kubernetes', value:'kubernetes'},
-  ]}>
-<TabItem value="docker">
-
-1. Download the GX Agent Docker container image from [Docker Hub](https://hub.docker.com/r/greatexpectations/agent) to your local or deployment environment.
-
-2. Run the following Docker command to start the GX Agent: 
-
-   ```bash title="Terminal input"
-   docker run -it \
-   -e GX_CLOUD_ACCESS_TOKEN= YOUR_ACCESS_TOKEN \ 
-   -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \  
-   greatexpectations/agent:latest
+    ```bash title="Terminal input"
+    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
-    Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously.
+   Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
 
-4. Optional. Run the following command to use the GX Agent image as the base image and optionally add custom commands:
+    ![GX Agent status](/img/gx_agent_status.png)
 
-   ```bash title="Terminal input"
-   FROM greatexpectations/agent
-   RUN echo "custom_commands"
-   ```
-5. Optional. Run the following command to rebuild the Docker image:
+4. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
-   ```bash title="Terminal input"
-   docker build -t myorg/agent
-   ```
-6. Optional. Run `docker ps` or open Docker Desktop to confirm the GX Agent is running.
+5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
-</TabItem>
-<TabItem value="kubernetes">
+    If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
-1. Open kubectl and run the following command to provide the access credentials to the Kubernetes container:
-    
-   ```sh title="Terminal input"
-   kubectl create secret generic gx-agent-secret \
-   --from-literal=GX_CLOUD_ORGANIZATION_ID=YOUR_ORGANIZATION_ID \
-   --from-literal=GX_CLOUD_ACCESS_TOKEN=YOUR_ACCESS_TOKEN \
-   ```
-    Replace `YOUR_ORGANIZATION_ID` and `YOUR_ACCESS_TOKEN` with the values you copied previously.
-
-2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
-
-3. Create and save a file named `deployment.yaml`, with the following configuration:
-
-   ```yaml title="deployment.yaml"
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-    name: gx-agent
-    labels:
-    app: gx-agent
-    spec:
-    replicas: 1
-    selector:
-    matchLabels:
-    app: gx-agent
-    template:
-    metadata:
-      labels:
-        app: gx-agent
-    spec:
-      containers:
-       name: gx-agent
-        image: greatexpectations/agent:latest
-        envFrom:
-        secretRef:
-         name: gx-agent-secret
-   ```
-5. Run the following command to use the `deployment.yaml`configuration file to deploy the GX Agent:
-
-   ```sh title="Terminal input"
-   kubectl apply -f deployment.yaml
-   ```
-6. Optional. Run the following command to confirm the GX Agent is running:
-
-   ```sh title="Terminal input"
-   kubectl logs -l app=gx-agent
-   ```
-7. Optional. Run the following command to terminate running resources gracefully:
-
-   ```sh title="Terminal input"
-   kubectl delete -f deployment.yaml
-   kubectl delete secret gx-agent-secret
-   ```
-
-
-</TabItem>
-</Tabs>
+    To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
 
 ## Next steps
 
