@@ -8,7 +8,7 @@ import LinkCard from '@site/src/components/LinkCard';
 
 import InProgress from '../_core_components/_in_progress.md';
 
-Create, edit, and implement Validation Definitions and Checkpoints.  A Validation Definition associates data with an Expectation Suite and can be used in testing and data exploration.  A Checkpoint executes one or more Validation Definitions and then performs set Actions based on the Validation Results each Validation Definition returns.
+Create, edit, and implement Validation Definitions and Checkpoints. A Validation Definition associates data with an Expectation Suite and can be used in data testing and exploration. A Checkpoint executes one or more Validation Definitions and then performs a set of Actions based on the Validation Results each Validation Definition returns.
 
 
 ## Manage Validation Definitions
