@@ -992,7 +992,7 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC},
+    help={"pty": _PTY_HELP_DESC, "reports": "Generate coverage reports to be uploaded to codecov"},
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(
