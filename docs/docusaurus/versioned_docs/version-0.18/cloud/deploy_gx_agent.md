@@ -68,7 +68,4 @@ Environment variables securely store your GX Cloud access credentials. The GX Ag
 
     To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
 
-## Next steps
-
-- [Connect GX Cloud](../cloud/connect/connect_lp.md)
 
