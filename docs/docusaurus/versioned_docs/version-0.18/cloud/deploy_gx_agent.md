@@ -16,10 +16,6 @@ To use GX Cloud features and functionality in an org-hosted deployment, you need
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
-## Self-hosted and org-hosted deployments
-
-To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality, and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
-
 ## Get your access token and organization ID
 
 You need your access token and organization ID to deploy the GX Agent. Access tokens shouldn't be committed to version control software. 
@@ -72,6 +68,10 @@ Use the information provided here to view your organization ID or create a new a
 ## Deploy the GX Agent
 
 The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [Deploy the GX Agent](#deploy-the-gx-agent).
+
+### Self-hosted and org-hosted deployments
+
+To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality, and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.rs
 
 ### Prerequisites
 
