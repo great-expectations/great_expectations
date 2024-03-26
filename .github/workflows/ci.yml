@@ -160,7 +160,7 @@ jobs:
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
       - name: Run the tests
-        run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose
+        run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -194,7 +194,7 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -325,7 +325,7 @@ jobs:
 
       - name: Run the tests
         run:
-          invoke ci-tests 'cloud' --up-services --verbose
+          invoke ci-tests 'cloud' --up-services --verbose  --reports
 
           # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -399,7 +399,7 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose  --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
