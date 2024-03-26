@@ -10,7 +10,7 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To use GX Cloud features and functionality in an org-hosted deployment, you need to deploy the GX Agent.
+To use GX Cloud features and functionality, you need to deploy the GX Agent. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ Use the information provided here to view your organization ID or create a new a
 
 ## Deploy the GX Agent
 
-The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [Deploy the GX Agent](#deploy-the-gx-agent).
+The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ### Self-hosted and org-hosted deployments
 
