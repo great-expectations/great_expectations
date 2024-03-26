@@ -41,7 +41,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.data_context.types.base import CheckpointValidationConfig
+from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -1661,16 +1661,16 @@ class Validator:
 
     def convert_to_checkpoint_validations_list(
         self,
-    ) -> list[CheckpointValidationConfig]:
+    ) -> list[CheckpointValidationDefinition]:
         """
         Generates a list of validations to be used in the construction of a Checkpoint.
 
         Returns:
-            A list of CheckpointValidationConfigs (one for each batch in the Validator).
+            A list of CheckpointValidationDefinitions (one for each batch in the Validator).
         """
         validations = []
         for batch in self.batch_cache.values():
-            validation = CheckpointValidationConfig(
+            validation = CheckpointValidationDefinition(
                 expectation_suite_name=self.expectation_suite_name,
                 expectation_suite_id=self.expectation_suite.id,
                 batch_request=batch.batch_request,

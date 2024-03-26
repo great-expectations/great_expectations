@@ -13,7 +13,7 @@ from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
-    from great_expectations.core.batch_config import BatchConfig
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
     from great_expectations.expectations.expectation import (
         Expectation,
@@ -24,16 +24,16 @@ if TYPE_CHECKING:
 class Validator:
     """Validator.
 
-    Responsible for running expectations on a batch configuration.
+    Responsible for running expectations on a batch definition.
     """
 
     def __init__(
         self,
-        batch_config: BatchConfig,
+        batch_definition: BatchDefinition,
         result_format: ResultFormat = ResultFormat.SUMMARY,
         batch_request_options: Optional[BatchRequestOptions] = None,
     ) -> None:
-        self._batch_config = batch_config
+        self._batch_definition = batch_definition
         self._batch_request_options = batch_request_options
         self.result_format = result_format
 
@@ -46,7 +46,7 @@ class Validator:
         expectation: Expectation,
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult:
-        """Run a single expectation against the batch config"""
+        """Run a single expectation against the batch definition"""
         results = self._validate_expectation_configs([expectation.configuration])
 
         assert len(results) == 1
@@ -57,7 +57,7 @@ class Validator:
         expectation_suite: ExpectationSuite,
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationSuiteValidationResult:
-        """Run an expectation suite against the batch config"""
+        """Run an expectation suite against the batch definition"""
         results = self._validate_expectation_configs(
             expectation_suite.expectation_configurations,
             evaluation_parameters,
@@ -83,7 +83,7 @@ class Validator:
 
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
-        batch_request = self._batch_config.build_batch_request(
+        batch_request = self._batch_definition.build_batch_request(
             batch_request_options=self._batch_request_options
         )
         return self._get_validator(batch_request=batch_request)
@@ -93,7 +93,7 @@ class Validator:
         expectation_configs: list[ExpectationConfiguration],
         evaluation_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationValidationResult]:
-        """Run a list of expectation configurations against the batch config"""
+        """Run a list of expectation configurations against the batch definition"""
         processed_expectation_configs = self._wrapped_validator.process_expectations_for_validation(
             expectation_configs, evaluation_parameters
         )

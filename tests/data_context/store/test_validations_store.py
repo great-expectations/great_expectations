@@ -307,7 +307,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 @pytest.mark.cloud
 def test_gx_cloud_response_json_to_object_dict() -> None:
     validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
-    validation_config = {
+    validation_definition = {
         "results": [],
         "success": True,
         "statistics": {
@@ -321,12 +321,12 @@ def test_gx_cloud_response_json_to_object_dict() -> None:
         "data": {
             "id": validation_id,
             "attributes": {
-                "result": validation_config,
+                "result": validation_definition,
             },
         }
     }
 
-    expected = validation_config
+    expected = validation_definition
     expected["id"] = validation_id
 
     actual = ValidationsStore.gx_cloud_response_json_to_object_dict(response_json)
