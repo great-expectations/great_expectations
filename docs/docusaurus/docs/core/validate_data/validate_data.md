@@ -13,7 +13,7 @@ Create, edit, and implement Validation Definitions and Checkpoints. A Validation
 
 ## Manage Validation Definitions
 
-Use Validation Definitions to associate data with Expectation Suites for checkpoints, and generate Validation Results for testing and data exploration.
+Use Validation Definitions to associate data with Expectation Suites for Checkpoints and generate Validation Results for data testing and exploration.
 
 <LinkCardGrid>
   
