@@ -110,7 +110,7 @@ For more information, see:
 
 A Checkpoint is the primary means for validating data in a production deployment of GX. Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.
 
-For more information, see [Manage Checkpoints](/core/validate_data/checkpoints./manage_checkpoints.md).
+For more information, see [Manage Checkpoints](/core/validate_data/checkpoints/manage_checkpoints.md).
 
 ### Validation Results
 
