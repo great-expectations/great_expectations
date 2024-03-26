@@ -1638,7 +1638,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def delete_checkpoint(
         self,
         name: str | None = None,
-        ge_cloud_id: str | None = None,
         id: str | None = None,
     ) -> None:
         """Deletes a given Checkpoint by either name or id.
@@ -1649,10 +1648,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
-        # <GX_RENAME>
-        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
-        del ge_cloud_id
-
         return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
