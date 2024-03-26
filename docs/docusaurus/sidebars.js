@@ -402,13 +402,12 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/try_gx_cloud' },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
           link: { type: 'doc', id: 'cloud/connect/connect_lp' },
           items: [
-            'cloud/deploy_gx_agent',
             'cloud/connect/connect_postgresql',
             'cloud/connect/connect_snowflake',
             'cloud/connect/connect_airflow',
