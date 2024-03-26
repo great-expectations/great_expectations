@@ -32,11 +32,11 @@
             "title": "Batch Metadata",
             "type": "object"
         },
-        "batch_configs": {
-            "title": "Batch Configs",
+        "batch_definitions": {
+            "title": "Batch Definitions",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/BatchConfig"
+                "$ref": "#/definitions/BatchDefinition"
             }
         },
         "filepath_or_buffer": {
@@ -602,8 +602,8 @@
                 "date_format_string"
             ]
         },
-        "BatchConfig": {
-            "title": "BatchConfig",
+        "BatchDefinition": {
+            "title": "BatchDefinition",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {

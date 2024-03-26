@@ -55,12 +55,12 @@ def empty_asset_name() -> str:
 
 
 @pytest.fixture
-def asset_with_batch_config_name() -> str:
+def asset_with_batch_definition_name() -> str:
     return "i have a batch config"
 
 
 @pytest.fixture
-def batch_config_name() -> str:
+def batch_definition_name() -> str:
     return "my cool batch config"
 
 
@@ -69,14 +69,14 @@ def datasource_store_with_fds_datasource(
     empty_datasource_store: DatasourceStore,
     fake_datasource_name: str,
     empty_asset_name: str,
-    asset_with_batch_config_name: str,
-    batch_config_name: str,
+    asset_with_batch_definition_name: str,
+    batch_definition_name: str,
 ) -> DatasourceStore:
     """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
     datasource = PandasDatasource(name=fake_datasource_name)
     datasource.add_csv_asset(empty_asset_name, "taxi.csv")
-    asset = datasource.add_csv_asset(asset_with_batch_config_name, "taxi.csv")
-    asset.add_batch_config(batch_config_name)
+    asset = datasource.add_csv_asset(asset_with_batch_definition_name, "taxi.csv")
+    asset.add_batch_definition(batch_definition_name)
 
     key = DataContextVariableKey(
         resource_name=fake_datasource_name,

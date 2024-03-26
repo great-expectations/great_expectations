@@ -26,7 +26,7 @@ from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.base import CheckpointValidationConfig
+from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -290,7 +290,7 @@ def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_valid
     validator = multi_batch_taxi_validator
 
     actual = validator.convert_to_checkpoint_validations_list()
-    expected_config = CheckpointValidationConfig(
+    expected_config = CheckpointValidationDefinition(
         expectation_suite_name="validating_taxi_data",
         expectation_suite_id=ANY,
         batch_request={
