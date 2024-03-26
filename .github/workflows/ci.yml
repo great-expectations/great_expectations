@@ -407,7 +407,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: great-expectations/great_expectations
-          flags: "${{ matrix.python-version }} | ${{ matrix.markers }}"
+          flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
 
   py38-min-versions:
     needs: [unit-tests, static-analysis]
