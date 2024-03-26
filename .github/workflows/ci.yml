@@ -162,6 +162,14 @@ jobs:
       - name: Run the tests
         run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose
 
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: ${{ matrix.doc-step }}
+
   unit-tests:
     strategy:
       matrix:
@@ -187,6 +195,14 @@ jobs:
 
       - name: Run the unit tests
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
+
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: ${{ matrix.python-version }}
 
   doc-checks:
     needs: [static-analysis]
@@ -310,6 +326,14 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
 
+              # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: cloud
+
   marker-tests:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
@@ -375,6 +399,14 @@ jobs:
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: ${{ matrix.python-version }} ${{ matrix.markers }} 
 
   py38-min-versions:
     needs: [unit-tests, static-analysis]
