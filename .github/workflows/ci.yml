@@ -324,9 +324,10 @@ jobs:
           docker compose -f assets/docker/mercury/docker-compose.yml logs
 
       - name: Run the tests
-        run: invoke ci-tests 'cloud' --up-services --verbose
+        run:
+          invoke ci-tests 'cloud' --up-services --verbose
 
-              # upload coverage report to codecov
+          # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.1.0
         with:
@@ -406,7 +407,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: great-expectations/great_expectations
-          flags: ${{ matrix.python-version }} ${{ matrix.markers }} 
+          flags: ${{ matrix.python-version }} ${{ matrix.markers }}
 
   py38-min-versions:
     needs: [unit-tests, static-analysis]
