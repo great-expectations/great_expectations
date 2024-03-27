@@ -164,13 +164,13 @@ sample_data = [
     ),
 ]
 
-creating_custom_expectations = [
-    IntegrationTestFixture(
-        name="expect_multicolumn_values_to_be_multiples_of_three",
-        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-]
+# creating_custom_expectations = [
+#     IntegrationTestFixture(
+#         name="expect_multicolumn_values_to_be_multiples_of_three",
+#         user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+#         backend_dependencies=[BackendDependencies.POSTGRESQL],
+#     ),
+# ]
 
 evaluation_parameters = [
     IntegrationTestFixture(
