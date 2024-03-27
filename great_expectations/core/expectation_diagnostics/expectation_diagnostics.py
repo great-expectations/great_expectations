@@ -7,7 +7,6 @@ from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,  # noqa: TCH001
 )
@@ -26,6 +25,9 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.types import SerializableDictDot
 
 
@@ -38,7 +40,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     1. `ExpectationDiagnostics.to_dict()` creates the JSON object that populates the Gallery.
     2. `ExpectationDiagnostics.generate_checklist()` creates CLI-type string output to assist with development.
-    """
+    """  # noqa: E501
 
     # This object is taken directly from the Expectation class, without modification
     examples: List[ExpectationTestDataCases]
@@ -68,11 +70,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
         result["execution_engines_list"] = sorted(
-            [
-                engine
-                for engine, _bool in result["execution_engines"].items()
-                if _bool is True
-            ]
+            [engine for engine, _bool in result["execution_engines"].items() if _bool is True]
         )
         return result
 
@@ -87,9 +85,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
         sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
@@ -113,7 +109,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has an informative docstring"""
 
-        message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'
+        message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'  # noqa: E501
         if "short_description" in description:
             short_description = description["short_description"]
         else:
@@ -123,9 +119,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 message=message,
                 passed=False,
             )
-        elif short_description.startswith("Expect ") and short_description.endswith(
-            "."
-        ):
+        elif short_description.startswith("Expect ") and short_description.endswith("."):
             return ExpectationDiagnosticCheckMessage(
                 message=message,
                 sub_messages=[
@@ -154,7 +148,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         examples: List[ExpectationTestDataCases],
         tests: List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""
+        """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""  # noqa: E501
 
         message = "Has at least one positive and negative example case, and all test cases pass"
         (
@@ -163,9 +157,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         ) = cls._count_positive_and_negative_example_cases(examples)
         unexpected_case_count = cls._count_unexpected_test_cases(tests)
         passed = (
-            (positive_case_count > 0)
-            and (negative_case_count > 0)
-            and (unexpected_case_count == 0)
+            (positive_case_count > 0) and (negative_case_count > 0) and (unexpected_case_count == 0)
         )
         print(positive_case_count, negative_case_count, unexpected_case_count, passed)
         return ExpectationDiagnosticCheckMessage(
@@ -177,7 +169,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _check_core_logic_for_at_least_one_execution_engine(
         backend_test_result_counts: List[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
+        """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""  # noqa: E501
 
         sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
@@ -185,8 +177,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None
-            and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
         ]
 
         if len(all_passing) > 0:
@@ -194,7 +185,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             for result in all_passing:
                 sub_messages.append(
                     {
-                        "message": f"All {result.num_passed} tests for {result.backend} are passing",
+                        "message": f"All {result.num_passed} tests for {result.backend} are passing",  # noqa: E501
                         "passed": True,
                     }
                 )
@@ -225,9 +216,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
             if test_result.test_passed is False:
-                backend_failing_names[test_result.backend].append(
-                    test_result.test_title
-                )
+                backend_failing_names[test_result.backend].append(test_result.test_title)
 
         for backend in backend_results:
             result_counts = ExpectationBackendTestResultCounts(
@@ -244,16 +233,17 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _check_core_logic_for_all_applicable_execution_engines(
         backend_test_result_counts: List[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
+        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""  # noqa: E501
 
         sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
-        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        message = (
+            "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        )
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None
-            and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
         ]
         some_failing = [
             backend_test_result
@@ -275,7 +265,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         for result in some_failing:
             sub_messages.append(
                 {
-                    "message": f"Only {result.num_passed} / {result.num_passed + result.num_failed} tests for {result.backend} are passing",
+                    "message": f"Only {result.num_passed} / {result.num_passed + result.num_failed} tests for {result.backend} are passing",  # noqa: E501
                     "passed": False,
                 }
             )
@@ -304,7 +294,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _count_positive_and_negative_example_cases(
         examples: List[ExpectationTestDataCases],
     ) -> Tuple[int, int]:
-        """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+        """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""  # noqa: E501
 
         positive_cases: int = 0
         negative_cases: int = 0
@@ -339,14 +329,12 @@ class ExpectationDiagnostics(SerializableDictDot):
         maturity_level: str,
         maturity_messages: ExpectationDiagnosticMaturityMessages,
     ) -> str:
-        """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
+        """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""  # noqa: E501
 
         output_message = f"Completeness checklist for {class_name} ({maturity_level}):"
 
         checks = (
-            maturity_messages.experimental
-            + maturity_messages.beta
-            + maturity_messages.production
+            maturity_messages.experimental + maturity_messages.beta + maturity_messages.production
         )
 
         for check in checks:
@@ -445,16 +433,14 @@ class ExpectationDiagnostics(SerializableDictDot):
         if all_renderer_types & renderer_types == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
-            # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
+            # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",  # noqa: E501
             message="Has both statement Renderers: prescriptive and diagnostic",
             passed=passed,
         )
 
     @staticmethod
     def _check_full_test_suite(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
@@ -464,12 +450,10 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(
-            message="Has passed a manual review by a code owner for code standards and style guides",
+            message="Has passed a manual review by a code owner for code standards and style guides",  # noqa: E501
             passed=library_metadata.manually_reviewed_code,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
         )

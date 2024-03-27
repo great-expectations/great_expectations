@@ -8,42 +8,44 @@
 # to ensure that the gallery is kept to-up-date with change.
 
 schedules:
-- cron: 0 7 * * *
-  displayName: Scheduled Runs
-  branches:
-    include:
-    - develop
-  always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
+  - cron: 0 7 * * *
+    displayName: Scheduled Runs
+    branches:
+      include:
+        - develop
+    always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
-resources:
-  containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mysql
-    image: mysql:8.0.20
-    ports:
-      - 3306:3306
-    env:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: test_ci
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-  - container: trino
-    image: trinodb/trino:400
-    ports:
-      - 8088:8080
+# The 'resources' block is commented since we are currently blocking the pipeline until we decide
+#   on a plan for hosting the gallery for 1.0. We will uncomment it when we unblock the pipeline.
+#resources:
+#  containers:
+#  - container: postgres
+#    image: postgres:11
+#    ports:
+#    - 5432:5432
+#    env:
+#      POSTGRES_DB: "test_ci"
+#      POSTGRES_HOST_AUTH_METHOD: "trust"
+#  - container: mysql
+#    image: mysql:8.0.20
+#    ports:
+#      - 3306:3306
+#    env:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+#      MYSQL_DATABASE: test_ci
+#  - container: mssql
+#    image: mcr.microsoft.com/mssql/server:2019-latest
+#    env:
+#      ACCEPT_EULA: Y
+#      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+#      MSSQL_DB: test_ci
+#      MSSQL_PID: Developer
+#    ports:
+#      - 1433:1433
+#  - container: trino
+#    image: trinodb/trino:400
+#    ports:
+#      - 8088:8080
 
 # The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
@@ -52,9 +54,19 @@ variables:
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
-  - stage: scope_check
+  - stage: block_pipeline
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: "ubuntu-20.04"
+    jobs:
+      - job: BlockPipeline
+        steps:
+          - bash: echo "Block pipeline"
+
+  - stage: scope_check
+    dependsOn: block_pipeline
+    condition: failed('block_pipeline')
+    pool:
+      vmImage: "ubuntu-20.04"
     jobs:
       - job: changes
         steps:
@@ -76,36 +88,36 @@ stages:
                 assets/scripts/**
 
   - stage: exp_tests_on_all_backends
-    dependsOn: scope_check
-    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    dependsOn: [scope_check, block_pipeline]
+    condition: and(failed('block_pipeline'), or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true)))
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: "ubuntu-20.04"
 
     jobs:
       - job: pandas
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: python ./build_gallery.py --backends "pandas" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -117,47 +129,46 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: spark
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: python ./build_gallery.py --backends "spark" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -169,27 +180,26 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: postgresql
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         services:
           postgres: postgres
@@ -197,22 +207,22 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, postgresql]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: python ./build_gallery.py --backends "postgresql" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -224,27 +234,26 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: mysql
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         services:
           postgres: mysql
@@ -252,18 +261,18 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, mysql]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - script: |
               printf 'Waiting for MySQL database to accept connections'
@@ -271,16 +280,16 @@ stages:
                 printf '.'
                 sleep 1;
               done;
-            displayName: 'Wait for MySQL database to initialise'
+            displayName: "Wait for MySQL database to initialise"
 
           - script: |
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
               mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
+            displayName: "Configure mysql"
 
           - bash: python ./build_gallery.py --backends "mysql" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -292,27 +301,26 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: trino
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         services:
           postgres: trino
@@ -320,31 +328,31 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, trino]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - script: |
               printf 'Waiting for Trino database to accept connections'
               sleep 30
-#             until trino --execute "SHOW CATALOGS"; do
-#               printf '.'
-#               sleep 1;
-#             done;
-            displayName: 'Wait for Trino database to initialise'
+            #             until trino --execute "SHOW CATALOGS"; do
+            #               printf '.'
+            #               sleep 1;
+            #             done;
+            displayName: "Wait for Trino database to initialise"
 
           - bash: python ./build_gallery.py --backends "trino" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -356,27 +364,26 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: mssql
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         services:
           mssql: mssql
@@ -384,26 +391,26 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, mssql]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
-            displayName: 'Configure mssql'
+            displayName: "Configure mssql"
 
           - bash: python ./build_gallery.py --backends "mssql" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -415,54 +422,53 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: bigquery
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - task: DownloadSecureFile@1
             name: gcp_authkey
-            displayName: 'Download Google Service Account'
+            displayName: "Download Google Service Account"
             inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-              retryCount: '2'
+              secureFile: "superconductive-service-acct_ge-oss-ci-cd.json"
+              retryCount: "2"
 
           - bash: python ./build_gallery.py --backends "bigquery" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # GCP credentials
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
@@ -478,47 +484,46 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: snowflake
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, snowflake]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: python ./build_gallery.py --backends "snowflake" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # snowflake credentials
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
@@ -538,47 +543,46 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
       - job: redshift
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, redshift]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: python ./build_gallery.py --backends "redshift" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py partial run'
+            displayName: "build_gallery.py partial run"
             env:
               # redshift credentials
               REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
@@ -597,99 +601,42 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
-
-#     - job: athena
-#       timeoutInMinutes: 180
-#       variables:
-#         python.version: '3.8'
-#
-#       steps:
-#         - task: UsePythonVersion@0
-#           inputs:
-#             versionSpec: '$(python.version)'
-#           displayName: 'Use Python $(python.version)'
-#
-#         - bash: python -m pip install --upgrade pip
-#           displayName: 'Update pip'
-#
-#         - script: |
-#             pip install \
-#               --requirement reqs/requirements-dev-all-contrib-expectations.txt \
-#               --editable ".[spark, athena]" \
-#               --constraint constraints-dev.txt
-#           displayName: 'Install dependencies'
-#
-#         - bash: python ./build_gallery.py --backends "athena" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'build_gallery.py partial run'
-#           env:
-#             # Athena credentials
-#             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
-#             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
-#             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
-#             ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-#             # AWS credentials
-#             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-#             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-#             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-#             # Azure credentials
-#             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-#             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
-#
-#         - bash: cat testing-error-messages.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Show testing errors'
-#
-#         - bash: cat gallery-tracebacks.txt
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Show gallery tracebacks'
-#
-#         - task: S3Upload@1
-#           inputs:
-#             regionName: 'us-east-2'
-#             awsCredentials: 'aws-ci-great-expectations'
-#             bucketName: 'superconductive-public'
-#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-#             globExpressions: '*.json'
-#             targetFolder: 'static/gallery/'
-#             filesAcl: 'public-read'
-
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
   - stage: build_gallery_staging
-    dependsOn: exp_tests_on_all_backends
+    dependsOn: [exp_tests_on_all_backends, block_pipeline]
+    condition: failed('block_pipeline')
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: "ubuntu-20.04"
 
     jobs:
       - job: combine_backend_results
         timeoutInMinutes: 180
         variables:
-          python.version: '3.8'
+          python.version: "3.8"
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install \
@@ -697,11 +644,11 @@ stages:
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, sqlalchemy]" \
                 --constraint constraints-dev.txt
-            displayName: 'Install dependencies'
+            displayName: "Install dependencies"
 
           - bash: bash ./download_json_from_s3.sh
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Copy JSON files from S3'
+            displayName: "Copy JSON files from S3"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -710,11 +657,11 @@ stages:
 
           - bash: for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'cat *_full.json files in assets/scripts'
+            displayName: "cat *_full.json files in assets/scripts"
 
           - bash: python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt ; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt ; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'build_gallery.py combining run'
+            displayName: "build_gallery.py combining run"
             env:
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -726,99 +673,48 @@ stages:
 
           - bash: cat testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show testing errors'
+            displayName: "Show testing errors"
 
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show gallery tracebacks'
+            displayName: "Show gallery tracebacks"
 
           - bash: cat docstrings.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show docstring conversions'
+            displayName: "Show docstring conversions"
 
           - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show Expectation types and counts'
+            displayName: "Show Expectation types and counts"
 
           - bash: grep -o "Implemented engines.*" output--build_gallery.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show implemented engines'
+            displayName: "Show implemented engines"
 
           - bash: cat expectation_library_v2--staging.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show generated JSON'
+            displayName: "Show generated JSON"
 
           - bash: rm -v *_full.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Remove copied *_full.json files'
+            displayName: "Remove copied *_full.json files"
 
           - task: S3Upload@1
             inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
-
-# Don't do build_package_gallery.py stuff...
-#   - Currently, this script will call the run_diagnostics method on every Expectation
-#     that exists in each package for all backends (even though this was already done
-#     by the build_gallery.py script)
-#   - The build_gallery.py script is now package aware
-#   - The Expectation Gallery site can now accept a URL that has a filter applied to
-#     limit results to a specific package, so no need to bundle them in the "packages" tab
-#
-#
-# - stage: build_package_gallery
-#   dependsOn: build_gallery_staging
-#   condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-#   pool:
-#     vmImage: 'ubuntu-20.04'
-#
-#   jobs:
-#     - job: build_package_gallery
-#       timeoutInMinutes: 180
-#       variables:
-#         python.version: '3.8'
-#
-#       steps:
-#         - task: UsePythonVersion@0
-#           inputs:
-#             versionSpec: '$(python.version)'
-#           displayName: 'Use Python $(python.version)'
-#
-#         - bash: python -m pip install --upgrade pip
-#           displayName: 'Update pip'
-#
-#         - script: |
-#             pip install \
-#               --editable "contrib/cli" \
-#               --editable "." \
-#               --constraint constraints-dev.txt
-#           displayName: 'Install dependencies'
-#
-#         - bash: python ./build_package_gallery.py
-#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-#           displayName: 'Build Package Gallery'
-#
-#         - task: S3Upload@1
-#           inputs:
-#             regionName: 'us-east-2'
-#             awsCredentials: 'aws-ci-great-expectations'
-#             bucketName: 'superconductive-public'
-#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-#             globExpressions: '*.json'
-#             targetFolder: 'static/gallery/'
-#             filesAcl: 'public-read'
-#
+              regionName: "us-east-2"
+              awsCredentials: "aws-ci-great-expectations"
+              bucketName: "superconductive-public"
+              sourceFolder: "$(Build.SourcesDirectory)/assets/scripts"
+              globExpressions: "*.json"
+              targetFolder: "static/gallery/"
+              filesAcl: "public-read"
 
   - stage: update_algolia_indexes
-    dependsOn: [exp_tests_on_all_backends, build_gallery_staging]
+    dependsOn:
+      [exp_tests_on_all_backends, build_gallery_staging, block_pipeline]
+    condition: failed('block_pipeline')
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: "ubuntu-20.04"
 
     jobs:
       - job: trigger_algolia
@@ -827,11 +723,11 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: '16.16'
+              versionSpec: "16.16"
 
           - bash: bash ./trigger_algolia.sh
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Update Algolia indexes from S3'
+            displayName: "Update Algolia indexes from S3"
             env:
               # algolia credentials
               ALGOLIA_ACCOUNT: $(ALGOLIA_ACCOUNT)
@@ -856,7 +752,6 @@ stages:
               ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX)
               ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX)
               ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX)
-
 #         - bash: |
 #             echo "About to trigger webhook: $GALLERY_BUILD_HOOK"
 #             curl -X POST -d {} $GALLERY_BUILD_HOOK

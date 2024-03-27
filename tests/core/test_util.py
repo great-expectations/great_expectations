@@ -1,5 +1,6 @@
+import datetime
+
 import pytest
-from freezegun import freeze_time
 
 from great_expectations.core.util import (
     AzureUrl,
@@ -11,9 +12,10 @@ from great_expectations.core.util import (
 )
 
 
-@freeze_time("11/05/1955")
 @pytest.mark.unit
 def test_substitute_all_strftime_format_strings():
+    now = datetime.datetime.utcnow()
+
     input_dict = {
         "month_no": "%m",
         "just_a_string": "Bloopy!",
@@ -24,13 +26,13 @@ def test_substitute_all_strftime_format_strings():
         "list": ["a", 123, "%a"],
     }
     expected_output_dict = {
-        "month_no": "11",
+        "month_no": now.strftime("%m"),
         "just_a_string": "Bloopy!",
-        "string_with_month_word": "Today we are in the month November!",
+        "string_with_month_word": f"Today we are in the month {now.strftime('%B')}!",
         "number": "90210",
         "escaped_percent": "'%m' is the format string for month number",
-        "inner_dict": {"day_word_full": "Saturday"},
-        "list": ["a", 123, "Sat"],
+        "inner_dict": {"day_word_full": now.strftime("%A")},
+        "list": ["a", 123, now.strftime("%a")],
     }
     assert substitute_all_strftime_format_strings(input_dict) == expected_output_dict
 
@@ -97,9 +99,7 @@ def test_azure_pandas_url_with_nested_blob():
 def test_azure_pandas_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
-    url = AzureUrl(
-        "my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+"
-    )
+    url = AzureUrl("my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+")
     assert url.account_name == "my_account"
     assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"
@@ -137,9 +137,7 @@ def test_azure_spark_url_with_nested_blob():
 def test_azure_spark_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
-    url = AzureUrl(
-        "my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+"
-    )
+    url = AzureUrl("my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+")
     assert url.account_name == "my_account"
     assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"

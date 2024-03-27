@@ -8,26 +8,26 @@ from typing import (
 )
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
-from great_expectations.core._docs_decorators import public_api
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.map_metric_provider.map_metric_provider import (
     MapMetricProvider,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class ColumnPairMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a column pair. All column pair metrics require domain
     keys of `column_A` and `column_B`.
 
     `expect_column_pair_values_to_be_equal` is an example of an Expectation that uses this metric.
-    """
+    """  # noqa: E501
 
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",

@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 import urllib.parse
+import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -12,8 +13,14 @@ import pandas as pd
 import pytest
 import requests
 
+from great_expectations import get_context
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
@@ -79,9 +86,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     context = empty_file_context
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
+    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
 
     yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
     assert yaml_path.exists()
@@ -93,28 +98,28 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
 
 
 @pytest.mark.cloud
-def test_splitters_are_persisted_on_creation(
+def test_partitioners_are_persisted_on_creation(
     empty_cloud_context_fluent: CloudDataContext,
     cloud_api_fake_db: FakeDBTypedDict,
     db_file: pathlib.Path,
 ):
     context = empty_cloud_context_fluent
 
-    datasource_name = "save_ds_splitters_test"
+    datasource_name = "save_ds_partitioners_test"
     datasource = context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
-    my_asset.add_splitter_year("date")
+    partitioner = PartitionerYear(column_name="date")
+    my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-        "attributes"
-    ]["datasource_config"]
-    print(f"'{datasource_name}' config -> \n\n{pf(datasource_config)}")
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
+        "datasource_config"
+    ]
 
-    # splitters should be present
-    assert datasource_config["assets"][0]["splitter"]
+    # partitioners should be present
+    assert datasource_config["assets"][0]["batch_definitions"][0]["partitioner"]
 
 
 @pytest.mark.filesystem
@@ -134,9 +139,7 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
 
     context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    ).add_query_asset(
-        asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"'
-    )
+    ).add_query_asset(asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"')
 
     fds_after_add: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
     print(f"'{asset_name}' added\n-----------------\n{pf(fds_after_add)}")
@@ -161,7 +164,7 @@ def test_delete_asset_with_cloud_data_context(
 
     datasource_name = "my_pg_ds"
     datasource = context.fluent_datasources[datasource_name]
-    asset_name = "my_table_asset_wo_splitters"
+    asset_name = "my_table_asset_wo_partitioners"
     asset = [asset for asset in datasource.assets if asset.name == asset_name][0]
     datasource.delete_asset(asset_name=asset_name)
 
@@ -173,9 +176,9 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-            "attributes"
-        ]["datasource_config"]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
+            "datasource_config"
+        ]["assets"]
     ]
     assert asset_name not in asset_names
 
@@ -328,6 +331,85 @@ def test_cloud_context_delete_datasource(
     assert response2.status_code == 404
 
 
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "invalid_datasource_config",
+    [
+        pytest.param(
+            {"type": "not_a_real_datasource_type", "foo": "bar"},
+            id="invalid_type",
+        ),
+        pytest.param(
+            {"type": "postgres", "connection_string": "postmalone+pyscopg2://"},
+            id="invalid pg conn_string",
+        ),
+        pytest.param(
+            {
+                "type": "sqlite",
+                "connection_string": "sqlite:///",
+                "assets": [
+                    {
+                        "name": "bad_query_asset",
+                        "type": "query",
+                        "query": "select * from foo",
+                        "table_name": "this is not valid",
+                    }
+                ],
+            },
+            id="invalid asset",
+        ),
+        pytest.param(
+            {
+                "type": "sqlite",
+                "connection_string": "sqlite:///",
+                "assets": [
+                    {
+                        "name": "bad_asset_type",
+                        "type": "NOT_A_VALID_ASSET_TYPE",
+                    }
+                ],
+            },
+            id="invalid asset type",
+        ),
+    ],
+)
+def test_invalid_datasource_config_does_not_break_cloud_context(
+    cloud_api_fake: RequestsMock,
+    cloud_details: CloudDetails,
+    cloud_api_fake_db: dict,
+    invalid_datasource_config: dict,
+):
+    """
+    Ensure that a datasource with an invalid config does not break the cloud context
+    """
+    datasource_id: str = str(uuid.uuid4())
+    datasource_name: str = "invalid_datasource"
+    invalid_datasource_config["name"] = datasource_name
+    cloud_api_fake_db["datasources"][datasource_id] = {
+        "data": {
+            "id": datasource_id,
+            "type": "datasource",
+            "attributes": {
+                "name": datasource_name,
+                "datasource_config": invalid_datasource_config,
+            },
+        }
+    }
+    with pytest.warns(GxInvalidDatasourceWarning):
+        context = get_context(
+            cloud_base_url=cloud_details.base_url,
+            cloud_organization_id=cloud_details.org_id,
+            cloud_access_token=cloud_details.access_token,
+        )
+        assert datasource_name in context.datasources
+        bad_datasource = context.get_datasource(datasource_name)
+    # test __repr__ and __str__
+    print(f"{bad_datasource!r}\n{bad_datasource!s}")
+    assert isinstance(bad_datasource, InvalidDatasource)
+    assert bad_datasource.name == datasource_name
+    assert len(bad_datasource.assets) == len(invalid_datasource_config.get("assets", []))
+
+
 @pytest.fixture
 def verify_asset_names_mock(
     cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
@@ -346,9 +428,7 @@ def verify_asset_names_mock(
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
-            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
-                datasource_id
-            )
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(datasource_id)
             if old_datasource:
                 if (
                     payload.data.name
@@ -382,9 +462,7 @@ class TestPandasDefaultWithCloud:
         verify_asset_names_mock: RequestsMock,
     ):
         context = empty_cloud_context_fluent
-        df = pd.DataFrame.from_dict(
-            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
-        )
+        df = pd.DataFrame.from_dict({"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]})
 
         context.sources.pandas_default.read_dataframe(df)
 

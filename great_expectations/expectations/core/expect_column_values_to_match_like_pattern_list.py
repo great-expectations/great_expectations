@@ -8,7 +8,6 @@ from great_expectations.core.evaluation_parameters import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.render.components import (
     LegacyRendererType,
@@ -71,7 +70,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     like_pattern_list: Union[List[str], EvaluationParameterDict]
     match_on: Literal["any", "all"] = "any"
@@ -81,9 +80,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         cls, like_pattern_list: list[str] | EvaluationParameterDict
     ) -> list[str] | EvaluationParameterDict:
         if len(like_pattern_list) < 1:
-            raise ValueError(
-                "At least one like_pattern must be supplied in the like_pattern_list."
-            )
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         return like_pattern_list
 
@@ -105,40 +102,6 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "like_pattern_list",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_values_to_match_like_pattern`
-        we require that the `configuraton.kwargs` contain a `like_pattern_list` key that is either a `list` or `dict`.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "like_pattern_list" in configuration.kwargs
-            ), "Must provide like_pattern_list"
-            assert isinstance(
-                configuration.kwargs.get("like_pattern_list"), (list, dict)
-            ), "like_pattern_list must be a list"
-            assert isinstance(configuration.kwargs.get("like_pattern_list"), dict) or (
-                len(configuration.kwargs.get("like_pattern_list")) > 0
-            ), "At least one like_pattern must be supplied in the like_pattern_list."
-            if isinstance(configuration.kwargs.get("like_pattern_list"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get(
-                    "like_pattern_list"
-                ), 'Evaluation Parameter dict for like_pattern_list kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     def _prescriptive_renderer(
@@ -157,14 +120,9 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
             ["column", "like_pattern_list", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
 
-        if (
-            not params.get("like_pattern_list")
-            or len(params.get("like_pattern_list")) == 0
-        ):
+        if not params.get("like_pattern_list") or len(params.get("like_pattern_list")) == 0:
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["like_pattern_list"]):
@@ -175,10 +133,8 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
         template_str = "Values must match the following like patterns: " + values_string
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."

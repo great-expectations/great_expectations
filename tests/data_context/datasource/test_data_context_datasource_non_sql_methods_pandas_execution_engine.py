@@ -38,9 +38,7 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
     )
     os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
-    titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../../test_sets/Titanic.csv"
-    )
+    titanic_csv_source_file_path: str = file_relative_path(__file__, "../../test_sets/Titanic.csv")
     titanic_csv_destination_file_path: str = str(
         os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
@@ -110,9 +108,7 @@ def test_get_validator_bad_batch_request(
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
-        context.get_validator(
-            batch_request=batch_request, expectation_suite_name="temp_suite"
-        )
+        context.get_validator(batch_request=batch_request, expectation_suite_name="temp_suite")
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
@@ -277,7 +273,7 @@ data_connectors:
     assert batch.data.dataframe.shape == (2, 2)
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -370,7 +366,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -463,13 +459,13 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     """
     What does this test and why?
     This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
-    """
+    """  # noqa: E501
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -572,7 +568,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     }
 
 
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(  # noqa: E501
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
@@ -642,10 +638,8 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         data_connector_query={"custom_filter_function": my_custom_batch_selector},
     )
 
-    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request
-    batch_list: List[Batch] = context.get_batch_list(
-        batch_request=batch_request, limit=2
-    )
+    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request  # noqa: E501
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request, limit=2)
     assert len(batch_list) == 4
 
     # first batch

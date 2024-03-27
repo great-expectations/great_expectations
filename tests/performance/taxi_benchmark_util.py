@@ -2,7 +2,8 @@
 Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_tripdata_sample_2019-01.csv)
     found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
-"""
+"""  # noqa: E501
+
 from __future__ import annotations
 
 import os
@@ -10,12 +11,13 @@ from typing import List, Optional
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
-    ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -32,12 +34,12 @@ def create_checkpoint(
 
     Returns:
         Configured checkpoint ready to be run.
-    """
+    """  # noqa: E501
     checkpoint_name = "my_checkpoint"
     datasource_name = "my_datasource"
     data_connector_name = "my_data_connector"
 
-    # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.
+    # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.  # noqa: E501
     assert 1 <= number_of_tables <= 100
     suite_and_asset_names = [f"taxi_trips_{i}" for i in range(1, number_of_tables + 1)]
 
@@ -59,10 +61,6 @@ def create_checkpoint(
         checkpoint_name,
         suite_and_asset_names,
     )
-
-
-def concurrency_config() -> ConcurrencyConfig:
-    return ConcurrencyConfig(enabled=True)
 
 
 def expected_validation_results() -> List[dict]:
@@ -259,14 +257,13 @@ def _create_context(
     bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_PERFORMANCE_DATASET")
     if not bigquery_dataset:
         raise ValueError(
-            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"
+            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"  # noqa: E501
         )
 
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
-        concurrency=concurrency_config(),
     )
 
     context = get_context(project_config=data_context_config)
@@ -335,15 +332,10 @@ def _add_checkpoint(
             name=checkpoint_name,
             class_name="Checkpoint",
             validations=validations,
-            run_name_template="my_run_name",
             action_list=[
                 ActionDict(
                     name="store_validation_result",
                     action=ActionDetails(class_name="StoreValidationResultAction"),
-                ),
-                ActionDict(
-                    name="store_evaluation_params",
-                    action=ActionDetails(class_name="StoreEvaluationParametersAction"),
                 ),
                 ActionDict(
                     name="update_data_docs",
@@ -375,7 +367,7 @@ def _add_checkpoint(
 
 def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
     suite = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_set",
             kwargs={
@@ -402,25 +394,25 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             },
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={"column": "vendor_id"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "vendor_id", "type_": "INTEGER"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
             kwargs={"column": "pickup_datetime", "type_": "STRING"},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             # rate_code_id refers to the final rate code in effect at the end of the trip
@@ -435,7 +427,7 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
             kwargs={"column": "rate_code_id", "value_set": [1, 2, 3, 4, 5, 6, 99]},
         )
     )
-    suite.add_expectation(
+    suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={
@@ -447,5 +439,5 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
     )
 
     # Save the expectation suite or else it doesn't show up in the data docs.
-    suite.expectation_suite_name = suite_name
+    suite.name = suite_name
     context.add_or_update_expectation_suite(expectation_suite=suite)

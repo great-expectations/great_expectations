@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -47,17 +49,19 @@ def datasource(
         connection_string=connection_string,
         create_temp_table=False,
     )
-    datasource.create_temp_table = True
+    updated_connection_string = f"{connection_string}&foo=bar"
+
+    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource = context.sources.add_or_update_snowflake(datasource=datasource)
     assert (
-        datasource.create_temp_table is True
+        datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
+    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.create_temp_table is False
+        datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = True
+    datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
@@ -65,17 +69,18 @@ def datasource(
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
     assert (
-        datasource.create_temp_table is True
+        datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
-    datasource.create_temp_table = False
+    datasource.connection_string = connection_string  # type: ignore[assignment] # is a str
     datasource_dict = datasource.dict()
     # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
+    _ = context.add_or_update_datasource(**datasource_dict)
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
-        datasource.create_temp_table is False
+        datasource.connection_string == connection_string
     ), "The datasource was not updated in the previous method call."
     return datasource
 
@@ -132,7 +137,7 @@ def expectation_suite(
     """Add Expectations for the Data Assets defined in this module.
     Note: There is no need to test Expectation Suite CRUD.
     Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation(
+    expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -144,6 +149,11 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name which mercury currently doesn't support",
+    strict=True,
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
@@ -162,6 +172,9 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
+@pytest.mark.xfail(
+    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+)
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

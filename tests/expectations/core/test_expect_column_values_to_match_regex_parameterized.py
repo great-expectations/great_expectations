@@ -1,11 +1,11 @@
 import pandas as pd
 import pytest
 
+import great_expectations.expectations as gxe
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.expectations.core import ExpectColumnValuesToMatchRegex
 
 
-class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchRegex):
+class ExpectColumnValuesAsStringToBePositiveInteger(gxe.ExpectColumnValuesToMatchRegex):
     regex: str = "^\\d+$"
 
 
@@ -29,9 +29,7 @@ def test_expect_column_values_as_string_to_be_positive_integers_pass(
         create_expectation_suite_with_name="test",
     )
 
-    assert validator.expect_column_values_as_string_to_be_positive_integer(
-        column="a"
-    ).success
+    assert validator.expect_column_values_as_string_to_be_positive_integer(column="a").success
 
 
 @pytest.mark.big
@@ -54,6 +52,4 @@ def test_expect_column_values_as_string_to_be_positive_integers_fail(
         create_expectation_suite_with_name="test",
     )
 
-    assert not validator.expect_column_values_as_string_to_be_positive_integer(
-        column="a"
-    ).success
+    assert not validator.expect_column_values_as_string_to_be_positive_integer(column="a").success

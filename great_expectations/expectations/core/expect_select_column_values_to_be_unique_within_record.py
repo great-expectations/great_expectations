@@ -20,8 +20,10 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -65,7 +67,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_list: Union[tuple, list]
     ignore_row_if: str = "all_values_are_missing"
@@ -102,11 +104,13 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
+            template_str = (
+                "Values must be unique across columns, at least $mostly_pct % of the time: "
+            )
         else:
             template_str = "Values must always be unique across columns: "
 
@@ -153,11 +157,11 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+            template_str = (
+                "Values must be unique across columns, at least $mostly_pct % of the time: "
             )
-            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
             template_str = "Values must always be unique across columns: "
 
@@ -175,10 +179,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
         return [

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import ClassVar, List, Optional
 from uuid import UUID
@@ -11,7 +13,7 @@ class Action:
 
     Attributes:
         name: A description of what happened. For example (<object>.<verb>) "validation_result.saved" or "token.deleted"
-    """
+    """  # noqa: E501
 
     name: str
 
@@ -34,7 +36,7 @@ class Event:
         return get_config().data_context_id
 
     @property
-    def organization_id(self) -> UUID:
+    def organization_id(self) -> UUID | None:
         return get_config().organization_id
 
     @property
@@ -42,20 +44,23 @@ class Event:
         return get_config().oss_id
 
     @property
-    def user_id(self) -> UUID:
+    def user_id(self) -> UUID | None:
         return get_config().user_id
+
+    @property
+    def distinct_id(self) -> UUID:
+        """The distinct_id is the primary key for identifying
+        anlaytics events. It is the user_id if it is set
+        (e.g. in a Cloud context), otherwise the oss_id.
+        """
+        return self.user_id or self.oss_id
 
     _allowed_actions: ClassVar[Optional[List[Action]]] = None
 
     def __post_init__(self):
         allowed_actions = self.get_allowed_actions()
-        if (
-            allowed_actions is not None
-            and self.action not in self.get_allowed_actions()
-        ):
-            raise ValueError(
-                f"Action [{self.action}] must be one of {self.get_allowed_actions()}"
-            )
+        if allowed_actions is not None and self.action not in self.get_allowed_actions():
+            raise ValueError(f"Action [{self.action}] must be one of {self.get_allowed_actions()}")
 
     @classmethod
     def get_allowed_actions(cls):
@@ -64,10 +69,12 @@ class Event:
     def properties(self) -> dict:
         props = {
             "data_context_id": self.data_context_id,
-            "organization_id": self.organization_id,
             "oss_id": self.oss_id,
-            "service": "python-client",
+            "service": "gx-core",
         }
+        if self.user_id is not None:
+            props.update({"user_id": self.user_id, "organization_id": self.organization_id})
+
         return {**props, **self._properties()}
 
     def _properties(self) -> dict:

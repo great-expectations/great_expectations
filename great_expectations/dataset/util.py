@@ -1,5 +1,6 @@
-# Utility methods for dealing with Dataset objects
+from __future__ import annotations
 
+# Utility methods for dealing with Dataset objects
 import logging
 from typing import Any, List, Optional, Union
 
@@ -32,9 +33,9 @@ def is_valid_categorical_partition_object(partition_object):
     ):
         return False
     # Expect the same number of values as weights; weights should sum to one
-    return len(partition_object["values"]) == len(
-        partition_object["weights"]
-    ) and np.allclose(np.sum(partition_object["weights"]), 1)
+    return len(partition_object["values"]) == len(partition_object["weights"]) and np.allclose(
+        np.sum(partition_object["weights"]), 1
+    )
 
 
 def is_valid_continuous_partition_object(partition_object):
@@ -42,7 +43,7 @@ def is_valid_continuous_partition_object(partition_object):
 
     :param partition_object: The partition_object to evaluate
     :return: Boolean
-    """
+    """  # noqa: E501
     if (
         (partition_object is None)
         or ("weights" not in partition_object)
@@ -57,11 +58,11 @@ def is_valid_continuous_partition_object(partition_object):
     else:
         comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects  # noqa: E501
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
-    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one
+    # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one  # noqa: E501
     return (
         (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
         and np.all(np.diff(partition_object["bins"]) > 0)
@@ -92,7 +93,7 @@ def categorical_partition_data(data):
 
     # Compute weights using denominator only of nonnull values
     null_indexes = series.isnull()
-    nonnull_count = (null_indexes == False).sum()
+    nonnull_count = (null_indexes is False).sum()
 
     weights = value_counts.values / nonnull_count
     return {"values": value_counts.index.tolist(), "weights": weights}
@@ -114,14 +115,12 @@ def kde_partition_data(data, estimate_tails=True):
         }
 
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     kde = stats.kde.gaussian_kde(data)
     evaluation_bins = np.linspace(
         start=np.min(data) - (kde.covariance_factor() / 2),
         stop=np.max(data) + (kde.covariance_factor() / 2),
-        num=np.floor(
-            ((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1
-        ).astype(int),
+        num=np.floor(((np.max(data) - np.min(data)) / kde.covariance_factor()) + 1).astype(int),
     )
     cdf_vals = [kde.integrate_box_1d(-np.inf, x) for x in evaluation_bins]
     evaluation_weights = np.diff(cdf_vals)
@@ -160,7 +159,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
             "weights": (list) The densities of the bins implied by the partition.
         }
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     if bins == "uniform":
         bins = np.linspace(start=np.min(data), stop=np.max(data), num=n_bins + 1)
     elif bins == "ntile":
@@ -172,13 +171,11 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         hist, bin_edges = np.histogram(data, bins, density=False, **kwargs)
     except ValueError as e:
         raise ValueError(
-            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"
+            "Unable to compute histogram. Did you know you can pass additional kwargs to numpy histogram,"  # noqa: E501
             "such as a range? Numpy error was: " + str(e)
         )
     except TypeError as e:
-        raise TypeError(
-            f"Unable to compute histogram. numpy histogram raised error: {e!s}"
-        )
+        raise TypeError(f"Unable to compute histogram. numpy histogram raised error: {e!s}")
 
     return {"bins": bin_edges, "weights": hist / len(data)}
 
@@ -209,7 +206,7 @@ def build_continuous_partition_object(
             }
 
             See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
     if isinstance(bins, np.ndarray):
         bins = bins.tolist()
@@ -247,7 +244,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
             "weights": (list) The densities of the values implied by the partition.
         }
         See :ref:`partition_object`.
-    """
+    """  # noqa: E501
     counts = dataset.get_column_value_counts(column, sort)
     return {
         "values": list(counts.index),
@@ -255,7 +252,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):  # noqa: PLR0912
+def infer_distribution_parameters(data, distribution, params=None):  # noqa: C901, PLR0912
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -285,9 +282,7 @@ def infer_distribution_parameters(data, distribution, params=None):  # noqa: PLR
     if params is None:
         params = {}
     elif not isinstance(params, dict):
-        raise TypeError(
-            "params must be a dictionary object, see great_expectations documentation"
-        )
+        raise TypeError("params must be a dictionary object, see great_expectations documentation")
 
     if "mean" not in params.keys():
         params["mean"] = data.mean()
@@ -367,7 +362,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
        Raises:
            AttributeError: \
                If an unsupported distribution is provided.
-    """
+    """  # noqa: E501
 
     params["loc"] = params.get("loc", 0)
     if "scale" not in params:
@@ -389,7 +384,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PLR0915
+def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR0912, PLR0915
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -409,21 +404,17 @@ def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PL
            ValueError: \
                With an informative description, usually when necessary parameters are omitted or are invalid.
 
-    """
+    """  # noqa: E501
 
-    norm_msg = (
-        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
+    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."  # noqa: E501
+    gamma_msg = (
+        "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
     )
-    beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
-    gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
-    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."
-    uniform_msg = (
-        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    # poisson_msg = "poisson distributions require 1 positive parameter 'lambda' and optionally 'loc'."  # noqa: E501
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = (
-        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
 
     if distribution not in [
         "norm",
@@ -442,9 +433,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PL
             raise ValueError("std_dev and scale must be positive.")
 
         # alpha and beta are required and positive
-        if distribution == "beta" and (
-            params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
-        ):
+        if distribution == "beta" and (params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0):
             raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
@@ -524,7 +513,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PL
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"  # noqa: E501
         )
 
 
@@ -544,7 +533,7 @@ def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs)
         A list of expectation results.
 
 
-    """
+    """  # noqa: E501
     expectation = getattr(df, expectation_type)
     results = list()
 
@@ -558,11 +547,7 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
     return ", ".join(
         [
             "approximate "
-            + str(
-                stmt.compile(
-                    dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}
-                )
-            )
+            + str(stmt.compile(dialect=sql_engine_dialect, compile_kwargs={"literal_binds": True}))
             for stmt in selects
         ]
     )
@@ -591,7 +576,5 @@ def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
     if mostly is not None:
         # Even though we type mostly as an int or float, we can't typecheck this whole project and
         # need to verify the type.
-        assert isinstance(
-            mostly, (int, float)
-        ), "'mostly' parameter must be an integer or float"
+        assert isinstance(mostly, (int, float)), "'mostly' parameter must be an integer or float"
         assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"

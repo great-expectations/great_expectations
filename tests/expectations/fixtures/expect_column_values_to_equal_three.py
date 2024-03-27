@@ -1,7 +1,6 @@
 from typing import Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -9,11 +8,15 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
@@ -74,7 +77,7 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
                     "title": "other_negative_test_with_mostly",
                     "exact_match_out": False,
                     "in": {"column": "mostly_threes", "mostly": 0.9},
-                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery
+                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery  # noqa: E501
                     "out": {
                         "success": False,
                         "unexpected_index_list": [6, 7],
@@ -104,29 +107,21 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         mostly = configuration.kwargs.get("mostly")
 
         if mostly:
-            return (
-                f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
-            )
+            return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
         else:
             return f'Do all the values in column "{column}" equal 3?'
 
     @classmethod
     @renderer(renderer_type="renderer.answer")
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
 
         if mostly:
             if result.success:
-                return (
-                    f'At least {mostly * 100}% of values in column "{column}" equal 3.'
-                )
+                return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
             else:
-                return (
-                    f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
-                )
+                return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
         else:  # noqa: PLR5501
             if result.success:
                 return f'All of the values in column "{column}" equal 3.'
@@ -134,7 +129,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 return f'Not all of the values in column "{column}" equal 3.'
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -155,9 +150,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 
         template_str = "values must be equal to 3"
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -225,7 +218,7 @@ class ExpectColumnValuesToEqualThree__BrokenIteration(
                     "title": "other_negative_test_with_mostly",
                     "exact_match_out": False,
                     "in": {"column": "mostly_threes", "mostly": 0.9},
-                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery
+                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery  # noqa: E501
                     "out": {
                         "success": False,
                         "unexpected_index_list": [6, 7],

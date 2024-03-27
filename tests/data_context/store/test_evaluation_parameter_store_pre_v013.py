@@ -4,7 +4,6 @@ import os
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -14,6 +13,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from tests import test_utils
 
 
@@ -118,7 +120,7 @@ def test_evaluation_parameter_store_methods(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
@@ -156,23 +158,21 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
         "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,
+        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
     }
 
 
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -207,9 +207,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,

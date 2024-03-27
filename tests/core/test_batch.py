@@ -48,7 +48,7 @@ def test_get_batch_request_from_acceptable_arguments_batch_request_passthrough()
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_runtime_parameter_conflicts_raise(
-    base_block: Dict[str, str]
+    base_block: Dict[str, str],
 ):
     with pytest.raises(ValueError) as ve:
         runtime = base_block.copy()
@@ -79,9 +79,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_conflicts
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")]
-)
+@pytest.mark.parametrize("param,value", [("batch_data", "b"), ("query", "q"), ("path", "p")])
 def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
     base_block: Dict[str, str], param, value
 ):
@@ -101,7 +99,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers_kwargs(
-    runtime_base_block: Dict[str, str]
+    runtime_base_block: Dict[str, str],
 ):
     """Batch identifiers can be provided by batch identifiers or kwargs"""
     bids = {"a": 1, "b": 2}
@@ -114,7 +112,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers_k
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_runtime_parameters_no_batch_identifiers(
-    runtime_base_block: Dict[str, str]
+    runtime_base_block: Dict[str, str],
 ):
     """Batch identifiers can be provided by batch identifiers or kwargs"""
     # testing no batch identifiers
@@ -124,7 +122,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameters_no_batch
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers(
-    runtime_base_block: Dict[str, str]
+    runtime_base_block: Dict[str, str],
 ):
     """Batch identifiers can be provided by batch identifiers or kwargs"""
     bids = {"a": 1, "b": 2}
@@ -138,7 +136,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers(
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_fluent(
-    base_fluent: Dict[str, str]
+    base_fluent: Dict[str, str],
 ):
     actual = get_batch_request_from_acceptable_arguments(**base_fluent)
     assert isinstance(actual, FluentBatchRequest)
@@ -146,7 +144,7 @@ def test_get_batch_request_from_acceptable_arguments_fluent(
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_fluent_with_options(
-    base_fluent: Dict[str, str]
+    base_fluent: Dict[str, str],
 ):
     actual = get_batch_request_from_acceptable_arguments(**base_fluent)
     assert isinstance(actual, FluentBatchRequest)
@@ -154,7 +152,7 @@ def test_get_batch_request_from_acceptable_arguments_fluent_with_options(
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_fluent_and_block_args_raises(
-    base_fluent: Dict[str, str]
+    base_fluent: Dict[str, str],
 ):
     base_fluent["data_connector_query"] = "q"
 
@@ -207,29 +205,29 @@ def test_get_batch_request_from_acceptable_arguments_block_data_connector_query(
 
 
 @pytest.mark.unit
-def test_get_batch_request_from_acceptable_arguments_block_splitter_sampler_batch_spec_passthrough(
+def test_get_batch_request_from_acceptable_arguments_block_partitioner_sampler_batch_spec_passthrough(  # noqa: E501
     base_block: Dict[str, str],
 ):
-    # splitter and sampling as batch_spec_passthrough
+    # partitioner and sampling as batch_spec_passthrough
     base_block["sampling_method"] = "sample"
     base_block["sampling_kwargs"] = {"a": "1"}
-    base_block["splitter_method"] = "split"
-    base_block["splitter_kwargs"] = {"b": "2"}
+    base_block["partitioner_method"] = "partition"
+    base_block["partitioner_kwargs"] = {"b": "2"}
     actual = get_batch_request_from_acceptable_arguments(**base_block)
 
     assert actual.batch_spec_passthrough["sampling_method"] == "sample"
     assert actual.batch_spec_passthrough["sampling_kwargs"] == {"a": "1"}
-    assert actual.batch_spec_passthrough["splitter_method"] == "split"
-    assert actual.batch_spec_passthrough["splitter_kwargs"] == {"b": "2"}
+    assert actual.batch_spec_passthrough["partitioner_method"] == "partition"
+    assert actual.batch_spec_passthrough["partitioner_kwargs"] == {"b": "2"}
     assert isinstance(actual, BatchRequest)
 
-    # existing batch_spec_passthrough should be preserved, no splitter or sampling args exist
+    # existing batch_spec_passthrough should be preserved, no partitioner or sampling args exist
     base_block["batch_spec_passthrough"] = {"c": "3"}
     actual = get_batch_request_from_acceptable_arguments(**base_block)
 
     assert actual.batch_spec_passthrough["c"] == "3"
     assert "sampling_method" not in actual.batch_spec_passthrough
     assert "sampling_kwargs" not in actual.batch_spec_passthrough
-    assert "splitter_method" not in actual.batch_spec_passthrough
-    assert "splitter_kwargs" not in actual.batch_spec_passthrough
+    assert "partitioner_method" not in actual.batch_spec_passthrough
+    assert "partitioner_kwargs" not in actual.batch_spec_passthrough
     assert isinstance(actual, BatchRequest)

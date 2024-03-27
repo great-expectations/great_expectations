@@ -8,7 +8,6 @@ from scipy import stats
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -58,11 +57,9 @@ class ColumnSkew(ColumnAggregateMetricProvider):
     ):
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
@@ -108,16 +105,12 @@ def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEng
     simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: sqlalchemy.Row = execution_engine.execute_query(
-            simple_query
-        ).fetchone()[0]
+        result: sqlalchemy.Row = execution_engine.execute_query(simple_query).fetchone()[0]
         return result
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        )
+        exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         logger.error(exception_message)
         raise pe
 
@@ -386,14 +379,12 @@ class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.skew",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

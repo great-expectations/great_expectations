@@ -4,8 +4,10 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -37,13 +39,11 @@ def test_meta_not_dict_exception(
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -85,7 +85,7 @@ def test_meta_not_dict_exception(
 
     assert (
         str(e.value)
-        == 'Argument "Strings are not acceptable" in "DefaultExpectationConfigurationBuilder" must be of type "dictionary" (value of type "<class \'str\'>" was encountered).\n'
+        == 'Argument "Strings are not acceptable" in "DefaultExpectationConfigurationBuilder" must be of type "dictionary" (value of type "<class \'str\'>" was encountered).\n'  # noqa: E501
     )
 
 
@@ -103,13 +103,11 @@ def test_condition_not_string_exception(
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -150,12 +148,12 @@ def test_condition_not_string_exception(
 
     assert (
         str(e.value)
-        == 'Argument "{\'condition\': \'$variables.tolerance<0.8\'}" in "DefaultExpectationConfigurationBuilder" must be of type "string" (value of type "<class \'dict\'>" was encountered).\n'
+        == 'Argument "{\'condition\': \'$variables.tolerance<0.8\'}" in "DefaultExpectationConfigurationBuilder" must be of type "string" (value of type "<class \'dict\'>" was encountered).\n'  # noqa: E501
     )
 
 
 @pytest.mark.slow  # 1.31s
-def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -168,13 +166,11 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -211,18 +207,18 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 @pytest.mark.slow  # 1.34s
-def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -250,14 +246,12 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     condition: Optional[str] = None
     max_user_id: int = 999999999999
 
-    min_user_id_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricMultiBatchParameterBuilder",
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-        )
+    min_user_id_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="MetricMultiBatchParameterBuilder",
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
     )
     validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         min_user_id_parameter_builder_config,
@@ -271,12 +265,12 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         data_context=data_context,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
-        batch_request=batch_request,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+            batch_request=batch_request,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -296,13 +290,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -339,11 +331,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -363,13 +355,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     parameter_container = ParameterContainer(parameter_nodes=None)
@@ -406,11 +396,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -430,13 +420,11 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -476,12 +464,12 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -501,13 +489,11 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -547,19 +533,19 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -572,13 +558,11 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -618,19 +602,19 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 @pytest.mark.slow  # 1.18s
-def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -643,13 +627,11 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -689,19 +671,19 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -714,13 +696,11 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -760,19 +740,19 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -785,13 +765,11 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -831,19 +809,19 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -856,13 +834,11 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -892,7 +868,9 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -902,19 +880,19 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 @pytest.mark.slow  # 1.20s
-def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -927,13 +905,11 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -963,7 +939,9 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         parameters=parameters,
     )
 
-    condition: str = "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -973,19 +951,19 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
 
 
 @pytest.mark.slow  # 1.19s
-def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(
+def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -998,13 +976,11 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -1034,7 +1010,9 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         parameters=parameters,
     )
 
-    condition: str = "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -1044,19 +1022,19 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 @pytest.mark.slow  # 1.21s
-def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(
+def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(  # noqa: E501
     alice_columnar_table_single_batch_context,
 ):
     data_context = alice_columnar_table_single_batch_context
@@ -1069,13 +1047,11 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-        )
+    min_user_id_parameter: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_min_user_id",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
     )
 
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -1105,7 +1081,9 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         parameters=parameters,
     )
 
-    condition: str = "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0]<0"
+    condition: str = (
+        "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0]<0"
+    )
     max_value: str = "$variables.max_user_id"
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -1115,12 +1093,12 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None

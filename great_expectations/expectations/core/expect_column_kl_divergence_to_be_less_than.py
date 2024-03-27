@@ -46,17 +46,15 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import (
-    MetricsCalculator,
-    _MetricsDict,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (
         ValidationDependencies,
@@ -66,7 +64,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
+class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
     KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \
@@ -157,7 +155,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed \
         value will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json \
         parsers to crash when encountered. The python None token will be serialized to null in json.
-    """
+    """  # noqa: E501
 
     partition_object: Union[dict, None]
     threshold: Union[float, None]
@@ -196,15 +194,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(
-                configuration, execution_engine, runtime_configuration
-            )
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine, runtime_configuration
         )
+        configuration = self.configuration
         partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
@@ -226,11 +222,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # validation_dependencies, so we use a validator
                 #
+                from great_expectations.validator.metrics_calculator import (
+                    MetricsCalculator,
+                )
+
                 metrics_calculator = MetricsCalculator(
                     execution_engine=execution_engine,
                     show_progress_bars=True,
                 )
-                resolved_metrics: _MetricsDict
                 resolved_metrics, _ = metrics_calculator.compute_metrics(
                     metric_configurations=[partition_metric_configuration],
                     runtime_configuration=None,
@@ -251,9 +250,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     metric_value_kwargs=None,
                 )
                 #
-                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
-                # since we have already evaluated it, and its result is in the kwargs for the histogram.
-                # However, currently the validation_dependencies' configurations are not passed to the _validate method
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,  # noqa: E501
+                # since we have already evaluated it, and its result is in the kwargs for the histogram.  # noqa: E501
+                # However, currently the validation_dependencies' configurations are not passed to the _validate method  # noqa: E501
                 #
                 validation_dependencies.set_metric_configuration(
                     metric_name="column.partition",
@@ -288,9 +287,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     metric_name="column_values.nonnull.count",
                     metric_configuration=nonnull_configuration,
                 )
-        if is_categorical is True or is_valid_categorical_partition_object(
-            partition_object
-        ):
+        if is_categorical is True or is_valid_categorical_partition_object(partition_object):
             validation_dependencies.set_metric_configuration(
                 metric_name="column.value_counts",
                 metric_configuration=MetricConfiguration(
@@ -358,20 +355,18 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self._get_default_value("bucketize_data")
         )
         partition_object = configuration.kwargs.get(
             "partition_object", self._get_default_value("partition_object")
         )
-        threshold = configuration.kwargs.get(
-            "threshold", self._get_default_value("threshold")
-        )
+        threshold = configuration.kwargs.get("threshold", self._get_default_value("threshold"))
         tail_weight_holdout = configuration.kwargs.get(
             "tail_weight_holdout", self._get_default_value("tail_weight_holdout")
         )
@@ -381,11 +376,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         )
         if partition_object is None:
             if bucketize_data:
-                # in this case, we have requested a partition, histogram using said partition, and nonnull count
+                # in this case, we have requested a partition, histogram using said partition, and nonnull count  # noqa: E501
                 bins = list(metrics["column.partition"])
                 weights = list(
-                    np.array(metrics["column.histogram"])
-                    / metrics["column_values.nonnull.count"]
+                    np.array(metrics["column.histogram"]) / metrics["column_values.nonnull.count"]
                 )
                 tail_weights = (1 - sum(weights)) / 2
                 partition_object = {
@@ -405,12 +399,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         if not is_valid_partition_object(partition_object):
             raise ValueError("Invalid partition object.")
 
-        if threshold is not None and (
-            (not isinstance(threshold, (int, float))) or (threshold < 0)
-        ):
-            raise ValueError(
-                "Threshold must be specified, greater than or equal to zero."
-            )
+        if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")
 
         if (
             (not isinstance(tail_weight_holdout, (int, float)))
@@ -434,9 +424,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
-                raise ValueError(
-                    "Internal weight holdout cannot be used for discrete data."
-                )
+                raise ValueError("Internal weight holdout cannot be used for discrete data.")
 
             # Data are expected to be discrete, use value_counts
             observed_weights = (
@@ -461,9 +449,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 # Scale existing expected values
                 test_df["expected"] *= 1 - tail_weight_holdout
                 # Fill NAs with holdout.
-                qk = test_df["expected"].fillna(
-                    tail_weight_holdout / na_counts["expected"]
-                )
+                qk = test_df["expected"].fillna(tail_weight_holdout / na_counts["expected"])
             else:
                 qk = test_df["expected"]
 
@@ -500,7 +486,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
                 raise ValueError(
-                    "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "
+                    "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "  # noqa: E501
                     "parameter set to false."
                 )
             # Build the histogram first using expected bins so that the largest bin is >=
@@ -511,7 +497,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             below_partition = metrics["below_partition"]
             above_partition = metrics["above_partition"]
 
-            # Observed Weights is just the histogram values divided by the total number of observations
+            # Observed Weights is just the histogram values divided by the total number of observations  # noqa: E501
             observed_weights = hist / nonnull_count
 
             # Adjust expected_weights to account for tail_weight and internal_weight
@@ -530,12 +516,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 if zero_count > 0:
                     for index, value in enumerate(expected_weights):
                         if value == 0:
-                            expected_weights[index] = (
-                                internal_weight_holdout / zero_count
-                            )
+                            expected_weights[index] = internal_weight_holdout / zero_count
 
             # Assign tail weight holdout if applicable
-            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.
+            # We need to check cases to only add tail weight holdout if it makes sense based on the provided partition.  # noqa: E501
             if (partition_object["bins"][0] == -np.inf) and (
                 partition_object["bins"][-1]
             ) == np.inf:
@@ -545,7 +529,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     )
                 if "tail_weights" in partition_object:
                     raise ValueError(
-                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
                 # Remove -inf and inf
@@ -570,15 +554,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             elif partition_object["bins"][0] == -np.inf:
                 if "tail_weights" in partition_object:
                     raise ValueError(
-                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
                 # Remove -inf
                 expected_bins = partition_object["bins"][1:]
 
-                comb_expected_weights = np.concatenate(
-                    (expected_weights, [tail_weight_holdout])
-                )
+                comb_expected_weights = np.concatenate((expected_weights, [tail_weight_holdout]))
                 # Set aside left tail weight and holdout
                 expected_tail_weights = np.concatenate(
                     ([expected_weights[0]], [tail_weight_holdout])
@@ -605,15 +587,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             elif partition_object["bins"][-1] == np.inf:
                 if "tail_weights" in partition_object:
                     raise ValueError(
-                        "There can be no tail weights for partitions with one or both endpoints at infinity"
+                        "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
                 # Remove inf
                 expected_bins = partition_object["bins"][:-1]
 
-                comb_expected_weights = np.concatenate(
-                    ([tail_weight_holdout], expected_weights)
-                )
+                comb_expected_weights = np.concatenate(([tail_weight_holdout], expected_weights))
                 # Set aside right tail weight and holdout
                 expected_tail_weights = np.concatenate(
                     ([tail_weight_holdout], [expected_weights[-1]])
@@ -670,11 +650,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 )
                 # Tail weights are just the counts on either side of the partition
                 observed_tail_weights = (
-                    np.concatenate(([below_partition], [above_partition]))
-                    / nonnull_count
+                    np.concatenate(([below_partition], [above_partition])) / nonnull_count
                 )
 
-                # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.
+                # Main expected_weights and main observed weights had no tail_weights, so nothing needs to be removed.  # noqa: E501
 
             # TODO: VERIFY THAT THIS STILL WORKS BASED ON CHANGE TO HIST
             # comb_expected_weights = np.array(comb_expected_weights).astype(float)
@@ -698,7 +677,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     "observed_value": observed_value,
                     "details": {
                         "observed_partition": {
-                            # return expected_bins, since we used those bins to compute the observed_weights
+                            # return expected_bins, since we used those bins to compute the observed_weights  # noqa: E501
                             "bins": expected_bins,
                             "weights": observed_weights.tolist(),
                             "tail_weights": observed_tail_weights.tolist(),
@@ -715,7 +694,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(cls, partition_object, header=None):  # noqa: PLR0912
+    def _get_kl_divergence_chart(  # noqa: PLR0912,C901 - 13
+        cls, partition_object, header=None
+    ):
         weights = partition_object["weights"]
 
         if len(weights) > 60:  # noqa: PLR2004
@@ -778,9 +759,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 bars = (
                     alt.Chart(df)
                     .mark_bar()
-                    .encode(
-                        x="values:N", y="fraction:Q", tooltip=["values", "fraction"]
-                    )
+                    .encode(x="values:N", y="fraction:Q", tooltip=["values", "fraction"])
                     .properties(width=chart_pixel_width, height=400, autosize="fit")
                 )
                 chart = bars.to_dict()
@@ -821,7 +800,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         return expected_distribution
 
     @classmethod
-    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:  # noqa: C901 - too complex
         weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
@@ -867,9 +846,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             chart = bars.to_dict()
         elif partition_object.get("values"):
-            is_boolean_list = all(
-                isinstance(value, bool) for value in partition_object["values"]
-            )
+            is_boolean_list = all(isinstance(value, bool) for value in partition_object["values"])
             if is_boolean_list:
                 values = [str(value) for value in partition_object["values"]]
             else:
@@ -912,9 +889,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                     )
         else:
             values = partition_object["values"]
-            table_rows = [
-                [value, num_to_str(fractions[idx])] for idx, value in enumerate(values)
-            ]
+            table_rows = [[value, num_to_str(fractions[idx])] for idx, value in enumerate(values)]
 
         if header:
             return {
@@ -1041,9 +1016,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        expected_partition_object = renderer_configuration.kwargs.get(
-            "partition_object", {}
-        )
+        expected_partition_object = renderer_configuration.kwargs.get("partition_object", {})
         weights = expected_partition_object.get("weights", [])
 
         # generate template string for header
@@ -1051,7 +1024,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             template_str = "can match any distribution."
         else:
             template_str = (
-                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "  # noqa: E501
                 "lower than $threshold."
             )
 
@@ -1169,12 +1142,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             template_str = "can match any distribution."
         else:
             template_str = (
-                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "  # noqa: E501
                 "lower than $threshold."
             )
-            expected_distribution = cls._get_kl_divergence_chart(
-                params.get("partition_object")
-            )
+            expected_distribution = cls._get_kl_divergence_chart(params.get("partition_object"))
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -1204,9 +1175,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        observed_partition_object = result.result.get("details", {}).get(
-            "observed_partition", {}
-        )
+        observed_partition_object = result.result.get("details", {}).get("observed_partition", {})
         weights = observed_partition_object.get("weights", [])
 
         observed_value = (
@@ -1276,7 +1245,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
             header_template_str,
             header_params_with_json_schema,
             chart,
-            chart_container_col_width,
+            _chart_container_col_width,
             distribution_table_header_row,
             distribution_table_rows,
         ) = cls._atomic_diagnostic_observed_value_template(
@@ -1386,9 +1355,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": "Histogram",
-                    "tooltip": {
-                        "content": "expect_column_kl_divergence_to_be_less_than"
-                    },
+                    "tooltip": {"content": "expect_column_kl_divergence_to_be_less_than"},
                     "tag": "h6",
                 },
             }

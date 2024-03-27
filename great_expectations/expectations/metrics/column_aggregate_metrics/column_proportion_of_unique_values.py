@@ -1,7 +1,8 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -17,6 +18,11 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+
 
 def unique_proportion(_metrics):
     """Computes the proportion of unique non-null values out of all non-null values"""
@@ -26,7 +32,7 @@ def unique_proportion(_metrics):
         f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
 
-    # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
+    # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)  # noqa: E501
     if total_values > 0 and total_values != null_count:
         return unique_values / (total_values - null_count)
     else:

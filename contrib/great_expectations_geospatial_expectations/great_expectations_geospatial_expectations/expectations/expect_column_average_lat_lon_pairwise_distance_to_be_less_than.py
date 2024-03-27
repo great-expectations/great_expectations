@@ -5,7 +5,6 @@ import numpy as np
 from scipy.spatial.distance import pdist
 from sklearn.metrics.pairwise import haversine_distances
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
@@ -140,13 +139,12 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnAggregateExpec
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         distance = metrics.get("column.average_lat_lon_pairwise_distance")
-        max_distance = self.get_success_kwargs(configuration).get("max_distance")
+        max_distance = self._get_success_kwargs().get("max_distance")
         success = distance < max_distance
         return {"success": success, "result": {"observed_value": distance}}
 

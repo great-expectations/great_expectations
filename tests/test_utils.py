@@ -113,7 +113,8 @@ def create_files_in_directory(
 
     for subdirectory in subdirectories:
         os.makedirs(  # noqa: PTH103
-            os.path.join(directory, subdirectory), exist_ok=True  # noqa: PTH118
+            os.path.join(directory, subdirectory),  # noqa: PTH118
+            exist_ok=True,
         )
 
     for file_name in file_name_list:
@@ -184,7 +185,7 @@ def build_tuple_filesystem_store_backend(
 ) -> StoreBackend:
     logger.debug(
         f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
-"{base_directory}"""
+"{base_directory}"""  # noqa: E501
     )
     store_backend_config: dict = {
         "module_name": module_name,
@@ -205,9 +206,7 @@ def build_checkpoint_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> CheckpointStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -238,9 +237,7 @@ def build_profiler_store_using_filesystem(
     overwrite_existing: bool = False,
 ) -> ProfilerStore:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     store = build_profiler_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
@@ -258,9 +255,7 @@ def save_config_to_filesystem(
     configuration: BaseYamlConfig,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     save_config_to_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -279,9 +274,7 @@ def load_config_from_filesystem(
     configuration_key: str,
 ) -> BaseYamlConfig:
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     return load_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -308,7 +301,7 @@ def build_configuration_store(
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
         raise gx_exceptions.DataContextError(
-            "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
+            "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."  # noqa: E501
         )
 
     store_backend.update(**kwargs)
@@ -450,9 +443,7 @@ def delete_config_from_filesystem(
     configuration_key: str,
 ):
     store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
     delete_config_from_store_backend(
         class_name=configuration_store_class_name,
         module_name=configuration_store_module_name,
@@ -504,7 +495,7 @@ def get_bigquery_table_prefix() -> str:
 
     Returns:
         String of table prefix, which is the gcp_project and dataset concatenated by a "."
-    """
+    """  # noqa: E501
     gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
     if not gcp_project:
         raise ValueError(
@@ -556,7 +547,7 @@ def load_and_concatenate_csvs(
 
     Returns:
         A pandas dataframe concatenating data loaded from all csvs.
-    """
+    """  # noqa: E501
 
     if convert_column_names_to_datetime is None:
         convert_column_names_to_datetime = []
@@ -570,7 +561,7 @@ def load_and_concatenate_csvs(
             df=df, column_names_to_convert=convert_column_names_to_datetime
         )
         if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
+            # Improving test performance by only loading the first 10 rows of our test data into the db  # noqa: E501
             df = df.head(10)
 
         dfs.append(df)
@@ -586,7 +577,7 @@ def convert_string_columns_to_datetime(
     """
     Converts specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
     Side-effect: Passed DataFrame is modified (in-place).
-    """
+    """  # noqa: E501
     if column_names_to_convert is None:
         column_names_to_convert = []
 
@@ -595,7 +586,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(  # noqa: PLR0912, PLR0915
+def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,
@@ -625,7 +616,7 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
         drop_existing_table: boolean value. If set to false, will append to existing table
     Returns:
         LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
-    """
+    """  # noqa: E501
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
     elif csv_path and not csv_paths:
@@ -646,13 +637,13 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
         engine = sa.create_engine(connection_string)
     else:
         logger.debug(
-            "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
+            "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "  # noqa: E501
             "install optional sqlalchemy dependency for support."
         )
         return return_value
 
     if engine.dialect.name.lower().startswith("mysql"):
-        # Don't attempt to DROP TABLE IF EXISTS on a table that doesn't exist in mysql because it will error
+        # Don't attempt to DROP TABLE IF EXISTS on a table that doesn't exist in mysql because it will error  # noqa: E501
         inspector = inspect(engine)
         db_name = connection_string.split("/")[-1]
         table_names = [name for name in inspector.get_table_names(schema=db_name)]
@@ -674,10 +665,10 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
             )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
-            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
         finally:
             connection.close()
@@ -690,9 +681,7 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
                     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
-                print(
-                    f"Adding to existing table {table_name} and adding data from {csv_paths}"
-                )
+                print(f"Adding to existing table {table_name} and adding data from {csv_paths}")
 
             with engine.connect() as connection:
                 add_dataframe_to_db(
@@ -706,10 +695,10 @@ def load_data_into_test_database(  # noqa: PLR0912, PLR0915
                 )
             return return_value
         except SQLAlchemyError:
-            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
             logger.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
-            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
         finally:
             if connection:
@@ -728,7 +717,7 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
         dataframe (pd.DataFrame): DataFrame to load
         table_name (str): table to load DataFrame to. Prefix containing project and dataset are loaded
                         by helper function.
-    """
+    """  # noqa: E501
     prefix: str = get_bigquery_table_prefix()
     table_id: str = f"""{prefix}.{table_name}"""
     from google.cloud import bigquery
@@ -827,9 +816,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
 
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        execution_engine.execute_query_in_transaction(
-            sa.text(f"DROP TABLE IF EXISTS {table_name}")
-        )
+        execution_engine.execute_query_in_transaction(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
@@ -862,12 +849,12 @@ def check_athena_table_count(
 ) -> bool:
     """
     Helper function used by awsathena integration test. Checks whether expected number of tables exist in database
-    """
+    """  # noqa: E501
     if sa:
         engine = sa.create_engine(connection_string)
     else:
         logger.debug(
-            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
+            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "  # noqa: E501
             "install optional sqlalchemy dependency for support."
         )
         return False
@@ -878,10 +865,10 @@ def check_athena_table_count(
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError:
-        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
         logger.error(error_message)
         raise gx_exceptions.DatabaseConnectionError(error_message)
-        # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+        # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
         # sensitive information does not make it into our CI logs.
     finally:
         connection.close()
@@ -896,7 +883,7 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine = sa.create_engine(connection_string)
     else:
         logger.debug(
-            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
+            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "  # noqa: E501
             "install optional sqlalchemy dependency for support."
         )
         return
@@ -944,7 +931,7 @@ def get_default_mssql_url() -> str:
         String of default connection to Docker container
     """
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
+    connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"  # noqa: E501
     return connection_string
 
 
@@ -957,7 +944,7 @@ def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     athena_db_name: str = os.getenv(db_name_env_var)
     if not athena_db_name:
         raise ValueError(
-            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"  # noqa: E501
         )
     return athena_db_name
 
@@ -972,7 +959,7 @@ def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str
     ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
     if not ATHENA_STAGING_S3:
         raise ValueError(
-            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"  # noqa: E501
         )
 
     return f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
@@ -999,7 +986,9 @@ def get_connection_string_and_dialect(
     return dialect, connection_string
 
 
-def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
+def find_strings_in_nested_obj(  # noqa: C901 - 14
+    obj: Any, target_strings: List[str]
+) -> bool:
     """Recursively traverse a nested structure to find all strings in an input string.
 
     Args:
@@ -1012,7 +1001,7 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
 
     strings: Set[str] = set(target_strings)
 
-    def _find_string(data: Any) -> bool:
+    def _find_string(data: Any) -> bool:  # noqa: C901
         if isinstance(data, list):
             for val in data:
                 if _find_string(val):

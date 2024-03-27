@@ -6,9 +6,8 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import project_manager
+from great_expectations import project_manager, set_context
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -28,6 +27,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 class DatasourceStoreSpy(DatasourceStore):
@@ -88,16 +90,17 @@ class CheckpointStoreSpy(CheckpointStore):
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
     Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
         project_config: DataContextConfig,
     ) -> None:
+        # expectation store is required for initializing the base DataContext
+        self._expectations_store = ExpectationsStoreSpy()
         super().__init__(project_config)
         self.save_count = 0
         self._datasource_store = DatasourceStoreSpy()
-        self._expectations_store = ExpectationsStoreSpy()
         self._checkpoint_store = CheckpointStoreSpy()
 
     @property
@@ -140,6 +143,7 @@ def in_memory_data_context(
         fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
     context.datasources.update(fluent_datasources)
+    set_context(context)
     return context
 
 
@@ -209,9 +213,7 @@ def test_delete_store_failure(in_memory_data_context: EphemeralDataContextSpy):
             DataContextConfig(progress_bars=ProgressBarsConfig(globally=True)),
             id="DataContextConfig",
         ),
-        pytest.param(
-            {"progress_bars": ProgressBarsConfig(globally=True)}, id="Mapping"
-        ),
+        pytest.param({"progress_bars": ProgressBarsConfig(globally=True)}, id="Mapping"),
     ],
 )
 def test_update_project_config(
@@ -259,7 +261,7 @@ def test_add_datasource_with_existing_datasource(
     "datasource, datasource_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_datasource",
             "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
@@ -274,7 +276,7 @@ def test_add_datasource_with_existing_datasource(
 )
 def test_add_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,
+    datasource: mock.MagicMock | None,  # noqa: TID251
     datasource_name: str | None,
     error_message: str,
 ):
@@ -302,13 +304,13 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
     if isinstance(parametrized_datasource_configs, DatasourceConfig):
         config_dict = parametrized_datasource_configs.to_dict()
         config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
-        config_dict["data_connectors"]["tripdata_monthly_configured"][
-            "base_directory"
-        ] = new_base_directory
+        config_dict["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
+            new_base_directory
+        )
         datasource = context.add_or_update_datasource(**config_dict)
-        datasource.config["data_connectors"]["tripdata_monthly_configured"][
-            "base_directory"
-        ] = new_base_directory
+        datasource.config["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
+            new_base_directory
+        )
 
         assert context.datasource_store.save_count == 1
     else:
@@ -320,7 +322,7 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
             datasource = context.add_or_update_datasource(**config_dict)
         datasource.base_directory = new_base_directory
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
@@ -367,11 +369,9 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
         with mock.patch(
             "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
         ):
-            persisted_datasource = context.add_or_update_datasource(
-                datasource=datasource
-            )
+            persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
         assert datasource == persisted_datasource
@@ -420,15 +420,13 @@ def test_add_or_update_datasource_adds_successfully(
     else:
         parametrized_datasource_configs["name"] = datasource_name
         if use_existing_datasource:
-            ds_type = _SourceFactories.type_lookup[
-                parametrized_datasource_configs["type"]
-            ]
+            ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
             datasource = ds_type(**parametrized_datasource_configs)
             _ = context.add_or_update_datasource(datasource=datasource)
         else:
             _ = context.add_or_update_datasource(**parametrized_datasource_configs)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
@@ -442,7 +440,7 @@ def test_add_or_update_datasource_adds_successfully(
     "datasource, datasource_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_datasource",
             "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
@@ -457,7 +455,7 @@ def test_add_or_update_datasource_adds_successfully(
 )
 def test_add_or_update_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,
+    datasource: mock.MagicMock | None,  # noqa: TID251
     datasource_name: str | None,
     error_message: str,
 ):
@@ -493,7 +491,7 @@ def test_add_expectation_suite_success(
                 kwargs={"column": "x", "value_set": [1, 2, 4]},
             ),
         ],
-        expectation_suite_name="default",
+        name="default",
         meta={"great_expectations_version": "0.15.44"},
     )
 
@@ -539,39 +537,14 @@ def test_add_expectation_suite_conflicting_args_failure(
     context = in_memory_data_context
     project_manager.set_project(context)
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
 
     with pytest.raises(TypeError):
-        context.add_expectation_suite(
-            expectation_suite=suite, expectation_suite_name=suite_name
-        )
+        context.add_expectation_suite(expectation_suite=suite, expectation_suite_name=suite_name)
 
     assert context.expectations_store.save_count == 0
-
-
-@pytest.mark.unit
-def test_update_expectation_suite_success(
-    in_memory_data_context: EphemeralDataContextSpy,
-):
-    context = in_memory_data_context
-
-    suite_name = "default"
-    suite = context.add_expectation_suite(suite_name)
-
-    assert context.expectations_store.save_count == 1
-
-    suite.expectation_configurations = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
-            kwargs={"column": "x", "value_set": [1, 2, 4]},
-        ),
-    ]
-    updated_suite = context.update_expectation_suite(suite)
-
-    assert updated_suite.expectation_configurations == suite.expectation_configurations
-    assert context.expectations_store.save_count == 2
 
 
 @pytest.mark.unit
@@ -581,14 +554,12 @@ def test_update_expectation_suite_failure(
     context = in_memory_data_context
 
     suite_name = "my_brand_new_suite"
-    suite = ExpectationSuite(expectation_suite_name=suite_name)
+    suite = ExpectationSuite(name=suite_name)
 
     with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
 
-    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(
-        e.value
-    )
+    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(e.value)
 
 
 @pytest.mark.unit
@@ -631,7 +602,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
                         kwargs={"column": "x", "value_set": [1, 2, 4]},
                     ),
                 ],
-                expectation_suite_name="default",
+                name="default",
                 meta={"great_expectations_version": "0.15.44"},
             ),
         },
@@ -650,7 +621,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
 
     suite = context.add_or_update_expectation_suite(**kwargs)
 
-    assert suite.expectation_suite_name == expectation_suite_name
+    assert suite.name == expectation_suite_name
     assert suite.expectation_configurations == expectations
     assert suite.meta == meta
     assert context.expectations_store.save_count == 1
@@ -723,7 +694,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
     project_manager.set_project(in_memory_data_context)
 
     if use_suite:
-        suite = ExpectationSuite(expectation_suite_name="default")
+        suite = ExpectationSuite(name="default")
     else:
         suite = None
     context = in_memory_data_context
@@ -771,7 +742,7 @@ def test_add_checkpoint_namespace_collision(
     "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_checkpoint_name",
             "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
@@ -787,7 +758,7 @@ def test_add_checkpoint_namespace_collision(
 def test_add_checkpoint_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
-    checkpoint: mock.MagicMock | None,
+    checkpoint: mock.MagicMock | None,  # noqa: TID251
     checkpoint_name: str | None,
     error_message: str,
 ):
@@ -821,12 +792,6 @@ def test_update_checkpoint_success(
             "name": "store_validation_result",
             "action": {
                 "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
             },
         },
         {
@@ -868,7 +833,6 @@ def test_add_or_update_checkpoint_adds_successfully(
     context = in_memory_data_context
 
     if use_existing_checkpoint:
-        checkpoint_config.pop("class_name")
         checkpoint = Checkpoint(**checkpoint_config, data_context=context)
         checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
     else:
@@ -877,10 +841,7 @@ def test_add_or_update_checkpoint_adds_successfully(
     actual_config = checkpoint.config
 
     assert actual_config.name == checkpoint_config["name"]
-    assert (
-        actual_config.expectation_suite_name
-        == checkpoint_config["expectation_suite_name"]
-    )
+    assert actual_config.expectation_suite_name == checkpoint_config["expectation_suite_name"]
     actual_validations = [v.to_dict() for v in actual_config.validations]
     assert actual_validations == checkpoint_config["validations"]
     assert context.checkpoint_store.save_count == 1
@@ -894,26 +855,22 @@ def test_add_or_update_checkpoint_adds_successfully(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "module_name": "great_expectations.checkpoint",
-                "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
                     {
                         "name": None,
                         "id": None,
                         "expectation_suite_name": "taxi.demo_pass",
-                        "expectation_suite_ge_cloud_id": None,
+                        "expectation_suite_id": None,
                         "batch_request": None,
                     },
                     {
                         "name": None,
                         "id": None,
                         "expectation_suite_name": None,
-                        "expectation_suite_ge_cloud_id": None,
+                        "expectation_suite_id": None,
                         "batch_request": {
                             "datasource_name": "oss_test_datasource",
                             "data_connector_name": "oss_test_data_connector",
@@ -926,27 +883,23 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "evaluation_parameters": {},
                     "expectation_suite_name": "oss_test_expectation_suite",
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
                         {
                             "name": None,
                             "id": None,
                             "expectation_suite_name": "taxi.demo_pass",
-                            "expectation_suite_ge_cloud_id": None,
+                            "expectation_suite_id": None,
                             "batch_request": None,
                         },
                         {
                             "name": None,
                             "id": None,
                             "expectation_suite_name": None,
-                            "expectation_suite_ge_cloud_id": None,
+                            "expectation_suite_id": None,
                             "batch_request": {
                                 "datasource_name": "oss_test_datasource",
                                 "data_connector_name": "oss_test_data_connector",
@@ -960,9 +913,6 @@ def test_add_or_update_checkpoint_adds_successfully(
         ),
         pytest.param(
             {
-                "class_name": "Checkpoint",
-                "module_name": "great_expectations.checkpoint",
-                "config_version": 1.0,
                 "validations": [],
                 "evaluation_parameters": {
                     "environment": "$GE_ENVIRONMENT",
@@ -975,8 +925,6 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "class_name": "Checkpoint",
-                    "config_version": 1.0,
                     "evaluation_parameters": {
                         "environment": "$GE_ENVIRONMENT",
                         "tolerance": 1.0e-2,
@@ -984,9 +932,7 @@ def test_add_or_update_checkpoint_adds_successfully(
                         "aux_param_1": "1 + $MY_PARAM",
                     },
                     "expectation_suite_name": None,
-                    "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
-                    "profilers": [],
                     "runtime_configuration": {},
                     "validations": [],
                 }
@@ -1025,12 +971,11 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     name = "my_checkpoint"
     checkpoint_config["name"] = name
 
-    checkpoint = context.add_checkpoint(name=name, class_name="Checkpoint")
+    checkpoint = context.add_checkpoint(name=name)
 
     assert len(checkpoint.validations) == 0
     assert context.checkpoint_store.save_count == 1
 
-    checkpoint_config.pop("class_name")
     checkpoint = Checkpoint(**checkpoint_config, data_context=context)
     checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
 
@@ -1043,7 +988,7 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
-            mock.MagicMock(),
+            mock.MagicMock(),  # noqa: TID251
             "my_checkpoint_name",
             "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
@@ -1059,7 +1004,7 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
 def test_add_or_update_checkpoint_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
-    checkpoint: mock.MagicMock | None,
+    checkpoint: mock.MagicMock | None,  # noqa: TID251
     checkpoint_name: str | None,
     error_message: str,
 ):

@@ -4,7 +4,6 @@ from typing import Optional
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import (
@@ -14,6 +13,9 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -51,18 +53,14 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                     return False
             return True
 
-        return column.apply(
-            not_contain_special_character, args=(list(string.punctuation))
-        )
+        return column.apply(not_contain_special_character, args=(list(string.punctuation)))
 
     # This method defines the business logic for evaluating the metric when using a SparkExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
             special_characters = [
-                char
-                for char in list(string.punctuation)
-                if char not in allowed_characters
+                char for char in list(string.punctuation) if char not in allowed_characters
             ]
 
             for c in special_characters:

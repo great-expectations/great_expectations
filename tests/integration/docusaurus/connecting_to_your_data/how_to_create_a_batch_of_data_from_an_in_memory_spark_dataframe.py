@@ -5,6 +5,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
@@ -14,18 +15,14 @@ yaml = YAMLHandler()
 context = gx.get_context()
 # </snippet>
 
-spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_application()
+spark_session: pyspark.SparkSession = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py create_expectation_suite">
-context.add_expectation_suite(
-    expectation_suite_name="insert_your_expectation_suite_name_here"
-)
+context.add_expectation_suite(expectation_suite_name="insert_your_expectation_suite_name_here")
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_expectation_suite">
-suite: ExpectationSuite = context.get_expectation_suite(
-    expectation_suite_name="insert_your_expectation_suite_name_here"
-)
+suite: ExpectationSuite = context.suites.get(name="insert_your_expectation_suite_name_here")
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py datasource_yaml">
 datasource_yaml = """
@@ -51,9 +48,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 path_to_file: str = "some_path.csv"
 # </snippet>
 # Please note this override is only to provide good UX for docs and tests.
-path_to_file: str = file_relative_path(
-    __file__, "data/yellow_tripdata_sample_2019-01.csv"
-)
+path_to_file: str = file_relative_path(__file__, "data/yellow_tripdata_sample_2019-01.csv")
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py pyspark_df">
 df: pyspark.DataFrame = spark_session.read.csv(path_to_file)
 # </snippet>
@@ -71,9 +66,7 @@ runtime_batch_request = RuntimeBatchRequest(
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
-path_to_file: str = file_relative_path(
-    __file__, "data/yellow_tripdata_sample_2019-01.csv"
-)
+path_to_file: str = file_relative_path(__file__, "data/yellow_tripdata_sample_2019-01.csv")
 
 # RuntimeBatchRequest with path
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request_2">

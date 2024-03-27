@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -64,11 +63,9 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
     ):
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
@@ -220,22 +217,19 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        run_date_str = self.get_success_kwargs(configuration).get("run_date")
+        run_date_str = self._get_success_kwargs().get("run_date")
 
         run_date = datetime.strptime(run_date_str, date_format)
 
-        threshold = float(self.get_success_kwargs(configuration).get("threshold"))
+        threshold = float(self._get_success_kwargs().get("threshold"))
 
         days_ago_dict = get_days_ago_dict(run_date)
 
-        equivalent_previous_days: List[datetime] = [
-            days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
-        ]
+        equivalent_previous_days: List[datetime] = [days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS]
 
         assert min(equivalent_previous_days) > (
             datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)
@@ -248,9 +242,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
             metrics, run_date_str, equivalent_previous_days
         )
         run_date_count: int = day_counts_dict[run_date_str]
-        diff_fraction = get_diff_fraction(
-            run_date_count, day_counts_dict, equivalent_previous_days
-        )
+        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, equivalent_previous_days)
 
         if diff_fraction > threshold:
             msg = (

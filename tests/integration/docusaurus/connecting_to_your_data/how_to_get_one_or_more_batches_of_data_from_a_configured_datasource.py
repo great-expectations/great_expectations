@@ -46,9 +46,7 @@ batch_request = BatchRequest(
 # </snippet>
 # NOTE: The following assertion is only for testing and can be ignored by users.
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 assert len(validator.batches) == 36
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py index data_connector_query">
@@ -141,9 +139,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py get_validator">
 # Now we can review a sample of data using a Validator
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py print(validator.batches)">
 print(validator.batches)
@@ -164,10 +160,7 @@ row_count = validator.get_metric(
 )
 assert row_count == 10000
 
-assert (
-    validator.active_batch.batch_definition.batch_identifiers["name"]
-    == "yellow_tripdata_sample"
-)
+assert validator.active_batch.batch_definition.batch_identifiers["name"] == "yellow_tripdata_sample"
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
         "group_name_from_your_data_connector_eg_year"
@@ -182,9 +175,7 @@ assert (
 )
 
 assert isinstance(validator, gx.validator.validator.Validator)
-assert "insert_your_datasource_name_here" in [
-    ds["name"] for ds in context.list_datasources()
-]
+assert "insert_your_datasource_name_here" in [ds["name"] for ds in context.list_datasources()]
 assert "insert_your_data_asset_name_here" in set(
     context.get_available_data_asset_names()["insert_your_datasource_name_here"][
         "insert_your_data_connector_name_here"

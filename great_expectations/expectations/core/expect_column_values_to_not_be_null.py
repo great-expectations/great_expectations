@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -11,6 +10,9 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    parse_result_format,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -31,10 +33,12 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -74,7 +78,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
-    """
+    """  # noqa: E501
 
     library_metadata: ClassVar[dict] = {
         "maturity": "production",
@@ -105,13 +109,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = (
-                "values must not be null, at least $mostly_pct % of the time."
-            )
+            template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must never be null."
 
@@ -143,17 +145,15 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
-                template_str = "$column values must not be null, at least $mostly_pct % of the time."
-            else:
                 template_str = (
-                    "values must not be null, at least $mostly_pct % of the time."
+                    "$column values must not be null, at least $mostly_pct % of the time."
                 )
+            else:
+                template_str = "values must not be null, at least $mostly_pct % of the time."
         else:  # noqa: PLR5501
             if include_column_name:
                 template_str = "$column values must never be null."
@@ -193,10 +193,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         try:
             null_percent = result_dict["unexpected_percent"]
-            return (
-                num_to_str(100 - null_percent, precision=5, use_locale=True)
-                + "% not null"
-            )
+            return num_to_str(100 - null_percent, precision=5, use_locale=True) + "% not null"
         except KeyError:
             return "unknown % not null"
         except TypeError:
@@ -204,9 +201,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         return "--"
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW)
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -224,8 +219,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                 },
             ),
             result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
+            if "unexpected_count" in result.result and result.result["unexpected_count"] is not None
             else "--",
         ]
 
@@ -258,15 +252,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get("mostly")
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
+        mostly = self._get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

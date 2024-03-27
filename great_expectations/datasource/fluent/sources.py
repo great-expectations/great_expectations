@@ -21,8 +21,8 @@ from typing import (
     Union,
 )
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -57,9 +57,7 @@ class _FieldDetails(NamedTuple):
     type_annotation: Type
 
 
-def _get_field_details(
-    model: Type[pydantic.BaseModel], field_name: str
-) -> _FieldDetails:
+def _get_field_details(model: Type[pydantic.BaseModel], field_name: str) -> _FieldDetails:
     """Get the default value of the requested field and its type annotation."""
     return _FieldDetails(
         default_value=model.__fields__[field_name].default,
@@ -113,7 +111,7 @@ class _SourceFactories:
         >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
-        """
+        """  # noqa: E501
 
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
         ds_type_name = _get_field_details(ds_type, "type").default_value
@@ -123,7 +121,7 @@ class _SourceFactories:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:  # noqa: E501
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -179,9 +177,7 @@ class _SourceFactories:
         )
 
     @classmethod
-    def _register_add_or_update_datasource(
-        cls, ds_type: Type[Datasource], ds_type_name: str
-    ):
+    def _register_add_or_update_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
         method_name = f"add_or_update_{ds_type_name}"
 
         def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
@@ -236,7 +232,7 @@ class _SourceFactories:
         for t in asset_types:
             if t.__name__.startswith("_"):
                 logger.debug(
-                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
+                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"  # noqa: E501
                 )
                 continue
             try:
@@ -246,12 +242,12 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
+                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"  # noqa: E501
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
                 raise TypeRegistrationError(
-                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
+                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",  # noqa: E501
                 ) from bad_field_exc
 
             cls._bind_asset_factory_method_if_not_present(ds_type, t, asset_type_name)
@@ -268,18 +264,16 @@ class _SourceFactories:
 
         if not asset_factory_defined:
             logger.debug(
-                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
+                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."  # noqa: E501
             )
 
-            def _add_asset_factory(
-                self: Datasource, name: str, **kwargs
-            ) -> pydantic.BaseModel:
+            def _add_asset_factory(self: Datasource, name: str, **kwargs) -> pydantic.BaseModel:
                 # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
                 if self.data_connector_type:
                     logger.info(
-                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"
+                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"  # noqa: E501
                     )
                     connect_options = {
                         k: v
@@ -288,7 +282,7 @@ class _SourceFactories:
                     }
                     if connect_options:
                         logger.info(
-                            f"{self.data_connector_type.__name__} connect_options provided -> {list(connect_options.keys())}"
+                            f"{self.data_connector_type.__name__} connect_options provided -> {list(connect_options.keys())}"  # noqa: E501
                         )
                         for k in connect_options:  # TODO: avoid this extra loop
                             kwargs.pop(k)
@@ -343,16 +337,14 @@ class _SourceFactories:
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
-            return self._data_context.sources.add_pandas(
-                name=DEFAULT_PANDAS_DATASOURCE_NAME
-            )
+            return self._data_context.sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource
 
         raise DefaultPandasDatasourceError(
-            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
-            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
+            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '  # noqa: E501
+            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."  # noqa: E501
         )
 
     @property
@@ -366,9 +358,7 @@ class _SourceFactories:
             current_datasource = self._data_context.get_datasource(name)
         except ValueError as e:
             if raise_if_none:
-                raise ValueError(
-                    f"There is no datasource {name} in the data context."
-                ) from e
+                raise ValueError(f"There is no datasource {name} in the data context.") from e
             current_datasource = None
         if current_datasource and not isinstance(current_datasource, datasource_type):
             raise ValueError(
@@ -394,9 +384,7 @@ class _SourceFactories:
             datasource = name_or_datasource
         elif name_or_datasource is None and "datasource" in kwargs:
             if len(kwargs) != 1:
-                raise ValueError(
-                    f"The datasource must be the sole argument. We received: {kwargs}"
-                )
+                raise ValueError(f"The datasource must be the sole argument. We received: {kwargs}")
             datasource = kwargs["datasource"]
         if datasource and not isinstance(datasource, datasource_type):
             raise ValueError(
@@ -433,14 +421,8 @@ class _SourceFactories:
         if new_datasource:
             return new_datasource
         if (
-            name_or_datasource
-            and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"  # noqa: PLR0133
-        ) or (
-            name_or_datasource is None
-            and "name" in kwargs
-            and isinstance(kwargs["name"], str)
-        ):
+            name_or_datasource and isinstance(name_or_datasource, str) and "name" not in "kwargs"  # noqa: PLR0133
+        ) or (name_or_datasource is None and "name" in kwargs and isinstance(kwargs["name"], str)):
             return None
         raise ValueError(
             "A datasource object or a name string must be present. The datasource or "
@@ -459,9 +441,7 @@ class _SourceFactories:
         ) -> Datasource:
             # Because of the precedence of `or` and `if`, these grouping paranthesis are necessary.
             datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
+                self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)
             ) or (
                 datasource_type(name=name_or_datasource, **kwargs)
                 if name_or_datasource
@@ -496,9 +476,7 @@ class _SourceFactories:
             from great_expectations.datasource.fluent.interfaces import Datasource
 
             updated_datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
+                self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)
             ) or (
                 datasource_type(name=name_or_datasource, **kwargs)
                 if name_or_datasource
@@ -521,9 +499,7 @@ class _SourceFactories:
 
             updated_datasource._data_context = self._data_context
             updated_datasource.test_connection()
-            return_obj = self._data_context._update_fluent_datasource(
-                datasource=updated_datasource
-            )
+            return_obj = self._data_context._update_fluent_datasource(datasource=updated_datasource)
             assert isinstance(return_obj, Datasource)
             return return_obj
 
@@ -549,20 +525,16 @@ class _SourceFactories:
             from great_expectations.datasource.fluent.interfaces import Datasource
 
             new_datasource = (
-                self._datasource_passed_in(
-                    datasource_type, name_or_datasource, **kwargs
-                )
+                self._datasource_passed_in(datasource_type, name_or_datasource, **kwargs)
             ) or (
                 datasource_type(name=name_or_datasource, **kwargs)
                 if name_or_datasource
                 else datasource_type(**kwargs)
             )
 
-            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
+            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg  # noqa: E501
             datasource_name: str = new_datasource.name
-            logger.debug(
-                f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
-            )
+            logger.debug(f"Adding or updating {datasource_type.__name__} with '{datasource_name}'")
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False
             )
@@ -577,13 +549,9 @@ class _SourceFactories:
             new_datasource._data_context = self._data_context
             new_datasource.test_connection()
             if datasource_name in self._data_context.datasources:
-                return_obj = self._data_context._update_fluent_datasource(
-                    datasource=new_datasource
-                )
+                return_obj = self._data_context._update_fluent_datasource(datasource=new_datasource)
             else:
-                return_obj = self._data_context._add_fluent_datasource(
-                    datasource=new_datasource
-                )
+                return_obj = self._data_context._add_fluent_datasource(datasource=new_datasource)
             assert isinstance(return_obj, Datasource)
             return return_obj
 
@@ -637,7 +605,7 @@ class _SourceFactories:
             elif crud_method_type == CrudMethodType.DELETE:
                 # deprecated-v0.17.2
                 warnings.warn(
-                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",
+                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",  # noqa: E501
                     DeprecationWarning,
                 )
                 return self.create_delete_crud_method(datasource_type, docstring)
@@ -646,9 +614,7 @@ class _SourceFactories:
                     f"Unknown crud method registered for {attr_name} with type {crud_method_type}"
                 )
         except KeyError as e:
-            raise AttributeError(
-                f"No crud method '{attr_name}' in {self.factories}"
-            ) from e
+            raise AttributeError(f"No crud method '{attr_name}' in {self.factories}") from e
 
     @override
     def __dir__(self) -> List[str]:

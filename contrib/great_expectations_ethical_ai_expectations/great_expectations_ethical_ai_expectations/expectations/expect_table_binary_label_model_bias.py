@@ -5,11 +5,13 @@ from aequitas.fairness import Fairness
 from aequitas.group import Group
 from aequitas.preprocessing import preprocess_input_df
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -85,9 +87,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         runtime_configuration=None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -203,9 +203,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
         "meta": None,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

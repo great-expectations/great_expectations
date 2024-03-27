@@ -6,13 +6,11 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import numpy as np
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
-from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -21,6 +19,10 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -105,7 +107,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
         {
             "data": {
                 "not_has_null": ["test", "foo", "for", "bar", "boo"],
-                "has_null": ["test", "foo", "for", "bar", np.NaN],
+                "has_null": ["test", "foo", "for", "bar", np.nan],
             },
             "tests": [
                 {
@@ -162,9 +164,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = (
-                "values must not be null, at least $mostly_pct % of the time."
-            )
+            template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
             template_str = "values must never be null."
 
@@ -201,11 +201,11 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
-                template_str = "$column values must not be null, at least $mostly_pct % of the time."
-            else:
                 template_str = (
-                    "values must not be null, at least $mostly_pct % of the time."
+                    "$column values must not be null, at least $mostly_pct % of the time."
                 )
+            else:
+                template_str = "values must not be null, at least $mostly_pct % of the time."
         else:
             if include_column_name:
                 template_str = "$column values must never be null."
@@ -246,19 +246,14 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
 
         try:
             null_percent = result_dict["unexpected_percent"]
-            return (
-                num_to_str(100 - null_percent, precision=5, use_locale=True)
-                + "% not null"
-            )
+            return num_to_str(100 - null_percent, precision=5, use_locale=True) + "% not null"
         except KeyError:
             return "unknown % not null"
         except TypeError:
             return "NaN% not null"
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW)
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -280,8 +275,7 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
                 }
             ),
             result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
+            if "unexpected_count" in result.result and result.result["unexpected_count"] is not None
             else "--",
         ]
 
@@ -317,17 +311,12 @@ class ExpectColumnValuesToNotBeNullAndColumnToNotBeEmpty(ColumnMapExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self._get_default_value("mostly")
-        )
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
+        mostly = self._get_success_kwargs().get("mostly", self._get_default_value("mostly"))
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

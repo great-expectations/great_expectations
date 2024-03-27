@@ -26,19 +26,42 @@ from pyparsing import (
     delimitedList,
     dictOf,
 )
-from typing_extensions import TypedDict
 
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias, TypeGuard
+
     from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
 
-EvaluationParameterDict = TypedDict("EvaluationParameterDict", {"$PARAMETER": str})
+# NOTE: Temporary alias - to be converted to a rich type
+EvaluationParameterDict: TypeAlias = dict
+
+
+def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
+    """Typeguard to check if a value is an evaluation parameter."""
+    return isinstance(value, dict) and "$PARAMETER" in value.keys()
+
+
+def get_evaluation_parameter_key(evaluation_parameter: EvaluationParameterDict) -> str:
+    """Get the key of an evaluation parameter.
+
+    e.g. if the evaluation parameter is {"$PARAMETER": "foo"}, this function will return "foo".
+    When evaluating the runtime configuration of an expectation, we will look for
+    a runtime value for "foo".
+
+    Args:
+        evaluation_parameter: The evaluation parameter to get the key of
+
+    Returns:
+        The key of the evaluation parameter
+    """
+    return evaluation_parameter["$PARAMETER"]
 
 
 class EvaluationParameterParser:
@@ -56,7 +79,7 @@ class EvaluationParameterParser:
     expr    :: term [ addop term ]*
 
     The parser is modified from: https://github.com/pyparsing/pyparsing/blob/master/examples/fourFn.py
-    """
+    """  # noqa: E501
 
     # map operator symbols to corresponding arithmetic operations
     opn = {
@@ -113,8 +136,7 @@ class EvaluationParameterParser:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
-                Literal("urn:great_expectations:")
-                + Word(alphas, f"{alphanums}_$:?=%.&")
+                Literal("urn:great_expectations:") + Word(alphas, f"{alphanums}_$:?=%.&")
             )
             variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
@@ -137,7 +159,7 @@ class EvaluationParameterParser:
             keyval = dictOf(key.setParseAction(self.push_first), value)
             kwarglist = delimitedList(keyval)
 
-            # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
+            # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple  # noqa: E501
             # 20211009 - JPC - Note that it's important that we consider kwarglist
             # first as part of disabling backtracking for the function's arguments
             fn_call = (ident + lpar + rpar).setParseAction(
@@ -158,7 +180,7 @@ class EvaluationParameterParser:
                 )
             ).setParseAction(self.push_unary_minus)
 
-            # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
+            # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left  # noqa: E501
             # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
             factor = Forward()
             factor <<= atom + (expop + factor).setParseAction(self.push_first)[...]
@@ -167,7 +189,7 @@ class EvaluationParameterParser:
             self._parser = expr
         return self._parser
 
-    def evaluate_stack(self, s):  # noqa: PLR0911, PLR0912
+    def evaluate_stack(self, s):  # noqa: C901, PLR0911, PLR0912
         op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
             op, num_args, has_fn_kwargs = op
@@ -195,33 +217,25 @@ class EvaluationParameterParser:
                 args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
                 return self.fn[op](*args)
         else:
-            # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*
-            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter
+            # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*  # noqa: E501
+            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter  # noqa: E501
             # method).
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info(
-                    "Evaluation parameter operand successfully parsed as integer."
-                )
+                logger.info("Evaluation parameter operand successfully parsed as integer.")
             except ValueError:
                 logger.info("Parsing evaluation parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info(
-                        "Evaluation parameter operand successfully parsed as float."
-                    )
+                    logger.info("Evaluation parameter operand successfully parsed as float.")
                 except ValueError:
                     logger.info("Parsing evaluation parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info(
-                            "Evaluation parameter operand successfully parsed as datetime."
-                        )
+                        logger.info("Evaluation parameter operand successfully parsed as datetime.")
                     except ValueError as e:
-                        logger.info(
-                            "Parsing evaluation parameter operand as datetime failed."
-                        )
+                        logger.info("Parsing evaluation parameter operand as datetime failed.")
                         raise e
             return evaluated
 
@@ -235,7 +249,7 @@ def build_evaluation_parameters(
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
-    """
+    """  # noqa: E501
     evaluation_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
 
@@ -243,7 +257,7 @@ def build_evaluation_parameters(
     # specified parameters.
     for key, value in evaluation_args.items():
         if isinstance(value, dict) and "$PARAMETER" in value:
-            # We do not even need to search for a value if we are not going to do interactive evaluation
+            # We do not even need to search for a value if we are not going to do interactive evaluation  # noqa: E501
             if not interactive_evaluation:
                 continue
 
@@ -273,7 +287,7 @@ def build_evaluation_parameters(
 EXPR = EvaluationParameterParser()
 
 
-def find_evaluation_parameter_dependencies(parameter_expression):
+def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
     """Parse a parameter expression to identify dependencies including GX URNs.
 
     Args:
@@ -284,7 +298,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
           - "urns": set of strings that are valid GX URN objects
           - "other": set of non-GX URN strings that are required to evaluate the parameter expression
 
-    """
+    """  # noqa: E501
     expr = EvaluationParameterParser()
 
     dependencies = {"urns": set(), "other": set()}
@@ -351,7 +365,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
     Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
     EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
     characters to support inclusion of GX URLs (see :ref:`evaluation_parameters` for more information).
-    """
+    """  # noqa: E501
     if evaluation_parameters is None:
         evaluation_parameters = {}
 
@@ -359,20 +373,18 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     if _is_single_function_no_args(parse_results):
         # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
-        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
+        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior  # noqa: E501
         pass
 
     elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:
-        # In this special case there were no operations to find, so only one value, but we don't have something to
+        # In this special case there were no operations to find, so only one value, but we don't have something to  # noqa: E501
         # substitute for that value
         try:
             res = ge_urn.parseString(parse_results[0])
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                 if store:
-                    return store.get_query_result(
-                        res["metric_name"], res.get("metric_kwargs", {})
-                    )
+                    return store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
                 return None
             else:
                 logger.error(
@@ -393,9 +405,9 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
             ) from e
 
     elif len(parse_results) == 1:
-        # In this case, we *do* have a substitution for a single type. We treat this specially because in this
-        # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
-        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
+        # In this case, we *do* have a substitution for a single type. We treat this specially because in this  # noqa: E501
+        # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)  # noqa: E501
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that  # noqa: E501
         # case here; is the evaluation parameter provided here in fact a metric definition?
         return evaluation_parameters[parse_results[0]]
 
@@ -418,7 +430,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                                 )
                             )  # value placed back in stack must be a string
                     else:
-                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
+                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.  # noqa: E501
                         pass
                 # graceful error handling for cases where the value in the stack isn't a URN:
                 except ParseException:
@@ -437,9 +449,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
-        exception_message = (
-            f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
-        )
+        exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
             f"Error while evaluating evaluation parameter expression: {e!s}"
@@ -473,7 +483,7 @@ def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> boo
     )
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
     deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

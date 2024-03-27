@@ -1,6 +1,5 @@
 from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -21,7 +20,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
 
     query = """
             SELECT {column_to_check}, COUNT(1)
-            FROM {active_batch}
+            FROM {batch}
             WHERE {condition}
             GROUP BY {column_to_check}
             HAVING count(1) > 1
@@ -46,7 +45,6 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

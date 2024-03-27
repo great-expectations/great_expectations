@@ -72,6 +72,6 @@
       }
     }
   ],
-  "expectation_suite_name": "titanic",
+  "name": "titanic",
   "meta": {}
 }

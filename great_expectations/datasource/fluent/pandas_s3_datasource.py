@@ -3,9 +3,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws, pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
@@ -55,22 +55,22 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def _get_s3_client(self) -> BaseClient:
         s3_client: Union[BaseClient, None] = self._s3_client
         if not s3_client:
-            # Validate that "boto3" library was successfully imported and attempt to create "s3_client" handle.
+            # Validate that "boto3" library was successfully imported and attempt to create "s3_client" handle.  # noqa: E501
             if aws.boto3:
                 _check_config_substitutions_needed(
                     self, self.boto3_options, raise_warning_if_provider_not_present=True
                 )
                 # pull in needed config substitutions using the `_config_provider`
-                # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
-                boto3_options: dict = self.dict(
-                    config_provider=self._config_provider
-                ).get("boto3_options", {})
+                # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed  # noqa: E501
+                boto3_options: dict = self.dict(config_provider=self._config_provider).get(
+                    "boto3_options", {}
+                )
                 try:
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
-                    # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
+                    # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.  # noqa: E501
                     raise PandasS3DatasourceError(
-                        f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'
+                        f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'  # noqa: E501
                     ) from e
             else:
                 raise PandasS3DatasourceError(
@@ -90,7 +90,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         try:
             _ = self._get_s3_client()
         except Exception as e:
@@ -145,6 +145,4 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             )
         )
 
-        logger.info(
-            f"{self.data_connector_type.__name__} created for '{data_asset.name}'"
-        )
+        logger.info(f"{self.data_connector_type.__name__} created for '{data_asset.name}'")

@@ -5,7 +5,9 @@ from typing import Callable, Dict, Union
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import RenderedAtomicContent
 
@@ -14,7 +16,7 @@ from great_expectations.render import RenderedAtomicContent
 def expectation_configuration_kwargs():
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "ge_cloud_id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
+        "id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
         "expectation_type": "",
         "kwargs": {},
         "meta": {},
@@ -23,7 +25,7 @@ def expectation_configuration_kwargs():
 
 @pytest.fixture
 def get_prescriptive_rendered_content(
-    expectation_configuration_kwargs: Dict[str, Union[str, dict]]
+    expectation_configuration_kwargs: Dict[str, Union[str, dict]],
 ) -> Callable:
     def _get_prescriptive_rendered_content(
         update_dict: Dict[str, Union[str, dict]],
@@ -51,16 +53,14 @@ def get_prescriptive_rendered_content(
 def evr_kwargs(expectation_configuration_kwargs):
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "expectation_config": ExpectationConfiguration(
-            **expectation_configuration_kwargs
-        ),
+        "expectation_config": ExpectationConfiguration(**expectation_configuration_kwargs),
         "result": {},
     }
 
 
 @pytest.fixture
 def get_diagnostic_rendered_content(
-    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]]
+    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]],
 ) -> Callable:
     def _get_diagnostic_rendered_content(
         update_dict: Dict[str, Union[dict, ExpectationConfiguration]],
@@ -198,8 +198,8 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
 def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
@@ -211,7 +211,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
             "threshold": 0.1,
         },
         "meta": {},
-        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+        "id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -242,11 +242,11 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
+def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(  # noqa: E501
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
@@ -258,7 +258,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
             "threshold": 0.1,
         },
         "meta": {},
-        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+        "id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -465,7 +465,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_in_set(
 
 
 @pytest.mark.unit
-def test_atomic_prescriptive_summary_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+def test_atomic_prescriptive_summary_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(  # noqa: E501
     snapshot,
     get_prescriptive_rendered_content,
 ):
@@ -515,7 +515,7 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
 
@@ -528,8 +528,8 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
 def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_column_quantile_values_to_be_between",
         "kwargs": {
@@ -547,7 +547,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -1296,11 +1296,9 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table
 
 
 @pytest.mark.unit
-def test_atomic_diagnostic_observed_value_without_result(
-    snapshot, get_diagnostic_rendered_content
-):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+def test_atomic_diagnostic_observed_value_without_result(snapshot, get_diagnostic_rendered_content):
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
@@ -1319,8 +1317,8 @@ def test_atomic_diagnostic_observed_value_without_result(
 def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
@@ -1340,8 +1338,8 @@ def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
 def test_atomic_diagnostic_observed_value_with_str_observed_value(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
@@ -1361,8 +1359,8 @@ def test_atomic_diagnostic_observed_value_with_str_observed_value(
 def test_atomic_diagnostic_observed_value_with_unexpected_percent(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
@@ -1382,8 +1380,8 @@ def test_atomic_diagnostic_observed_value_with_unexpected_percent(
 def test_atomic_diagnostic_observed_value_with_empty_result(
     snapshot, get_diagnostic_rendered_content
 ):
-    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
-    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},

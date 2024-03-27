@@ -45,14 +45,11 @@ _STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(
-        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
-    ) -> None:
+    def __init__(self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._datasources: dict = {}
-        self._usage_statistics_handler = None
         self._config_provider = config_provider
 
     def _init_variables(self):
@@ -89,23 +86,23 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
     # Ensure that config references the above env var
     data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
     datasource_config_dict = datasource_config_with_names.to_json_dict()
-    datasource_config_dict["data_connectors"][data_connector_name][
-        "base_directory"
-    ] = f"${variable}"
+    datasource_config_dict["data_connectors"][data_connector_name]["base_directory"] = (
+        f"${variable}"
+    )
 
     instantiated_datasource = context.add_datasource(**datasource_config_dict)
 
     # Runtime object should have the substituted value for downstream usage
-    assert instantiated_datasource.data_connectors[
-        data_connector_name
-    ].base_directory.endswith(value_associated_with_variable)
+    assert instantiated_datasource.data_connectors[data_connector_name].base_directory.endswith(
+        value_associated_with_variable
+    )
 
     # Config attached to object should mirror the runtime object
     assert instantiated_datasource.config["data_connectors"][data_connector_name][
         "base_directory"
     ].endswith(value_associated_with_variable)
 
-    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)  # noqa: E501
     assert (
         instantiated_datasource._raw_config["data_connectors"][data_connector_name][
             "base_directory"

@@ -4,19 +4,20 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-
 from typing import Optional
 
 from shapely.geometry import Point, Polygon
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -42,9 +43,7 @@ class ColumnValuesCoordinatesDegreeDecimal(ColumnMapMetricProvider):
     @staticmethod
     def _point_in_bounds(point, bounds):
         try:
-            result = bounds.intersects(
-                Point(float(eval(point)[1]), float(eval(point)[0]))
-            )
+            result = bounds.intersects(Point(float(eval(point)[1]), float(eval(point)[0])))
         except TypeError:
             try:
                 result = bounds.intersects(Point(float(point[1]), float(point[0])))

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict
 
 from great_expectations.compatibility import pyspark
@@ -54,9 +56,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = [col for col in table_columns if col["name"] == column_name][
-            0
-        ]
+        column_metadata = [col for col in table_columns if col["name"] == column_name][0]
         if isinstance(
             column_metadata["type"],
             (
@@ -65,7 +65,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                 pyspark.types.IntegerType,
             ),
         ):
-            # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
+            # if column is any type that could have NA values, remove them (not filtered by .isNotNull())  # noqa: E501
             compute_domain_kwargs = execution_engine.add_column_row_condition(
                 metric_domain_kwargs,
                 filter_null=cls.filter_column_isnull,
@@ -75,12 +75,10 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             compute_domain_kwargs = metric_domain_kwargs
 
         (
-            df,
+            _df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            compute_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(compute_domain_kwargs, MetricDomainTypes.COLUMN)
 
         # instead detect types naturally
         column = F.col(column_name)
@@ -93,9 +91,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
                 F.lag(column).over(pyspark.Window.orderBy(F.lit("constant"))),
             )
         else:
-            diff = column - F.lag(column).over(
-                pyspark.Window.orderBy(F.lit("constant"))
-            )
+            diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
             diff = F.when(diff.isNull(), -1).otherwise(diff)
 
         # NOTE: because in spark we are implementing the window function directly,

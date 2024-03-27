@@ -1,14 +1,11 @@
-from itertools import zip_longest
-from typing import Dict, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from itertools import zip_longest
+from typing import TYPE_CHECKING, Dict, Optional, Union
+
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -20,6 +17,15 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
@@ -47,7 +53,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_list: Union[list, set, EvaluationParameterDict, None]
 
@@ -77,13 +83,13 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        renderer_configuration.add_param(
-            name="column_list", param_type=RendererValueType.ARRAY
-        )
+        renderer_configuration.add_param(name="column_list", param_type=RendererValueType.ARRAY)
         params = renderer_configuration.params
 
         if not params.column_list:
-            template_str = "Must have a list of columns in a specific order, but that order is not specified."
+            template_str = (
+                "Must have a list of columns in a specific order, but that order is not specified."
+            )
         else:
             template_str = "Must have these columns in this order: "
             array_param_name = "column_list"
@@ -119,7 +125,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
 
         if params["column_list"] is None:
-            template_str = "Must have a list of columns in a specific order, but that order is not specified."
+            template_str = (
+                "Must have a list of columns in a specific order, but that order is not specified."
+            )
 
         else:
             template_str = "Must have these columns in this order: "
@@ -146,33 +154,28 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
-        expected_column_list = self.get_success_kwargs(configuration).get("column_list")
+        expected_column_list = self._get_success_kwargs().get("column_list")
         actual_column_list = metrics.get("table.columns")
 
-        if expected_column_list is None or list(actual_column_list) == list(
-            expected_column_list
-        ):
+        if expected_column_list is None or list(actual_column_list) == list(expected_column_list):
             return {
                 "success": True,
                 "result": {"observed_value": list(actual_column_list)},
             }
         else:
-            # In the case of differing column lengths between the defined expectation and the observed column set, the
+            # In the case of differing column lengths between the defined expectation and the observed column set, the  # noqa: E501
             # max is determined to generate the column_index.
             number_of_columns = max(len(expected_column_list), len(actual_column_list))
             column_index = range(number_of_columns)
 
             # Create a list of the mismatched details
             compared_lists = list(
-                zip_longest(
-                    column_index, list(expected_column_list), list(actual_column_list)
-                )
+                zip_longest(column_index, list(expected_column_list), list(actual_column_list))
             )
             mismatched = [
                 {"Expected Column Position": i, "Expected": k, "Found": v}

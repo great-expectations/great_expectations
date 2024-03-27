@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 from uuid import UUID
 
 import numpy
@@ -25,7 +25,7 @@ class TestCloudDataStore:
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
-        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
 
     def test_add_expectation_suite_name_collision_failure(
@@ -33,7 +33,7 @@ class TestCloudDataStore:
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
-        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
         with pytest.raises(ExpectationSuiteError):
             context.add_expectation_suite("test_suite")
@@ -89,7 +89,7 @@ class TestCloudDataStoreMetricRun:
 
         uuid_from_add = cloud_data_store.add(metric_run)
 
-        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":[0.25,0.5,0.75],"exception":null,"column":"column","quantiles":[0.25,0.5,0.75],"allow_relative_error":0.001,"value_type":"list[float]","metric_type":"ColumnQuantileValuesMetric"}]}}}'
+        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":[0.25,0.5,0.75],"exception":null,"column":"column","quantiles":[0.25,0.5,0.75],"allow_relative_error":0.001,"value_type":"list[float]","metric_type":"ColumnQuantileValuesMetric"}]}}}'  # noqa: E501
 
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",
@@ -141,7 +141,7 @@ class TestCloudDataStoreMetricRun:
 
         uuid_from_add = cloud_data_store.add(metric_run)
 
-        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":1,"exception":null,"column":"column","value_type":"int","metric_type":"ColumnMetric"}]}}}'
+        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":1,"exception":null,"column":"column","value_type":"int","metric_type":"ColumnMetric"}]}}}'  # noqa: E501
 
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",
@@ -162,9 +162,7 @@ class TestCloudDataStoreMetricRun:
                     batch_id="batch_id",
                     metric_name="metric_name",
                     value=1,
-                    exception=MetricException(
-                        type="exception type", message="exception message"
-                    ),
+                    exception=MetricException(type="exception type", message="exception message"),
                     column="column",
                 )
             ],
@@ -198,7 +196,7 @@ class TestCloudDataStoreMetricRun:
 
         uuid_from_add = cloud_data_store.add(metric_run)
 
-        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":1,"exception":{"type":"exception type","message":"exception message"},"column":"column","value_type":"int","metric_type":"ColumnMetric"}]}}}'
+        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":1,"exception":{"type":"exception type","message":"exception message"},"column":"column","value_type":"int","metric_type":"ColumnMetric"}]}}}'  # noqa: E501
 
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",
@@ -250,7 +248,7 @@ class TestCloudDataStoreMetricRun:
 
         uuid_from_add = cloud_data_store.add(metric_run)
 
-        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":2.5,"exception":null,"column":"column","value_type":"float64","metric_type":"ColumnMetric"}]}}}'
+        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":2.5,"exception":null,"column":"column","value_type":"float64","metric_type":"ColumnMetric"}]}}}'  # noqa: E501
 
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",

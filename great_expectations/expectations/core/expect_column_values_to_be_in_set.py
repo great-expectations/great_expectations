@@ -1,12 +1,10 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -38,6 +36,12 @@ from great_expectations.expectations.expectation import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -96,7 +100,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
 
@@ -158,7 +162,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -204,16 +208,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
@@ -230,9 +230,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(

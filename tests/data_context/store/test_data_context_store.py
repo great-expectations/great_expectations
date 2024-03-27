@@ -35,8 +35,16 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             "expectation_validation_result": False,
             "globally": False,
         },
+        "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {
+            "checkpoint_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "base_directory": "checkpoints/",
+                    "class_name": "TupleFilesystemStoreBackend",
+                },
+            },
             "evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore",
                 "module_name": "great_expectations.data_context.store",
@@ -47,6 +55,15 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "base_directory": "expectations/",
                     "class_name": "TupleFilesystemStoreBackend",
                 },
+            },
+            "profiler_store": {
+                "class_name": "ProfilerStore",
+            },
+            "validation_definition_store": {
+                "class_name": "ValidationDefinitionStore",
+            },
+            "validations_store": {
+                "class_name": "ValidationsStore",
             },
         },
     }

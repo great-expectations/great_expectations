@@ -2,10 +2,12 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -40,7 +42,7 @@ def test_inline_renderer_instantiation_error_message(
         InlineRenderer(render_object=expectation_suite)  # type: ignore
     assert (
         str(e.value)
-        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
+        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."  # noqa: E501
     )
 
 
@@ -248,8 +250,7 @@ def test_inline_renderer_instantiation_error_message(
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column values must belong to this set: $v__0 $v__1 "
-                        "$v__2.",
+                        "template": "$column values must belong to this set: $v__0 $v__1 " "$v__2.",
                     },
                     "value_type": "StringValueType",
                 },
@@ -389,21 +390,19 @@ def test_inline_renderer_expectation_validation_result_serialization(
         success=True,
     )
 
-    inline_renderer: InlineRenderer = InlineRenderer(
-        render_object=expectation_validation_result
+    inline_renderer: InlineRenderer = InlineRenderer(render_object=expectation_validation_result)
+
+    expectation_validation_result_rendered_atomic_content: List[RenderedAtomicContent] = (
+        inline_renderer.get_rendered_content()
     )
 
-    expectation_validation_result_rendered_atomic_content: List[
-        RenderedAtomicContent
-    ] = inline_renderer.get_rendered_content()
-
-    actual_serialized_expectation_validation_result_rendered_atomic_content: List[
-        dict
-    ] = clean_serialized_rendered_atomic_content_graphs(
-        serialized_rendered_atomic_content=[
-            rendered_atomic_content.to_json_dict()
-            for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
-        ]
+    actual_serialized_expectation_validation_result_rendered_atomic_content: List[dict] = (
+        clean_serialized_rendered_atomic_content_graphs(
+            serialized_rendered_atomic_content=[
+                rendered_atomic_content.to_json_dict()
+                for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
+            ]
+        )
     )
 
     assert (
@@ -545,8 +544,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "template": "$column values must belong to this set: $v__0 $v__1 "
-                        "$v__2.",
+                        "template": "$column values must belong to this set: $v__0 $v__1 " "$v__2.",
                     },
                     "value_type": "StringValueType",
                 }
@@ -703,21 +701,19 @@ def test_inline_renderer_expectation_configuration_serialization(
     expectation_configuration: ExpectationConfiguration,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,
 ):
-    inline_renderer: InlineRenderer = InlineRenderer(
-        render_object=expectation_configuration
+    inline_renderer: InlineRenderer = InlineRenderer(render_object=expectation_configuration)
+
+    expectation_configuration_rendered_atomic_content: List[RenderedAtomicContent] = (
+        inline_renderer.get_rendered_content()
     )
 
-    expectation_configuration_rendered_atomic_content: List[
-        RenderedAtomicContent
-    ] = inline_renderer.get_rendered_content()
-
-    actual_serialized_expectation_configuration_rendered_atomic_content: List[
-        dict
-    ] = clean_serialized_rendered_atomic_content_graphs(
-        serialized_rendered_atomic_content=[
-            rendered_atomic_content.to_json_dict()
-            for rendered_atomic_content in expectation_configuration_rendered_atomic_content
-        ]
+    actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = (
+        clean_serialized_rendered_atomic_content_graphs(
+            serialized_rendered_atomic_content=[
+                rendered_atomic_content.to_json_dict()
+                for rendered_atomic_content in expectation_configuration_rendered_atomic_content
+            ]
+        )
     )
 
     assert (

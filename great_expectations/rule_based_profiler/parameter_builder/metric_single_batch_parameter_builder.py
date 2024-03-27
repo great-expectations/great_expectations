@@ -31,13 +31,14 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     A Single-Batch-only implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs,
     and metric_name as arguments.
-    """
+    """  # noqa: E501
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "single_batch_mode",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "single_batch_mode",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -48,9 +49,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -69,7 +68,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name=metric_name,  # type: ignore[arg-type] # could be None
@@ -96,7 +95,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
+        """  # noqa: E501
         # Compute metric value for one Batch object (expressed as list of Batch objects).
         super().build_parameters(
             domain=domain,

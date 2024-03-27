@@ -5,7 +5,6 @@ import numpy as np
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -21,6 +20,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
@@ -42,9 +44,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         if all(_column.str.isdigit()) is True:
             temp_column = _column.astype(int)
         else:
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         series_diff = np.diff(temp_column)
 
@@ -70,18 +70,12 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
     ):
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = [col for col in table_columns if col["name"] == column_name][
-            0
-        ]
+        column_metadata = [col for col in table_columns if col["name"] == column_name][0]
 
-        if pyspark.types and isinstance(
-            column_metadata["type"], pyspark.types.StringType
-        ):
+        if pyspark.types and isinstance(column_metadata["type"], pyspark.types.StringType):
             column = F.col(column_name).cast(pyspark.types.IntegerType())
         else:
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         compute_domain_kwargs = metric_domain_kwargs
 
@@ -94,9 +88,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         )
 
         if any(np.array(df.select(column.isNull()).collect())):
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
+            raise TypeError("Column must be a string-type capable of being cast to int.")
 
         diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
@@ -215,25 +207,21 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
             if not rule(param_value):
                 raise InvalidExpectationKwargsError(error_message)
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         super().validate_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
         dependencies: ValidationDependencies = super().get_validation_dependencies(
-            configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
             metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
-            configuration=configuration,
+            configuration=self.configuration,
             runtime_configuration=runtime_configuration,
         )
 
@@ -250,7 +238,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -262,11 +249,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         success = all(string_integers_increasing[0])
 
         return ExpectationValidationResult(
-            result={
-                "observed_value": np.unique(
-                    string_integers_increasing[0], return_counts=True
-                )
-            },
+            result={"observed_value": np.unique(string_integers_increasing[0], return_counts=True)},
             success=success,
         )
 

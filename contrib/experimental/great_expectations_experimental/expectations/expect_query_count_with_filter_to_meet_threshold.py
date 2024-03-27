@@ -6,7 +6,6 @@ For detailed instructions on how to use it, please see:
 
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -15,6 +14,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -25,7 +27,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     query = """
                 SELECT COUNT(*) n
-                FROM {active_batch}
+                FROM {batch}
                 WHERE {col} = {filter}
             """
 
@@ -40,29 +42,25 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         threshold = configuration["kwargs"].get("threshold")
 
         try:
             assert threshold is not None, "'threshold' must be specified"
-            assert isinstance(
-                threshold, (int, float)
-            ), "'threshold' must be a valid float or int"
+            assert isinstance(threshold, (int, float)), "'threshold' must be a valid float or int"
             assert threshold > 0, "'threshold' must be positive"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         count: int = list(metrics.get("query.template_values")[0].values())[0]
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")

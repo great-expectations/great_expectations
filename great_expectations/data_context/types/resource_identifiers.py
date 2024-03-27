@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from marshmallow import Schema, fields, post_load
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -18,23 +18,23 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name: str) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__()
-        if not isinstance(expectation_suite_name, str):
+        if not isinstance(name, str):
             raise gx_exceptions.InvalidDataContextKeyError(
-                f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
+                f"name must be a string, not {type(name).__name__}"
             )
-        self._expectation_suite_name = expectation_suite_name
+        self._name = name
 
     @property
-    def expectation_suite_name(self):
-        return self._expectation_suite_name
+    def name(self):
+        return self._name
 
     def to_tuple(self):
-        return tuple(self.expectation_suite_name.split("."))
+        return tuple(self.name.split("."))
 
     def to_fixed_length_tuple(self):
-        return (self.expectation_suite_name,)
+        return (self.name,)
 
     @classmethod
     def from_tuple(cls, tuple_):
@@ -42,14 +42,14 @@ class ExpectationSuiteIdentifier(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        return cls(expectation_suite_name=tuple_[0])
+        return cls(name=tuple_[0])
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
+        return f"{self.__class__.__name__}::{self._name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
-    expectation_suite_name = fields.Str()
+    name = fields.Str()
 
     # noinspection PyUnusedLocal
     @post_load
@@ -100,7 +100,7 @@ class BatchIdentifierSchema(Schema):
 
 @public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""  # noqa: E501
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
@@ -143,7 +143,7 @@ class ValidationResultIdentifier(DataContextKey):
 
     def to_fixed_length_tuple(self):
         return tuple(
-            [self.expectation_suite_identifier.expectation_suite_name]
+            [self.expectation_suite_identifier.name]
             + list(self.run_id.to_tuple())
             + [self.batch_identifier or "__none__"]
         )
@@ -234,7 +234,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         super().__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_identifier
+                name=expectation_suite_identifier
             )
 
         if isinstance(run_id, dict):
@@ -287,8 +287,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def to_evaluation_parameter_urn(self):
         if self._metric_kwargs_id is None:
             return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple())
-                + [self.metric_name]
+                list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]
             )
         else:
             return "urn:great_expectations:validations:" + ":".join(
@@ -310,9 +309,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,
-            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
-                tuple_[3:-2]
-            ),
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[3:-2]),
             metric_name=metric_id.metric_name,
             metric_kwargs_id=metric_id.metric_kwargs_id,
         )
@@ -321,8 +318,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
-                "ValidationMetricIdentifier fixed length tuple must have exactly six "
-                "components."
+                "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
         if tuple_[2] == "__":
             tuple_data_asset_name = None
@@ -408,9 +404,7 @@ class ValidationResultIdentifierSchema(Schema):
     run_id = fields.Nested(
         RunIdentifierSchema,
         required=True,
-        error_messages={
-            "required": "run_id is required for a " "ValidationResultIdentifier"
-        },
+        error_messages={"required": "run_id is required for a " "ValidationResultIdentifier"},
     )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
@@ -427,13 +421,9 @@ class SiteSectionIdentifier(DataContextKey):
             if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ValidationResultIdentifier(
-                    *resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(*resource_identifier)
             else:
-                self._resource_identifier = ValidationResultIdentifier(
-                    **resource_identifier
-                )
+                self._resource_identifier = ValidationResultIdentifier(**resource_identifier)
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
                 self._resource_identifier = resource_identifier  # type: ignore[assignment]
@@ -447,7 +437,7 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
     @property
@@ -478,7 +468,7 @@ class SiteSectionIdentifier(DataContextKey):
             )
         else:
             raise gx_exceptions.InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"  # noqa: E501
             )
 
 

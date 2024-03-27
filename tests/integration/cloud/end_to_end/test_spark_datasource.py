@@ -6,8 +6,10 @@ from typing import TYPE_CHECKING, Callable, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -42,9 +44,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     datasource.persist = False
     datasource_dict = datasource.dict()
     datasource = context.sources.add_or_update_spark(**datasource_dict)
@@ -54,9 +54,7 @@ def datasource(
     datasource.persist = True
     datasource_dict = datasource.dict()
     datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.persist is True, "The datasource was not updated in the previous method call."
     return datasource
 
 
@@ -90,9 +88,7 @@ def data_asset(
 def batch_request(
     data_asset: DataAsset,
     spark_session: pyspark.SparkSession,
-    spark_df_from_pandas_df: Callable[
-        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
-    ],
+    spark_df_from_pandas_df: Callable[[pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame],
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
     """Build a BatchRequest depending on the types of Data Assets tested in the module."""
@@ -120,7 +116,7 @@ def expectation_suite(
     """Add Expectations for the Data Assets defined in this module.
     Note: There is no need to test Expectation Suite CRUD.
     Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation(
+    expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -132,6 +128,11 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name which mercury currently doesn't support",
+    strict=True,
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
@@ -150,6 +151,9 @@ def test_interactive_validator(
     assert expectation_validation_result.success
 
 
+@pytest.mark.xfail(
+    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
+)
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     """Test running a Checkpoint that was created using the entities defined in this module."""

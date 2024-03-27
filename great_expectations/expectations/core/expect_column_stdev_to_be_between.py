@@ -1,14 +1,11 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -26,6 +23,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -75,7 +79,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     See Also:
         [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -140,7 +144,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
             elif not params.min_value:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             else:
@@ -189,7 +193,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
             elif params["min_value"] is None:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             elif params["max_value"] is None:
@@ -221,14 +225,12 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.standard_deviation",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

@@ -2,12 +2,14 @@ from typing import Optional
 
 from pandas import to_datetime
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
@@ -37,9 +39,7 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
             if col_start is None or col_end is None or col_gap is None:
                 return None
 
-            diff_months = (col_end.year - col_start.year) * 12 + (
-                col_end.month - col_start.month
-            )
+            diff_months = (col_end.year - col_start.year) * 12 + (col_end.month - col_start.month)
             return col_gap == diff_months or abs(col_gap - diff_months) <= threshold
 
         if threshold is None:
@@ -50,7 +50,6 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
-
     """Expect the difference of 2 datetime columns is equal to another column in month.
 
     This means that for each row, we expect end_datetime - start_datetime = gap (in months)
@@ -174,9 +173,7 @@ class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
         "threshold": 0,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

@@ -1,10 +1,11 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
 )
@@ -17,13 +18,18 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
     multicolumn_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (  # noqa: E501
     multicolumn_function_partial,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class CompoundColumnsUnique(MulticolumnMapMetricProvider):
@@ -32,10 +38,12 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     implementation, which combines the "map" and "condition" parts in a single step, the support for
     "SqlAlchemyExecutionEngine" is more detailed.  Thus, the "map" and "condition" parts for "SqlAlchemyExecutionEngine"
     are handled separately, with the "condition" part relying on the "map" part as a metric dependency.
-    """
+    """  # noqa: E501
 
     function_metric_name = "compound_columns.count"  # pre-requisite "map" style metric
-    condition_metric_name = "compound_columns.unique"  # "condition" style metric required to be implemented by provider
+    condition_metric_name = (
+        "compound_columns.unique"  # "condition" style metric required to be implemented by provider
+    )
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -68,12 +76,12 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             3 2 3 1
 
         The fourth column, "_num_rows", holds the value of the "map" function -- the number of rows the group occurs in.
-        """
+        """  # noqa: E501
 
-        # Needed as keys (hence, string valued) to access "ColumnElement" objects contained within the "FROM" clauses.
+        # Needed as keys (hence, string valued) to access "ColumnElement" objects contained within the "FROM" clauses.  # noqa: E501
         column_names = kwargs.get("_column_names")
 
-        # Need all columns of the table for the purposes of reporting entire rows satisfying unexpected condition logic.
+        # Need all columns of the table for the purposes of reporting entire rows satisfying unexpected condition logic.  # noqa: E501
         table_columns = kwargs.get("_table_columns")
 
         table = kwargs.get(
@@ -81,10 +89,10 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
         # Filipe - 20231114
-        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. The solution to this is to perform our operation without the need
-        # for a sub query. We can do this by using the window function count, to get the number of duplicate
-        # rows by over partition by the compound unique columns. This will give a table which has the same
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table  # noqa: E501
+        # more than once in the same query. The solution to this is to perform our operation without the need  # noqa: E501
+        # for a sub query. We can do this by using the window function count, to get the number of duplicate  # noqa: E501
+        # rows by over partition by the compound unique columns. This will give a table which has the same  # noqa: E501
         # number of rows as the original table, but with an additional column _num_rows column.
         dialect = kwargs.get("_dialect")
         try:
@@ -95,9 +103,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             except AttributeError:
                 dialect_name = ""
         if dialect and dialect_name == "mysql":
-            table_columns_selector = [
-                sa.column(column_name) for column_name in table_columns
-            ]
+            table_columns_selector = [sa.column(column_name) for column_name in table_columns]
             partition_by_columns = (
                 sa.func.count()
                 .over(partition_by=[sa.column(column) for column in column_names])
@@ -105,28 +111,22 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             )
             count_selector = table_columns_selector + [partition_by_columns]
             original_table_clause = (
-                sa.select(*count_selector)
-                .select_from(table)
-                .alias("original_table_clause")
+                sa.select(*count_selector).select_from(table).alias("original_table_clause")
             )
             return original_table_clause
 
-        # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
-        # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
+        # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the  # noqa: E501
+        # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these  # noqa: E501
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
-        table_columns_selector = [
-            sa.column(column_name) for column_name in table_columns
-        ]
+        table_columns_selector = [sa.column(column_name) for column_name in table_columns]
         original_table_clause = (
-            sa.select(*table_columns_selector)
-            .select_from(table)
-            .alias("original_table_clause")
+            sa.select(*table_columns_selector).select_from(table).alias("original_table_clause")
         )
 
-        # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
-        # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
+        # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the  # noqa: E501
+        # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.  # noqa: E501
         # Give this aggregated group count a distinctive label.
-        # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
+        # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.  # noqa: E501
         count_selector = column_list + [sa.func.count().label("_num_rows")]
         group_count_query = (
             sa.select(*count_selector)
@@ -135,16 +135,13 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             .alias("group_counts_subquery")
         )
 
-        # The above "group_count_query", if executed, will produce the result set containing the number of rows that
-        # equals the number of distinct values of the group -- unique grouping (e.g., as in a multi-column primary key).
-        # Hence, in order for the "_num_rows" column values to provide an entry for each row of the original table, the
-        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_clause"
-        # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
+        # The above "group_count_query", if executed, will produce the result set containing the number of rows that  # noqa: E501
+        # equals the number of distinct values of the group -- unique grouping (e.g., as in a multi-column primary key).  # noqa: E501
+        # Hence, in order for the "_num_rows" column values to provide an entry for each row of the original table, the  # noqa: E501
+        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_clause"  # noqa: E501
+        # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.  # noqa: E501
         conditions = sa.and_(
-            *(
-                group_count_query.c[name] == original_table_clause.c[name]
-                for name in column_names
-            )
+            *(group_count_query.c[name] == original_table_clause.c[name] for name in column_names)
         )
         # noinspection PyProtectedMember
         compound_columns_count_query = (
@@ -160,7 +157,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             .alias("records_with_grouped_column_counts_subquery")
         )
 
-        # The returned SQLAlchemy "FromClause" "compound_columns_count_query" object realizes the "map" metric function.
+        # The returned SQLAlchemy "FromClause" "compound_columns_count_query" object realizes the "map" metric function.  # noqa: E501
         return compound_columns_count_query
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -175,7 +172,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         Other than boolean operations, column access, argument of filtering, and limiting the size of the result set,
         this "row_wise_cond", serving as the main component of the unexpected condition logic, carries along with it
         the entire object hierarchy, making any encapsulating query ready for execution against the database engine.
-        """
+        """  # noqa: E501
 
         metrics = kwargs.get("_metrics")
         compound_columns_count_query, _, _ = metrics[
@@ -191,8 +188,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
-            <= 1
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names))) <= 1
         )
         return row_wise_cond
 
@@ -208,7 +204,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         """
         Returns a dictionary of given metric names and their corresponding configuration, specifying the metric types
         and their respective domains.
-        """
+        """  # noqa: E501
 
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,

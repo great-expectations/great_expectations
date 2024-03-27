@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -43,6 +45,6 @@ class ColumnMean(ColumnAggregateMetricProvider):
             types.LongType,
         ):
             raise TypeError(
-                f"Expected numeric column type for function mean(). Recieved type: {column_data_type}"
+                f"Expected numeric column type for function mean(). Recieved type: {column_data_type}"  # noqa: E501
             )
         return F.mean(column)

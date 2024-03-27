@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from great_expectations.compatibility.pydantic import root_validator
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+    EvaluationParameterDict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -26,8 +27,10 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -76,7 +79,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -95,7 +98,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         return values
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -122,7 +125,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     )
 
     @classmethod
-    def _prescriptive_template(
+    @override
+    def _prescriptive_template(  # noqa: C901 - too complex
         cls,
         renderer_configuration: RendererConfiguration,
     ):
@@ -140,28 +144,32 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         params = renderer_configuration.params
 
         template_str = ""
+        at_least_str = ""
+        at_most_str = ""
         if not params.min_value and not params.max_value:
             template_str += "may have any numerical value."
         else:
             at_least_str = "greater than or equal to"
             if params.strict_min:
-                at_least_str: str = cls._get_strict_min_string(
+                at_least_str = cls._get_strict_min_string(
                     renderer_configuration=renderer_configuration
                 )
             at_most_str = "less than or equal to"
             if params.strict_max:
-                at_most_str: str = cls._get_strict_max_string(
+                at_most_str = cls._get_strict_max_string(
                     renderer_configuration=renderer_configuration
                 )
 
             if params.min_value and params.max_value:
-                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                template_str += (
+                    f"values must be {at_least_str} $min_value and {at_most_str} $max_value"
+                )
             elif not params.min_value:
                 template_str += f"values must be {at_most_str} $max_value"
             else:
                 template_str += f"values must be {at_least_str} $min_value"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -178,6 +186,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -193,7 +202,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs if configuration else {},
             [
                 "column",
                 "min_value",
@@ -213,15 +222,13 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 mostly_str = ", at least $mostly_pct % of the time"
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
+                template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."  # noqa: E501
 
             elif params["min_value"] is None:
                 template_str += f"values must be {at_most_str} $max_value{mostly_str}."
@@ -242,13 +249,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

@@ -10,17 +10,9 @@ from great_expectations_contrib.package import (
     Maturity,
 )
 
+import great_expectations.expectations as gxe
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
-)
-from great_expectations.expectations.core.expect_column_min_to_be_between import (
-    ExpectColumnMinToBeBetween,
-)
-from great_expectations.expectations.core.expect_column_most_common_value_to_be_in_set import (
-    ExpectColumnMostCommonValueToBeInSet,
-)
-from great_expectations.expectations.core.expect_column_stdev_to_be_between import (
-    ExpectColumnStdevToBeBetween,
 )
 
 
@@ -33,15 +25,13 @@ def package() -> GreatExpectationsContribPackageManifest:
 @pytest.fixture
 def diagnostics() -> List[ExpectationDiagnostics]:
     expectations = [
-        ExpectColumnMinToBeBetween,
-        ExpectColumnMostCommonValueToBeInSet,
-        ExpectColumnStdevToBeBetween,
+        gxe.ExpectColumnMinToBeBetween,
+        gxe.ExpectColumnMostCommonValueToBeInSet,
+        gxe.ExpectColumnStdevToBeBetween,
     ]
     diagnostics = list(
         map(
-            lambda e: e().run_diagnostics(
-                only_consider_these_backends=["pandas", "sqlite"]
-            ),
+            lambda e: e().run_diagnostics(only_consider_these_backends=["pandas", "sqlite"]),
             expectations,
         )
     )
@@ -59,9 +49,7 @@ def test_update_expectations(
         isinstance(expectation, ExpectationDiagnostics)
         for expectation in package.expectations.values()
     )
-    assert (
-        package.status and package.status.production >= 2 and package.status.total == 3
-    )
+    assert package.status and package.status.production >= 2 and package.status.total == 3
     assert package.maturity == Maturity.PRODUCTION
 
 
@@ -80,20 +68,14 @@ ruamel.yaml>=0.16,<0.17.18  # package
 
     package._update_dependencies(str(requirements_file))
     assert package.dependencies == [
-        Dependency(
-            text="altair", link="https://pypi.org/project/altair", version="<5, >=4.0.0"
-        ),
-        Dependency(
-            text="Click", link="https://pypi.org/project/Click", version=">=7.1.2"
-        ),
+        Dependency(text="altair", link="https://pypi.org/project/altair", version="<5, >=4.0.0"),
+        Dependency(text="Click", link="https://pypi.org/project/Click", version=">=7.1.2"),
         Dependency(
             text="mistune",
             link="https://pypi.org/project/mistune",
             version="<2.0.0, >=0.8.4",
         ),
-        Dependency(
-            text="numpy", link="https://pypi.org/project/numpy", version=">=1.14.1"
-        ),
+        Dependency(text="numpy", link="https://pypi.org/project/numpy", version=">=1.14.1"),
         Dependency(
             text="ruamel.yaml",
             link="https://pypi.org/project/ruamel.yaml",

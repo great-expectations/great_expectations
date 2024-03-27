@@ -25,9 +25,7 @@ def pyproject_toml_dict() -> dict:
 @pytest.fixture(scope="module")
 def pytest_markers(pyproject_toml_dict: dict) -> list[str]:
     """Return pytest markers"""
-    LOGGER.debug(
-        f"pytest config ->\n{pf(pyproject_toml_dict['tool']['pytest'], depth=2)}"
-    )
+    LOGGER.debug(f"pytest config ->\n{pf(pyproject_toml_dict['tool']['pytest'], depth=2)}")
     marker_details = pyproject_toml_dict["tool"]["pytest"]["ini_options"]["markers"]
     LOGGER.debug(f"marker_details ->\n{pf(marker_details)}")
     return [m.split(":")[0] for m in marker_details]

@@ -6,7 +6,7 @@ sqlite_integration_tests = []
 connecting_to_your_data = [
     IntegrationTestFixture(
         name="how_to_configure_a_sql_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py",
+        user_flow_script="docs/docusaurus/docs/snippets/how_to_configure_a_sql_datasource.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
@@ -38,10 +38,10 @@ connecting_to_your_data = [
     ),
 ]
 
-split_data = []
+partition_data = []
 
 sample_data = []
 
 sqlite_integration_tests += connecting_to_your_data
-sqlite_integration_tests += split_data
+sqlite_integration_tests += partition_data
 sqlite_integration_tests += sample_data

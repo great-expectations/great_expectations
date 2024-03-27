@@ -5,7 +5,6 @@ from lxml import etree
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import (
@@ -15,6 +14,9 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
@@ -174,9 +176,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str = "values must match the following XML Schema, at least $mostly_pct % of the time: $formatted_xml"
             else:
-                template_str = (
-                    "values must match the following XML Schema: $formatted_xml"
-                )
+                template_str = "values must match the following XML Schema: $formatted_xml"
 
         if include_column_name:
             template_str = "$column " + template_str

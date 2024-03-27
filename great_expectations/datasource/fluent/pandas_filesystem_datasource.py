@@ -4,8 +4,8 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -25,9 +25,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
     # class attributes
-    data_connector_type: ClassVar[
-        Type[FilesystemDataConnector]
-    ] = FilesystemDataConnector
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = FilesystemDataConnector
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",
@@ -50,11 +48,9 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
+            raise TestConnectionError(f"Path: {self.base_directory.resolve()} does not exist.")
 
         if self.assets and test_assets:
             for asset in self.assets:

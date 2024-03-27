@@ -1,19 +1,23 @@
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.asset.asset import (
-    Asset,
-)
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import LegacyBatchDefinition
+    from great_expectations.core.batch_spec import PathBatchSpec
+    from great_expectations.datasource.data_connector.asset.asset import (
+        Asset,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +41,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex (dict): Optional dict the filter and organize the data_references.
         sorters (list): Optional list if you want to sort the data_references
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -101,23 +105,19 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
 
-            for data_reference in self._get_data_reference_list(
-                data_asset_name=data_asset_name
-            ):
-                mapped_batch_definition_list: List[
-                    BatchDefinition
-                ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-                    data_reference=data_reference,
-                    data_asset_name=data_asset_name,
+            for data_reference in self._get_data_reference_list(data_asset_name=data_asset_name):
+                mapped_batch_definition_list: List[LegacyBatchDefinition] = (
+                    self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                        data_reference=data_reference,
+                        data_asset_name=data_asset_name,
+                    )
                 )
-                self._data_references_cache[data_asset_name][
-                    data_reference
-                ] = mapped_batch_definition_list
+                self._data_references_cache[data_asset_name][data_reference] = (
+                    mapped_batch_definition_list
+                )
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
@@ -134,7 +134,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             number of data_references known by this DataConnector.
-        """
+        """  # noqa: E501
         total_references: int = sum(
             len(self._data_references_cache[data_asset_name])
             for data_asset_name in self._data_references_cache
@@ -150,7 +150,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         Returns:
             list of data_references that are not matched by configuration.
-        """
+        """  # noqa: E501
         unmatched_data_references: List[str] = []
         for (
             data_asset_name,
@@ -163,8 +163,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return unmatched_data_references
 
     @override
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
-        batch_definition_list: List[BatchDefinition] = [
+    def _get_batch_definition_list_from_cache(self) -> List[LegacyBatchDefinition]:
+        batch_definition_list: List[LegacyBatchDefinition] = [
             batch_definitions[0]
             for data_reference_sub_cache in self._data_references_cache.values()
             for batch_definitions in data_reference_sub_cache.values()
@@ -173,9 +173,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return batch_definition_list
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -202,11 +200,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
     def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
         asset: Optional[Asset] = None
-        if (
-            data_asset_name is not None
-            and self.assets
-            and data_asset_name in self.assets
-        ):
+        if data_asset_name is not None and self.assets and data_asset_name in self.assets:
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
 
         return asset
@@ -218,12 +212,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         raise NotImplementedError
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
@@ -242,12 +236,10 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset  # noqa: E501
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
 
         return batch_spec

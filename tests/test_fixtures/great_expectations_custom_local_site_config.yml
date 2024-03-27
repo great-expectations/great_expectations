@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 2
+config_version: 3
 datasources:
   # For example, this one.
   mydatasource:
@@ -15,6 +15,7 @@ datasources:
 plugins_directory: plugins/
 
 expectations_store_name: expectations_store
+checkpoint_store_name: checkpoint_store
 evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: validations_store
 
@@ -24,6 +25,11 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
   validations_store:
     class_name: ValidationsStore
     store_backend:
@@ -61,14 +67,14 @@ stores:
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
-      module_name: great_expectations.data_context.store
-      class_name: EvaluationParameterStore
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
 
 data_docs_sites:
   local_site: # site name
-  # “local_site” renders documentation for all the datasources in the project from GX artifacts in the local repo.
-  # The site includes expectation suites and profiling and validation results from uncommitted directory.
-  # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
+    # “local_site” renders documentation for all the datasources in the project from GX artifacts in the local repo.
+    # The site includes expectation suites and profiling and validation results from uncommitted directory.
+    # Local site provides the convenience of visualizing all the entities stored in JSON files as HTML.
 
     module_name: great_expectations.render.renderer.site_builder
     class_name: SiteBuilder
@@ -102,10 +108,6 @@ validation_operators:
         action:
           class_name: StoreValidationResultAction
           target_store_name: validations_store
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:

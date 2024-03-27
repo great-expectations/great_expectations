@@ -1,13 +1,11 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -24,6 +22,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -58,7 +63,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     See Also:
         [expect_column_distinct_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
         [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 
@@ -72,7 +77,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
     args_keys = (
@@ -80,6 +85,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         "value_set",
     )
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -117,16 +123,17 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
 
         return renderer_configuration
 
+    @override
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
@@ -147,9 +154,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"distinct values must match this set: {values_string}."
 
@@ -170,9 +175,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"distinct values must match this set: {values_string}."
 
@@ -187,33 +190,29 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
+    @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        observed_value_counts = metrics.get("column.value_counts")
+        observed_value_counts = metrics["column.value_counts"]
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs(configuration).get("value_set")
+        value_set = self._get_success_kwargs()["value_set"]
 
         parsed_value_set = value_set
 

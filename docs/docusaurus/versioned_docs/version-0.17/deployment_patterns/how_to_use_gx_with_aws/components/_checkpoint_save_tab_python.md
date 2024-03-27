@@ -1,0 +1,2 @@
+```python title="Python" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/databricks_deployment_patterns_dataframe_python_configs.py add checkpoint config"
+```

@@ -1,11 +1,9 @@
-from typing import List, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-)
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
+from typing import TYPE_CHECKING, List, Optional, Union
+
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -13,6 +11,14 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251
@@ -61,7 +67,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     like_pattern: Union[str, EvaluationParameterDict]
 
@@ -104,14 +110,8 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
             ["column", "like_pattern", "mostly"],
         )
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+        mostly_str = "" if params.get("mostly") is None else ", at least $mostly_pct % of the time"
         like_pattern = params.get("like_pattern")  # noqa: F841
 
         template_str = f"Values must match like pattern $like_pattern {mostly_str}: "

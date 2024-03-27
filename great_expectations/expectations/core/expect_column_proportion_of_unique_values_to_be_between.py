@@ -1,14 +1,11 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -30,6 +27,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -79,7 +83,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
 
     See Also:
         [expect_column_unique_value_count_to_be_between](https://greatexpectations.io/expectations/expect_column_unique_value_count_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -96,7 +100,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.unique_proportion",)
     success_keys = (
         "min_value",
@@ -116,7 +120,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: C901 - too complex
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -146,20 +150,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     renderer_configuration=renderer_configuration
                 )
             if not params.min_value:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif not params.max_value:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params.min_value.value != params.max_value.value:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
+                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
                 else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -201,20 +199,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_most_str} $max_value."
-                )
+                template_str = f"fraction of unique values must be {at_most_str} $max_value."
             elif params["max_value"] is None:
-                template_str = (
-                    f"fraction of unique values must be {at_least_str} $min_value."
-                )
+                template_str = f"fraction of unique values must be {at_least_str} $min_value."
             else:  # noqa: PLR5501
                 if params["min_value"] != params["max_value"]:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
+                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."  # noqa: E501
                 else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
+                    template_str = "fraction of unique values must be exactly $min_value."
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -271,14 +263,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.unique_proportion",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

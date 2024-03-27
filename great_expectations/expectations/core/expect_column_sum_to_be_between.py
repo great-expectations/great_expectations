@@ -25,10 +25,12 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -72,7 +74,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         * If max_value is None, then min_value is treated as a lower bound
         * observed_value field in the result object is customized for this expectation to be a list \
           representing the actual column sum
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -89,7 +91,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.sum",)
     success_keys = (
         "min_value",
@@ -140,7 +142,9 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"sum must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = (
+                    f"sum must be {at_least_str} $min_value and {at_most_str} $max_value."
+                )
             elif not params.min_value:
                 template_str = f"sum must be {at_most_str} $max_value."
             else:
@@ -188,7 +192,9 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"sum must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = (
+                    f"sum must be {at_least_str} $min_value and {at_most_str} $max_value."
+                )
             elif params["min_value"] is None:
                 template_str = f"sum must be {at_most_str} $max_value."
             elif params["max_value"] is None:
@@ -221,14 +227,12 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.sum",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

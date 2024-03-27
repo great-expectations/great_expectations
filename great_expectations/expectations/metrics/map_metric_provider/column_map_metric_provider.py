@@ -4,20 +4,20 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
-from great_expectations.core._docs_decorators import public_api
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.map_metric_provider.map_metric_provider import (
     MapMetricProvider,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class ColumnMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a single column. An example of a column map
     metric is `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of
@@ -25,7 +25,7 @@ class ColumnMapMetricProvider(MapMetricProvider):
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
-    """
+    """  # noqa: E501
 
     condition_domain_keys = (
         "batch_id",

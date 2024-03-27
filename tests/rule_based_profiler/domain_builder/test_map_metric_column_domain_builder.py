@@ -207,7 +207,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
 
 
 @pytest.mark.slow  # 2.66s
-def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_unexpected_values_proportion(
+def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_unexpected_values_proportion(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context = bobby_columnar_table_multi_batch_deterministic_data_context

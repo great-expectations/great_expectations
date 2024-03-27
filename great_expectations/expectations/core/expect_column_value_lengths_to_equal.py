@@ -1,11 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -24,6 +22,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -64,7 +68,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
-    """
+    """  # noqa: E501
 
     value: Union[float, EvaluationParameterDict]
 
@@ -105,7 +109,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -144,11 +148,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

@@ -4,13 +4,9 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Optional, Union
+from typing import ClassVar, List, Tuple, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -19,63 +15,51 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
-    """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+    """Expect the expect the number of rows returned from a queried table to equal a specified value.
 
-    metric_dependencies = ("query.table",)
+    expect_queried_table_row_count_to_be is a \
+    [Query Expectation](https://docs.greatexpectations.io/docs/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations)
 
-    query = """
+    Args:
+        value (int): \
+            Expected number of returned rows
+        query (str): \
+            SQL query to be executed (default will perform a SELECT COUNT(*) on the table)
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+    """
+
+    value: int
+    query: str = """
             SELECT COUNT(*)
-            FROM {active_batch}
+            FROM {batch}
             """
 
-    success_keys = (
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ("query.table",)
+
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "value",
         "query",
     )
 
-    domain_keys = ("batch_id", "row_condition", "condition_parser")
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
-    default_kwarg_values = {
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-        "meta": None,
-        "value": None,
-        "query": query,
-    }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-        value = configuration["kwargs"].get("value")
-
-        try:
-            assert value is not None, "'value' must be specified"
-            assert (
-                isinstance(value, int) and value >= 0
-            ), "`value` must be an integer greater than or equal to zero"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ) -> Union[ExpectationValidationResult, dict]:
-        metrics = convert_to_json_serializable(data=metrics)
-        query_result = list(metrics.get("query.table")[0].values())[0]
-        value = configuration["kwargs"].get("value")
-
-        success = query_result == value
-
-        return {
-            "success": success,
-            "result": {"observed_value": query_result},
-        }
-
-    examples = [
+    examples: ClassVar[List[dict]] = [
         {
             "data": [
                 {
@@ -138,6 +122,24 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         "tags": ["query-based"],
         "contributors": ["@austiezr"],
     }
+
+    def _validate(
+        self,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = list(metrics.get("query.table")[0].values())[0]
+        value = configuration["kwargs"].get("value")
+
+        success = query_result == value
+
+        return {
+            "success": success,
+            "result": {"observed_value": query_result},
+        }
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -9,6 +8,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -33,7 +35,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         SELECT
             COUNT(1)
         FROM
-            {active_batch}
+            {batch}
         WHERE
             ({column_a} is not null and {column_b} is null)
             OR
@@ -54,9 +56,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -72,36 +72,27 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
 
         template_dict = configuration.kwargs.get("template_dict")
         try:
-            assert isinstance(
-                template_dict, dict
-            ), "'template_dict' must be supplied as a dict"
+            assert isinstance(template_dict, dict), "'template_dict' must be supplied as a dict"
             assert all(
                 [
                     "column_a" in template_dict,
                     "column_b" in template_dict,
                 ]
             ), "The following keys must be in the template dict: column_a, column_b"
-            assert isinstance(
-                template_dict["column_a"], str
-            ), "column_a must be a string"
-            assert isinstance(
-                template_dict["column_b"], str
-            ), "column_b must be a string"
+            assert isinstance(template_dict["column_a"], str), "column_a must be a string"
+            assert isinstance(template_dict["column_b"], str), "column_b must be a string"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
         try:
-            num_of_inconsistent_rows = list(
-                metrics.get("query.template_values")[0].values()
-            )[0]
+            num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
         except IndexError:
             raise IndexError("Invalid index - query.template_values has no [0] index]")
 
@@ -109,9 +100,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
 
         return {
             "success": is_success,
-            "result": {
-                "info": f"Row count with inconsistent values: {num_of_inconsistent_rows}"
-            },
+            "result": {"info": f"Row count with inconsistent values: {num_of_inconsistent_rows}"},
         }
 
     examples = [

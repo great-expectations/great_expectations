@@ -2,7 +2,6 @@ import geopandas
 import numpy as np
 from shapely.geometry import Point, Polygon
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
@@ -21,7 +20,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         geo_ser = geopandas.GeoSeries(column)
-        input_indices, result_indices = geo_ser.sindex.query_bulk(
+        _input_indices, result_indices = geo_ser.sindex.query_bulk(
             geo_ser.geometry, predicate="overlaps"
         )
         overlapping = np.unique(result_indices)  # integer indeces of overlapping
@@ -96,7 +95,6 @@ class ExpectColumnValuesGeometryToOverlap(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics,
         runtime_configuration: dict = None,
         execution_engine=None,

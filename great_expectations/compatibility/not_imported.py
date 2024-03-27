@@ -7,6 +7,7 @@ libraries are not installed, we check for existence of the associated library.
 
 We also consolidate logic for warning based on version number in this module.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -38,9 +39,7 @@ class NotImported:
         return False
 
 
-def is_version_greater_or_equal(
-    version: str | Version, compare_version: str | Version
-) -> bool:
+def is_version_greater_or_equal(version: str | Version, compare_version: str | Version) -> bool:
     """Check if the version is greater or equal to the compare_version.
 
     Args:
@@ -58,9 +57,7 @@ def is_version_greater_or_equal(
     return version >= compare_version
 
 
-def is_version_less_than(
-    version: str | Version, compare_version: str | Version
-) -> bool:
+def is_version_less_than(version: str | Version, compare_version: str | Version) -> bool:
     """Check if the version is less than the compare_version.
 
     Args:

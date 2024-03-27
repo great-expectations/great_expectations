@@ -151,7 +151,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
-        reason="False match for context.get_expectation_suite()",
+        reason="False match for context.suites.get()",
         name="get_expectation_suite",
         filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
     ),
@@ -696,7 +696,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path(
-            "great_expectations/datasource/fluent/spark_generic_splitters.py"
+            "great_expectations/datasource/fluent/spark_generic_partitioners.py"
         ),
     ),
     IncludeExcludeDefinition(
@@ -748,5 +748,110 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Not yet part of the public API",
         name="ResultFormat",
         filepath=pathlib.Path("great_expectations/core/result_format.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="Not yet part of the public API, under active development",
+        name="BatchDefinition",
+        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="add_expectation",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/expectations_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="delete_expectation",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/expectations_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="build_batch_request",
+        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="save",
+        filepath=pathlib.Path("great_expectations/core/batch_config.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="delete",
+        filepath=pathlib.Path(
+            "great_expectations/data_context/store/datasource_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="",
+        name="ExpectColumnValuesToBeInSet",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_be_in_set.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This validate is a name collision with batch.validate().",
+        name="validate",
+        filepath=pathlib.Path("great_expectations/profile/base.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToBeBetween",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_be_between.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="We do not want Expectations in our API docs. Expectation docs live in the gallery.",
+        name="ExpectColumnValuesToNotBeNull",
+        filepath=pathlib.Path(
+            "great_expectations/expectations/core/expect_column_values_to_not_be_null.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users.",
+        name="get_or_create_spark_session",
+        filepath=pathlib.Path(
+            "great_expectations/execution_engine/sparkdf_execution_engine.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method can be removed in 1.0",
+        name="get_or_create_spark_application",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method can be removed in 1.0",
+        name="get_or_create_spark_session",
+        filepath=pathlib.Path("great_expectations/core/util.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
+        name="get_batch_request_options_keys",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/file_path_data_asset.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
+        name="get_batch_request_options_keys",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/pandas_datasource.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
+        name="get_batch_request_options_keys",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/spark_datasource.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
+        name="get_batch_request_options_keys",
+        filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
     ),
 ]

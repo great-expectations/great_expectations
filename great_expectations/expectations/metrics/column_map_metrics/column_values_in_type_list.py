@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 
@@ -16,7 +18,7 @@ class ColumnValuesInTypeList(ColumnMapMetricProvider):
     condition_value_keys = ("type_list",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, type_list, **kwargs):
+    def _pandas(cls, column, type_list, **kwargs):  # noqa: C901 - too complex
         comp_types = []
         for type_ in type_list:
             try:

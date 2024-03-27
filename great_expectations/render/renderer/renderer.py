@@ -1,21 +1,23 @@
+from __future__ import annotations
+
 from functools import wraps
 from typing import Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def renderer(
-    renderer_type: str, **kwargs
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def renderer(renderer_type: str, **kwargs) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def wrapper(renderer_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(renderer_fn)
         def inner_func(*args: P.args, **kwargs: P.kwargs):
@@ -32,10 +34,13 @@ def renderer(
 class Renderer:
     """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
 
-    def __init__(self) -> None:
-        # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
-        # used to be composed exclusively of classmethods
-        pass
+    def serialize(self) -> dict:
+        # Necessary to enable proper serialization within an Action (and additionally, within a Checkpoint)  # noqa: E501
+        # TODO: Renderers should be ported over to Pydantic to prevent this fork in logic
+        return {
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
@@ -77,7 +82,7 @@ class Renderer:
 
         :param evrs:
         :return: list of columns with best effort sorting
-        """
+        """  # noqa: E501
         evrs_ = evrs if isinstance(evrs, list) else evrs.results
 
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(
@@ -101,7 +106,7 @@ class Renderer:
         else:
             ordered_columns = []
 
-        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column  # noqa: E501
         # names from entire evr
         if set(sorted_columns) == set(ordered_columns):
             return ordered_columns

@@ -3,6 +3,7 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
+
 import math
 
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -19,9 +20,7 @@ def check_perfect_square(m):
 
 
 def check_fibonacci(m):
-    return (
-        check_perfect_square(5 * m * m + 4) or check_perfect_square(5 * m * m - 4)
-    ) and m >= 0
+    return (check_perfect_square(5 * m * m + 4) or check_perfect_square(5 * m * m - 4)) and m >= 0
 
 
 def is_valid_fibonacci_number(number: int) -> bool:

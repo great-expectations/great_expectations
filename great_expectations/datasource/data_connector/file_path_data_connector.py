@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import logging
 import re
-from typing import Callable, Dict, Iterator, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     BatchSpec,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -25,7 +27,9 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -41,33 +45,23 @@ class DataConnectorStorageDataReferenceResolver:
         "InferredAssetDBFSDataConnector": "DBFS",
         "ConfiguredAssetDBFSDataConnector": "DBFS",
     }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
-        Tuple[str, str], Callable
-    ] = {
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[Tuple[str, str], Callable] = {
         (
             "S3",
             "PandasExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(**template_arguments),
         (
             "S3",
             "SparkDFExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(**template_arguments),
         (
             "GCS",
             "PandasExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(**template_arguments),
         (
             "GCS",
             "SparkDFExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(**template_arguments),
         (
             "ABS",
             "PandasExecutionEngine",
@@ -89,9 +83,7 @@ class DataConnectorStorageDataReferenceResolver:
         (
             "DBFS",
             "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
-            **template_arguments
-        ),
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(**template_arguments),
     }
 
     @staticmethod
@@ -101,14 +93,14 @@ class DataConnectorStorageDataReferenceResolver:
         template_arguments: dict,
     ):
         """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, execution_engine_name)
-        ](
-            template_arguments
+        storage_name: str = (
+            DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+                data_connector_name
+            ]
         )
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[  # noqa: E501
+            (storage_name, execution_engine_name)
+        ](template_arguments)
 
 
 @public_api
@@ -132,7 +124,7 @@ class FilePathDataConnector(DataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -205,7 +197,7 @@ class FilePathDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
         batch_request: BatchRequest,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
 
@@ -219,16 +211,14 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of BatchDefinition objects that match BatchRequest
 
-        """
+        """  # noqa: E501
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
-        return self._get_batch_definition_list_from_batch_request(
-            batch_request=batch_request_base
-        )
+        return self._get_batch_definition_list_from_batch_request(batch_request=batch_request_base)
 
     def _get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         """
         Retrieve batch_definitions that match batch_request.
 
@@ -242,14 +232,14 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of BatchDefinition objects that match BatchRequest
 
-        """
+        """  # noqa: E501
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         # Use a combination of a list and set to preserve iteration order
-        batch_definition_list: List[BatchDefinition] = list()
+        batch_definition_list: List[LegacyBatchDefinition] = list()
         batch_definition_set = set()
         for batch_definition in self._get_batch_definition_list_from_cache():
             if (
@@ -268,10 +258,7 @@ class FilePathDataConnector(DataConnector):
 
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
-            if (
-                batch_request.limit is not None
-                and data_connector_query_dict.get("limit") is None
-            ):
+            if batch_request.limit is not None and data_connector_query_dict.get("limit") is None:
                 data_connector_query_dict["limit"] = batch_request.limit
 
             batch_filter_obj: BatchFilter = build_batch_filter(
@@ -284,8 +271,8 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
+        self, batch_definition_list: List[LegacyBatchDefinition]
+    ) -> List[LegacyBatchDefinition]:
         """
         Use configured sorters to sort batch_definition
 
@@ -307,7 +294,7 @@ class FilePathDataConnector(DataConnector):
     @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
@@ -322,7 +309,7 @@ class FilePathDataConnector(DataConnector):
 
     @override
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> str:
         data_asset_name: str = batch_definition.data_asset_name
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
@@ -335,19 +322,17 @@ class FilePathDataConnector(DataConnector):
         )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
     def resolve_data_reference(self, template_arguments: dict):
@@ -360,61 +345,49 @@ class FilePathDataConnector(DataConnector):
 
     @override
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(
-            batch_definition=batch_definition
-        )
+        path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""
+"""  # noqa: E501
             )
 
-        path = self._get_full_file_path(
-            path=path, data_asset_name=batch_definition.data_asset_name
-        )
+        path = self._get_full_file_path(path=path, data_asset_name=batch_definition.data_asset_name)
 
         return {"path": path}
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
         super()._validate_batch_request(batch_request=batch_request)
-        self._validate_sorters_configuration(
-            data_asset_name=batch_request.data_asset_name
-        )
+        self._validate_sorters_configuration(data_asset_name=batch_request.data_asset_name)
 
-    def _validate_sorters_configuration(
-        self, data_asset_name: Optional[str] = None
-    ) -> None:
+    def _validate_sorters_configuration(self, data_asset_name: Optional[str] = None) -> None:
         if self.sorters is not None and len(self.sorters) > 0:
             # data_asset_name: str = batch_request.data_asset_name
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
-            if any(
-                sorter_name not in group_names for sorter_name in self.sorters.keys()
-            ):
+            if any(sorter_name not in group_names for sorter_name in self.sorters.keys()):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
-                    """
+                    """  # noqa: E501
                 )
 
             if len(group_names) < len(self.sorters):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
-                    """
+                    """  # noqa: E501
                 )
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+    def _get_batch_definition_list_from_cache(self) -> List[LegacyBatchDefinition]:
         raise NotImplementedError
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         raise NotImplementedError
 
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         raise NotImplementedError

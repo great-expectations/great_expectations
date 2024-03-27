@@ -21,6 +21,8 @@ from typing import (  # TODO: revert use of cast
 import pytest
 
 from great_expectations.compatibility import pydantic
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -29,6 +31,8 @@ from great_expectations.datasource.fluent.config import (
 )
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
+    _BATCH_DEFINITION_NAME_KEY,
+    _BATCH_DEFINITIONS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -40,7 +44,7 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    SplitterYearAndMonth,
+    SqlPartitionerYearAndMonth,
     TableAsset,
 )
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
@@ -73,18 +77,23 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
             "type": "postgres",
             "assets": [
                 {
-                    "name": "my_table_asset_wo_splitters",
+                    "name": "my_table_asset_wo_partitioners",
                     "table_name": "my_table",
                     "type": "table",
                 },
                 {
-                    "splitter": {
-                        "column_name": "my_column",
-                        "method_name": "split_on_year_and_month",
-                    },
                     "table_name": "another_table",
-                    "name": "with_splitter",
+                    "name": "with_partitioner",
                     "type": "table",
+                    "batch_definitions": [
+                        {
+                            "name": "with_partitioner",
+                            "partitioner": {
+                                "column_name": "my_column",
+                                "method_name": "partition_on_year_and_month",
+                            },
+                        }
+                    ],
                 },
                 {
                     "order_by": [
@@ -111,9 +120,14 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "csv",
                     "name": "my_csv_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",  # noqa: E501
                     "sep": "|",
                     "names": ["col1", "col2"],
+                    "batch_definitions": [
+                        {
+                            "name": "my_batch_definition",
+                        }
+                    ],
                     "batch_metadata": {
                         "pipeline_filename": "${pipeline_filename}",
                     },
@@ -121,7 +135,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "json",
                     "name": "my_json_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",  # noqa: E501
                     "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
@@ -186,16 +200,14 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
                 {
                     "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH
-                    / "yellow_tripdata_sample_2018-04.csv",
+                    "filepath_or_buffer": CSV_PATH / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH
-                    / "yellow_tripdata_sample_2018-04.csv",
+                    "filepath_or_buffer": CSV_PATH / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
@@ -234,9 +246,7 @@ class TestExcludeUnsetAssetFields:
         asset_dict_config.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(
-                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-                ),
+                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict_config["name"]
@@ -262,14 +272,12 @@ class TestExcludeUnsetAssetFields:
     def test_from_gx_config(self, asset_dict: dict):
         """
         Ensure that unset fields are excluded even when being parsed by the top-level `GxConfig` class.
-        """
+        """  # noqa: E501
         # fill in required args
         asset_dict.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(
-                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-                ),
+                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_dict_config = copy.deepcopy(asset_dict)
@@ -345,19 +353,40 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
             no_ids[ds_name]["assets"][asset_name].pop("id", None)
 
-    no_ids = (
-        _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
-            config={
-                _FLUENT_DATASOURCES_KEY: no_ids,
-            }
-        )
+            if _BATCH_DEFINITIONS_KEY in asset_config:
+                with_ids[ds_name]["assets"][asset_name][_BATCH_DEFINITIONS_KEY] = {
+                    batch_definition[_BATCH_DEFINITION_NAME_KEY]: batch_definition
+                    for batch_definition in with_ids[ds_name]["assets"][asset_name][
+                        _BATCH_DEFINITIONS_KEY
+                    ]
+                }
+                for batch_definition in with_ids[ds_name]["assets"][asset_name][
+                    _BATCH_DEFINITIONS_KEY
+                ].values():
+                    batch_asset_id = uuid.uuid4()
+                    all_ids.append(str(batch_asset_id))
+                    batch_definition["id"] = str(batch_asset_id)
+
+                no_ids[ds_name]["assets"][asset_name][_BATCH_DEFINITIONS_KEY] = {
+                    batch_definition[_BATCH_DEFINITION_NAME_KEY]: batch_definition
+                    for batch_definition in no_ids[ds_name]["assets"][asset_name][
+                        _BATCH_DEFINITIONS_KEY
+                    ]
+                }
+                for batch_definition in no_ids[ds_name]["assets"][asset_name][
+                    _BATCH_DEFINITIONS_KEY
+                ].values():
+                    batch_definition.pop("id", None)
+
+    no_ids = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
+        config={
+            _FLUENT_DATASOURCES_KEY: no_ids,
+        }
     )
-    with_ids = (
-        _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
-            config={
-                _FLUENT_DATASOURCES_KEY: with_ids,
-            }
-        )
+    with_ids = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
+        config={
+            _FLUENT_DATASOURCES_KEY: with_ids,
+        }
     )
 
     gx_config_no_ids = GxConfig.parse_obj(no_ids)
@@ -405,6 +434,33 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),
+        p(GxConfig.parse_raw, COMPLEX_CONFIG_JSON, id="complex json"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
+    ],
+)
+def test_batch_definitions_are_assigned_data_assets(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    loaded: GxConfig = load_method(input_)
+    assert loaded
+
+    batch_definitions: List[BatchDefinition] = []
+    assert loaded.datasources
+    for datasource in loaded.datasources:
+        for data_asset in datasource.assets:
+            batch_definitions.extend(data_asset.batch_definitions)
+    assert len(batch_definitions) > 0
+    for batch_definition in batch_definitions:
+        assert batch_definition.data_asset is not None
+        assert batch_definition in batch_definition.data_asset.batch_definitions
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
     [
         p({}, (_FLUENT_DATASOURCES_KEY,), "field required", id="no datasources"),
@@ -448,24 +504,31 @@ def test_catch_bad_top_level_config(
     [
         p(
             {
-                "name": "unknown splitter",
+                "name": "unknown partitioner",
                 "type": "table",
                 "table_name": "pool",
-                "splitter": {
-                    "method_name": "not_a_valid_method_name",
-                    "column_name": "foo",
-                },
+                "batch_definitions": [
+                    {
+                        "name": "unknown_partitioner_batch_definition",
+                        "partitioner": {
+                            "method_name": "not_a_valid_method_name",
+                            "column_name": "foo",
+                        },
+                    }
+                ],
             },
             (
                 _FLUENT_DATASOURCES_KEY,
                 "assets",
                 0,
                 "TableAsset",
-                "splitter",
+                "batch_definitions",
+                0,
+                "partitioner",
                 "method_name",
             ),
             "unexpected value; permitted:",
-            id="unknown splitter method",
+            id="unknown partitioner method",
         ),
         p(
             {
@@ -552,14 +615,14 @@ def test_catch_bad_asset_configs(
         )
     ],
 )
-def test_general_splitter_errors(
+def test_general_partitioner_errors(
     inject_engine_lookup_double,
     bad_column_kwargs: dict,
     expected_error_type: str,
     expected_msg: str,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        SplitterYearAndMonth(**bad_column_kwargs)
+        SqlPartitionerYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -609,9 +672,7 @@ def from_all_config(request: FixtureRequest) -> GxConfig:
 
 
 @pytest.mark.unit
-def test_dict_config_round_trip(
-    inject_engine_lookup_double, from_dict_gx_config: GxConfig
-):
+def test_dict_config_round_trip(inject_engine_lookup_double, from_dict_gx_config: GxConfig):
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
@@ -623,9 +684,7 @@ def test_dict_config_round_trip(
 
 
 @pytest.mark.unit
-def test_json_config_round_trip(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
-):
+def test_json_config_round_trip(inject_engine_lookup_double, from_json_gx_config: GxConfig):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
@@ -637,9 +696,7 @@ def test_json_config_round_trip(
 
 
 @pytest.mark.filesystem
-def test_yaml_config_round_trip(
-    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
-):
+def test_yaml_config_round_trip(inject_engine_lookup_double, from_yaml_gx_config: GxConfig):
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
@@ -672,9 +729,7 @@ def test_yaml_file_config_round_trip(
 
 
 @pytest.mark.filesystem
-def test_assets_key_presence(
-    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
-):
+def test_assets_key_presence(inject_engine_lookup_double, from_yaml_gx_config: GxConfig):
     ds_wo_assets = None
     ds_with_assets = None
     for ds in from_yaml_gx_config.datasources:
@@ -686,23 +741,20 @@ def test_assets_key_presence(
     assert ds_wo_assets, "Need at least one Datasource without assets for this test"
 
     dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
-    print(
-        f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
-    )
+    print(f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}")
 
     assert _ASSETS_KEY in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_with_assets.name]
     assert _ASSETS_KEY not in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_wo_assets.name]
 
 
 # Marked via from_all_config fixture
-def test_splitters_deserialization(
-    inject_engine_lookup_double, from_all_config: GxConfig
-):
-    table_asset: TableAsset = from_all_config.get_datasource(
-        datasource_name="my_pg_ds"
-    ).get_asset(asset_name="with_splitter")
-    assert isinstance(table_asset.splitter, SplitterYearAndMonth)
-    assert table_asset.splitter.method_name == "split_on_year_and_month"
+def test_partitioners_deserialization(inject_engine_lookup_double, from_all_config: GxConfig):
+    table_asset: TableAsset = from_all_config.get_datasource(datasource_name="my_pg_ds").get_asset(
+        asset_name="with_partitioner"
+    )
+    partitioner = table_asset.batch_definitions[0].partitioner
+    assert isinstance(partitioner, PartitionerYearAndMonth)
+    assert partitioner.method_name == "partition_on_year_and_month"
 
 
 # TDD Tests for future work
@@ -720,15 +772,13 @@ def test_yaml_config_round_trip_ordering(
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
 @pytest.mark.big
-def test_custom_sorter_serialization(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
-):
+def test_custom_sorter_serialization(inject_engine_lookup_double, from_json_gx_config: GxConfig):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT[_FLUENT_DATASOURCES_KEY][
-        "my_pg_ds"
-    ]["assets"]["with_dslish_sorters"]["order_by"]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT[_FLUENT_DATASOURCES_KEY]["my_pg_ds"][
+        "assets"
+    ]["with_dslish_sorters"]["order_by"]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped
@@ -760,9 +810,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
-            datasource_without_default_pandas_data_asset_config_dict[
-                _FLUENT_DATASOURCES_KEY
-            ],
+            datasource_without_default_pandas_data_asset_config_dict[_FLUENT_DATASOURCES_KEY],
         )
     )[0]
     default_pandas_datasoure_config_dict["assets"] = list(
@@ -787,9 +835,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
-            only_default_pandas_datasource_and_data_asset_config_dict[
-                _FLUENT_DATASOURCES_KEY
-            ],
+            only_default_pandas_datasource_and_data_asset_config_dict[_FLUENT_DATASOURCES_KEY],
         )
     )[0]
     default_pandas_datasoure_config_dict["assets"] = list(
@@ -846,19 +892,19 @@ def test_config_substitution_retains_original_value_on_save(
     print(f"injected env variables:\n{pf(seed_ds_env_vars)}\n")
     my_conn_str = os.environ["MY_CONN_STR"]
 
-    original: dict = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
+    original: dict = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]["my_sqlite_ds_w_subs"]
 
     from great_expectations import get_context
 
-    context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
-    )
+    context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 
     print(context.fluent_config)
 
-    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
+    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(
+        datasource_name="my_sqlite_ds_w_subs"
+    )  # type: ignore[assignment]
 
     assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
     assert (
@@ -870,9 +916,9 @@ def test_config_substitution_retains_original_value_on_save(
 
     context._save_project_config()
 
-    round_tripped = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
+    round_tripped = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]["my_sqlite_ds_w_subs"]
 
     assert round_tripped == original
 
@@ -887,18 +933,16 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     # show injected env variable
     print(f"injected env variables:\n{pf(seed_ds_env_vars)}")
 
-    original: dict = cast(
-        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
-    )[_FLUENT_DATASOURCES_KEY]
+    original: dict = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
+        _FLUENT_DATASOURCES_KEY
+    ]
     assert original.get("my_sqlite_ds_w_subs")  # will be modified
     assert original.get("my_pg_ds")  # will be deleted
     assert not original.get("my_sqlite")  # will be added
 
     from great_expectations import get_context
 
-    context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
-    )
+    context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 
     datasources = context.fluent_datasources
 
@@ -914,9 +958,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]
         "my_sqlite_ds_w_subs"
     )
-    sqlite_ds_w_subs.add_table_asset(
-        "new_asset", table_name="yellow_tripdata_sample_2019_01"
-    )
+    sqlite_ds_w_subs.add_table_asset("new_asset", table_name="yellow_tripdata_sample_2019_01")
 
     context._save_project_config()
 

@@ -55,11 +55,7 @@ class GXSqlDialect(Enum):
     @classmethod
     def get_all_dialect_names(cls) -> List[str]:
         """Get dialect names for all SQL dialects."""
-        return [
-            dialect_name.value
-            for dialect_name in cls
-            if dialect_name != GXSqlDialect.OTHER
-        ]
+        return [dialect_name.value for dialect_name in cls if dialect_name != GXSqlDialect.OTHER]
 
     @classmethod
     def get_all_dialects(cls) -> List[GXSqlDialect]:
@@ -81,9 +77,7 @@ DIALECT_IDENTIFIER_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, Literal['"', "`"]]
 def quote_str(unquoted_identifier: str, dialect: GXSqlDialect) -> str:
     """Quote a string using the specified dialect's quote character."""
     quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
-    if unquoted_identifier.startswith(quote_char) or unquoted_identifier.endswith(
-        quote_char
-    ):
+    if unquoted_identifier.startswith(quote_char) or unquoted_identifier.endswith(quote_char):
         raise ValueError(
             f"Identifier {unquoted_identifier} already uses quote character {quote_char}"
         )
@@ -98,15 +92,13 @@ def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
 
 
 @overload
-def wrap_identifier(indentifier: str, dialect: GXSqlDialect = ...) -> quoted_name:
-    ...
+def wrap_identifier(indentifier: str, dialect: GXSqlDialect = ...) -> quoted_name: ...
 
 
 @overload
 def wrap_identifier(
     indentifier: quoted_name, dialect: GXSqlDialect | None = ...
-) -> quoted_name:
-    ...
+) -> quoted_name: ...
 
 
 def wrap_identifier(

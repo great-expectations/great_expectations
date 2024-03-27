@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import os
-import unittest
-from typing import TYPE_CHECKING, Dict, List, Optional, cast
-from unittest import mock
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 import pytest
 from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
@@ -17,7 +15,6 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_res
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
@@ -39,9 +36,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -80,9 +75,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 def bobby_profile_data_profiler_structured_data_assistant_result(
     bobby_columnar_table_multi_batch_probabilistic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: FileDataContext = (
-        bobby_columnar_table_multi_batch_probabilistic_data_context
-    )
+    context: FileDataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -134,20 +127,13 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         == profile_data_profiler_structured_data_assistant_result_as_dict
     )
     assert (
-        len(
-            bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
-        )
-        == 2
+        len(bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules) == 2
     )
 
 
 @pytest.mark.big
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 7.34s
 def test_profile_data_profiler_structured_data_assistant_result_get_expectation_suite(
-    mock_emit,
     bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled: DataProfilerStructuredDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
@@ -157,15 +143,6 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
-    )
 
 
 @pytest.mark.big
@@ -184,9 +161,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     for (
         domain,
         parameter_values_for_fully_qualified_parameter_names,
-    ) in (
-        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
-    ):
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
@@ -196,9 +171,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     for (
         domain,
         parameter_values_for_fully_qualified_parameter_names,
-    ) in (
-        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
-    ):
+    ) in bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
     assert (
         num_metrics == 50
@@ -209,9 +182,9 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
 def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode

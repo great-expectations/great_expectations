@@ -1,8 +1,10 @@
 from typing import List
 
 import great_expectations as gx
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
@@ -114,9 +116,7 @@ batch_request: dict = {
 
 result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)
 
-expectation_configurations: List[
-    ExpectationConfiguration
-] = result.expectation_configurations
+expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
 
 print(expectation_configurations)
 
@@ -124,7 +124,6 @@ print(expectation_configurations)
 row_count_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.16.7"},
-        "data_asset_type": None,
         "expectations": [
             {
                 "kwargs": {"min_value": 10000, "max_value": 10000, "mostly": 1.0},

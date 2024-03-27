@@ -1,4 +1,5 @@
 """These tests exercise ConfigurationBundle including Serialization."""
+
 import pytest
 
 from great_expectations.data_context.migrator.configuration_bundle import (
@@ -79,17 +80,17 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
         expected_serialized_bundle = stub_serialized_configuration_bundle
 
-        # Remove meta before comparing since it contains the GX version
+        # Remove meta and notes before comparing since it contains the GX version
         serialized_bundle["expectation_suites"][0].pop("meta", None)
         expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+        serialized_bundle["expectation_suites"][0].pop("notes", None)
+        expected_serialized_bundle["expectation_suites"][0].pop("notes", None)
 
         assert serialized_bundle == expected_serialized_bundle
 
@@ -111,9 +112,7 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
@@ -134,15 +133,8 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
-        assert (
-            serialized_bundle["data_context_variables"].get(
-                "anonymous_usage_statistics"
-            )
-            is None
-        )
+        assert serialized_bundle["data_context_variables"].get("anonymous_usage_statistics") is None

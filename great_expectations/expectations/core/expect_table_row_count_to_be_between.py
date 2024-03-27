@@ -24,10 +24,12 @@ from great_expectations.render.util import (
 
 if TYPE_CHECKING:
     from great_expectations.core import (
-        ExpectationConfiguration,
         ExpectationValidationResult,
     )
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -68,7 +70,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     See Also:
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
-    """
+    """  # noqa: E501
 
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None
     max_value: Union[int, EvaluationParameterDict, datetime, None] = None
@@ -126,7 +128,9 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+                template_str = (
+                    f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+                )
             elif not params.min_value:
                 template_str = f"Must have {at_most_str} $max_value rows."
             else:
@@ -166,7 +170,9 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+                template_str = (
+                    f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+                )
             elif params["min_value"] is None:
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
@@ -188,14 +194,12 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     @override
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="table.row_count",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

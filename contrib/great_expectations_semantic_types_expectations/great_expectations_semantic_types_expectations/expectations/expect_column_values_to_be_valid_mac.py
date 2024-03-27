@@ -7,7 +7,9 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-MAC_REGEX = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9a-fA-F]{4}\\.[0-9a-fA-F]{4}\\.[0-9a-fA-F]{4})$"
+MAC_REGEX = (
+    r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9a-fA-F]{4}\\.[0-9a-fA-F]{4}\\.[0-9a-fA-F]{4})$"
+)
 
 
 # This class defines a Metric to support your Expectation.

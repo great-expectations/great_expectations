@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -22,6 +22,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -73,7 +79,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     regex_list: Union[List[str], EvaluationParameterDict]
     match_on: Literal["any", "all"] = "any"
@@ -134,16 +140,14 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
 
         if params.match_on and params.match_on.value == "all":
             template_str = (
-                "values must match all of the following regular expressions: "
-                + values_string
+                "values must match all of the following regular expressions: " + values_string
             )
         else:
             template_str = (
-                "values must match any of the following regular expressions: "
-                + values_string
+                "values must match any of the following regular expressions: " + values_string
             )
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -190,25 +194,19 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         else:
             for i, v in enumerate(params["regex_list"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["regex_list"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["regex_list"])])
 
         if params.get("match_on") == "all":
             template_str = (
-                "values must match all of the following regular expressions: "
-                + values_string
+                "values must match all of the following regular expressions: " + values_string
             )
         else:
             template_str = (
-                "values must match any of the following regular expressions: "
-                + values_string
+                "values must match any of the following regular expressions: " + values_string
             )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.expectations.expectation import (
     BatchExpectation,
 )
@@ -5,9 +7,7 @@ from great_expectations.expectations.expectation import (
 
 # NOTE: This Expectation is incomplete and not ready for use.
 #       It should remain unexported until it meets the requirements set by our V1 API.
-class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
-    BatchExpectation
-):
+class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(BatchExpectation):
     def __init__(self, *args, **kwargs):
         raise NotImplementedError
 

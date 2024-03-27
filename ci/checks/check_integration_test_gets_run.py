@@ -16,7 +16,7 @@ should be included in the integration test suite as follows:
 
 Find all test files, generate the test suite and ensure that all test files are included in the test suite.
 Assumes that all integration test dependencies are installed and passed into pytest.
-"""
+"""  # noqa: E501
 
 import pathlib
 import shutil
@@ -26,8 +26,8 @@ from typing import Set
 
 IGNORED_VIOLATIONS = [
     # TODO: Add IntegrationTestFixture for these tests or remove them if no longer needed
-    "tests/expectations/core/test_expect_column_mean_to_be_positive.py",
-    "tests/expectations/core/test_expect_column_values_to_be_in_set.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_mean_to_be_positive.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/test_expect_column_values_to_be_in_set.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
@@ -35,29 +35,35 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
-    "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
-    "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
-    "tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py",
+    "docs/docusaurus/docs/snippets/redshift_python_example.py",
+    "docs/docusaurus/docs/snippets/redshift_yaml_example.py",
+    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data.py",
+    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas.py",
     "tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml",
     "tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml",
-    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
-    "tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py",
-    "tests/integration/docusaurus/expectations/examples/batch_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/query_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py",
-    "tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py",
-    "tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
-    "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
-    "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
-    "tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py",
-    "tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py",
+    "docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_aggregate_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_map_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/column_pair_map_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/multicolumn_map_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/regex_based_column_map_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/set_based_column_map_expectation_template.py",
+    "docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py",
+    "docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+    "docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+    "docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+    "docs/docusaurus/docs/snippets/quickstart.py",
+    "docs/docusaurus/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/ge_checkpoint_bigquery.py",
+    "docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/ge_checkpoint_gcs.py",
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml",
-    "tests/integration/fixtures/query_store/great_expectations/great_expectations.yml",
-    "tests/integration/fixtures/query_store/great_expectations/uncommitted/config_variables.yml",
+    "docs/docusaurus/docs/oss/guides/expectations/advanced/great_expectations.yml",
+    "docs/docusaurus/docs/oss/guides/expectations/advanced/config_variables.yml",
+    "docs/docusaurus/docs/snippets/legacy_docs/ge_checkpoint_gcs.py",
+    "docs/docusaurus/docs/snippets/legacy_docs/ge_checkpoint_bigquery.py",
 ]
 
 
@@ -83,9 +89,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
             text=True,
             capture_output=True,
         )
-        pwd = subprocess.run(
-            ["pwd"], text=True, capture_output=True, check=True
-        ).stdout.strip("\n")
+        pwd = subprocess.run(["pwd"], text=True, capture_output=True, check=True).stdout.strip("\n")
         res_test_files = subprocess.run(  # noqa: PLW1510
             ["sed", f"s/:.*//;s?{pwd}??"],
             text=True,
@@ -148,10 +152,7 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
             input=res_test_fixture_definitions.stdout,
             capture_output=True,
         )
-        return {
-            s.strip()
-            for s in res_test_files_with_fixture_definitions.stdout.splitlines()
-        }
+        return {s.strip() for s in res_test_files_with_fixture_definitions.stdout.splitlines()}
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
@@ -171,7 +172,7 @@ def main() -> None:
     )
     if new_violations:
         print(
-            f"[ERROR] Found {len(new_violations)} test files which are not used in test suite; please add to test script runner!"
+            f"[ERROR] Found {len(new_violations)} test files which are not used in test suite; please add to test script runner!"  # noqa: E501
         )
         for line in new_violations:
             print(line)

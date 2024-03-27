@@ -1,21 +1,25 @@
+from __future__ import annotations
+
 import logging
 import traceback
 import warnings
 from copy import deepcopy
+from typing import TYPE_CHECKING, Callable
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
-    LegacyRendererType,
     RenderedTableContent,
 )
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +27,7 @@ logger = logging.getLogger(__name__)
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     _content_block_type = "table"
     _rendered_component_type = RenderedTableContent
-    _rendered_component_default_init_kwargs = {
-        "table_options": {"search": True, "icon-size": "sm"}
-    }
+    _rendered_component_default_init_kwargs = {"table_options": {"search": True, "icon-size": "sm"}}
 
     _default_element_styling = {
         "default": {"classes": ["badge", "badge-secondary"]},
@@ -44,25 +46,18 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         custom_columns = []
         if (
             len(validation_results) > 0
-            and "meta_properties_to_render"
-            in validation_results[0].expectation_config.kwargs
-            and validation_results[0].expectation_config.kwargs[
-                "meta_properties_to_render"
-            ]
+            and "meta_properties_to_render" in validation_results[0].expectation_config.kwargs
+            and validation_results[0].expectation_config.kwargs["meta_properties_to_render"]
             is not None
         ):
             custom_columns = list(
-                validation_results[0]
-                .expectation_config.kwargs["meta_properties_to_render"]
-                .keys()
+                validation_results[0].expectation_config.kwargs["meta_properties_to_render"].keys()
             )
         return sorted(custom_columns)
 
     @classmethod
     @override
-    def _process_content_block(
-        cls, content_block, has_failed_evr, render_object=None
-    ) -> None:
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
@@ -77,24 +72,26 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if has_failed_evr is False:
             styling = deepcopy(content_block.styling) if content_block.styling else {}
             if styling.get("classes"):
-                styling["classes"].append(
-                    "hide-succeeded-validations-column-section-target-child"
-                )
+                styling["classes"].append("hide-succeeded-validations-column-section-target-child")
             else:
-                styling["classes"] = [
-                    "hide-succeeded-validations-column-section-target-child"
-                ]
+                styling["classes"] = ["hide-succeeded-validations-column-section-target-child"]
 
             content_block.styling = styling
 
+    @override
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
-        expectation_string_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
+    def _get_content_block_fn(  # noqa: C901, PLR0915
+        cls,
+        expectation_type: str,
+        expectation_config: ExpectationConfiguration | None = None,
+    ) -> Callable | None:
+        content_block_fn = super()._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
         )
-        expectation_string_fn = (
-            expectation_string_fn[1] if expectation_string_fn else None
-        )
+        if content_block_fn == cls._render_expectation_description:
+            return content_block_fn
+
+        expectation_string_fn = content_block_fn
         if expectation_string_fn is None:
             expectation_string_fn = cls._get_legacy_v2_api_style_expectation_string_fn(
                 expectation_type
@@ -102,8 +99,8 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         if expectation_string_fn is None:
             expectation_string_fn = cls._missing_content_block_fn
 
-        # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
-        def row_generator_fn(
+        # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes  # noqa: E501
+        def row_generator_fn(  # noqa: C901
             configuration=None,
             result=None,
             runtime_configuration=None,
@@ -136,7 +133,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            """  # noqa: E501
             try:
                 unexpected_statement_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -180,10 +177,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     observed_value_renderer[1](result=result)
                     if observed_value_renderer
                     else (
-                        cls._get_legacy_v2_api_observed_value(
-                            expectation_string_fn, result
-                        )
-                        or "--"
+                        cls._get_legacy_v2_api_observed_value(expectation_string_fn, result) or "--"
                     )
                 ]
             except Exception as e:
@@ -219,14 +213,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _get_legacy_v2_api_style_expectation_string_fn(cls, expectation_type):
         legacy_expectation_string_fn = getattr(cls, expectation_type, None)
         if legacy_expectation_string_fn is None:
-            # With the V2 API, expectation rendering was implemented by defining a method with the same name as the expectation.
+            # With the V2 API, expectation rendering was implemented by defining a method with the same name as the expectation.  # noqa: E501
             # If no legacy rendering is present, return None.
             return None
 
         # deprecated-v0.13.28
         warnings.warn(
-            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "
-            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",
+            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "  # noqa: E501
+            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",  # noqa: E501
             DeprecationWarning,
         )
 
@@ -236,26 +230,21 @@ diagnose and repair the underlying issue.  Detailed information follows:
             if runtime_configuration is None:
                 runtime_configuration = {}
 
-            # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.
+            # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.  # noqa: E501
             return legacy_expectation_string_fn(
                 expectation=configuration,
                 styling=runtime_configuration.get("styling", None),
-                include_column_name=runtime_configuration.get(
-                    "include_column_name", True
-                ),
+                include_column_name=runtime_configuration.get("include_column_name", True),
             )
 
         return expectation_string_fn_with_legacy_translation
 
     @staticmethod
     def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
-        if (
-            expectation_string_fn.__name__
-            != "expectation_string_fn_with_legacy_translation"
-        ):
-            # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".
+        if expectation_string_fn.__name__ != "expectation_string_fn_with_legacy_translation":
+            # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".  # noqa: E501
             # If this isn't the case, return None, so we don't do any legacy logic.
             return None
 
-        # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.
+        # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.  # noqa: E501
         return result["result"].get("observed_value")

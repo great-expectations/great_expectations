@@ -14,12 +14,12 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
     file_get_unfiltered_batch_definition_list_fn,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters (list): Optional list if you want to sort the data_references
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
-    """
+    """  # noqa: E501
 
     asset_level_option_keys: ClassVar[tuple[str, ...]] = ("glob_directive",)
     asset_options_type: ClassVar[Type[FilesystemOptions]] = FilesystemOptions
@@ -57,26 +57,24 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
-        self._data_context_root_directory: Optional[
-            pathlib.Path
-        ] = data_context_root_directory
+        self._data_context_root_directory: Optional[pathlib.Path] = data_context_root_directory
 
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
             batching_regex=batching_regex,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -89,7 +87,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
-        """
+        """  # noqa: E501
         return normalize_directory_path(
             dir_path=self._base_directory,
             root_directory_path=self._data_context_root_directory,
@@ -104,13 +102,13 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
         ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
@@ -131,7 +129,7 @@ class FilesystemDataConnector(FilePathDataConnector):
 
         Returns:
             Instantiated "FilesystemDataConnector" object
-        """
+        """  # noqa: E501
         return FilesystemDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
@@ -139,7 +137,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
@@ -167,8 +165,8 @@ class FilesystemDataConnector(FilePathDataConnector):
 
         Returns:
             Customized error message
-        """
-        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
+        """  # noqa: E501
+        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,

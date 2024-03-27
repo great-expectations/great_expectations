@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Generator
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Any, Generator
 from unittest import mock
 
 import pytest
+from pytest import param
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -15,6 +17,7 @@ from great_expectations.datasource.fluent import (
     SqliteDatasource,
 )
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -26,11 +29,28 @@ LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:
+def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:  # noqa: TID251
     spy = mocker.spy(sa, "create_engine")
     yield spy
     if not spy.call_count:
         LOGGER.warning("SQLAlchemy create_engine was not called")
+
+
+@pytest.fixture
+def gx_sqlalchemy_execution_engine_spy(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+) -> Generator[mock.MagicMock, None, None]:  # noqa: TID251
+    """
+    Mock the SQLDatasource.execution_engine_type property to return a spy so that what would be passed to
+    the GX SqlAlchemyExecutionEngine constructor can be inspected.
+
+    NOTE: This is not exactly what gets passed to the sqlalchemy.engine.create_engine() function, but it is close.
+    """  # noqa: E501
+    spy = mocker.Mock(spec=SqlAlchemyExecutionEngine)
+    monkeypatch.setattr(SQLDatasource, "execution_engine_type", spy)
+    yield spy
+    if not spy.call_count:
+        LOGGER.warning("SqlAlchemyExecutionEngine.__init__() was not called")
 
 
 @pytest.fixture
@@ -49,33 +69,98 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "ds_kwargs",
     [
-        dict(
-            connection_string="sqlite:///",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+            ),
+            id="connection_string only",
         ),
-        dict(
-            connection_string="${MY_CONN_STR}",
-            kwargs={"isolation_level": "SERIALIZABLE"},
+        param(
+            dict(
+                connection_string="sqlite:///",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="no subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="${MY_CONN_STR}",
+                kwargs={"isolation_level": "SERIALIZABLE"},
+            ),
+            id="subs + kwargs",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=True,
+            ),
+            id="create_temp_table=True",
+        ),
+        param(
+            dict(
+                connection_string="sqlite:///",
+                create_temp_table=False,
+            ),
+            id="create_temp_table=False",
         ),
     ],
 )
-def test_kwargs_are_passed_to_create_engine(
-    create_engine_spy: mock.MagicMock,
-    monkeypatch: pytest.MonkeyPatch,
-    ephemeral_context_with_defaults: EphemeralDataContext,
-    ds_kwargs: dict,
-    filter_gx_datasource_warnings: None,
-):
-    monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+class TestConfigPasstrough:
+    def test_kwargs_passed_to_create_engine(
+        self,
+        create_engine_spy: mock.MagicMock,  # noqa: TID251
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
-    context = ephemeral_context_with_defaults
-    ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
-    print(ds)
-    ds.test_connection()
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        ds.test_connection()
 
-    create_engine_spy.assert_called_once_with(
-        "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
-    )
+        create_engine_spy.assert_called_once_with(
+            "sqlite:///",
+            **{
+                **ds.dict(include={"kwargs"}, exclude_unset=False)["kwargs"],
+                **ds_kwargs.get("kwargs", {}),
+            },
+        )
+
+    def test_ds_config_passed_to_gx_sqlalchemy_execution_engine(
+        self,
+        gx_sqlalchemy_execution_engine_spy: mock.MagicMock,  # noqa: TID251
+        monkeypatch: pytest.MonkeyPatch,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+        ds_kwargs: dict,
+        filter_gx_datasource_warnings: None,
+    ):
+        monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
+
+        context = ephemeral_context_with_defaults
+        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        print(ds)
+        gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
+        print(f"{gx_execution_engine=}")
+
+        expected_args: dict[str, Any] = {
+            # kwargs that we expect are passed to SqlAlchemyExecutionEngine
+            # including datasource field default values
+            **ds.dict(
+                exclude_unset=False,
+                exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
+            ),
+            **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
+            **ds_kwargs.get("kwargs", {}),
+            # config substitution should have been performed
+            **ds.dict(include={"connection_string"}, config_provider=ds._config_provider),
+        }
+        assert "create_temp_table" in expected_args
+
+        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
+        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
 
 
 @pytest.mark.unit
@@ -86,7 +171,7 @@ def test_table_quoted_name_type_does_not_exist(
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that mechanism for detection of non-existent table_nam" works correctly.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "table_name_0",
         "table_name_1",
@@ -116,7 +201,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all upper case entity usage does not undergo any conversion.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "ACTORS",
         "ARTISTS",
@@ -160,7 +245,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all lower case entity usage undergo conversion to quoted literals.
-    """
+    """  # noqa: E501
     table_names_in_dbms_schema: list[str] = [
         "actors",
         "artists",
@@ -237,15 +322,11 @@ def test_specific_datasource_warnings(
     This test ensures that a warning is raised when a specific datasource class is suggested.
     """
     context = ephemeral_context_with_defaults
-    monkeypatch.setenv(
-        "MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db"
-    )
+    monkeypatch.setenv("MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db")
 
     if suggested_datasource_class:
         with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
-            context.sources.add_sql(
-                name="my_datasource", connection_string=connection_string
-            )
+            context.sources.add_sql(name="my_datasource", connection_string=connection_string)
     else:
         with warnings.catch_warnings():
             warnings.simplefilter("error")  # should already be the default

@@ -1,9 +1,7 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 try:
@@ -62,7 +66,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_match_json_schema](https://greatexpectations.io/expectations/expect_column_values_to_match_json_schema)
-    """
+    """  # noqa: E501
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -94,7 +98,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -131,10 +135,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

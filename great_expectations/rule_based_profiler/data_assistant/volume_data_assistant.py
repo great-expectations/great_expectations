@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
@@ -29,16 +31,16 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+    from great_expectations.validator.validator import Validator
 
 
 class VolumeDataAssistant(DataAssistant):
     """
     VolumeDataAssistant provides exploration and validation of "Data Volume" aspects of specified data Batch objects.
-    """
+    """  # noqa: E501
 
     __alias__: str = "volume"
 
@@ -57,7 +59,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         Returns:
             Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
-        """
+        """  # noqa: E501
         return None
 
     @override
@@ -65,7 +67,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         Returns:
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
-        """
+        """  # noqa: E501
         table_rule: Rule = self._build_table_rule()
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
@@ -88,14 +90,13 @@ class VolumeDataAssistant(DataAssistant):
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
     @staticmethod
     def _build_table_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for table "Domain" type.
-        """
+        """  # noqa: E501
         # Step-1: Instantiate "TableDomainBuilder" object.
 
         table_domain_builder: DomainBuilder = TableDomainBuilder(
@@ -104,42 +105,40 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
-        )
+        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()  # noqa: E501
 
-        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.  # noqa: E501
 
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
         ]
-        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(  # noqa: E501
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
-        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").  # noqa: E501
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **table_row_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_table_row_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_table_row_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(  # noqa: E501
             expectation_type="expect_table_row_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             min_value=f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
             max_value=f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
             meta={
-                "profiler_details": f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",  # noqa: E501
             },
         )
 
-        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.  # noqa: E501
 
         variables: dict = {
             "false_positive_rate": 0.05,
@@ -176,55 +175,51 @@ class VolumeDataAssistant(DataAssistant):
     def _build_categorical_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
-        """
-        # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
+        """  # noqa: E501
+        # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.  # noqa: E501
 
-        categorical_column_type_domain_builder: DomainBuilder = (
-            CategoricalColumnDomainBuilder(
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
-                max_unique_values=None,
-                max_proportion_unique=None,
-                data_context=None,
-            )
+        categorical_column_type_domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            allowed_semantic_types_passthrough=None,
+            cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
+            max_unique_values=None,
+            max_proportion_unique=None,
+            data_context=None,
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
-        )
+        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()  # noqa: E501
 
-        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.  # noqa: E501
 
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
         ]
-        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(  # noqa: E501
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
-        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").  # noqa: E501
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **column_distinct_values_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_unique_value_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_unique_value_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(  # noqa: E501
             expectation_type="expect_column_unique_value_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -233,11 +228,11 @@ class VolumeDataAssistant(DataAssistant):
             strict_min=f"{VARIABLES_KEY}strict_min",
             strict_max=f"{VARIABLES_KEY}strict_max",
             meta={
-                "profiler_details": f"{column_distinct_values_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{column_distinct_values_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",  # noqa: E501
             },
         )
 
-        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.  # noqa: E501
 
         variables: dict = {
             "cardinality_limit_mode": CardinalityLimitMode.FEW.name,

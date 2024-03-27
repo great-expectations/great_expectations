@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta
 
@@ -8,14 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class PandasDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
-
-    pass
-
-
-class SparkDFDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
     """
@@ -37,7 +31,7 @@ class SqlAlchemyDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
         return self.get("schema")
 
 
-class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+class PathBatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "path" not in self:
@@ -52,7 +46,7 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
         return self.get("reader_method")
 
 
-class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+class S3BatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "s3" not in self:
@@ -67,13 +61,11 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
         return self.get("reader_method")
 
 
-class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
+class InMemoryBatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "dataset" not in self:
-            raise InvalidBatchKwargsError(
-                "InMemoryBatchKwargs requires a 'dataset' element"
-            )
+            raise InvalidBatchKwargsError("InMemoryBatchKwargs requires a 'dataset' element")
 
     @property
     def dataset(self):
@@ -88,22 +80,6 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
         if not isinstance(self["dataset"], pd.DataFrame):
             raise InvalidBatchKwargsError(
                 "PandasDatasourceInMemoryBatchKwargs 'dataset' must be a pandas DataFrame"
-            )
-
-
-class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        from great_expectations.compatibility import pyspark
-
-        if not pyspark:
-            raise InvalidBatchKwargsError(
-                "SparkDFDatasourceInMemoryBatchKwargs requires a valid pyspark installation, but pyspark import failed."
-            )
-
-        if not (pyspark.DataFrame and isinstance(self["dataset"], pyspark.DataFrame)):  # type: ignore[truthy-function]
-            raise InvalidBatchKwargsError(
-                "SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame"
             )
 
 
@@ -135,16 +111,3 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     @property
     def query_parameters(self):
         return self.get("query_parameters")
-
-
-class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        if "query" not in self:
-            raise InvalidBatchKwargsError(
-                "SparkDFDatasourceQueryBatchKwargs requires a 'query' element"
-            )
-
-    @property
-    def query(self):
-        return self.get("query")

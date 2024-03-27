@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import List, Optional
 
@@ -8,7 +10,7 @@ class Asset:
     """
     A typed data asset class that maintains data asset specific properties (to override data connector level properties with
     the same name and/or semantics, such as "partitioner_name", "base_directory", and "glob_directive").
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,

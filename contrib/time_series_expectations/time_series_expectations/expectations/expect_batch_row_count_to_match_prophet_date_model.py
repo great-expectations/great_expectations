@@ -2,7 +2,6 @@ from typing import Dict
 
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -99,12 +98,12 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         batch_row_count = metrics["table.row_count"]
+        configuration = self.configuration
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 

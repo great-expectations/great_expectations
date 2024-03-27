@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -38,21 +40,15 @@ class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
                 expectation_type = cls._get_expectation_type(sub_object)
                 if expectation_type in cls.expectation_renderers:
                     new_rows = [
-                        get_renderer_impl(expectation_type, renderer_type)[1](
-                            result=sub_object
-                        )
-                        for renderer_type in cls.expectation_renderers.get(
-                            expectation_type
-                        )
+                        get_renderer_impl(expectation_type, renderer_type)[1](result=sub_object)
+                        for renderer_type in cls.expectation_renderers.get(expectation_type)
                     ]
                     table_rows.extend(new_rows)
         else:
             expectation_type = cls._get_expectation_type(ge_object)
             if expectation_type in cls.expectation_renderers:
                 new_rows = [
-                    get_renderer_impl(expectation_type, renderer_type)[1](
-                        result=ge_object
-                    )
+                    get_renderer_impl(expectation_type, renderer_type)[1](result=ge_object)
                     for renderer_type in cls.expectation_renderers.get(expectation_type)
                 ]
                 table_rows.extend(new_rows)

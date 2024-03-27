@@ -1,7 +1,7 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain import Domain
+from typing import TYPE_CHECKING, Dict, List, Optional
+
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,  # noqa: TCH001
 )
@@ -10,15 +10,21 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
-from great_expectations.rule_based_profiler.rule.rule_state import (
-    RuleState,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.core.domain import Domain
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.rule_based_profiler.rule.rule_state import (
+        RuleState,
+    )
 
 
 class RuleOutput:
     """
     RuleOutput provides methods for extracting useful information from RuleState using directives and application logic.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -27,7 +33,7 @@ class RuleOutput:
         """
         Args:
             rule_state: RuleState object represented by "Domain" objects and parameters,.computed for one Rule object.
-        """
+        """  # noqa: E501
         self._rule_state = rule_state
 
     @property
@@ -43,10 +49,7 @@ class RuleOutput:
         expectation_configuration_builder: ExpectationConfigurationBuilder
         for domain in domains:
             expectation_configuration_builders: List[ExpectationConfigurationBuilder]
-            if (
-                self.rule_state.rule
-                and self.rule_state.rule.expectation_configuration_builders
-            ):
+            if self.rule_state.rule and self.rule_state.rule.expectation_configuration_builders:
                 expectation_configuration_builders = (
                     self.rule_state.rule.expectation_configuration_builders
                 )
@@ -54,12 +57,10 @@ class RuleOutput:
                 expectation_configuration_builders = []
 
             for expectation_configuration_builder in expectation_configuration_builders:
-                config = (
-                    expectation_configuration_builder.build_expectation_configuration(
-                        domain=domain,
-                        variables=self.rule_state.variables,
-                        parameters=self.rule_state.parameters,
-                    )
+                config = expectation_configuration_builder.build_expectation_configuration(
+                    domain=domain,
+                    variables=self.rule_state.variables,
+                    parameters=self.rule_state.parameters,
                 )
                 if config:
                     expectation_configurations.append(config)
@@ -73,23 +74,19 @@ class RuleOutput:
             for domain in self.rule_state.domains
         }
 
-    def get_fully_qualified_parameter_names_for_domain_id(
-        self, domain_id: str
-    ) -> List[str]:
+    def get_fully_qualified_parameter_names_for_domain_id(self, domain_id: str) -> List[str]:
         domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
         domain: Domain = domains_dict[domain_id]
-        fully_qualified_parameter_names: List[
-            str
-        ] = self.get_fully_qualified_parameter_names_for_domain(domain=domain)
+        fully_qualified_parameter_names: List[str] = (
+            self.get_fully_qualified_parameter_names_for_domain(domain=domain)
+        )
         return fully_qualified_parameter_names
 
     def get_fully_qualified_parameter_names_for_domain(
         self,
         domain: Optional[Domain] = None,
     ) -> List[str]:
-        fully_qualified_parameter_names: List[
-            str
-        ] = get_fully_qualified_parameter_names(
+        fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
             domain=domain,
             variables=self.rule_state.variables,
             parameters=self.rule_state.parameters,
@@ -112,10 +109,8 @@ class RuleOutput:
     ) -> Dict[str, ParameterNode]:
         domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
         domain: Domain = domains_dict[domain_id]
-        parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, ParameterNode
-        ] = self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(
-            domain=domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = (
+            self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(domain=domain)
         )
         return parameter_values_for_fully_qualified_parameter_names
 
@@ -123,11 +118,11 @@ class RuleOutput:
         self,
         domain: Optional[Domain] = None,
     ) -> Dict[str, ParameterNode]:
-        parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, ParameterNode
-        ] = get_parameter_values_for_fully_qualified_parameter_names(
-            domain=domain,
-            variables=self.rule_state.variables,
-            parameters=self.rule_state.parameters,
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = (
+            get_parameter_values_for_fully_qualified_parameter_names(
+                domain=domain,
+                variables=self.rule_state.variables,
+                parameters=self.rule_state.parameters,
+            )
         )
         return parameter_values_for_fully_qualified_parameter_names

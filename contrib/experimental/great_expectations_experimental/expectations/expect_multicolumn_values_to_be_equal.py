@@ -8,13 +8,11 @@ import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,
 )
-from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -29,6 +27,10 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _format_map_output,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+    parse_result_format,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
@@ -89,9 +91,7 @@ class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
         for idx_src in range(num_columns - 1):
             for idx_dest in range(idx_src + 1, num_columns):
                 conditions.append(
-                    F.col(column_names[idx_src]).eqNullSafe(
-                        F.col(column_names[idx_dest])
-                    )
+                    F.col(column_names[idx_src]).eqNullSafe(F.col(column_names[idx_dest]))
                 )
         row_wise_cond = reduce(lambda a, b: a & b, conditions, F.lit(True))
         return row_wise_cond
@@ -246,9 +246,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = (
-                "$column_list values must be equal, at least $mostly_pct % of the time."
-            )
+            template_str = "$column_list values must be equal, at least $mostly_pct % of the time."
         else:
             template_str = "$column_list values must be equal."
 
@@ -285,9 +283,13 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
-                template_str = "$column_list values must be equal at least $mostly_pct % of the time."
+                template_str = (
+                    "$column_list values must be equal at least $mostly_pct % of the time."
+                )
             else:
-                template_str = "$column_list values must be equal, at least $mostly_pct % of the time."
+                template_str = (
+                    "$column_list values must be equal, at least $mostly_pct % of the time."
+                )
         else:
             if include_column_name:
                 template_str = "$column_list values must be equal."
@@ -329,8 +331,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         try:
             null_percent = result_dict["unexpected_percent"]
             return (
-                num_to_str(100 - null_percent, precision=5, use_locale=True)
-                + "% values are equal"
+                num_to_str(100 - null_percent, precision=5, use_locale=True) + "% values are equal"
             )
         except KeyError:
             return "unknown % values are not equal"
@@ -338,9 +339,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             return "NaN% values are not equal"
 
     @classmethod
-    @renderer(
-        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
-    )
+    @renderer(renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW)
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -360,8 +359,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                 }
             ),
             result.result["unexpected_count"]
-            if "unexpected_count" in result.result
-            and result.result["unexpected_count"] is not None
+            if "unexpected_count" in result.result and result.result["unexpected_count"] is not None
             else "--",
         ]
 
@@ -395,17 +393,12 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self._get_default_value("mostly")
-        )
+        result_format = self._get_result_format(runtime_configuration=runtime_configuration)
+        mostly = self._get_success_kwargs().get("mostly", self._get_default_value("mostly"))
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -452,6 +445,4 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectMulticolumnValuesToBeEqual().print_diagnostic_checklist(
-        show_failed_tests=True
-    )
+    ExpectMulticolumnValuesToBeEqual().print_diagnostic_checklist(show_failed_tests=True)

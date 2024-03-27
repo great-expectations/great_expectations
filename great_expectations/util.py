@@ -55,12 +55,6 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 
-try:
-    import black
-except ImportError:
-    black = None  # type: ignore[assignment]
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -177,7 +171,7 @@ def measure_execution_time(
 
     Returns:
         Callable -- configured "execution_time_decorator" function.
-    """
+    """  # noqa: E501
 
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -193,7 +187,7 @@ def measure_execution_time(
 
             Returns:
                 Any (output value of original function being decorated).
-            """
+            """  # noqa: E501
             time_begin: float = (getattr(time, method))()
             try:
                 return func(*args, **kwargs)
@@ -209,23 +203,19 @@ def measure_execution_time(
                 if execution_time_holder is not None and hasattr(
                     execution_time_holder, execution_time_property_name
                 ):
-                    setattr(
-                        execution_time_holder, execution_time_property_name, delta_t
-                    )
+                    setattr(execution_time_holder, execution_time_property_name, delta_t)
 
                 if pretty_print:
                     if include_arguments:
-                        bound_args: BoundArguments = signature(func).bind(
-                            *args, **kwargs
-                        )
+                        bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                         call_args: OrderedDict = bound_args.arguments
                         print(
                             f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
-seconds."""
+seconds."""  # noqa: E501
                         )
                     else:
                         print(
-                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."  # noqa: E501
                         )
 
         return compute_delta_t
@@ -233,9 +223,7 @@ seconds."""
     return execution_time_decorator
 
 
-def verify_dynamic_loading_support(
-    module_name: str, package_name: Optional[str] = None
-) -> None:
+def verify_dynamic_loading_support(module_name: str, package_name: Optional[str] = None) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
@@ -255,7 +243,7 @@ def verify_dynamic_loading_support(
         message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
-        """
+        """  # noqa: E501
         raise FileNotFoundError(message)
 
 
@@ -263,7 +251,7 @@ def import_library_module(module_name: str) -> Optional[ModuleType]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
-    """
+    """  # noqa: E501
     module_obj: Optional[ModuleType]
 
     try:
@@ -369,7 +357,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
+    context = context_factory(project_config=data_context_config, mode="ephemeral")
 
     return context
 
@@ -386,7 +374,7 @@ def gen_directory_tree_str(startpath: PathStr):
             bbb.txt
 
     #Note: files and directories are sorted alphabetically, so that this method can be used for testing.
-    """
+    """  # noqa: E501
 
     output_str = ""
 
@@ -404,29 +392,6 @@ def gen_directory_tree_str(startpath: PathStr):
             output_str += f"{subindent}{f}\n"
 
     return output_str
-
-
-# NOTE: Can delete once CLI is removed
-def lint_code(code: str) -> str:
-    """Lint strings of code passed in.  Optional dependency "black" must be installed."""
-
-    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
-    # While this seems to resolve the issue, the root cause is yet to be determined.
-
-    if black is None:
-        logger.warning(
-            "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
-        )
-        return code
-
-    black_file_mode = black.FileMode()
-    if not isinstance(code, str):
-        raise TypeError
-    try:
-        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
-        return linted_code
-    except (black.NothingChanged, RuntimeError):
-        return code
 
 
 # NOTE: Can delete once CLI is removed
@@ -454,9 +419,7 @@ def _convert_nulls_to_None(code: str) -> str:
     result = re.findall(pattern, code)
     for match in result:
         code = code.replace(f'"{match}": null', f'"{match}": None')
-        logger.info(
-            f"Replaced '{match}: null' with '{match}: None' before writing to file"
-        )
+        logger.info(f"Replaced '{match}: null' with '{match}: None' before writing to file")
     return code
 
 
@@ -473,7 +436,7 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
     return code
 
 
-def filter_properties_dict(  # noqa: PLR0913, PLR0912
+def filter_properties_dict(  # noqa: C901, PLR0912, PLR0913
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -496,7 +459,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
-    """
+    """  # noqa: E501
     if keep_fields is None:
         keep_fields = set()
 
@@ -505,7 +468,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
     if keep_fields & delete_fields:
         raise ValueError(
-            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."  # noqa: E501
         )
 
     if clean_falsy:
@@ -516,7 +479,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
     if not isinstance(properties, dict):
         raise ValueError(
-            f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'
+            f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'  # noqa: E501
         )
 
     if not inplace:
@@ -533,9 +496,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
         )
 
     if delete_fields:
-        keys_for_deletion.extend(
-            [key for key, value in properties.items() if key in delete_fields]
-        )
+        keys_for_deletion.extend([key for key, value in properties.items() if key in delete_fields])
 
     if clean_nulls:
         keys_for_deletion.extend(
@@ -589,7 +550,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: dict,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -597,12 +558,11 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: list,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -610,12 +570,11 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> list:
-    ...
+) -> list: ...
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: set,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -623,12 +582,11 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> set:
-    ...
+) -> set: ...
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: tuple,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -636,12 +594,11 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> tuple:
-    ...
+) -> tuple: ...
 
 
 @overload
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(
     properties: None,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -649,11 +606,10 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
-def deep_filter_properties_iterable(  # noqa: PLR0913
+def deep_filter_properties_iterable(  # noqa: C901, PLR0913
     properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -813,8 +769,7 @@ def convert_decimal_to_float(d: SupportsFloat) -> float:
         len(
             list(
                 filter(
-                    lambda frame_info: Path(frame_info.filename).name
-                    == "parameter_builder.py"
+                    lambda frame_info: Path(frame_info.filename).name == "parameter_builder.py"
                     and frame_info.function == "get_metrics",
                     stack(),
                 )
@@ -838,7 +793,7 @@ def convert_decimal_to_float(d: SupportsFloat) -> float:
 def requires_lossy_conversion(d: decimal.Decimal) -> bool:
     """
     This method determines whether or not conversion from "decimal.Decimal" to standard "float" type cannot be lossless.
-    """
+    """  # noqa: E501
     return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
@@ -866,18 +821,14 @@ def isclose(
     of the "atol" value (here, 8 digits as the default).  However, when the "control" value is large in magnitude, the
     relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
     deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
-    """
+    """  # noqa: E501
     if isinstance(operand_a, str) and isinstance(operand_b, str):
         return operand_a == operand_b
 
-    if isinstance(operand_a, datetime.datetime) and isinstance(
-        operand_b, datetime.datetime
-    ):
+    if isinstance(operand_a, datetime.datetime) and isinstance(operand_b, datetime.datetime):
         operand_a = operand_a.timestamp()  # type: ignore[assignment]
         operand_b = operand_b.timestamp()  # type: ignore[assignment]
-    elif isinstance(operand_a, datetime.timedelta) and isinstance(
-        operand_b, datetime.timedelta
-    ):
+    elif isinstance(operand_a, datetime.timedelta) and isinstance(operand_b, datetime.timedelta):
         operand_a = operand_a.total_seconds()  # type: ignore[assignment]
         operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
@@ -901,8 +852,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
         key: Any  # must be "hashable"
         value: Any
         return all(
-            key in target
-            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            key in target and is_candidate_subset_of_target(candidate=val, target=target[key])
             for key, val in candidate.items()
         )
 
@@ -910,10 +860,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
         subitem: Any
         superitem: Any
         return all(
-            any(
-                is_candidate_subset_of_target(subitem, superitem)
-                for superitem in target
-            )
+            any(is_candidate_subset_of_target(subitem, superitem) for superitem in target)
             for subitem in candidate
         )
 
@@ -937,7 +884,7 @@ def is_ndarray_datetime_dtype(
 ) -> bool:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
-    """
+    """  # noqa: E501
     value: Any
     result: bool = all(isinstance(value, datetime.datetime) for value in data)
     return result or (
@@ -959,10 +906,8 @@ def convert_ndarray_to_datetime_dtype_best_effort(
         Boolean flag -- True if all elements of original "data" were "datetime.datetime" type objects; False, otherwise.
         Boolean flag -- True, if conversion was performed; False, otherwise.
         Output "np.ndarray" (converted, if necessary).
-    """
-    if is_ndarray_datetime_dtype(
-        data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy
-    ):
+    """  # noqa: E501
+    if is_ndarray_datetime_dtype(data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy):
         return True, False, data
 
     value: Any
@@ -988,11 +933,9 @@ def convert_ndarray_datetime_to_float_dtype_utc_timezone(
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
 
     Note: Conversion of "datetime.datetime" to "float" uses "UTC" TimeZone to normalize all "datetime.datetime" values.
-    """
+    """  # noqa: E501
     value: Any
-    return np.asarray(
-        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
-    )
+    return np.asarray([value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data])
 
 
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
@@ -1000,7 +943,7 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
 
     Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
-    """
+    """  # noqa: E501
     value: Any
     return np.asarray(
         [datetime.datetime.utcfromtimestamp(value) for value in data]  # noqa: DTZ004
@@ -1014,7 +957,7 @@ def convert_ndarray_float_to_datetime_tuple(
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
 
     Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
-    """
+    """  # noqa: E501
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
@@ -1023,7 +966,7 @@ def does_ndarray_contain_decimal_dtype(
 ) -> TypeGuard[npt.NDArray]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
-    """
+    """  # noqa: E501
     value: Any
     result: bool = any(isinstance(value, decimal.Decimal) for value in data)
     return result
@@ -1032,10 +975,10 @@ def does_ndarray_contain_decimal_dtype(
 def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
-    """
-    convert_decimal_to_float_vectorized: Callable[
-        [np.ndarray], np.ndarray
-    ] = np.vectorize(pyfunc=convert_decimal_to_float)
+    """  # noqa: E501
+    convert_decimal_to_float_vectorized: Callable[[np.ndarray], np.ndarray] = np.vectorize(
+        pyfunc=convert_decimal_to_float
+    )
     return convert_decimal_to_float_vectorized(data)
 
 
@@ -1044,7 +987,7 @@ def convert_pandas_series_decimal_to_float_dtype(
 ) -> pd.Series | None:
     """
     Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
-    """
+    """  # noqa: E501
     series_data: np.ndarray = data.to_numpy()
     series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
     if series_data_has_decimal:
@@ -1073,19 +1016,6 @@ def is_list_of_strings(_list) -> TypeGuard[List[str]]:
     return isinstance(_list, list) and all(isinstance(site, str) for site in _list)
 
 
-def generate_library_json_from_registered_expectations():
-    """Generate the JSON object used to populate the public gallery"""
-    from great_expectations.expectations.registry import _registered_expectations
-
-    library_json = {}
-
-    for expectation_name, expectation in _registered_expectations.items():
-        report_object = expectation().run_diagnostics()
-        library_json[expectation_name] = report_object
-
-    return library_json
-
-
 def generate_temporary_table_name(
     default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
@@ -1104,7 +1034,7 @@ def get_sqlalchemy_url(drivername, **credentials):
 
 
 def get_sqlalchemy_selectable(
-    selectable: Union[sa.Table, sqlalchemy.Select]
+    selectable: Union[sa.Table, sqlalchemy.Select],
 ) -> Union[sa.Table, sqlalchemy.Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
@@ -1115,7 +1045,7 @@ def get_sqlalchemy_selectable(
     also needs to be handled here, using the old equivalent method.
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
-    """
+    """  # noqa: E501
     if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
@@ -1130,7 +1060,7 @@ def get_sqlalchemy_subquery_type():
     This helper method ensures that the appropriate type is returned.
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
-    """
+    """  # noqa: E501
     try:
         return sa.sql.Subquery
     except AttributeError:
@@ -1151,7 +1081,7 @@ def import_make_url():
     """
     Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
     still be accessed from sqlalchemy.engine.url to avoid import errors.
-    """
+    """  # noqa: E501
     if version.parse(sa.__version__) < version.parse("1.4"):
         make_url = sqlalchemy.url.make_url
     else:
@@ -1162,7 +1092,7 @@ def import_make_url():
 
 def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
     ch_type = type_
-    if type(ch_type) is str:  # noqa: E721
+    if type(ch_type) is str:
         if type_.lower() in ("decimal", "decimaltype()"):
             ch_type = type_module.types.Decimal
         elif type_.lower() in ("fixedstring"):
@@ -1199,12 +1129,10 @@ def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     return potential_type
 
 
-def pandas_series_between_inclusive(
-    series: pd.Series, min_value: int, max_value: int
-) -> pd.Series:
+def pandas_series_between_inclusive(series: pd.Series, min_value: int, max_value: int) -> pd.Series:
     """
     As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
-    """
+    """  # noqa: E501
     metric_series: pd.Series
     if version.parse(pd.__version__) >= version.parse("1.3.0"):
         metric_series = series.between(min_value, max_value, inclusive="both")

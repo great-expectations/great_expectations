@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -22,6 +22,12 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -70,7 +76,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
-    """
+    """  # noqa: E501
 
     regex: Union[str, EvaluationParameterDict] = "(?s).*"
 
@@ -102,20 +108,18 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         mostly = configuration.kwargs.get("mostly")
         regex = configuration.kwargs.get("regex")
 
-        return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
+        return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'  # noqa: E501
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
         if result.success:
-            return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+            return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'  # noqa: E501
         else:
-            return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+            return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'  # noqa: E501
 
     @classmethod
     def _prescriptive_template(
@@ -133,12 +137,10 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         params = renderer_configuration.params
 
         if not params.regex:
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -174,16 +176,12 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         )
 
         if not params.get("regex"):
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

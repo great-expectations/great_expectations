@@ -1,13 +1,9 @@
-import logging
-from typing import Dict, Optional
+from __future__ import annotations
 
-import numpy as np
+import logging
+from typing import TYPE_CHECKING, Dict, Optional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
-)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
@@ -17,11 +13,19 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_quantile_statistic_interpolation_method_from_rule_state,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-)
-from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
+
+if TYPE_CHECKING:
+    import numpy as np
+
+    from great_expectations.core.domain import Domain
+    from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+        NumericRangeEstimationResult,
+    )
+    from great_expectations.rule_based_profiler.parameter_container import (
+        ParameterContainer,
+    )
+    from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -37,7 +41,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
     Implements the "bootstrapped" estimation of parameter values from data.
 
     (Please refer to "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html" for details.)
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -61,7 +65,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             fuzzy=False,
         ):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'
+                message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'  # noqa: E501
             )
 
         false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(
@@ -71,7 +75,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
 
-        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.configuration.n_resamples,
@@ -82,7 +86,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
         if n_resamples is None:
             n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
 
-        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.configuration.random_seed,
@@ -91,7 +95,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
 
-        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
+        quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(  # noqa: E501
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
             round_decimals=self.configuration.round_decimals,
             domain=domain,
@@ -103,10 +107,8 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
                 DEFAULT_BOOTSTRAP_QUANTILE_STATISTIC_INTERPOLATION_METHOD
             )
 
-        # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_correction: Optional[
-            bool
-        ] = get_parameter_value_and_validate_return_type(
+        # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        quantile_bias_correction: Optional[bool] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.configuration.quantile_bias_correction,
             expected_return_type=None,
@@ -116,15 +118,15 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
         if quantile_bias_correction is None:
             quantile_bias_correction = False
 
-        # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_std_error_ratio_threshold: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        quantile_bias_std_error_ratio_threshold: Optional[float] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
         if quantile_bias_std_error_ratio_threshold is None:
             quantile_bias_std_error_ratio_threshold = (

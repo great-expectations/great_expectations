@@ -9,7 +9,7 @@ import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch  # noqa: TID251
 
 import pytest
 import requests
@@ -39,16 +39,18 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 yaml = YAMLHandler()
+
+# No longer used but keeping around for tests
+USAGE_STATISTICS_QA_URL = (
+    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+)
 
 
 @pytest.fixture()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):
-    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
+    # This data_context is *manually* created to have the config we want, vs created with DataContext.create  # noqa: E501
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
@@ -67,7 +69,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
 def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
-    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
+    # This data_context is *manually* created to have the config we want, vs created with DataContext.create  # noqa: E501
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
@@ -91,7 +93,8 @@ def create_data_context_files(
     if config_variables_fixture_filename:
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         os.makedirs(  # noqa: PTH103
-            os.path.join(context_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+            os.path.join(context_path, "uncommitted"),  # noqa: PTH118
+            exist_ok=True,
         )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
@@ -122,14 +125,14 @@ def create_common_data_context_files(context_path, asset_config_path):
         exist_ok=True,
     )
     copy_relative_path(
-        "../test_fixtures/"
-        "expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../test_fixtures/" "expectation_suites/parameterized_expectation_suite_fixture.json",
         os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),  # noqa: PTH118
+        exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",
@@ -163,6 +166,7 @@ def basic_data_context_config():
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
             "stores": {
@@ -171,6 +175,13 @@ def basic_data_context_config():
                     "store_backend": {
                         "class_name": "TupleFilesystemStoreBackend",
                         "base_directory": "expectations/",
+                    },
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
                     },
                 },
                 "evaluation_parameter_store": {
@@ -224,6 +235,7 @@ def data_context_config_with_datasources(conn_string_password):
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {
                 "Datasource 1: Redshift": {
@@ -325,6 +337,13 @@ def data_context_config_with_datasources(conn_string_password):
                         "base_directory": "expectations/",
                     },
                 },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
+                    },
+                },
                 "evaluation_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
                     "class_name": "EvaluationParameterStore",
@@ -379,9 +398,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
+                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -478,9 +495,7 @@ class MockResponse:
     ) -> None:
         self._json_data = json_data
         self.status_code = status_code
-        self.headers = headers or {
-            "content-type": "application/json" if json_data else "text/html"
-        }
+        self.headers = headers or {"content-type": "application/json" if json_data else "text/html"}
         self._exc_to_raise = exc_to_raise
 
     def json(self):
@@ -492,26 +507,20 @@ class MockResponse:
         if self._exc_to_raise:
             raise self._exc_to_raise
         if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(
-                f"Mock {self.status_code} HTTPError", response=self
-            )
+            raise requests.exceptions.HTTPError(f"Mock {self.status_code} HTTPError", response=self)
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
 
 
 @pytest.fixture
-def mock_response_factory() -> (
-    Callable[[JSONData, int, Optional[RequestError]], MockResponse]
-):
+def mock_response_factory() -> Callable[[JSONData, int, Optional[RequestError]], MockResponse]:
     def _make_mock_response(
         json_data: JSONData,
         status_code: int,
         exc_to_raise: Optional[RequestError] = None,
     ) -> MockResponse:
-        return MockResponse(
-            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
-        )
+        return MockResponse(json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise)
 
     return _make_mock_response
 
@@ -554,9 +563,7 @@ def basic_fluent_datasource_config() -> dict:
             {
                 "name": "my_csv",
                 "type": "csv",
-                "batching_regex": re.compile(
-                    r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE
-                ),
+                "batching_regex": re.compile(r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE),
             }
         ],
         "base_directory": pathlib.PosixPath("/path/to/trip_data"),
@@ -635,22 +642,20 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def checkpoint_config() -> dict:
     checkpoint_config = {
         "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
                 "name": None,
                 "id": None,
                 "expectation_suite_name": "taxi.demo_pass",
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": None,
             },
             {
                 "name": None,
                 "id": None,
                 "expectation_suite_name": None,
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "batch_request": {
                     "datasource_name": "oss_test_datasource",
                     "data_connector_name": "oss_test_data_connector",
@@ -662,10 +667,6 @@ def checkpoint_config() -> dict:
             {
                 "action": {"class_name": "StoreValidationResultAction"},
                 "name": "store_validation_result",
-            },
-            {
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-                "name": "store_evaluation_params",
             },
         ],
     }

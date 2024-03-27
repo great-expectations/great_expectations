@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict
 
 import numpy as np
@@ -28,7 +30,7 @@ class ColumnValuesBetweenCount(MetricProvider):
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913, PLR0912
+    def _pandas(  # noqa: C901, PLR0912, PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -48,7 +50,7 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         (
             df,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
@@ -82,7 +84,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         return np.count_nonzero(series)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913, PLR0912
+    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -103,14 +105,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True)
         ) or (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True)
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=True
@@ -118,14 +116,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False)
         ) or (
             min_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
         ):
             min_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=False
@@ -133,14 +127,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=True)
         ) or (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=True
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=True)
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=True
@@ -148,14 +138,10 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_np", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_np", negative=False)
         ) or (
             max_value
-            == get_sql_dialect_floating_point_infinity_value(
-                schema="api_cast", negative=False
-            )
+            == get_sql_dialect_floating_point_infinity_value(schema="api_cast", negative=False)
         ):
             max_value = get_sql_dialect_floating_point_infinity_value(
                 schema=dialect_name, negative=False
@@ -163,7 +149,7 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
@@ -197,7 +183,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         ).scalar()
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: PLR0913, PLR0912
+    def _spark(  # noqa: C901, PLR0912, PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -217,7 +203,7 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         (
             df,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
