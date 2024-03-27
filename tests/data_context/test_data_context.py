@@ -767,7 +767,7 @@ gx/
         data_docs/
         validations/
             .ge_store_backend_id
-    validation_configs/
+    validation_definitions/
 """
     )
 
@@ -795,7 +795,7 @@ gx/
         data_docs/
         validations/
             .ge_store_backend_id
-    validation_configs/
+    validation_definitions/
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -895,7 +895,7 @@ def test_scaffold_directories(tmp_path_factory):
         "expectations",
         ".gitignore",
         "uncommitted",
-        "validation_configs",
+        "validation_definitions",
     }
     assert set(
         os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118
@@ -1040,7 +1040,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
 ):
     context = empty_context_with_checkpoint
     with pytest.raises(gx_exceptions.DataContextError):
-        context.checkpoints.get("not_a_checkpoint")
+        context.get_legacy_checkpoint("not_a_checkpoint")
 
 
 @pytest.mark.filesystem
@@ -1059,13 +1059,13 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert context.list_checkpoints() == ["my_checkpoint"]
 
     with pytest.raises(gx_exceptions.InvalidBaseYamlConfigError):
-        context.checkpoints.get("my_checkpoint")
+        context.get_legacy_checkpoint("my_checkpoint")
 
 
 @pytest.mark.unit
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
-    obs = context.checkpoints.get("my_checkpoint")
+    obs = context.get_legacy_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
@@ -1115,7 +1115,7 @@ def test_run_checkpoint_new_style(
     checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
-    checkpoint = context.checkpoints.get(checkpoint_config.name)
+    checkpoint = context.get_legacy_checkpoint(checkpoint_config.name)
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 

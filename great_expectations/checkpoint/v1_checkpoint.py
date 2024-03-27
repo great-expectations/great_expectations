@@ -5,7 +5,6 @@ import json
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import project_manager
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
@@ -15,7 +14,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.validation_config import ValidationConfig
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -23,8 +22,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.store.validation_config_store import (
-        ValidationConfigStore,
+    from great_expectations.data_context.store.validation_definition_store import (
+        ValidationDefinitionStore,
     )
 
 
@@ -45,7 +44,7 @@ class Checkpoint(BaseModel):
     """  # noqa: E501
 
     name: str
-    validation_definitions: List[ValidationConfig]
+    validation_definitions: List[ValidationDefinition]
     actions: List[ValidationAction]
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
@@ -81,40 +80,43 @@ class Checkpoint(BaseModel):
             ],
             "result_format": "SUMMARY",
             "id": "b758816-64c8-46cb-8f7e-03c12cea1d67"
+        }
         """  # noqa: E501
 
         arbitrary_types_allowed = (
             True  # Necessary for compatibility with ValidationAction's Marshmallow dep
         )
         json_encoders = {
-            ValidationConfig: lambda v: v.identifier_bundle(),
+            ValidationDefinition: lambda v: v.identifier_bundle(),
             Renderer: lambda r: r.serialize(),
         }
 
     @validator("validation_definitions", pre=True)
     def _validate_validation_definitions(
-        cls, validation_definitions: list[ValidationConfig] | list[dict]
-    ) -> list[ValidationConfig]:
+        cls, validation_definitions: list[ValidationDefinition] | list[dict]
+    ) -> list[ValidationDefinition]:
+        from great_expectations import project_manager
+
         if len(validation_definitions) == 0:
             raise ValueError("Checkpoint must contain at least one validation definition")
 
         if isinstance(validation_definitions[0], dict):
-            validation_config_store = project_manager.get_validation_config_store()
+            validation_definition_store = project_manager.get_validation_definition_store()
             identifier_bundles = [
                 _IdentifierBundle(**v)  # type: ignore[arg-type] # All validation configs are dicts if the first one is
                 for v in validation_definitions
             ]
-            return cls._deserialize_identifier_bundles_to_validation_configs(
-                identifier_bundles=identifier_bundles, store=validation_config_store
+            return cls._deserialize_identifier_bundles_to_validation_definitions(
+                identifier_bundles=identifier_bundles, store=validation_definition_store
             )
 
-        return cast(List[ValidationConfig], validation_definitions)
+        return cast(List[ValidationDefinition], validation_definitions)
 
     @classmethod
-    def _deserialize_identifier_bundles_to_validation_configs(
-        cls, identifier_bundles: list[_IdentifierBundle], store: ValidationConfigStore
-    ) -> list[ValidationConfig]:
-        validation_definitions: list[ValidationConfig] = []
+    def _deserialize_identifier_bundles_to_validation_definitions(
+        cls, identifier_bundles: list[_IdentifierBundle], store: ValidationDefinitionStore
+    ) -> list[ValidationDefinition]:
+        validation_definitions: list[ValidationDefinition] = []
         for id_bundle in identifier_bundles:
             key = store.get_key(name=id_bundle.name, id=id_bundle.id)
 
@@ -150,7 +152,6 @@ class Checkpoint(BaseModel):
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
-            validation_result_url=None,  # TODO: Need to plumb from actions
         )
 
     def _run_validation_definitions(
@@ -178,7 +179,7 @@ class Checkpoint(BaseModel):
 
     def _build_result_key(
         self,
-        validation_definition: ValidationConfig,
+        validation_definition: ValidationDefinition,
         run_id: RunIdentifier,
         batch_identifier: Optional[str] = None,
     ) -> ValidationResultIdentifier:
@@ -210,7 +211,6 @@ class CheckpointResult(BaseModel):
     run_id: RunIdentifier
     run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
     checkpoint_config: Checkpoint
-    validation_result_url: Optional[str] = None
     success: Optional[bool] = None
 
     class Config:

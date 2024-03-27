@@ -79,7 +79,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.PROFILER: "profiler",
         GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GXCloudRESTResource.VALIDATION_RESULT: "result",
-        GXCloudRESTResource.VALIDATION_CONFIG: "validation_config",
+        GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definition",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
@@ -104,7 +104,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GXCloudRESTResource.PROFILER: "profilers",
             GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
             GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
-            GXCloudRESTResource.VALIDATION_CONFIG: "validation_configs",
+            GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definitions",
         }
     )
 

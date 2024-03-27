@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import ClassVar, Dict, Type
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.data_context.store.database_store_backend import (
@@ -12,6 +13,8 @@ from great_expectations.data_context.store.database_store_backend import (
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -19,6 +22,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 
 class ValidationsStore(Store):
@@ -168,3 +174,34 @@ class ValidationsStore(Store):
     @override
     def config(self) -> dict:
         return self._config
+
+    def store_validation_results(
+        self,
+        suite_validation_result: ExpectationSuiteValidationResult,
+        suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
+        expectation_suite_identifier: Optional[
+            ExpectationSuiteIdentifier | GXCloudIdentifier
+        ] = None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+    ) -> bool | GXCloudResourceRef:
+        """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
+        This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
+        """  # noqa: E501
+        checkpoint_id = None
+        if self.cloud_mode and checkpoint_identifier:
+            checkpoint_id = checkpoint_identifier.id
+
+        expectation_suite_id = None
+        if isinstance(expectation_suite_identifier, GXCloudIdentifier):
+            expectation_suite_id = expectation_suite_identifier.id
+
+        return self.set(
+            key=suite_validation_result_identifier,
+            value=suite_validation_result,
+            checkpoint_id=checkpoint_id,
+            expectation_suite_id=expectation_suite_id,
+        )
+
+    @staticmethod
+    def parse_result_url_from_gx_cloud_ref(ref: GXCloudResourceRef) -> str | None:
+        return ref.response["data"]["attributes"]["validation_result"]["display_url"]

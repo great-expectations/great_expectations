@@ -21,7 +21,7 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.types.base import CheckpointValidationConfig
+from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
@@ -187,7 +187,7 @@ def send_email(  # noqa: C901, PLR0913
 
 
 def get_substituted_validation_dict(
-    substituted_runtime_config: dict, validation_dict: CheckpointValidationConfig
+    substituted_runtime_config: dict, validation_dict: CheckpointValidationDefinition
 ) -> dict:
     substituted_validation_dict = {
         "batch_request": get_substituted_batch_request(
@@ -363,7 +363,7 @@ def get_updated_action_list(base_action_list: list, other_action_list: list) -> 
 
 
 def does_batch_request_in_validations_contain_batch_data(
-    validations: List[CheckpointValidationConfig],
+    validations: List[CheckpointValidationDefinition],
 ) -> bool:
     for val in validations:
         if (
@@ -379,8 +379,8 @@ def does_batch_request_in_validations_contain_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-) -> list[CheckpointValidationConfig]:
+    validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
+) -> list[CheckpointValidationDefinition]:
     if not validations:
         return []
 
@@ -388,17 +388,17 @@ def get_validations_with_batch_request_as_dict(
         if "batch_request" in value:
             value["batch_request"] = get_batch_request_as_dict(batch_request=value["batch_request"])
 
-    return convert_validations_list_to_checkpoint_validation_configs(validations)
+    return convert_validations_list_to_checkpoint_validation_definitions(validations)
 
 
-def convert_validations_list_to_checkpoint_validation_configs(
-    validations: list[dict] | list[CheckpointValidationConfig] | None,
-) -> list[CheckpointValidationConfig]:
+def convert_validations_list_to_checkpoint_validation_definitions(
+    validations: list[dict] | list[CheckpointValidationDefinition] | None,
+) -> list[CheckpointValidationDefinition]:
     # We accept both dicts and rich config types but all internal usage should use the latter
     if not validations:
         return []
     return [
-        CheckpointValidationConfig(**validation) if isinstance(validation, dict) else validation
+        CheckpointValidationDefinition(**validation) if isinstance(validation, dict) else validation
         for validation in validations
     ]
 
@@ -409,9 +409,6 @@ def validate_validation_dict(validation_dict: dict, batch_request_required: bool
 
     if not validation_dict.get("expectation_suite_name"):
         raise gx_exceptions.CheckpointError("validation expectation_suite_name must be specified")
-
-    if not validation_dict.get("action_list"):
-        raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
 def send_sns_notification(
