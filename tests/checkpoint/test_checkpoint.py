@@ -2320,7 +2320,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
 def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     context = fake_cloud_context_basic
     checkpoint_name = "my_checkpoint"
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint = context.get_legacy_checkpoint(checkpoint_name)
     checkpoint_result = checkpoint.run()
     org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
     assert (
@@ -2333,7 +2333,7 @@ def test_use_validation_url_from_cloud(fake_cloud_context_basic):
 def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
     context, slack_counter = fake_cloud_context_with_slack
     checkpoint_name = "my_checkpoint"
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint = context.get_legacy_checkpoint(checkpoint_name)
     checkpoint.run()
     assert slack_counter.count == 5
 
