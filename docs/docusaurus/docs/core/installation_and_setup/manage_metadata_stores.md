@@ -280,7 +280,7 @@ In the following example, `validations_store_name` is set to ``validations_GCS_s
 ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/configure_expectation_stores.md) make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing Expectations in GCS make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## Copy existing Validation Results to the GCS bucket (Optional)
@@ -668,7 +668,7 @@ In the following example, `expectations_store_name` is set to ``expectations_GCS
 ```
 
 :::warning
-If you are storing [Validations in GCS](./configure_result_stores.md) make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are storing Validations in GCS make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## Copy existing Expectation JSON files to the GCS bucket (Optional)
