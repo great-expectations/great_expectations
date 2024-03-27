@@ -150,16 +150,17 @@ module.exports = {
           position: 'right',
         },
         {
+          label: 'Expectations gallery',
+          to: 'https://greatexpectations.io/expectations',
+          position: 'right'
+        },
+        {
           type: 'dropdown',
           label: 'Resources',
           items: [
             {
               label: 'Get support',
               to: '/docs/resources/get_support',
-            },
-            {
-              label: 'Expectations gallery',
-              to: 'https://greatexpectations.io/expectations',
             },
             {
               label: 'Integration support policy',
