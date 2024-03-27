@@ -154,11 +154,11 @@ Use the information provided here to configure a new storage location for Valida
 
 <Prerequisites>
 
-- [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
-- [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
-- [A Checkpoint](/oss/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
+- [A Data Context](./manage_data_contexts.md).
+- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+- [A Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](/oss/guides/setup/configuring_data_docs/host_and_share_data_docs.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
+- An Azure Blob container.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
 
 </Prerequisites>
@@ -171,7 +171,7 @@ GX recommends that you store Azure Storage credentials in the ``config_variables
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 
-To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md)
 
 ### Identify your Validation Results Store
 
@@ -207,10 +207,8 @@ stores:
 ```
 
 :::note
-If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
+If the container for hosting and sharing Data Docs on Azure Blob Storage is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
-
-Additional authentication and configuration options are available. See [Host and Share Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ## Copy existing Validation Results JSON files to the Azure blob (Optional)
 
@@ -282,7 +280,7 @@ In the following example, `validations_store_name` is set to ``validations_GCS_s
 ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/configure_expectation_stores.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Expectations in GCS](../configuring_metadata_stores/configure_expectation_stores.md) make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## Copy existing Validation Results to the GCS bucket (Optional)
@@ -399,7 +397,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
       password: '<your_password>'
       database: '<your_database_name>'
     ```
-    To configure the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../configuring_data_contexts/how_to_configure_credentials.md).
+    To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core).
 
 2. Optional. To use a specific schema as the backend, specify `schema` as an additional keyword argument. For example:
 
@@ -532,7 +530,7 @@ Use the information provided here to configure a new storage location for Expect
 - [A Data Context](/oss/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 - [An Expectations Suite](/oss/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- An Azure Blob container.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
 </Prerequisites>
@@ -544,7 +542,7 @@ GX recommends that you store Azure Storage credentials in the ``config_variables
 ```yaml
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
-To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md).
 
 ## Identify your Data Context Expectations Store
 
@@ -581,10 +579,8 @@ stores:
 ```
 
 :::note
-If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
+If the container for hosting and sharing Data Docs on Azure Blob Storage is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
-
-Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ## Copy existing Expectation JSON files to the Azure blob (Optional)
 
@@ -672,7 +668,7 @@ In the following example, `expectations_store_name` is set to ``expectations_GCS
 ```
 
 :::warning
-If you are also storing [Validations in GCS](./configure_result_stores.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are storing [Validations in GCS](./configure_result_stores.md) make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## Copy existing Expectation JSON files to the GCS bucket (Optional)
@@ -850,7 +846,7 @@ To add database credentials, open ``config_variables.yml`` and add the following
       password: '<your_password>'
       database: '<your_database_name>'
 ```
-To configure the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../configuring_data_contexts/how_to_configure_credentials.md).
+To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md).
 
 ## Identify your Data Context Expectations Store
 
