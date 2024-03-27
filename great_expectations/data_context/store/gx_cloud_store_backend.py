@@ -674,7 +674,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> dict:
         """Construct the correct payload for the cloud backend.
 
-        Arguments `resource_type`, `attributes_key`, `resource_id`, and `attributes_value` of type Any
+        Arguments `resource_type`, `resource_id`, and `attributes_value` of type Any
         are deprecated in GX V1, and are only required for resources still using V0 endpoints.
         """
         version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_type, EndpointVersion.V0)
@@ -686,7 +686,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             else:
                 raise TypeError("Type of parameter attributes_value is unsupported in GX V1.")
 
-            return cls._construct_json_payload_v1(payload=payload)
+            return cls._construct_json_payload_v1(payload=payload, attributes_key=attributes_key)
         else:
             return cls._construct_json_payload_v0(
                 resource_type=resource_type,
@@ -725,10 +725,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _construct_json_payload_v1(
         cls,
         payload: dict,
+        attributes_key: str,
     ) -> dict:
         return {
             "data": {
-                "suite": payload,
+                attributes_key: payload,
             }
         }
 
