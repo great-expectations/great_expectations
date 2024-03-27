@@ -42,6 +42,7 @@ class CheckpointFactory(Factory[Checkpoint]):
 
         self._store.add(key=key, value=checkpoint)
 
+        # TODO: Add id adding logic to CheckpointStore to prevent round trip
         return self._store.get(key=key)
 
     @public_api
