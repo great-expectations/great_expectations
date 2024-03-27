@@ -189,7 +189,6 @@ Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Prerequisites>
 
-- <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
@@ -228,7 +227,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
     ```
 
-<AbsBatchingRegexExample />
+<BatchingRegexExplaination />
 
 ### Next steps
 
@@ -243,7 +242,6 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 <Prerequisites>
 
-- <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
@@ -282,7 +280,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```python title="Python" name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_azure_blob_storage_using_spark.py add_asset"
     ```
 
-<AbsBatchingRegexExample />
+<BatchingRegexExplaination />
 
 ### Next steps
 
