@@ -397,7 +397,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
       password: '<your_password>'
       database: '<your_database_name>'
     ```
-    To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core).
+    To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
 
 2. Optional. To use a specific schema as the backend, specify `schema` as an additional keyword argument. For example:
 
