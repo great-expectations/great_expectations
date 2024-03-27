@@ -9,12 +9,14 @@ from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
+    from great_expectations.core.data_context_key import StringKey
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
     from great_expectations.data_context.store.checkpoint_store import (
         V1CheckpointStore as CheckpointStore,
     )
+    from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 
 # TODO: Add analytics as needed
@@ -43,7 +45,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         self._store.add(key=key, value=checkpoint)
 
         # TODO: Add id adding logic to CheckpointStore to prevent round trip
-        return self._store.get(key=key)
+        return self._get(key=key)
 
     @public_api
     @override
@@ -80,4 +82,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
+        return self._get(key=key)
+
+    def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
         return cast(Checkpoint, self._store.get(key=key))
