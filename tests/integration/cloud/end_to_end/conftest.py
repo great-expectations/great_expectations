@@ -125,15 +125,15 @@ def checkpoint(
             }
         ],
     )
-    checkpoint = context.get_checkpoint(name=checkpoint_name)
+    checkpoint = context.get_legacy_checkpoint(name=checkpoint_name)
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
-    context.delete_checkpoint(checkpoint.name)
+    context.delete_legacy_checkpoint(checkpoint.name)
 
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_checkpoint(name=checkpoint_name)
+        context.get_legacy_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")

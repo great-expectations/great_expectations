@@ -1595,13 +1595,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return Checkpoint.DEFAULT_ACTION_LIST
 
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    def get_checkpoint(
+    def get_legacy_checkpoint(
         self,
         name: str | None = None,
         id: str | None = None,
@@ -1629,13 +1623,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return checkpoint
 
-    @public_api
-    @new_argument(
-        argument_name="id",
-        version="0.15.48",
-        message="To be used in place of `ge_cloud_id`",
-    )
-    def delete_checkpoint(
+    def delete_legacy_checkpoint(
         self,
         name: str | None = None,
         id: str | None = None,

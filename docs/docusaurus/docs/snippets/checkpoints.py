@@ -35,7 +35,7 @@ context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/checkpoints.py retrieve_and_run">
-checkpoint = context.get_checkpoint("taxi_checkpoint")
+checkpoint = context.get_legacy_checkpoint("taxi_checkpoint")
 checkpoint.run()
 # </snippet>
 

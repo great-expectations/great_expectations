@@ -33,7 +33,7 @@ asset = datasource.add_table_asset(
 
 # get checkpoint
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_sql.py get checkpoint">
-my_checkpoint = context.get_checkpoint("my_checkpoint")
+my_checkpoint = context.get_legacy_checkpoint("my_checkpoint")
 # </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.

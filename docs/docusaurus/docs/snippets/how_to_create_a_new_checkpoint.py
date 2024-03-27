@@ -59,7 +59,7 @@ context.build_data_docs()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py get checkpoint">
-retrieved_checkpoint = context.get_checkpoint(name="my_checkpoint")
+retrieved_checkpoint = context.get_legacy_checkpoint(name="my_checkpoint")
 # </snippet>
 
 assert retrieved_checkpoint
