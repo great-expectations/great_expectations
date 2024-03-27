@@ -217,7 +217,10 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
-                cloud_suite = ExpectationSuite(**result.response["data"]["suite"])
+                suite_dict = result.response["data"]["suite"]
+                cloud_suite = self.deserialize(suite_dict)
+                if isinstance(cloud_suite, dict):
+                    cloud_suite = ExpectationSuite(**cloud_suite)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,

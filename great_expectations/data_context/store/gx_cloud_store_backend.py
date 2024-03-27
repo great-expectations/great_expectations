@@ -118,7 +118,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.PROFILER: EndpointVersion.V0,
         GXCloudRESTResource.RENDERED_DATA_DOC: EndpointVersion.V0,
         GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
-        GXCloudRESTResource.VALIDATION_CONFIG: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
     }
     # we want to support looking up EndpointVersion from either GXCloudRESTResource
     # or a pluralized version of it, as defined by RESOURCE_PLURALITY_LOOKUP_DICT.
