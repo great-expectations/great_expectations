@@ -663,7 +663,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     @classmethod
-    def construct_versioned_payload(
+    def construct_versioned_payload(  # noqa: PLR0913
         cls,
         resource_type: str,
         organization_id: str,
@@ -698,7 +698,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @classmethod
-    def _construct_json_payload_v0(
+    def _construct_json_payload_v0(  # noqa: PLR0913
         cls,
         resource_type: str,
         organization_id: str,
