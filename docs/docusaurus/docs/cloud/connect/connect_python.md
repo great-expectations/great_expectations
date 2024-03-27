@@ -9,7 +9,7 @@ Learn how to use GX Cloud from a Python script or interpreter, such as a Jupyter
 
 :::note Get the most out of GX Cloud
 
-To get the most out of GX Cloud, GX recommends deploying the GX Agent. If you do not deploy the GX Agent, some features and functionality might be unavailable. To deploy the GX Agent, see [Deploy the GX Agent](../deploy_gx_agent.md)
+To get the most out of GX Cloud, GX recommends deploying the GX Agent. If you do not deploy the GX Agent, some features and functionality might be unavailable. To deploy the GX Agent, see [Deploy the GX Agent](../deploy_gx_agent.md).
 
 :::
 
