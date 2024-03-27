@@ -1,22 +1,19 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
-from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.data_context.store import CheckpointStore
-    from great_expectations.data_context.types.resource_identifiers import (
-        ConfigurationIdentifier,
-        GXCloudIdentifier,
+    from great_expectations.data_context.store.checkpoint_store import (
+        V1CheckpointStore as CheckpointStore,
     )
 
 
@@ -43,10 +40,9 @@ class CheckpointFactory(Factory[Checkpoint]):
                 f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
             )
 
-        self._store.add(key=key, value=checkpoint.get_config())
+        self._store.add(key=key, value=checkpoint)
 
-        # TODO: Add id adding logic to CheckpointStore to prevent round trip
-        return self._get(key=key)
+        return self._store.get(key=key)
 
     @public_api
     @override
@@ -83,11 +79,4 @@ class CheckpointFactory(Factory[Checkpoint]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
-        return self._get(key=key)
-
-    def _get(self, key: GXCloudIdentifier | ConfigurationIdentifier) -> Checkpoint:
-        config: dict | CheckpointConfig = self._store.get(key=key)  # type: ignore[assignment]
-        if isinstance(config, CheckpointConfig):
-            config = config.to_json_dict()
-
-        return Checkpoint(**config, data_context=self._context)
+        return cast(Checkpoint, self._store.get(key=key))

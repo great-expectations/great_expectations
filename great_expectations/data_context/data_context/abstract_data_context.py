@@ -75,6 +75,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -325,8 +326,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._checkpoints: CheckpointFactory | None = None
         if checkpoint_store := self.stores.get(self.checkpoint_store_name):
+            v1_checkpoint_store = V1CheckpointStore(store_name=self.checkpoint_store_name)
+            v1_checkpoint_store._store_backend = checkpoint_store.store_backend
             self._checkpoints = CheckpointFactory(
-                store=checkpoint_store,
+                store=v1_checkpoint_store,
                 context=self,
             )
 
