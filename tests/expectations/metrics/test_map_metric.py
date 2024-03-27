@@ -11,7 +11,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -52,9 +52,7 @@ def sqlite_table_for_unexpected_rows_with_index(
         try:
             from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
-            sqlite_path = file_relative_path(
-                __file__, "../../test_sets/metrics_test.db"
-            )
+            sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
             sqlite_engine = sa.create_engine(f"sqlite:///{sqlite_path}")
             df = pd.DataFrame(
                 {
@@ -142,9 +140,9 @@ def _expecation_configuration_to_validation_result_pandas(
     Args:
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
-    """
+    """  # noqa: E501
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -178,7 +176,7 @@ def _expecation_configuration_to_validation_result_sql(
     Args:
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
-    """
+    """  # noqa: E501
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
@@ -187,17 +185,15 @@ def _expecation_configuration_to_validation_result_sql(
         create_temp_table=False,
     )
     execution_engine = engine
-    my_data_connector: ConfiguredAssetSqlDataConnector = (
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=execution_engine,
-            assets={
-                "my_asset": {
-                    "table_name": "animal_names",
-                },
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "table_name": "animal_names",
             },
-        )
+        },
     )
 
     context.datasources["my_test_datasource"] = Datasource(
@@ -215,22 +211,18 @@ def _expecation_configuration_to_validation_result_sql(
         },
     )
 
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="my_asset",
-            )
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="my_asset",
         )
     )
     assert len(batch_definition_list) == 1
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[0]
     )
-    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
-    )
+    batch_data, _batch_markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
     batch = Batch(data=batch_data, batch_definition=batch_definition_list[0])
     validator = Validator(
         execution_engine=engine,
@@ -261,9 +253,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     metric = MetricConfiguration(
         metric_name="column.max", metric_domain_kwargs={}, metric_value_kwargs=None
     )
-    dependencies = mp.get_evaluation_dependencies(
-        metric, execution_engine=PandasExecutionEngine()
-    )
+    dependencies = mp.get_evaluation_dependencies(metric, execution_engine=PandasExecutionEngine())
 
     table_column_types_metric: MetricConfiguration = dependencies["table.column_types"]
     table_columns_metric: MetricConfiguration = dependencies["table.columns"]
@@ -288,9 +278,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    dependencies = mp.get_evaluation_dependencies(
-        metric, execution_engine=PandasExecutionEngine()
-    )
+    dependencies = mp.get_evaluation_dependencies(metric, execution_engine=PandasExecutionEngine())
     assert (
         dependencies["unexpected_condition"].id[0]
         == f"column_values.nonnull.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
@@ -306,7 +294,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
+        == f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"  # noqa: E501
     )
 
     metric = MetricConfiguration(
@@ -418,12 +406,10 @@ def test_pandas_unexpected_rows_basic_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -455,16 +441,14 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "include_unexpected_rows": False,  # this is the default value, but making explicit for testing purposes
+                "include_unexpected_rows": False,  # this is the default value, but making explicit for testing purposes  # noqa: E501
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -501,12 +485,10 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -547,12 +529,10 @@ def test_pandas_unexpected_rows_complete_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -604,9 +584,8 @@ def test_expectation_configuration_has_result_format(
             )
         )
 
-    assert (
-        "`result_format` configured at the Expectation-level will not be persisted."
-        in str(config_warning.list[0].message)
+    assert "`result_format` configured at the Expectation-level will not be persisted." in str(
+        config_warning.list[0].message
     )
 
 
@@ -625,12 +604,10 @@ def test_pandas_default_complete_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -671,12 +648,10 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     )
     # result_format configuration at ExpectationConfiguration-level will emit warning
     with pytest.warns(UserWarning):
-        result: ExpectationValidationResult = (
-            _expecation_configuration_to_validation_result_pandas(
-                expectation_configuration=expectation_configuration,
-                dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-                context=in_memory_runtime_context,
-            )
+        result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+            expectation_configuration=expectation_configuration,
+            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+            context=in_memory_runtime_context,
         )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -724,12 +699,10 @@ def test_pandas_default_to_not_include_unexpected_rows(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert result.result == expected_evr_without_unexpected_rows.result
 
@@ -751,12 +724,10 @@ def test_pandas_specify_not_include_unexpected_rows(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_pandas(
-            expectation_configuration=expectation_configuration,
-            dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_pandas(
+        expectation_configuration=expectation_configuration,
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        context=in_memory_runtime_context,
     )
     assert result.result == expected_evr_without_unexpected_rows.result
 
@@ -795,7 +766,7 @@ def test_spark_single_column_complete_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -852,7 +823,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -923,7 +894,7 @@ def test_spark_single_column_summary_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -976,7 +947,7 @@ def test_spark_single_column_basic_result_format(
         },
     )
     expectation = gxe.ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
         data_asset_name="my_asset",
@@ -1024,11 +995,9 @@ def test_sqlite_single_column_complete_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_sql(
+        expectation_configuration=expectation_configuration,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1072,11 +1041,9 @@ def test_sqlite_single_column_complete_result_format_id_pk(
 
     # result_format configuration at ExpectationConfiguration-level will emit warning
     with pytest.warns(UserWarning):
-        result: ExpectationValidationResult = (
-            _expecation_configuration_to_validation_result_sql(
-                expectation_configuration=expectation_configuration,
-                context=in_memory_runtime_context,
-            )
+        result: ExpectationValidationResult = _expecation_configuration_to_validation_result_sql(
+            expectation_configuration=expectation_configuration,
+            context=in_memory_runtime_context,
         )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1125,11 +1092,9 @@ def test_sqlite_single_column_summary_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_sql(
+        expectation_configuration=expectation_configuration,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -1162,11 +1127,9 @@ def test_sqlite_single_column_basic_result_format(
             },
         },
     )
-    result: ExpectationValidationResult = (
-        _expecation_configuration_to_validation_result_sql(
-            expectation_configuration=expectation_configuration,
-            context=in_memory_runtime_context,
-        )
+    result: ExpectationValidationResult = _expecation_configuration_to_validation_result_sql(
+        expectation_configuration=expectation_configuration,
+        context=in_memory_runtime_context,
     )
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,

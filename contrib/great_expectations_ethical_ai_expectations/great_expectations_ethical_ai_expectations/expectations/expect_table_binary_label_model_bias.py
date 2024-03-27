@@ -87,9 +87,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         runtime_configuration=None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -205,9 +203,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
         "meta": None,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.

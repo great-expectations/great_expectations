@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 import pytest
@@ -21,7 +23,7 @@ def test_expectation_validation_result_describe_returns_expected_description():
             column="passenger_count",
             min_value=0,
             max_value=6,
-            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",  # noqa: E501
         ).configuration,
         result={
             "element_count": 100000,
@@ -102,7 +104,7 @@ def test_expectation_validation_result_describe_returns_expected_description_wit
             column="passenger_count",
             min_value=0,
             max_value=6,
-            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+            notes="Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",  # noqa: E501
         ).configuration,
         result={
             "element_count": 100000,
@@ -153,7 +155,16 @@ def test_expectation_validation_result_describe_returns_expected_description_wit
 
 
 @pytest.mark.unit
-def test_expectation_suite_validation_result_returns_expected_shape():
+@pytest.mark.parametrize(
+    "validation_result_url",
+    [
+        "https://app.greatexpectations.io/organizations/my-org/data-assets/6f6d390b-a52b-41d1-b5c0-a1d57a6b4618/validations/expectation-suites/a0af0eb5-90ab-4219-ab60-482eee0a8b32/results/e77ce5e4-b71b-4f86-9c3b-f82385aab660",
+        None,
+    ],
+)
+def test_expectation_suite_validation_result_returns_expected_shape(
+    validation_result_url: str | None,
+):
     # arrange
     svr = ExpectationSuiteValidationResult(
         success=True,
@@ -188,7 +199,7 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                     "expectation_config": ExpectationConfiguration(
                         **{
                             "meta": {},
-                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",
+                            "notes": "Per the TLC data dictionary, this is a driver-submitted value (historically between 0 to 6)",  # noqa: E501
                             "id": "9f76d0b5-9d99-4ed9-a269-339b35e60490",
                             "kwargs": {
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
@@ -233,6 +244,7 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                 }
             ),
         ],
+        result_url=validation_result_url,
     )
     # act
     description = svr.describe()
@@ -287,6 +299,7 @@ def test_expectation_suite_validation_result_returns_expected_shape():
                     },
                 },
             ],
+            "result_url": validation_result_url,
         },
         indent=4,
     )

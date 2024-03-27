@@ -48,7 +48,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
-    """
+    """  # noqa: E501
     if is_version_less_than(pd.__version__, "2.0.0"):
         with warnings.catch_warnings():
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -112,7 +112,7 @@ def _read_sql_table_as_df(  # noqa: PLR0913
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
-    """
+    """  # noqa: E501
     if dialect == GXSqlDialect.TRINO:
         return pd.read_sql_table(
             table_name=table_name,
@@ -187,10 +187,8 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 * None : Uses standard SQL ``INSERT`` clause (one per row).
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
-    """
-    if sqlalchemy.sqlalchemy and is_version_less_than(
-        sqlalchemy.sqlalchemy.__version__, "2.0.0"
-    ):
+    """  # noqa: E501
+    if sqlalchemy.sqlalchemy and is_version_less_than(sqlalchemy.sqlalchemy.__version__, "2.0.0"):
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this

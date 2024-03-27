@@ -84,7 +84,7 @@ A Checkpoint validates Expectation Suite data. After you create a Checkpoint to 
 
 ## Add a Validation to a Checkpoint
 
-Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Manage Checkpoints](/core/validate_data/manage_checkpoints.md) in the GX 1.0 documentaion.
+Add Validation data to a Checkpoint to aggregate individual Expectation Suite or Data Source Validations into a single Checkpoint. For more information, see [Manage Checkpoints](/core/validate_data/checkpoints/manage_checkpoints.md).
 
 1. In GX Cloud, click **Checkpoints**.
 

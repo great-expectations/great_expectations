@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, U
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import azure
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch import BatchRequestBase, LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -30,10 +30,10 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
-    batch_definition: BatchDefinition,
+    batch_definition: LegacyBatchDefinition,
     batch_request: BatchRequestBase,
 ) -> bool:
-    assert isinstance(batch_definition, BatchDefinition)
+    assert isinstance(batch_definition, LegacyBatchDefinition)
     assert isinstance(batch_request, BatchRequestBase)
 
     if (
@@ -65,8 +65,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
             for key in batch_filter_parameters.keys():
                 if not (
                     key in batch_definition.batch_identifiers
-                    and batch_definition.batch_identifiers[key]
-                    == batch_filter_parameters[key]
+                    and batch_definition.batch_identifiers[key] == batch_filter_parameters[key]
                 ):
                     return False
 
@@ -77,8 +76,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
         for key in batch_request.batch_identifiers.keys():
             if not (
                 key in batch_definition.batch_identifiers
-                and batch_definition.batch_identifiers[key]
-                == batch_request.batch_identifiers[key]
+                and batch_definition.batch_identifiers[key] == batch_request.batch_identifiers[key]
             ):
                 return False
 
@@ -92,7 +90,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
+) -> Optional[List[LegacyBatchDefinition]]:
     processed_data_reference: Optional[Tuple[str, IDDict]] = (
         convert_data_reference_string_to_batch_identifiers_using_regex(
             data_reference=data_reference,
@@ -110,7 +108,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
         data_asset_name = data_asset_name_from_batch_identifiers
 
     return [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -133,18 +131,14 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     # Check for `(?P<name>)` named group syntax
     match_dict = matches.groupdict()
     if match_dict:  # Only named groups will populate this dict
-        batch_identifiers = _determine_batch_identifiers_using_named_groups(
-            match_dict, group_names
-        )
+        batch_identifiers = _determine_batch_identifiers_using_named_groups(match_dict, group_names)
     else:
         groups: list = list(matches.groups())
         batch_identifiers = IDDict(dict(zip(group_names, groups)))
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
-    data_asset_name: str = batch_identifiers.pop(
-        "data_asset_name", DEFAULT_DATA_ASSET_NAME
-    )
+    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>  # noqa: E501
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>  # noqa: E501
+    data_asset_name: str = batch_identifiers.pop("data_asset_name", DEFAULT_DATA_ASSET_NAME)
 
     return data_asset_name, batch_identifiers
 
@@ -165,29 +159,25 @@ def _determine_batch_identifiers_using_named_groups(
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition,
+    batch_definition: LegacyBatchDefinition,
     regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
-    if not isinstance(batch_definition, BatchDefinition):
-        raise TypeError(
-            "batch_definition is not of an instance of type BatchDefinition"
-        )
+    if not isinstance(batch_definition, LegacyBatchDefinition):
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
 
     data_asset_name: str = batch_definition.data_asset_name
     batch_identifiers: IDDict = batch_definition.batch_identifiers
-    data_reference: str = (
-        convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers=batch_identifiers,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-            data_asset_name=data_asset_name,
-        )
+    data_reference: str = convert_batch_identifiers_to_data_reference_string_using_regex(
+        batch_identifiers=batch_identifiers,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+        data_asset_name=data_asset_name,
     )
     return data_reference
 
 
-# TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
+# TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>  # noqa: E501
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
     regex_pattern: re.Pattern,
@@ -198,7 +188,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)
-    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
+    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>  # noqa: E501
     if data_asset_name is not None:
         template_arguments["data_asset_name"] = data_asset_name
 
@@ -212,7 +202,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 
 # noinspection PyUnresolvedReferences
-def _invert_regex_to_data_reference_template(
+def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
     regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
@@ -238,7 +228,7 @@ def _invert_regex_to_data_reference_template(
 
 
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
-    """
+    """  # noqa: E501
     data_reference_template: str = ""
     group_name_index: int = 0
 
@@ -279,9 +269,7 @@ def _invert_regex_to_data_reference_template(
         ]:
             pass
         else:
-            raise ValueError(
-                f"Unrecognized regex token {token} in regex pattern {regex_pattern}."
-            )
+            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
@@ -348,15 +336,14 @@ def get_filesystem_one_level_directory_glob_path_list(
     :param base_directory_path -- base directory path, relative to which file paths will be collected
     :param glob_directive -- glob expansion directive
     :returns -- list of relative file paths
-    """
+    """  # noqa: E501
     if isinstance(base_directory_path, str):
         base_directory_path = pathlib.Path(base_directory_path)
 
     globbed_paths = base_directory_path.glob(glob_directive)
 
     path_list: List[str] = [
-        os.path.relpath(str(posix_path), base_directory_path)
-        for posix_path in globbed_paths
+        os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths
     ]
 
     return path_list
@@ -385,11 +372,9 @@ def list_azure_keys(
 
     Returns:
         List of keys representing Azure file paths (as filtered by the query_options dict)
-    """
+    """  # noqa: E501
     container: str = query_options["container"]
-    container_client: azure.ContainerClient = azure_client.get_container_client(
-        container=container
-    )
+    container_client: azure.ContainerClient = azure_client.get_container_client(container=container)
 
     path_list: List[str] = []
 
@@ -440,7 +425,7 @@ def list_gcs_keys(
 
     Returns:
         List of keys representing GCS file paths (as filtered by the `query_options` dict)
-    """
+    """  # noqa: E501
     # Delimiter determines whether or not traversal of bucket is recursive
     # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
@@ -449,7 +434,7 @@ def list_gcs_keys(
             'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
             or with a Fluent datasource without enabling recursive file discovery, \
             the delimiter that has been passed to gcs_options in your config cannot be empty; \
-            please note that the value is being set to the default "/" in order to work with the Google SDK.'
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'  # noqa: E501
         )
         query_options["delimiter"] = "/"
     elif delimiter is not None and recursive:
@@ -472,7 +457,7 @@ def list_gcs_keys(
     return keys
 
 
-def list_s3_keys(
+def list_s3_keys(  # noqa: C901 - too complex
     s3, query_options: dict, iterator_dict: dict, recursive: bool = False
 ) -> Generator[str, None, None]:
     """
@@ -487,7 +472,7 @@ def list_s3_keys(
     :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
     :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
     :return: string valued key representing file path on S3 (full prefix and leaf file name)
-    """
+    """  # noqa: E501
     if iterator_dict is None:
         iterator_dict = {}
 
@@ -502,9 +487,7 @@ def list_s3_keys(
         raise ValueError("S3 query may not have been configured correctly.")
 
     if "Contents" in s3_objects_info:
-        keys: List[str] = [
-            item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
-        ]
+        keys: List[str] = [item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0]
         yield from keys
 
     if recursive and "CommonPrefixes" in s3_objects_info:
@@ -536,9 +519,9 @@ def list_s3_keys(
 
 
 # TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
-# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
-# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
-# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
+# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is  # noqa: E501
+# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this  # noqa: E501
+# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).  # noqa: E501
 def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
@@ -563,18 +546,14 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     sorter: Sorter = instantiate_class_from_config(
         config=sorter_config,
         runtime_environment=runtime_environment,
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector.sorter"
-        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector.sorter"},
     )
     return sorter
 
 
 def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
-    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, DataConnector] = {
-        "data_connector": runtime_environment
-    }
+    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""  # noqa: E501
+    runtime_environment_dict: Dict[str, DataConnector] = {"data_connector": runtime_environment}
     config = assetConfigSchema.load(config)
     config = assetConfigSchema.dump(config)
     asset: Asset = instantiate_class_from_config(

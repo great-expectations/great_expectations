@@ -2,7 +2,7 @@
 Purpose: To ensure that no stray snippet opening/closing tags are present in our production docs
 
 In short, this script creates a temporary Docusaurus build and utilizes grep to parse for stray tags.
-"""
+"""  # noqa: E501
 
 from __future__ import annotations
 
@@ -45,9 +45,7 @@ def run_grep(target_dir: str) -> List[str]:
             text=True,
         )
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
-        )
+        raise RuntimeError(f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}")
     return res.stdout.splitlines()
 
 
@@ -73,10 +71,7 @@ def parse_grep(lines: list[str]) -> list[str]:
     only_one_closing_tag = False
     closing_tag_count = 0
     for line in lines:
-        if (
-            'name="tests/integration/docusaurus/template/script_example.py full"'
-            in line
-        ):
+        if 'name="tests/integration/docusaurus/template/script_example.py full"' in line:
             example_present = True
         if "</snippet>" in line:
             closing_tag_count += 1

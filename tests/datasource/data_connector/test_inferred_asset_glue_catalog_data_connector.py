@@ -3,7 +3,7 @@ import random
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import Batch, BatchDefinition
+from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import Datasource
@@ -88,9 +88,7 @@ def test_get_batch_data_and_metadata_without_partitions(
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -100,7 +98,7 @@ def test_get_batch_data_and_metadata_without_partitions(
         data_asset_name_suffix="__suffix",
     )
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             datasource_name="FAKE_Datasource_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="prefix__db_test.tb_titanic_without_partitions__suffix",
@@ -129,12 +127,10 @@ def test_get_batch_data_and_metadata_with_partitions(
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_data_connector": {
@@ -145,7 +141,7 @@ def test_get_batch_data_and_metadata_with_partitions(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -154,7 +150,7 @@ def test_get_batch_data_and_metadata_with_partitions(
         "FAKE_Datasource_NAME"
     ].data_connectors["my_data_connector"]
 
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="prefix__db_test.tb_titanic_with_partitions__suffix",
@@ -166,9 +162,7 @@ def test_get_batch_data_and_metadata_with_partitions(
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)
 
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
 
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["0"]).success

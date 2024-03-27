@@ -66,7 +66,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_match_json_schema](https://greatexpectations.io/expectations/expect_column_values_to_match_json_schema)
-    """
+    """  # noqa: E501
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -136,9 +136,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         template_str = "values must be parseable as JSON"
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

@@ -8,10 +8,10 @@ from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -44,9 +44,7 @@ def test_basic_instantiation():
         "alpha-3.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
@@ -102,9 +100,7 @@ def test_return_all_batch_definitions_unsorted():
         "alex_20200819_1300.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -157,97 +153,75 @@ def test_return_all_batch_definitions_unsorted():
         )
     )
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
     ]
     assert expected == unsorted_batch_definition_list
 
     # with named data_asset_name
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_s3_data_connector",
-                data_asset_name="TestFiles",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -276,9 +250,7 @@ def test_return_all_batch_definitions_sorted():
         "alex_20200819_1300.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -318,96 +290,74 @@ def test_return_all_batch_definitions_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_s3_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_s3_data_connector",
+            data_asset_name="TestFiles",
         )
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
 
@@ -429,19 +379,17 @@ def test_return_all_batch_definitions_sorted():
         ),
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # TEST 2: Should only return the specified partition
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition = BatchDefinition(
+    expected_batch_definition = LegacyBatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
@@ -463,10 +411,8 @@ def test_return_all_batch_definitions_sorted():
         data_connector_query=None,
     )
     # should return 10
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 10
 
@@ -488,9 +434,7 @@ def test_alpha():
         "test_dir_alpha/D.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -517,8 +461,8 @@ def test_alpha():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     # Try to fetch a batch from a nonexistent asset
     my_batch_request: BatchRequest = BatchRequest(
@@ -528,10 +472,8 @@ def test_alpha():
         data_connector_query=None,
     )
 
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 0
 
@@ -541,10 +483,8 @@ def test_alpha():
         data_asset_name="A",
         data_connector_query=IDDict(**{"batch_filter_parameters": {"part_1": "B"}}),
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
@@ -576,9 +516,7 @@ def test_foxtrot():
         "test_dir_foxtrot/D/D-eee.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -616,18 +554,16 @@ def test_foxtrot():
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
 
@@ -655,9 +591,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         "alex_20200819_1300.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         """
@@ -697,9 +631,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                     "name": "general_s3_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
@@ -727,9 +659,7 @@ def test_return_all_batch_definitions_too_many_sorters():
         "alex_20200819_1300.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     my_data_connector_yaml = yaml.load(
         f"""
@@ -766,9 +696,7 @@ def test_return_all_batch_definitions_too_many_sorters():
                     "name": "general_s3_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
@@ -798,9 +726,7 @@ def test_example_with_explicit_data_asset_names():
         "my_base_directory/gamma-202005.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
     yaml_string = f"""
 class_name: ConfiguredAssetS3DataConnector

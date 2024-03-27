@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,  # noqa: TCH001
     BatchMarkers,  # noqa: TCH001
     BatchRequestBase,  # noqa: TCH001
+    LegacyBatchDefinition,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
 
@@ -47,7 +47,7 @@ class DataConnector:
         execution_engine: The Execution Engine object to used by this Data Connector to read the data.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -103,16 +103,16 @@ class DataConnector:
 
     def get_batch_data_and_metadata(
         self,
-        batch_definition: BatchDefinition,
+        batch_definition: LegacyBatchDefinition,
     ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
 
         Args:
-            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+            batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
 
-        """
+        """  # noqa: E501
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -124,25 +124,23 @@ class DataConnector:
             batch_markers,
         )
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
 
         Args:
-            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+            batch_definition (LegacyBatchDefinition): required batch_definition parameter for retrieval
         Returns:
             BatchSpec object built from BatchDefinition
 
-        """
-        batch_spec_params: dict = (
-            self._generate_batch_spec_parameters_from_batch_definition(
-                batch_definition=batch_definition
-            )
+        """  # noqa: E501
+        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
+            batch_definition=batch_definition
         )
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
 
-        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
+        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config  # noqa: E501
         if isinstance(batch_definition.batch_spec_passthrough, dict):
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
@@ -155,9 +153,7 @@ class DataConnector:
     ) -> None:
         raise NotImplementedError
 
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class
@@ -165,7 +161,7 @@ class DataConnector:
         Args:
             data_asset_name (str): optional data_asset_name to retrieve more specific results
 
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
@@ -204,21 +200,21 @@ class DataConnector:
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> List[LegacyBatchDefinition]:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List[LegacyBatchDefinition]]:
         raise NotImplementedError
 
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> Any:
         raise NotImplementedError
 
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: LegacyBatchDefinition
     ) -> dict:
         raise NotImplementedError
 
@@ -233,9 +229,9 @@ class DataConnector:
         """
         if batch_request.datasource_name != self.datasource_name:
             raise ValueError(
-                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""
+                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""  # noqa: E501
             )
         if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""  # noqa: E501
             )

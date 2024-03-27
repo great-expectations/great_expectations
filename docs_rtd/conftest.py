@@ -15,7 +15,7 @@
 #     doctest_namespace["np"] = numpy
 #     doctest_namespace["ge"] = great_expectations
 #     doctest_namespace["npi"] = pandas_npi_dataset
-#     doctest_namespace["ExpectationValidationResult"] = great_expectations.core.ExpectationValidationResult
+#     doctest_namespace["ExpectationValidationResult"] = great_expectations.core.ExpectationValidationResult  # noqa: E501
 #
 #
 # from os import chdir, getcwd

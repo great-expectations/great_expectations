@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class SqlAlchemyQueryStore(Store):
     """SqlAlchemyQueryStore stores queries by name, and makes it possible to retrieve the resulting value by query
-    name."""
+    name."""  # noqa: E501
 
     _key_class: ClassVar[Type] = StringKey
 
@@ -39,8 +39,7 @@ class SqlAlchemyQueryStore(Store):
     ) -> None:
         if not sa:
             raise gx_exceptions.DataContextError(
-                "sqlalchemy module not found, but is required for "
-                "SqlAlchemyQueryStore"
+                "sqlalchemy module not found, but is required for " "SqlAlchemyQueryStore"
             )
         super().__init__(
             store_backend=store_backend,
@@ -48,16 +47,15 @@ class SqlAlchemyQueryStore(Store):
             store_name=store_name,
         )
         if queries:
-            # If queries are defined in configuration, then we load them into an InMemoryStoreBackend
+            # If queries are defined in configuration, then we load them into an InMemoryStoreBackend  # noqa: E501
             try:
                 assert isinstance(
                     queries, dict
                 ), "SqlAlchemyQueryStore queries must be defined as a dictionary"
                 assert (
-                    store_backend is None
-                    or store_backend["class_name"] == "InMemoryStoreBackend"
+                    store_backend is None or store_backend["class_name"] == "InMemoryStoreBackend"
                 ), (
-                    "If queries are provided in configuration, then store_backend must be empty or an "
+                    "If queries are provided in configuration, then store_backend must be empty or an "  # noqa: E501
                     "InMemoryStoreBackend"
                 )
                 for k, v in queries.items():
@@ -77,8 +75,8 @@ class SqlAlchemyQueryStore(Store):
             options = url_create_fn(drivername, **credentials)
             self.engine = sa.create_engine(options)
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "credentials": credentials,
             "queries": queries,

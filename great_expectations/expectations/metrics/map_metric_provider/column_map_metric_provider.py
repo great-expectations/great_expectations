@@ -25,7 +25,7 @@ class ColumnMapMetricProvider(MapMetricProvider):
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
-    """
+    """  # noqa: E501
 
     condition_domain_keys = (
         "batch_id",

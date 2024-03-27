@@ -90,7 +90,7 @@ class CheckpointStoreSpy(CheckpointStore):
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
     Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -213,9 +213,7 @@ def test_delete_store_failure(in_memory_data_context: EphemeralDataContextSpy):
             DataContextConfig(progress_bars=ProgressBarsConfig(globally=True)),
             id="DataContextConfig",
         ),
-        pytest.param(
-            {"progress_bars": ProgressBarsConfig(globally=True)}, id="Mapping"
-        ),
+        pytest.param({"progress_bars": ProgressBarsConfig(globally=True)}, id="Mapping"),
     ],
 )
 def test_update_project_config(
@@ -306,13 +304,13 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
     if isinstance(parametrized_datasource_configs, DatasourceConfig):
         config_dict = parametrized_datasource_configs.to_dict()
         config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
-        config_dict["data_connectors"]["tripdata_monthly_configured"][
-            "base_directory"
-        ] = new_base_directory
+        config_dict["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
+            new_base_directory
+        )
         datasource = context.add_or_update_datasource(**config_dict)
-        datasource.config["data_connectors"]["tripdata_monthly_configured"][
-            "base_directory"
-        ] = new_base_directory
+        datasource.config["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
+            new_base_directory
+        )
 
         assert context.datasource_store.save_count == 1
     else:
@@ -324,7 +322,7 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
             datasource = context.add_or_update_datasource(**config_dict)
         datasource.base_directory = new_base_directory
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
@@ -371,11 +369,9 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
         with mock.patch(
             "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
         ):
-            persisted_datasource = context.add_or_update_datasource(
-                datasource=datasource
-            )
+            persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
         assert datasource == persisted_datasource
@@ -424,15 +420,13 @@ def test_add_or_update_datasource_adds_successfully(
     else:
         parametrized_datasource_configs["name"] = datasource_name
         if use_existing_datasource:
-            ds_type = _SourceFactories.type_lookup[
-                parametrized_datasource_configs["type"]
-            ]
+            ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
             datasource = ds_type(**parametrized_datasource_configs)
             _ = context.add_or_update_datasource(datasource=datasource)
         else:
             _ = context.add_or_update_datasource(**parametrized_datasource_configs)
 
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
         assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
@@ -548,9 +542,7 @@ def test_add_expectation_suite_conflicting_args_failure(
         suite = None
 
     with pytest.raises(TypeError):
-        context.add_expectation_suite(
-            expectation_suite=suite, expectation_suite_name=suite_name
-        )
+        context.add_expectation_suite(expectation_suite=suite, expectation_suite_name=suite_name)
 
     assert context.expectations_store.save_count == 0
 
@@ -567,9 +559,7 @@ def test_update_expectation_suite_failure(
     with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
 
-    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(
-        e.value
-    )
+    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(e.value)
 
 
 @pytest.mark.unit
@@ -851,10 +841,7 @@ def test_add_or_update_checkpoint_adds_successfully(
     actual_config = checkpoint.config
 
     assert actual_config.name == checkpoint_config["name"]
-    assert (
-        actual_config.expectation_suite_name
-        == checkpoint_config["expectation_suite_name"]
-    )
+    assert actual_config.expectation_suite_name == checkpoint_config["expectation_suite_name"]
     actual_validations = [v.to_dict() for v in actual_config.validations]
     assert actual_validations == checkpoint_config["validations"]
     assert context.checkpoint_store.save_count == 1

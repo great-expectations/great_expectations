@@ -34,7 +34,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         glob_directive (str): glob for selecting files in directory (defaults to *)
         sorters (list): optional list of sorters for sorting data_references
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -65,9 +65,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         )
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         full_path = super()._get_full_file_path_for_asset(path=path, asset=asset)
         template_arguments: dict = {
             "path": full_path,

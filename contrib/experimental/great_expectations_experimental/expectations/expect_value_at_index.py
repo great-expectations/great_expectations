@@ -29,9 +29,7 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
     def _pandas(cls, column, value, index, **kwargs):
         # print(column, str(type(column)))
         return column.apply(
-            lambda element: element[index] == value
-            if str(element) == element
-            else False
+            lambda element: element[index] == value if str(element) == element else False
         )
 
         # return column == 3

@@ -6,7 +6,7 @@ import pytest
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -108,9 +108,7 @@ def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -140,7 +138,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -149,8 +147,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             )
         )
     )
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -163,7 +161,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -176,7 +174,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -189,7 +187,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -202,7 +200,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -215,7 +213,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -228,7 +226,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -241,7 +239,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -254,7 +252,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -267,7 +265,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 }
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -486,9 +484,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_only_unique_batch_definitions(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -527,8 +523,8 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     ]
     assert my_data_connector.get_unmatched_data_reference_count() == 2
 
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -536,7 +532,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 {"path": "A/file_1.csv", "directory": "A", "filename": "file_1.csv"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -544,7 +540,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 {"path": "A/file_2.csv", "directory": "A", "filename": "file_2.csv"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -552,7 +548,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 {"path": "A/file_3.csv", "directory": "A", "filename": "file_3.csv"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -560,7 +556,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
@@ -578,7 +574,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
 
-    unsorted_batch_definition_list: List[BatchDefinition] = (
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
@@ -626,15 +622,13 @@ def test_alpha(tmp_path_factory):
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
+    my_batch_definition_list: List[LegacyBatchDefinition]
+    my_batch_definition: LegacyBatchDefinition
 
     my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(
-        datasource_name="BASE", data_asset_name="A", options={}
-    )
+    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
     )
@@ -763,7 +757,7 @@ def test_foxtrot(tmp_path_factory):
         data_asset_name="my_filesystem_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     )
     assert len(my_batch_definition_list) == 3
@@ -772,9 +766,7 @@ def test_foxtrot(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_relative_base_directory_path(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_relative_asset_base_directory_path"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -834,7 +826,7 @@ def test_relative_base_directory_path(tmp_path_factory):
         data_asset_name="my_filesystem_data_asset",
         options={},
     )
-    my_batch_definition_list: List[BatchDefinition] = (
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     )
     assert len(my_batch_definition_list) == 1

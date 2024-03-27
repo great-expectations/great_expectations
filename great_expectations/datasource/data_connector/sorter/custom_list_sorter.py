@@ -9,7 +9,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class CustomListSorter(Sorter):
     """
     CustomListSorter
         - The CustomListSorter is able to sort partitions values according to a user-provided custom list.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -28,9 +28,7 @@ class CustomListSorter(Sorter):
     ) -> None:
         super().__init__(name=name, orderby=orderby)
 
-        self._reference_list = self._validate_reference_list(
-            reference_list=reference_list
-        )
+        self._reference_list = self._validate_reference_list(reference_list=reference_list)
 
     @staticmethod
     def _validate_reference_list(
@@ -43,12 +41,12 @@ class CustomListSorter(Sorter):
         for item in reference_list:
             if not isinstance(item, str):
                 raise gx_exceptions.SorterError(
-                    f"Items in reference list for CustomListSorter must have string type (actual type is `{type(item)!s}`)."
+                    f"Items in reference list for CustomListSorter must have string type (actual type is `{type(item)!s}`)."  # noqa: E501
                 )
         return reference_list
 
     @override
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: LegacyBatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
         if batch_value in self._reference_list:

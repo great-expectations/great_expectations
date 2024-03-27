@@ -28,9 +28,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class DataProfilerProfileNumericColumnsPercentDiffGreaterThanThreshold(
     DataProfilerProfileMetricProvider
 ):
-    metric_name = (
-        "data_profiler.profile_numeric_columns_percent_diff_greater_than_threshold"
-    )
+    metric_name = "data_profiler.profile_numeric_columns_percent_diff_greater_than_threshold"
 
     value_keys = (
         "profile_path",
@@ -71,9 +69,7 @@ class DataProfilerProfileNumericColumnsPercentDiffGreaterThanThreshold(
 
             # adds stats if generic stat key is provided
             numerical_diff_statistics_copy = copy.deepcopy(numerical_diff_statistics)
-            stats = replace_generic_operator_in_report_keys(
-                stats, numerical_diff_statistics_copy
-            )
+            stats = replace_generic_operator_in_report_keys(stats, numerical_diff_statistics_copy)
 
             if col not in columns:  # Makes sure column exists within profile schema
                 requested_columns[col] = "Column requested was not found."
@@ -92,10 +88,7 @@ class DataProfilerProfileNumericColumnsPercentDiffGreaterThanThreshold(
                     requested_columns[col][stat] = "Statistic requested was not found."
                     continue
                 diff_val = col_data_stats[stat]
-                if (
-                    diff_val == "ERR_divide_by_zero"
-                    or diff_val == "ERR_no_original_value"
-                ):
+                if diff_val == "ERR_divide_by_zero" or diff_val == "ERR_no_original_value":
                     unavailable_stats[col][stat] = diff_val
                     continue
                 if diff_val == "unchanged":  # In the case there is no delta
@@ -228,9 +221,7 @@ class ExpectProfileNumericColumnsPercentDiffGreaterThanThreshold(
 
     example_profile = dp.Profiler(df, options=profiler_opts)
 
-    profile_path = (
-        "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
-    )
+    profile_path = "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
 
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
@@ -305,9 +296,7 @@ class ExpectProfileNumericColumnsPercentDiffGreaterThanThreshold(
         },
     ]
 
-    profile_metric = (
-        "data_profiler.profile_numeric_columns_percent_diff_greater_than_threshold"
-    )
+    profile_metric = "data_profiler.profile_numeric_columns_percent_diff_greater_than_threshold"
 
     success_keys = (
         "profile_path",

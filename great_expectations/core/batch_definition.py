@@ -7,6 +7,7 @@ from great_expectations.compatibility import pydantic
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
 from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
+from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
-class BatchConfig(pydantic.BaseModel):
+class BatchDefinition(pydantic.BaseModel):
     """Configuration for a batch of data.
 
     References the DataAsset to be used, and any additional parameters needed to fetch the data.
@@ -46,4 +47,23 @@ class BatchConfig(pydantic.BaseModel):
         )
 
     def save(self) -> None:
-        self.data_asset._save_batch_config(self)
+        self.data_asset._save_batch_definition(self)
+
+    def identifier_bundle(self) -> _EncodedValidationData:
+        # Utilized as a custom json_encoder
+        asset = self.data_asset
+        ds = asset.datasource
+        return _EncodedValidationData(
+            datasource=_IdentifierBundle(
+                name=ds.name,
+                id=ds.id,
+            ),
+            asset=_IdentifierBundle(
+                name=asset.name,
+                id=str(asset.id) if asset.id else None,
+            ),
+            batch_definition=_IdentifierBundle(
+                name=self.name,
+                id=self.id,
+            ),
+        )

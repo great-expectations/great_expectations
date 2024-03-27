@@ -55,9 +55,7 @@ class ColumnAggregateTimeSeriesExpectation(ColumnAggregateExpectation, ABC):
         forecast_lower_bound = forecast.yhat_lower[0]
         forecast_upper_bound = forecast.yhat_upper[0]
 
-        in_bounds = (forecast_lower_bound < metric_value) & (
-            metric_value < forecast_upper_bound
-        )
+        in_bounds = (forecast_lower_bound < metric_value) & (metric_value < forecast_upper_bound)
 
         return {
             "success": in_bounds,

@@ -4,7 +4,7 @@ import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.compatibility import google
-from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
@@ -59,9 +59,7 @@ def expected_config_dict():
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
-def test_instantiation_without_args(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
-):
+def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -181,7 +179,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         prefix="",
     )
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -225,7 +223,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
     my_data_connector._refresh_data_references_cache()
 
-    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name
+    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name  # noqa: E501
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -308,7 +306,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
             },
         )
     ) == [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
@@ -371,18 +369,16 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="my_inferred_asset_filesystem_data_connector",
-                data_asset_name="some_bucket",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
         )
     )
 
     expected = [
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -390,7 +386,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -398,7 +394,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -406,7 +402,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -414,7 +410,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -422,7 +418,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -430,7 +426,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                 {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
             ),
         ),
-        BatchDefinition(
+        LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
@@ -492,9 +488,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -551,9 +545,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         )
 
 
@@ -564,9 +556,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
 )
-def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled
-):
+def test_get_full_file_path(mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
@@ -612,14 +602,10 @@ default_regex:
         == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/beta_here/beta-202002.txt", "beta")
         == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
-        my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
-        )
+        my_data_connector._get_full_file_path("my_base_directory/gamma-202005.csv", "gamma")
         == "gs://my_bucket/my_base_directory/gamma-202005.csv"
     )

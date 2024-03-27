@@ -64,9 +64,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
 
         return {
             "success": num_of_missing_rows == 0,
-            "result": {
-                "Rows with IDs in first table missing in second table": num_of_missing_rows
-            },
+            "result": {"Rows with IDs in first table missing in second table": num_of_missing_rows},
         }
 
     examples = [

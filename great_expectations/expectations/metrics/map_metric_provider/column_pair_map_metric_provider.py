@@ -27,7 +27,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
     keys of `column_A` and `column_B`.
 
     `expect_column_pair_values_to_be_equal` is an example of an Expectation that uses this metric.
-    """
+    """  # noqa: E501
 
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",

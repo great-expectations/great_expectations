@@ -52,7 +52,7 @@ def test_table_domain_builder(
     # Assert Domain object equivalence.
     assert domain == table_Users_domain
 
-    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
+    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.  # noqa: E501
     assert domain.domain_type.value == "table"
     assert domain.kwargs is None
 
@@ -352,7 +352,7 @@ def test_column_pair_domain_builder_wrong_column_names(
         )
 
     assert (
-        'Error: Columns specified for ColumnPairDomainBuilder in sorted order must correspond to "column_A" and "column_B" (in this exact order).'
+        'Error: Columns specified for ColumnPairDomainBuilder in sorted order must correspond to "column_A" and "column_B" (in this exact order).'  # noqa: E501
         in str(excinfo.value)
     )
 
@@ -414,7 +414,7 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
 
     domain: Domain = domains[0]
 
-    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
+    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.  # noqa: E501
     assert domain.domain_type.value == "column_pair"
     assert domain.domain_kwargs.column_A == "user_id"
     assert domain.domain_kwargs.column_B == "event_type"
@@ -533,7 +533,7 @@ def test_multi_column_domain_builder_correct_column_list(
 
     domain: Domain = domains[0]
 
-    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
+    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.  # noqa: E501
     assert domain.domain_type.value == "multicolumn"
     assert domain.domain_kwargs.column_list == [
         "event_type",

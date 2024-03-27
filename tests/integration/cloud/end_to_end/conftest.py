@@ -69,9 +69,7 @@ def expectation_suite(
     )
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(
-        expectation_suite=expectation_suite
-    )
+    expectation_suite = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
     assert len(expectation_suite.expectations) > 0
     _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -127,15 +125,15 @@ def checkpoint(
             }
         ],
     )
-    checkpoint = context.checkpoints.get(name=checkpoint_name)
+    checkpoint = context.get_legacy_checkpoint(name=checkpoint_name)
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
-    context.checkpoints.delete(checkpoint)
+    context.delete_legacy_checkpoint(checkpoint.name)
 
     with pytest.raises(gx_exceptions.DataContextError):
-        context.checkpoints.get(name=checkpoint_name)
+        context.get_legacy_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
@@ -168,9 +166,7 @@ def table_factory() -> Iterator[TableFactory]:
     Given a SQLAlchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """
-    all_created_tables: dict[
-        str, list[dict[Literal["table_name", "schema_name"], str | None]]
-    ] = {}
+    all_created_tables: dict[str, list[dict[Literal["table_name", "schema_name"], str | None]]] = {}
     engines: dict[str, sqlalchemy.engine.Engine] = {}
 
     def _table_factory(
@@ -182,9 +178,7 @@ def table_factory() -> Iterator[TableFactory]:
         LOGGER.info(
             f"Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
         )
-        created_tables: list[
-            dict[Literal["table_name", "schema_name"], str | None]
-        ] = []
+        created_tables: list[dict[Literal["table_name", "schema_name"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
             transaction = conn.begin()

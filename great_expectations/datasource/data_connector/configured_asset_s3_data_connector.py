@@ -16,7 +16,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.datasource.data_connector.asset import Asset
     from great_expectations.execution_engine import ExecutionEngine
 
@@ -44,7 +44,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         max_keys (int): S3 max_keys (default is 1000)
         boto3_options (dict): optional boto3 options
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -90,19 +90,17 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> S3BatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     @override
@@ -135,9 +133,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

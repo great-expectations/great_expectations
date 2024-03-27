@@ -35,17 +35,12 @@ total_batch_definition_list: list = [
 # Filter to all batch_definitions prior to December
 pre_dec_batch_filter: BatchFilter = build_batch_filter(
     data_connector_query_dict={
-        "custom_filter_function": lambda batch_identifiers: int(
-            batch_identifiers["month"]
-        )
-        < 12
+        "custom_filter_function": lambda batch_identifiers: int(batch_identifiers["month"]) < 12
         and batch_identifiers["year"] == "2019"
     }
 )
-pre_dec_batch_definition_list: list = (
-    pre_dec_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
-    )
+pre_dec_batch_definition_list: list = pre_dec_batch_filter.select_from_data_connector_query(
+    batch_definition_list=total_batch_definition_list
 )
 
 # Get the highest max and lowest min before December
@@ -69,7 +64,7 @@ for batch_definition in pre_dec_batch_definition_list:
     )
     cumulative_min = current_min if current_min < cumulative_min else cumulative_min
 
-# Use the highest max and lowest min from before December to create an expectation which we validate against December
+# Use the highest max and lowest min from before December to create an expectation which we validate against December  # noqa: E501
 result = validator_multi_batch.expect_column_values_to_be_between(
     "fare_amount", min_value=cumulative_min, max_value=cumulative_max
 )

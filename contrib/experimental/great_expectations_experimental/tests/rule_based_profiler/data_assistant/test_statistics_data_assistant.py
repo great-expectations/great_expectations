@@ -66,10 +66,7 @@ def test_statistics_data_assistant_result_serialization(
     statistics_data_assistant_result_as_dict: dict = (
         bobby_statistics_data_assistant_result.to_dict()
     )
-    assert (
-        set(statistics_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
-    )
+    assert set(statistics_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
     assert (
         bobby_statistics_data_assistant_result.to_json_dict()
         == statistics_data_assistant_result_as_dict
@@ -168,9 +165,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
             (
                 _ndarray_is_datetime_type,
                 parameter_value,
-            ) = convert_metric_values_to_float_dtype_best_effort(
-                metric_values=parameter_value
-            )
+            ) = convert_metric_values_to_float_dtype_best_effort(metric_values=parameter_value)
             parameter_value_magnitude = np.linalg.norm(parameter_value)
             metrics_magnitude += parameter_value_magnitude * parameter_value_magnitude
             num_elements += 1
@@ -178,9 +173,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     metrics_magnitude = math.sqrt(metrics_magnitude)
 
     assert np.allclose(metrics_magnitude, 3.331205802908463e3)
-    assert (
-        num_elements == 153
-    )  # This quantity must be equal to the total number of metrics.
+    assert num_elements == 153  # This quantity must be equal to the total number of metrics.
 
     normalized_metrics_vector: MetricValues = []
     for (
@@ -195,9 +188,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
             (
                 _ndarray_is_datetime_type,
                 parameter_value,
-            ) = convert_metric_values_to_float_dtype_best_effort(
-                metric_values=parameter_value
-            )
+            ) = convert_metric_values_to_float_dtype_best_effort(metric_values=parameter_value)
             parameter_value = parameter_value / metrics_magnitude
             normalized_metrics_vector.append(parameter_value)
 
@@ -208,9 +199,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     normalized_metrics_vector_magnitude: float = 0.0
     for parameter_value in normalized_metrics_vector:
         parameter_value_magnitude = np.linalg.norm(parameter_value)
-        normalized_metrics_vector_magnitude += (
-            parameter_value_magnitude * parameter_value_magnitude
-        )
+        normalized_metrics_vector_magnitude += parameter_value_magnitude * parameter_value_magnitude
 
     assert np.allclose(normalized_metrics_vector_magnitude, 1.0)
 
@@ -280,18 +269,14 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     assert len(batch_list) == 12
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35
 
 
 @pytest.mark.big
 @pytest.mark.slow  # 104 seconds
-def test_sql_happy_path_statistics_data_assistant(
-    empty_data_context, test_backends, sa
-) -> None:
+def test_sql_happy_path_statistics_data_assistant(empty_data_context, test_backends, sa) -> None:
     """
     The intent of this test is to ensure that our "happy path", exercised by notebooks is in working order.
 
@@ -350,9 +335,7 @@ def test_sql_happy_path_statistics_data_assistant(
     assert len(batch_list) == 13
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35
 
@@ -423,17 +406,13 @@ def test_spark_happy_path_statistics_data_assistant(
             "reader_method": "csv",
             "reader_options": {"header": True, "schema": schema},
         },
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2019", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2019", "month": "01"}},
     )
     batch_request: BatchRequest = multi_batch_batch_request
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 1
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35

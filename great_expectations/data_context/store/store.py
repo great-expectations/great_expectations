@@ -78,7 +78,7 @@ class Store:
             store_backend:
             runtime_environment:
             store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
-        """
+        """  # noqa: E501
         if store_backend is None:
             store_backend = {"class_name": "InMemoryStoreBackend"}
         self._store_name = store_name
@@ -115,7 +115,7 @@ class Store:
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
         deserialization into a collection of GX objects
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def _validate_key(self, key: DataContextKey) -> None:
@@ -162,7 +162,7 @@ class Store:
         Report the store_backend_id of the currently-configured StoreBackend, suppressing warnings for invalid configurations.
         Returns:
             store_backend_id which is a UUID(version=4)
-        """
+        """  # noqa: E501
         return self._store_backend.store_backend_id_warnings_suppressed
 
     @property
@@ -223,9 +223,7 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.set(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -235,9 +233,7 @@ class Store:
 
     def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.add(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -247,21 +243,15 @@ class Store:
 
     def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self._store_backend.update(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        return self._store_backend.update(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
-    def add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
         return self._add_or_update(key=key, value=value, **kwargs)
 
-    def _add_or_update(
-        self, key: DataContextKey, value: Any, **kwargs
-    ) -> None | GXCloudIdentifier:
+    def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         self._validate_key(key)
         return self._store_backend.add_or_update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
@@ -288,7 +278,7 @@ class Store:
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
-        # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
+        # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).  # noqa: E501
         if hasattr(config, "id"):
             id = config.id
 
@@ -321,9 +311,7 @@ class Store:
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
-            logger.critical(
-                f"Error {e} occurred while attempting to instantiate a store."
-            )
+            logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
             class_name: str = store_config["class_name"]
             module_name = store_config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(

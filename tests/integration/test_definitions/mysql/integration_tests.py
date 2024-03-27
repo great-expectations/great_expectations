@@ -71,7 +71,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.MYSQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MYSQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MYSQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_mysql",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -114,7 +114,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.MYSQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_mysql",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",

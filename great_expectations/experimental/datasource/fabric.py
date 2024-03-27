@@ -71,14 +71,10 @@ class _PowerBIAsset(DataAsset):
         Whatever is needed to test the connection to and/or validity of the asset.
         This could be a noop.
         """
-        LOGGER.debug(
-            f"Testing connection to {self.__class__.__name__} has not been implemented"
-        )
+        LOGGER.debug(f"Testing connection to {self.__class__.__name__} has not been implemented")
 
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]:
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
@@ -99,18 +95,16 @@ class _PowerBIAsset(DataAsset):
         )
         # TODO: update get_batch_data_and_markers types
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
-        data, markers = execution_engine.get_batch_data_and_markers(
-            batch_spec=batch_spec
-        )
+        data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
         # batch_definition (along with batch_spec and markers) is only here to satisfy a
         # legacy constraint when computing usage statistics in a validator. We hope to remove
         # it in the future.
         # imports are done inline to prevent a circular dependency with core/batch.py
         from great_expectations.core import IDDict
-        from great_expectations.core.batch import BatchDefinition
+        from great_expectations.core.batch import LegacyBatchDefinition
 
-        batch_definition = BatchDefinition(
+        batch_definition = LegacyBatchDefinition(
             datasource_name=self.datasource.name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
@@ -143,7 +137,7 @@ class _PowerBIAsset(DataAsset):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
-        """
+        """  # noqa: E501
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -214,7 +208,7 @@ class PowerBITable(_PowerBIAsset):
     mode: Mode = "xmla"
 
 
-# This improves our error messages by providing a more specific type for pydantic to validate against
+# This improves our error messages by providing a more specific type for pydantic to validate against  # noqa: E501
 # It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
 # https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
 AssetTypes = Annotated[
@@ -271,9 +265,7 @@ class FabricPowerBIDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         if not self._running_on_fabric():
-            raise TestConnectionError(
-                "Must be running Microsoft Fabric to use this datasource"
-            )
+            raise TestConnectionError("Must be running Microsoft Fabric to use this datasource")
 
         try:
             from sempy import fabric  # noqa: F401 # test if fabric is installed
@@ -305,7 +297,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIDax(
             name=name,
@@ -337,7 +329,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIMeasure(
             name=name,
@@ -376,7 +368,7 @@ class FabricPowerBIDatasource(Datasource):
 
         Returns:
             The asset that is added to the datasource.
-        """
+        """  # noqa: E501
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBITable(
             name=name,

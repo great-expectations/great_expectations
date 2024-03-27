@@ -21,7 +21,7 @@ class IntegrationTestFixture:
         data_dir: Folder that contains data used in the test.
         other_files: other files (like credential information) to copy into the test environment. These are presented as Tuple(path_to_source_file, path_to_target_file), where path_to_target_file is relative to the test_script.py file in our test environment
         util_script: Path of optional util script that is used in test script (for loading test_specific methods like load_data_into_test_database())
-    """
+    """  # noqa: E501
 
     name: str
     user_flow_script: str

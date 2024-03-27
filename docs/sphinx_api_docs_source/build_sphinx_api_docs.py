@@ -30,6 +30,7 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
+from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
 
 from docs.sphinx_api_docs_source.check_public_api_docstrings import (
     get_public_api_definitions,
@@ -179,7 +180,7 @@ class SphinxInvokeDocsBuilder:
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.debug(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
-                    fout.write(doc_str)
+                    fout.write(doc_str.replace("amp;#42;", "#42;"))
 
     def _get_generated_html_file_paths(self):
         """Collect html file paths from Sphinx-generated html, skipping known index paths."""
@@ -217,6 +218,8 @@ class SphinxInvokeDocsBuilder:
         title = soup.find("h1").extract()
         title_str = title.get_text(strip=True)
         title_str = title_str.replace("#", "")
+
+        apply_markdown_adjustments(soup, html_file_path, html_file_contents)
 
         sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
