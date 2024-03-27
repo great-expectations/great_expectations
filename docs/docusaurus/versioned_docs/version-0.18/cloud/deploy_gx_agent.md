@@ -10,7 +10,9 @@ toc_max_heading_level: 2
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-To use GX Cloud features and functionality, you need to deploy the GX Agent. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+To use GX Cloud features and functionality, you need to deploy the GX Agent. The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data, all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
+
+The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ## Prerequisites
 
@@ -67,7 +69,7 @@ Use the information provided here to view your organization ID or create a new a
 
 ## Deploy the GX Agent
 
-The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [Deploy the GX Agent](#deploy-the-gx-agent).
+The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ### Self-hosted and org-hosted deployments
 
@@ -81,36 +83,12 @@ To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deplo
 
 <Tabs
   groupId="deploy-agent"
-  defaultValue='local'
+  defaultValue='deployment'
   values={[
+  {label: 'Org-hosted', value:'deployment'},
   {label: 'Self-hosted', value:'local'},
-  {label: 'Org-hosted', value:'deployment environment'},
   ]}>
-<TabItem value="local">
-
-1. Start the Docker Engine.
-
-2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Agent:
-
-    ```bash title="Terminal input"
-    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
-    ```
-   Replace `user_access_token` and `organization_id` with the values you copied previously. 
-
-3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
-
-    ![GX Agent status](/img/gx_agent_status.png)
-
-4. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
-
-5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
-
-    If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
-
-    To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
-
-</TabItem>
-<TabItem value="deployment environment">
+<TabItem value="deployment">
 
 You can deploy the GX Agent container in any deployment environment where you can run Docker container images.
 
@@ -229,6 +207,29 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="local">
+
+1. Start the Docker Engine.
+
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Agent:
+
+    ```bash title="Terminal input"
+    docker run --rm --pull=always -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
+    ```
+   Replace `user_access_token` and `organization_id` with the values you copied previously. 
+
+3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
+
+    ![GX Agent status](/img/gx_agent_status.png)
+
+4. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+5. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
+
+    If you stop the GX Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
+
+    To edit an environment variable, stop the GX Agent, edit the environment variable, save the change, and then restart the GX Agent.
 
 </TabItem>
 </Tabs>
