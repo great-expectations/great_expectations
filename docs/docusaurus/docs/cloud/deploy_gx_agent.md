@@ -69,7 +69,7 @@ Use the information provided here to view your organization ID or create a new a
 
 ## Deploy the GX Agent
 
-The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+The GX Agent allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ### Self-hosted and org-hosted deployments
 
