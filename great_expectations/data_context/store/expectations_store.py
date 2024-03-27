@@ -292,7 +292,8 @@ class ExpectationsStore(Store):
     def serialize(self, value):
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
-            return self._expectationSuiteSchema.dump(value)
+            val = self._expectationSuiteSchema.dump(value)
+            return val
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, value):
