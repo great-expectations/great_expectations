@@ -155,8 +155,8 @@ Use the information provided here to configure a new storage location for Valida
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
-- [A Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
+- [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 - An Azure Blob container.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
@@ -171,7 +171,7 @@ GX recommends that you store Azure Storage credentials in the ``config_variables
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 
-To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md)
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md)
 
 ### Identify your Validation Results Store
 
@@ -233,7 +233,7 @@ To make Great Expectations look for Validation Results on the Azure store, set t
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on Azure Blob and then visualize the results by re-building Data Docs.
+[Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on Azure Blob and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="gcs">
@@ -247,8 +247,8 @@ To view all the code used in this topic, see [how_to_configure_a_validation_resu
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
-- [A Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
+- [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Validation Results.
 
@@ -301,7 +301,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ## Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on GCS, and then visualize the results by re-building Data Docs.
+[Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on GCS, and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="filesystem">
@@ -313,8 +313,8 @@ Use the information provided here to configure a new storage location for Valida
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
-- [A Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
+- [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
 
 </Prerequisites>
@@ -364,7 +364,7 @@ stores:
 
 ## Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building Data Docs.
+Run a [Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="postgresql">
@@ -376,8 +376,8 @@ Use the information provided here to configure Great Expectations to store Valid
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
-- [A Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
+- [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
 
 </Prerequisites>
@@ -473,7 +473,7 @@ store_backend:
 
 ## Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by re-building Data Docs.
+[Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by re-building Data Docs.
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 
@@ -528,7 +528,7 @@ Use the information provided here to configure a new storage location for Expect
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - An Azure Blob container.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
@@ -542,7 +542,7 @@ GX recommends that you store Azure Storage credentials in the ``config_variables
 ```yaml
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
-To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md).
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
 
 ## Identify your Data Context Expectations Store
 
@@ -635,7 +635,7 @@ To view all the code used in this topic, see [how_to_configure_an_expectation_st
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
 
@@ -719,7 +719,7 @@ Use the information provided here to configure a new storage location for Expect
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
 </Prerequisites>
@@ -826,7 +826,7 @@ Use the information provided here to configure an Expectations store in a Postgr
 <Prerequisites>
 
 - [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>
@@ -846,7 +846,7 @@ To add database credentials, open ``config_variables.yml`` and add the following
       password: '<your_password>'
       database: '<your_database_name>'
 ```
-To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md).
+To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
 
 ## Identify your Data Context Expectations Store
 
