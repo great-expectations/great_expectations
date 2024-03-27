@@ -233,7 +233,7 @@ To make Great Expectations look for Validation Results on the Azure store, set t
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](/reference/learn/terms/data_docs.md).
+[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on Azure Blob and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="gcs">
@@ -301,7 +301,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ## Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/reference/learn/terms/data_docs.md).
+[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on GCS, and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="filesystem">
@@ -364,7 +364,7 @@ stores:
 
 ## Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](/reference/learn/terms/data_docs.md).
+Run a [Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building Data Docs.
 
 </TabItem>
 <TabItem value="postgresql">
@@ -473,7 +473,7 @@ store_backend:
 
 ## Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](/reference/learn/terms/data_docs.md).
+[Run a Checkpoint](/core/validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by re-building Data Docs.
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 
