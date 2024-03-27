@@ -1,22 +1,28 @@
 import React, {useEffect, useState} from 'react';
 import styles from './styles.module.scss';
 import useBaseUrl from "@docusaurus/useBaseUrl";
-export default function GithubNavbarItem({ owner, repository }) {
+
+export default function GithubNavbarItem({ owner, repository, className }) {
 
     const [starsCount, setStarsCount] = useState('0')
     const [forksCount, setForksCount] = useState('0')
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true)
+    const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        fetch(`https://api.github.com/repos/${owner}/${repository}`)
-            .then(response => response.json())
-            .then(data => {
-                setStarsCount(formatCompactNumber(data.stargazers_count))
-                setForksCount(formatCompactNumber(data.forks_count))
-                setShowGithubBadgeInfo(true)
-            }).catch( _ => {
-                setShowGithubBadgeInfo(false)
-            })
+        if(window.innerWidth > MOBILE_BREAKPOINT){
+            fetch(`https://api.github.com/repos/${owner}/${repository}`)
+                .then(response => response.json())
+                .then(data => {
+                    setStarsCount(formatCompactNumber(data.stargazers_count))
+                    setForksCount(formatCompactNumber(data.forks_count))
+                    setShowGithubBadgeInfo(true)
+                }).catch( _ => {
+                    setShowGithubBadgeInfo(false)
+                })
+        } else {
+            setShowGithubBadgeInfo(false)
+        }
     }, []);
 
     function formatCompactNumber(number) {
@@ -31,7 +37,7 @@ export default function GithubNavbarItem({ owner, repository }) {
 
     return repository && (
         <a href={`https://github.com/${owner}/${repository}`} target="_blank"
-           className={styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
+           className={ className + ' ' + styles.githubBadge + ' ' + (showGithubBadgeInfo ? styles.githubBadgeNoErrors : '')}>
             <img src={githubMarkImg} className={styles.githubMark}
                  alt="Github Invertocat Logo"/>
             { showGithubBadgeInfo && (<div className={styles.githubBadgeInfo}>
