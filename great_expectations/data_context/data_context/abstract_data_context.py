@@ -328,7 +328,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if checkpoint_store := self.stores.get(self.checkpoint_store_name):
             # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
             #       Upon the deletion of the old checkpoint store, the new one will be promoted.
-            v1_checkpoint_store = V1CheckpointStore(store_name=self.checkpoint_store_name)
+            v1_checkpoint_store = V1CheckpointStore()
             v1_checkpoint_store._store_backend = (
                 checkpoint_store.store_backend
             )  # Leverage same backend as what was configured for the old store
