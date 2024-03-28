@@ -325,7 +325,7 @@ jobs:
 
       - name: Run the tests
         run:
-          invoke ci-tests 'cloud' --up-services --verbose  --reports -W default::great_expectations.datasources.fluent.GxInvalidDatasourceWarning
+          invoke ci-tests 'cloud' --up-services --verbose  --reports -W default::great_expectations.datasource.fluent.GxInvalidDatasourceWarning
 
           # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
