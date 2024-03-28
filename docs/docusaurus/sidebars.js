@@ -123,7 +123,6 @@ module.exports = {
             },
           ]
         },
-
         {
           type: 'category',
           label: '🚧 Manage Data Sources',
@@ -368,9 +367,46 @@ module.exports = {
           ]
         },
         {
-          type: 'doc',
-          id: 'core/validate_data/checkpoints/manage_checkpoints',
-          label: 'Manage Checkpoints'
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'core/validate_data/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#create-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'List available Checkpoints',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints',
+            },
+            {
+              type: 'link',
+              label: 'Get a Checkpoint by name',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name',
+            },
+            {
+              type: 'link',
+              label: 'Get Checkpoints by attributes',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes',
+            },
+            {
+              type: 'link',
+              label: 'Update a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: '🚧 Run a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+          ]
         },
       ]
     }

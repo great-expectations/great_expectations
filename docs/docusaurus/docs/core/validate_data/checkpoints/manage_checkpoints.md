@@ -1,6 +1,8 @@
 ---
 title: Manage Checkpoints
 ---
+import InProgress from '../../_core_components/_in_progress.md';
+
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
@@ -20,7 +22,7 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 <TabItem value="procedure" label="Procedure">
 
-1. Import the GX library and the Checkpoint class:
+1. Import the GX library and the `Checkpoint` class:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py import statements"
   ```
@@ -154,7 +156,7 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 </Tabs>
 
-## Update a Checkpoint's Validation Definitions or Actions
+## Update a Checkpoint
 
 <Tabs>
 
@@ -170,7 +172,7 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 3. Overwrite the Checkpoint's values with updated lists.
 
-  In this example both the Validations Definitions and Actions recieve updates:
+  In this example both the Validations Definitions and Actions of the Checkpoint recieve updates:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/update_a_checkpoint.py full update values"
   ```
@@ -218,3 +220,5 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 </Tabs>
 
 ## Run a Checkpoint
+
+<InProgress/>
