@@ -999,7 +999,7 @@ def docs_snippet_tests(
     },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: C901 - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1042,7 +1042,7 @@ def ci_tests(
 
     if W:
         # https://docs.python.org/3/library/warnings.html#describing-warning-filters
-        pytest_options.append(f"-W={warnings}")
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:
