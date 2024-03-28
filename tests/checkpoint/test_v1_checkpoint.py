@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import expectations as gxe
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
@@ -48,25 +49,25 @@ def test_checkpoint_no_validation_definitions_raises_error():
 @pytest.mark.unit
 def test_checkpoint_save_success(mocker: pytest.MockFixture):
     context = mocker.Mock(spec=AbstractDataContext)
-    context.v1_checkpoint_store.has_key.return_value = True
     set_context(project=context)
+
     checkpoint = Checkpoint(
         name="my_checkpoint",
         validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
         actions=[],
     )
     store_key = context.v1_checkpoint_store.get_key.return_value
-
     checkpoint.save()
 
-    # expect that the data context is kept in sync
     context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
 @pytest.mark.unit
 def test_checkpoint_save_failure(mocker: pytest.MockFixture):
     context = mocker.Mock(spec=AbstractDataContext)
-    context.v1_checkpoint_store.has_key.return_value = False
+    context.v1_checkpoint_store.update.side_effect = gx_exceptions.StoreBackendError(
+        "This is an error"
+    )
     set_context(project=context)
 
     checkpoint = Checkpoint(
