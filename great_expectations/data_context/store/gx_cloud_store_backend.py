@@ -684,9 +684,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             elif attributes_value is None:
                 payload = kwargs
             else:
-                raise TypeError("Type of parameter attributes_value is unsupported in GX V1.")
+                raise TypeError("Parameter attributes_value of type `{}` is unsupported in GX V1.")
 
-            return cls._construct_json_payload_v1(payload=payload, attributes_key=attributes_key)
+            return cls._construct_json_payload_v1(payload=payload)
         else:
             return cls._construct_json_payload_v0(
                 resource_type=resource_type,
@@ -725,11 +725,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _construct_json_payload_v1(
         cls,
         payload: dict,
-        attributes_key: str,
     ) -> dict:
         return {
             "data": {
-                attributes_key: payload,
+                **payload,
             }
         }
 
