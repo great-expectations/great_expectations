@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 # https://setuptools.pypa.io/en/latest/pkg_resources.html
-import pkg_resources  # noqa: TID251: TODO: switch to importlib.metadata or importlib.resources or poetry
+import pkg_resources  # noqa: TID251: TODO: switch to poetry
 from setuptools import find_packages, setup
 
 import versioneer
