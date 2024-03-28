@@ -37,10 +37,10 @@ class ExpectationConfigurationDTO(pydantic.BaseModel):
 
     id: str
     expectation_type: str
-    rendered_content: list[dict] | None
+    rendered_content: Optional[list[dict]]
     kwargs: dict
-    meta: dict | None
-    expectation_context: dict | None
+    meta: Optional[dict]
+    expectation_context: Optional[dict]
 
 
 class ExpectationSuiteDTO(pydantic.BaseModel):
@@ -52,8 +52,8 @@ class ExpectationSuiteDTO(pydantic.BaseModel):
     name: str
     id: str
     expectations: list[ExpectationConfigurationDTO]
-    meta: dict | None
-    notes: str | None
+    meta: Optional[dict]
+    notes: Optional[str]
 
 
 class ExpectationsStore(Store):
