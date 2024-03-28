@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
@@ -85,4 +85,8 @@ class CheckpointFactory(Factory[Checkpoint]):
         return self._get(key=key)
 
     def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
-        return cast(Checkpoint, self._store.get(key=key))
+        checkpoint = self._store.get(key=key)
+        if not isinstance(checkpoint, Checkpoint):
+            raise ValueError(f"Object with key {key} was found, but it is not a Checkpoint.")
+
+        return checkpoint
