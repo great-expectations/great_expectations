@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
@@ -28,6 +29,31 @@ if TYPE_CHECKING:
     from great_expectations.expectations.expectation import Expectation
 
     _TExpectation = TypeVar("_TExpectation", bound=Expectation)
+
+
+class ExpectationConfigurationDTO(pydantic.BaseModel):
+    class Config:
+        extra = pydantic.Extra.ignore
+
+    id: str
+    expectation_type: str
+    rendered_content: list[dict] | None
+    kwargs: dict[str, Any]
+    meta: dict | None
+    expectation_context: dict | None
+
+
+class ExpectationSuiteDTO(pydantic.BaseModel):
+    """Capture known fields from a serialized ExpectationSuite."""
+
+    class Config:
+        extra = pydantic.Extra.ignore
+
+    name: str
+    id: str
+    expectations: list[ExpectationConfigurationDTO]
+    meta: dict | None
+    notes: str | None
 
 
 class ExpectationsStore(Store):
@@ -86,7 +112,7 @@ class ExpectationsStore(Store):
 
     @override
     @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
+    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -102,11 +128,9 @@ class ExpectationsStore(Store):
                 )
         else:
             suite_data = response_json["data"]
-        ge_cloud_suite_id: str = suite_data["id"]
-        suite_dict: Dict = suite_data["suite"]
-        suite_dict["id"] = ge_cloud_suite_id
 
-        return suite_dict
+        suite_dto = ExpectationSuiteDTO.parse_obj(suite_data)
+        return suite_dto.dict()
 
     def add_expectation(self, suite: ExpectationSuite, expectation: _TExpectation) -> _TExpectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
@@ -193,9 +217,9 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
-
-                suite_kwargs = result.response["data"]["suite"]
-
+                suite_kwargs = self.deserialize(
+                    self.gx_cloud_response_json_to_object_dict(result.response)
+                )
                 cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
@@ -217,10 +241,10 @@ class ExpectationsStore(Store):
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
                 result = cast(GXCloudResourceRef, result)
-                suite_dict = result.response["data"]["suite"]
-                cloud_suite = self.deserialize(suite_dict)
-                if isinstance(cloud_suite, dict):
-                    cloud_suite = ExpectationSuite(**cloud_suite)
+                suite_kwargs = self.deserialize(
+                    self.gx_cloud_response_json_to_object_dict(result.response)
+                )
+                cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
@@ -299,7 +323,7 @@ class ExpectationsStore(Store):
             return val
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, value):
+    def deserialize(self, value: dict | str) -> ExpectationSuite:
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
         else:
