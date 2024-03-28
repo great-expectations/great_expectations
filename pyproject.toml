@@ -387,6 +387,7 @@ filterwarnings = [
     # we should never use it but it is used in some of our dependencies
     # https://setuptools.pypa.io/en/latest/pkg_resources.html
     "once:pkg_resources is deprecated as an API:DeprecationWarning",
+    "once:Deprecated call to `pkg_resources.declare_namespace('ruamel')`:DeprecationWarning",
 
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
