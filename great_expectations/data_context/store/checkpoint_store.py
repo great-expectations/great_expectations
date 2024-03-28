@@ -293,3 +293,11 @@ class V1CheckpointStore(Store):
         if not self.cloud_mode:
             value.id = str(uuid.uuid4())
         return super()._add(key=key, value=value, **kwargs)
+
+    @override
+    def _update(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
+        try:
+            super()._update(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError as e:
+            name = key.to_tuple()[0]
+            raise ValueError(f"Could not find existing Checkpoint '{name}' to update") from e

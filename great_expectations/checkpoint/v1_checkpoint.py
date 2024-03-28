@@ -209,10 +209,7 @@ class Checkpoint(BaseModel):
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
 
-        try:
-            store.update(key=key, value=self)
-        except gx_exceptions.StoreBackendError as e:
-            raise ValueError(f"Could not find existing Checkpoint '{self.name}' to update") from e
+        store.update(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
