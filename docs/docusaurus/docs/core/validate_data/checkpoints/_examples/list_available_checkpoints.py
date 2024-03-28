@@ -1,10 +1,10 @@
 """
 This example script demonstrates how to list the Checkpoints available
- in a Data Context and filter that list on attributes.
+ in a Data Context and use attributes to filter the list.
 
 The <snippet> tags are used to insert the corresponding code into the
- Great Expectations documentation.  They can be disregarded by anyone
- reviewing this script.
+  GX documentation, and you can disregard them.
+ 
 """
 
 # <snippet name="/core/validate_data/checkpoints/_examples/list_available_checkpoints.py full example code">
