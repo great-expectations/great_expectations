@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
@@ -38,7 +38,7 @@ class ExpectationConfigurationDTO(pydantic.BaseModel):
     id: str
     expectation_type: str
     rendered_content: list[dict] | None
-    kwargs: dict[str, Any]
+    kwargs: dict
     meta: dict | None
     expectation_context: dict | None
 
