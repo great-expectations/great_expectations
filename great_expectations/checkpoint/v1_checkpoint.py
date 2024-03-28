@@ -204,7 +204,16 @@ class Checkpoint(BaseModel):
 
     @public_api
     def save(self) -> None:
-        raise NotImplementedError
+        from great_expectations import project_manager
+
+        store = project_manager.get_checkpoints_store()
+
+        key = store.get_key(name=self.name, id=self.id)
+
+        try:
+            store.update(key=key, value=self)
+        except gx_exceptions.StoreBackendError as e:
+            raise ValueError(f"Could not find existing Checkpoint '{self.name}' to update") from e
 
 
 class CheckpointResult(BaseModel):

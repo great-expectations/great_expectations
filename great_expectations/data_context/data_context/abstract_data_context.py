@@ -75,6 +75,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -646,6 +647,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
+
+    @property
+    def v1_checkpoint_store(self) -> V1CheckpointStore:
+        legacy_checkpoint_store = self.checkpoint_store
+        store = V1CheckpointStore()
+        store._store_backend = legacy_checkpoint_store.store_backend
+        return store
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
