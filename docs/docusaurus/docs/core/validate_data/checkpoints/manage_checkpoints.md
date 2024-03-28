@@ -135,12 +135,7 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 3. Use a list comprehension to return all Checkpoints that match the filtered attributes.
 
-  For example, you can retrieve all Checkpoints associated with a specific Data Asset by filtering on the Data Assets of the Checkpoints' Validation Definitions:
-
-  ```python title="Python" name="/core/validate_data/checkpoints/_examples/get_checkpoints_by_attributes.py filter checkpoints list on data asset"
-  ```
-
-  Or you could return all Checkpoints that send alerts through Slack by filtering on the Actions of each Checkpoint:
+  For example, you can retrieve all Checkpoints that send alerts through Slack by filtering on the Actions of each Checkpoint:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/get_checkpoints_by_attributes.py filter checkpoints list on actions"
   ```
