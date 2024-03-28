@@ -382,7 +382,10 @@ filterwarnings = [
     # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
     "default::pytest_mock.plugin.PytestMockWarning",
 
-    "default::DeprecationWarning: pkg_resources is deprecated as an API",
+    # the pkg_resources module distributed with setuptools has been deprecated
+    # we should never use it but it is used in some of our dependencies
+    # https://setuptools.pypa.io/en/latest/pkg_resources.html
+    "once::DeprecationWarning: pkg_resources is deprecated as an API",
 
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
