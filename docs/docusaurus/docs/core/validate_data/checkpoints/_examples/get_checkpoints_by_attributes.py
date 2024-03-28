@@ -3,8 +3,8 @@ This example script demonstrates how to filter the list of Checkpoints in a
  Data Context on attributes.
 
 The <snippet> tags are used to insert the corresponding code into the
- Great Expectations documentation.  They can be disregarded by anyone
- reviewing this script.
+  GX documentation, and you can disregard them.
+ 
 """
 
 # <snippet name="/core/validate_data/checkpoints/_examples/get_checkpoints_by_attributes.py full example code">
