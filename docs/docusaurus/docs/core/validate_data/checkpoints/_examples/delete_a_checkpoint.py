@@ -4,7 +4,7 @@ This example script demonstrates how to retrieve an existing Checkpoint
 
 The <snippet> tags are used to insert the corresponding code into the
  GX documentation, and you can disregard them.
- reviewing this script.
+ 
 """
 
 # <snippet name="/core/validate_data/checkpoints/_examples/delete_a_checkpoint.py full example script">
