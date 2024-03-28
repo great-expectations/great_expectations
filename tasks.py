@@ -992,10 +992,14 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC, "reports": "Generate coverage reports to be uploaded to codecov"},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: C901 - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1005,6 +1009,7 @@ def ci_tests(
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1034,6 +1039,10 @@ def ci_tests(
 
     if verbose:
         pytest_options.append("-vv")
+
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:

@@ -15,7 +15,7 @@ from subprocess import CalledProcessError, CompletedProcess, check_output, run
 from typing import Dict, Final, List, Optional, Tuple
 
 import click
-import pkg_resources
+import pkg_resources  # noqa: TID251 # TODO: switch to importlib.metadata or importlib.resources
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_diagnostics.expectation_doctor import (
