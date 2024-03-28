@@ -114,17 +114,15 @@ validation_definition = context.validation_definitions.add(ValidationDefinition(
 
 <TabItem value="procedure" label="Procedure">
 
-Validation Definitions can be accessed through `context.validation_definitions`.  This is an iterable object, so you can list all the Validation Definitions saved in a Data Context by:
-
 1. <StepRequestADataContext/>.
 
   In this example the variable `context` is your Data Context.
 
-2. Iterate `context.validation_definitions` and print the name attribute for each Validation Definition:
+2. Use the Data Context to retrieve and print the names of the available Validation Definitions:
 
   ```python
-  for definition in context.validation_definitions:
-      print(definition.name)
+  validation_definition_names = [definition.name for definition in context.validation_definitions]
+  print(validation_definition_names)
   ```
 
 
@@ -146,7 +144,6 @@ for definition in context.validation_definitions:
 </TabItem>
 
 </Tabs>
-
 
 ## Get a Validation Definition by name
 

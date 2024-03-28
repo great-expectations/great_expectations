@@ -20,18 +20,25 @@ context = gx.get_context()
 validation_definition_name = "my_existing_validation_definition"
 validation_definition = context.validation_definitions.get(name=validation_definition_name)
 
-# highlight-start
+validation_definitions = [validation_definition]
+# <snippet name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py determine actions">
+actions = [gx.UpdateDataDocs(...), gx.SlackNotification(...)]
+# </snippet>
 # <snippet name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py create checkpoint">
-checkpoint = Checkpoint(
-  validations=[validation_definition],
-  actions=[]
-)
-# </snippet>
-# highlight-end
+checkpoint_name = "my_checkpoint"
 
-# <snippet name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py add checkpoint">
 # highlight-start
-context.checkpoints.add(checkpoint)
+checkpoint = Checkpoint(
+  name=checkpoint_name,
+  validations=validation_definitions,
+  actions=actions
+)
 # highlight-end
 # </snippet>
+
+# highlight-start
+# <snippet name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py add checkpoint">
+context.checkpoints.add(checkpoint)
+# </snippet>
+# highlight-end
 # </snippet>
