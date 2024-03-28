@@ -439,7 +439,7 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/try_gx_cloud' },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',
