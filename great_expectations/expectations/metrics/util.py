@@ -154,6 +154,25 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         pass
 
     try:
+        # Databricks - may be there is better approach for this check
+        if dialect.name == "databricks":
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
+                )
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
+
+    try:
         # Bigquery
         if hasattr(dialect, "BigQueryDialect"):
             if positive:
