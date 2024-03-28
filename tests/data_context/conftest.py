@@ -25,7 +25,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
-    AnyPayload,
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
@@ -480,7 +479,7 @@ def fake_data_connector_id() -> str:
     return "0c08e6ba-8ed9-4715-a179-da2f08aab13e"
 
 
-JSONData = Union[AnyPayload, Dict[str, Any]]
+JSONData = Union[Dict[str, Any]]
 RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
 
 
