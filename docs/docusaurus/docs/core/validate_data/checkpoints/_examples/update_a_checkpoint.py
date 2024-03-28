@@ -3,8 +3,7 @@ This example script demonstrates how to update a Checkpoint's Validation Definit
   and Actions list, and persist those changes to the Data Context.
 
 The <snippet> tags are used to insert the corresponding code into the
- Great Expectations documentation.  They can be disregarded by anyone
- reviewing this script.
+ GX documentation, and you can disregard them.
 """
 
 # <snippet name="/core/validate_data/checkpoints/_examples/update_a_checkpoint.py full example script">
