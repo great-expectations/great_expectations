@@ -13,37 +13,17 @@ from great_expectations.data_context.store.checkpoint_store import (
 from great_expectations.exceptions import DataContextError
 
 
-@pytest.fixture
-def checkpoint_dict():
-    return {
-        "name": "my_checkpoint",
-        "validation_definitions": [
-            {
-                "name": "my_validation_def",
-                "id": "a758816-64c8-46cb-8f7e-03c12cea1d67",
-            }
-        ],
-        "actions": [],
-        "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
-    }
-
-
-def _assert_checkpoint_equality(actual: Checkpoint, expected: Checkpoint):
-    # Checkpoint equality is currently defined as equality of the config
-    # TODO: We should change this to a more robust comparison (instead of memory addresses)
-    actual_config = actual.config.to_json_dict()
-    expected_config = expected.config.to_json_dict()
-    assert actual_config == expected_config
-
-
 @pytest.mark.unit
-def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict, mocker: MockerFixture):
+def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    store.get.return_value = checkpoint_dict
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+    )
+    store.get.return_value = checkpoint
     context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
@@ -54,18 +34,19 @@ def test_checkpoint_factory_get_uses_store_get(checkpoint_dict: dict, mocker: Mo
     # Assert
     store.get.assert_called_once_with(key=key)
 
-    assert result == checkpoint_dict
+    assert result == checkpoint
 
 
 @pytest.mark.unit
-def test_checkpoint_factory_get_raises_error_on_missing_key(
-    checkpoint_dict: dict, mocker: MockerFixture
-):
+def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    store.get.return_value = checkpoint_dict
+    checkpoint = Checkpoint(
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+    )
+    store.get.return_value = checkpoint
     context = mocker.MagicMock(spec=AbstractDataContext)
     factory = CheckpointFactory(store=store, context=context)
     set_context(context)
@@ -85,12 +66,14 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
+    store.get.return_value = None
     context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
     set_context(context)
+    factory = CheckpointFactory(store=store, context=context)
     checkpoint = Checkpoint(
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
+    store.get.return_value = checkpoint
 
     # Act
     factory.add(checkpoint=checkpoint)
