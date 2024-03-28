@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Final, Literal, Optional, Type, Union
+from typing import TYPE_CHECKING, Final, Literal, Optional, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
@@ -22,7 +22,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
