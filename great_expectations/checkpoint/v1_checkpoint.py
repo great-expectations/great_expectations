@@ -207,7 +207,6 @@ class Checkpoint(BaseModel):
         from great_expectations import project_manager
 
         store = project_manager.get_checkpoints_store()
-
         key = store.get_key(name=self.name, id=self.id)
 
         try:

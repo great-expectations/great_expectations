@@ -35,9 +35,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import (
         EvaluationParameterStore,
         ExpectationsStore,
-        V1CheckpointStore,
         ValidationsStore,
     )
+    from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
