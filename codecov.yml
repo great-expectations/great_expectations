@@ -1,0 +1,17 @@
+flag_management:
+  default_rules: # the rules that will be followed for any flag added, generally
+    carryforward: false
+    statuses:
+      - type: project
+        target: auto # the default target for the project
+        threshold: 60% # the default minimum threshold for the project
+      - type: patch
+        target: 90%
+  # in general these individual flags should correspond to pytest markers
+  # individual_flags: # exceptions to the default rules above, stated flag by flag
+  # - name: some_flag
+  #   statuses:
+  #     - type: project
+  #       target: 75%
+  #     - type: patch
+  #       target: 95%

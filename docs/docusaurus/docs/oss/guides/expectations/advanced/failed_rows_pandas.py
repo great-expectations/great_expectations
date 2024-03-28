@@ -29,7 +29,7 @@ data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
 
 # get checkpoint
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/failed_rows_pandas.py get checkpoint">
-my_checkpoint = context.checkpoints.get("my_checkpoint")
+my_checkpoint = context.get_legacy_checkpoint("my_checkpoint")
 # </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.
