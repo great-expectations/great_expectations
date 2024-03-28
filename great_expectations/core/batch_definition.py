@@ -52,18 +52,23 @@ class BatchDefinition(pydantic.BaseModel):
     def identifier_bundle(self) -> _EncodedValidationData:
         # Utilized as a custom json_encoder
         asset = self.data_asset
-        ds = asset.datasource
+        data_source = asset.datasource
+
+        data_source_bundle = _IdentifierBundle(
+            name=data_source.name,
+            id=str(data_source.id) if data_source.id else None,
+        )
+        asset_bundle = _IdentifierBundle(
+            name=asset.name,
+            id=str(asset.id) if asset.id else None,
+        )
+        batch_definition_bundle = _IdentifierBundle(
+            name=self.name,
+            id=self.id,
+        )
+
         return _EncodedValidationData(
-            datasource=_IdentifierBundle(
-                name=ds.name,
-                id=ds.id,
-            ),
-            asset=_IdentifierBundle(
-                name=asset.name,
-                id=str(asset.id) if asset.id else None,
-            ),
-            batch_definition=_IdentifierBundle(
-                name=self.name,
-                id=self.id,
-            ),
+            datasource=data_source_bundle,
+            asset=asset_bundle,
+            batch_definition=batch_definition_bundle,
         )

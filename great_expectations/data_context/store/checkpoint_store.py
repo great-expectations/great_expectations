@@ -283,6 +283,9 @@ class V1CheckpointStore(Store):
     def deserialize(self, value):
         from great_expectations.checkpoint.v1_checkpoint import Checkpoint as V1Checkpoint
 
+        if self.cloud_mode:
+            return V1Checkpoint.parse_obj(value)
+
         return V1Checkpoint.parse_raw(value)
 
     @override
