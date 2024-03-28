@@ -382,6 +382,8 @@ filterwarnings = [
     # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
     "default::pytest_mock.plugin.PytestMockWarning",
 
+    "default::DeprecationWarning: pkg_resources is deprecated as an API",
+
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
