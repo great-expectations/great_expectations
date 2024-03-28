@@ -323,11 +323,13 @@ class ExpectationsStore(Store):
             return val
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, value: dict | str) -> ExpectationSuite:
+    def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
-        else:
+        elif isinstance(value, str):
             return self._expectationSuiteSchema.loads(value)
+        else:
+            raise TypeError(f"Cannot deserialize value of unknown type: {type(value)}")
 
     def get_key(
         self, name: str, id: Optional[str] = None
