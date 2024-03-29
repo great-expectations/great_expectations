@@ -167,7 +167,7 @@ class LinkChecker:
         # link should be relative to the location of the current file
         return file.parent / path
 
-    def _get_docroot_path(self, path: pathlib.Path) -> pathlib.Path:
+    def _get_docroot_path(self, path: pathlib.Path | str) -> pathlib.Path:
         return self._docs_path / path
 
     def _check_absolute_link(
