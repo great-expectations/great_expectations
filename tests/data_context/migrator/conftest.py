@@ -43,6 +43,8 @@ class StubValidationsStore:
         # Note: Key is unused
         return ExpectationSuiteValidationResult(
             success=True,
+            results=[],
+            suite_name="empty_suite",
         )
 
 

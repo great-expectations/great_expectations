@@ -14,6 +14,7 @@ def test_OpsgenieRenderer_validation_results_success():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
@@ -50,6 +51,7 @@ def test_OpsgenieRenderer_checkpoint_validation_results_success():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
@@ -75,6 +77,7 @@ def test_OpsgenieRenderer_validation_results_failure():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=False,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 1,
             "successful_expectations": 0,

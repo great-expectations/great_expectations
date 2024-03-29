@@ -85,6 +85,7 @@ def validation_result_suite():
     return ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="empty_suite",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
@@ -112,6 +113,7 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
     return ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="empty_suite",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,

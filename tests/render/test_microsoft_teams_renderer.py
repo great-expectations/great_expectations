@@ -46,6 +46,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_bat
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,

@@ -27,7 +27,7 @@ from great_expectations.data_context.data_context.context_factory import (
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
@@ -182,6 +182,7 @@ class TestValidationRun:
         assert output == ExpectationSuiteValidationResult(
             results=graph_validate_results,
             success=True,
+            suite_name="empty_suite",
             statistics={
                 "evaluated_expectations": 1,
                 "successful_expectations": 1,
@@ -190,7 +191,7 @@ class TestValidationRun:
             },
         )
 
-    @mock.patch.object(ValidationsStore, "set")
+    @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results_for_non_cloud(
         self,
@@ -223,7 +224,7 @@ class TestValidationRun:
         assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
-    @mock.patch.object(ValidationsStore, "set")
+    @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results_for_cloud(
         self,

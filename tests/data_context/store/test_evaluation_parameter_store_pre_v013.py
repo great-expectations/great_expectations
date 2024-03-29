@@ -114,6 +114,7 @@ def test_evaluation_parameter_store_methods(
             )
         ],
         success=True,
+        suite_name="empty_suite",
     )
 
     data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(

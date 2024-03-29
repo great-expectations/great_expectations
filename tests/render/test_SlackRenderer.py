@@ -36,6 +36,7 @@ def failed_expectation_suite_validation_result():
             }
         ],
         success=False,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
@@ -67,6 +68,7 @@ def success_expectation_suite_validation_result():
             "unsuccessful_expectations": 0,
             "success_percent": None,
         },
+        suite_name="default",
         meta={
             "great_expectations_version": "v0.8.0__develop",
             "batch_kwargs": {"data_asset_name": "x/y/z"},
@@ -207,6 +209,7 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
