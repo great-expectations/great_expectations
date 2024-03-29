@@ -3,21 +3,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
-from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
+    from great_expectations.core.data_context_key import StringKey
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.data_context.store import CheckpointStore
-    from great_expectations.data_context.types.resource_identifiers import (
-        ConfigurationIdentifier,
-        GXCloudIdentifier,
+    from great_expectations.data_context.store.checkpoint_store import (
+        V1CheckpointStore as CheckpointStore,
     )
+    from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 
 # TODO: Add analytics as needed
@@ -43,7 +42,7 @@ class CheckpointFactory(Factory[Checkpoint]):
                 f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
             )
 
-        self._store.add(key=key, value=checkpoint.get_config())
+        self._store.add(key=key, value=checkpoint)
 
         # TODO: Add id adding logic to CheckpointStore to prevent round trip
         return self._get(key=key)
@@ -85,9 +84,9 @@ class CheckpointFactory(Factory[Checkpoint]):
 
         return self._get(key=key)
 
-    def _get(self, key: GXCloudIdentifier | ConfigurationIdentifier) -> Checkpoint:
-        config: dict | CheckpointConfig = self._store.get(key=key)  # type: ignore[assignment]
-        if isinstance(config, CheckpointConfig):
-            config = config.to_json_dict()
+    def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
+        checkpoint = self._store.get(key=key)
+        if not isinstance(checkpoint, Checkpoint):
+            raise ValueError(f"Object with key {key} was found, but it is not a Checkpoint.")
 
-        return Checkpoint(**config, data_context=self._context)
+        return checkpoint
