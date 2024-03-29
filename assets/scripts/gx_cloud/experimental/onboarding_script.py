@@ -36,17 +36,13 @@ assert asset_name, "Please set asset_name."
 path_to_data = None
 # to use sample data uncomment next line
 # path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-assert (
-    path_to_data
-), "Please set path_to_data. This can be a local filepath or a remote URL."
+assert path_to_data, "Please set path_to_data. This can be a local filepath or a remote URL."
 
 # Get or add Asset
 try:
     asset: CSVAsset = datasource.get_asset(asset_name=asset_name)
 except LookupError:
-    asset: CSVAsset = datasource.add_csv_asset(
-        asset_name, filepath_or_buffer=path_to_data
-    )
+    asset: CSVAsset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
 
 # Build BatchRequest
 batch_request: BatchRequest = asset.build_batch_request()
@@ -81,7 +77,7 @@ expectation_configuration = gx.core.ExpectationConfiguration(
     }
 )
 
-expectation_suite.add_expectation(expectation_configuration=expectation_configuration)
+expectation_suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
 # Save the Expectation Suite
 context.update_expectation_suite(expectation_suite=expectation_suite)
@@ -105,8 +101,6 @@ checkpoint_config = {
             },
         }
     ],
-    "config_version": 1,
-    "class_name": "Checkpoint",
 }
 
 checkpoint: Checkpoint = context.add_or_update_checkpoint(**checkpoint_config)

@@ -55,7 +55,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
-    """
+    """  # noqa: E501
 
     column_list: Union[tuple, list]
 
@@ -92,11 +92,11 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "  # noqa: E501
         else:
             template_str = "Values for given compound columns must be unique together: "
 
@@ -142,11 +142,9 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
-            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+            template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "  # noqa: E501
         else:
             template_str = "Values for given compound columns must be unique together: "
 
@@ -164,10 +162,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
 

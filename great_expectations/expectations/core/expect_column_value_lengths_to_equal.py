@@ -68,7 +68,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
-    """
+    """  # noqa: E501
 
     value: Union[float, EvaluationParameterDict]
 
@@ -109,7 +109,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -148,11 +148,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

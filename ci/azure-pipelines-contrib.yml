@@ -5,14 +5,24 @@ variables:
   contrib_major: 0
   contrib_minor: 1
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
-  python.version: '3.8'
+  python.version: "3.8"
 
 name: $(Date:yyyyMMdd)$(Rev:rrr)
 
 stages:
-  - stage: contrib
+  - stage: block_pipeline
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: "ubuntu-20.04"
+    jobs:
+      - job: BlockPipeline
+        steps:
+          - bash: echo "Block pipeline"
+
+  - stage: contrib
+    dependsOn: block_pipeline
+    condition: failed('block_pipline')
+    pool:
+      vmImage: "ubuntu-20.04"
     jobs:
       - job: changes
         steps:
@@ -46,8 +56,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -62,11 +72,11 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
       - job: deploy_experimental
         dependsOn: [changes, test]
@@ -75,11 +85,11 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: "$(python.version)"
+            displayName: "Use Python $(python.version)"
 
           - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+            displayName: "Update pip"
 
           - script: |
               pip install twine wheel
@@ -88,14 +98,14 @@ stages:
               echo '$(contrib_major).$(contrib_minor).$(Build.BuildNumber)' > ./PACKAGE_VERSION
               cat ./PACKAGE_VERSION
             workingDirectory: $(Build.SourcesDirectory)/contrib/experimental
-            displayName: 'Update build version'
+            displayName: "Update build version"
 
           # Build the python distribution from source
           - script: |
               python setup.py sdist
               python setup.py bdist_wheel
             workingDirectory: $(Build.SourcesDirectory)/contrib/experimental
-            displayName: 'Build distribution'
+            displayName: "Build distribution"
 
           - task: TwineAuthenticate@1
             inputs:
@@ -105,7 +115,7 @@ stages:
           - script: |
               python -m twine upload -r great-expectations-experimental --verbose --config-file $(PYPIRC_PATH) dist/*
             workingDirectory: $(Build.SourcesDirectory)/contrib/experimental
-            displayName: 'Upload'
+            displayName: "Upload"
 
       - job: deploy_ethical_ai
         dependsOn: [changes, test]
@@ -115,7 +125,7 @@ stages:
           - script: |
               echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
             workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_ethical_ai_expectations
-            displayName: 'TODO ethical_ai'
+            displayName: "TODO ethical_ai"
 
       - job: deploy_geospatial
         dependsOn: [changes, test]
@@ -125,7 +135,7 @@ stages:
           - script: |
               echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
             workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_geospatial_expectations
-            displayName: 'TODO geospatial'
+            displayName: "TODO geospatial"
 
       - job: deploy_semantic_types
         dependsOn: [changes, test]
@@ -135,7 +145,7 @@ stages:
           - script: |
               echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
             workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_semantic_types_expectations
-            displayName: 'TODO semantic_types'
+            displayName: "TODO semantic_types"
 
       - job: deploy_zipcode
         dependsOn: [changes, test]
@@ -145,4 +155,4 @@ stages:
           - script: |
               echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
             workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_zipcode_expectations
-            displayName: 'TODO zipcode'
+            displayName: "TODO zipcode"

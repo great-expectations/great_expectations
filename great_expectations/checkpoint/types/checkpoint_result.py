@@ -61,7 +61,7 @@ class CheckpointResult(SerializableDictDot):
         run_results: A Dict with ValidationResultIdentifier keys and Dict values, which contains at minimum a `validation_result` key and an `action_results` key.
         checkpoint_config: The CheckpointConfig instance used to create this CheckpointResult.
         success: An optional boolean describing the success of all run_results in this CheckpointResult.
-    """
+    """  # noqa: E501
 
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
@@ -89,23 +89,17 @@ class CheckpointResult(SerializableDictDot):
         else:
             self._success = success
 
-        self._validation_results: list[
-            ExpectationSuiteValidationResult
-        ] | dict | None = None
+        self._validation_results: list[ExpectationSuiteValidationResult] | dict | None = None
         self._data_assets_validated: list[dict] | dict | None = None
         self._data_assets_validated_by_batch_id: dict | None = None
-        self._validation_result_identifiers: list[
-            ValidationResultIdentifier
-        ] | None = None
+        self._validation_result_identifiers: list[ValidationResultIdentifier] | None = None
         self._expectation_suite_names: list[str] | None = None
         self._data_asset_names: list[str] | None = None
         self._validation_results_by_expectation_suite_name: dict | None = None
         self._validation_results_by_data_asset_name: dict | None = None
         self._batch_identifiers: list[str] | None = None
         self._statistics: dict | None = None
-        self._validation_statistics: dict[
-            ValidationResultIdentifier, dict
-        ] | None = None
+        self._validation_statistics: dict[ValidationResultIdentifier, dict] | None = None
         self._validation_results_by_validation_result_identifier: dict | None = None
 
     @property
@@ -170,7 +164,7 @@ class CheckpointResult(SerializableDictDot):
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
-                    validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                    validation_result_identifier.expectation_suite_identifier.name
                     for validation_result_identifier in self.run_results.keys()
                 }
             )
@@ -262,12 +256,9 @@ class CheckpointResult(SerializableDictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_definition"].data_asset_name
-                        == data_asset_name
+                        if data_asset["batch_definition"].data_asset_name == data_asset_name
                     ]
-            self._validation_results_by_data_asset_name = (
-                validation_results_by_data_asset_name
-            )
+            self._validation_results_by_data_asset_name = validation_results_by_data_asset_name
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
@@ -287,13 +278,9 @@ class CheckpointResult(SerializableDictDot):
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                active_batch_definition = validation_result.meta[
-                    "active_batch_definition"
-                ]
+                active_batch_definition = validation_result.meta["active_batch_definition"]
                 batch_id = active_batch_definition.id
-                expectation_suite_name = validation_result.meta[
-                    "expectation_suite_name"
-                ]
+                expectation_suite_name = validation_result.meta["expectation_suite_name"]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
                         "batch_definition": active_batch_definition,
@@ -304,9 +291,9 @@ class CheckpointResult(SerializableDictDot):
                     assets_validated_by_batch_id[batch_id]["validation_results"].append(
                         validation_result
                     )
-                    assets_validated_by_batch_id[batch_id][
-                        "expectation_suite_names"
-                    ].append(expectation_suite_name)
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(
+                        expectation_suite_name
+                    )
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
         return self._data_assets_validated_by_batch_id
 
@@ -321,9 +308,7 @@ class CheckpointResult(SerializableDictDot):
                     if validation_result.success
                 ]
             )
-            unsuccessful_validation_count = (
-                validation_result_count - successful_validation_count
-            )
+            unsuccessful_validation_count = validation_result_count - successful_validation_count
             successful_validation_percent = (
                 validation_result_count
                 and (successful_validation_count / validation_result_count) * 100
@@ -357,9 +342,9 @@ class CheckpointResult(SerializableDictDot):
             A JSON-serializable dict representation of this CheckpointResult.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
         # make this refactoring infeasible at the present time.
 
         serializable_dict: dict = {
@@ -378,7 +363,7 @@ class CheckpointResult(SerializableDictDot):
     def __getstate__(self):
         """
         In order for object to be picklable, its "__dict__" or or result of calling "__getstate__()" must be picklable.
-        """
+        """  # noqa: E501
         return self.to_json_dict()
 
     def __deepcopy__(self, memo):
@@ -405,7 +390,7 @@ class CheckpointResult(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         serializable_dict: dict = self.to_json_dict()
         return json.dumps(serializable_dict, indent=2)
 
@@ -417,7 +402,7 @@ class CheckpointResult(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
 

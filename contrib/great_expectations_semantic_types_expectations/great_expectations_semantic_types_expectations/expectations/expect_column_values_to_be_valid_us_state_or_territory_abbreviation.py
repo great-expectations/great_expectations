@@ -9,9 +9,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_state_or_territory_abbreviation(state: str, dc_statehood: bool):
-    list_of_state_and_territory_abbrs = [
-        x.abbr for x in us.states.STATES_AND_TERRITORIES
-    ]
+    list_of_state_and_territory_abbrs = [x.abbr for x in us.states.STATES_AND_TERRITORIES]
     if dc_statehood is True:
         list_of_state_and_territory_abbrs.append("DC")
     else:
@@ -35,9 +33,7 @@ class ColumnValuesToBeValidUSStateOrTerritoryAbbreviation(ColumnMapMetricProvide
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, dc_statehood=True, **kwargs):
-        return column.apply(
-            lambda x: is_valid_state_or_territory_abbreviation(x, dc_statehood)
-        )
+        return column.apply(lambda x: is_valid_state_or_territory_abbreviation(x, dc_statehood))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)

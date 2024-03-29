@@ -34,7 +34,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
     COUNT(1)
     FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY
     {open_date_column}) AS next_start_date
-    FROM {active_batch})
+    FROM {batch})
     """
 
     success_keys = (
@@ -75,9 +75,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         metrics = convert_to_json_serializable(data=metrics)
         holes_count: int
         total_count: int
-        holes_count, total_count = list(
-            metrics.get("query.template_values")[0].values()
-        )
+        holes_count, total_count = list(metrics.get("query.template_values")[0].values())
         error_rate = float(holes_count) / total_count
 
         return {
@@ -216,9 +214,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         },
     ]
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         super().validate_configuration(configuration)
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:

@@ -207,9 +207,7 @@ def test_datasource_dict___getitem__raises_key_error_on_store_miss(
 def test_datasource_dict___getitem___with_fds(
     build_datasource_dict_with_store_spy: Callable, pandas_fds: PandasDatasource
 ):
-    datasource_dict = build_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_fds]
-    )
+    datasource_dict = build_datasource_dict_with_store_spy(datasource_configs=[pandas_fds])
     store = datasource_dict._datasource_store
     assert store.get_count == 0
 
@@ -327,9 +325,7 @@ def test_cacheable_datasource_dict___setitem___with_block_datasource(
     assert store.set_count == 0
 
     # non-FDS use both store and cache
-    empty_cacheable_datasource_dict[
-        pandas_block_datasource.name
-    ] = pandas_block_datasource
+    empty_cacheable_datasource_dict[pandas_block_datasource.name] = pandas_block_datasource
     assert store.set_count == 1
 
 

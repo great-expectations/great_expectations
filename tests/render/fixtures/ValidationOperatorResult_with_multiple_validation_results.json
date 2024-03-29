@@ -780,12 +780,6 @@
           "action": {
             "class_name": "StoreValidationResultAction"
           }
-        },
-        {
-          "name": "store_evaluation_params",
-          "action": {
-            "class_name": "StoreEvaluationParametersAction"
-          }
         }
       ],
       "result_format": {

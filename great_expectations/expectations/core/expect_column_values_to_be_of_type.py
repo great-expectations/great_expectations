@@ -123,7 +123,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
-    """
+    """  # noqa: E501
 
     type_: str
 
@@ -168,13 +168,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
-            template_str = (
-                "values must be of type $type_, at least $mostly_pct % of the time."
-            )
+            template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
 
@@ -209,14 +207,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str = (
-                "values must be of type $type_, at least $mostly_pct % of the time."
-            )
+            template_str = "values must be of type $type_, at least $mostly_pct % of the time."
         else:
             template_str = "values must be of type $type_."
 
@@ -299,8 +293,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 # bigquery geography requires installing an extra package
                 if (
                     expected_type.lower() == "geography"
-                    and execution_engine.engine.dialect.name.lower()
-                    == GXSqlDialect.BIGQUERY
+                    and execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(
@@ -309,9 +302,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         + "  $ pip install 'sqlalchemy-bigquery[geography]'"
                     )
                 elif type_module.__name__ == "pyathena.sqlalchemy_athena":
-                    potential_type = get_pyathena_potential_type(
-                        type_module, expected_type
-                    )
+                    potential_type = get_pyathena_potential_type(type_module, expected_type)
                     # In the case of the PyAthena dialect we need to verify that
                     # the type returned is indeed a type and not an instance.
                     if not inspect.isclass(potential_type):
@@ -333,9 +324,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
-                logger.warning(
-                    "No recognized sqlalchemy types in type_list for current dialect."
-                )
+                logger.warning("No recognized sqlalchemy types in type_list for current dialect.")
             types = tuple(types)
             success = isinstance(actual_column_type, types)
 
@@ -378,11 +367,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             PandasExecutionEngine,
         )
 
-        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version  # noqa: E501
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
-        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.  # noqa: E501
+        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate  # noqa: E501
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
             ColumnMapExpectation, self
@@ -432,7 +421,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     None,
                 ]
             ):
-                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies  # noqa: E501
                 validation_dependencies = super().get_validation_dependencies(
                     execution_engine, runtime_configuration
                 )
@@ -487,9 +476,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 None,
             ]:
                 # this calls ColumnMapMetric._validate
-                return super()._validate(
-                    metrics, runtime_configuration, execution_engine
-                )
+                return super()._validate(metrics, runtime_configuration, execution_engine)
             return self._validate_pandas(
                 actual_column_type=actual_column_type, expected_type=expected_type
             )
@@ -505,13 +492,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
-        logger.warning(
-            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-        )
+        logger.warning("No sqlalchemy dialect found; relying in top-level sqlalchemy types.")
         return sa
 
     # Redshift does not (yet) export types to top level; only recognize base SA types
@@ -578,7 +563,7 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     return execution_engine.dialect_module
 
 
-def _native_type_type_map(type_):  # noqa: PLR0911
+def _native_type_type_map(type_):  # noqa: C901, PLR0911
     # We allow native python types in cases where the underlying type is "object":
     if type_.lower() == "none":
         return (type(None),)

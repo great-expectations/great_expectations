@@ -14,6 +14,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Iterable,
     List,
     Optional,
@@ -93,6 +94,8 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
     "linear",
 }
 
+NP_RANDOM_GENERATOR: Final = np.random.default_rng()
+
 
 def get_validator(  # noqa: PLR0913
     purpose: str,
@@ -108,9 +111,7 @@ def get_validator(  # noqa: PLR0913
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
-        expectation_suite_name = (
-            f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
-        )
+        expectation_suite_name = f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
     else:
         expectation_suite_name = (
             f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
@@ -132,7 +133,7 @@ def get_validator(  # noqa: PLR0913
         if num_batches == 0:
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
-"""
+"""  # noqa: E501
             )
 
     validator = get_validator_with_expectation_suite(
@@ -179,19 +180,19 @@ def get_batch_ids(  # noqa: PLR0913
     num_batch_ids: int = len(batch_ids)
 
     if limit is not None:
-        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
+        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.  # noqa: E501
         if not (0 <= limit <= num_batch_ids):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
 ({limit} was requested).
-"""
+"""  # noqa: E501
             )
         batch_ids = batch_ids[-limit:]
 
     if num_batch_ids == 0:
         raise gx_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
-"""
+"""  # noqa: E501
         )
 
     return batch_ids
@@ -206,19 +207,19 @@ def build_batch_request(
     if batch_request is None:
         return None
 
-    # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    effective_batch_request: Optional[
-        Union[BatchRequestBase, dict]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=domain,
-        parameter_reference=batch_request,
-        expected_return_type=(BatchRequestBase, dict),
-        variables=variables,
-        parameters=parameters,
+    # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=batch_request,
+            expected_return_type=(BatchRequestBase, dict),
+            variables=variables,
+            parameters=parameters,
+        )
     )
-    materialized_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest]
-    ] = materialize_batch_request(batch_request=effective_batch_request)
+    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
+        materialize_batch_request(batch_request=effective_batch_request)
+    )
 
     return materialized_batch_request
 
@@ -230,7 +231,7 @@ def build_metric_domain_kwargs(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ):
-    # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=metric_domain_kwargs,
@@ -259,7 +260,7 @@ def get_parameter_value_and_validate_return_type(
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
-    """
+    """  # noqa: E501
     if isinstance(parameter_reference, dict):
         parameter_reference = safe_deep_copy(data=parameter_reference)
 
@@ -275,7 +276,7 @@ def get_parameter_value_and_validate_return_type(
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{parameter_reference}" must be of type "{expected_return_type!s}" \
 (value of type "{type(parameter_reference)!s}" was encountered).
-"""
+"""  # noqa: E501
             )
 
     return parameter_reference
@@ -291,7 +292,7 @@ def get_parameter_value(
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  Moreover, if the parameter_reference argument is an object of type "dict",
     it will recursively detect values using the fully-qualified parameter name format and evaluate them accordingly.
-    """
+    """  # noqa: E501
     if isinstance(parameter_reference, dict):
         for key, value in parameter_reference.items():
             parameter_reference[key] = get_parameter_value(
@@ -355,13 +356,13 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": Dict[Tuple[str, str, str], MetricValue],
         }
-    """
+    """  # noqa: E501
     key: str
     metric_configuration: MetricConfiguration
     metric_configurations_for_key: List[MetricConfiguration]
 
-    # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
-    # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+    # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.  # noqa: E501
+    # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.  # noqa: E501
     resolved_metrics: _MetricsDict
     resolved_metrics, _ = validator.compute_metrics(
         metric_configurations=[
@@ -373,17 +374,14 @@ def get_resolved_metrics_by_key(
         min_graph_edges_pbar_enable=0,
     )
 
-    # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
+    # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).  # noqa: E501
     metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
-        key: [
-            metric_configuration.id
-            for metric_configuration in metric_configurations_for_key
-        ]
+        key: [metric_configuration.id for metric_configuration in metric_configurations_for_key]
         for key, metric_configurations_for_key in metric_configurations_by_key.items()
     }
 
     metric_configuration_ids: List[Tuple[str, str, str]]
-    # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
+    # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.  # noqa: E501
     metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
         itertools.chain(
             *[
@@ -393,7 +391,7 @@ def get_resolved_metrics_by_key(
         )
     )
 
-    # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
+    # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of  # noqa: E501
     # interest (reflecting specified key values/combinations).
     metric_configuration_id: Tuple[str, str, str]
     metric_value: Any
@@ -445,7 +443,7 @@ def build_domains_from_column_names(
     :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
     :param table_column_name_to_inferred_semantic_domain_type_map: map from column name to inferred semantic type
     :return: list of resulting Domain objects
-    """
+    """  # noqa: E501
     column_name: str
     domains: List[Domain] = [
         Domain(
@@ -473,14 +471,14 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[
-        Union[ParameterNode, Dict[str, Any]]
-    ] = get_parameter_value_and_validate_return_type(
-        domain=None,
-        parameter_reference=VARIABLES_PREFIX,
-        expected_return_type=None,
-        variables=variables,
-        parameters=None,
+    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
+        get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=VARIABLES_PREFIX,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()
@@ -507,7 +505,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     Returns:
         Boolean value indicating whether or not specified "Domain" is inferred to denote "integer" values
 
-    """
+    """  # noqa: E501
 
     inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
         INFERRED_SEMANTIC_TYPE_KEY
@@ -536,7 +534,7 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
 
     Returns:
         Boolean value indicating whether or not specified "Domain" is inferred as "SemanticDomainTypes.DATETIME"
-    """
+    """  # noqa: E501
 
     inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
         INFERRED_SEMANTIC_TYPE_KEY
@@ -557,11 +555,11 @@ def get_false_positive_rate_from_rule_state(
 ) -> Union[float, np.float64]:
     """
     This method obtains false_positive_rate from "rule state" (i.e., variables and parameters) and validates the result.
-    """
+    """  # noqa: E501
     if false_positive_rate is None:
         return 5.0e-2
 
-    # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
     false_positive_rate = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=false_positive_rate,
@@ -569,24 +567,24 @@ def get_false_positive_rate_from_rule_state(
         variables=variables,
         parameters=parameters,
     )
-    if not (0.0 <= false_positive_rate <= 1.0):  # noqa: PLR2004
+    if not (0.0 <= false_positive_rate <= 1.0):
         raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
-"""
+"""  # noqa: E501
         )
     elif false_positive_rate <= NP_EPSILON:
         warnings.warn(
             f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.  A \
 false_positive_rate of {NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
         )
         false_positive_rate = np.float64(NP_EPSILON)
     elif false_positive_rate >= (1.0 - NP_EPSILON):
         warnings.warn(
             f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.  A \
 false_positive_rate of {1.0 - NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
         )
         false_positive_rate = np.float64(1.0 - NP_EPSILON)
 
@@ -603,16 +601,14 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
     """
     This method obtains quantile_statistic_interpolation_method from "rule state" (i.e., variables and parameters) and
     validates the result.
-    """
-    # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    quantile_statistic_interpolation_method = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=quantile_statistic_interpolation_method,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
+    """  # noqa: E501
+    # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+    quantile_statistic_interpolation_method = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=quantile_statistic_interpolation_method,
+        expected_return_type=str,
+        variables=variables,
+        parameters=parameters,
     )
     if (
         quantile_statistic_interpolation_method
@@ -621,7 +617,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         raise gx_exceptions.ProfilerExecutionError(
             message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
 {RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
-"""
+"""  # noqa: E501
         )
 
     if quantile_statistic_interpolation_method == "auto":
@@ -688,7 +684,7 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
         random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
             for making probabilistic sampling deterministic.
-    """
+    """  # noqa: E501
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
@@ -707,16 +703,12 @@ def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
+    lower_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
+    upper_quantile_point_estimate: Union[np.float64, datetime.datetime] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -791,7 +783,7 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
     bootstrap sampling technique (see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
     computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
     probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
-    """
+    """  # noqa: E501
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
@@ -808,36 +800,32 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
 
     bootstraps: np.ndarray
     if random_seed:
-        random_state: np.random.Generator = np.random.Generator(
-            np.random.PCG64(random_seed)
-        )
-        bootstraps = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
+        random_state: np.random.Generator = np.random.Generator(np.random.PCG64(random_seed))
+        bootstraps = random_state.choice(metric_values, size=(n_resamples, metric_values.size))
     else:
-        bootstraps = np.random.choice(
+        bootstraps = NP_RANDOM_GENERATOR.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=lower_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_lower_quantile,
+    lower_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=lower_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_lower_quantile,
+        )
     )
-    upper_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
-        bootstraps=bootstraps,
-        quantile_pct=upper_quantile_pct,
-        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        quantile_bias_correction=quantile_bias_correction,
-        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        sample_quantile=sample_upper_quantile,
+    upper_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
+        _determine_quantile_bias_corrected_point_estimate(
+            bootstraps=bootstraps,
+            quantile_pct=upper_quantile_pct,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
+            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+            sample_quantile=sample_upper_quantile,
+        )
     )
 
     return build_numeric_range_estimation_result(
@@ -862,7 +850,7 @@ def build_numeric_range_estimation_result(
 
     Returns:
         Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
-    """
+    """  # noqa: E501
     ndarray_is_datetime_type: bool
     metric_values_converted: np.ndarray
     (
@@ -874,7 +862,7 @@ def build_numeric_range_estimation_result(
     bin_edges: np.ndarray
     if ndarray_is_datetime_type:
         histogram = np.histogram(a=metric_values_converted, bins=NUM_HISTOGRAM_BINS)
-        # Use "UTC" TimeZone normalization in "bin_edges" when "metric_values" consists of "datetime.datetime" objects.
+        # Use "UTC" TimeZone normalization in "bin_edges" when "metric_values" consists of "datetime.datetime" objects.  # noqa: E501
         bin_edges = convert_ndarray_float_to_datetime_dtype(data=histogram[1])
     else:
         histogram = np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)
@@ -916,13 +904,13 @@ def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
 
     # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
     # See:
-    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).  # noqa: E501
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     quantile_bias_corrected_point_estimate: np.float64
 
     if (
         not quantile_bias_correction
-        and bootstrap_quantile_standard_error > 0.0  # noqa: PLR2004
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
@@ -945,7 +933,7 @@ def convert_metric_values_to_float_dtype_best_effort(
 
     Return:
         Boolean flag -- True, if conversion of original "np.ndarray" to "datetime.datetime" occurred; False, otherwise.
-    """
+    """  # noqa: E501
     original_ndarray_is_datetime_type: bool
     conversion_ndarray_to_datetime_type_performed: bool
     metric_values_converted: np.ndaarray
@@ -960,8 +948,7 @@ def convert_metric_values_to_float_dtype_best_effort(
         fuzzy=False,
     )
     ndarray_is_datetime_type: bool = (
-        original_ndarray_is_datetime_type
-        or conversion_ndarray_to_datetime_type_performed
+        original_ndarray_is_datetime_type or conversion_ndarray_to_datetime_type_performed
     )
     if ndarray_is_datetime_type:
         metric_values_converted = convert_ndarray_datetime_to_float_dtype_utc_timezone(
@@ -986,7 +973,7 @@ def get_validator_with_expectation_suite(  # noqa: PLR0913
     Instantiates and returns "Validator" using "data_context", "batch_list" or "batch_request", and other information.
     Use "expectation_suite" if provided; otherwise, if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
+    """  # noqa: E501
     assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
     assert expectation_suite_name is None or isinstance(expectation_suite_name, str)
 
@@ -1007,7 +994,7 @@ def get_validator_with_expectation_suite(  # noqa: PLR0913
     return validator
 
 
-def get_or_create_expectation_suite(
+def get_or_create_expectation_suite(  # noqa: C901
     data_context: Optional[AbstractDataContext],
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
@@ -1017,14 +1004,14 @@ def get_or_create_expectation_suite(
     """
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
+    """  # noqa: E501
     generate_temp_expectation_suite_name: bool
     create_expectation_suite: bool
 
     if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
+        if expectation_suite.name != expectation_suite_name:
             raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'  # noqa: E501
             )
 
         return expectation_suite
@@ -1042,26 +1029,21 @@ def get_or_create_expectation_suite(
         if not component_name:
             component_name = "test"
 
-        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"  # noqa: E501
 
     if create_expectation_suite:
         if persist:
             try:
                 # noinspection PyUnusedLocal
-                expectation_suite = data_context.get_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
+                expectation_suite = data_context.suites.get(name=expectation_suite_name)
             except gx_exceptions.DataContextError:
                 expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-                logger.info(
-                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-                )
+                logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=data_context,
+                name=expectation_suite_name,
             )
 
     return expectation_suite
@@ -1086,7 +1068,7 @@ def sanitize_parameter_name(
 
     Returns:
         string-valued sanitized concatenation of "name" and MD5-digest of "suffix" arguments.
-    """
+    """  # noqa: E501
     if suffix:
         suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
         name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
@@ -1096,8 +1078,7 @@ def sanitize_parameter_name(
 
 class _NumericIterableWithDtype(Iterable, Protocol):
     @property
-    def dtype(self) -> Any:
-        ...
+    def dtype(self) -> Any: ...
 
 
 def _is_iterable_of_numeric_dtypes(

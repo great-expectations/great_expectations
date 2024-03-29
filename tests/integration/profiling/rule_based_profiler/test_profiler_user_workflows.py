@@ -13,7 +13,6 @@ from typing import (
     Type,
     cast,
 )
-from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -49,10 +48,6 @@ from great_expectations.rule_based_profiler.parameter_container import Parameter
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 if TYPE_CHECKING:
@@ -118,10 +113,8 @@ def bobster_validator(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
-    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
-    context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""  # noqa: E501
+    context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
@@ -149,7 +142,7 @@ def quentin_validator(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
-    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
+    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""  # noqa: E501
     context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
@@ -183,7 +176,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     Batches created in the multibatch_generic_csv_generator fixture should be available using the
     multibatch_generic_csv_generator_context
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
+    """  # noqa: E501
 
     context = alice_columnar_table_single_batch_context
 
@@ -194,9 +187,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
-    file_list: List[str] = [
-        alice_columnar_table_single_batch["sample_data_relative_path"]
-    ]
+    file_list: List[str] = [alice_columnar_table_single_batch["sample_data_relative_path"]]
 
     assert (
         data_connector._get_data_reference_list_from_cache_by_data_asset_name(
@@ -225,13 +216,9 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 
 
 @freeze_time(TIMESTAMP)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 2.31s
 @pytest.mark.big
 def test_alice_profiler_user_workflow_single_batch(
-    mock_emit,
     caplog,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -245,12 +232,12 @@ def test_alice_profiler_user_workflow_single_batch(
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -272,9 +259,7 @@ def test_alice_profiler_user_workflow_single_batch(
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
     assert (
         result.expectation_configurations
@@ -282,133 +267,6 @@ def test_alice_profiler_user_workflow_single_batch(
             "expected_expectation_suite"
         ].expectation_configurations
     )
-
-    assert mock_emit.call_count == 43
-
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
-    )
-
-    # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
-        {
-            "event_payload": {
-                "anonymized_name": "0481bcf98600fd04aa24df03d05cdcf5",
-                "config_version": 1.0,
-                "anonymized_rules": [
-                    {
-                        "anonymized_name": "b9c8ed2ae9948de069a857628bb4291a",
-                        "anonymized_domain_builder": {
-                            "parent_class": "DomainBuilder",
-                            "anonymized_class": "9c8f42e45ec72197d6fb4d0d5194c89d",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "MetricSingleBatchParameterBuilder",
-                                "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
-                            },
-                            {
-                                "parent_class": "MetricSingleBatchParameterBuilder",
-                                "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
-                            },
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_of_type",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_not_be_null",
-                            },
-                        ],
-                    },
-                    {
-                        "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
-                        "anonymized_domain_builder": {
-                            "parent_class": "ColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "MetricSingleBatchParameterBuilder",
-                                "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
-                            },
-                            {
-                                "parent_class": "MetricSingleBatchParameterBuilder",
-                                "anonymized_name": "0bb947e516b26696a66787dc936570b7",
-                            },
-                            {
-                                "parent_class": "MetricSingleBatchParameterBuilder",
-                                "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
-                            },
-                            {
-                                "parent_class": "SimpleDateFormatStringParameterBuilder",
-                                "anonymized_name": "c5caa53c1ee64365b96ec96a285a6b3a",
-                            },
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_of_type",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_increasing",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_min_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_max_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_match_strftime_format",
-                            },
-                        ],
-                    },
-                    {
-                        "anonymized_name": "83a71ec7b61bbdb8eb728ebc428f8aea",
-                        "anonymized_domain_builder": {
-                            "parent_class": "CategoricalColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "ValueSetMultiBatchParameterBuilder",
-                                "anonymized_name": "46d405b0294a06e1335c04bf1441dabf",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_in_set",
-                            }
-                        ],
-                    },
-                ],
-                "rule_count": 3,
-                "variable_count": 5,
-            },
-            "event": "profiler.run",
-            "success": True,
-        }
-    )
-    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 # noinspection PyUnusedLocal
@@ -424,7 +282,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     Batches created in the multibatch_generic_csv_generator fixture should be available using the
     multibatch_generic_csv_generator_context
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
+    """  # noqa: E501
 
     context = bobby_columnar_table_multi_batch_deterministic_data_context
 
@@ -486,13 +344,9 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 13.08s
 @pytest.mark.big
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(
-    mock_emit,
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(  # noqa: E501
     caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
@@ -506,12 +360,12 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -537,24 +391,19 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
-            expectation_configuration.meta["profiler_details"].pop(
-                "estimation_histogram", None
-            )
+            expectation_configuration.meta["profiler_details"].pop("estimation_histogram", None)
 
-    assert (
-        result.expectation_configurations
-        == fixture_expectation_suite.expectation_configurations
+    assert result.expectation_configurations == fixture_expectation_suite.expectation_configurations
+
+    profiled_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
+        profiler.get_fully_qualified_parameter_names_by_domain()
     )
 
-    profiled_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, List[str]
-    ] = profiler.get_fully_qualified_parameter_names_by_domain()
-
-    fixture_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, List[str]
-    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
-        "expected_fixture_fully_qualified_parameter_names_by_domain"
-    ]
+    fixture_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
+        bobby_columnar_table_multi_batch[
+            "test_configuration_quantiles_estimator"
+        ]["expected_fixture_fully_qualified_parameter_names_by_domain"]
+    )
 
     assert (
         profiled_fully_qualified_parameter_names_by_domain
@@ -566,17 +415,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         rule_name="row_count_range_rule",
     )
 
-    profiled_fully_qualified_parameter_names_for_domain_id: List[
-        str
-    ] = profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
+    profiled_fully_qualified_parameter_names_for_domain_id: List[str] = (
+        profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
+    )
 
-    fixture_fully_qualified_parameter_names_for_domain_id: List[
-        str
-    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
-        "expected_fixture_fully_qualified_parameter_names_by_domain"
-    ][
-        domain
-    ]
+    fixture_fully_qualified_parameter_names_for_domain_id: List[str] = (
+        bobby_columnar_table_multi_batch[
+            "test_configuration_quantiles_estimator"
+        ]["expected_fixture_fully_qualified_parameter_names_by_domain"][domain]
+    )
 
     assert (
         profiled_fully_qualified_parameter_names_for_domain_id
@@ -589,9 +436,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, ParameterNode]
-    ] = bobby_columnar_table_multi_batch[
-        "test_configuration_quantiles_estimator"
-    ][
+    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
     ]
 
@@ -620,145 +465,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
         str, ParameterNode
-    ] = bobby_columnar_table_multi_batch[
-        "test_configuration_quantiles_estimator"
-    ][
+    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
-    ][
-        domain
-    ]
+    ][domain]
 
     assert convert_to_json_serializable(
         data=profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
     ) == convert_to_json_serializable(
         data=fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
     )
-
-    assert mock_emit.call_count == 99
-
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
-    )
-
-    # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
-        {
-            "event_payload": {
-                "anonymized_name": "43c8704c864dd10feed13219062f0228",
-                "config_version": 1.0,
-                "anonymized_rules": [
-                    {
-                        "anonymized_name": "7980584b8d0c7c8a66dbeaaf4b067885",
-                        "anonymized_domain_builder": {
-                            "parent_class": "TableDomainBuilder"
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_table_row_count_to_be_between",
-                            }
-                        ],
-                    },
-                    {
-                        "anonymized_name": "9b95e917ab153669bcd32ec522604556",
-                        "anonymized_domain_builder": {
-                            "parent_class": "ColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "anonymized_name": "ace31374d026e07ec630c7459915e628",
-                            },
-                            {
-                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "anonymized_name": "f2dcb0a322c3ab161d0fd33e6bac3d7f",
-                            },
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_min_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_max_to_be_between",
-                            },
-                        ],
-                    },
-                    {
-                        "anonymized_name": "716348d3985f11679de53ec2b6ce5987",
-                        "anonymized_domain_builder": {
-                            "parent_class": "ColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "SimpleDateFormatStringParameterBuilder",
-                                "anonymized_name": "49526fea6686e5f87be493967a5ba6b7",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_match_strftime_format",
-                            }
-                        ],
-                    },
-                    {
-                        "anonymized_name": "38f59421a7c7b59a45b547a73c7714f9",
-                        "anonymized_domain_builder": {
-                            "parent_class": "ColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "RegexPatternStringParameterBuilder",
-                                "anonymized_name": "2a791a71865e26a98b3f9f89ef83556b",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_match_regex",
-                            }
-                        ],
-                    },
-                    {
-                        "anonymized_name": "57a6fe0ec12e12107fc275b42855ab1c",
-                        "anonymized_domain_builder": {
-                            "parent_class": "CategoricalColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "ValueSetMultiBatchParameterBuilder",
-                                "anonymized_name": "73b050124a17a420f2fb3e605f7111b2",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_in_set",
-                            }
-                        ],
-                    },
-                ],
-                "rule_count": 5,
-                "variable_count": 3,
-            },
-            "event": "profiler.run",
-            "success": True,
-        }
-    )
-    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 class HasStaticDefaultProfiler(Protocol):
@@ -773,45 +488,35 @@ class HasStaticDefaultProfiler(Protocol):
 
 # An expectations default profiler config is a static variable. Setting it to a custom value will
 # actually overwrite the default. This will cause other tests in this session to fail that depend
-# on the default value. This decorator stores the default value and restores it at the end of this test.
+# on the default value. This decorator stores the default value and restores it at the end of this test.  # noqa: E501
 # We shouldn't be overwriting the default and that is ticketed:
 # https://superconductive.atlassian.net/browse/GREAT-1127
 @contextlib.contextmanager
 def restore_profiler_config(
     expectation: Type[HasStaticDefaultProfiler],
 ) -> Iterator[None]:
-    original_default_profiler_config = copy.deepcopy(
-        expectation.default_profiler_config
-    )
+    original_default_profiler_config = copy.deepcopy(expectation.default_profiler_config)
     try:
         yield
     finally:
         expectation.default_profiler_config = original_default_profiler_config
-        expectation.default_kwarg_values[
-            "profiler_config"
-        ] = original_default_profiler_config
+        expectation.default_kwarg_values["profiler_config"] = original_default_profiler_config
 
 
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 4.83s
 @pytest.mark.big
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_estimator(
-    mock_emit,
     caplog,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     # Load data context
-    data_context = (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
-    )
+    data_context = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
@@ -821,12 +526,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -846,16 +551,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
         result.expectation_configurations[0].to_json_dict()["kwargs"]
     )
-    min_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "min_value"
-        ]
-    )
-    max_value: int = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "max_value"
-        ]
-    )
+    min_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "min_value"
+    ]
+    max_value: int = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "max_value"
+    ]
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
@@ -876,64 +577,14 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
 
-    assert mock_emit.call_count == 3
-
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
-    )
-
-    # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
-        {
-            "event_payload": {
-                "anonymized_name": "510b23dfd19c492f33d114b184f245e8",
-                "config_version": 1.0,
-                "anonymized_rules": [
-                    {
-                        "anonymized_name": "7980584b8d0c7c8a66dbeaaf4b067885",
-                        "anonymized_domain_builder": {
-                            "parent_class": "TableDomainBuilder"
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_table_row_count_to_be_between",
-                            }
-                        ],
-                    }
-                ],
-                "rule_count": 1,
-                "variable_count": 6,
-            },
-            "event": "profiler.run",
-            "success": True,
-        }
-    )
-    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
 
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 15.07s
 @pytest.mark.big
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
-    mock_emit,
     caplog,
     quentin_columnar_table_multi_batch_data_context,
     quentin_columnar_table_multi_batch,
@@ -948,12 +599,12 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
@@ -977,19 +628,17 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict: Dict[
         str, dict
     ] = {
-        expectation_configuration_dict["kwargs"][
-            "column"
-        ]: expectation_configuration_dict["kwargs"]
+        expectation_configuration_dict["kwargs"]["column"]: expectation_configuration_dict["kwargs"]
         for expectation_configuration_dict in [
             expectation_configuration.to_json_dict()
             for expectation_configuration in result.expectation_configurations
         ]
     }
-    expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
+    expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[  # noqa: E501
         str, List[List[Number]]
     ] = {
         column_name: expectation_kwargs["quantile_ranges"]["value_ranges"]
-        for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()
+        for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()  # noqa: E501
     }
 
     assert (
@@ -1008,9 +657,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     for (
         column_name,
         column_quantiles,
-    ) in (
-        expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column.items()
-    ):
+    ) in expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column.items():  # noqa: E501
         paired_quantiles = zip(
             column_quantiles,
             quentin_columnar_table_multi_batch["test_configuration"][
@@ -1024,51 +671,5 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     desired=value_ranges[1][idx],
                     rtol=RTOL,
                     atol=ATOL,
-                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",  # noqa: E501
                 )
-
-    assert mock_emit.call_count == 11
-
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
-    )
-
-    # noinspection PyUnresolvedReferences
-    expected_profiler_run_event: mock._Call = mock.call(
-        {
-            "event_payload": {
-                "anonymized_name": "0592a9cacfa4ce642536161869d1ba19",
-                "config_version": 1.0,
-                "anonymized_rules": [
-                    {
-                        "anonymized_name": "f54fc6b216560f2a56a3cced587fb6e3",
-                        "anonymized_domain_builder": {
-                            "parent_class": "ColumnDomainBuilder",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "anonymized_name": "71243c854c0c04e9e014d02a793abe55",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_quantile_values_to_be_between",
-                            }
-                        ],
-                    }
-                ],
-                "rule_count": 1,
-                "variable_count": 8,
-            },
-            "event": "profiler.run",
-            "success": True,
-        }
-    )
-    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

@@ -26,30 +26,22 @@ def test_get_chart_titles():
     assert layer_b.title == title_text
     assert layered_chart.title == alt.Undefined
 
-    chart_titles: List[str] = DataAssistantResult._get_chart_titles(
-        charts=[layered_chart]
-    )
+    chart_titles: List[str] = DataAssistantResult._get_chart_titles(charts=[layered_chart])
     assert len(chart_titles) == 1
     assert chart_titles[0] == title_text
 
-    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(
-        layer=layered_chart
-    )
+    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(layer=layered_chart)
     assert chart_title == title_text
 
     # case where the title is passed as alt.TitleParams
     layer_b: alt.Chart = alt.Chart(data=df, title=alt.TitleParams(text=title_text))
     assert layer_b.title.text == title_text
 
-    chart_titles: List[str] = DataAssistantResult._get_chart_titles(
-        charts=[layered_chart]
-    )
+    chart_titles: List[str] = DataAssistantResult._get_chart_titles(charts=[layered_chart])
     assert len(chart_titles) == 1
     assert chart_titles[0] == title_text
 
-    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(
-        layer=layered_chart
-    )
+    chart_title: Optional[str] = DataAssistantResult._get_chart_layer_title(layer=layered_chart)
     assert chart_title == title_text
 
     # case where no title exists
@@ -64,16 +56,12 @@ def test_get_expectation_suite_should_use_default_name_if_none():
     data_assistant_result: DataAssistantResult = DataAssistantResult()
 
     # Should not raise an error
-    expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=None, send_usage_event=False
-    )
+    expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=None)
     assert expectation_suite
     assert isinstance(expectation_suite, ExpectationSuite)
-    assert expectation_suite.expectation_suite_name
+    assert expectation_suite.name
 
-    expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=None, send_usage_event=True
-    )
+    expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=None)
     assert expectation_suite
     assert isinstance(expectation_suite, ExpectationSuite)
-    assert expectation_suite.expectation_suite_name
+    assert expectation_suite.name

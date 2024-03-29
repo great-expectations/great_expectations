@@ -10,9 +10,9 @@ def generate_trend(time, trend_params) -> np.ndarray:
     X = time * 0
     prev_cutpoint = 0
     for param_set in trend_params:
-        X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set[
-            "beta"
-        ] * (time[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint)
+        X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set["beta"] * (
+            time[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint
+        )
         prev_cutpoint = param_set["cutpoint"]
     return X
 
@@ -45,9 +45,7 @@ def generate_posneg_pareto(alpha, size):
     """Generate a positive or negative pareto distribution."""
 
     if alpha is not None:
-        return np.random.pareto(a=alpha, size=size) * np.random.randint(
-            -1, 2, size=size
-        )
+        return np.random.pareto(a=alpha, size=size) * np.random.randint(-1, 2, size=size)
     else:
         return 0
 

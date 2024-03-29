@@ -8,9 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -35,7 +35,9 @@ GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
 GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
 REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
-_CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
+_CHECK_HELP_DESC = (
+    "Only checks for needed changes without writing back. Exit with error code if changes needed."
+)
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
 # https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
@@ -55,7 +57,7 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(  # noqa: PLR0913
+def sort(
     ctx: Context,
     path: str = ".",
     check: bool = False,
@@ -70,6 +72,7 @@ def sort(  # noqa: PLR0913
     if not isort:
         cmds = [
             "ruff",
+            "check",
             path,
             "--select I",
             "--diff" if check else "--fix",
@@ -94,7 +97,7 @@ def sort(  # noqa: PLR0913
         "pty": _PTY_HELP_DESC,
     }
 )
-def fmt(  # noqa: PLR0913
+def fmt(
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -108,7 +111,7 @@ def fmt(  # noqa: PLR0913
     if sort_:
         sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
-    cmds = ["black", path]
+    cmds = ["ruff", "format", path]
     if check:
         cmds.append("--check")
     if exclude:
@@ -125,7 +128,7 @@ def fmt(  # noqa: PLR0913
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(  # noqa: PLR0913
+def lint(
     ctx: Context,
     path: str = ".",
     fmt_: bool = True,
@@ -133,12 +136,12 @@ def lint(  # noqa: PLR0913
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run formatter (black) and linter (ruff)"""
+    """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
@@ -167,9 +170,7 @@ def upgrade(ctx: Context, path: str = "."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(
-    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
-):
+def hooks(ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -237,7 +238,7 @@ def marker_coverage(
         " Default to version set in pyproject.toml",
     },
 )
-def type_check(  # noqa: PLR0913, PLR0912
+def type_check(  # noqa: C901, PLR0912
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -278,7 +279,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -286,6 +287,8 @@ def type_check(  # noqa: PLR0913, PLR0912
         bin = "dmypy run --"
     else:
         bin = "mypy"
+
+    cmds = [bin]
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
 
@@ -297,11 +300,11 @@ def type_check(  # noqa: PLR0913, PLR0912
             )
             relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
+        # following imports here can cause mutually exclusive import errors with normal type-checking  # noqa: E501
+        cmds.append("--follow-imports=silent")
 
-    cmds = [
-        bin,
-        *ge_pkgs,
-    ]
+    cmds.extend(ge_pkgs)
+
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
@@ -321,50 +324,6 @@ def type_check(  # noqa: PLR0913, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
-
-
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
@@ -375,14 +334,14 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
         "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
-        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
-        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",  # noqa: E501
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",  # noqa: E501
         "html": "Create html coverage report",
-        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
-        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",  # noqa: E501
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",  # noqa: E501
     },
 )
-def tests(  # noqa: PLR0913
+def tests(  # noqa: C901
     ctx: Context,
     unit: bool = True,
     ignore_markers: bool = False,
@@ -401,7 +360,7 @@ def tests(  # noqa: PLR0913
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
 
     See also, the newer `invoke ci-tests --help`.
-    """
+    """  # noqa: E501
     markers = []
     markers += ["unit" if unit else "not unit"]
 
@@ -455,7 +414,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "target": "Set the target build stage to build.",
     }
 )
-def docker(  # noqa: PLR0913
+def docker(
     ctx: Context,
     name: str = "gx38local",
     tag: str = "latest",
@@ -485,10 +444,7 @@ def docker(  # noqa: PLR0913
                 "-f",
                 "docker/Dockerfile.tests",
                 f"--tag {name}:{tag}",
-                *[
-                    f"--build-arg {arg}"
-                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
-                ],
+                *[f"--build-arg {arg}" for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]],
                 ".",
             ]
         )
@@ -524,7 +480,7 @@ def docker(  # noqa: PLR0913
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(
+def type_schema(  # noqa: C901 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,
@@ -546,9 +502,7 @@ def type_schema(
         _iter_all_registered_types,
     )
 
-    schema_dir_root: Final[pathlib.Path] = (
-        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
-    )
+    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
         print(f"🗑️ removing schema directory and contents - {file_count} .json files")
@@ -613,7 +567,7 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
         os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     )
     curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."  # noqa: E501
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -627,9 +581,7 @@ def api_docs(ctx: Context):
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
     sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
 
     doc_builder = SphinxInvokeDocsBuilder(
@@ -643,59 +595,55 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned docs and code. Default False.",
-        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",  # noqa: E501
         "lint": "Run the linter",
+        "clear": "Delete the docs' generated assets, caches, and build artifacts.",
     },
 )
 def docs(
     ctx: Context,
     build: bool = False,
-    clean: bool = False,
     start: bool = False,
     lint: bool = False,
+    version: str | None = None,
+    clear: bool = False,
 ):
-    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""  # noqa: E501
+    from packaging.version import parse as parse_version
+
+    from docs.docs_build import DocsBuilder
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="docs", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="docs", correct_dir=repo_root)
 
     print("Running invoke docs from:", repo_root)
-    old_pwd = pathlib.Path.cwd()
+    old_cwd = pathlib.Path.cwd()
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
-    if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
-        ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = [
-            "rm",
-            "-rf",
-            "versioned_code",
-            "versioned_docs",
-            "versioned_sidebars",
-        ]
-        ctx.run(" ".join(rm_rf_cmds), echo=True)
-    elif lint:
+
+    if lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
-    else:  # noqa: PLR5501
-        if start:
-            ctx.run(" ".join(["yarn start"]), echo=True)
+    elif version:
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        docs_builder.create_version(version=parse_version(version))
+    elif start:
+        ctx.run(" ".join(["yarn start"]), echo=True)
+    elif clear:
+        ctx.run(" ".join(["yarn", "clear"]), echo=True)
+    else:
+        docs_builder = DocsBuilder(ctx, docusaurus_dir)
+        print("Making sure docusaurus dependencies are installed.")
+        ctx.run(" ".join(["yarn install"]), echo=True)
+
+        if build:
+            print("Running build_docs from:", docusaurus_dir)
+            docs_builder.build_docs()
         else:
-            print("Making sure docusaurus dependencies are installed.")
-            ctx.run(" ".join(["yarn install"]), echo=True)
+            print("Running build_docs_locally from:", docusaurus_dir)
+            docs_builder.build_docs_locally()
 
-            if build:
-                build_docs_cmd = "../build_docs"
-            else:
-                build_docs_cmd = "../build_docs_locally.sh"
-
-            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
-            ctx.run(build_docs_cmd, echo=True)
-
-    os.chdir(old_pwd)
+    os.chdir(old_cwd)
 
 
 @invoke.task(
@@ -708,13 +656,11 @@ def public_api_task(
     ctx: Context,
     write_to_file: bool = False,
 ):
-    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""  # noqa: E501
 
     repo_root = pathlib.Path(__file__).parent
 
-    _exit_with_error_if_not_run_from_correct_dir(
-        task_name="public-api", correct_dir=repo_root
-    )
+    _exit_with_error_if_not_run_from_correct_dir(task_name="public-api", correct_dir=repo_root)
 
     # Docs folder is not reachable from install of Great Expectations
     api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
@@ -730,7 +676,9 @@ def _exit_with_error_if_not_run_from_correct_dir(
     if not correct_dir:
         correct_dir = pathlib.Path(__file__).parent
     curdir = pathlib.Path.cwd()
-    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    exit_message = (
+        f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    )
     if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
@@ -831,7 +779,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-mssql.txt",
             "reqs/requirements-dev-mysql.txt",
             "reqs/requirements-dev-postgresql.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
             "reqs/requirements-dev-trino.txt",
         ),
@@ -852,7 +800,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
             "reqs/requirements-dev-snowflake.txt",
-            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0  # noqa: E501
             "reqs/requirements-dev-sqlalchemy1.txt",
         ),
         extra_pytest_args=(
@@ -959,11 +907,11 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
-def deps(  # noqa: PLR0913
+def deps(
     ctx: Context,
     markers: list[str],
     requirements_dev: list[str],
@@ -985,7 +933,7 @@ def deps(  # noqa: PLR0913
     the 'requirements-dev-cloud.txt' dependencies.
 
     $ invoke deps -m external_sqldialect -r cloud
-    """
+    """  # noqa: E501
     cmds = ["pip", "install"]
     if editable_install:
         cmds.append("-e .")
@@ -1044,10 +992,14 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(  # noqa: PLR0913
+def ci_tests(  # noqa: C901 - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1057,6 +1009,7 @@ def ci_tests(  # noqa: PLR0913
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1087,6 +1040,10 @@ def ci_tests(  # noqa: PLR0913
     if verbose:
         pytest_options.append("-vv")
 
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
+
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:
             service(
@@ -1101,9 +1058,7 @@ def ci_tests(  # noqa: PLR0913
             pytest_options.append(extra_pytest_arg)
 
     marker_statement = (
-        f"'all_backends or {marker}'"
-        if _add_all_backends_marker(marker)
-        else f"'{marker}'"
+        f"'all_backends or {marker}'" if _add_all_backends_marker(marker) else f"'{marker}'"
     )
 
     pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
@@ -1145,8 +1100,7 @@ def service(
             cmds = []
 
             if (
-                service_name == "mercury"
-                and os.environ.get("CI") != "true"  # noqa: TID251
+                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [
@@ -1167,9 +1121,7 @@ def service(
                 )
 
             if restart_services:
-                print(
-                    f"  Removing existing containers and building latest for {service_name} ..."
-                )
+                print(f"  Removing existing containers and building latest for {service_name} ...")
                 cmds.extend(
                     [
                         "docker",

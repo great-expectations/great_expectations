@@ -5,24 +5,24 @@ Managing the Expectation Gallery Site
 
 This should only need to be done if there are new Expectations merged in or if the content in the Expectation details pages changes (i.e. reformatting Expectation docstrings like [PR 6340](https://github.com/great-expectations/great_expectations/pull/6340), [PR 6423](https://github.com/great-expectations/great_expectations/pull/6423), [PR 6577](https://github.com/great-expectations/great_expectations/pull/6577), and [PR 8353](https://github.com/great-expectations/great_expectations/pull/8353)).
 
-- Visit <https://app.netlify.com/sites/staging-great-expectations/deploys> while logged into Netlify
-    - Click the "Trigger deploy" button
+- Visit &lt;https://app.netlify.com/sites/staging-great-expectations/deploys&gt; while logged into Netlify
+- Click the "Trigger deploy" button
 
 ## Manually promote staging to prod
 
 **Staging changes will never go to prod without doing this!**
 
-The staging S3 file will get copied to prod at <https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json> and the Algolia indicies for the prod site are updated by the `manual_staging_json_to_prod` CI pipeline, which is **only manually triggered**. You can re-deploy the prod site through Netlify.
+The staging S3 file will get copied to prod at &lt;https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json&gt; and the Algolia indicies for the prod site are updated by the `manual_staging_json_to_prod` CI pipeline, which is **only manually triggered**. You can re-deploy the prod site through Netlify.
 
-- Make sure everything looks OK in staging <https://staging-great-expectations.netlify.app/expectations>
+- Make sure everything looks OK in staging &lt;https://staging-great-expectations.netlify.app/expectations&gt;
     - Check total number of Expectations
     - Look at the "Completeness" view and "Data Source" view
-- Visit <https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=18> while logged into Azure Pipelines
+- Visit &lt;https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=18&gt; while logged into Azure Pipelines
     - Click the "Run pipeline" button
     - Click the "Run" button
-- Visit <https://app.netlify.com/sites/dazzling-wilson-9787fb/deploys> while logged into Netlify
+- Visit &lt;https://app.netlify.com/sites/dazzling-wilson-9787fb/deploys&gt; while logged into Netlify
     - Click the "Trigger deploy" button
-- Make sure everything looks OK in prod <https://greatexpectations.io/expectations>
+- Make sure everything looks OK in prod &lt;https://greatexpectations.io/expectations&gt;
 
 ## Misc things you should rarely need to touch
 
@@ -39,7 +39,7 @@ The Netlify vars are read by [gatsby-node.js in the website repo](https://github
 
 ### Algolia index names
 
-On the <https://dashboard.algolia.com/apps/2S9KBQSQ3L/indices> page, the names that match these patterns are used by the gallery
+On the &lt;https://dashboard.algolia.com/apps/2S9KBQSQ3L/indices&gt; page, the names that match these patterns are used by the gallery
 
 - `prod_expectations_*`
 - `prod_expectations`

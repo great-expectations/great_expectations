@@ -43,19 +43,15 @@ class ContentBlockRenderer(Renderer):
         pass
 
     @classmethod
-    def render(
-        cls, render_object: Any, **kwargs
-    ) -> Union[_rendered_component_type, Any, None]:
+    def render(cls, render_object: Any, **kwargs) -> Union[_rendered_component_type, Any, None]:
         cls.validate_input(render_object)
-        exception_list_content_block: bool = kwargs.get(
-            "exception_list_content_block", False
-        )
+        exception_list_content_block: bool = kwargs.get("exception_list_content_block", False)
 
         data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-        """
+        """  # noqa: E501
 
         runtime_configuration = {
             "styling": cls._get_element_styling(),
@@ -79,7 +75,20 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(  # noqa: PLR0913, PLR0912
+    def _get_content_block_fn_from_render_object(
+        cls, obj_: ExpectationConfiguration | ExpectationValidationResult
+    ):
+        expectation_type = cls._get_expectation_type(obj_)
+        expectation_config = (
+            obj_.expectation_config if isinstance(obj_, ExpectationValidationResult) else obj_
+        )
+
+        return cls._get_content_block_fn(
+            expectation_type=expectation_type, expectation_config=expectation_config
+        )
+
+    @classmethod
+    def _render_list(  # noqa: C901, PLR0912, PLR0913
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -93,9 +102,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-            expectation_type = cls._get_expectation_type(obj_)
-
-            content_block_fn = cls._get_content_block_fn(expectation_type)
+            content_block_fn = cls._get_content_block_fn_from_render_object(obj_)
 
             if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
                 has_failed_evr = True
@@ -125,9 +132,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     logger.error(exception_message)
 
                     if isinstance(obj_, ExpectationValidationResult):
-                        content_block_fn = cls._get_content_block_fn(
-                            "_missing_content_block_fn"
-                        )
+                        content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                         expectation_config = obj_.expectation_config
                         result = content_block_fn(
                             configuration=expectation_config,
@@ -166,10 +171,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
             if result is not None:
                 if isinstance(obj_, ExpectationConfiguration):
-                    expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
-                    if expectation_meta_notes:
+                    expectation_notes = cls._render_expectation_notes(obj_)
+                    if expectation_notes:
                         # this adds collapse content block to expectation string
-                        result[0] = [result[0], expectation_meta_notes]
+                        result[0] = [result[0], expectation_notes]
 
                     horizontal_rule = RenderedStringTemplateContent(
                         **{
@@ -181,9 +186,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                     "classes": ["mt-1", "mb-1"],
                                 },
                             },
-                            "styling": {
-                                "parent": {"styles": {"list-style-type": "none"}}
-                            },
+                            "styling": {"parent": {"styles": {"list-style-type": "none"}}},
                         }
                     )
                     result.append(horizontal_rule)
@@ -198,12 +201,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
             rendered_component_type_default_init_kwargs = getattr(
                 cls, "_rendered_component_default_init_kwargs", {}
             )
-            rendered_component_type_init_kwargs.update(
-                rendered_component_type_default_init_kwargs
-            )
-            content_block = cls._rendered_component_type(
-                **rendered_component_type_init_kwargs
-            )
+            rendered_component_type_init_kwargs.update(rendered_component_type_default_init_kwargs)
+            content_block = cls._rendered_component_type(**rendered_component_type_init_kwargs)
             cls._process_content_block(
                 content_block,
                 has_failed_evr=has_failed_evr,
@@ -215,7 +214,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(  # noqa: PLR0912, PLR0913
+    def _render_other(  # noqa: C901, PLR0912, PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -224,12 +223,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         kwargs: dict,
     ) -> Any:
         """Helper method to render non-list render_objects - refer to `render` for more context"""
-        expectation_type = cls._get_expectation_type(render_object)
-
-        content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
-        )
-        content_block_fn = content_block_fn[1] if content_block_fn else None
+        content_block_fn = cls._get_content_block_fn_from_render_object(render_object)
         if content_block_fn is not None and not exception_list_content_block:
             try:
                 if isinstance(render_object, ExpectationValidationResult):
@@ -253,9 +247,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 logger.error(exception_message)
 
                 if isinstance(render_object, ExpectationValidationResult):
-                    content_block_fn = cls._get_content_block_fn(
-                        "_missing_content_block_fn"
-                    )
+                    content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
                     result = content_block_fn(
                         result=render_object,
                         runtime_configuration=runtime_configuration,
@@ -289,16 +281,35 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 )
         if result is not None:
             if isinstance(render_object, ExpectationConfiguration):
-                expectation_meta_notes = cls._render_expectation_meta_notes(
-                    render_object
-                )
-                if expectation_meta_notes:
-                    result.append(expectation_meta_notes)
+                expectation_notes = cls._render_expectation_notes(render_object)
+                if expectation_notes:
+                    result.append(expectation_notes)
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
-        if not expectation.meta.get("notes"):
+    def _render_expectation_description(
+        cls,
+        configuration: ExpectationConfiguration,
+        runtime_configuration: dict,
+        **kwargs,
+    ) -> list[RenderedStringTemplateContent]:
+        expectation = configuration.to_domain_obj()
+        description = expectation.description
+        if not description:
+            raise ValueError("Cannot render an expectation with no description.")
+        # If we wish to support $VAR substitution, we should use RenderedStringTemplateContent with params  # noqa: E501
+        return [
+            RenderedMarkdownContent(
+                markdown=description, styling=runtime_configuration.get("styling", {})
+            )
+        ]
+
+    @classmethod
+    def _render_expectation_notes(
+        cls, expectation_config: ExpectationConfiguration
+    ) -> CollapseContent:
+        notes = expectation_config.notes
+        if not notes:
             return None
         else:
             collapse_link = RenderedStringTemplateContent(
@@ -318,59 +329,30 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     },
                 }
             )
-            notes = expectation.meta["notes"]
-            note_content = None
 
             if isinstance(notes, str):
-                note_content = [notes]
-
-            elif isinstance(notes, list):
-                note_content = notes
-
-            elif isinstance(notes, dict):
-                if "format" in notes:
-                    if notes["format"] == "string":
-                        if isinstance(notes["content"], str):
-                            note_content = [notes["content"]]
-                        elif isinstance(notes["content"], list):
-                            note_content = notes["content"]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-
-                    elif notes["format"] == "markdown":
-                        if isinstance(notes["content"], str):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": notes["content"],
-                                        "styling": {
-                                            "parent": {"styles": {"color": "red"}}
-                                        },
-                                    }
-                                )
-                            ]
-                        elif isinstance(notes["content"], list):
-                            note_content = [
-                                RenderedMarkdownContent(
-                                    **{
-                                        "content_block_type": "markdown",
-                                        "markdown": note,
-                                        "styling": {"parent": {}},
-                                    }
-                                )
-                                for note in notes["content"]
-                            ]
-                        else:
-                            logger.warning(
-                                "Unrecognized Expectation suite notes format. Skipping rendering."
-                            )
-                else:
-                    logger.warning(
-                        "Unrecognized Expectation suite notes format. Skipping rendering."
+                note_content = [
+                    RenderedMarkdownContent(
+                        **{
+                            "content_block_type": "markdown",
+                            "markdown": notes,
+                            "styling": {"parent": {"styles": {"color": "red"}}},
+                        }
                     )
+                ]
+            elif isinstance(notes, list):
+                note_content = [
+                    RenderedMarkdownContent(
+                        **{
+                            "content_block_type": "markdown",
+                            "markdown": note,
+                            "styling": {"parent": {}},
+                        }
+                    )
+                    for note in notes
+                ]
+            else:
+                note_content = None
 
             notes_block = TextContent(
                 **{
@@ -397,19 +379,39 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(
-        cls, content_block, has_failed_evr, render_object=None
-    ) -> None:
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None) -> None:
         header = cls._get_header()
         if header != "":
             content_block.header = header
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(
+        cls,
+        expectation_type: str,
+        expectation_config: ExpectationConfiguration | None = None,
+    ) -> Callable | None:
+        # Prioritize `description` param on Expectation before falling back to renderer
+        if expectation_config:
+            content_block_fn = cls._get_content_block_fn_from_expectation_description(
+                expectation_config=expectation_config,
+            )
+            if content_block_fn:
+                return content_block_fn
+
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         return content_block_fn[1] if content_block_fn else None
+
+    @classmethod
+    def _get_content_block_fn_from_expectation_description(
+        cls, expectation_config: ExpectationConfiguration
+    ) -> Callable | None:
+        expectation = expectation_config.to_domain_obj()
+        description = expectation.description
+        if description:
+            return cls._render_expectation_description
+        return None
 
     @classmethod
     def list_available_expectations(cls):

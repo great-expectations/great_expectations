@@ -4,7 +4,6 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-
 from typing import Optional
 
 from shapely.geometry import Point, Polygon
@@ -44,9 +43,7 @@ class ColumnValuesCoordinatesDegreeDecimal(ColumnMapMetricProvider):
     @staticmethod
     def _point_in_bounds(point, bounds):
         try:
-            result = bounds.intersects(
-                Point(float(eval(point)[1]), float(eval(point)[0]))
-            )
+            result = bounds.intersects(Point(float(eval(point)[1]), float(eval(point)[0])))
         except TypeError:
             try:
                 result = bounds.intersects(Point(float(point[1]), float(point[0])))

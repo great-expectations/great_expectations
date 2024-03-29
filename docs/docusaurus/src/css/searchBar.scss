@@ -1,0 +1,15 @@
+.custom-search-bar .DocSearch-Button {
+  background: none;
+
+  &-Placeholder {
+    display: none;
+  }
+
+  &-Container svg path {
+    stroke-width: 3;
+  }
+
+  &-Keys {
+    display: none;
+  }
+}

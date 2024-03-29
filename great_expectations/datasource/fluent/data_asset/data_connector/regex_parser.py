@@ -35,9 +35,7 @@ class RegExParser:
     def get_matches(self, target: str) -> Optional[Match[str]]:
         return self._regex_pattern.match(target)
 
-    def get_named_group_name_to_group_value_mapping(
-        self, target: str
-    ) -> Dict[str, str] | None:
+    def get_named_group_name_to_group_value_mapping(self, target: str) -> Dict[str, str] | None:
         # Check for `(?P<name>)` named group syntax
         matches: Optional[Match[str]] = self.get_matches(target=target)
         if matches is None:
@@ -66,8 +64,7 @@ class RegExParser:
         idx: int
         common_group_indexes: List[int] = list(
             filter(
-                lambda idx: idx
-                not in self._named_group_name_to_group_index_mapping.values(),
+                lambda idx: idx not in self._named_group_name_to_group_index_mapping.values(),
                 range(1, self._num_all_matched_group_values + 1),
             )
         )
@@ -109,34 +106,32 @@ class RegExParser:
         all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_name_to_group_index_mapping: Dict[
-            str, int
-        ] = all_group_names_to_group_indexes_bidirectional_mappings[0]
+        all_group_name_to_group_index_mapping: Dict[str, int] = (
+            all_group_names_to_group_indexes_bidirectional_mappings[0]
+        )
         return all_group_name_to_group_index_mapping
 
     def get_all_group_index_to_group_name_mapping(self) -> Dict[int, str]:
         all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_index_to_group_name_mapping: Dict[
-            int, str
-        ] = all_group_names_to_group_indexes_bidirectional_mappings[1]
+        all_group_index_to_group_name_mapping: Dict[int, str] = (
+            all_group_names_to_group_indexes_bidirectional_mappings[1]
+        )
         return all_group_index_to_group_name_mapping
 
     def get_all_group_names(self) -> List[str]:
-        all_group_name_to_group_index_mapping: Dict[
-            str, int
-        ] = self.get_all_group_name_to_group_index_mapping()
+        all_group_name_to_group_index_mapping: Dict[str, int] = (
+            self.get_all_group_name_to_group_index_mapping()
+        )
         all_group_names: List[str] = list(all_group_name_to_group_index_mapping.keys())
         return all_group_names
 
     def get_all_group_indexes(self) -> List[int]:
-        all_group_index_to_group_name_mapping: Dict[
-            int, str
-        ] = self.get_all_group_index_to_group_name_mapping()
-        all_group_indexes: List[int] = list(
-            all_group_index_to_group_name_mapping.keys()
+        all_group_index_to_group_name_mapping: Dict[int, str] = (
+            self.get_all_group_index_to_group_name_mapping()
         )
+        all_group_indexes: List[int] = list(all_group_index_to_group_name_mapping.keys())
         return all_group_indexes
 
     def get_group_name_to_group_value_mapping(
@@ -144,9 +139,7 @@ class RegExParser:
         target: str,
     ) -> Dict[str, str]:
         all_group_names: List[str] = self.get_all_group_names()
-        all_matched_group_values: List[str] = (
-            self.get_all_matched_group_values(target=target) or []
-        )
+        all_matched_group_values: List[str] = self.get_all_matched_group_values(target=target) or []
         group_name_to_group_value_mapping: Dict[str, str] = dict(
             zip(all_group_names, all_matched_group_values)
         )
@@ -157,9 +150,7 @@ class RegExParser:
         target: str,
     ) -> Dict[int, str]:
         all_group_indexes: List[int] = self.get_all_group_indexes()
-        all_matched_group_values: List[str] = (
-            self.get_all_matched_group_values(target=target) or []
-        )
+        all_matched_group_values: List[str] = self.get_all_matched_group_values(target=target) or []
         group_index_to_group_value_mapping: Dict[int, str] = dict(
             zip(all_group_indexes, all_matched_group_values)
         )

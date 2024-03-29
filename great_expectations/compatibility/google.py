@@ -5,7 +5,7 @@ import warnings
 from great_expectations.compatibility.not_imported import NotImported
 
 GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
-    "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
+    "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"  # noqa: E501
 )
 
 with warnings.catch_warnings():

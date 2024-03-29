@@ -4,12 +4,10 @@ import warnings
 
 from great_expectations.compatibility.not_imported import NotImported
 
-SPARK_NOT_IMPORTED = NotImported(
-    "pyspark is not installed, please 'pip install pyspark'"
-)
+SPARK_NOT_IMPORTED = NotImported("pyspark is not installed, please 'pip install pyspark'")
 
 with warnings.catch_warnings():
-    # DeprecationWarning: typing.io is deprecated, import directly from typing instead. typing.io will be removed in Python 3.12.
+    # DeprecationWarning: typing.io is deprecated, import directly from typing instead. typing.io will be removed in Python 3.12.  # noqa: E501
     warnings.simplefilter(action="ignore", category=DeprecationWarning)
     try:
         import pyspark
@@ -57,6 +55,11 @@ except (ImportError, AttributeError):
     SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
+    from pyspark.sql.connect.session import SparkSession as SparkConnectSession
+except (ImportError, AttributeError):
+    SparkConnectSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
     from pyspark.sql import SQLContext
 except (ImportError, AttributeError):
     SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
@@ -75,3 +78,8 @@ try:
     from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
+    from pyspark.errors import PySparkAttributeError
+except (ImportError, AttributeError):
+    PySparkAttributeError = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]

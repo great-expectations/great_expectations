@@ -17,16 +17,19 @@ repos:
         args: [--branch, develop, --branch, main]
       - id: detect-private-key
         exclude: tests/test_fixtures/database_key_test*
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
-    hooks:
-      - id: black-jupyter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.1.6"
+    rev: "v0.3.0"
     hooks:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
         args: ["--fix"]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [yaml]
+        exclude: tests/data_context/fixtures/bad_yml
   # Github Actions Linter
   # Need to be able to inline ignore errors
   # https://github.com/rhysd/actionlint/issues/237
@@ -36,12 +39,12 @@ repos:
   #     - id: actionlint
 # https://pre-commit.ci/
 ci:
-    autofix_commit_msg: |
-        [pre-commit.ci] auto fixes from pre-commit.com hooks
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
 
-        for more information, see https://pre-commit.ci
-    autofix_prs: true
-    autoupdate_branch: 'develop'
-    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-    autoupdate_schedule: monthly
-    submodules: false
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: "develop"
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: monthly
+  submodules: false

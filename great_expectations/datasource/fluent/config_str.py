@@ -80,16 +80,14 @@ def _check_config_substitutions_needed(
     """
     Given a Datasource and a dict-like mapping type return the keys whose value is a `ConfigStr` type.
     Optionally raise a warning if config substitution is needed but impossible due to a missing `_config_provider`.
-    """
-    need_config_subs: set[str] = {
-        k for (k, v) in options.items() if isinstance(v, ConfigStr)
-    }
+    """  # noqa: E501
+    need_config_subs: set[str] = {k for (k, v) in options.items() if isinstance(v, ConfigStr)}
     if (
         need_config_subs
         and raise_warning_if_provider_not_present
         and not datasource._config_provider
     ):
         warnings.warn(
-            f"config variables '{','.join(need_config_subs)}' need substitution but no `_ConfigurationProvider` is present"
+            f"config variables '{','.join(need_config_subs)}' need substitution but no `_ConfigurationProvider` is present"  # noqa: E501
         )
     return need_config_subs

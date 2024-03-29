@@ -6,11 +6,12 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 
 # Set up a basic spark session
-spark = gx.core.util.get_or_create_spark_application()
+spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # basic dataframe
 data = [
@@ -65,9 +66,7 @@ batch_request = RuntimeBatchRequest(
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 # </snippet>
 

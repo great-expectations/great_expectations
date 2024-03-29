@@ -35,8 +35,8 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
         value_set = metric_value_kwargs.get("value_set")
         (
             df,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
+            _compute_domain_kwargs,
+            _accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -100,16 +100,12 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
-            "value_set"
-        )
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value("value_set")
         column = configuration.kwargs.get("column")
 
         try:
             assert column is not None, "`column` must be specified"
-            assert (
-                "value_set" in configuration.kwargs or value_set
-            ), "value_set is required"
+            assert "value_set" in configuration.kwargs or value_set, "value_set is required"
             assert isinstance(
                 value_set, (list, set, dict)
             ), "value_set must be a list, set, or dict"

@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import copy
 import logging
+import warnings
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pydantic import (
+    ValidationError as PydanticValidationError,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -18,6 +22,10 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
@@ -26,7 +34,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypedDict
 
-    from great_expectations.core.batch_config import BatchConfig
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -66,8 +73,8 @@ class DatasourceStore(Store):
             store_name=store_name,  # type: ignore[arg-type]
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -77,6 +84,7 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    @override
     def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
@@ -95,12 +103,10 @@ class DatasourceStore(Store):
         return self._serializer.serialize(value)
 
     @overload
-    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig:
-        ...
+    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig: ...
 
     @overload
-    def deserialize(self, value: FluentDatasource) -> FluentDatasource:
-        ...
+    def deserialize(self, value: FluentDatasource) -> FluentDatasource: ...
 
     @override
     def deserialize(
@@ -109,17 +115,24 @@ class DatasourceStore(Store):
         """
         See parent 'Store.deserialize()' for more information
         """
-        # When using the InlineStoreBackend, objects are already converted to their respective config types.
+        # When using the InlineStoreBackend, objects are already converted to their respective config types.  # noqa: E501
         if isinstance(value, (DatasourceConfig, FluentDatasource)):
             return value
         elif isinstance(value, dict):
             # presence of a 'type' field means it's a fluent datasource
-            type_ = value.get("type")
+            type_: str | None = value.get("type")
             if type_:
-                datasource_model = _SourceFactories.type_lookup.get(type_)
-                if not datasource_model:
-                    raise LookupError(f"Unknown Datasource 'type': '{type_}'")
-                return datasource_model(**value)
+                try:
+                    datasource_model = _SourceFactories.type_lookup[type_]
+                    return datasource_model(**value)
+                except (PydanticValidationError, LookupError) as config_error:
+                    warnings.warn(
+                        f"Datasource {value.get('name', '')} configuration is invalid."
+                        " Check `my_datasource.config_error` attribute for more details.",
+                        GxInvalidDatasourceWarning,
+                    )
+                    # Any fields that are not part of the schema are ignored
+                    return InvalidDatasource(config_error=config_error, **value)
             return self._schema.load(value)
         else:
             return self._schema.loads(value)
@@ -137,10 +150,8 @@ class DatasourceStore(Store):
         data = response_json["data"]
         if isinstance(data, list):
             if len(data) > 1:
-                # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`
-                raise TypeError(
-                    f"GX Cloud returned {len(data)} Datasources but expected 1"
-                )
+                # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`  # noqa: E501
+                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")
             data = data[0]
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
@@ -153,26 +164,22 @@ class DatasourceStore(Store):
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
         deserialization into a collection of GX objects
-        """
+        """  # noqa: E501
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if not isinstance(data, list):
-            raise TypeError(
-                "GX Cloud did not return a collection of Datasources when expected"
-            )
+            raise TypeError("GX Cloud did not return a collection of Datasources when expected")
 
         return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
 
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
-        datasource_ge_cloud_id: str = data["id"]
+        datasource_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
-        datasource_config_dict["id"] = datasource_ge_cloud_id
+        datasource_config_dict["id"] = datasource_id
         return datasource_config_dict
 
-    def retrieve_by_name(
-        self, datasource_name: str
-    ) -> DatasourceConfig | FluentDatasource:
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig | FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -185,12 +192,12 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: Union[
-            DataContextVariableKey, GXCloudIdentifier
-        ] = self.store_backend.build_key(name=datasource_name)
+        datasource_key: Union[DataContextVariableKey, GXCloudIdentifier] = (
+            self.store_backend.build_key(name=datasource_name)
+        )
         if not self.has_key(datasource_key):
             raise ValueError(
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
@@ -225,14 +232,13 @@ class DatasourceStore(Store):
             raise ValueError("Datasource is not a FluentDatasource")
         return datasource
 
-    @overload  # type: ignore[override]
+    @overload
     def set(
         self,
         key: Union[DataContextKey, None],
         value: FluentDatasource,
         **kwargs,
-    ) -> FluentDatasource:
-        ...
+    ) -> FluentDatasource: ...
 
     @overload
     def set(
@@ -240,8 +246,7 @@ class DatasourceStore(Store):
         key: Union[DataContextKey, None],
         value: DatasourceConfig,
         **kwargs,
-    ) -> DatasourceConfig:
-        ...
+    ) -> DatasourceConfig: ...
 
     @override
     def set(
@@ -257,7 +262,7 @@ class DatasourceStore(Store):
             **_: kwargs will be ignored but accepted to align with the parent class.
         Returns:
             DatasourceConfig retrieved from the DatasourceStore.
-        """
+        """  # noqa: E501
         if not key:
             key = self._build_key_from_config(value)
         return self._persist_datasource(key=key, config=value)
@@ -267,23 +272,19 @@ class DatasourceStore(Store):
     ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(
-            key=key, value=config
-        )
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key=key, value=config)
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):
-            # Setting the name in the config is currently needed to handle adding the name to v2 datasource
+            # Setting the name in the config is currently needed to handle adding the name to v2 datasource  # noqa: E501
             # configs and can be refactored (e.g. into `get()`)
             return_value.name = key.resource_name
 
         return return_value
 
-    def add_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def add_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Persists a DatasourceConfig in the store by a given name.
 
         Args:
@@ -304,9 +305,7 @@ class DatasourceStore(Store):
                 message="A Datasource with the given name already exists",
             )
 
-    def update_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def update_by_name(self, datasource_name: str, datasource_config: DatasourceConfig) -> None:
         """Updates a DatasourceConfig that already exists in the store.
 
         Args:
@@ -331,60 +330,3 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
-
-    def add_batch_config(self, batch_config: BatchConfig) -> BatchConfig:
-        data_asset = batch_config.data_asset
-        key = DataContextVariableKey(resource_name=data_asset.datasource.name)
-        loaded_datasource = self.get_fluent_datasource_by_name(
-            data_asset.datasource.name
-        )
-        loaded_asset = loaded_datasource.get_asset(data_asset.name)
-
-        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
-        if batch_config.name in batch_config_names:
-            raise ValueError(
-                f'"{batch_config.name}" already exists (all existing batch_config names are {", ".join(batch_config_names)})'
-            )
-
-        # This must be set for it to be picked up during serialization
-        loaded_asset.__fields_set__.add("batch_configs")
-
-        loaded_asset.batch_configs.append(batch_config)
-        updated_datasource = self._persist_datasource(key=key, config=loaded_datasource)
-        assert isinstance(updated_datasource, FluentDatasource)
-
-        updated_asset = updated_datasource.get_asset(data_asset.name)
-
-        updated_batch_config_as_list = [
-            bc for bc in updated_asset.batch_configs if bc.name == batch_config.name
-        ]
-        assert len(updated_batch_config_as_list) == 1
-        updated_batch_config = updated_batch_config_as_list[0]
-
-        updated_batch_config.set_data_asset(updated_asset)
-        return updated_batch_config
-
-    def delete_batch_config(self, batch_config: BatchConfig) -> None:
-        data_asset = batch_config.data_asset
-        key = DataContextVariableKey(resource_name=data_asset.datasource.name)
-        loaded_datasource = self.get_fluent_datasource_by_name(
-            data_asset.datasource.name
-        )
-        loaded_asset = loaded_datasource.get_asset(data_asset.name)
-
-        batch_config_names = {bc.name for bc in loaded_asset.batch_configs}
-        if batch_config.name not in batch_config_names:
-            raise ValueError(
-                f'"{batch_config.name}" does not exist (all existing batch_config names are {", ".join(batch_config_names)})'
-            )
-
-        loaded_asset.batch_configs = [
-            bc for bc in loaded_asset.batch_configs if bc.name != batch_config.name
-        ]
-
-        # This must be set for it to be picked up during serialization
-        has_batch_configs = len(loaded_asset.batch_configs) > 0
-        if not has_batch_configs and "batch_configs" in loaded_asset.__fields_set__:
-            loaded_asset.__fields_set__.remove("batch_configs")
-
-        self._persist_datasource(key=key, config=loaded_datasource)

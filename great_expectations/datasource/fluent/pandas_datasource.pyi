@@ -35,6 +35,7 @@ from great_expectations._docs_decorators import (
 from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import Partitioner
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
@@ -70,14 +71,13 @@ class _PandasDataAsset(DataAsset):
     def test_connection(self) -> None: ...
     def batch_request_options_template(self) -> BatchRequestOptions: ...
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]: ...
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
     @override
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = ...,
         batch_slice: Optional[BatchSlice] = ...,
+        partitioner: Optional[Partitioner] = ...,
     ) -> BatchRequest: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...
@@ -124,7 +124,7 @@ class DataFrameAsset(_PandasDataAsset):
 
     @new_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     @override
@@ -132,9 +132,7 @@ class DataFrameAsset(_PandasDataAsset):
         self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest: ...
     @override
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> list[Batch]: ...
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
 
 _PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
 
@@ -172,7 +170,7 @@ class PandasDatasource(_PandasDatasource):
     def test_connection(self, test_assets: bool = ...) -> None: ...
     @deprecated_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     def add_dataframe_asset(

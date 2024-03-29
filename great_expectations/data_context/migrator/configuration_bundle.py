@@ -1,4 +1,5 @@
 """TODO: Add docstring"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, cast
@@ -43,7 +44,7 @@ class ConfigurationBundle:
         self._expectation_suites = self._get_all_expectation_suites()
         self._checkpoints = self._get_all_checkpoints()
 
-        # Treated slightly differently as we require the keys downstream when printing migration status.
+        # Treated slightly differently as we require the keys downstream when printing migration status.  # noqa: E501
         self._validation_results = self._get_all_validation_results()
 
     @property
@@ -100,8 +101,7 @@ class ConfigurationBundle:
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
-            self._context.get_expectation_suite(name)
-            for name in self._context.list_expectation_suite_names()
+            self._context.suites.get(name) for name in self._context.list_expectation_suite_names()
         ]
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:

@@ -44,11 +44,12 @@ MISSING: Final = object()
 
 GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
 
-DUMMY_JWT_TOKEN: Final[
-    str
-] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+DUMMY_JWT_TOKEN: Final[str] = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+)
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
+FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
@@ -108,6 +109,7 @@ FakeDBTypedDict = TypedDict(
     # using alternative syntax for creating type dict because of key names with hyphens
     # https://peps.python.org/pep-0589/#alternative-syntax
     {
+        "me": Dict[str, str],
         "data-context-configuration": Dict[str, Union[str, dict]],
         "DATASOURCE_NAMES": Set[str],
         "datasources": Dict[str, dict],
@@ -149,6 +151,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         datasources_by_id[id] = ds_response_json
 
     return {
+        "me": {"user_id": FAKE_USER_ID},
         "DATASOURCE_NAMES": datasource_names,
         "datasources": datasources_by_id,
         "EXPECTATION_SUITE_NAMES": set(),
@@ -166,9 +169,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
             "validations_store_name": "default_validations_store",
             "stores": {
-                "default_evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
+                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -221,6 +222,15 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
 _CLOUD_API_FAKE_DB: FakeDBTypedDict = {}  # type: ignore[typeddict-item] # will be assigned in `create_fake_db_seed_data`
 
 
+def get_user_id(request: PreparedRequest) -> CallbackResult:
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
+    resource_path: str = request.url.split("/")[-1]
+    user_dict = _CLOUD_API_FAKE_DB.get(resource_path)
+    return CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(user_dict))
+
+
 def get_dc_configuration_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
@@ -245,9 +255,7 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
 
     datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if datasource:
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(datasource)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(datasource))
     else:
         result = CallbackResult(
             404,
@@ -283,9 +291,7 @@ def delete_datasources_cb(
         LOGGER.debug(f"Deleted datasource '{ds_name}'")
         result = CallbackResult(204, headers={}, body="")
     else:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
     return result
 
@@ -312,9 +318,9 @@ def delete_data_assets_cb(
                 deleted_asset_idx = idx
                 break
         if deleted_asset_idx is not None:
-            deleted_asset = datasource["data"]["attributes"]["datasource_config"][
-                "assets"
-            ].pop(deleted_asset_idx)
+            deleted_asset = datasource["data"]["attributes"]["datasource_config"]["assets"].pop(
+                deleted_asset_idx
+            )
             break
 
     if deleted_asset:
@@ -322,9 +328,7 @@ def delete_data_assets_cb(
         LOGGER.debug(f"Deleted asset '{asset_name}'")
         result = CallbackResult(204, headers={}, body="")
     else:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
     return result
 
@@ -421,10 +425,7 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if (
-            payload.data.name
-            != old_datasource["data"]["attributes"]["datasource_config"]["name"]
-        ):
+        if payload.data.name != old_datasource["data"]["attributes"]["datasource_config"]["name"]:
             raise NotImplementedError("Unsure how to handle name change")
         _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
@@ -474,8 +475,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         exp_suite_list = [
             d["data"]
             for d in exp_suite_list
-            if d["data"]["attributes"]["suite"]["expectation_suite_name"]
-            in queried_names
+            if d["data"]["attributes"]["suite"]["name"] in queried_names
         ]
 
     resp_body = {"data": exp_suite_list}
@@ -494,13 +494,9 @@ def get_expectation_suite_by_id_cb(
     parsed_url = urllib.parse.urlparse(url)
     expectation_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["expectation_suites"].get(
-        expectation_id
-    )
+    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["expectation_suites"].get(expectation_id)
     if expectation_suite:
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(expectation_suite)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(expectation_suite))
     else:
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
     return result
@@ -514,7 +510,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -536,11 +532,9 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     else:
         suite_id = FAKE_EXPECTATION_SUITE_ID
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"][
-            "expectations"
-        ]:
-            expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+        payload["data"]["attributes"]["suite"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
+            expectation_configuration["id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
@@ -563,7 +557,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+    name = payload["data"]["attributes"]["suite"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -586,13 +580,11 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         )
     else:
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["ge_cloud_id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"][
-            "expectations"
-        ]:
+        payload["data"]["attributes"]["suite"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
             # add IDs to new expectations
-            if not expectation_configuration.get("ge_cloud_id"):
-                expectation_configuration["ge_cloud_id"] = str(uuid.uuid4())
+            if not expectation_configuration.get("id"):
+                expectation_configuration["id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
@@ -639,7 +631,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
         checkpoint_list = [
             d
             for d in checkpoint_list
-            if d["data"]["attributes"]["checkpoint_name"] in queried_names
+            if d["attributes"]["checkpoint_config"]["name"] in queried_names
         ]
 
     resp_body = {"data": checkpoint_list}
@@ -657,9 +649,7 @@ def get_checkpoint_by_id_cb(request: PreparedRequest) -> CallbackResult:
     checkpoint_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
     if checkpoint := _CLOUD_API_FAKE_DB["checkpoints"].get(checkpoint_id):
-        result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint))
     else:
         result = CallbackResult(
             404,
@@ -707,12 +697,45 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     else:
         id_ = FAKE_CHECKPOINT_ID
         payload["data"]["id"] = id_
-        checkpoints[id_] = payload
+        checkpoints[id_] = payload["data"]
         checkpoint_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
     LOGGER.debug(f"Response {result.status}")
     return result
+
+
+def delete_checkpoint_by_name_cb(
+    request: PreparedRequest,
+) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
+    queried_names: list[str] = query_params.get("name", [])  # type: ignore[assignment]
+    if not queried_names:
+        raise ValueError("Must provide checkpoint name for deletion.")
+
+    cp_name = queried_names[0]
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
+
+    checkpoint_id: str | None = None
+    for checkpoint in checkpoints.values():
+        if checkpoint["attributes"]["checkpoint_config"]["name"] == cp_name:
+            checkpoint_id = checkpoint["id"]
+            break
+
+    if not checkpoint_id:
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
+        return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+
+    deleted_cp = checkpoints.pop(checkpoint_id)
+    print(pf(deleted_cp, depth=5))
+
+    _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
+    LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
+    return CallbackResult(204, headers={}, body="")
 
 
 def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
@@ -735,9 +758,7 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
                     {
                         "code": "Mock 400/422",
                         "detail": "Field may not be null.",
-                        "source": {
-                            "pointer": "/data/attributes/result/meta/validation_id"
-                        },
+                        "source": {"pointer": "/data/attributes/result/meta/validation_id"},
                     }
                 ]
             ).json(),
@@ -761,6 +782,7 @@ def gx_cloud_api_fake_ctx(
     """Mock the GX Cloud API for the lifetime of the context manager."""
     org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
+    me_url = f"{org_url_base}/accounts/me"
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
     _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
@@ -770,6 +792,7 @@ def gx_cloud_api_fake_ctx(
     with responses.RequestsMock(
         assert_all_requests_are_fired=assert_all_requests_are_fired
     ) as resp_mocker:
+        resp_mocker.add_callback(responses.GET, me_url, get_user_id)
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
@@ -815,12 +838,12 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/expectation-suites",
             post_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.PUT,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
             put_expectation_suites_cb,
-        ),
+        )
         resp_mocker.add_callback(
             responses.DELETE,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
@@ -835,6 +858,11 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base}/checkpoints",
             post_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            f"{org_url_base}/checkpoints",
+            delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,

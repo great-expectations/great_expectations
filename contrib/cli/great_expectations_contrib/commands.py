@@ -61,9 +61,9 @@ def publish_cmd() -> None:
 def perform_check(suppress_output: bool) -> bool:
     commands = [
         Command(
-            "black",
-            "black --check .",
-            "Please ensure that your files are linted properly with `black .`",
+            "ruff format",
+            "ruff format --check .",
+            "Please ensure that your files are linted properly with `ruff format .`",
         ),
         # TODO: update this (or don't)
         Command(
@@ -90,9 +90,7 @@ def perform_check(suppress_output: bool) -> bool:
 
     is_successful = successes == len(commands)
     color = "green" if is_successful else "red"
-    echo(
-        f"Summary: [{successes}/{len(commands)}] checks have passed!", color, bold=True
-    )
+    echo(f"Summary: [{successes}/{len(commands)}] checks have passed!", color, bold=True)
 
     return is_successful
 
@@ -173,9 +171,7 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
     return GreatExpectationsContribPackageManifest(**data)
 
 
-def write_package_to_disk(
-    package: GreatExpectationsContribPackageManifest, path: str
-) -> None:
+def write_package_to_disk(package: GreatExpectationsContribPackageManifest, path: str) -> None:
     """Serialize a GreatExpectationsContribPackageManifest instance into a JSON file.
 
     Args:

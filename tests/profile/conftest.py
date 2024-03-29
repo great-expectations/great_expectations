@@ -10,7 +10,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.self_check.util import get_dataset
 
 
 @pytest.fixture
@@ -20,10 +19,12 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),  # noqa: PTH118
+        exist_ok=True,
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "checkpoints"),  # noqa: PTH118
+        exist_ok=True,
     )
     data_path = os.path.join(context_path, "../data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -74,57 +75,8 @@ def get_set_of_columns_and_expectations_from_suite(
         A tuple containing a set of columns and a set of expectations found in a suite
     """
     columns: Set[str] = {
-        i.kwargs.get("column")
-        for i in suite.expectation_configurations
-        if i.kwargs.get("column")
+        i.kwargs.get("column") for i in suite.expectation_configurations if i.kwargs.get("column")
     }
-    expectations: Set[str] = {
-        i.expectation_type for i in suite.expectation_configurations
-    }
+    expectations: Set[str] = {i.expectation_type for i in suite.expectation_configurations}
 
     return columns, expectations
-
-
-@pytest.fixture
-def non_numeric_low_card_dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-
-    # fmt: off
-    data = {
-        "lowcardnonnum": [
-            "a", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b",
-        ]
-    }
-    # fmt: on
-    schemas = {
-        "pandas": {
-            "lowcardnonnum": "str",
-        },
-        "postgresql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "sqlite": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "mysql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "mssql": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "spark": {
-            "lowcardnonnum": "StringType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)

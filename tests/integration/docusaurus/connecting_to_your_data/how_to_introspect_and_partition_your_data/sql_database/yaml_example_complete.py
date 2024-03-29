@@ -34,8 +34,8 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
-        splitter_method: split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: pickup_datetime
             date_format_string: "%Y-%m-%d"
 
@@ -46,8 +46,8 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
-        splitter_method: split_on_converted_datetime
-        splitter_kwargs:
+        partitioner_method: partition_on_converted_datetime
+        partitioner_kwargs:
             column_name: pickup_datetime
             date_format_string: "%Y-%m-%d %H"
 
@@ -66,8 +66,8 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
-                splitter_method: split_on_column_value
-                splitter_kwargs:
+                partitioner_method: partition_on_column_value
+                partitioner_kwargs:
                     column_name: passenger_count
 
             by_num_riders_random_sample:
@@ -75,8 +75,8 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
-                splitter_method: split_on_column_value
-                splitter_kwargs:
+                partitioner_method: partition_on_column_value
+                partitioner_kwargs:
                     column_name: passenger_count
                 sampling_method: _sample_using_random
                 sampling_kwargs:
@@ -98,9 +98,9 @@ context.test_yaml_config(datasource_yaml)
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
+    data_connector_names="whole_table"
+)["whole_table"]
 assert len(available_data_asset_names) == 3
 # Here is a BatchRequest referring to an un-partitioned inferred data_asset.
 batch_request = BatchRequest(
@@ -114,9 +114,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name: str = "main.yellow_tripdata_sample_2019_01"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -205,7 +203,5 @@ assert "main.yellow_tripdata_sample_2019_01" in set(
     context.get_available_data_asset_names()["taxi_datasource"]["whole_table"]
 )
 assert "taxi__main.yellow_tripdata_sample_2019_01__asset" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "by_num_riders_random_sample"
-    ]
+    context.get_available_data_asset_names()["taxi_datasource"]["by_num_riders_random_sample"]
 )

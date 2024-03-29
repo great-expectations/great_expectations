@@ -66,7 +66,8 @@ class CloudDataStore(DataStore[StorableTypes]):
         assert context.ge_cloud_config is not None
         assert self._context.ge_cloud_config is not None
         self._session = create_session(
-            access_token=context.ge_cloud_config.access_token
+            access_token=context.ge_cloud_config.access_token,
+            retry_count=0,  # Do not retry on authentication errors
         )
 
     def _map_to_url(self, value: StorableTypes) -> str:
@@ -81,9 +82,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         payload = Payload(
             data=PayloadData(
                 type=self._map_to_resource_type(value),
-                attributes=value.dict(
-                    exclude={"metrics": {"__all__": {"__orig_class__"}}}
-                ),
+                attributes=value.dict(exclude={"metrics": {"__all__": {"__orig_class__"}}}),
             )
         )
         return payload.json()

@@ -78,7 +78,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     See Also:
         [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
-    """
+    """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
@@ -95,7 +95,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.median",)
     success_keys = (
         "min_value",
@@ -145,7 +145,9 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = (
+                    f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
+                )
             elif not params.min_value:
                 template_str = f"median must be {at_most_str} $max_value."
             else:
@@ -192,7 +194,9 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
             if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
+                template_str = (
+                    f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
+                )
             elif params["min_value"] is None:
                 template_str = f"median must be {at_most_str} $max_value."
             elif params["max_value"] is None:

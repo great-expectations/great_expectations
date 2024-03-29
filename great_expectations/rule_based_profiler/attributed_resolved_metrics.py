@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
-    def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
-        # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
+def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # noqa: C901
+    def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:  # noqa: C901
+        # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.  # noqa: E501
         if isinstance(
             values,
             deep_filter_properties_iterable(
@@ -46,7 +46,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                 values = deep_filter_properties_iterable(properties=values)
                 if values:
                     values_iterator: Iterator
-                    # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
+                    # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).  # noqa: E501
                     if all(isinstance(value, (list, tuple)) for value in values):
                         values_iterator = iter(values)
                         first_value_length: int = len(next(values_iterator))
@@ -57,13 +57,12 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                         ):
                             return True
 
-                    # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).
+                    # Components of different types cannot be packaged into "numpy.ndarray" type (due to type mismatch).  # noqa: E501
                     values_iterator = iter(values)
                     first_value_type: type = type(next(values_iterator))
                     current_type: type
                     if not all(
-                        type(current_value) == first_value_type
-                        for current_value in values_iterator
+                        type(current_value) == first_value_type for current_value in values_iterator
                     ):
                         return True
 
@@ -87,7 +86,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     In order to gather results pertaining to diverse MetricConfiguration directives, computed metrics are augmented
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
-    """
+    """  # noqa: E501
 
     batch_ids: Optional[List[str]] = None
     metric_attributes: Optional[Attributes] = None
@@ -95,11 +94,11 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @staticmethod
     def get_conditioned_attributed_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValues]
+        attributed_metric_values: Dict[str, MetricValues],
     ) -> Dict[str, MetricValues]:
         """
         Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
-        """
+        """  # noqa: E501
         if attributed_metric_values is None:
             return {}
 
@@ -112,17 +111,15 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @staticmethod
     def get_conditioned_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValue]
+        attributed_metric_values: Dict[str, MetricValue],
     ) -> Optional[MetricValues]:
         """
         Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).
-        """
+        """  # noqa: E501
         if attributed_metric_values is None:
             return None
 
-        metric_values_all_batches: MetricValues = list(
-            attributed_metric_values.values()
-        )
+        metric_values_all_batches: MetricValues = list(attributed_metric_values.values())
         return _condition_metric_values(metric_values=metric_values_all_batches)
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
@@ -158,7 +155,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if self.attributed_metric_values is None:
             return {}
 
-        return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(
+        return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(  # noqa: E501
             attributed_metric_values=self.attributed_metric_values
         )
 
@@ -167,8 +164,10 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if self.attributed_metric_values is None:
             return None
 
-        return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
-            attributed_metric_values=self.attributed_metric_values
+        return (
+            AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+                attributed_metric_values=self.attributed_metric_values
+            )
         )
 
     @override

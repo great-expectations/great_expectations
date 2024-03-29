@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import random
-import uuid
-from typing import ClassVar, Dict, Type
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -25,6 +22,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 
 class ValidationsStore(Store):
@@ -94,35 +94,25 @@ class ValidationsStore(Store):
             bug_risk: Moderate
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     _key_class: ClassVar[Type] = ValidationResultIdentifier
 
-    def __init__(
-        self, store_backend=None, runtime_environment=None, store_name=None
-    ) -> None:
-        self._expectationSuiteValidationResultSchema = (
-            ExpectationSuiteValidationResultSchema()
-        )
+    def __init__(self, store_backend=None, runtime_environment=None, store_name=None) -> None:
+        self._expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_suffix"] = store_backend.get(
-                    "filepath_suffix", ".json"
-                )
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get(
@@ -143,8 +133,8 @@ class ValidationsStore(Store):
             store_name=store_name,
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -163,9 +153,7 @@ class ValidationsStore(Store):
         """
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
         suite_validation_result_dict = response_json["data"]["attributes"]["result"]
-        suite_validation_result_dict[
-            "ge_cloud_id"
-        ] = ge_cloud_suite_validation_result_id
+        suite_validation_result_dict["id"] = ge_cloud_suite_validation_result_id
 
         return suite_validation_result_dict
 
@@ -182,68 +170,38 @@ class ValidationsStore(Store):
         else:
             return self._expectationSuiteValidationResultSchema.loads(value)
 
-    def self_check(self, pretty_print):
-        return_obj = {}
-
-        if pretty_print:
-            print("Checking for existing keys...")
-
-        return_obj["keys"] = self.list_keys()
-        return_obj["len_keys"] = len(return_obj["keys"])
-        len_keys = return_obj["len_keys"]
-
-        if pretty_print:
-            if return_obj["len_keys"] == 0:
-                print(f"\t{len_keys} keys found")
-            else:
-                print(f"\t{len_keys} keys found:")
-                for key in return_obj["keys"][:10]:
-                    print(f"		{key!s}")
-            if len_keys > 10:  # noqa: PLR2004
-                print("\t\t...")
-            print()
-
-        test_key_name = "test-key-" + "".join(
-            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
-        )
-
-        if self.cloud_mode:
-            test_key: GXCloudIdentifier = self.key_class(
-                resource_type=GXCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
-            )
-
-        else:
-            test_key: ValidationResultIdentifier = self.key_class(
-                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    expectation_suite_name="temporary_test_suite",
-                ),
-                run_id="temporary_test_run_id",
-                batch_identifier=test_key_name,
-            )
-        test_value = ExpectationSuiteValidationResult(success=True)
-
-        if pretty_print:
-            print(f"Attempting to add a new test key: {test_key}...")
-        self.set(key=test_key, value=test_value)
-        if pretty_print:
-            print("\tTest key successfully added.")
-            print()
-
-        if pretty_print:
-            print(
-                f"Attempting to retrieve the test value associated with key: {test_key}..."
-            )
-        test_value = self.get(
-            key=test_key,
-        )
-        if pretty_print:
-            print("\tTest value successfully retrieved.")
-            print()
-
-        return return_obj
-
     @property
     @override
     def config(self) -> dict:
         return self._config
+
+    def store_validation_results(
+        self,
+        suite_validation_result: ExpectationSuiteValidationResult,
+        suite_validation_result_identifier: ValidationResultIdentifier | GXCloudIdentifier,
+        expectation_suite_identifier: Optional[
+            ExpectationSuiteIdentifier | GXCloudIdentifier
+        ] = None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+    ) -> bool | GXCloudResourceRef:
+        """Helper function to do the heavy lifting for StoreValidationResultAction and ValidationConfigs.
+        This is broken from the ValidationAction (for now) so we don't need to pass the data_context around.
+        """  # noqa: E501
+        checkpoint_id = None
+        if self.cloud_mode and checkpoint_identifier:
+            checkpoint_id = checkpoint_identifier.id
+
+        expectation_suite_id = None
+        if isinstance(expectation_suite_identifier, GXCloudIdentifier):
+            expectation_suite_id = expectation_suite_identifier.id
+
+        return self.set(
+            key=suite_validation_result_identifier,
+            value=suite_validation_result,
+            checkpoint_id=checkpoint_id,
+            expectation_suite_id=expectation_suite_id,
+        )
+
+    @staticmethod
+    def parse_result_url_from_gx_cloud_ref(ref: GXCloudResourceRef) -> str | None:
+        return ref.response["data"]["attributes"]["validation_result"]["display_url"]

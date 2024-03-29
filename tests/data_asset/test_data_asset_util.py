@@ -17,21 +17,6 @@ from great_expectations.self_check.util import expectationSuiteSchema
     "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
 )
 def test_recursively_convert_to_json_serializable(tmp_path):
-    asset = gx.dataset.PandasDataset(
-        {
-            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        }
-    )
-    asset.expect_column_values_to_be_in_set(
-        "x", [1, 2, 3, 4, 5, 6, 7, 8, 9], mostly=0.8
-    )
-
-    part = gx.dataset.util.continuous_partition_data(asset.x)
-    asset.expect_column_kl_divergence_to_be_less_than("x", part, 0.6)
-
-    # Dumping this JSON object verifies that everything is serializable
-    json.dumps(expectationSuiteSchema.dump(asset.get_expectation_suite()), indent=2)
-
     x = {
         "w": ["aaaa", "bbbb", 1.3, 5, 6, 7],
         "x": np.array([1, 2, 3]),

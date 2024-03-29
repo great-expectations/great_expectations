@@ -6,6 +6,7 @@
 #
 # https://black.readthedocs.io/en/stable/guides/introducing_black_to_your_project.html#avoiding-ruining-git-blame
 # Apply noqa markers for all TCH001 violations
+# https://github.com/great-expectations/great_expectations/pull/7072
 f5e7df1846102d9a62cc9b9110387925ffae60cc
 # Apply noqa markers for all PTH (use-pathlib) violations
 # https://github.com/great-expectations/great_expectations/pull/7290
@@ -19,3 +20,30 @@ e55b3484a86f654e8b819041dd6cc73730e01a8f
 # black 2.2 -> 2.3 formatting changes
 # https://github.com/great-expectations/great_expectations/pull/7946
 582fe60179b9b8bf31ba0a394bfa669f495ce8c6
+# lint ci, expectations and rule_based_profiler
+# https://github.com/great-expectations/great_expectations/pull/8422
+8bd2dea55e22188b74d1b20abee480f2c298239d
+# ruff 0.0.280
+# https://github.com/great-expectations/great_expectations/pull/8179
+544f90d0e90807032e517283c1c0971904ebd4e0
+# ruff 0.0.284
+# https://github.com/great-expectations/great_expectations/pull/8552
+02224a3c9f53552207682c54dde70f9bb4cae1c4
+# add @overrides
+# https://github.com/great-expectations/great_expectations/pull/8589
+c3df7cde688332cb101432909145b37ff4108803
+# prettier yaml formatting
+# https://github.com/great-expectations/great_expectations/pull/9562
+179c974eb23cbd5197459e0c95749f22041f806e
+# black -> ruff format
+# https://github.com/great-expectations/great_expectations/pull/9536
+697d5910c8331721e7dc299b1c0a294de84275b5
+# Ban unittest.mock usage
+# https://github.com/great-expectations/great_expectations/pull/9586
+fc5023b4e1f1dad2e9c6faa8897fa92991b821ab
+# Reduce max cyclomatic complexity from 10 -> 8
+# https://github.com/great-expectations/great_expectations/pull/9622
+edf5dbdc77b418d659dc9d87462cd6df9a85436c
+# Change line-length from 88 -> 100
+# https://github.com/great-expectations/great_expectations/pull/9584
+d170c89167a96b702edc02b16dbf5984619d0e8f

@@ -116,9 +116,7 @@ batch_request: dict = {
 
 result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)
 
-expectation_configurations: List[
-    ExpectationConfiguration
-] = result.expectation_configurations
+expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
 
 print(expectation_configurations)
 
@@ -126,7 +124,6 @@ print(expectation_configurations)
 row_count_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.16.7"},
-        "data_asset_type": None,
         "expectations": [
             {
                 "kwargs": {"min_value": 10000, "max_value": 10000, "mostly": 1.0},

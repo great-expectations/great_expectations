@@ -2,30 +2,24 @@
 import pytest
 
 from great_expectations.core.batch import (
-    BatchDefinition,
     BatchRequest,
     BatchRequestBase,
     IDDict,
+    LegacyBatchDefinition,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    InferredAssetFilesystemDataConnector,
-)
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
 
 
 @pytest.fixture
 def basic_data_connector(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
     basic_data_connector = instantiate_class_from_config(
         yaml.load(
@@ -52,11 +46,11 @@ assets:
     return basic_data_connector
 
 
-# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
+# TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>  # noqa: E501
 @pytest.mark.unit
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
-    A = BatchDefinition(
+    A = LegacyBatchDefinition(
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
@@ -127,7 +121,7 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=BatchDefinition(
+        batch_definition=LegacyBatchDefinition(
             **{
                 "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
@@ -145,72 +139,6 @@ def test__batch_definition_matches_batch_request():
         ),
     )
     # TODO : Test cases to exercise ranges, etc.
-
-
-@pytest.mark.filesystem
-def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecutionEngine(
-    tmp_path_factory,
-):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alex_20201010_1000.csv",
-            "abe_202011111_2000.csv",
-            "will_20201212_3000.csv",
-        ],
-    )
-    my_data_connector = InferredAssetFilesystemDataConnector(
-        name="my_data_connector",
-        base_directory=base_directory,
-        glob_directive="*.csv",
-        datasource_name="FAKE_DATASOURCE",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "timestamp", "size"],
-        },
-    )
-    self_check_results = my_data_connector.self_check()
-    assert self_check_results["data_asset_count"] == 3
-    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-    # assert self_check_results["example_data_reference"]["n_rows"] == 2
-
-
-@pytest.mark.spark
-def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(
-    spark_session, basic_spark_df_execution_engine, tmp_path_factory
-):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "basic_data_connector_inferred_asset_filesystem_data_connector"
-        )
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alex_20201010_1000.csv",
-            "abe_202011111_2000.csv",
-            "will_20201212_3000.csv",
-        ],
-    )
-    my_data_connector = InferredAssetFilesystemDataConnector(
-        name="my_data_connector",
-        base_directory=base_directory,
-        glob_directive="*.csv",
-        datasource_name="FAKE_DATASOURCE",
-        execution_engine=basic_spark_df_execution_engine,
-        default_regex={
-            "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
-            "group_names": ["data_asset_name", "timestamp", "size"],
-        },
-    )
-    self_check_results = my_data_connector.self_check()
-    assert self_check_results["data_asset_count"] == 3
-    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-    # assert self_check_results["example_data_reference"]["n_rows"] == 3
 
 
 @pytest.mark.filesystem

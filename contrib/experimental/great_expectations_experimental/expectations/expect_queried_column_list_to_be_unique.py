@@ -20,7 +20,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     query = """
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
-            FROM {active_batch}
+            FROM {batch}
             GROUP BY {column_list}
             HAVING count(1) > 1
             )

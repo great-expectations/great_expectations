@@ -35,9 +35,9 @@ class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
 @public_api
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[GoogleCloudStorageDataConnector]
-    ] = GoogleCloudStorageDataConnector
+    data_connector_type: ClassVar[Type[GoogleCloudStorageDataConnector]] = (
+        GoogleCloudStorageDataConnector
+    )
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "bucket_or_name",
@@ -58,22 +58,22 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     def _get_gcs_client(self) -> google.Client:
         gcs_client: Union[google.Client, None] = self._gcs_client
         if not gcs_client:
-            # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
+            # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.  # noqa: E501
             if google.service_account and google.storage:
                 try:
-                    credentials: Union[
-                        google.Client, None
-                    ] = None  # If configured with gcloud CLI / env vars
+                    credentials: Union[google.Client, None] = (
+                        None  # If configured with gcloud CLI / env vars
+                    )
                     _check_config_substitutions_needed(
                         self,
                         self.gcs_options,
                         raise_warning_if_provider_not_present=True,
                     )
                     # pull in needed config substitutions using the `_config_provider`
-                    # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
-                    gcs_options: dict = self.dict(
-                        config_provider=self._config_provider
-                    ).get("gcs_options", {})
+                    # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed  # noqa: E501
+                    gcs_options: dict = self.dict(config_provider=self._config_provider).get(
+                        "gcs_options", {}
+                    )
 
                     if "filename" in gcs_options:
                         filename: str = gcs_options.pop("filename")
@@ -86,17 +86,15 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                             info=info
                         )
 
-                    gcs_client = google.storage.Client(
-                        credentials=credentials, **gcs_options
-                    )
+                    gcs_client = google.storage.Client(credentials=credentials, **gcs_options)
                 except Exception as e:
-                    # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
+                    # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.  # noqa: E501
                     raise SparkGoogleCloudStorageDatasourceError(
                         f'Due to exception: "{e!r}", "gcs_client" could not be created.'
                     ) from e
             else:
                 raise SparkGoogleCloudStorageDatasourceError(
-                    'Unable to create "SparkGoogleCloudStorageDatasource" due to missing google dependency.'
+                    'Unable to create "SparkGoogleCloudStorageDatasource" due to missing google dependency.'  # noqa: E501
                 )
 
             self._gcs_client = gcs_client
@@ -112,14 +110,18 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
         try:
+            # tests GCS connection
             _ = self._get_gcs_client()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
+
+        # tests Spark connection, raising TestConnectionError
+        super().test_connection()
 
         if self.assets and test_assets:
             for asset in self.assets:

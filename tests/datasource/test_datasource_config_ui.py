@@ -6,7 +6,6 @@ from great_expectations.data_context.types.base import (
 )
 from tests.data_context.test_data_context_config_ui import (
     default_pandas_datasource_config,  # noqa: F401
-    default_spark_datasource_config,  # noqa: F401
 )
 
 pytestmark = pytest.mark.unit
@@ -65,18 +64,6 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
     )
 
     desired_config = default_sql_alchemy_datasource_config["my_sql_alchemy_datasource"]
-
-    datasource_config_schema = DatasourceConfigSchema()
-    assert datasource_config_schema.dump(datasource_config) == desired_config
-
-
-def test_SparkDatasource_config(default_spark_datasource_config):  # noqa: F811
-    datasource_config = DatasourceConfig(
-        class_name="SparkDFDatasource",
-        batch_kwargs_generators={},
-    )
-
-    desired_config = default_spark_datasource_config["my_spark_datasource"]
 
     datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config

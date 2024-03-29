@@ -3,13 +3,16 @@
 const remarkNamedSnippets = require('./scripts/remark-named-snippets/index');
 const remarkCodeImport = require('remark-code-import');
 
+const config = require('dotenv').config()
+
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
+  customFields: {posthogApiKey: config.parsed.POSTHOG_API_KEY},
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenMarkdownLinks: 'throw',
   favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
@@ -27,26 +30,35 @@ module.exports = {
 
   scripts: [
     {
-      src: "/scripts/set-tab.js",
+      src: '/scripts/set-tab.js',
       async: true,
       defer: true,
     },
   ],
 
   themeConfig: {
+    announcementBar: {
+      id: 'cta_bar',
+      content:
+        '<a style="font-weight:600" href="https://hubs.li/Q02nK_ZH0">Get started with GX Cloud by joining our bi-weekly hands on workshop.</a>',
+      backgroundColor: '#141432',
+      textColor: '#fff',
+      isCloseable: true,
+    },
     gxCard: {
-      title: "What is GX Cloud?",
-      description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
+      title: 'What is GX Cloud?',
+      description:
+        'GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.',
       buttons: {
         primary: {
-          label: "Sign up for GX Cloud",
-          href: "https://greatexpectations.io/cloud"
+          label: 'Sign up for GX Cloud',
+          href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
-          label: "Learn about Great Expectations",
-          href: "https://greatexpectations.io/company"
-        }
-      }
+          label: 'Why GX Cloud?',
+          href: 'https://docs.greatexpectations.io/docs/cloud/why_gx_cloud',
+        },
+      },
     },
     docs: {
       sidebar: {
@@ -60,12 +72,9 @@ module.exports = {
       indexName: 'greatexpectations',
       searchPagePath: 'search',
       contextualSearch: true,
-      searchParameters: {
-        facetFilters: ['version:current'],
-      },
     },
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark'),
+      theme: require('./src/theme/CodeBlock/theme'),
     },
     colorMode: {
       disableSwitch: true,
@@ -84,49 +93,90 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/gx-logo.svg',
+        src: 'img/GXDocs.svg',
         href: 'https://greatexpectations.io',
       },
       items: [
-        {
-          type: 'search',
-          position: 'right',
-        },
         {
           type: 'docsVersionDropdown',
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: 'https://legacy.docs.greatexpectations.io/',
-              label: '0.13.x and earlier',
+              to: 'https://legacy.017.docs.greatexpectations.io',
+              label: '0.17.x and earlier',
             },
           ],
           dropdownActiveClassDisabled: true,
         },
         {
-          label: 'HOME',
-          to: '/docs/home/',
+          type: 'search',
+          position: 'left',
+          className: 'custom-search-bar',
         },
         {
-          label: 'GX CLOUD',
-          to: '/docs/cloud/',
+          type: 'custom-githubNavbarItem',
+          position: 'left',
+          owner: 'great-expectations',
+          repository: 'great_expectations',
         },
         {
+          label: 'Home',
+          to: '/docs/home',
+          position: 'right',
+          className: 'non-versioned-section',
+        },
+        {
+          label: 'GX Cloud',
+          to: 'docs/cloud',
+          position: 'right',
+          className: 'non-versioned-section',
+        },
+        {
+          type: 'doc',
           label: 'GX OSS',
-          to: '/docs/oss/',
+          docId: 'oss/oss',
+          position: 'right',
         },
         {
+          type: 'doc',
+          label: 'Learn',
+          docId: 'reference/learn/reference_overview',
+          position: 'right',
+        },
+        {
+          type: 'doc',
           label: 'GX API',
-          to: '/docs/reference/api',
+          docId: 'reference/index',
+          position: 'right',
         },
         {
-          label: 'LEARN',
-          to: '/docs/reference/learn/',
+          label: 'Expectations gallery',
+          to: 'https://greatexpectations.io/expectations',
+          position: 'right'
+        },
+        {
+          type: 'dropdown',
+          label: 'Resources',
+          items: [
+            {
+              label: 'Get support',
+              to: '/docs/resources/get_support',
+            },
+            {
+              label: 'Integration support policy',
+              to: '/docs/application_integration_support',
+            },
+            {
+              label: 'Community',
+              to: 'https://greatexpectations.io/community',
+            },
+          ],
+          position: 'right',
         },
         {
           to: 'https://greatexpectations.io/cloud',
           label: 'Sign up for GX Cloud',
-          position: 'right',
+          position: 'left',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
         },
@@ -155,8 +205,8 @@ module.exports = {
             },
             {
               label: 'Integration support policy',
-              to: '/docs/application_integration_support'
-            }
+              to: '/docs/application_integration_support',
+            },
           ],
         },
         {
@@ -201,8 +251,8 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`,
     },
     mermaid: {
-      theme: {light: "neutral", dark: "neutral"},
-    }
+      theme: { light: 'neutral', dark: 'neutral' },
+    },
   },
   themes: ['@docusaurus/theme-mermaid'],
 
@@ -211,16 +261,32 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          includeCurrentVersion: true,
           sidebarPath: require.resolve('./sidebars.js'),
           // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
           remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
-          lastVersion: 'current',
+          // versions needs to map major.minor -> major.minor.patch for display purposes. Update the patch as needed.
           versions: {
             current: {
-              label: '0.18.3',
-              path: ''
-            }
-          }
+              label: '1.0 prerelease',
+              path: '1.0-prerelease',
+            },
+            ['0.18']: {
+              label: '0.18.9',
+              path: '',
+            },
+          },
+          admonitions: {
+            keywords: [
+              'note',
+              'info',
+              'tip',
+              'warning',
+              'caution',
+              'danger',
+              'cta',
+            ],
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss'),

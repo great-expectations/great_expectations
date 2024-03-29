@@ -6,13 +6,13 @@ description: Create and manage Expectations in GX Cloud.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. An Expectation Suite contains multiple Expectations.
 
-To learn more about Expectations, see [Expectation](/docs/reference/learn/terms/expectation).
+<!-- [//]: # (TODO: To learn more about Expectations, see Expectation.) -->
 
 ## Prerequisites
 
-- You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
+- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
 
-- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
 ## Available Expectations
 
@@ -54,7 +54,7 @@ The following table lists the available GX Cloud Expectations.
 
 8. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
-9. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation
 
@@ -82,9 +82,9 @@ View the Expectation history to determine when an Expectation was changed and wh
 
 3. Click the **Change Log** tab.
 
-4. Optional. Select an Expectation in the **Table of contents** pane to view the change history for a specific Expectation.
+4. Optional. Select an Expectation in the **Columns** pane to view the change history for a specific Expectation.
 
-    The date, time, and email address of the users who changed the Expectation appear below the Expectation name. Strikethrough text indicates an Expectation was deleted.
+    The date, time, and email address of the users who created, edited, or deleted the Expectation appears below the Expectation name. Strikethrough text indicates an Expectation was deleted.
 
 ## Delete an Expectation
 

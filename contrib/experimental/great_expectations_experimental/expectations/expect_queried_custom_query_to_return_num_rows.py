@@ -17,7 +17,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
 
     Args:
     template_dict: dict containing the following key: \
-         user_query (user query. It must contain active_batch e.g. "select * from {active_batch}")
+         user_query (user query. It must contain active_batch e.g. "select * from {batch}")
     """
 
     metric_dependencies = ("query.template_values",)
@@ -32,7 +32,13 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         "query",
     )
 
-    domain_keys = ("user_query", "batch_id", "row_condition", "condition_parser")
+    domain_keys = (
+        "template_dict",
+        "user_query",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
     default_kwarg_values = {
         "result_format": "BASIC",

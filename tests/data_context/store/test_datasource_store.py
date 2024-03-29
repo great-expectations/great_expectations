@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import copy
 import pathlib
-from typing import Callable, List, Optional, cast
-from unittest import mock
+from typing import TYPE_CHECKING, Callable, List, Optional, cast
+from unittest.mock import ANY as MOCK_ANY
 
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_config import BatchConfig
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -36,9 +35,11 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
     YAMLReadyDictDatasourceConfigSerializer,
 )
-from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 
@@ -54,12 +55,12 @@ def empty_asset_name() -> str:
 
 
 @pytest.fixture
-def asset_with_batch_config_name() -> str:
+def asset_with_batch_definition_name() -> str:
     return "i have a batch config"
 
 
 @pytest.fixture
-def batch_config_name() -> str:
+def batch_definition_name() -> str:
     return "my cool batch config"
 
 
@@ -68,14 +69,14 @@ def datasource_store_with_fds_datasource(
     empty_datasource_store: DatasourceStore,
     fake_datasource_name: str,
     empty_asset_name: str,
-    asset_with_batch_config_name: str,
-    batch_config_name: str,
+    asset_with_batch_definition_name: str,
+    batch_definition_name: str,
 ) -> DatasourceStore:
     """Datasource store on datasource that has 2 assets. one of the assets has a batch config."""
     datasource = PandasDatasource(name=fake_datasource_name)
     datasource.add_csv_asset(empty_asset_name, "taxi.csv")
-    asset = datasource.add_csv_asset(asset_with_batch_config_name, "taxi.csv")
-    asset.add_batch_config(batch_config_name)
+    asset = datasource.add_csv_asset(asset_with_batch_definition_name, "taxi.csv")
+    asset.add_batch_definition(batch_definition_name)
 
     key = DataContextVariableKey(
         resource_name=fake_datasource_name,
@@ -170,9 +171,7 @@ def test__assert_serialized_datasource_configs_are_equal(
         _assert_serialized_datasource_configs_are_equal([])
 
     with pytest.raises(AssertionError):
-        _assert_serialized_datasource_configs_are_equal(
-            [block_config_datasource_config]
-        )
+        _assert_serialized_datasource_configs_are_equal([block_config_datasource_config])
 
     # Happy path
     _assert_serialized_datasource_configs_are_equal(
@@ -236,96 +235,6 @@ def test_datasource_store_retrieval(
     )
 
 
-@pytest.mark.unit
-def test_datasource_store__add_batch_config__success(
-    datasource_store_with_fds_datasource: DatasourceStore,
-    empty_asset_name: str,
-    fake_datasource_name: str,
-) -> None:
-    # Arrange
-    store = datasource_store_with_fds_datasource
-    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
-        empty_asset_name
-    )
-
-    # Act
-    batch_config = BatchConfig(name="my cool batch config")
-    batch_config.set_data_asset(asset)
-    updated_batch_config = store.add_batch_config(batch_config)
-
-    # Assert
-    updated_datasource = store.get_fluent_datasource_by_name(fake_datasource_name)
-    assert updated_batch_config.name == batch_config.name
-    assert isinstance(updated_datasource, Datasource)
-    updated_batch_configs = updated_datasource.get_asset(asset.name).batch_configs
-    assert any(bc.name == batch_config.name for bc in updated_batch_configs)
-
-
-@pytest.mark.unit
-def test_datasource_store__add_batch_config__duplicate_name(
-    datasource_store_with_fds_datasource: DatasourceStore,
-    asset_with_batch_config_name: str,
-    fake_datasource_name: str,
-    batch_config_name: str,
-) -> None:
-    # Arrange
-    store = datasource_store_with_fds_datasource
-    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
-        asset_with_batch_config_name
-    )
-
-    # Act + Assert
-    new_batch_config = BatchConfig(name=batch_config_name)
-    new_batch_config.set_data_asset(asset)
-
-    with pytest.raises(ValueError, match="already exists"):
-        store.add_batch_config(new_batch_config)
-
-
-@pytest.mark.unit
-def test_datasource_store__delete_batch_config__success(
-    datasource_store_with_fds_datasource: DatasourceStore,
-    asset_with_batch_config_name: str,
-    fake_datasource_name: str,
-) -> None:
-    # Arrange
-    store = datasource_store_with_fds_datasource
-    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
-        asset_with_batch_config_name
-    )
-    assert len(asset.batch_configs) == 1
-
-    # Act
-    store.delete_batch_config(asset.batch_configs[0])
-
-    # Assert
-    updated_asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
-        asset_with_batch_config_name
-    )
-    assert len(updated_asset.batch_configs) == 0
-
-
-@pytest.mark.unit
-def test_datasource_store__delete_batch_config__does_not_exist(
-    datasource_store_with_fds_datasource: DatasourceStore,
-    empty_asset_name: str,
-    fake_datasource_name: str,
-    batch_config_name: str,
-) -> None:
-    # Arrange
-    store = datasource_store_with_fds_datasource
-    asset = store.get_fluent_datasource_by_name(fake_datasource_name).get_asset(
-        empty_asset_name
-    )
-
-    # Act + Assert
-    new_batch_config = BatchConfig(name=batch_config_name)
-    new_batch_config.set_data_asset(asset)
-
-    with pytest.raises(ValueError, match="does not exist"):
-        store.delete_batch_config(new_batch_config)
-
-
 @pytest.mark.cloud
 def test_datasource_store_set_cloud_mode(
     block_config_datasource_config: DatasourceConfig,
@@ -335,6 +244,7 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
+    mocker: MockerFixture,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": GXCloudStoreBackend.__name__,
@@ -353,43 +263,40 @@ def test_datasource_store_set_cloud_mode(
         serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
 
-    with mock.patch(
+    mock_post = mocker.patch(
         "requests.Session.post",
         autospec=True,
         side_effect=mocked_datasource_post_response,
-    ) as mock_post, mock.patch(
+    )
+    _ = mocker.patch(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_datasource_get_response,
-    ):
-        retrieved_datasource_config = store.set(
-            key=None, value=block_config_datasource_config
-        )
+    )
+    retrieved_datasource_config = store.set(key=None, value=block_config_datasource_config)
 
-        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
-        expected_datasource_config = serializer.serialize(
-            block_config_datasource_config
-        )
+    serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+    expected_datasource_config = serializer.serialize(block_config_datasource_config)
 
-        mock_post.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
-            json={
-                "data": {
-                    "type": "datasource",
-                    "attributes": {
-                        "datasource_config": expected_datasource_config,
-                        "organization_id": ge_cloud_organization_id,
-                    },
-                }
-            },
-        )
+    mock_post.assert_called_with(
+        MOCK_ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+        json={
+            "data": {
+                "type": "datasource",
+                "attributes": {
+                    "datasource_config": expected_datasource_config,
+                    "organization_id": ge_cloud_organization_id,
+                },
+            }
+        },
+    )
 
-        json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+    json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
 
-        assert json_serializer.serialize(
-            retrieved_datasource_config
-        ) == json_serializer.serialize(datasource_config_with_names_and_ids)
+    assert json_serializer.serialize(retrieved_datasource_config) == json_serializer.serialize(
+        datasource_config_with_names_and_ids
+    )
 
 
 @pytest.mark.filesystem
@@ -406,9 +313,7 @@ def test_datasource_store_with_inline_store_backend(
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YAMLReadyDictDatasourceConfigSerializer(
-            schema=datasourceConfigSchema
-        ),
+        serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
     )
 
     key = DataContextVariableKey(
@@ -473,10 +378,8 @@ def test_datasource_store_retrieve_by_name(
     block_config_datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
-    actual_config: DatasourceConfig = (
-        datasource_store_with_single_datasource.retrieve_by_name(
-            datasource_name=fake_datasource_name
-        )
+    actual_config: DatasourceConfig = datasource_store_with_single_datasource.retrieve_by_name(
+        datasource_name=fake_datasource_name
     )
     set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
     retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
@@ -515,9 +418,9 @@ def test_datasource_store_update_by_name(
     updated_base_directory: str = "foo/bar/baz"
 
     updated_datasource_config = copy.deepcopy(block_config_datasource_config)
-    updated_datasource_config.data_connectors["tripdata_monthly_configured"][
-        "base_directory"
-    ] = updated_base_directory
+    updated_datasource_config.data_connectors["tripdata_monthly_configured"]["base_directory"] = (
+        updated_base_directory
+    )
 
     datasource_store_with_single_datasource.update_by_name(
         datasource_name=fake_datasource_name,
@@ -527,9 +430,7 @@ def test_datasource_store_update_by_name(
     key = DataContextVariableKey(
         resource_name=fake_datasource_name,
     )
-    actual_config = cast(
-        DatasourceConfig, datasource_store_with_single_datasource.get(key=key)
-    )
+    actual_config = cast(DatasourceConfig, datasource_store_with_single_datasource.get(key=key))
 
     set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
     retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
@@ -558,7 +459,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
 
 
 @pytest.mark.unit
-def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
+def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(  # noqa: E501
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
     empty_data_context,
@@ -573,9 +474,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YAMLReadyDictDatasourceConfigSerializer(
-            schema=datasourceConfigSchema
-        ),
+        serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
     )
 
     key = DataContextVariableKey(
@@ -595,16 +494,14 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
         [set_config_serializer, retrieved_config_serializer],
     )
 
-    with open(
-        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
-    ) as f:
+    with open(pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML) as f:
         context_config_from_disk: dict = yaml.load(f)
 
     assert "name" not in context_config_from_disk["datasources"]["my_datasource"]
 
 
 @pytest.mark.filesystem
-def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
+def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(  # noqa: E501
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
     empty_data_context,
@@ -619,9 +516,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YAMLReadyDictDatasourceConfigSerializer(
-            schema=datasourceConfigSchema
-        ),
+        serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
     )
 
     key = DataContextVariableKey(
@@ -641,16 +536,14 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
         [set_config_serializer, retrieved_config_serializer],
     )
 
-    with open(
-        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
-    ) as f:
+    with open(pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML) as f:
         context_config_from_disk: dict = yaml.load(f)
 
     assert (
         "name"
-        not in context_config_from_disk["datasources"]["my_datasource"][
-            "data_connectors"
-        ]["tripdata_monthly_configured"]
+        not in context_config_from_disk["datasources"]["my_datasource"]["data_connectors"][
+            "tripdata_monthly_configured"
+        ]
     )
 
 
@@ -767,7 +660,7 @@ def test_gx_cloud_response_json_to_object_collection():
                                     "hurricanes_and_typhoons": {
                                         "batch_identifiers": ["ocean"],
                                         "class_name": "Asset",
-                                        "module_name": "great_expectations.datasource.data_connector.asset",
+                                        "module_name": "great_expectations.datasource.data_connector.asset",  # noqa: E501
                                         "name": "hurricanes_and_typhoons",
                                     }
                                 },

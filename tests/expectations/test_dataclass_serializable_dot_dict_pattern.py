@@ -2,7 +2,7 @@
 This file is intended to
 1. test the basic behavior of SerializableDictDot, in combination with @dataclass, and
 2. provides examples of best practice for working with typed objects within the Great Expectations codebase
-"""
+"""  # noqa: E501
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -332,7 +332,7 @@ def test_can_be_nested():
     assert my_C["A_list"][1].bar == 102
     assert my_C["B_list"][0]["quux"] == 43
 
-    # Note: we don't currently support dot notation access within lists: `assert my_C["A_list"].1.bar == 102`
+    # Note: we don't currently support dot notation access within lists: `assert my_C["A_list"].1.bar == 102`  # noqa: E501
 
     # Demonstrate that we can access Enum sub-objects
     assert my_C["beta_var"] == MyEnum("x")
@@ -451,7 +451,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
     One especially thorny example is when the dictionary contains keys that are reserved words in python.
 
     For example, test cases use the reserved word: "in" as one of their required fields.
-    """
+    """  # noqa: E501
 
     import inspect
     import logging
@@ -464,7 +464,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
 
         @classmethod
         def from_legacy_dict(cls, dict):
-            """This method is an adapter to allow typing of legacy my_class_e dictionary objects, without needing to immediately clean up every object."""
+            """This method is an adapter to allow typing of legacy my_class_e dictionary objects, without needing to immediately clean up every object."""  # noqa: E501
             temp_dict = {}
             for k, v in dict.items():
                 # Ignore parameters that don't match the type definition

@@ -45,9 +45,7 @@ def test_num_to_str():
     f = 1.23456789012345e-10  # significant digits can come late
     assert num_to_str(f, precision=20) == "1.23456789012345e-10"
     assert num_to_str(f, precision=5) == "≈1.2346e-10"
-    assert (
-        num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
-    )
+    assert num_to_str(f, precision=20, no_scientific=True) == "0.000000000123456789012345"
     assert num_to_str(f, precision=5, no_scientific=True) == "≈0.00000000012346"
 
     f = 100.0  # floats should have trailing digits and numbers stripped
@@ -60,7 +58,7 @@ def test_num_to_str():
     assert num_to_str(f, precision=10) == "100"
     assert num_to_str(f, precision=10, use_locale=True) == "100"
 
-    f = 1000  # If we have a number longer than our precision, we should still be able to correctly format
+    f = 1000  # If we have a number longer than our precision, we should still be able to correctly format  # noqa: E501
     assert num_to_str(f, precision=4) == "1000"
     assert num_to_str(f) == "1000"
 
@@ -73,9 +71,7 @@ def test_resource_key_passes_run_name_filter():
     )
 
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"equals": "profiling"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"equals": "profiling"})
         is False
     )
     assert (
@@ -99,15 +95,11 @@ def test_resource_key_passes_run_name_filter():
     )
 
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "profiling"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "profiling"})
         is True
     )
     assert (
-        resource_key_passes_run_name_filter(
-            resource_key, run_name_filter={"includes": "foobar"}
-        )
+        resource_key_passes_run_name_filter(resource_key, run_name_filter={"includes": "foobar"})
         is False
     )
 
@@ -561,8 +553,8 @@ def test_build_count_table_sampled():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
-    assert table_rows == [["giraffe", 3], ["lion", 2], ["zebra", 1]]
+    assert header_row == ["Sampled Unexpected Values"]
+    assert table_rows == [["giraffe"], ["lion"], ["zebra"]]
 
 
 def test_build_count_table_with_empty_string():
@@ -575,9 +567,9 @@ def test_build_count_table_with_empty_string():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert header_row == ["Sampled Unexpected Values"]
     assert table_rows == [
-        ["EMPTY", 1],
+        ["EMPTY"],
     ]
 
 
@@ -591,5 +583,5 @@ def test_build_count_table_with_null():
         partial_unexpected_counts=partial_unexpected_counts,
         unexpected_count=unexpected_count,
     )
-    assert header_row == ["Sampled Unexpected Values", "Count"]
-    assert table_rows == [["null", 1]]
+    assert header_row == ["Sampled Unexpected Values"]
+    assert table_rows == [["null"]]

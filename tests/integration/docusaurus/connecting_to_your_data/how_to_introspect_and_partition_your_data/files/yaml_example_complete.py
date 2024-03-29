@@ -68,13 +68,9 @@ context.test_yaml_config(datasource_yaml)
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
-)[
-    "default_inferred_data_connector_name"
-]
+)["default_inferred_data_connector_name"]
 assert len(available_data_asset_names) == 36
 
 # Here is a BatchRequest naming an inferred data_asset.
@@ -89,9 +85,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -176,13 +170,13 @@ batch_request = BatchRequest(
         }
     },
     batch_spec_passthrough={
-        "splitter_method": "<YOUR_SPLITTER_METHOD>",
-        "splitter_kwargs": {
-            "<YOUR_SPLITTER_OBJECTIVE_NAME>": "<YOUR_SPLITTER_OBJECTIVE_KEYS>",
+        "partitioner_method": "<YOUR_PARTITIONER_METHOD>",
+        "partitioner_kwargs": {
+            "<YOUR_PARTITIONER_OBJECTIVE_NAME>": "<YOUR_PARTITIONER_OBJECTIVE_KEYS>",
             "batch_identifiers": {
-                "<YOUR_SPLITTER_OBJECTIVE_0_KEY>": "<YOUR_SPLITTER_OBJECTIVE_0_VALUE>",
-                "<YOUR_SPLITTER_OBJECTIVE_1_KEY>": "<YOUR_SPLITTER_OBJECTIVE_1_VALUE>",
-                "<YOUR_SPLITTER_OBJECTIVE_2_KEY>": "<YOUR_SPLITTER_OBJECTIVE_2_VALUE>",
+                "<YOUR_PARTITIONER_OBJECTIVE_0_KEY>": "<YOUR_PARTITIONER_OBJECTIVE_0_VALUE>",
+                "<YOUR_PARTITIONER_OBJECTIVE_1_KEY>": "<YOUR_PARTITIONER_OBJECTIVE_1_VALUE>",
+                "<YOUR_PARTITIONER_OBJECTIVE_2_KEY>": "<YOUR_PARTITIONER_OBJECTIVE_2_VALUE>",
                 # ...
             },
         },
@@ -207,8 +201,8 @@ batch_request.data_connector_query["batch_filter_parameters"] = {
 }
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count">
-batch_request.batch_spec_passthrough["splitter_method"] = "split_on_column_value"
-batch_request.batch_spec_passthrough["splitter_kwargs"] = {
+batch_request.batch_spec_passthrough["partitioner_method"] = "partition_on_column_value"
+batch_request.batch_spec_passthrough["partitioner_kwargs"] = {
     "column_name": "passenger_count",
     "batch_identifiers": {"passenger_count": 2},
 }

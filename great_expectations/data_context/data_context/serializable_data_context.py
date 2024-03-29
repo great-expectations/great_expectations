@@ -18,7 +18,6 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 )
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
@@ -49,6 +48,7 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.VALIDATION_DEFINITIONS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
     GX_DIR: ClassVar[str] = "gx"
@@ -96,7 +96,7 @@ class SerializableDataContext(AbstractDataContext):
     ) -> PathStr | None:
         if project_root_dir and context_root_dir:
             raise TypeError(
-                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
+                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"  # noqa: E501
             )
 
         if project_root_dir:
@@ -127,12 +127,12 @@ class SerializableDataContext(AbstractDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = project_config.anonymous_usage_statistics
-        context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = self.config.anonymous_usage_statistics
+        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            project_config.anonymous_usage_statistics
+        )
+        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            self.config.anonymous_usage_statistics
+        )
 
         if (
             project_config_usage_stats.enabled is False  # type: ignore[union-attr]
@@ -149,7 +149,7 @@ class SerializableDataContext(AbstractDataContext):
         if project_config_usage_stats is None or context_config_usage_stats is None:
             return True
 
-        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         if (
             project_config_usage_stats.data_context_id  # noqa: PLR1714
@@ -158,13 +158,12 @@ class SerializableDataContext(AbstractDataContext):
         ):
             return True
 
-        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
         global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
         if (
             project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
             != context_config_usage_stats.usage_statistics_url
-            and context_config_usage_stats.usage_statistics_url
-            != global_usage_stats_url
+            and context_config_usage_stats.usage_statistics_url != global_usage_stats_url
         ):
             return True
 
@@ -175,7 +174,6 @@ class SerializableDataContext(AbstractDataContext):
     def create(
         cls,
         project_root_dir: Optional[PathStr] = None,
-        usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
     ) -> SerializableDataContext:
         """
@@ -197,10 +195,9 @@ class SerializableDataContext(AbstractDataContext):
 
         Returns:
             DataContext
-        """
+        """  # noqa: E501
         gx_dir = cls._scaffold(
             project_root_dir=project_root_dir,
-            usage_statistics_enabled=usage_statistics_enabled,
         )
         return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
@@ -208,7 +205,6 @@ class SerializableDataContext(AbstractDataContext):
     def _scaffold(
         cls,
         project_root_dir: Optional[PathStr] = None,
-        usage_statistics_enabled: bool = True,
     ) -> pathlib.Path:
         if not project_root_dir:
             project_root_dir = pathlib.Path.cwd()
@@ -224,14 +220,12 @@ class SerializableDataContext(AbstractDataContext):
     - No action was taken."""
             warnings.warn(message)
         else:
-            cls._write_project_template_to_disk(gx_dir, usage_statistics_enabled)
+            cls._write_project_template_to_disk(gx_dir)
 
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
-    - No action was taken.""".format(
-                uncommitted_dir
-            )
+    - No action was taken.""".format(uncommitted_dir)
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
@@ -275,16 +269,11 @@ class SerializableDataContext(AbstractDataContext):
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
-    def _write_project_template_to_disk(
-        cls, gx_dir: PathStr, usage_statistics_enabled: bool = True
-    ) -> None:
+    def _write_project_template_to_disk(cls, gx_dir: PathStr) -> None:
         gx_dir = pathlib.Path(gx_dir)
         file_path = gx_dir / cls.GX_YML
         with file_path.open("w") as template:
-            if usage_statistics_enabled:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
-            else:
-                template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
+            template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
 
     @classmethod
     def _scaffold_directories(cls, base_dir: pathlib.Path) -> None:
@@ -379,9 +368,7 @@ class SerializableDataContext(AbstractDataContext):
         return result
 
     @classmethod
-    def get_ge_config_version(
-        cls, context_root_dir: Optional[PathStr] = None
-    ) -> Optional[float]:
+    def get_ge_config_version(cls, context_root_dir: Optional[PathStr] = None) -> Optional[float]:
         yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return None
@@ -407,7 +394,7 @@ class SerializableDataContext(AbstractDataContext):
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
                 raise gx_exceptions.UnsupportedConfigVersionError(
-                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(
+                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(  # noqa: E501
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
@@ -432,9 +419,7 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def _find_context_yml_file(
-        cls, search_start_dir: Optional[PathStr] = None
-    ) -> str | None:
+    def _find_context_yml_file(cls, search_start_dir: Optional[PathStr] = None) -> str | None:
         """Search for the yml file starting here and moving upward."""
         if search_start_dir is None:
             search_start_dir = pathlib.Path.cwd()
@@ -456,9 +441,7 @@ class SerializableDataContext(AbstractDataContext):
         yml_path: str | None = None
 
         for i in range(4):
-            logger.debug(
-                f"Searching for config file {search_start_dir} ({i} layer deep)"
-            )
+            logger.debug(f"Searching for config file {search_start_dir} ({i} layer deep)")
 
             potential_ge_dir = search_start_dir / gx_dir
 
@@ -534,9 +517,7 @@ class SerializableDataContext(AbstractDataContext):
         return bool(context.list_expectation_suites())
 
     @classmethod
-    def _attempt_context_instantiation(
-        cls, ge_dir: PathStr
-    ) -> Optional[SerializableDataContext]:
+    def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:
         try:
             context = cls(context_root_dir=ge_dir)
             return context

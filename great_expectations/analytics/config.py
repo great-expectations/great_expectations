@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Optional
 from uuid import UUID
 
 from great_expectations.compatibility.pydantic import (
@@ -18,9 +19,7 @@ class _EnvConfig(BaseSettings):
     gx_posthog_host: HttpUrl = "https://posthog.greatexpectations.io"  # type: ignore[assignment] # default will be coerced
     gx_posthog_project_api_key: str = ""
 
-    _gx_cloud_dev_posthog_project_api_key: str = (
-        "phc_dq7deLClUIj5Sm9M40eAMthzkNtBOhF22ZDqPVxU14e"
-    )
+    _gx_cloud_dev_posthog_project_api_key: str = "phc_dq7deLClUIj5Sm9M40eAMthzkNtBOhF22ZDqPVxU14e"
 
     @property
     def posthog_enabled(self) -> bool:
@@ -43,8 +42,8 @@ class _EnvConfig(BaseSettings):
 
 
 class Config(GenericModel):
-    organization_id: UUID = DUMMY_UUID
-    user_id: UUID = DUMMY_UUID
+    organization_id: Optional[UUID] = None
+    user_id: Optional[UUID] = None
     data_context_id: UUID = DUMMY_UUID
     oss_id: UUID = DUMMY_UUID
     cloud_mode: bool = False

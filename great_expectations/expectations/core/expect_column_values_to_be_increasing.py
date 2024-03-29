@@ -71,7 +71,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     See Also:
         [expect_column_values_to_be_decreasing](https://greatexpectations.io/expectations/expect_column_values_to_be_decreasing)
-    """
+    """  # noqa: E501
 
     strictly: Union[bool, None] = None
 
@@ -109,7 +109,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         else:
             template_str = "values must be greater than or equal to previous values"
 
-        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+        if params.mostly and params.mostly.value < 1.0:
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -155,10 +155,8 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         else:
             template_str = "values must be greater than or equal to previous values"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

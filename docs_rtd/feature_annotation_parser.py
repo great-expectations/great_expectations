@@ -34,7 +34,7 @@ maturity_details_keys = [
 ]
 
 
-def parse_feature_annotation(docstring: Union[str, List[str], None]):
+def parse_feature_annotation(docstring: Union[str, List[str], None]):  # noqa: C901 - too complex
     """Parse a docstring and return a feature annotation."""
     list_of_annotations = []
     id_val = ""
@@ -62,9 +62,9 @@ def parse_feature_annotation(docstring: Union[str, List[str], None]):
                     maturity_details_dict[this_key] = this_val
                 elif this_key == "icon":  # icon is a special cases
                     if this_val == "":
-                        annotation_dict[
-                            this_key
-                        ] = f"https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/{id_val}.png"
+                        annotation_dict[this_key] = (
+                            f"https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/{id_val}.png"
+                        )
                     else:
                         annotation_dict[this_key] = this_val
                 else:

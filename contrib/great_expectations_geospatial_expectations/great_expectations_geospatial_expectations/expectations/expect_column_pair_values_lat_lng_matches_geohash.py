@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import ClassVar, List, Literal, Tuple
 
 import geohash as gh
 import pandas as pd
@@ -6,10 +6,6 @@ import pandas as pd
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
@@ -37,15 +33,41 @@ class ColumnPairValuesLatLngMatchesGeohash(ColumnPairMapMetricProvider):
 class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
     """Expect latlngs in column A to match with geohashes in column B.
 
-    The more digits a geohash has, the smaller and more precise of an area it \
-    represents. When converting a latlng to a geohash, we are only asserting \
-    that it falls somewhere within the other geohash we're comparing it with. \
-    To verify this, we only need to make sure that they share their left-most \
-    digits. For example, dpz8 contains dpz80 (in addition to any other geohash \
-    that begins with "dpz8".
+    The more digits a geohash has, the smaller and more precise of an area it represents.
+    When converting a latlng to a geohash, we are only asserting that it falls somewhere within the other geohash
+    we're comparing it with.  To verify this, we only need to make sure that they share their left-most digits.
+    For example, dpz8 contains dpz80 (in addition to any other geohash that begins with "dpz8".
+
+    expect_column_pair_values_lat_lng_matches_geohash is a \
+    [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations)
+
+    Args:
+        column_A (str): \
+            The first column name
+        column_B (str): \
+            The second column name
+
+    Keyword Args:
+        ignore_row_if (str): \
+            "all_values_are_missing", "any_value_is_missing", "never"
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
     """
 
-    examples = [
+    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
+        "both_values_are_missing"
+    )
+
+    examples: ClassVar[List[dict]] = [
         {
             "data": {
                 "latlngs": [
@@ -89,17 +111,16 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         }
     ]
 
-    map_metric = "column_pair_values.lat_lng_matches_geohash"
-    success_keys = (
+    map_metric: ClassVar[str] = "column_pair_values.lat_lng_matches_geohash"
+    success_keys: ClassVar[Tuple[str, ...]] = (
         "column_A",
         "column_B",
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {"mostly": 1.0, "ignore_row_if": "both_values_are_missing"}
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "tags": [
             "geospatial",
             "hackathon-22",
@@ -110,19 +131,6 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         ],
         "requirements": ["python-geohash", "pandas"],
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert (
-                "column_A" in configuration.kwargs
-                and "column_B" in configuration.kwargs
-            ), "both columns must be provided"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ class MockGCSClient:
 
 
 def _build_spark_gcs_datasource(
-    gcs_options: Dict[str, Any] | None = None
+    gcs_options: Dict[str, Any] | None = None,
 ) -> SparkGoogleCloudStorageDatasource:
     gcs_client: google.Client = cast(google.Client, MockGCSClient())
     spark_gcs_datasource = SparkGoogleCloudStorageDatasource(
@@ -64,9 +64,7 @@ def _build_spark_gcs_datasource(
 
 @pytest.fixture
 def spark_gcs_datasource() -> SparkGoogleCloudStorageDatasource:
-    spark_gcs_datasource: SparkGoogleCloudStorageDatasource = (
-        _build_spark_gcs_datasource()
-    )
+    spark_gcs_datasource: SparkGoogleCloudStorageDatasource = _build_spark_gcs_datasource()
     return spark_gcs_datasource
 
 
@@ -105,13 +103,11 @@ def csv_asset(
 
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(
-        r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    )
+    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     data_connector: GoogleCloudStorageDataConnector = cast(
         GoogleCloudStorageDataConnector, csv_asset._data_connector
     )
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
     return regex, test_connection_error_message
 
 
@@ -211,9 +207,7 @@ def test_add_csv_asset_to_datasource(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_construct_csv_asset_directly(
-    mock_gcs_client, mock_list_keys, object_keys: List[str]
-):
+def test_construct_csv_asset_directly(mock_gcs_client, mock_list_keys, object_keys: List[str]):
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
@@ -243,7 +237,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -269,7 +263,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "timestamp",
@@ -295,7 +289,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options
+    options = asset.get_batch_request_options_keys()
     assert options == (
         "name",
         "batch_request_param_2",
@@ -323,14 +317,12 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request(
-            {"name": "alex", "timestamp": "1234567890", "price": 1300}
-        )
+        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
 
 
 @pytest.mark.big
 @pytest.mark.xfail(
-    reason="Accessing objects on google.cloud.storage using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
+    reason="Accessing objects on google.cloud.storage using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."  # noqa: E501
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,
@@ -354,9 +346,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -375,10 +365,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
         **asset_specified_metadata,
     }
-    assert (
-        batch.id
-        == "spark_gcs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-    )
+    assert batch.id == "spark_gcs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)

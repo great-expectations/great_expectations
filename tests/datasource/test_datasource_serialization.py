@@ -1,4 +1,5 @@
 """Test v3 API datasource serialization."""
+
 import pytest
 
 from great_expectations.data_context.types.base import (
@@ -162,9 +163,7 @@ class TestDatasourceConfigSerialization:
     ):
         observed_dump = datasourceConfigSchema.dump(datasource_config)
 
-        round_tripped = DatasourceConfig._dict_round_trip(
-            datasourceConfigSchema, observed_dump
-        )
+        round_tripped = DatasourceConfig._dict_round_trip(datasourceConfigSchema, observed_dump)
 
         assert round_tripped == expected_roundtrip_config
 
@@ -175,10 +174,7 @@ class TestDatasourceConfigSerialization:
             == expected_roundtrip_config.get("id")
         )
 
-        if (
-            hasattr(datasource_config, "data_connectors")
-            and datasource_config.data_connectors
-        ):
+        if hasattr(datasource_config, "data_connectors") and datasource_config.data_connectors:
             for (
                 data_connector_name,
                 data_connector_config,

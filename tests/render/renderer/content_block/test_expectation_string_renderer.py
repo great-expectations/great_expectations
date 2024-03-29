@@ -1,6 +1,7 @@
 """
 The real meat of these tests lives in the test_definitions directory for individual expectations
 """
+
 import pytest
 
 from great_expectations.expectations.expectation_configuration import (
@@ -30,8 +31,7 @@ def test_expectation_string_renderer_styling():
     assert len(result) == 1
     template = result[0].string_template
     assert (
-        template["template"]
-        == "$column values must be unique, at least $mostly_pct % of the time."
+        template["template"] == "$column values must be unique, at least $mostly_pct % of the time."
     )
     assert template["params"]["mostly_pct"] == "30"
 
@@ -44,7 +44,6 @@ def test_expectation_string_renderer_styling():
     assert len(result) == 1
     template = result[0].string_template
     assert (
-        template["template"]
-        == "$column values must be unique, at least $mostly_pct % of the time."
+        template["template"] == "$column values must be unique, at least $mostly_pct % of the time."
     )
     assert template["params"]["mostly_pct"] == "32.345"

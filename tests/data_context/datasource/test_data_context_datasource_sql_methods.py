@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, List, Union
 
 import pytest
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -54,18 +55,14 @@ def test_get_batch_list(data_context_with_simple_sql_datasource_for_testing_get_
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "data_connector_query": {
-                    "batch_filter_parameters": {"date": "2020-01-15"}
-                },
+                "data_connector_query": {"batch_filter_parameters": {"date": "2020-01-15"}},
             }
         )
 
     # Failed specification using an incomplete BatchRequest
     with pytest.raises(TypeError):
         context.get_batch_list(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db", data_connector_name="daily"
-            )
+            batch_request=BatchRequest(datasource_name="my_sqlite_db", data_connector_name="daily")
         )
 
     # Failed specification using an incomplete BatchRequest
@@ -109,9 +106,7 @@ def test_get_batch_list(data_context_with_simple_sql_datasource_for_testing_get_
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        data_connector_query=IDDict(
-            {"batch_filter_parameters": {"date": "2020-01-15"}}
-        ),
+        data_connector_query=IDDict({"batch_filter_parameters": {"date": "2020-01-15"}}),
     )
 
     # Successful specification using parameters and batch_identifiers
@@ -126,10 +121,8 @@ def test_get_batch_list(data_context_with_simple_sql_datasource_for_testing_get_
 def test_get_validator_bad_batch_request(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
-    context: AbstractDataContext = (
-        data_context_with_simple_sql_datasource_for_testing_get_batch
-    )
-    context.add_expectation_suite("my_expectations")
+    context: AbstractDataContext = data_context_with_simple_sql_datasource_for_testing_get_batch
+    context.suites.add(ExpectationSuite("my_expectations"))
     batch_request: BatchRequest = BatchRequest(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -139,14 +132,12 @@ def test_get_validator_bad_batch_request(
     with pytest.raises(KeyError):
         # as a result of introspection, the data_assets will already be loaded into the cache.
         # an incorrect data_asset_name will result in a key error
-        context.get_validator(
-            batch_request=batch_request, expectation_suite_name="my_expectations"
-        )
+        context.get_validator(batch_request=batch_request, expectation_suite_name="my_expectations")
 
 
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite("my_expectations"))
 
     # Successful specification using a typed BatchRequest
     context.get_validator(
@@ -166,9 +157,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "data_connector_query": {
-                    "batch_filter_parameters": {"date": "2020-01-15"}
-                },
+                "data_connector_query": {"batch_filter_parameters": {"date": "2020-01-15"}},
             },
             expectation_suite_name="my_expectations",
         )
@@ -207,9 +196,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
     # Failed specification using an incomplete BatchRequest
     with pytest.raises(TypeError):
         context.get_validator(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db", data_connector_name="daily"
-            ),
+            batch_request=BatchRequest(datasource_name="my_sqlite_db", data_connector_name="daily"),
             expectation_suite_name="my_expectations",
         )
 
@@ -258,9 +245,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        data_connector_query=IDDict(
-            {"batch_filter_parameters": {"date": "2020-01-15"}}
-        ),
+        data_connector_query=IDDict({"batch_filter_parameters": {"date": "2020-01-15"}}),
         expectation_suite_name="my_expectations",
     )
 
@@ -278,7 +263,7 @@ def test_get_validator_expectation_suite_options(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.add_expectation_suite("some_expectations")
+    context.suites.add(ExpectationSuite("some_expectations"))
 
     # Successful specification with an existing expectation_suite_name
     context.get_validator(
@@ -290,7 +275,7 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fetched ExpectationSuite object
-    some_expectations = context.get_expectation_suite("some_expectations")
+    some_expectations = context.suites.get("some_expectations")
     context.get_validator(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -300,9 +285,7 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fresh ExpectationSuite object
-    some_more_expectations = context.add_expectation_suite(
-        expectation_suite_name="some_more_expectations"
-    )
+    some_more_expectations = context.suites.add(ExpectationSuite(name="some_more_expectations"))
     context.get_validator(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -354,9 +337,6 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
 
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
-    assert (
-        batch.batch_definition["data_asset_name"]
-        == "table_partitioned_by_date_column__A"
-    )
+    assert batch.batch_definition["data_asset_name"] == "table_partitioned_by_date_column__A"
     assert batch.batch_definition["batch_identifiers"] == {"date": "2020-01-15"}
     assert isinstance(batch.data, SqlAlchemyBatchData)

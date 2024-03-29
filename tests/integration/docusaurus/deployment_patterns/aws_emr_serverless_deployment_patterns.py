@@ -1,6 +1,5 @@
 import boto3
 
-import great_expectations as gx
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -9,13 +8,14 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 # </snippet>
 
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
-    sc = gx.core.util.get_or_create_spark_application()
+    sc = SparkDFExecutionEngine.get_or_create_spark_session()
     spark = pyspark.SQLContext(sc)
 
     spark_file = "pyspark_df.parquet"
@@ -42,9 +42,7 @@ if __name__ == "__main__":
         anonymous_usage_statistics=config_file["anonymous_usage_statistics"],
         checkpoint_store_name=config_file["checkpoint_store_name"],
         store_backend_defaults=S3StoreBackendDefaults(
-            default_bucket_name=config_file["data_docs_sites"]["s3_site"][
-                "store_backend"
-            ]["bucket"]
+            default_bucket_name=config_file["data_docs_sites"]["s3_site"]["store_backend"]["bucket"]
         ),
     )
 
@@ -64,24 +62,15 @@ if __name__ == "__main__":
         expectation_suite_name=expectation_suite_name,
     )
     print(validator.head())
-    validator.expect_column_values_to_not_be_null(
-        column="passenger_count"
-    )  ## add some test
+    validator.expect_column_values_to_not_be_null(column="passenger_count")  ## add some test
     validator.save_expectation_suite(discard_failed_expectations=False)
     my_checkpoint_name = "in_memory_checkpoint"
     python_config = {
         "name": my_checkpoint_name,
-        "class_name": "Checkpoint",
-        "config_version": 1,
-        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {"class_name": "StoreEvaluationParametersAction"},
             },
         ],
         "validations": [
@@ -95,16 +84,13 @@ if __name__ == "__main__":
             }
         ],
     }
-    context_gx.add_or_update_checkpoint(**python_config)
+    checkpoint = context_gx.add_or_update_checkpoint(**python_config)
 
-    results = context_gx.run_checkpoint(
-        checkpoint_name=my_checkpoint_name,
+    results = checkpoint.run(
         run_name="run_name",
         batch_request={
             "runtime_parameters": {"batch_data": df_spark},
-            "batch_identifiers": {
-                "runtime_batch_identifier_name": "default_identifier"
-            },
+            "batch_identifiers": {"runtime_batch_identifier_name": "default_identifier"},
         },
     )
 

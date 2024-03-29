@@ -14,64 +14,64 @@ connecting_to_your_data = [
     ),
 ]
 
-split_data = [
+partition_data = [
     IntegrationTestFixture(
-        name="split_data_on_whole_table_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        name="partition_data_on_whole_table_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_whole_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
     IntegrationTestFixture(
-        name="split_data_on_column_value_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        name="partition_data_on_column_value_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
     IntegrationTestFixture(
-        name="split_data_on_divided_integer_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        name="partition_data_on_divided_integer_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_divided_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
     IntegrationTestFixture(
-        name="split_data_on_mod_integer_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        name="partition_data_on_mod_integer_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_mod_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_snowflake",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -80,27 +80,27 @@ split_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),
     #     backend_dependencies=[BackendDependencies.SNOWFLAKE],
     # ),
     IntegrationTestFixture(
-        name="split_data_on_multi_column_values_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        name="partition_data_on_multi_column_values_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_multi_column_values.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_snowflake",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
@@ -109,21 +109,21 @@ split_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),
     #     backend_dependencies=[BackendDependencies.SNOWFLAKE],
     # ),
     IntegrationTestFixture(
-        name="split_data_on_datetime_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        name="partition_data_on_datetime_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_datetime_and_day_part.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -140,7 +140,7 @@ sample_data = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -149,5 +149,5 @@ sample_data = [
 ]
 
 snowflake_integration_tests += connecting_to_your_data
-snowflake_integration_tests += split_data
+snowflake_integration_tests += partition_data
 snowflake_integration_tests += sample_data

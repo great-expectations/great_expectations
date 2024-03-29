@@ -1,0 +1,40 @@
+.pagination-nav__item {
+  flex: inherit;
+}
+
+.pagination-nav {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pagination-nav__label {
+  display: none;
+}
+
+.pagination-nav__sublabel {
+  color: var(--ifm-color-primary);
+  font-size: var(--p-font-size);
+  margin: 0;
+}
+
+.pagination-nav__link {
+  border: 1px solid var(--ifm-link-color);
+  color: var(--ifm-color-primary);
+  padding: 0.5em 2em;
+  background: transparent;
+  max-width: 14rem;
+  text-align: center;
+  width: 100%;
+
+  &--next {
+    margin-left: auto;
+  }
+}
+
+a.pagination-nav__link:hover {
+  background-color: var(--color-primary-dark);
+
+  & .pagination-nav__sublabel {
+    color: var(--white)
+  }
+}

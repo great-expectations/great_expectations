@@ -1,4 +1,5 @@
 """POC for loading config."""
+
 from __future__ import annotations
 
 import logging
@@ -28,8 +29,8 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
-    _BATCH_CONFIG_NAME_KEY,
-    _BATCH_CONFIGS_KEY,
+    _BATCH_DEFINITION_NAME_KEY,
+    _BATCH_DEFINITIONS_KEY,
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
@@ -84,20 +85,18 @@ T = TypeVar("T")
 class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
-    fluent_datasources: List[Datasource] = Field(
-        ..., description=_FLUENT_STYLE_DESCRIPTION
-    )
+    fluent_datasources: List[Datasource] = Field(..., description=_FLUENT_STYLE_DESCRIPTION)
 
     _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
-        _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+        _DATASOURCE_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     _EXCLUDE_FROM_DATA_ASSET_SERIALIZATION: ClassVar[Set[str]] = {
-        _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+        _DATA_ASSET_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
-    _EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION: ClassVar[Set[str]] = {
-        _BATCH_CONFIG_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    _EXCLUDE_FROM_BATCH_DEFINITION_SERIALIZATION: ClassVar[Set[str]] = {
+        _BATCH_DEFINITION_NAME_KEY,  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.  # noqa: E501
     }
 
     class Config:
@@ -150,7 +149,7 @@ class GxConfig(FluentBaseModel):
             )[0]
         except IndexError as exc:
             raise LookupError(
-                f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"
+                f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"  # noqa: E501
             ) from exc
 
     def update_datasources(self, datasources: Dict[str, Datasource]) -> None:
@@ -188,7 +187,7 @@ class GxConfig(FluentBaseModel):
     # noinspection PyNestedDecorators
     @validator(_FLUENT_DATASOURCES_KEY, pre=True)
     @classmethod
-    def _load_datasource_subtype(cls, v: List[dict]):
+    def _load_datasource_subtype(cls, v: List[dict]):  # noqa: C901 - too complex
         logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: List[Datasource] = []
 
@@ -218,10 +217,7 @@ class GxConfig(FluentBaseModel):
                 datasource.delete_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
             # if the default pandas datasource has no assets, it should not be serialized
-            if (
-                datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME
-                or len(datasource.assets) > 0
-            ):
+            if datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME or len(datasource.assets) > 0:
                 loaded_datasources.append(datasource)
 
                 # TODO: move this to a different 'validator' method
@@ -248,7 +244,7 @@ class GxConfig(FluentBaseModel):
 
         TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
         we use a new `config_version` instead of `fluent_datasources` key.
-        """
+        """  # noqa: E501
         loaded = yaml.load(f)
         logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         loaded = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
@@ -261,7 +257,7 @@ class GxConfig(FluentBaseModel):
         return config
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -274,11 +270,10 @@ class GxConfig(FluentBaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
-    def yaml(  # noqa: PLR0913
+    def yaml(
         self,
         stream_or_path: pathlib.Path,
         *,
@@ -291,8 +286,7 @@ class GxConfig(FluentBaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> pathlib.Path:
-        ...
+    ) -> pathlib.Path: ...
 
     @override
     def yaml(  # noqa: PLR0913
@@ -357,24 +351,22 @@ class GxConfig(FluentBaseModel):
                     data_assets: List[dict] = datasource_config["assets"]
                     data_asset_config: dict
                     data_assets_config_as_dict = {
-                        data_asset_config[
-                            _DATA_ASSET_NAME_KEY
-                        ]: _exclude_fields_from_serialization(
+                        data_asset_config[_DATA_ASSET_NAME_KEY]: _exclude_fields_from_serialization(
                             source_dict=data_asset_config,
                             exclusions=self._EXCLUDE_FROM_DATA_ASSET_SERIALIZATION,
                         )
                         for data_asset_config in data_assets
                     }
                     for data_asset in data_assets_config_as_dict.values():
-                        if _BATCH_CONFIGS_KEY in data_asset:
-                            data_asset[_BATCH_CONFIGS_KEY] = {
-                                batch_config[
-                                    _BATCH_CONFIG_NAME_KEY
+                        if _BATCH_DEFINITIONS_KEY in data_asset:
+                            data_asset[_BATCH_DEFINITIONS_KEY] = {
+                                batch_definition[
+                                    _BATCH_DEFINITION_NAME_KEY
                                 ]: _exclude_fields_from_serialization(
-                                    source_dict=batch_config,
-                                    exclusions=self._EXCLUDE_FROM_BATCH_CONFIG_SERIALIZATION,
+                                    source_dict=batch_definition,
+                                    exclusions=self._EXCLUDE_FROM_BATCH_DEFINITION_SERIALIZATION,
                                 )
-                                for batch_config in data_asset[_BATCH_CONFIGS_KEY]
+                                for batch_definition in data_asset[_BATCH_DEFINITIONS_KEY]
                             }
                     datasource_config["assets"] = data_assets_config_as_dict
 
@@ -414,11 +406,13 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
                 data_asset_config: dict
                 for data_asset_name, data_asset_config in data_assets.items():
                     data_asset_config[_DATA_ASSET_NAME_KEY] = data_asset_name
-                    if _BATCH_CONFIGS_KEY in data_asset_config:
-                        batch_config_list = _convert_batch_configs_from_yaml_to_internal_object_representation(
-                            data_asset_config[_BATCH_CONFIGS_KEY]
+                    if _BATCH_DEFINITIONS_KEY in data_asset_config:
+                        batch_definition_list = (
+                            _convert_batch_definitions_from_yaml_to_internal_object_representation(
+                                data_asset_config[_BATCH_DEFINITIONS_KEY]
+                            )
                         )
-                        data_asset_config[_BATCH_CONFIGS_KEY] = batch_config_list
+                        data_asset_config[_BATCH_DEFINITIONS_KEY] = batch_definition_list
 
                 datasource_config[_ASSETS_KEY] = list(data_assets.values())
 
@@ -429,12 +423,12 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
     return config
 
 
-def _convert_batch_configs_from_yaml_to_internal_object_representation(
-    batch_configs: Dict[str, Dict]
+def _convert_batch_definitions_from_yaml_to_internal_object_representation(
+    batch_definitions: Dict[str, Dict],
 ) -> List[Dict]:
     for (
-        batch_config_name,
-        batch_config,
-    ) in batch_configs.items():
-        batch_config[_BATCH_CONFIG_NAME_KEY] = batch_config_name
-    return list(batch_configs.values())
+        batch_definition_name,
+        batch_definition,
+    ) in batch_definitions.items():
+        batch_definition[_BATCH_DEFINITION_NAME_KEY] = batch_definition_name
+    return list(batch_definitions.values())

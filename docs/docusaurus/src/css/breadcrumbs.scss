@@ -1,0 +1,18 @@
+:root {
+  --ifm-breadcrumb-spacing: 0;
+  --ifm-breadcrumb-size-multiplier: 1;
+}
+
+.breadcrumbs .breadcrumbs__link {
+  background: none;
+  color: var(--ifm-color-primary);
+
+  &:any-link:hover {
+    background: none;
+    color: var(--link-hover-color);
+  }
+}
+
+.breadcrumbs:has(li:only-child) {
+  display: none;
+}

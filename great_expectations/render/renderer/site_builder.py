@@ -195,9 +195,7 @@ class SiteBuilder:
                 "class_name": "DefaultSiteSectionBuilder",
                 "source_store_name": data_context.validations_store_name,
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
-                "validation_results_limit": site_index_builder.get(
-                    "validation_results_limit"
-                ),
+                "validation_results_limit": site_index_builder.get("validation_results_limit"),
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
@@ -221,9 +219,7 @@ class SiteBuilder:
                 }
         if site_section_builders.get("profiling", "None") not in FALSEY_YAML_STRINGS:
             if site_section_builders["profiling"].get("run_name_filter") is None:
-                site_section_builders["profiling"]["run_name_filter"] = {
-                    "includes": "profiling"
-                }
+                site_section_builders["profiling"]["run_name_filter"] = {"includes": "profiling"}
 
         self.site_section_builders = {}
         for site_section_name, site_section_config in site_section_builders.items():
@@ -233,9 +229,7 @@ class SiteBuilder:
                 site_section_config.get("module_name")
                 or "great_expectations.render.renderer.site_builder"
             )
-            self.site_section_builders[
-                site_section_name
-            ] = instantiate_class_from_config(
+            self.site_section_builders[site_section_name] = instantiate_class_from_config(
                 config=site_section_config,
                 runtime_environment={
                     "data_context": data_context,
@@ -246,7 +240,10 @@ class SiteBuilder:
                     "show_how_to_buttons": self.show_how_to_buttons,
                     "cloud_mode": self.cloud_mode,
                 },
-                config_defaults={"name": site_section_name, "module_name": module_name},
+                config_defaults={
+                    "name": site_section_name,
+                    "module_name": module_name,
+                },
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(
@@ -379,12 +376,9 @@ class DefaultSiteSectionBuilder:
         self.ge_cloud_mode = cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration "
-                "with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration " "with a class_name key."
             )
-        module_name = (
-            renderer.get("module_name") or "great_expectations.render.renderer"
-        )
+        module_name = renderer.get("module_name") or "great_expectations.render.renderer"
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={"data_context": data_context},
@@ -419,7 +413,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
+    def build(self, resource_identifiers=None) -> None:  # noqa: C901, PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -436,16 +430,12 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):
-                if not resource_key_passes_run_name_filter(
-                    resource_key, self.run_name_filter
-                ):
+                if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
                     continue
             try:
                 resource = self.source_store.get(resource_key)
                 if isinstance(resource_key, ExpectationSuiteIdentifier):
-                    resource = ExpectationSuite(
-                        **resource, data_context=self.data_context
-                    )
+                    resource = ExpectationSuite(**resource)
             except exceptions.InvalidKeyError:
                 logger.warning(
                     f"Object with Key: {resource_key!s} could not be retrieved. Skipping..."
@@ -453,24 +443,20 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
-                expectation_suite_name = resource_key.expectation_suite_name
-                logger.debug(
-                    f"        Rendering expectation suite {expectation_suite_name}"
-                )
+                expectation_suite_name = resource_key.name
+                logger.debug(f"        Rendering expectation suite {expectation_suite_name}")
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
                 run_name = run_id.run_name
                 run_time = run_id.run_time
-                expectation_suite_name = (
-                    resource_key.expectation_suite_identifier.expectation_suite_name
-                )
+                expectation_suite_name = resource_key.expectation_suite_identifier.name
                 if self.name == "profiling":
                     logger.debug(
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
                     logger.debug(
-                        f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
+                        f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"  # noqa: E501
                     )
 
             try:
@@ -478,9 +464,7 @@ class DefaultSiteSectionBuilder:
 
                 if self.cloud_mode:
                     self.target_store.set(
-                        GXCloudIdentifier(
-                            resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
-                        ),
+                        GXCloudIdentifier(resource_type=GXCloudRESTResource.RENDERED_DATA_DOC),
                         rendered_content,
                         source_type=resource_key.resource_type,
                         source_id=resource_key.id,
@@ -504,11 +488,10 @@ class DefaultSiteSectionBuilder:
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-                """
+                """  # noqa: E501
                 exception_traceback = traceback.format_exc()
                 exception_message += (
-                    f'{type(e).__name__}: "{e!s}".  '
-                    f'Traceback: "{exception_traceback}".'
+                    f'{type(e).__name__}: "{e!s}".  ' f'Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 
@@ -547,9 +530,7 @@ class DefaultSiteIndexBuilder:
                 "module_name": "great_expectations.render.renderer",
                 "class_name": "SiteIndexPageRenderer",
             }
-        module_name = (
-            renderer.get("module_name") or "great_expectations.render.renderer"
-        )
+        module_name = renderer.get("module_name") or "great_expectations.render.renderer"
         self.renderer_class = instantiate_class_from_config(
             config=renderer,
             runtime_environment={"data_context": data_context},
@@ -617,9 +598,7 @@ class DefaultSiteIndexBuilder:
             )
         else:
             filepath = (
-                pathlib.Path(
-                    *["expectations", *expectation_suite_name.split(".")]
-                ).as_posix()
+                pathlib.Path(*["expectations", *expectation_suite_name.split(".")]).as_posix()
                 + ".html"
             )
 
@@ -642,9 +621,7 @@ class DefaultSiteIndexBuilder:
                 "asset_name": asset_name,
                 "batch_kwargs": batch_kwargs,
                 "batch_spec": batch_spec,
-                "expectation_suite_filepath": expectation_suite_filepath
-                if run_id
-                else None,
+                "expectation_suite_filepath": expectation_suite_filepath if run_id else None,
             }
         )
 
@@ -682,7 +659,7 @@ class DefaultSiteIndexBuilder:
         #     )
 
         return {
-            "header": "To continue exploring Great Expectations check out one of these tutorials...",
+            "header": "To continue exploring Great Expectations check out one of these tutorials...",  # noqa: E501
             "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
@@ -741,7 +718,7 @@ class DefaultSiteIndexBuilder:
         be skipped and removed from the target store
         :param build_index: a flag if False, skips building the index page
         :return: tuple(index_page_url, index_links_dict)
-        """
+        """  # noqa: E501
 
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
@@ -757,9 +734,7 @@ class DefaultSiteIndexBuilder:
 
         self._add_expectations_to_index_links(index_links_dict, skip_and_clean_missing)
         validation_and_profiling_result_site_keys = (
-            self._build_validation_and_profiling_result_site_keys(
-                skip_and_clean_missing
-            )
+            self._build_validation_and_profiling_result_site_keys(skip_and_clean_missing)
         )
         self._add_profiling_to_index_links(
             index_links_dict, validation_and_profiling_result_site_keys
@@ -781,7 +756,7 @@ class DefaultSiteIndexBuilder:
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            """  # noqa: E501
             exception_traceback = traceback.format_exc()
             exception_message += (
                 f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
@@ -796,9 +771,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectations = self.site_section_builders_config.get("expectations", "None")
         if expectations and expectations not in FALSEY_YAML_STRINGS:
             expectation_suite_source_keys = self.data_context.stores[
-                self.site_section_builders_config["expectations"].get(
-                    "source_store_name"
-                )
+                self.site_section_builders_config["expectations"].get("source_store_name")
             ].list_keys()
             expectation_suite_site_keys = [
                 ExpectationSuiteIdentifier.from_tuple(expectation_suite_tuple)
@@ -810,9 +783,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 cleaned_keys = []
                 for expectation_suite_site_key in expectation_suite_site_keys:
                     if expectation_suite_site_key not in expectation_suite_source_keys:
-                        self.target_store.store_backends[
-                            ExpectationSuiteIdentifier
-                        ].remove_key(expectation_suite_site_key)
+                        self.target_store.store_backends[ExpectationSuiteIdentifier].remove_key(
+                            expectation_suite_site_key
+                        )
                     else:
                         cleaned_keys.append(expectation_suite_site_key)
                 expectation_suite_site_keys = cleaned_keys
@@ -820,7 +793,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             for expectation_suite_key in expectation_suite_site_keys:
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
-                    expectation_suite_name=expectation_suite_key.expectation_suite_name,
+                    expectation_suite_name=expectation_suite_key.name,
                     section_name="expectations",
                 )
 
@@ -840,9 +813,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             validation_and_profiling_result_source_keys = set(
                 self.data_context.stores[
-                    self.site_section_builders_config[source_store].get(
-                        "source_store_name"
-                    )
+                    self.site_section_builders_config[source_store].get("source_store_name")
                 ].list_keys()
             )
             validation_and_profiling_result_site_keys = [
@@ -853,16 +824,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
             ]
             if skip_and_clean_missing:
                 cleaned_keys = []
-                for (
-                    validation_result_site_key
-                ) in validation_and_profiling_result_site_keys:
+                for validation_result_site_key in validation_and_profiling_result_site_keys:
                     if (
                         validation_result_site_key
                         not in validation_and_profiling_result_source_keys
                     ):
-                        self.target_store.store_backends[
-                            ValidationResultIdentifier
-                        ].remove_key(validation_result_site_key)
+                        self.target_store.store_backends[ValidationResultIdentifier].remove_key(
+                            validation_result_site_key
+                        )
                     else:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
@@ -890,7 +859,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=profiling_result_key.batch_identifier,
-                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         run_id=profiling_result_key.run_id,
                         validations_store_name=self.source_stores.get("profiling"),
                     )
@@ -900,7 +869,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
-                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         section_name="profiling",
                         batch_identifier=profiling_result_key.batch_identifier,
                         run_id=profiling_result_key.run_id,
@@ -912,7 +881,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Profiling result not found: {profiling_result_key.to_tuple()!s:s} - skipping"
+                    error_msg = f"Profiling result not found: {profiling_result_key.to_tuple()!s:s} - skipping"  # noqa: E501
                     logger.warning(error_msg)
 
     def _add_validations_to_index_links(
@@ -922,9 +891,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     ) -> None:
         validations = self.site_section_builders_config.get("validations", "None")
         if validations and validations not in FALSEY_YAML_STRINGS:
-            validations_run_name_filter = self.site_section_builders_config[
-                "validations"
-            ]["run_name_filter"]
+            validations_run_name_filter = self.site_section_builders_config["validations"][
+                "run_name_filter"
+            ]
             validation_result_site_keys = [
                 validation_result_key
                 for validation_result_key in validation_and_profiling_result_site_keys
@@ -945,7 +914,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 try:
                     validation = self.data_context.get_validation_result(
                         batch_identifier=validation_result_key.batch_identifier,
-                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         run_id=validation_result_key.run_id,
                         validations_store_name=self.source_stores.get("validations"),
                     )
@@ -956,7 +925,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
-                        expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
+                        expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         section_name="validations",
                         batch_identifier=validation_result_key.batch_identifier,
                         run_id=validation_result_key.run_id,
@@ -969,7 +938,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Validation result not found: {validation_result_key.to_tuple()!s:s} - skipping"
+                    error_msg = f"Validation result not found: {validation_result_key.to_tuple()!s:s} - skipping"  # noqa: E501
                     logger.warning(error_msg)
 
 

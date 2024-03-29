@@ -1,1 +1,0 @@
-- [How to install Great Expectations for use with local filesystem data](/docs/oss/guides/setup/installation/install_gx)

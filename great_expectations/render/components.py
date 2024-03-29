@@ -78,9 +78,7 @@ class LegacyDiagnosticRendererType(str, Enum):
     OBSERVED_VALUE = ".".join([LegacyRendererType.DIAGNOSTIC, "observed_value"])
     STATUS_ICON = ".".join([LegacyRendererType.DIAGNOSTIC, "status_icon"])
     SUMMARY = ".".join([LegacyRendererType.DIAGNOSTIC, "summary"])
-    UNEXPECTED_STATEMENT = ".".join(
-        [LegacyRendererType.DIAGNOSTIC, "unexpected_statement"]
-    )
+    UNEXPECTED_STATEMENT = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_statement"])
     UNEXPECTED_TABLE = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_table"])
 
 
@@ -114,23 +112,13 @@ class LegacyDescriptiveRendererType(str, Enum):
     COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW = ".".join(
         [LegacyRendererType.DESCRIPTIVE, "column_properties_table", "regex_count_row"]
     )
-    EXAMPLE_VALUES_BLOCK = ".".join(
-        [LegacyRendererType.DESCRIPTIVE, "example_values_block"]
-    )
+    EXAMPLE_VALUES_BLOCK = ".".join([LegacyRendererType.DESCRIPTIVE, "example_values_block"])
     HISTOGRAM = ".".join([LegacyRendererType.DESCRIPTIVE, "histogram"])
     QUANTILE_TABLE = ".".join([LegacyRendererType.DESCRIPTIVE, "quantile_table"])
-    STATS_TABLE_MAX_ROW = ".".join(
-        [LegacyRendererType.DESCRIPTIVE, "stats_table", "max_row"]
-    )
-    STATS_TABLE_MEAN_ROW = ".".join(
-        [LegacyRendererType.DESCRIPTIVE, "stats_table", "mean_row"]
-    )
-    STATS_TABLE_MIN_ROW = ".".join(
-        [LegacyRendererType.DESCRIPTIVE, "stats_table", "min_row"]
-    )
-    VALUE_COUNTS_BAR_CHART = ".".join(
-        [LegacyRendererType.DESCRIPTIVE, "value_counts_bar_chart"]
-    )
+    STATS_TABLE_MAX_ROW = ".".join([LegacyRendererType.DESCRIPTIVE, "stats_table", "max_row"])
+    STATS_TABLE_MEAN_ROW = ".".join([LegacyRendererType.DESCRIPTIVE, "stats_table", "mean_row"])
+    STATS_TABLE_MIN_ROW = ".".join([LegacyRendererType.DESCRIPTIVE, "stats_table", "min_row"])
+    VALUE_COUNTS_BAR_CHART = ".".join([LegacyRendererType.DESCRIPTIVE, "value_counts_bar_chart"])
 
 
 class RenderedContent:
@@ -157,9 +145,7 @@ class RenderedContent:
                 result_list.append(item.to_json_dict())
             elif isinstance(item, list):
                 result_list.append(
-                    RenderedContent.rendered_content_list_to_json(
-                        item, check_dicts=check_dicts
-                    )
+                    RenderedContent.rendered_content_list_to_json(item, check_dicts=check_dicts)
                 )
             elif check_dicts and isinstance(item, dict):
                 result_list.append(cls.rendered_content_dict_to_json(item))
@@ -176,13 +162,9 @@ class RenderedContent:
             elif isinstance(val, RenderedContent):
                 json_dict[key] = val.to_json_dict()
             elif isinstance(val, list):
-                json_dict[key] = cls.rendered_content_list_to_json(
-                    val, check_list_dicts
-                )
+                json_dict[key] = cls.rendered_content_list_to_json(val, check_list_dicts)
             elif isinstance(val, dict):
-                json_dict[key] = cls.rendered_content_dict_to_json(
-                    val, check_list_dicts
-                )
+                json_dict[key] = cls.rendered_content_dict_to_json(val, check_list_dicts)
         return json_dict
 
 
@@ -302,7 +284,7 @@ class RenderedTableContent(RenderedComponentContent):
             name and the values being a dictionary with the following form:
 
             sortable: A boolean indicating whether the column is sortable.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -344,9 +326,7 @@ class RenderedTableContent(RenderedComponentContent):
                 d["subheader"] = self.subheader
         d["table"] = RenderedContent.rendered_content_list_to_json(self.table)
         if self.header_row is not None:
-            d["header_row"] = RenderedContent.rendered_content_list_to_json(
-                self.header_row
-            )
+            d["header_row"] = RenderedContent.rendered_content_list_to_json(self.header_row)
         if self.header_row_options is not None:
             d["header_row_options"] = self.header_row_options
         if self.table_options is not None:
@@ -372,9 +352,7 @@ class RenderedTabsContent(RenderedComponentContent):
             A JSON-serializable dict representation of this RenderedTabsContent.
         """
         d = super().to_json_dict()
-        d["tabs"] = RenderedContent.rendered_content_list_to_json(
-            self.tabs, check_dicts=True
-        )
+        d["tabs"] = RenderedContent.rendered_content_list_to_json(self.tabs, check_dicts=True)
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -459,9 +437,7 @@ class RenderedContentBlockContainer(RenderedComponentContent):
             A JSON-serializable dict representation of this RenderedContentBlockContainer.
         """
         d = super().to_json_dict()
-        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
-            self.content_blocks
-        )
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
         return d
 
 
@@ -497,7 +473,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
             styling: A dictionary containing styling information.
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -553,9 +529,7 @@ class RenderedBulletListContent(RenderedComponentContent):
             A JSON-serializable dict representation of this RenderedBulletListContent.
         """
         d = super().to_json_dict()
-        d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
-            self.bullet_list
-        )
+        d["bullet_list"] = RenderedContent.rendered_content_list_to_json(self.bullet_list)
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
                 d["header"] = self.header.to_json_dict()
@@ -651,7 +625,7 @@ class CollapseContent(RenderedComponentContent):
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
         inline_link: Whether to include a link inline.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -714,14 +688,13 @@ class RenderedDocumentContent(RenderedContent):
         expectation_suite_name=None,
         batch_kwargs=None,
         batch_spec=None,
-        ge_cloud_id=None,
+        id=None,
     ) -> None:
         if not isinstance(sections, list) and all(
             isinstance(section, RenderedSectionContent) for section in sections
         ):
             raise InvalidRenderedContentError(
-                "RenderedDocumentContent requires a list of RenderedSectionContent for "
-                "sections."
+                "RenderedDocumentContent requires a list of RenderedSectionContent for " "sections."
             )
         self.sections = sections
         self.data_asset_name = data_asset_name
@@ -733,7 +706,7 @@ class RenderedDocumentContent(RenderedContent):
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
         self.batch_spec = batch_spec
-        self.ge_cloud_id = ge_cloud_id
+        self.id = id
 
     @public_api
     @override
@@ -754,15 +727,14 @@ class RenderedDocumentContent(RenderedContent):
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
         d["batch_spec"] = self.batch_spec
-        d["ge_cloud_id"] = self.ge_cloud_id
+        d["id"] = self.id
         return d
 
 
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
-            isinstance(content_block, RenderedComponentContent)
-            for content_block in content_blocks
+            isinstance(content_block, RenderedComponentContent) for content_block in content_blocks
         ):
             raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "
@@ -780,9 +752,7 @@ class RenderedSectionContent(RenderedContent):
             A JSON-serializable dict representation of this RenderedSectionContent.
         """
         d = super().to_json_dict()
-        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
-            self.content_blocks
-        )
+        d["content_blocks"] = RenderedContent.rendered_content_list_to_json(self.content_blocks)
         d["section_name"] = self.section_name
         return d
 
@@ -840,9 +810,7 @@ class RenderedAtomicValue(DictDot):
             elif key == "params":
                 for param_name, param in value.items():
                     if not isinstance(param["schema"]["type"], str):
-                        json_dict[key][param_name]["schema"]["type"] = param["schema"][
-                            "type"
-                        ].value
+                        json_dict[key][param_name]["schema"]["type"] = param["schema"]["type"].value
         return json_dict
 
 
@@ -919,9 +887,7 @@ class RenderedAtomicValueSchema(Schema):
                 meta_notes = cleaned_serialized_dict.get(key, {})
                 if meta_notes is None or not meta_notes.get("content"):
                     cleaned_serialized_dict.pop(key)
-            elif (
-                key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
-            ):
+            elif key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None:
                 cleaned_serialized_dict.pop(key)
         return cleaned_serialized_dict
 
@@ -981,7 +947,7 @@ class RenderedAtomicContentSchema(Schema):
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE during serialization if
-        their values are None."""
+        their values are None."""  # noqa: E501
         data = deepcopy(data)
         for key in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

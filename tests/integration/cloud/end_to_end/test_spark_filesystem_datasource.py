@@ -63,17 +63,13 @@ def datasource(
         name=datasource_name, base_directory=original_base_dir
     )
 
-    datasource.base_directory = normalize_directory_path(
-        updated_base_dir, context.root_directory
-    )
+    datasource.base_directory = normalize_directory_path(updated_base_dir, context.root_directory)
     datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."
 
-    datasource.base_directory = normalize_directory_path(
-        original_base_dir, context.root_directory
-    )
+    datasource.base_directory = normalize_directory_path(original_base_dir, context.root_directory)
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
         datasource.base_directory == original_base_dir
@@ -119,7 +115,7 @@ def expectation_suite(
     """Add Expectations for the Data Assets defined in this module.
     Note: There is no need to test Expectation Suite CRUD.
     Those assertions can be found in the expectation_suite fixture."""
-    expectation_suite.add_expectation(
+    expectation_suite.add_expectation_configuration(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
@@ -131,6 +127,11 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="Expectation suites in 1.0.0 now have a name attribute "
+    "instead of expectation_suite_name which mercury currently doesn't support",
+    strict=True,
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,

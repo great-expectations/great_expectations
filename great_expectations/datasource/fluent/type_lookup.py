@@ -63,16 +63,20 @@ class TypeLookup(
             continue
 
     @overload
-    def __getitem__(self, key: str) -> Type:
-        ...
+    def __getitem__(self, key: str) -> Type: ...
 
     @overload
-    def __getitem__(self, key: Type) -> str:
-        ...
+    def __getitem__(self, key: Type) -> str: ...
 
     @override
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
-        return super().__getitem__(key)
+        try:
+            return super().__getitem__(key)
+        except KeyError as key_err:
+            msg = f"{key} was not found."
+            if isinstance(key, str):
+                msg = f"type {msg} Available types are: {', '.join(self.type_names())}"
+            raise LookupError(msg) from key_err
 
     @override
     def __delitem__(self, key: ValidTypes):
@@ -141,7 +145,7 @@ class TypeLookup(
         AssertionError: Should fail
         >>> print(tuple in t)
         False
-        """
+        """  # noqa: E501
         txn_exc: Union[Exception, None] = None
 
         backup_data = copy.copy(self.data)

@@ -3,11 +3,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility.pydantic import (
+    root_validator,
+)
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -92,7 +93,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
-    """
+    """  # noqa: E501
 
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None
     max_value: Union[int, EvaluationParameterDict, datetime, None] = None
@@ -124,60 +125,16 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "max_value",
     )
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
-        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
-        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
-
-         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-         superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-
-        configuration = configuration or self.configuration
-
-        try:
-            assert (
-                configuration.kwargs.get("min_value") is not None
-                or configuration.kwargs.get("max_value") is not None
-            ), "min_value and max_value cannot both be None"
-            if configuration.kwargs.get("min_value"):
-                assert (
-                    isinstance(configuration.kwargs["min_value"], dict)
-                    or float(configuration.kwargs.get("min_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("min_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "min_value"
-                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
-
-            if configuration.kwargs.get("max_value"):
-                assert (
-                    isinstance(configuration.kwargs["max_value"], dict)
-                    or float(configuration.kwargs.get("max_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("max_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "max_value"
-                    ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+    @root_validator
+    def _validate_min_or_max_set(cls, values):
+        min_value = values.get("min_value")
+        max_value = values.get("max_value")
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+        return values
 
     @classmethod
-    def _prescriptive_template(  # noqa: PLR0912
+    def _prescriptive_template(  # noqa: C901, PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -208,23 +165,27 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
                 if params.min_value and params.max_value:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 else:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params.min_value and params.max_value:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
                 else:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -236,7 +197,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -277,28 +238,30 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
 
                 elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if include_column_name:
             template_str = f"$column {template_str}"

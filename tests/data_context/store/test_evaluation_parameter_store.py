@@ -24,10 +24,6 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @pytest.fixture(
@@ -131,8 +127,10 @@ def test_evaluation_parameter_store_methods(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
@@ -169,23 +167,23 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite.store_evaluation_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
-        run_id
+    bound_parameters = (
+        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+            run_id
+        )
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024,
         "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,
+        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
     }
 
 
 @pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -220,9 +218,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S.%fZ"
-        )
+        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
     metric_identifier = ValidationMetricIdentifier(
         run_id=run_id,
@@ -271,9 +267,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.cloud
 def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
@@ -303,9 +297,7 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
@@ -337,9 +329,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,
@@ -364,42 +354,3 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     evaluation_parameter_store.get_bind_params(run_id=run_id)
     assert mock_gcs_list_keys.called
     assert not mock_parent_list_keys.called
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store
-class_name: EvaluationParameterStore
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "EvaluationParameterStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "InMemoryStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

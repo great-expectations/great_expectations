@@ -153,7 +153,7 @@ class BatchKwargsGenerator:
             bug_risk: Low
 
     --ge-feature-maturity-info--
-    """
+    """  # noqa: E501
 
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters: Set = set()
@@ -191,7 +191,7 @@ class BatchKwargsGenerator:
 
         Returns:
             A list of partition_id strings
-        """
+        """  # noqa: E501
         raise NotImplementedError
 
     def get_config(self):
@@ -205,12 +205,10 @@ class BatchKwargsGenerator:
 
     def get_iterator(self, data_asset_name=None, **kwargs):
         if data_asset_name in self._data_asset_iterators:
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-                data_asset_name
-            ]
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
             if passed_kwargs != kwargs:
                 logger.warning(
-                    "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
+                    "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "  # noqa: E501
                     "use different supplemental kwargs."
                 )
             return data_asset_iterator
@@ -229,17 +227,14 @@ class BatchKwargsGenerator:
         batch_parameters.update(kwargs)
         param_keys = set(batch_parameters.keys())
         recognized_params = (
-            self.recognized_batch_parameters
-            | self._datasource.recognized_batch_parameters
+            self.recognized_batch_parameters | self._datasource.recognized_batch_parameters
         )
         if not param_keys <= recognized_params:
-            logger.warning(
-                f"Unrecognized batch_parameter(s): {param_keys - recognized_params!s}"
-            )
+            logger.warning(f"Unrecognized batch_parameter(s): {param_keys - recognized_params!s}")
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)
         batch_kwargs["data_asset_name"] = data_asset_name
-        # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.
+        # Track the datasource *in batch_kwargs* when building from a context so that the context can easily reuse them.  # noqa: E501
         batch_kwargs["datasource"] = self._datasource.name
         return batch_kwargs
 
@@ -252,44 +247,34 @@ class BatchKwargsGenerator:
         data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
         if passed_kwargs != kwargs:
             logger.warning(
-                "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
+                "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "  # noqa: E501
                 "use new supplemental kwargs."
             )
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-                data_asset_name
-            ]
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
         try:
             batch_kwargs = next(data_asset_iterator)
             batch_kwargs["datasource"] = self._datasource.name
             return batch_kwargs
         except StopIteration:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-            data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-                data_asset_name
-            ]
+            data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
             if passed_kwargs != kwargs:
                 logger.warning(
-                    "Asked to yield batch_kwargs using different batch parameters. Resetting iterator to "
+                    "Asked to yield batch_kwargs using different batch parameters. Resetting iterator to "  # noqa: E501
                     "use different batch parameters."
                 )
                 self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
-                data_asset_iterator, passed_kwargs = self._data_asset_iterators[
-                    data_asset_name
-                ]
+                data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
             try:
                 batch_kwargs = next(data_asset_iterator)
                 batch_kwargs["datasource"] = self._datasource.name
                 return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
-                logger.warning(
-                    f"No batch_kwargs found for data_asset_name {data_asset_name}"
-                )
+                logger.warning(f"No batch_kwargs found for data_asset_name {data_asset_name}")
                 return {}
         except TypeError:
-            # If we don't actually have an iterator we can generate, even after resetting, just return empty
-            logger.warning(
-                f"Unable to generate batch_kwargs for data_asset_name {data_asset_name}"
-            )
+            # If we don't actually have an iterator we can generate, even after resetting, just return empty  # noqa: E501
+            logger.warning(f"Unable to generate batch_kwargs for data_asset_name {data_asset_name}")
             return {}

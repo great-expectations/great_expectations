@@ -59,9 +59,7 @@ def test_reader_fn():
 @pytest.mark.unit
 def test_get_domain_records_with_column_domain():
     engine = PandasExecutionEngine()
-    df = pd.DataFrame(
-        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
-    )
+    df = pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]})
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
@@ -293,9 +291,7 @@ def test_get_compute_domain_with_multicolumn_domain():
     )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {
-        "column_list": ["a", "b", "c"]
-    }, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {"column_list": ["a", "b", "c"]}, "Accessor kwargs have been modified"
 
 
 @pytest.mark.unit
@@ -327,9 +323,7 @@ def test_get_compute_domain_with_row_condition():
         domain_type="table",
     )
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data["b"].equals(expected_df["b"]), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
     assert (
@@ -357,9 +351,7 @@ def test_get_compute_domain_with_unmeetable_row_condition():
         domain_type="column",
     )
     # Ensuring data has been properly queried
-    assert data["b"].equals(
-        expected_df["b"]
-    ), "Data does not match after getting compute domain"
+    assert data["b"].equals(expected_df["b"]), "Data does not match after getting compute domain"
 
     # Ensuring compute kwargs have not been modified
     assert (
@@ -401,21 +393,17 @@ def test_resolve_metric_bundle():
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
-    results = engine.resolve_metrics(
-        metrics_to_resolve=desired_metrics, metrics=metrics
-    )
+    results = engine.resolve_metrics(metrics_to_resolve=desired_metrics, metrics=metrics)
     metrics.update(results)
 
     # Ensuring metrics have been properly resolved
-    assert (
-        metrics[("column.mean", "column=a", ())] == 2.0
-    ), "mean metric not properly computed"
+    assert metrics[("column.mean", "column=a", ())] == 2.0, "mean metric not properly computed"
     assert metrics[("column.standard_deviation", "column=a", ())] == 1.0, (
         "standard deviation " "metric not properly computed"
     )
 
 
-# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
+# Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error  # noqa: E501
 @pytest.mark.unit
 def test_resolve_metric_bundle_with_nonexistent_metric():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
@@ -455,12 +443,12 @@ def test_dataframe_property_given_loaded_batch():
 
 @pytest.mark.unit
 def test_get_batch_data(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
         )
     )
-    assert split_df.dataframe.shape == (120, 10)
+    assert partitioned_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
     with pytest.raises(gx_exceptions.InvalidBatchSpecError):
@@ -510,7 +498,7 @@ def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",
         reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
+        partitioner_method="_partition_on_whole_table",
     )
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
@@ -520,12 +508,12 @@ def test_get_batch_with_no_s3_configured():
 
 
 @pytest.mark.big
-def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
+def test_get_batch_with_partition_on_divided_integer_and_sample_on_list(test_df):
+    partitioned_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
+            partitioner_method="_partition_on_divided_integer",
+            partitioner_kwargs={
                 "column_name": "id",
                 "divisor": 10,
                 "batch_identifiers": {"id": 5},
@@ -538,9 +526,9 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
             },
         )
     )
-    assert split_df.dataframe.shape == (2, 10)
-    assert split_df.dataframe.id.min() == 54
-    assert split_df.dataframe.id.max() == 59
+    assert partitioned_df.dataframe.shape == (2, 10)
+    assert partitioned_df.dataframe.id.min() == 54
+    assert partitioned_df.dataframe.id.max() == 59
 
 
 # noinspection PyUnusedLocal
@@ -665,9 +653,9 @@ def test_get_batch_data_with_gcs_batch_spec(
 )
 @pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
-    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
-    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
-    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
+    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,  # noqa: E501
+    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.  # noqa: E501
+    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.  # noqa: E501
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
     with pytest.raises(gx_exceptions.ExecutionEngineError):

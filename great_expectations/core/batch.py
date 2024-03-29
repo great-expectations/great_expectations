@@ -78,7 +78,7 @@ def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
 
 
 @public_api
-class BatchDefinition(SerializableDictDot):
+class LegacyBatchDefinition(SerializableDictDot):
     """Precisely identifies a set of data from a data source.
 
     More concretely, a BatchDefinition includes all the information required to precisely
@@ -167,7 +167,7 @@ class BatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
-            """
+            """  # noqa: E501
             )
         if data_connector_name is None:
             raise ValueError("A valid data_connector must be specified.")
@@ -175,7 +175,7 @@ class BatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of a data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if data_asset_name is None:
             raise ValueError("A valid data_asset_name must be specified.")
@@ -183,7 +183,7 @@ class BatchDefinition(SerializableDictDot):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
 "{type(data_asset_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
@@ -254,7 +254,7 @@ class BatchRequestBase(SerializableDictDot):
     for the internal protocol use, whereby NULL values are allowed as per the internal needs.  The BatchRequest class extends
     BatchRequestBase and adds to it strong validation (described above plus additional attribute validation) so as to formally
     validate user specified fields.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -362,9 +362,9 @@ class BatchRequestBase(SerializableDictDot):
             A JSON-serializable dict representation of this BatchRequestBase.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
         # make this refactoring infeasible at the present time.
 
         # if batch_data appears in BatchRequest, temporarily replace it with
@@ -373,9 +373,7 @@ class BatchRequestBase(SerializableDictDot):
         serializeable_dict: dict
         if batch_request_contains_batch_data(batch_request=self):
             if self.runtime_parameters is None:
-                raise ValueError(
-                    "BatchRequestBase missing runtime_parameters during serialization"
-                )
+                raise ValueError("BatchRequestBase missing runtime_parameters during serialization")
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
@@ -414,7 +412,7 @@ class BatchRequestBase(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -430,7 +428,7 @@ class BatchRequestBase(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
     @staticmethod
@@ -446,13 +444,13 @@ class BatchRequestBase(SerializableDictDot):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
-            """
+            """  # noqa: E501
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
                 f"""The type of data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
-                """
+                """  # noqa: E501
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
             raise TypeError(
@@ -471,7 +469,7 @@ class BatchRequestBase(SerializableDictDot):
             raise TypeError(
                 f"""The type of limit must be an integer (Python "int").  The type given is "{type(limit)!s}", which
 is illegal.
-                """
+                """  # noqa: E501
             )
 
 
@@ -638,26 +636,26 @@ class RuntimeBatchRequest(BatchRequestBase):
         """
         We must have both or neither of runtime_parameters and batch_identifiers (but not either one of them).
         This is strict equivalence ("if-and-only") condition ("exclusive NOR"); otherwise, ("exclusive OR") means error.
-        """
+        """  # noqa: E501
         if (not runtime_parameters and batch_identifiers) or (
             runtime_parameters and not batch_identifiers
         ):
             raise ValueError(
-                "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"
+                "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
-                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""
+                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
-                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""
+                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""  # noqa: E501
             )
 
         if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
@@ -668,11 +666,11 @@ class RuntimeBatchRequest(BatchRequestBase):
             )
 
 
-# TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
+# TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>  # noqa: E501
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
-    process, such as the timestamp at which a query was executed."""
+    process, such as the timestamp at which a query was executed."""  # noqa: E501
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -700,8 +698,8 @@ class BatchData:
 
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
-#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
-#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.  # noqa: E501
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>  # noqa: E501
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
 @public_api
 @deprecated_argument(argument_name="data_context", version="0.14.0")
@@ -739,7 +737,7 @@ class Batch(SerializableDictDot):
         self,
         data: BatchDataType | None = None,
         batch_request: BatchRequestBase | dict | None = None,
-        batch_definition: BatchDefinition | None = None,
+        batch_definition: LegacyBatchDefinition | None = None,
         batch_spec: BatchSpec | None = None,
         batch_markers: BatchMarkers | None = None,
         # The remaining parameters are for backward compatibility.
@@ -767,9 +765,9 @@ class Batch(SerializableDictDot):
         if batch_markers is None:
             batch_markers = BatchMarkers(
                 {
-                    "ge_load_time": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ")
+                    "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%dT%H%M%S.%fZ"
+                    )
                 }
             )
 
@@ -838,7 +836,7 @@ class Batch(SerializableDictDot):
             "data": str(self.data),
             "batch_request": self.batch_request.to_dict(),
             "batch_definition": self.batch_definition.to_json_dict()
-            if isinstance(self.batch_definition, BatchDefinition)
+            if isinstance(self.batch_definition, LegacyBatchDefinition)
             else {},
             "batch_spec": self.batch_spec,
             "batch_markers": self.batch_markers,
@@ -863,7 +861,7 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        if isinstance(batch_definition, BatchDefinition):
+        if isinstance(batch_definition, LegacyBatchDefinition):
             return batch_definition.id
 
         if isinstance(batch_definition, IDDict):
@@ -911,7 +909,7 @@ def materialize_batch_request(
     batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
-        args: dict[str, Any] | BlockConfigBatchRequestTypedDict
+        args: dict[str, Any] | BlockConfigBatchRequestTypedDict,
     ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -932,9 +930,7 @@ def materialize_batch_request(
     batch_request_class: type
     if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
-    elif batch_request_contains_runtime_parameters(
-        batch_request=effective_batch_request
-    ):
+    elif batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -975,15 +971,13 @@ def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with
     | FluentBatchRequest
     | dict
     | BlockConfigBatchRequestTypedDict = ...,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
 def get_batch_request_as_dict(
     batch_request: None = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
 def get_batch_request_as_dict(
@@ -1005,7 +999,7 @@ def get_batch_request_as_dict(
     return batch_request  # type: ignore[return-value] # FDS BatchRequest is missing data_connector (other fields)
 
 
-def _get_block_batch_request(  # noqa: PLR0913
+def _get_block_batch_request(  # noqa: C901, PLR0913
     *,
     datasource_name: str | None = None,
     data_connector_name: str | None = None,
@@ -1019,8 +1013,8 @@ def _get_block_batch_request(  # noqa: PLR0913
     custom_filter_function: Callable | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     **kwargs,
 ):
     """Returns a block-config batch request based on the provided parameters
@@ -1068,13 +1062,13 @@ def _get_block_batch_request(  # noqa: PLR0913
             if sampling_kwargs is not None:
                 sampling_params["sampling_kwargs"] = sampling_kwargs
             batch_spec_passthrough.update(sampling_params)
-        if splitter_method is not None:
-            splitter_params: dict = {
-                "splitter_method": splitter_method,
+        if partitioner_method is not None:
+            partitioner_params: dict = {
+                "partitioner_method": partitioner_method,
             }
-            if splitter_kwargs is not None:
-                splitter_params["splitter_kwargs"] = splitter_kwargs
-            batch_spec_passthrough.update(splitter_params)
+            if partitioner_kwargs is not None:
+                partitioner_params["partitioner_kwargs"] = partitioner_kwargs
+            batch_spec_passthrough.update(partitioner_params)
 
     batch_request_as_dict: dict = {
         "datasource_name": datasource_name,
@@ -1121,7 +1115,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             ]
         ):
             raise ValueError(
-                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
+                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "  # noqa: E501
                 "runtime_parameters argument."
             )
 
@@ -1180,8 +1174,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     batch_spec_passthrough: dict | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
-    splitter_method: str | None = None,
-    splitter_kwargs: dict | None = None,
+    partitioner_method: str | None = None,
+    partitioner_kwargs: dict | None = None,
     runtime_parameters: dict | None = None,
     query: str | None = None,
     path: str | None = None,
@@ -1213,8 +1207,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         sampling_method
         sampling_kwargs
 
-        splitter_method
-        splitter_kwargs
+        partitioner_method
+        partitioner_kwargs
 
         batch_spec_passthrough
 
@@ -1224,7 +1218,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
 
     Returns:
         (BatchRequest, RuntimeBatchRequest or FluentBatchRequest) The formal BatchRequest, RuntimeBatchRequest or FluentBatchRequest object
-    """
+    """  # noqa: E501
 
     # block-style batch-request args, includes arguments for both runtime and basic batch requests
     block_config_args = {
@@ -1240,8 +1234,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         "custom_filter_function": custom_filter_function,
         "sampling_method": sampling_method,
         "sampling_kwargs": sampling_kwargs,
-        "splitter_method": splitter_method,
-        "splitter_kwargs": splitter_kwargs,
+        "partitioner_method": partitioner_method,
+        "partitioner_kwargs": partitioner_kwargs,
         "batch_spec_passthrough": batch_spec_passthrough,
     }
 
@@ -1249,7 +1243,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         """Returns a list of the block-config batch request arguments"""
         return [k for k, v in block_config_args.items() if v]
 
-    # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
+    # ensure that the first parameter is datasource_name, which should be a str. This check prevents users  # noqa: E501
     # from passing in batch_request as an unnamed parameter.
     if datasource_name and not isinstance(datasource_name, str):
         raise TypeError(
@@ -1291,7 +1285,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         block_args = block_style_args()
         if block_args:
             raise ValueError(
-                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"
+                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"  # noqa: E501
             )
 
         result = _get_fluent_batch_request_class()(
@@ -1315,8 +1309,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         custom_filter_function=custom_filter_function,
         sampling_method=sampling_method,
         sampling_kwargs=sampling_kwargs,
-        splitter_method=splitter_method,
-        splitter_kwargs=splitter_kwargs,
+        partitioner_method=partitioner_method,
+        partitioner_kwargs=partitioner_kwargs,
         **kwargs,
     )
 
@@ -1380,11 +1374,7 @@ if TYPE_CHECKING:
 if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     BatchDataUnion: TypeAlias = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
 
-    BatchDataType: TypeAlias = Union[
-        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
-    ]
+    BatchDataType: TypeAlias = Union[Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
-    BatchDataUnion = Union[  # type: ignore[misc] # Cannot assign multiple types
-        BatchData, pd.DataFrame
-    ]
+    BatchDataUnion = Union[BatchData, pd.DataFrame]  # type: ignore[misc] # Cannot assign multiple types

@@ -27,7 +27,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     query = """
                 SELECT COUNT(*) n
-                FROM {active_batch}
+                FROM {batch}
                 WHERE {col} = {filter}
             """
 
@@ -42,18 +42,14 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]) -> None:
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         threshold = configuration["kwargs"].get("threshold")
 
         try:
             assert threshold is not None, "'threshold' must be specified"
-            assert isinstance(
-                threshold, (int, float)
-            ), "'threshold' must be a valid float or int"
+            assert isinstance(threshold, (int, float)), "'threshold' must be a valid float or int"
             assert threshold > 0, "'threshold' must be positive"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

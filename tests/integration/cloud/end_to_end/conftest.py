@@ -13,9 +13,11 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -67,14 +69,12 @@ def expectation_suite(
     )
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(
-        expectation_suite=expectation_suite
-    )
+    expectation_suite = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
     assert len(expectation_suite.expectations) > 0
-    _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
-        _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+        _ = context.suites.get(name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
@@ -85,14 +85,14 @@ def validator(
 ) -> Iterator[Validator]:
     validator: Validator = context.get_validator(
         batch_request=batch_request,
-        expectation_suite_name=expectation_suite.expectation_suite_name,
+        expectation_suite_name=expectation_suite.name,
     )
     validator.head()
     yield validator
     validator.save_expectation_suite()
     expectation_suite = validator.get_expectation_suite()
-    _ = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite.expectation_suite_name,
+    _ = context.suites.get(
+        name=expectation_suite.name,
     )
 
 
@@ -102,18 +102,16 @@ def checkpoint(
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
-    checkpoint_name = (
-        f"{batch_request.data_asset_name} | {expectation_suite.expectation_suite_name}"
-    )
+    checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
     _ = context.add_checkpoint(
         name=checkpoint_name,
         validations=[
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             },
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             },
         ],
@@ -122,21 +120,20 @@ def checkpoint(
         name=checkpoint_name,
         validations=[
             {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "expectation_suite_name": expectation_suite.name,
                 "batch_request": batch_request,
             }
         ],
     )
-    checkpoint = context.get_checkpoint(name=checkpoint_name)
+    checkpoint = context.get_legacy_checkpoint(name=checkpoint_name)
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
-    context.delete_checkpoint(
-        name=checkpoint_name,
-    )
+    context.delete_legacy_checkpoint(checkpoint.name)
+
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_checkpoint(name=checkpoint_name)
+        context.get_legacy_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
@@ -160,8 +157,7 @@ class TableFactory(Protocol):
         gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema_name: str | None = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(scope="module")
@@ -170,9 +166,7 @@ def table_factory() -> Iterator[TableFactory]:
     Given a SQLAlchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """
-    all_created_tables: dict[
-        str, list[dict[Literal["table_name", "schema_name"], str | None]]
-    ] = {}
+    all_created_tables: dict[str, list[dict[Literal["table_name", "schema_name"], str | None]]] = {}
     engines: dict[str, sqlalchemy.engine.Engine] = {}
 
     def _table_factory(
@@ -184,9 +178,7 @@ def table_factory() -> Iterator[TableFactory]:
         LOGGER.info(
             f"Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
         )
-        created_tables: list[
-            dict[Literal["table_name", "schema_name"], str | None]
-        ] = []
+        created_tables: list[dict[Literal["table_name", "schema_name"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
             transaction = conn.begin()
@@ -256,11 +248,6 @@ def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
-        return get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-            }
-        )
+        return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
