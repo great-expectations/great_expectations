@@ -108,7 +108,7 @@ def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
 def checkpoint(
     mocker: pytest.MockFixture, mock_checkpoint_json: dict, mock_checkpoint_dict: dict
 ) -> V1CheckpointStore:
-    cp = mocker.Mock(spec=Checkpoint, id=None)
+    cp = mocker.Mock(spec=Checkpoint, name="my_checkpoint", id=None)
     cp.json.return_value = json.dumps(mock_checkpoint_json)
     cp.dict.return_value = mock_checkpoint_dict
     return cp
@@ -291,3 +291,15 @@ def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
 def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
     with pytest.raises(ValueError, match=f"{error_substring}*."):
         V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+
+
+@pytest.mark.unit
+def test_update_failure_wraps_store_backend_error(
+    ephemeral_store: V1CheckpointStore, checkpoint: Checkpoint
+):
+    key = ephemeral_store.get_key(name="my_nonexistant_checkpoint")
+
+    with pytest.raises(ValueError) as e:
+        ephemeral_store.update(key=key, value=checkpoint)
+
+    assert "Could not find existing Checkpoint" in str(e.value)

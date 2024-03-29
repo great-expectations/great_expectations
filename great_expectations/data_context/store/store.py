@@ -239,7 +239,6 @@ class Store:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
-        print("STORE", self)
         return self._update(key=key, value=value, **kwargs)
 
     def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
