@@ -15,7 +15,10 @@ def collect_requirements_files() -> List[pathlib.Path]:
     assert reqs_dir.exists()
 
     pattern = "requirements*.txt"
-    return list(project_root.glob(pattern)) + list(reqs_dir.glob(pattern))
+    requirement_files = list(project_root.glob(pattern)) + list(reqs_dir.glob(pattern))
+    # don't care about types
+    requirement_files.remove(pathlib.Path(project_root, "requirements-types.txt"))
+    return requirement_files
 
 
 def parse_requirements_files_to_strings(files: list[pathlib.Path]) -> dict:
@@ -180,7 +183,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 82
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 63
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -267,33 +270,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements-dev.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
-        ("requirements-types.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
-        ("requirements-types.txt", "adr-tools-python", (("==", "1.0.3"),)),
-        ("requirements-types.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
-        ("requirements-types.txt", "ipykernel", (("<=", "6.17.1"),)),
-        ("requirements-types.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
-        (
-            "requirements-types.txt",
-            "marshmallow",
-            (("<", "4.0.0"), (">=", "3.7.1")),
-        ),
-        ("requirements-types.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
-        ("requirements-types.txt", "mypy", (("==", "1.7.1"),)),
-        ("requirements-types.txt", "numpy", (("<", "2.0.0"), (">=", "1.22.4"))),
-        ("requirements-types.txt", "pandas", (("<", "2.2.0"),)),
-        ("requirements-types.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
-        ("requirements-types.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
-        ("requirements-types.txt", "pytest", (("<", "8.0"), (">=", "7.2"))),
-        (
-            "requirements-types.txt",
-            "ruamel.yaml",
-            (("<", "0.17.18"), (">=", "0.16")),
-        ),
-        ("requirements-types.txt", "ruff", (("==", "0.3.0"),)),
-        ("requirements-types.txt", "snapshottest", (("==", "0.6.0"),)),
-        ("requirements-types.txt", "sqlalchemy", (("<", "2.0.0"),)),
-        ("requirements-types.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
-        ("requirements-types.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),

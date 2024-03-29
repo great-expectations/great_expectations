@@ -155,14 +155,14 @@ class LinkChecker:
                 link, file, f"External link raised a connection error {err.errno}"
             )
 
-    def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
+    def _get_absolute_path(self, path: pathlib.Path | str) -> pathlib.Path:
         return self._docs_root.joinpath(path).resolve()
 
-    def _get_absolute_static_path(self, path: pathlib.Path) -> pathlib.Path:
+    def _get_absolute_static_path(self, path: pathlib.Path | str) -> pathlib.Path:
         return self._static_root / path
 
     def _get_relative_path(
-        self, file: pathlib.Path, path: pathlib.Path
+        self, file: pathlib.Path, path: pathlib.Path | str
     ) -> pathlib.Path:
         # link should be relative to the location of the current file
         return file.parent / path
@@ -357,7 +357,7 @@ class LinkChecker:
 @click.option(
     "--static-root",
     "-sr",
-    type=click.Path(exists=True, file_okay=False),
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
     default="docs/docusaurus/static",
     help="Root (static folder) to all images for link validating",
 )
