@@ -472,9 +472,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
     exp_suite_list: list[dict] = list(exp_suites.values())
     if queried_names:
-        exp_suite_list = [
-            d["data"] for d in exp_suite_list if d["data"]["suite"]["name"] in queried_names
-        ]
+        exp_suite_list = [d["data"] for d in exp_suite_list if d["data"]["name"] in queried_names]
 
     resp_body = {"data": exp_suite_list}
 
@@ -508,7 +506,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["suite"]["name"]
+    name = payload["data"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -530,8 +528,8 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     else:
         suite_id = FAKE_EXPECTATION_SUITE_ID
         payload["data"]["id"] = suite_id
-        payload["data"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["suite"]["expectations"]:
+        payload["data"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["expectations"]:
             expectation_configuration["id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
@@ -555,7 +553,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    name = payload["data"]["suite"]["name"]
+    name = payload["data"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -578,8 +576,8 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         )
     else:
         payload["data"]["id"] = suite_id
-        payload["data"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["suite"]["expectations"]:
+        payload["data"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["expectations"]:
             # add IDs to new expectations
             if not expectation_configuration.get("id"):
                 expectation_configuration["id"] = str(uuid.uuid4())
