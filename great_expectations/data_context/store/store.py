@@ -131,7 +131,7 @@ class Store:
 
     @property
     def cloud_mode(self) -> bool:
-        return isinstance(self.store_backend, GXCloudStoreBackend)
+        return isinstance(self._store_backend, GXCloudStoreBackend)
 
     @property
     def store_backend(self) -> StoreBackend:
@@ -148,7 +148,7 @@ class Store:
         Returns:
             store_backend_id which is a UUID(version=4)
         """
-        return self.store_backend.store_backend_id
+        return self._store_backend.store_backend_id
 
     @property
     def key_class(self) -> Type[DataContextKey]:
@@ -163,7 +163,7 @@ class Store:
         Returns:
             store_backend_id which is a UUID(version=4)
         """  # noqa: E501
-        return self.store_backend.store_backend_id_warnings_suppressed
+        return self._store_backend.store_backend_id_warnings_suppressed
 
     @property
     def config(self) -> dict:
@@ -194,17 +194,17 @@ class Store:
         self, key: DataContextKey | GXCloudIdentifier | ConfigurationIdentifier
     ) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self.store_backend.get(key)
+            return self._store_backend.get(key)
 
         if self.cloud_mode:
             self._validate_key(key)
-            value = self.store_backend.get(self.key_to_tuple(key))
+            value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors
             if value:
                 value = self.gx_cloud_response_json_to_object_dict(response_json=value)
         else:
             self._validate_key(key)
-            value = self.store_backend.get(self.key_to_tuple(key))
+            value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
             return self.deserialize(value)
@@ -212,7 +212,7 @@ class Store:
         return None
 
     def get_all(self) -> list[Any]:
-        objs = self.store_backend.get_all()
+        objs = self._store_backend.get_all()
         if self.cloud_mode:
             objs = self.gx_cloud_response_json_to_object_collection(objs)
 
@@ -220,10 +220,10 @@ class Store:
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> Any:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self.store_backend.set(key, value, **kwargs)
+            return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self.store_backend.set(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        return self._store_backend.set(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -233,7 +233,7 @@ class Store:
 
     def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self.store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        return self._store_backend.add(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         """
@@ -243,7 +243,7 @@ class Store:
 
     def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
-        return self.store_backend.update(self.key_to_tuple(key), self.serialize(value), **kwargs)
+        return self._store_backend.update(self.key_to_tuple(key), self.serialize(value), **kwargs)
 
     def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         """
@@ -253,25 +253,25 @@ class Store:
 
     def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None | GXCloudIdentifier:
         self._validate_key(key)
-        return self.store_backend.add_or_update(
+        return self._store_backend.add_or_update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
             key
-            for key in self.store_backend.list_keys()
+            for key in self._store_backend.list_keys()
             if not key == StoreBackend.STORE_BACKEND_ID_KEY
         ]
         return [self.tuple_to_key(key) for key in keys_without_store_backend_id]
 
     def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self.store_backend.has_key(key)
+            return self._store_backend.has_key(key)
         else:
             if self._use_fixed_length_key:
-                return self.store_backend.has_key(key.to_fixed_length_tuple())
-            return self.store_backend.has_key(key.to_tuple())
+                return self._store_backend.has_key(key.to_fixed_length_tuple())
+            return self._store_backend.has_key(key.to_tuple())
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
