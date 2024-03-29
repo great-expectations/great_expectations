@@ -54,31 +54,17 @@ _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     skip_first_param=True,
 )
 
-CSVAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "csv", _FilePathDataAsset
-)
-ExcelAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "excel", _FilePathDataAsset
-)
-FWFAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "fwf", _FilePathDataAsset
-)
-JSONAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "json", _FilePathDataAsset
-)
-ORCAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "orc", _FilePathDataAsset
-)
-ParquetAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
-    "parquet", _FilePathDataAsset
-)
+CSVAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("csv", _FilePathDataAsset)
+ExcelAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("excel", _FilePathDataAsset)
+FWFAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("fwf", _FilePathDataAsset)
+JSONAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("json", _FilePathDataAsset)
+ORCAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("orc", _FilePathDataAsset)
+ParquetAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("parquet", _FilePathDataAsset)
 
 
 class _PandasFilePathDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(
-        _FILE_PATH_ASSET_MODELS.values()
-    )
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(_FILE_PATH_ASSET_MODELS.values())
 
     # instance attributes
     assets: List[_FilePathDataAsset] = []

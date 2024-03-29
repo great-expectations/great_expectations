@@ -19,7 +19,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 @pytest.mark.unit
 def test_expectation_self_check():
-    my_expectation = ExpectColumnValuesToEqualThree()
+    my_expectation = ExpectColumnValuesToEqualThree(column="values")
     expectation_diagnostic = my_expectation.run_diagnostics()
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
 
@@ -134,7 +134,7 @@ def test_expectation_self_check():
                     "passed": False,
                     "sub_messages": [
                         {
-                            "message": "No example found to get kwargs for ExpectationConfiguration",
+                            "message": "No example found to get kwargs for ExpectationConfiguration",  # noqa: E501
                             "passed": False,
                         },
                     ],
@@ -147,7 +147,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",  # noqa: E501
                     "passed": False,
                     "sub_messages": [
                         {
@@ -171,13 +171,13 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has at least one positive and negative example case, and all test cases pass",
+                    "message": "Has at least one positive and negative example case, and all test cases pass",  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -202,7 +202,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has passed a manual review by a code owner for code standards and style guides",
+                    "message": "Has passed a manual review by a code owner for code standards and style guides",  # noqa: E501
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -213,7 +213,7 @@ def test_expectation_self_check():
 
 @pytest.mark.unit
 def test_include_in_gallery_flag():
-    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
+    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
 
@@ -242,9 +242,7 @@ def test_self_check_on_an_existing_expectation():
     report_object = expectation().run_diagnostics()
     # print(json.dumps(report_object, indent=2))
 
-    report_object["description"].pop(
-        "docstring"
-    )  # Don't try to exact match the docstring
+    report_object["description"].pop("docstring")  # Don't try to exact match the docstring
 
     # one of the test cases in the examples for this expectation is failing on our CI
     # and the number of items depends on the flags
@@ -256,8 +254,7 @@ def test_self_check_on_an_existing_expectation():
         "description": {
             "camel_name": "ExpectColumnValuesToMatchRegex",
             "snake_name": "expect_column_values_to_match_regex",
-            "short_description": "Expect column entries to be strings that match a given regular expression.",
-            # "docstring": "Expect column entries to be strings that match a given regular expression. Valid matches can be found     anywhere in the string, for example \"[at]+\" will identify the following strings as expected: \"cat\", \"hat\",     \"aa\", \"a\", and \"t\", and the following strings as unexpected: \"fish\", \"dog\".\n\n    expect_column_values_to_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `\"success\": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_not_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_not_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n    ",
+            "short_description": "Expect column entries to be strings that match a given regular expression.",  # noqa: E501
         },
         "execution_engines": {
             "PandasExecutionEngine": True,
@@ -266,13 +263,13 @@ def test_self_check_on_an_existing_expectation():
         },
         "renderers": {
             "standard": {
-                "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',
-                "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
+                "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',  # noqa: E501
+                "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",  # noqa: E501
                 "renderer.diagnostic.observed_value": "20% unexpected",
                 "renderer.diagnostic.status_icon": "",
                 "renderer.diagnostic.unexpected_table": None,
-                "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-                "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',
+                "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",  # noqa: E501
+                "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',  # noqa: E501
             },
             "custom": [],
         },
@@ -356,9 +353,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -417,9 +412,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -468,9 +461,7 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
-        examples
-    )
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
     my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
         expectation_config=my_expectation_config
     )
@@ -513,16 +504,16 @@ def test_expectation__get_renderers():
 
 @pytest.mark.unit
 def test_expectation_is_abstract():
-    # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
+    # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)  # noqa: E501
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 
 
 @pytest.mark.unit
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    expectation_diagnostics = (
-        ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
-    )
+    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration(
+        column="values"
+    ).run_diagnostics()
     # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
     tests = expectation_diagnostics["tests"]

@@ -2,30 +2,72 @@ from __future__ import annotations
 
 import pytest
 import sqlalchemy as sa
+from pytest import param
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
     SnowflakeDsn,
 )
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+
+@pytest.fixture
+def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MY_CONN_STR", "snowflake://my_user:password@my_account")
+    monkeypatch.setenv("MY_PASSWORD", "my_password")
 
 
 @pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",
     [
-        {"connection_string": "snowflake://my_user:password@my_account"},
-        {"user": "my_user", "password": "password", "account": "my_account"},
+        param(
+            {"connection_string": "snowflake://my_user:password@my_account"},
+            id="connection_string str",
+        ),
+        param({"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"),
+        param(
+            {
+                "connection_string": {
+                    "user": "my_user",
+                    "password": "password",
+                    "account": "my_account",
+                }
+            },
+            id="connection_string dict",
+        ),
+        param(
+            {
+                "connection_string": {
+                    "user": "my_user",
+                    "password": "${MY_PASSWORD}",
+                    "account": "my_account",
+                }
+            },
+            id="connection_string dict with password ConfigStr",
+        ),
+        param(
+            {"user": "my_user", "password": "password", "account": "my_account"},
+            id="old config format - top level keys",
+        ),
     ],
 )
-def test_valid_config(config_kwargs: dict):
+def test_valid_config(
+    empty_file_context: AbstractDataContext, seed_env_vars: None, config_kwargs: dict
+):
     my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
     assert my_sf_ds_1
 
+    my_sf_ds_1._data_context = empty_file_context  # attach to enable config substitution
     sql_engine = my_sf_ds_1.get_engine()
     assert isinstance(sql_engine, sa.engine.Engine)
+
+    exec_engine = my_sf_ds_1.get_execution_engine()
+    assert isinstance(exec_engine, SqlAlchemyExecutionEngine)
 
 
 @pytest.mark.unit
@@ -43,10 +85,15 @@ def test_valid_config(config_kwargs: dict):
             {"account": "my_account", "user": "my_user"},
             id="incomplete connect_args",
         ),
+        pytest.param(
+            {"connection_string": {"account": "my_account", "user": "my_user"}},
+            {},
+            id="incomplete connection_string dict connect_args",
+        ),
     ],
 )
 def test_conflicting_connection_string_and_args_raises_error(
-    connection_string: ConfigStr | SnowflakeDsn | None, connect_args: dict
+    connection_string: ConfigStr | SnowflakeDsn | None | dict, connect_args: dict
 ):
     with pytest.raises(ValueError):
         _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
@@ -61,7 +108,12 @@ def test_conflicting_connection_string_and_args_raises_error(
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -71,7 +123,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],
@@ -82,7 +134,12 @@ def test_conflicting_connection_string_and_args_raises_error(
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -92,7 +149,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],
@@ -103,7 +160,12 @@ def test_conflicting_connection_string_and_args_raises_error(
             [
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
                     "type": "value_error",
                 },
                 {
@@ -113,7 +175,7 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
                     "type": "value_error",
                 },
             ],
@@ -125,23 +187,17 @@ def test_invalid_connection_string_raises_dsn_error(
     connection_string: str, expected_errors: list[dict]
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = SnowflakeDatasource(
-            name="my_snowflake", connection_string=connection_string
-        )
+        _ = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
 
     assert expected_errors == exc_info.value.errors()
 
 
 # TODO: Cleanup how we install test dependencies and remove this skipif
-@pytest.mark.skipif(
-    True if not snowflake else False, reason="snowflake is not installed"
-)
+@pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
     connection_string = "snowflake://my_user:password@my_account"
-    datasource = SnowflakeDatasource(
-        name="my_snowflake", connection_string=connection_string
-    )
+    datasource = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
     # testing that this doesn't raise an exception
     datasource.get_execution_engine()
 

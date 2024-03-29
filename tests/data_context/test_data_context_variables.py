@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 import copy
 import pathlib
 import random
 import string
-from typing import Any
-from unittest import mock
+from typing import TYPE_CHECKING, Any
+from unittest.mock import ANY as MOCK_ANY
+from unittest.mock import patch as mock_patch
 
 import pytest
 
+from great_expectations import get_context, project_manager
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -25,20 +28,22 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
     DataContextConfig,
     GXCloudConfig,
     IncludeRenderedContentConfig,
-    NotebookConfig,
-    NotebookTemplateConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
+from tests.data_context.conftest import (
     USAGE_STATISTICS_QA_URL,
 )
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
+    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 
@@ -73,8 +78,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "notebooks": None,
-        "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
             "expectation_suite": False,
@@ -143,9 +146,8 @@ def file_data_context(
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
     context_root_dir = project_path / FileDataContext.GX_DIR
-    context = FileDataContext(
-        project_config=data_context_config, context_root_dir=context_root_dir
-    )
+    context = FileDataContext(project_config=data_context_config, context_root_dir=context_root_dir)
+    project_manager.set_project(context)
     return context
 
 
@@ -166,16 +168,17 @@ def cloud_data_context(
         cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=context_root_dir,
     )
+    project_manager.set_project(cloud_data_context)
     return cloud_data_context
 
 
 def stores() -> dict:
     return {
-        "profiler_store": {
-            "class_name": "ProfilerStore",
+        "checkpoint_store": {
+            "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "profilers/",
+                "base_directory": "checkpoints/",
             },
         },
     }
@@ -200,22 +203,6 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
     return AnonymizedUsageStatisticsConfig(
         enabled=False,
     )
-
-
-@pytest.fixture
-def notebooks() -> NotebookConfig:
-    return NotebookConfig(
-        class_name="SuiteEditNotebookRenderer",
-        module_name="great_expectations.render.renderer.v3.suite_edit_notebook_renderer",
-        header_markdown=NotebookTemplateConfig(
-            file_name="my_notebook_template.md",
-        ),
-    )
-
-
-@pytest.fixture
-def concurrency() -> ConcurrencyConfig:
-    return ConcurrencyConfig(enabled=True)
 
 
 @pytest.fixture
@@ -267,10 +254,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
         ),
-        pytest.param(
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store getter",
-        ),
         pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
@@ -279,14 +262,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.CONCURRENCY,
-            id="concurrency getter",
         ),
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
@@ -329,9 +304,7 @@ def test_data_context_variables_get_with_substitutions(
     env_var_name: str = "MY_CONFIG_VERSION"
     value_associated_with_env_var: float = 7.0
 
-    data_context_config_dict[
-        DataContextVariableSchema.CONFIG_VERSION
-    ] = f"${env_var_name}"
+    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     config_values: dict = {
         env_var_name: value_associated_with_env_var,
@@ -399,16 +372,6 @@ def test_data_context_variables_get_with_substitutions(
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
-            notebooks,
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks setter",
-        ),
-        pytest.param(
-            concurrency,
-            DataContextVariableSchema.CONCURRENCY,
-            id="concurrency setter",
-        ),
-        pytest.param(
             progress_bars,
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
@@ -446,6 +409,7 @@ def test_data_context_variables_set(
 
 @pytest.mark.unit
 def test_data_context_variables_save_config(
+    mocker: MockerFixture,
     data_context_config_dict: dict,
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
@@ -458,55 +422,68 @@ def test_data_context_variables_save_config(
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save_config()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
-    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(
-        key=key
-    )
-    assert (
-        persisted_value.to_json_dict()
-        == ephemeral_data_context_variables.config.to_json_dict()
-    )
+    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(key=key)
+    assert persisted_value.to_json_dict() == ephemeral_data_context_variables.config.to_json_dict()
 
     # FileDataContextVariables
-    with mock.patch(
+    mock_save = mocker.patch(
         "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
-    ) as mock_save:
-        file_data_context_variables.save_config()
+    )
+    file_data_context_variables.save_config()
 
-        assert mock_save.call_count == 1
+    assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.Session.put", autospec=True) as mock_put:
-        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
+    mock_put = mocker.patch("requests.Session.put", autospec=True)
+    type(mock_put.return_value).status_code = mocker.PropertyMock(return_value=200)
 
-        cloud_data_context_variables.save_config()
+    cloud_data_context_variables.save_config()
 
-        expected_config_dict: dict = {}
-        for attr in (
-            "config_variables_file_path",
-            "config_version",
-            "data_docs_sites",
-            "notebooks",
-            "plugins_directory",
-            "stores",
-            "include_rendered_content",
-        ):
-            expected_config_dict[attr] = data_context_config_dict[attr]
-
-        assert mock_put.call_count == 1
-        mock_put.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
-            json={
-                "data": {
-                    "type": "data_context_variables",
-                    "attributes": {
-                        "organization_id": ge_cloud_organization_id,
-                        "data_context_variables": expected_config_dict,
-                    },
-                }
+    expected_config_dict = {
+        "config_variables_file_path": "uncommitted/config_variables.yml",
+        "config_version": 3.0,
+        "data_docs_sites": {},
+        "plugins_directory": "plugins/",
+        "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
+                },
             },
-        )
+            "evaluation_parameter_store": {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "EvaluationParameterStore",
+            },
+            "checkpoint_store": {"class_name": "CheckpointStore"},
+            "profiler_store": {"class_name": "ProfilerStore"},
+            "validations_store": {"class_name": "ValidationsStore"},
+            "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
+        },
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
+        "profiler_store_name": "profiler_store",
+    }
+
+    assert mock_put.call_count == 1
+    mock_put.assert_called_with(
+        MOCK_ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
+        json={
+            "data": {
+                "type": "data_context_variables",
+                "attributes": {
+                    "organization_id": ge_cloud_organization_id,
+                    "data_context_variables": expected_config_dict,
+                },
+            }
+        },
+    )
 
 
 @pytest.mark.unit
@@ -544,7 +521,7 @@ def test_file_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
@@ -556,16 +533,14 @@ def test_file_data_context_variables_e2e(
     )
     updated_include_rendered_content.expectation_validation_result = True
 
-    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
+    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     value_associated_with_env_var: str = "foo/bar/baz"
     monkeypatch.setenv(env_var_name, value_associated_with_env_var)
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
-    file_data_context.variables.include_rendered_content = (
-        updated_include_rendered_content
-    )
+    file_data_context.variables.include_rendered_content = updated_include_rendered_content
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -583,9 +558,7 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk.include_rendered_content.to_dict()
         == updated_include_rendered_content.to_dict()
     )
-    assert (
-        file_data_context.variables.plugins_directory == value_associated_with_env_var
-    )
+    assert file_data_context.variables.plugins_directory == value_associated_with_env_var
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
@@ -609,15 +582,17 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 @pytest.mark.e2e
 @pytest.mark.cloud
-@mock.patch(
+@mock_patch(
     "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
 )
 @pytest.mark.xfail(
     strict=False,
-    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
+    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",  # noqa: E501
 )
 def test_cloud_enabled_data_context_variables_e2e(
-    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+    mock_save_project_config: MagicMock,
+    data_docs_sites: dict,
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -631,16 +606,16 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
-    """
+    """  # noqa: E501
     # Prepare updated plugins directory to set and save to the Cloud backend.
-    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results  # noqa: E501
+    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
     updated_data_docs_sites = data_docs_sites
-    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -653,7 +628,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites

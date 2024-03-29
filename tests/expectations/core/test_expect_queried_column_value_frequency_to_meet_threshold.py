@@ -1,13 +1,12 @@
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING
 
 import pytest
-from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (  # noqa: E501
     ExpectQueriedColumnValueFrequencyToMeetThreshold,  # noqa: F401 # needed for expectation registration
 )
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import (
     get_test_validator_with_data,
 )
@@ -56,7 +55,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     warns,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -81,9 +80,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.parametrize(
@@ -91,7 +88,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     [
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM titanic GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM titanic GROUP BY {col}",  # noqa: E501
             True,
             0.6481340441736482,
             None,
@@ -99,7 +96,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_runtime_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {batch} GROUP BY {col}",  # noqa: E501
             False,
             0.04112718964204113,
             None,
@@ -107,7 +104,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT(y) FROM wrong) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT(y) FROM wrong) FROM {batch} GROUP BY {col}",  # noqa: E501
             True,
             7.091666666666667,
             None,
@@ -115,7 +112,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {batch} GROUP BY {col}",  # noqa: E501
             False,
             0.2338156892612338,
             'col("Age")<35',
@@ -123,7 +120,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
         (
             sqlite_batch_request,
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",  # noqa: E501
             False,
             0.3240670220868241,
             None,
@@ -142,7 +139,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     warns,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -169,9 +166,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -195,9 +190,8 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,
@@ -225,9 +219,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -235,14 +227,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     "query,success,observed,row_condition,warns",
     [
         (
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",  # noqa: E501
             False,
             0.3240670220868241,
             None,
             False,
         ),
         (
-            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch}) / 2 FROM {batch} GROUP BY {col}",  # noqa: E501
             False,
             0.3107287449392713,
             'col("Age")<35',
@@ -263,9 +255,8 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,
@@ -295,16 +286,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
                 condition_parser="great_expectations__experimental__",
             )
         )
-    assert (
-        result["success"] == success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] == success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.big
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_value(
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     validator: Validator = context.get_validator(batch_request=sqlite_batch_request)
 

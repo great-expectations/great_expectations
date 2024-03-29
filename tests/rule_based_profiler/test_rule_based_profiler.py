@@ -1,19 +1,16 @@
-from typing import Any, Dict, List, Optional
-from unittest import mock
-from unittest.mock import MagicMock
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from unittest.mock import patch as mock_patch
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.data_context.cloud_data_context import (
-    CloudDataContext,
-)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GXCloudIdentifier,
 )
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import (
@@ -42,20 +39,25 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.util import deep_filter_properties_iterable
 
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
+    from pytest_mock import MockerFixture
+
 
 @pytest.fixture()
 def sample_rule_dict():
     return {
         "domain_builder": {
             "include_column_names": None,
-            "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
             "class_name": "ColumnDomainBuilder",
             "include_column_name_suffixes": ["_amount"],
         },
         "parameter_builders": [],
         "expectation_configuration_builders": [
             {
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                 "condition": None,
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "meta": {},
@@ -72,9 +74,9 @@ def test_reconcile_profiler_variables_no_overrides(
     variables_multi_part_name_parameter_container,
 ):
     variables: Dict[str, Any] = {}
-    effective_variables: Optional[
-        ParameterContainer
-    ] = profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    effective_variables: Optional[ParameterContainer] = (
+        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    )
     assert effective_variables == variables_multi_part_name_parameter_container
 
 
@@ -87,12 +89,10 @@ def test_reconcile_profiler_variables_with_overrides(
         "estimator": "bootstrap",
         "mostly": 8.0e-1,
     }
-    effective_variables: Optional[
-        ParameterContainer
-    ] = profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
-    assert effective_variables.to_dict()["parameter_nodes"]["variables"][
-        "variables"
-    ] == {
+    effective_variables: Optional[ParameterContainer] = (
+        profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
+    )
+    assert effective_variables.to_dict()["parameter_nodes"]["variables"]["variables"] == {
         "false_positive_threshold": 2.0e-2,
         "estimator": "bootstrap",
         "mostly": 8.0e-1,
@@ -105,9 +105,9 @@ def test_reconcile_profiler_rules_no_overrides(
 ):
     rules: Dict[str, Dict[str, Any]] = {}
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
     assert effective_rules == profiler_with_placeholder_args.rules
 
 
@@ -141,8 +141,8 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -155,7 +155,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -174,13 +174,13 @@ def test_reconcile_profiler_rules_new_rule_override(
         "rule_0": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -190,7 +190,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -207,8 +207,8 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -221,7 +221,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -237,13 +237,13 @@ def test_reconcile_profiler_rules_new_rule_override(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -255,8 +255,8 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -272,9 +272,9 @@ def test_reconcile_profiler_rules_new_rule_override(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -306,7 +306,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
                 "include_column_name_suffixes": [
                     "_ts",
@@ -315,7 +315,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -327,8 +327,8 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -344,9 +344,9 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -394,13 +394,13 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
                     "single_batch_mode": False,
@@ -410,7 +410,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -427,8 +427,8 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -444,9 +444,9 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -466,8 +466,8 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -480,7 +480,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -499,13 +499,13 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                 "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -517,8 +517,8 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -531,7 +531,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -546,9 +546,9 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -589,8 +589,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -603,7 +603,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -622,13 +622,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -638,7 +638,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -655,8 +655,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
@@ -671,7 +671,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -686,9 +686,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
         rules=rules,
         reconciliation_directives=ReconciliationDirectives(
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -730,7 +728,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -749,13 +747,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -772,7 +770,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -787,9 +785,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
         rules=rules,
         reconciliation_directives=ReconciliationDirectives(
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -837,8 +833,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -851,7 +847,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -870,13 +866,13 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         "rule_1": {
             "variables": {},
             "domain_builder": {
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                 "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
                     "class_name": "MetricMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "single_batch_mode": False,
@@ -886,7 +882,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "estimator": "bootstrap",
@@ -903,8 +899,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
@@ -917,7 +913,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -932,9 +928,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         },
     }
 
-    effective_rules: List[
-        Rule
-    ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+    effective_rules: List[Rule] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules
+    )
 
     rule: Rule
     effective_rule_configs_actual: Dict[str, dict] = {
@@ -946,11 +942,12 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_without_dynamic_args(
-    mock_data_context: mock.MagicMock,
-    mock_profiler_run: mock.MagicMock,
+    mock_data_context: MagicMock,
+    mock_profiler_run: MagicMock,
+    mocker: MockerFixture,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -961,7 +958,7 @@ def test_run_profiler_without_dynamic_args(
     )
 
     assert mock_profiler_run.called
-    assert mock_profiler_run.call_args == mock.call(
+    assert mock_profiler_run.call_args == mocker.call(
         variables=None,
         rules=None,
         batch_list=None,
@@ -980,11 +977,12 @@ def test_run_profiler_without_dynamic_args(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_with_dynamic_args(
-    mock_data_context: mock.MagicMock,
-    mock_profiler_run: mock.MagicMock,
+    mock_data_context: MagicMock,
+    mock_profiler_run: MagicMock,
+    mocker: MockerFixture,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1001,7 +999,7 @@ def test_run_profiler_with_dynamic_args(
     )
 
     assert mock_profiler_run.called
-    assert mock_profiler_run.call_args == mock.call(
+    assert mock_profiler_run.call_args == mocker.call(
         variables=variables,
         rules=rules,
         batch_list=None,
@@ -1020,11 +1018,11 @@ def test_run_profiler_with_dynamic_args(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_on_data_creates_suite_with_dict_arg(
-    mock_data_context: mock.MagicMock,
-    mock_rule_based_profiler_run: mock.MagicMock,
+    mock_data_context: MagicMock,
+    mock_rule_based_profiler_run: MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1048,11 +1046,11 @@ def test_run_profiler_on_data_creates_suite_with_dict_arg(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
-    mock_data_context: mock.MagicMock,
-    mock_rule_based_profiler_run: mock.MagicMock,
+    mock_data_context: MagicMock,
+    mock_rule_based_profiler_run: MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1081,9 +1079,9 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler_with_too_many_args_raises_error(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
     populated_profiler_store: ProfilerStore,
 ):
     with pytest.raises(AssertionError) as e:
@@ -1098,9 +1096,9 @@ def test_get_profiler_with_too_many_args_raises_error(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_serialize_profiler_config(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     profiler = BaseRuleBasedProfiler(
@@ -1116,13 +1114,11 @@ def test_serialize_profiler_config(
         "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
         "class_name": "TableDomainBuilder",
     }
-    assert isinstance(
-        profiler.rules[0].parameter_builders[0], MetricMultiBatchParameterBuilder
-    )
+    assert isinstance(profiler.rules[0].parameter_builders[0], MetricMultiBatchParameterBuilder)
     assert ParameterBuilderConfig(
         **profiler.rules[0].parameter_builders[0].to_json_dict()
     ).to_json_dict() == {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
         "class_name": "MetricMultiBatchParameterBuilder",
         "name": "my_parameter",
         "metric_name": "my_metric",
@@ -1141,9 +1137,9 @@ def test_serialize_profiler_config(
     assert DefaultExpectationConfigurationBuilder(
         **profiler.rules[0].expectation_configuration_builders[0].to_json_dict()
     ).to_json_dict() == {
-        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
         "class_name": "DefaultExpectationConfigurationBuilder",
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "validation_parameter_builder_configs": None,
         "column_A": "$domain.domain_kwargs.column_A",
         "column_B": "$domain.domain_kwargs.column_B",
@@ -1160,9 +1156,9 @@ def test_serialize_profiler_config(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_profiler(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
@@ -1183,35 +1179,10 @@ def test_add_profiler(
     mock_data_context.profiler_store.add.asset_called_once()
 
 
-@pytest.mark.cloud
-def test_add_profiler_ge_cloud_mode(
-    ge_cloud_profiler_id: str,
-    ge_cloud_profiler_key: GXCloudIdentifier,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
-):
-    profiler_args = profiler_config_with_placeholder_args.to_dict()
-    for attr in ("class_name", "module_name"):
-        profiler_args.pop(attr)
-
-    with mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext",
-        spec=CloudDataContext,
-    ) as mock_data_context:
-        profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-            data_context=mock_data_context,
-            profiler_store=mock_data_context.profiler_store,
-            **profiler_args,
-        )
-
-    assert isinstance(profiler, RuleBasedProfiler)
-    assert profiler.name == profiler_config_with_placeholder_args.name
-    mock_data_context.profiler_store.add.assert_called_once()
-
-
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
 ):
     name = "my_profiler_config"
     config_version = 1.0
@@ -1235,7 +1206,7 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
             "expectation_configuration_builders": [
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
-                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
                 },
             ],
         }
@@ -1254,13 +1225,13 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    with mock.patch(
+    with mock_patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
         return_value=profiler_config_with_placeholder_args,
     ):
@@ -1275,9 +1246,10 @@ def test_get_profiler(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_get_profiler_non_existent_profiler_raises_error(
-    mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
+    mock_data_context: MagicMock,
+    empty_profiler_store: ProfilerStore,
 ):
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(
@@ -1292,9 +1264,10 @@ def test_get_profiler_non_existent_profiler_raises_error(
 
 @pytest.mark.unit
 def test_delete_profiler(
+    mocker: MockerFixture,
     populated_profiler_store: ProfilerStore,
 ):
-    with mock.patch(
+    with mock_patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.remove_key",
     ) as mock_remove_key:
         RuleBasedProfiler.delete_profiler(
@@ -1304,9 +1277,7 @@ def test_delete_profiler(
         )
 
     assert mock_remove_key.call_count == 1
-    assert mock_remove_key.call_args == mock.call(
-        key=ConfigurationIdentifier("my_profiler")
-    )
+    assert mock_remove_key.call_args == mocker.call(key=ConfigurationIdentifier("my_profiler"))
 
 
 @pytest.mark.unit
@@ -1338,8 +1309,8 @@ def test_delete_profiler_non_existent_profiler_raises_error(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.store.ProfilerStore")
-def test_list_profilers(mock_profiler_store: mock.MagicMock):
+@mock_patch("great_expectations.data_context.store.ProfilerStore")
+def test_list_profilers(mock_profiler_store: MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
     store.list_keys.return_value = [ConfigurationIdentifier(char) for char in keys]
@@ -1350,8 +1321,8 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
 
 
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.store.ProfilerStore")
-def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
+@mock_patch("great_expectations.data_context.store.ProfilerStore")
+def test_list_profilers_in_cloud_mode(mock_profiler_store: MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
     store.list_keys.return_value = keys
@@ -1362,15 +1333,16 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
-@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
-@mock.patch(
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
+@mock_patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_single_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: MagicMock,
+    mock_domain_builder: MagicMock,
+    mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1384,7 +1356,7 @@ def test_add_single_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    first_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
@@ -1394,21 +1366,22 @@ def test_add_single_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    duplicate_of_first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    duplicate_of_first_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=duplicate_of_first_rule)
     assert len(profiler.rules) == 1
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
-@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
-@mock.patch(
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
+@mock_patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_rule_overwrite_first_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: MagicMock,
+    mock_domain_builder: MagicMock,
+    mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1422,21 +1395,22 @@ def test_add_rule_overwrite_first_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    first_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
-@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
-@mock.patch(
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
+@mock_patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
 def test_add_rule_add_second_rule(
-    mock_expectation_configuration_builder: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
+    mock_expectation_configuration_builder: MagicMock,
+    mock_domain_builder: MagicMock,
+    mock_data_context: MagicMock,
+    mocker: MockerFixture,
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -1450,7 +1424,7 @@ def test_add_rule_add_second_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    first_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
@@ -1460,15 +1434,15 @@ def test_add_rule_add_second_rule(
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
-    second_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    second_rule.to_json_dict = mocker.MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(rule=second_rule)
     assert len(profiler.rules) == 2
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@mock_patch("great_expectations.data_context.data_context.AbstractDataContext")
 def test_add_rule_bad_rule(
-    mock_data_context: mock.MagicMock,
+    mock_data_context: MagicMock,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rbp",

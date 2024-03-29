@@ -174,63 +174,6 @@
         "datetimes": "DATETIME"
       }
     },
-    "tests" : [
-      {
-        "title": "basic_positive_test_case_date_set",
-        "suppress_test_for": ["sqlite"],
-        "exact_match_out": false,
-        "in": {
-          "column": "dates",
-          "value_set": ["2018-01-01", "2018-01-02"],
-          "parse_strings_as_datetimes": true
-        },
-        "out": {
-          "success": true,
-          "observed_value": ["2018-01-01T00:00:00", "2018-01-02T00:00:00", "2018-01-03T00:00:00"]
-        }
-      },
-      {
-        "title": "basic_negative_test_case_date_set",
-        "suppress_test_for": ["sqlite"],
-        "exact_match_out": false,
-        "in": {
-          "column": "dates",
-          "value_set": ["2018-01-04", "2018-01-02"],
-          "parse_strings_as_datetimes": true
-        },
-        "out": {
-          "success": false,
-          "observed_value": ["2018-01-01T00:00:00", "2018-01-02T00:00:00", "2018-01-03T00:00:00"]
-        }
-      },
-      {
-        "title": "basic_positive_test_case_datetime_set",
-        "suppress_test_for": ["sqlite"],
-        "exact_match_out": false,
-        "in": {
-          "column": "datetimes",
-          "value_set": ["2018-01-01 00:34:01", "2018-01-02 00:34:01"],
-          "parse_strings_as_datetimes": true
-        },
-        "out": {
-          "success": true,
-          "observed_value": ["2018-01-01T00:34:01", "2018-01-02T00:34:01", "2018-01-03T00:34:01"]
-        }
-      },
-      {
-        "title": "basic_negative_test_case_datetime_set",
-        "suppress_test_for": ["sqlite"],
-        "exact_match_out": false,
-        "in": {
-          "column": "datetimes",
-          "value_set": ["2018-01-04", "2018-01-02"],
-          "parse_strings_as_datetimes": true
-        },
-        "out": {
-          "success": false,
-          "observed_value": ["2018-01-01T00:34:01", "2018-01-02T00:34:01", "2018-01-03T00:34:01"]
-        }
-      }
-    ]
+    "tests" : []
   }]
 }

@@ -1,26 +1,23 @@
 from __future__ import annotations
 
-import copy
 import datetime
 import decimal
 import json
 import logging
-import os
 import pathlib
 import re
 import sys
 import uuid
+import warnings
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     List,
     Mapping,
     MutableMapping,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     overload,
@@ -33,14 +30,17 @@ import pandas as pd
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
+
+# import of private class will be removed when deprecated methods are removed from this module
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.render import RenderedContent
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 
@@ -145,16 +145,6 @@ def in_jupyter_notebook():
         return False  # Probably standard Python interpreter
 
 
-def in_databricks() -> bool:
-    """
-    Tests whether we are in a Databricks environment.
-
-    Returns:
-        bool
-    """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
-
-
 def determine_progress_bar_method_by_environment() -> Callable:
     """
     As tqdm has specific methods for progress bar creation and iteration,
@@ -197,52 +187,45 @@ JSONConvertable: TypeAlias = Union[
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+def convert_to_json_serializable(
     data: ToDict,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+def convert_to_json_serializable(
     data: ToList,
-) -> list:
-    ...
+) -> list: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToBool,
-) -> bool:
-    ...
+) -> bool: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToFloat,
-) -> float:
-    ...
+) -> float: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToInt,
-) -> int:
-    ...
+) -> int: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToStr,
-) -> str:
-    ...
+) -> str: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @public_api  # - complexity 32
@@ -291,7 +274,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, dict):
         new_dict = {}
         for key in data:
-            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
+            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string  # noqa: E501
             new_dict[str(key)] = convert_to_json_serializable(data[key])
 
         return new_dict
@@ -305,8 +288,8 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     if isinstance(data, (np.ndarray, pd.Index)):
         # test_obj[key] = test_obj[key].tolist()
-        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        # to the number of digits for which the string representation will equal the float representation
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
         return [convert_to_json_serializable(x) for x in data.tolist()]
 
     if isinstance(data, np.int64):
@@ -350,13 +333,13 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
     if data is None:
         # No problem to encode json
         return data
 
     try:
-        if not isinstance(data, list) and pd.isna(data):
+        if not isinstance(data, list) and pd.isna(data):  # type: ignore[arg-type]
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list)`
             return None
@@ -372,8 +355,8 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         return [
             {
-                index_name: convert_to_json_serializable(idx),
-                value_name: convert_to_json_serializable(val),
+                index_name: convert_to_json_serializable(idx),  # type: ignore[call-overload]
+                value_name: convert_to_json_serializable(val),  # type: ignore[dict-item]
             }
             for idx, val in data.items()
         ]
@@ -384,9 +367,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return convert_to_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     # SQLAlchemy serialization
     if LegacyRow and isinstance(data, LegacyRow):
@@ -410,10 +391,11 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
+    if isinstance(data, RenderedContent):
+        return data.to_json_dict()
+
     # Unable to serialize (unrecognized data type).
-    raise TypeError(
-        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
-    )
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")
 
 
 def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
@@ -448,8 +430,8 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
 
     if isinstance(data, (np.ndarray, pd.Index)):
         # test_obj[key] = test_obj[key].tolist()
-        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        # to the number of digits for which the string representation will equal the float representation
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
         _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
         return
 
@@ -472,7 +454,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         return
 
     # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
     if data is None:
         # No problem to encode json
         return
@@ -494,19 +476,17 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         _ = [
             {
-                index_name: ensure_json_serializable(idx),
-                value_name: ensure_json_serializable(val),
+                index_name: ensure_json_serializable(idx),  # type: ignore[func-returns-value]
+                value_name: ensure_json_serializable(val),  # type: ignore[func-returns-value]
             }
             for idx, val in data.items()
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return ensure_json_serializable(
-            dict(zip(data.schema.names, zip(*data.collect())))
-        )
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
 
     if isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
@@ -536,7 +516,7 @@ def substitute_all_strftime_format_strings(
     """
     This utility function will iterate over input data and for all strings, replace any strftime format
     elements using either the provided datetime_obj or the current datetime
-    """
+    """  # noqa: E501
 
     datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
     if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
@@ -546,8 +526,7 @@ def substitute_all_strftime_format_strings(
         }
     elif isinstance(data, list):
         return [
-            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
-            for el in data
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj) for el in data
         ]
     elif isinstance(data, str):
         return datetime_obj.strftime(data)
@@ -561,7 +540,7 @@ def parse_string_to_datetime(
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
-            """
+            """  # noqa: E501
         )
 
     if not datetime_format_string:
@@ -571,7 +550,7 @@ def parse_string_to_datetime(
         raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{type(datetime_format_string)!s}").
-            """
+            """  # noqa: E501
         )
 
     return datetime.datetime.strptime(  # noqa: DTZ007
@@ -613,14 +592,12 @@ class AzureUrl:
     )
 
     def __init__(self, url: str) -> None:
-        search = re.search(
-            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
-        )
+        search = re.search(AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url)
         if search is None:
             search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
-            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"  # noqa: E501
             self._protocol = search.group(1)
             self._account_name = search.group(2)
             self._container = search.group(3)
@@ -782,153 +759,58 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, Any]] = None,
-    force_reuse_spark_context: bool = True,
+    spark_config: Optional[dict[str, str]] = None,
+    force_reuse_spark_context: Optional[bool] = None,
 ) -> pyspark.SparkSession:
-    """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-
-    Args:
-        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
-        force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
-
-    Returns: SparkSession (new or existing as per "isStopped()" status).
-    """
-    if spark_config is None:
-        spark_config = {}
-    else:
-        spark_config = copy.deepcopy(spark_config)
-
-    name: Optional[str] = spark_config.get("spark.app.name")
-    if not name:
-        name = "default_great_expectations_spark_application"
-
-    spark_config.update({"spark.app.name": name})
-
-    spark_session: Optional[pyspark.SparkSession] = get_or_create_spark_session(
-        spark_config=spark_config
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_application() is deprecated and will be removed in v1.0.0. "  # noqa: E501
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",  # noqa: E501
+        category=DeprecationWarning,
     )
-    if spark_session is None:
-        raise ValueError("SparkContext could not be started.")
-
-    # noinspection PyUnresolvedReferences
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    if not force_reuse_spark_context and spark_restart_required(
-        current_spark_config=spark_session.sparkContext.getConf().getAll(),
-        desired_spark_config=spark_config,
-    ):
-        if not sc_stopped:
-            try:
-                # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-                logger.info("Stopping existing spark context to reconfigure.")
-                spark_session.sparkContext.stop()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-        spark_session = get_or_create_spark_session(spark_config=spark_config)
-        if spark_session is None:
-            raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
-
-    if sc_stopped:
-        raise ValueError("SparkContext stopped unexpectedly.")
-
-    return spark_session
+    if force_reuse_spark_context is not None:
+        # deprecated-v1.0.0
+        warnings.warn(
+            "force_reuse_spark_context is deprecated and will be removed in version 1.0. "
+            "In environments that allow it, the existing Spark context will be reused, adding the "
+            "spark_config options that have been passed. If the Spark context cannot be updated with "  # noqa: E501
+            "the spark_config, the context will be stopped and restarted with the new spark_config.",  # noqa: E501
+            category=DeprecationWarning,
+        )
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config  # type:ignore[arg-type]
+    )
 
 
-# noinspection PyPep8Naming
 def get_or_create_spark_session(
-    spark_config: Optional[Dict[str, str]] = None,
-) -> pyspark.SparkSession | None:
+    spark_config: Optional[dict[str, str]] = None,
+) -> pyspark.SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
-
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
 
     Args:
         spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
 
     Returns:
+        SparkSession
+    """  # noqa: E501
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
-    """
-    spark_session: Optional[pyspark.SparkSession]
-    try:
-        if spark_config is None:
-            spark_config = {}
-        else:
-            spark_config = copy.deepcopy(spark_config)
+    # deprecated-v1.0.0
+    warnings.warn(
+        "Utility method get_or_create_spark_session() is deprecated and will be removed in v1.0.0. "
+        "Please pass your spark_config to the relevant Spark Datasource, or create your Spark Session outside of GX.",  # noqa: E501
+        category=DeprecationWarning,
+    )
 
-        builder = pyspark.SparkSession.builder
-
-        app_name: Optional[str] = spark_config.get("spark.app.name")
-        if app_name:
-            builder.appName(app_name)
-
-        for k, v in spark_config.items():
-            if k != "spark.app.name":
-                builder.config(k, v)
-
-        spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        if spark_session.sparkContext._jsc.sc().isStopped():
-            raise ValueError("SparkContext stopped unexpectedly.")
-
-    except AttributeError:
-        logger.error(
-            "Unable to load spark context; install optional spark dependency for support."
-        )
-        spark_session = None
-
-    return spark_session
+    return SparkDFExecutionEngine.get_or_create_spark_session(
+        spark_config=spark_config or {},  # type: ignore[arg-type]
+    )
 
 
-def spark_restart_required(
-    current_spark_config: List[Tuple[str, Any]], desired_spark_config: dict
-) -> bool:
-    """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
-
-    Either new "App" name or configuration change necessitates Spark session restart.
-
-    Args:
-        current_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-        desired_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
-
-    Returns: Boolean flag indicating (if True) that Spark session restart is required.
-    """
-
-    # we can't change spark context config values within databricks runtimes
-    if in_databricks():
-        return False
-
-    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
-    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
-        "spark.app.name"
-    ):
-        return True
-
-    if not {(k, v) for k, v in desired_spark_config.items()}.issubset(
-        current_spark_config
-    ):
-        return True
-
-    return False
-
-
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
+def get_sql_dialect_floating_point_infinity_value(schema: str, negative: bool = False) -> float:
     res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:

@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 2
+config_version: 3
 datasources:
   # For example, this one.
   mydatasource:
@@ -15,10 +15,10 @@ datasources:
         base_directory: ../data
 plugins_directory: plugins/
 
-
 evaluation_parameter_store_name: evaluation_parameter_store
 validations_store_name: validations_store
 expectations_store_name: expectations_store
+checkpoint_store_name: checkpoint_store
 
 stores:
   expectations_store:
@@ -27,6 +27,12 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
   validations_store:
     class_name: ValidationsStore
     store_backend:
@@ -34,8 +40,8 @@ stores:
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
-      module_name: great_expectations.data_context.store
-      class_name: EvaluationParameterStore
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
@@ -46,10 +52,6 @@ validation_operators:
         action:
           class_name: StoreValidationResultAction
           target_store_name: validations_store
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
@@ -64,7 +66,7 @@ validation_operators:
       #       class_name: SlackRenderer
 
 data_docs_sites:
-  local_site:  # this is a user-selected name - you may select your own
+  local_site: # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleFilesystemStoreBackend

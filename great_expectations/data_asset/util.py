@@ -17,7 +17,7 @@ from great_expectations.types import SerializableDictDot, SerializableDotDict
 def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
-    there is no need to specify a custom partial_unexpected_count."""
+    there is no need to specify a custom partial_unexpected_count."""  # noqa: E501
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:  # noqa: PLR5501
@@ -55,7 +55,7 @@ Usage::
 
     Our new homegrown implementation directly searches the MRO, instead
     of relying on super, and concatenates documentation together.
-"""
+"""  # noqa: E501
 
 
 class DocInherit:
@@ -101,7 +101,7 @@ def recursively_convert_to_json_serializable(
 
 
 def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
-    test_obj,
+    test_obj: Any,
 ) -> Any:
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
@@ -127,7 +127,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         for key in test_obj:
             if key == "row_condition" and test_obj[key] is not None:
                 ensure_row_condition_is_correct(test_obj[key])
-            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
+            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string  # noqa: E501
             new_dict[str(key)] = recursively_convert_to_json_serializable(test_obj[key])
 
         return new_dict
@@ -141,12 +141,12 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     elif isinstance(test_obj, (np.ndarray, pd.Index)):
         # test_obj[key] = test_obj[key].tolist()
-        # If we have an array or index, convert it first to a list--causing coercion to float--and then round
-        # to the number of digits for which the string representation will equal the float representation
-        return [recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
+        return [_recursively_convert_to_json_serializable(x) for x in test_obj.tolist()]
 
     # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
     elif test_obj is None:
         # No problem to encode json
         return test_obj
@@ -159,9 +159,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     elif np.issubdtype(type(test_obj), np.bool_):
         return bool(test_obj)
 
-    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(
-        type(test_obj), np.uint
-    ):
+    elif np.issubdtype(type(test_obj), np.integer) or np.issubdtype(type(test_obj), np.uint):
         return int(test_obj)
 
     elif np.issubdtype(type(test_obj), np.floating):
@@ -175,16 +173,14 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         value_name = test_obj.name or "value"
         return [
             {
-                index_name: recursively_convert_to_json_serializable(idx),
-                value_name: recursively_convert_to_json_serializable(val),
+                index_name: _recursively_convert_to_json_serializable(idx),
+                value_name: _recursively_convert_to_json_serializable(val),
             }
             for idx, val in test_obj.items()
         ]
 
     elif isinstance(test_obj, pd.DataFrame):
-        return recursively_convert_to_json_serializable(
-            test_obj.to_dict(orient="records")
-        )
+        return _recursively_convert_to_json_serializable(test_obj.to_dict(orient="records"))
 
     # elif np.issubdtype(type(test_obj), np.complexfloating):
     # Note: Use np.complexfloating to avoid Future Warning from numpy
@@ -222,5 +218,5 @@ def ensure_row_condition_is_correct(row_condition_string) -> None:
         )
     if "\n" in row_condition_string:
         raise InvalidExpectationConfigurationError(
-            f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."
+            f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."  # noqa: E501
         )

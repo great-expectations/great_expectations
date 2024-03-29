@@ -1,12 +1,14 @@
 from typing import Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     InvalidExpectationConfigurationError,
     QueryExpectation,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 
 
@@ -15,7 +17,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
 
     Args:
     template_dict: dict containing the following key: \
-         user_query (user query. It must contain active_batch e.g. "select * from {active_batch}")
+         user_query (user query. It must contain active_batch e.g. "select * from {batch}")
     """
 
     metric_dependencies = ("query.template_values",)
@@ -30,11 +32,16 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         "query",
     )
 
-    domain_keys = ("user_query", "batch_id", "row_condition", "condition_parser")
+    domain_keys = (
+        "template_dict",
+        "user_query",
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "value": "dummy_value",
@@ -43,11 +50,11 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         metrics = convert_to_json_serializable(data=metrics)
         query_result = list(metrics.get("query.template_values")[0].values())[0]
         value = configuration["kwargs"].get("value")

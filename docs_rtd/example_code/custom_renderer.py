@@ -31,9 +31,7 @@ class CustomPageRenderer(Renderer):
                 "subheader": subheader,
                 "styling": {
                     "classes": ["col-12"],
-                    "header": {
-                        "classes": ["alert", "alert-secondary"] if highlight else []
-                    },
+                    "header": {"classes": ["alert", "alert-secondary"] if highlight else []},
                 },
             }
         )
@@ -89,9 +87,7 @@ class CustomPageRenderer(Renderer):
 
     @classmethod
     def _get_graph_content_block(cls, header="", subheader="", col=12):
-        df = pd.DataFrame(
-            {"value": [1, 2, 3, 4, 5, 6], "count": [123, 232, 543, 234, 332, 888]}
-        )
+        df = pd.DataFrame({"value": [1, 2, 3, 4, 5, 6], "count": [123, 232, 543, 234, 332, 888]})
         bars = (
             alt.Chart(df)
             .mark_bar(size=20)
@@ -119,7 +115,7 @@ class CustomPageRenderer(Renderer):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "This is a string template with tooltip, using a top-level custom tag.",
+                    "template": "This is a string template with tooltip, using a top-level custom tag.",  # noqa: E501
                     "tag": "code",
                     "tooltip": {"content": "This is the tooltip content."},
                 },
@@ -136,7 +132,7 @@ class CustomPageRenderer(Renderer):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "$icon This is a Font Awesome Icon, using a param-level custom tag\n$red_text\n$bold_serif",
+                    "template": "$icon This is a Font Awesome Icon, using a param-level custom tag\n$red_text\n$bold_serif",  # noqa: E501
                     "params": {
                         "icon": "",
                         "red_text": "And this is red text!",
@@ -218,9 +214,7 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Bullet List Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Bullet List Content Block"
-                                ),
+                                cls._get_header_content_block(header="Bullet List Content Block"),
                                 cls._get_bullet_list_content_block(
                                     header="My Important List",
                                     subheader="Unremarkable Subheader",
@@ -232,12 +226,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Table Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Table Content Block"
-                                ),
-                                cls._get_table_content_block(
-                                    header="My Big Data Table"
-                                ),
+                                cls._get_header_content_block(header="Table Content Block"),
+                                cls._get_table_content_block(header="My Big Data Table"),
                             ],
                         }
                     ),
@@ -245,12 +235,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Value List Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Value List Content Block"
-                                ),
-                                cls._get_value_list_content_block(
-                                    header="My Name Value List"
-                                ),
+                                cls._get_header_content_block(header="Value List Content Block"),
+                                cls._get_value_list_content_block(header="My Name Value List"),
                             ],
                         }
                     ),
@@ -258,12 +244,8 @@ class CustomPageRenderer(Renderer):
                         **{
                             "section_name": "Graph Content Block",
                             "content_blocks": [
-                                cls._get_header_content_block(
-                                    header="Graph Content Block"
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My Big Data Graph"
-                                ),
+                                cls._get_header_content_block(header="Graph Content Block"),
+                                cls._get_graph_content_block(header="My Big Data Graph"),
                             ],
                         }
                     ),
@@ -296,18 +278,10 @@ class CustomPageRenderer(Renderer):
                                 cls._get_header_content_block(
                                     header="Multiple Content Block Section"
                                 ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_graph_content_block(
-                                    header="My col-4 Graph", col=4
-                                ),
-                                cls._get_table_content_block(
-                                    header="My col-6 Table", col=6
-                                ),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_graph_content_block(header="My col-4 Graph", col=4),
+                                cls._get_table_content_block(header="My col-6 Table", col=6),
                                 cls._get_bullet_list_content_block(
                                     header="My col-6 List", subheader="subheader", col=6
                                 ),

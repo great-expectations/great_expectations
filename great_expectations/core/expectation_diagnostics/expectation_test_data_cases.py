@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -33,17 +35,13 @@ class TestBackend:
             self.backend in allowed_backend_names
         ), f"backend must be one of {allowed_backend_names}, not {self.backend}"
         if self.backend != "sqlalchemy":
-            assert (
-                self.dialects is None
-            ), f"You may not specify dialects for backend {self.backend}"
+            assert self.dialects is None, f"You may not specify dialects for backend {self.backend}"
         else:
             assert (
                 isinstance(self.dialects, list) and len(self.dialects) > 0
             ), "dialects must be a list for backend sqlalchemy"
             bad_dialects = [
-                dialect
-                for dialect in self.dialects
-                if dialect not in allowed_sql_dialects
+                dialect for dialect in self.dialects if dialect not in allowed_sql_dialects
             ]
             assert (
                 bad_dialects == []
@@ -70,7 +68,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
     * Legacy test cases used "in" (a python reserved word). This has been changed to "input".
     * To maintain parallelism, we've also made the corresponding change from "out" to "output".
     * To avoid any ambiguity, ExpectationLegacyTestCaseAdapter only accepts keyword arguments. Positional arguments are not allowed.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,

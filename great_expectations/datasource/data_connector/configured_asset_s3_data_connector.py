@@ -1,12 +1,12 @@
-import logging
-from typing import List, Optional
+from __future__ import annotations
 
+import logging
+from typing import TYPE_CHECKING, List, Optional
+
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import aws
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
@@ -14,7 +14,11 @@ from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
     sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import LegacyBatchDefinition
+    from great_expectations.datasource.data_connector.asset import Asset
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +44,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         max_keys (int): S3 max_keys (default is 1000)
         boto3_options (dict): optional boto3 options
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -86,19 +90,17 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> S3BatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return S3BatchSpec(batch_spec)
 
     @override
@@ -131,9 +133,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
+    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset] = None) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
@@ -35,9 +35,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     # This is a very hacky type check.
     # A better way would be to figure out the proper parent class for dialects within SQLAlchemy
-    assert (
-        str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
-    )
+    assert str(type(batch_data.sql_engine_dialect))[:28] == "<class 'sqlalchemy.dialects."
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
@@ -84,14 +82,12 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {
-        "test_temp_view"
-    }
+    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {"test_temp_view"}
 
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
-    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
+    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True  # noqa: E501
     SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
@@ -135,7 +131,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 4
 
     # test schema with execution engine
-    # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation
+    # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation  # noqa: E501
     my_batch_spec = SqlAlchemyDatasourceBatchSpec(
         **{
             "table_name": "test_table",
@@ -172,7 +168,7 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+    (query_to_create_temp_table, _temp_table_name) = batch_data._create_temporary_table(
         dialect=GXSqlDialect.SQLITE,
         query="test_query",
         temp_table_schema_name="test_schema",
@@ -190,7 +186,7 @@ def test_instantiation_with_temp_table_schema():
         )
         (
             query_to_create_temp_table,
-            temp_table_name,
+            _temp_table_name,
         ) = batch_data._create_temporary_table(
             dialect=GXSqlDialect.SQLITE,
             query="test_query",
@@ -206,7 +202,7 @@ def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine
 
     In cases where we create a validator but explicitly set `create_temp_table`=False, we directly use the
     selectable created by SqlAlchemyExecutionEngine's _build_selectable_from_batch_spec() method.
-    """
+    """  # noqa: E501
 
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
     # only have the view that is created by the `sqlite_view_engine` fixture

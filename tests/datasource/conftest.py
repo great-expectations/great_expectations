@@ -11,7 +11,6 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
     Datasource,
     PandasDatasource,
-    SparkDFDatasource,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
@@ -22,9 +21,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import get_sqlite_connection_url
 
 
-def create_partitions_for_table(
-    glue_client, database_name: str, table_name: str, partitions: dict
-):
+def create_partitions_for_table(glue_client, database_name: str, table_name: str, partitions: dict):
     """
     This function is used to create partitions for a table in the Glue Data Catalog. It
     will create one partition per combination of partition values. Example: if we define
@@ -61,7 +58,6 @@ def test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine(
 ):
     return SparkDFExecutionEngine(
         name="test_spark_execution_engine",
-        force_reuse_spark_context=True,
     )
 
 
@@ -74,9 +70,9 @@ def glue_titanic_catalog():
             "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
         )
 
-    os.environ[
-        "AWS_DEFAULT_REGION"
-    ] = "testing"  # required when connecting to the glue client, even when mocked
+    os.environ["AWS_DEFAULT_REGION"] = (
+        "testing"  # required when connecting to the glue client, even when mocked
+    )
 
     with mock_glue():
         client = boto3.client("glue")
@@ -123,13 +119,6 @@ def glue_titanic_catalog():
 @pytest.fixture(scope="module")
 def basic_pandas_datasource():
     return PandasDatasource("basic_pandas_datasource")
-
-
-@pytest.fixture(scope="module")
-def basic_sparkdf_datasource(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    return SparkDFDatasource("basic_sparkdf_datasource")
 
 
 @pytest.fixture

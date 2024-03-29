@@ -1,8 +1,10 @@
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
@@ -19,7 +21,7 @@ def test_exception_list_content_block_renderer():
                 exception_info={
                     "raised_exception": True,
                     "exception_message": "Invalid partition object.",
-                    "exception_traceback": 'Traceback (most recent call last):\n  File "/home/user/great_expectations/great_expectations/data_asset/data_asset.py", line 186, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File " /home/user/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/home/user/great_expectations/great_expectations/dataset/dataset.py", line 3388, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+                    "exception_traceback": 'Traceback (most recent call last):\n  File "/home/user/great_expectations/great_expectations/data_asset/data_asset.py", line 186, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File " /home/user/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/home/user/great_expectations/great_expectations/dataset/dataset.py", line 3388, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',  # noqa: E501
                 },
                 expectation_config=ExpectationConfiguration(
                     expectation_type="expect_column_kl_divergence_to_be_less_than",
@@ -41,7 +43,7 @@ def test_exception_list_content_block_renderer():
             {
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "$column: $expectation_type raised an exception: $exception_message",
+                    "template": "$column: $expectation_type raised an exception: $exception_message",  # noqa: E501
                     "params": {
                         "column": "answer",
                         "expectation_type": "expect_column_kl_divergence_to_be_less_than",

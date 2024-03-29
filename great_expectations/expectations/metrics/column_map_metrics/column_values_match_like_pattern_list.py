@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -28,17 +30,13 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
             raise ValueError("match_on must be any or all")
 
         if len(like_pattern_list) == 0:
-            raise ValueError(
-                "At least one like_pattern must be supplied in the like_pattern_list."
-            )
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         like_pattern_expression = get_dialect_like_pattern_expression(
             column, _dialect, like_pattern_list[0]
         )
         if like_pattern_expression is None:
-            logger.warning(
-                f"Like patterns are not supported for dialect {_dialect.dialect.name!s}"
-            )
+            logger.warning(f"Like patterns are not supported for dialect {_dialect.dialect.name!s}")
             raise NotImplementedError
 
         if match_on == "any":

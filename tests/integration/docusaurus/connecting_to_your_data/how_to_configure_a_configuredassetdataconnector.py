@@ -38,7 +38,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource">
@@ -67,15 +69,13 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
-
-test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
 )
 
-assert test_yaml == test_python
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config),
+)
 
 context.add_datasource(**datasource_config)
 
@@ -86,9 +86,7 @@ batch_request = BatchRequest(
     data_asset_name="yellow_tripdata",
 )
 
-context.add_or_update_expectation_suite(
-    expectation_suite_name="<MY EXPECTATION SUITE NAME>"
-)
+context.add_or_update_expectation_suite(expectation_suite_name="<MY EXPECTATION SUITE NAME>")
 
 validator = context.get_validator(
     batch_request=batch_request,
@@ -131,14 +129,14 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET>/", "superconductive-docs-test"
-)
+datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-docs-test")
 datasource_yaml = datasource_yaml.replace(
     "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3">
@@ -168,18 +166,16 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "bucket"
-] = "superconductive-docs-test"
-datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "prefix"
-] = "data/taxi_yellow_tripdata_samples/"
-
-test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["bucket"] = (
+    "superconductive-docs-test"
+)
+datasource_config["data_connectors"]["default_inferred_data_connector_name"]["prefix"] = (
+    "data/taxi_yellow_tripdata_samples/"
 )
 
-assert test_yaml == test_python
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config),
+)
 
 context.add_datasource(**datasource_config)
 
@@ -216,7 +212,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python">
@@ -244,15 +242,13 @@ datasource_config = {
 # </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
-
-test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
 )
 
-assert test_yaml == test_python
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config),
+)
 
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output">
 context.add_datasource(**datasource_config)
@@ -306,7 +302,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex">
@@ -335,16 +333,15 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_one_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_one_data_asset/"
+)
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -385,7 +382,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/single_directory_two_data_assets/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 python">
@@ -418,17 +417,15 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/single_directory_two_data_assets/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/single_directory_two_data_assets/"
+)
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-# TODO: Uncomment the line below once ISSUE #3589 (https://github.com/great-expectations/great_expectations/issues/3589) is resolved
-# assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -476,7 +473,9 @@ datasource_yaml = datasource_yaml.replace(
     "<MY DIRECTORY>/", "../data/nested_directories_data_asset/"
 )
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 python">
@@ -511,16 +510,15 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/nested_directories_data_asset/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/nested_directories_data_asset/"
+)
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
@@ -564,11 +562,11 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>/", "../data/nested_directories_complex/"
-)
+datasource_yaml = datasource_yaml.replace("<MY DIRECTORY>/", "../data/nested_directories_complex/")
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 python">
@@ -605,16 +603,15 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
-datasource_config["data_connectors"]["default_configured_data_connector_name"][
-    "base_directory"
-] = "../data/nested_directories_complex/"
+datasource_config["data_connectors"]["default_configured_data_connector_name"]["base_directory"] = (
+    "../data/nested_directories_complex/"
+)
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][

@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -21,6 +22,10 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     import pandas as pd
+
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ColumnMedian(ColumnAggregateMetricProvider):
@@ -46,11 +51,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     ):
         (
             selectable,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         """SqlAlchemy Median Implementation"""
@@ -100,11 +103,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     ):
         (
             df,
-            compute_domain_kwargs,
+            _compute_domain_kwargs,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column = accessor_domain_kwargs["column"]
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
@@ -117,9 +118,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
 
         """Spark Median Implementation"""
         table_row_count = metrics["table.row_count"]
-        result = df.approxQuantile(
-            column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
-        )
+        result = df.approxQuantile(column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0)
         return np.mean(result)
 
     @classmethod

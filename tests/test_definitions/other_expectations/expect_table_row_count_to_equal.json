@@ -87,7 +87,7 @@
           },
           "out": {
             "success": false,
-            "traceback_substring": "ValueError"
+            "traceback_substring": "not a valid integer"
           }
         }
       ]

@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.rule_based_profiler.data_assistant import (
     ColumnValueMissingDataAssistant,
 )
@@ -18,7 +17,7 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 
 
 @pytest.mark.unit
-def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
+def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (  # noqa: E501
     None
 ):
     data_assistant_result: DataAssistantResult = ColumnValueMissingDataAssistantResult()
@@ -30,7 +29,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
         include_column_names=include_column_names
     )
 
-    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.  # noqa: E501
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 0
 
@@ -74,7 +73,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
             "expect_column_values_to_be_null",
         ]
         column = expectation.kwargs["column"]
-        assert expectation.kwargs["mostly"] == expected_results[column]["mostly"]
+        assert expectation.kwargs.get("mostly", 1.0) == expected_results[column]["mostly"]
         assert expectation.expectation_type == expected_results[column]["expectation"]
 
 
@@ -82,7 +81,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
 def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_batch(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -102,9 +101,7 @@ def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_bat
         "expectation_configuration_builders"
     ]
     for builder in expectation_configuration_builders:
-        validation_parameter_builder_configs = builder[
-            "validation_parameter_builder_configs"
-        ]
+        validation_parameter_builder_configs = builder["validation_parameter_builder_configs"]
         assert len(validation_parameter_builder_configs) == 1
         assert validation_parameter_builder_configs[0]["mode"] == "multi_batch"
 
@@ -138,9 +135,7 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
         "expectation_configuration_builders"
     ]
     for builder in expectation_configuration_builders:
-        validation_parameter_builder_configs = builder[
-            "validation_parameter_builder_configs"
-        ]
+        validation_parameter_builder_configs = builder["validation_parameter_builder_configs"]
         assert len(validation_parameter_builder_configs) == 1
         assert validation_parameter_builder_configs[0]["mode"] == "single_batch"
 
@@ -154,7 +149,7 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
 
     Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
     compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html, specifically the dot case e.g. `a.b`.
-    """
+    """  # noqa: E501
 
     columns = ["snake_case", "kebab-case", "dot.case"]
     values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
@@ -170,7 +165,7 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
         batch_request=batch_request, exclude_column_names=["snake_case", "kebab-case"]
     )
 
-    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
+    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.  # noqa: E501
     # Other metrics should pass.
     assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
         "column_value_missing_rule"
@@ -179,5 +174,5 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
         data_assistant_result.rule_exception_tracebacks["column_value_missing_rule"][
             "exception_message"
         ]
-        == "Column names cannot contain '.' when computing parameters for unexpected count statistics."
+        == "Column names cannot contain '.' when computing parameters for unexpected count statistics."  # noqa: E501
     )

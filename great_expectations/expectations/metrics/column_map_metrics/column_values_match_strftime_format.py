@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from great_expectations.compatibility import pyspark
@@ -24,7 +26,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 return True
             except TypeError:
                 raise TypeError(
-                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."  # noqa: E501
                 )
             except ValueError:
                 return False
@@ -33,7 +35,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, strftime_format, **kwargs):
-        # Below is a simple validation that the provided format can both format and parse a datetime object.
+        # Below is a simple validation that the provided format can both format and parse a datetime object.  # noqa: E501
         # %D is an example of a format that can format but not parse, e.g.
         try:
             datetime.strptime(  # noqa: DTZ007
@@ -51,7 +53,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 return True
             except TypeError:
                 raise TypeError(
-                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+                    "Values passed to expect_column_values_to_match_strftime_format must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."  # noqa: E501
                 )
             except ValueError:
                 return False

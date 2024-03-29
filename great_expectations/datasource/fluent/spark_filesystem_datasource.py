@@ -4,8 +4,8 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -23,9 +23,7 @@ logger = logging.getLogger(__name__)
 @public_api
 class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[FilesystemDataConnector]
-    ] = FilesystemDataConnector
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = FilesystemDataConnector
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",
@@ -47,11 +45,15 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
 
         Raises:
             TestConnectionError: If the connection test fails.
-        """
+        """  # noqa: E501
+        # tests Filesystem connection
         if not self.base_directory.exists():
             raise TestConnectionError(
                 f"base_directory path: {self.base_directory.resolve()} does not exist."
             )
+
+        # tests Spark connection, raising TestConnectionError
+        super().test_connection()
 
         if self.assets and test_assets:
             for asset in self.assets:

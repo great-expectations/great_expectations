@@ -1,20 +1,17 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import altair as alt
 import pandas as pd
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -32,6 +29,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -85,8 +89,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -97,12 +99,14 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
-    """
+    """  # noqa: E501
+
+    value_set: Union[list, set, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -114,21 +118,10 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("value_set",)
 
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "parse_strings_as_datetimes": False,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
@@ -152,7 +145,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
-                template_str = "distinct values must belong to a set, but that set is not specified."
+                template_str = (
+                    "distinct values must belong to a set, but that set is not specified."
+                )
         else:
             array_param_name = "value_set"
             param_prefix = "v__"
@@ -168,13 +163,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             )
 
             if renderer_configuration.include_column_name:
-                template_str = (
-                    f"$column distinct values must belong to this set: {value_set_str}."
-                )
+                template_str = f"$column distinct values must belong to this set: {value_set_str}."
             else:
-                template_str = (
-                    f"distinct values must belong to this set: {value_set_str}."
-                )
+                template_str = f"distinct values must belong to this set: {value_set_str}."
 
         renderer_configuration.template_str = template_str
 
@@ -203,23 +194,19 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
-                template_str = "distinct values must belong to a set, but that set is not specified."
+                template_str = (
+                    "distinct values must belong to a set, but that set is not specified."
+                )
 
         else:
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
             if renderer_configuration.include_column_name:
-                template_str = (
-                    f"$column distinct values must belong to this set: {values_string}."
-                )
+                template_str = f"$column distinct values must belong to this set: {values_string}."
             else:
-                template_str = (
-                    f"distinct values must belong to this set: {values_string}."
-                )
+                template_str = f"distinct values must belong to this set: {values_string}."
 
         if params["row_condition"] is not None:
             (
@@ -229,9 +216,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(
@@ -260,12 +245,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             values = value_count_dicts.index.tolist()
             counts = value_count_dicts.tolist()
         else:
-            values = [
-                value_count_dict["value"] for value_count_dict in value_count_dicts
-            ]
-            counts = [
-                value_count_dict["count"] for value_count_dict in value_count_dicts
-            ]
+            values = [value_count_dict["value"] for value_count_dict in value_count_dicts]
+            counts = [value_count_dict["count"] for value_count_dict in value_count_dicts]
 
         df = pd.DataFrame(
             {
@@ -309,9 +290,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "Value Counts",
-                            "tooltip": {
-                                "content": "expect_column_distinct_values_to_be_in_set"
-                            },
+                            "tooltip": {"content": "expect_column_distinct_values_to_be_in_set"},
                             "tag": "h6",
                         },
                     }
@@ -325,58 +304,17 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
         return new_block
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates configuration for the Expectation.
-
-        For `expect_column_distinct_values_to_be_in_set` we require that the `configuraton.kwargs` contain
-        a `value_set` key that is either a `list`, `set`, or `dict`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
-        value_set = self.get_success_kwargs(configuration).get("value_set") or []
+        value_set = self._get_success_kwargs().get("value_set") or []
 
-        if parse_strings_as_datetimes:
-            parsed_value_set = parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
+        parsed_value_set = value_set
 
         expected_value_set = set(parsed_value_set)
 

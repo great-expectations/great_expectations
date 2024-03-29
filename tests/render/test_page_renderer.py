@@ -4,77 +4,66 @@ import re
 import mistune
 import pytest
 
-from great_expectations import DataContext
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.render import RenderedContent, RenderedDocumentContent
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
 pytestmark = pytest.mark.filesystem
 
 
-def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
-    empty_data_context,
-):
-    context: DataContext = empty_data_context
+def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
+        ExpectationSuite(name="test", notes="*hi*")
+    )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
+    assert RenderedContent.rendered_content_list_to_json(result.text) == [
+        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*hi*",
+            "styling": {"parent": {}},
+        },
+    ]
+
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
+            name="test",
+            notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*hi*",
+        {
+            "content_block_type": "markdown",
+            "markdown": "*alpha*",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "_bravo_",
+            "styling": {"parent": {}},
+        },
+        {
+            "content_block_type": "markdown",
+            "markdown": "charlie",
+            "styling": {"parent": {}},
+        },
     ]
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
-            data_context=context,
-        )
-    )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
-    assert RenderedContent.rendered_content_list_to_json(result.text) == [
-        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
-    ]
-
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.STRING,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
-        )
-    )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
-    assert RenderedContent.rendered_content_list_to_json(result.text) == [
-        "This Expectation suite currently contains 0 total Expectations across 0 columns.",
-        "*alpha*",
-        "_bravo_",
-        "charlie",
-    ]
-
-    result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": "*alpha*"}},
-            data_context=context,
+            name="test",
+            notes="*alpha*",
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -97,14 +86,8 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={
-                "notes": {
-                    "format": MetaNotesFormat.MARKDOWN,
-                    "content": ["*alpha*", "_bravo_", "charlie"],
-                }
-            },
-            data_context=context,
+            name="test",
+            notes=["*alpha*", "_bravo_", "charlie"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -138,16 +121,12 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
         ]
 
 
-def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes(
-    empty_data_context,
-):
-    context: ExpectationSuite = empty_data_context
+def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=None,
-            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -157,9 +136,8 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
-            meta={"notes": {"format": MetaNotesFormat.MARKDOWN, "content": ["hi"]}},
-            data_context=context,
+            name="test",
+            notes=["hi"],
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -182,7 +160,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
-            expectation_suite_name="test",
+            name="test",
             meta={},
             expectations=[
                 ExpectationConfiguration(
@@ -196,7 +174,6 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
                     expectation_type="expect_column_to_exist", kwargs={"column": "y"}
                 ),
             ],
-            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text)[0])
@@ -236,7 +213,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
         "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
+                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501
                 "params": {
                     "suite_title": "Expectation Suite:",
                     "data_asset": "Data asset:",
@@ -244,7 +221,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
                     "success": "Failed",
-                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',
+                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',  # noqa: E501
                 },
                 "styling": {
                     "params": {
@@ -252,9 +229,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                         "status_title": {"classes": ["h6"]},
                         "expectation_suite_name": {
                             "tag": "a",
-                            "attributes": {
-                                "href": "../../../../expectations/default.html"
-                            },
+                            "attributes": {"href": "../../../../expectations/default.html"},
                         },
                     },
                     "classes": ["mb-0", "mt-1"],
@@ -409,9 +384,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                     "styling": {"parent": {"classes": []}},
                     "string_template": {
                         "template": "$value",
-                        "params": {
-                            "value": "project_dir/project_path/data/titanic/Titanic.csv"
-                        },
+                        "params": {"value": "project_dir/project_path/data/titanic/Titanic.csv"},
                         "styling": {"default": {"styles": {"word-break": "break-all"}}},
                     },
                 },
@@ -441,11 +414,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "engine"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                             {
@@ -454,11 +423,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "python"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                         ],
@@ -469,11 +434,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "sep"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                             {
@@ -482,11 +443,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "None"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                         ],
@@ -535,45 +492,37 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     titanic_profiled_evrs_1,
     ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
 
     # replace version of vega-lite in res to match snapshot test
-    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
-        "table"
-    ][10][2]["content_blocks"][1]
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1]["table"][10][2][
+        "content_blocks"
+    ][1]
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-    assert (
-        rendered_validation_results
-        == ValidationResultsPageRenderer_render_with_run_info_at_end
-    )
+    assert rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_end
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     titanic_profiled_evrs_1,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=False
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=False)
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
 
     # replace version of vega-lite in res to match snapshot test
-    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
-        "table"
-    ][10][2]["content_blocks"][1]
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1]["table"][10][2][
+        "content_blocks"
+    ][1]
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
     assert (
-        rendered_validation_results
-        == ValidationResultsPageRenderer_render_with_run_info_at_start
+        rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_start
     )

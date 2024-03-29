@@ -39,17 +39,18 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute histogram using specified metric for one Batch of data.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
-        "column_partition_metric_single_batch_parameter_builder_config",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricSingleBatchParameterBuilder.exclude_field_names
+        | {
+            "column_partition_metric_single_batch_parameter_builder_config",
+            "metric_name",
+            "metric_domain_kwargs",
+            "metric_value_kwargs",
+            "enforce_numeric_metric",
+            "replace_nan_with_zero",
+            "reduce_scalar_metric",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -57,9 +58,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         bins: str = "uniform",
         n_bins: int = 10,
         allow_relative_error: bool = False,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -75,7 +74,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
 
         self._column_partition_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
@@ -126,10 +125,10 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
-        # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        """  # noqa: E501
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"  # noqa: E501
+        # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(  # noqa: E501
             domain=domain,
             parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
             expected_return_type=None,
@@ -140,10 +139,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        if (
-            domain.domain_type == MetricDomainTypes.COLUMN
-            and "." in domain.domain_kwargs["column"]
-        ):
+        if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
             raise gx_exceptions.ProfilerExecutionError(
                 "Column names cannot contain '.' when computing the histogram metric."
             )
@@ -153,29 +149,31 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} into bins encountered empty or non-existent \
 elements.
-"""
+"""  # noqa: E501
             )
 
         if not _is_iterable_of_numeric_dtypes(bins):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
-"""
+"""  # noqa: E501
             )
 
-        # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).
+        # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).  # noqa: E501
         bins = sorted(set(bins))
 
-        column_values_nonnull_count_metric_single_batch_parameter_builder = MetricSingleBatchParameterBuilder(
-            name="column_values_nonnull_count_metric_single_batch_parameter_builder",
-            metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
-            data_context=self.data_context,
+        column_values_nonnull_count_metric_single_batch_parameter_builder = (
+            MetricSingleBatchParameterBuilder(
+                name="column_values_nonnull_count_metric_single_batch_parameter_builder",
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+                data_context=self.data_context,
+            )
         )
         column_values_nonnull_count_metric_single_batch_parameter_builder.build_parameters(
             domain=domain,
@@ -185,8 +183,8 @@ elements.
             batch_request=self.batch_request,
             runtime_configuration=runtime_configuration,
         )
-        # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(  # noqa: E501
             domain=domain,
             parameter_reference=column_values_nonnull_count_metric_single_batch_parameter_builder.raw_fully_qualified_parameter_name,
             expected_return_type=None,
@@ -220,9 +218,7 @@ elements.
         weights: np.ndarray = np.asarray(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
         ) / (
-            column_values_nonnull_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            column_values_nonnull_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
             + NP_EPSILON
         )
         tail_weights: float = (1.0 - sum(weights)) / 2.0

@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.expectation_configuration import (
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
@@ -39,9 +40,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def __init__(
         self,
         expectation_type: str,
-        validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
@@ -55,7 +54,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
             data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
-        """
+        """  # noqa: E501
 
         super().__init__(data_context=data_context)
 
@@ -70,11 +69,11 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         Since ExpectationConfigurationBuilderConfigSchema allows arbitrary fields (as ExpectationConfiguration kwargs)
         to be provided, they must be all converted to public property accessors and/or public fields in order for all
         provisions by Builder, SerializableDictDot, and DictDot to operate properly in compliance with their interfaces.
-        """
+        """  # noqa: E501
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'  # noqa: E501
             )
 
     def build_expectation_configuration(  # noqa: PLR0913
@@ -85,7 +84,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         """
         Args:
             domain: Domain object that is context for execution of this ParameterBuilder object.
@@ -97,7 +96,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
 
         Returns:
             ExpectationConfiguration object.
-        """
+        """  # noqa: E501
         self.resolve_validation_dependencies(
             domain=domain,
             variables=variables,
@@ -107,9 +106,23 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             runtime_configuration=runtime_configuration,
         )
 
-        return self._build_expectation_configuration(
+        config = self._build_expectation_configuration(
             domain=domain, variables=variables, parameters=parameters
         )
+        if config:
+            return self._roundtrip_config_through_expectation(domain=domain, config=config)
+        return None
+
+    def _roundtrip_config_through_expectation(
+        self, domain: Domain, config: ExpectationConfiguration
+    ) -> ExpectationConfiguration:
+        """
+        Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
+        """  # noqa: E501
+        expectation_cls = get_expectation_impl(config.expectation_type)
+        kwargs = {**config.kwargs, **domain.domain_kwargs}
+        expectation = expectation_cls(**kwargs, meta=config.meta)
+        return expectation.configuration
 
     def resolve_validation_dependencies(  # noqa: PLR0913
         self,
@@ -143,7 +156,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> ExpectationConfiguration:
+    ) -> ExpectationConfiguration | None:
         pass
 
     @property
@@ -170,9 +183,7 @@ def init_rule_expectation_configuration_builders(
 
 
 def init_expectation_configuration_builder(
-    expectation_configuration_builder_config: Union[
-        ExpectationConfigurationBuilder, dict
-    ],
+    expectation_configuration_builder_config: Union[ExpectationConfigurationBuilder, dict],
     data_context: Optional[AbstractDataContext] = None,
 ) -> ExpectationConfigurationBuilder:
     if not isinstance(expectation_configuration_builder_config, dict):
@@ -180,12 +191,12 @@ def init_expectation_configuration_builder(
             expectation_configuration_builder_config.to_dict()
         )
 
-    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
+    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(  # noqa: E501
         config=expectation_configuration_builder_config,
         runtime_environment={"data_context": data_context},
         config_defaults={
             "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
         },
     )
     return expectation_configuration_builder

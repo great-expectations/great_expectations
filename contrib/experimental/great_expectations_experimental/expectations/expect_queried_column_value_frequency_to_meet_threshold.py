@@ -4,9 +4,8 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Optional, Union
+from typing import List, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -15,17 +14,24 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 
 
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
 
+    column: str
+    threshold: Union[float, List[float]]
+    value: Union[str, List[str]]
+
     metric_dependencies = ("query.column",)
 
     query = """
             SELECT {col},
-            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
-            FROM {active_batch}
+            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {batch})
+            FROM {batch}
             GROUP BY {col}
             """
 
@@ -40,7 +46,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "column": None,
@@ -59,11 +64,14 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
         try:
             assert value is not None, "'value' must be specified"
-            assert (isinstance(threshold, (int, float)) and 0 < threshold <= 1) or (
-                isinstance(threshold, list)
-                and all(isinstance(x, (int, float)) for x in threshold)
-                and all(0 < x <= 1 for x in threshold)
-                and 0 < sum(threshold) <= 1
+            assert (
+                (isinstance(threshold, (int, float)) and 0 < threshold <= 1)
+                or (
+                    isinstance(threshold, list)
+                    and all(isinstance(x, (int, float)) for x in threshold)
+                    and all(0 < x <= 1 for x in threshold)
+                    and 0 < sum(threshold) <= 1
+                )
             ), "'threshold' must be 1, a float between 0 and 1, or a list of floats whose sum is between 0 and 1"
             if isinstance(threshold, list):
                 assert isinstance(value, list) and len(value) == len(
@@ -74,28 +82,22 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")
         query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
-            success = all(
-                query_result[value[i]] >= threshold[i] for i in range(len(value))
-            )
+            success = all(query_result[value[i]] >= threshold[i] for i in range(len(value)))
 
             return {
                 "success": success,
-                "result": {
-                    "observed_value": [
-                        query_result[value[i]] for i in range(len(value))
-                    ]
-                },
+                "result": {"observed_value": [query_result[value[i]] for i in range(len(value))]},
             }
 
         success = query_result[value] >= threshold

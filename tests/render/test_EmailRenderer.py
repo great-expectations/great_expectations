@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core.batch import BatchDefinition, IDDict
+from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -37,38 +37,34 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
     assert rendered_output == expected_output
 
     # not configured
     notify_with = ["fake_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
 
     assert rendered_output == expected_output
 
 
 def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
-    batch_definition = BatchDefinition(
+    batch_definition = LegacyBatchDefinition(
         datasource_name="test_datasource",
         data_connector_name="test_dataconnector",
         data_asset_name="test_data_asset",
@@ -96,31 +92,27 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
     notify_with = ["local_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
     assert rendered_output == expected_output
 
     # not configured
     notify_with = ["fake_site"]
-    rendered_output = EmailRenderer().render(
-        validation_result_suite, data_docs_pages, notify_with
-    )
+    rendered_output = EmailRenderer().render(validation_result_suite, data_docs_pages, notify_with)
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',  # noqa: E501
     )
 
     assert rendered_output == expected_output

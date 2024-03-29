@@ -19,10 +19,12 @@ from typing import (
 )
 
 import pytest
+from moto import mock_s3
 from pytest import MonkeyPatch
 from typing_extensions import override
 
 import great_expectations as gx
+from great_expectations.compatibility import aws
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -53,10 +55,10 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 if TYPE_CHECKING:
     import responses
+    from botocore.client import BaseClient as BotoBaseClient
     from pytest import FixtureRequest
 
     from great_expectations.data_context import CloudDataContext
-
 
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
@@ -68,7 +70,7 @@ logger = logging.getLogger(__name__)
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
+    partitioner_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -76,14 +78,14 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
-        splitter_query_response: An optional list of dictionaries. Each dictionary is a row returned
-            from the splitter query. The keys are the column names and the value is the column values,
+        partitioner_query_response: An optional list of dictionaries. Each dictionary is a row returned
+            from the partitioner query. The keys are the column names and the value is the column values,
             eg: [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
-    """
+    """  # noqa: E501
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, create_temp_table: bool = True, *args, **kwargs):
-            # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
+            # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in  # noqa: E501
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
             self.engine = MockSaEngine(dialect=Dialect(dialect))
@@ -96,20 +98,20 @@ def sqlachemy_execution_engine_mock_cls(
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
-        def execute_split_query(self, split_query):
+        def execute_partitioned_query(self, partitioned_query):
             class Row:
                 def __init__(self, attributes):
                     for k, v in attributes.items():
                         setattr(self, k, v)
 
-            # We know that splitter_query_response is non-empty because of validation
+            # We know that partitioner_query_response is non-empty because of validation
             # at the top of the outer function.
-            # In some cases, such as in the datetime splitters,
-            # a dictionary is returned our from out splitter query with the key as the parameter_name.
+            # In some cases, such as in the datetime partitioners,
+            # a dictionary is returned our from out partitioner query with the key as the parameter_name.  # noqa: E501
             # Otherwise, a list of values is returned.
-            if isinstance(splitter_query_response[0], dict):
-                return [Row(row_dict) for row_dict in splitter_query_response]
-            return splitter_query_response
+            if isinstance(partitioner_query_response[0], dict):
+                return [Row(row_dict) for row_dict in partitioner_query_response]
+            return partitioner_query_response
 
     return MockSqlAlchemyExecutionEngine
 
@@ -218,9 +220,7 @@ def empty_contexts(
     request: FixtureRequest,
     cloud_storage_get_client_doubles,
 ) -> FileDataContext | CloudDataContext:
-    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
-        request.param
-    )
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(request.param)
     return context_fixture
 
 
@@ -235,6 +235,28 @@ def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
     return fluent_gx_config_yml.read_text()
 
 
+@pytest.fixture()
+def aws_region_name() -> str:
+    return "us-east-1"
+
+
+@pytest.fixture(scope="function")
+def aws_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monkeypatch ENV AWS Credentials for moto."""
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "testing")
+
+
+@pytest.fixture
+def s3_mock(aws_credentials, aws_region_name: str) -> Generator[BotoBaseClient, None, None]:
+    with mock_s3():
+        client = aws.boto3.client("s3", region_name=aws_region_name)
+        yield client
+
+
 class _TestClientDummy:
     pass
 
@@ -243,9 +265,7 @@ _CLIENT_DUMMY = _TestClientDummy()
 
 
 def _get_test_client_dummy(*args, **kwargs) -> _TestClientDummy:
-    logger.debug(
-        f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}"
-    )
+    logger.debug(f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}")
     return _CLIENT_DUMMY
 
 
@@ -291,10 +311,8 @@ def cloud_storage_get_client_doubles(
 
     gcs
     azure
-    """
-    logger.warning(
-        "Patching cloud storage _get_*_client() methods to return client test doubles"
-    )
+    """  # noqa: E501
+    logger.warning("Patching cloud storage _get_*_client() methods to return client test doubles")
 
 
 @pytest.fixture
@@ -305,9 +323,7 @@ def filter_data_connector_build_warning():
 
 
 @pytest.fixture
-def fluent_only_config(
-    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
-) -> GxConfig:
+def fluent_only_config(fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
     fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
     assert fluent_config.datasources
@@ -343,9 +359,7 @@ def seeded_file_context(
     fluent_yaml_config_file: pathlib.Path,
     seed_ds_env_vars: tuple,
 ) -> FileDataContext:
-    context = gx.get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
+    context = gx.get_context(context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -393,7 +407,5 @@ def seeded_contexts(
     request: FixtureRequest,
 ):
     """Parametrized fixture for seeded File and Cloud DataContexts."""
-    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
-        request.param
-    )
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(request.param)
     return context_fixture

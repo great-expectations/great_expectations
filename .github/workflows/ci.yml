@@ -1,10 +1,10 @@
 name: ci
 
-# This pipeline is intended to facilicate the full coverage of tests for OSS GX.
+# This pipeline is intended to facilitate the full coverage of tests for OSS GX.
 # A "reasonable" set of tests will run on every pull request, and a full set will run with:
 #   1. Manual triggering
 #   2. Every 3 hours
-#   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
+#   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
 on:
   merge_group:
@@ -17,10 +17,16 @@ on:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
-  workflow_dispatch:  # allows manual triggering with branch picker
+  workflow_dispatch: # allows manual triggering with branch picker
   push:
+    # Semantic versioning syntax defined by PyPI: https://pythonpackaging.info/07-Package-Release.html#Versioning-your-code
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+      # Stable release syntax
+      - "[0-9]+.[0-9]+.[0-9]+"
+      # Prerelease syntax
+      - "[0-9]+.[0-9]+.[0-9]+a[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -70,33 +76,13 @@ jobs:
       - name: Marker-coverage-check
         run: invoke marker-coverage
 
-  docs-changes:
-    # check whether docs were changed
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    outputs:
-      docs: ${{ steps.filter.outputs.docs }}
-    steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          docs:
-            - 'docs/**'
-            - 'tests/integration/docusaurus/**'
-            - 'tests/integration/fixtures/**'
-            - 'tests/test_sets/**'
-
   docs-snippets:
-    needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
+    needs: [unit-tests, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -109,7 +95,7 @@ jobs:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
-      GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
+      GOOGLE_APPLICATION_CREDENTIALS: "gcp-credentials.json"
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -174,7 +160,15 @@ jobs:
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
       - name: Run the tests
-        run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose
+        run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
+
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: ${{ matrix.doc-step }}
 
   unit-tests:
     strategy:
@@ -200,7 +194,15 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
+
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: ${{ matrix.python-version }}
 
   doc-checks:
     needs: [static-analysis]
@@ -231,17 +233,19 @@ jobs:
         run: python ci/checks/check_integration_test_gets_run.py
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
-      - name: public_api_report
-        run: invoke public-api
+      # Disabling public_api_report during V1 development; should be re-enabled upon completion of public API audit
+      # - name: public_api_report
+      #   run: invoke public-api
       - name: link_checker
-        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
-    needs: [doc-checks, docs-changes]
-    # run on non-draft PRs with docs changes
+    needs: [doc-checks]
+    # run on non-draft PRs
     if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
+      github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -257,6 +261,7 @@ jobs:
       - name: Build docs
         env:
           NODE_OPTIONS: --max_old_space_size=4096
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   cloud-tests:
@@ -269,6 +274,17 @@ jobs:
     env:
       GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
       PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
+      AUTH0_DOMAIN: ${{secrets.AUTH0_DOMAIN}}
+      AUTH0_API_AUDIENCE: ${{secrets.AUTH0_API_AUDIENCE}}
+      AUTH0_MERCURY_API_CLIENT_ID: ${{secrets.AUTH0_MERCURY_API_CLIENT_ID}}
+      AUTH0_MERCURY_API_CLIENT_SECRET: ${{secrets.AUTH0_MERCURY_API_CLIENT_SECRET}}
+      GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
+      GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
+      PACT_DO_NOT_TRACK: true
+      SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
+      SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+      LOGGING_LEVEL: DEBUG
+      ENVIRONMENT: local
 
     steps:
       - name: Checkout
@@ -302,44 +318,28 @@ jobs:
           docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150 && \
           docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
 
+      - name: Show logs for debugging
+        if: failure()
+        run: |
+          docker compose -f assets/docker/mercury/docker-compose.yml logs
+
       - name: Run the tests
-        env:
-          AUTH0_DOMAIN: ${{secrets.AUTH0_DOMAIN}}
-          AUTH0_API_AUDIENCE: ${{secrets.AUTH0_API_AUDIENCE}}
-          AUTH0_MERCURY_API_CLIENT_ID: ${{secrets.AUTH0_MERCURY_API_CLIENT_ID}}
-          AUTH0_MERCURY_API_CLIENT_SECRET: ${{secrets.AUTH0_MERCURY_API_CLIENT_SECRET}}
-          GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
-          GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
-          PACT_DO_NOT_TRACK: true
-          SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
-          SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
-          LOGGING_LEVEL: DEBUG
-          ENVIRONMENT: local
-        run: invoke ci-tests 'cloud' --up-services --verbose
+        run:
+          invoke ci-tests 'cloud' --up-services --verbose  --reports -W default::great_expectations.datasource.fluent.GxInvalidDatasourceWarning
 
-      - name: Get mercury version
-        run: |
-          curl -s ''${GX_CLOUD_BASE_URL}'/status' | \
-            python3 -c "import os, sys, json; api_version=json.load(sys.stdin)['api_version']; os.system(f'echo api_version={api_version}');" \
-            >> $GITHUB_OUTPUT
-        id: get_mercury_version
-
-      - name: Verify endpoint contracts
-        run: |
-          pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} \
-            --pact-url=tests/integration/cloud/rest_contracts/pacts/great_expectations-mercury.json \
-            --pact-broker-url=https://greatexpectations.pactflow.io/ \
-            --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} \
-            --provider=mercury \
-            --provider-version-branch=develop \
-            --provider-app-version=${{ steps.get_mercury_version.outputs.api_version }}
-
+          # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: cloud
 
   marker-tests:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-    # aws
+      # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -362,7 +362,6 @@ jobs:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - aws_deps
           - big
-          - cli
           - databricks
           - filesystem
           - mssql
@@ -378,10 +377,8 @@ jobs:
           # prevents this https://github.com/rhysd/actionlint/issues/237
           - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
-          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.9' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.10' }}
-          - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
 
     steps:
       - name: Checkout
@@ -402,7 +399,15 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose  --reports
+
+      # upload coverage report to codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: great-expectations/great_expectations
+          flags: "${{ matrix.python-version }} ${{ matrix.markers }}"
 
   py38-min-versions:
     needs: [unit-tests, static-analysis]
@@ -494,7 +499,7 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
-  airflow220-min-versions:
+  airflow-min-versions:
     needs: [unit-tests, static-analysis]
     runs-on: ubuntu-latest
     steps:
@@ -507,7 +512,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: requirements.txt
       - name: Install dependencies
-        run: pip install . -c ci/constraints-test/airflow220-min-install.txt
+        run: pip install . -c ci/constraints-test/airflow-min-install.txt
       - name: Run the test
         # ensure the great_expectations can be imported and a context created
         run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
@@ -536,45 +541,24 @@ jobs:
       - name: Import Great Expectations
         run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
 
-  usage_stats_integration:
-    needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.8"
-          cache: "pip"
-          cache-dependency-path: requirements.txt
-      - name: Install Great Expectations with core deps only
-        run: pip install . --constraint constraints-dev.txt -r reqs/requirements-dev-test.txt
-      - name: Usage Stats Integration Test
-        env:
-          GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-        # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
-        run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-
   build-n-publish:
-    needs: [
-      ci-is-on-main-repo,
-      doc-checks,
-      static-analysis,
-      docs-snippets,
-      unit-tests,
-      cloud-tests,
-      marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
-      py311-min-versions,
-      pydantic-v1,
-      airflow220-min-versions,
-      import_gx,
-      usage_stats_integration
-    ]
+    needs:
+      [
+        ci-is-on-main-repo,
+        doc-checks,
+        static-analysis,
+        docs-snippets,
+        unit-tests,
+        cloud-tests,
+        marker-tests,
+        py38-min-versions,
+        py39-min-versions,
+        py310-min-versions,
+        py311-min-versions,
+        pydantic-v1,
+        airflow-min-versions,
+        import_gx,
+      ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
@@ -588,7 +572,7 @@ jobs:
       - name: Set up Python 3.8
         uses: actions/setup-python@v3
         with:
-          python-version: '3.8'
+          python-version: "3.8"
       - name: Update pip
         run: python -m pip install --upgrade pip
       - name: Install Twine and Wheel, and prepare packaging
@@ -606,24 +590,24 @@ jobs:
           skip-existing: true # prevent against pushing duplicate versions
 
   notify_on_failure:
-    needs: [
-      ci-is-on-main-repo,
-      doc-checks,
-      static-analysis,
-      docs-snippets,
-      unit-tests,
-      cloud-tests,
-      marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
-      py311-min-versions,
-      pydantic-v1,
-      airflow220-min-versions,
-      import_gx,
-      usage_stats_integration,
-      build-n-publish
-    ]
+    needs:
+      [
+        ci-is-on-main-repo,
+        doc-checks,
+        static-analysis,
+        docs-snippets,
+        unit-tests,
+        cloud-tests,
+        marker-tests,
+        py38-min-versions,
+        py39-min-versions,
+        py310-min-versions,
+        py311-min-versions,
+        pydantic-v1,
+        airflow-min-versions,
+        import_gx,
+        build-n-publish,
+      ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:

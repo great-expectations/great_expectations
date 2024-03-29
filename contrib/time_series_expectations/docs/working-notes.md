@@ -1,4 +1,5 @@
 ### TimeSeriesExpectations
+
 Expectations for detecting trends, seasonality, outliers, etc. in time series data
 
 Author: Abe Gong ([abegong](https://github.com/abegong))
@@ -18,35 +19,33 @@ WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
 ```
 
 ### Overview
+
 This package contains...
 
-* Four Data Assistants for creating time series Expectations: Freshness, Volume, BatchLevelTimeSeries, and RowLevelTimeSeries.
-* Expectations for detecting trends, seasonality, outliers, etc. in time series data
-* Abstract Base Classses for creating additional time series Expectations.
-* Methods for generating time series data for testing purposes.
-* Methods for pulling illustrative data from real-world sources.
-
+- Four Data Assistants for creating time series Expectations: Freshness, Volume, BatchLevelTimeSeries, and RowLevelTimeSeries.
+- Expectations for detecting trends, seasonality, outliers, etc. in time series data
+- Abstract Base Classses for creating additional time series Expectations.
+- Methods for generating time series data for testing purposes.
+- Methods for pulling illustrative data from real-world sources.
 
 ### Installation
 
 `time_series_expectations` has optional dependencies on several time series packages:
 
-* [Prophet]({link})
-* [`statsmodels`]({link})
-* [`NeuralProphet`]({link})
-* [`pmdarima`]({link})
+- [Prophet]({link})
+- [`statsmodels`]({link})
+- [`NeuralProphet`]({link})
+- [`pmdarima`]({link})
 
 Each of these package has its own dependencies, strengths, and weaknesses. Please visit your favorite search engine and/or these external links for more information.
 
-* ...
-* https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/
-* https://neptune.ai/blog/arima-vs-prophet-vs-lstm
-
+- ...
+- https://www.machinelearningplus.com/time-series/arima-model-time-series-forecasting-python/
+- https://neptune.ai/blog/arima-vs-prophet-vs-lstm
 
 You can install any of those packages like this: `pip install time_series_expectations[prophet, statsmodels]`
 
 Technically, `pip install time_series_expectations` is also allowed. But if you don't specify a time series dependency at all, very few of the Expectations in this package will work.
-
 
 ### Data Assistants and Usage
 
@@ -54,7 +53,7 @@ This module contains four new DataAssistants, which serve as the primary entry p
 
 Warning: These docs assume that you have completed the Great Expectations onboarding tutorial, and are familiar with basic concepts including [Expectations](link), [DataAssistants](link), and [DataSources](link).
 
-* Freshness : "I always want to know how fresh my data is"
+- Freshness : "I always want to know how fresh my data is"
 
 ```
 freshness_expectation_suite = context.assistants.freshness.profile_data_asset(
@@ -62,7 +61,7 @@ freshness_expectation_suite = context.assistants.freshness.profile_data_asset(
 )
 ```
 
-* Volume: "I want to know if data is arriving at the expected rate"
+- Volume: "I want to know if data is arriving at the expected rate"
 
 ```
 volume_expectation_suite = context.assistants.volume.profile_data_asset(
@@ -70,7 +69,7 @@ volume_expectation_suite = context.assistants.volume.profile_data_asset(
 )
 ```
 
-* BatchLevelTimeSeries: "I have a data asset with multiple batches arriving over time. I want to learn what patterns are normal in that data, and then monitor it for anomalies"
+- BatchLevelTimeSeries: "I have a data asset with multiple batches arriving over time. I want to learn what patterns are normal in that data, and then monitor it for anomalies"
 
 ```
 time_series_expectation_suite = context.assistants.time_series_by_batch.profile_data_asset(
@@ -89,13 +88,13 @@ time_series_expectation_suite = context.assistants.time_series_by_batch.profile_
 )
 ```
 
-* RowLevelTimeSeries: "I have numeric time series data in a table, file, etc. I want to learn what patterns are normal in that data, and then monitor it for anomalies"
+- RowLevelTimeSeries: "I have numeric time series data in a table, file, etc. I want to learn what patterns are normal in that data, and then monitor it for anomalies"
 
 time_series_expectation_suite = context.assistants.time_series_by_row.profile_data_asset(
-    context.sources.my_db.assets.my_table,
-    date_column="created_at",
-    columns=["foo", "bar", "baz"],
-    metrics=["mean", "median", "sum", "percent_null"]
+context.sources.my_db.assets.my_table,
+date_column="created_at",
+columns=["foo", "bar", "baz"],
+metrics=["mean", "median", "sum", "percent_null"]
 )
 
 ### New Expectations
@@ -104,10 +103,9 @@ This module introduces several new Expectations, inheriting from some new abstra
 
 You can learn more about the Expectations in the Expectation gallery, [here](link).
 
-
 ### Abstract Base Classes
 
-The most important ABCs are [BatchAggregateStatisticTimeSeriesExpectation](link), [ColumnAggregateTimeSeriesExpectation](link), and  [ColumnPairTimeSeriesExpectation](link). They allow time series models to be applied to data in a variety of shapes and formats. Please see the class docstrings for more detailed explanation.
+The most important ABCs are [BatchAggregateStatisticTimeSeriesExpectation](link), [ColumnAggregateTimeSeriesExpectation](link), and [ColumnPairTimeSeriesExpectation](link). They allow time series models to be applied to data in a variety of shapes and formats. Please see the class docstrings for more detailed explanation.
 
 The full class hierarchy is:
 
@@ -150,12 +148,13 @@ The full class hierarchy is:
                 expect_column_pair_values_to_match_prophet_date_model
                 expect_column_pair_values_to_match_prophet_timestamp_model
                 expect_column_pair_values_to_match_arima_model
-        
+
+
 Formatting conventions:
 
-* Abstract base classes are in camel case, and marked with (ABC).
-* Concrete classes are in snake case.
-* Classes from the core Expectations library are in *italics*.
+- Abstract base classes are in camel case, and marked with (ABC).
+- Concrete classes are in snake case.
+- Classes from the core Expectations library are in _italics_.
 
 ### Methods for generating synthetic time series data
 

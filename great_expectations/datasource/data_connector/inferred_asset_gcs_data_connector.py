@@ -1,16 +1,20 @@
-import logging
-from typing import List, Optional
+from __future__ import annotations
 
+import logging
+from typing import TYPE_CHECKING, List, Optional
+
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import google
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import LegacyBatchDefinition
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +51,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         gcs_options: Options passed to the GCS Storage Client.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -88,17 +92,13 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_file(
-                        filename=filename
-                    )
+                credentials = google.service_account.Credentials.from_service_account_file(
+                    filename=filename
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = (
-                    google.service_account.Credentials.from_service_account_info(
-                        info=info
-                    )
+                credentials = google.service_account.Credentials.from_service_account_info(
+                    info=info
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
@@ -107,25 +107,21 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             )
 
     @override
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
+    def build_batch_spec(self, batch_definition: LegacyBatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
         Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
+            batch_definition (LegacyBatchDefinition): to be used to build batch_spec
 
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
+        batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
             "prefix": self._prefix,
@@ -144,9 +140,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         template_arguments: dict = {

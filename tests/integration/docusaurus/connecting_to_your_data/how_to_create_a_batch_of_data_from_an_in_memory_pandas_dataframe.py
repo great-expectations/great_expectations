@@ -2,7 +2,6 @@
 import pandas as pd
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -12,19 +11,15 @@ yaml: YAMLHandler = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_context">
-context: DataContext = gx.get_context()
+context = gx.get_context()
 # </snippet>
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py create_expectation_suite">
-context.add_expectation_suite(
-    expectation_suite_name="insert_your_expectation_suite_name_here"
-)
+context.add_expectation_suite(expectation_suite_name="insert_your_expectation_suite_name_here")
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_expectation_suite">
-suite: ExpectationSuite = context.get_expectation_suite(
-    expectation_suite_name="insert_your_expectation_suite_name_here"
-)
+suite: ExpectationSuite = context.suites.get(name="insert_your_expectation_suite_name_here")
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py datasource_yaml">

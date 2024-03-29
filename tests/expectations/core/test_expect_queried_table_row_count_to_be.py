@@ -1,13 +1,12 @@
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING
 
 import pytest
-from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (  # noqa: E501
     ExpectQueriedTableRowCountToBe,  # noqa: F401 # needed for expectation registration
 )
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import build_in_memory_runtime_context
 from great_expectations.validator.validator import (
@@ -54,21 +53,17 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 @pytest.mark.parametrize(
@@ -103,22 +98,18 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            query=query,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        query=query,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -141,26 +132,21 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,
         context=context,
     )
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed
 
 
 # noinspection PyUnusedLocal
@@ -169,7 +155,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     [
         (
             True,
-            "SELECT COUNT (*) FROM (SELECT * FROM {active_batch} LIMIT 100)",
+            "SELECT COUNT (*) FROM (SELECT * FROM {batch} LIMIT 100)",
             100,
             100,
             'col("Age")>17',
@@ -184,29 +170,23 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     observed,
     row_condition,
     spark_session,
-    basic_spark_df_execution_engine,
     titanic_df,
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,
         context=context,
     )
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_table_row_count_to_be(
-            value=value,
-            query=query,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
-        )
+    result: ExpectationValidationResult = validator.expect_queried_table_row_count_to_be(
+        value=value,
+        query=query,
+        row_condition=row_condition,
+        condition_parser="great_expectations__experimental__",
     )
 
-    assert (
-        result["success"] is success and result["result"]["observed_value"] == observed
-    )
+    assert result["success"] is success and result["result"]["observed_value"] == observed

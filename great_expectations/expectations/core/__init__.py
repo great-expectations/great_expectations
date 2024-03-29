@@ -8,7 +8,7 @@ from .expect_column_distinct_values_to_equal_set import (
     ExpectColumnDistinctValuesToEqualSet,
 )
 from .expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
+    ExpectColumnKLDivergenceToBeLessThan,
 )
 from .expect_column_max_to_be_between import ExpectColumnMaxToBeBetween
 from .expect_column_mean_to_be_between import ExpectColumnMeanToBeBetween
@@ -16,9 +16,6 @@ from .expect_column_median_to_be_between import ExpectColumnMedianToBeBetween
 from .expect_column_min_to_be_between import ExpectColumnMinToBeBetween
 from .expect_column_most_common_value_to_be_in_set import (
     ExpectColumnMostCommonValueToBeInSet,
-)
-from .expect_column_pair_cramers_phi_value_to_be_less_than import (
-    ExpectColumnPairCramersPhiValueToBeLessThan,
 )
 from .expect_column_pair_values_a_to_be_greater_than_b import (
     ExpectColumnPairValuesAToBeGreaterThanB,

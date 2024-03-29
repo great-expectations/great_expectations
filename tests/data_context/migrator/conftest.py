@@ -11,16 +11,14 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
-from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
 class StubUsageStats:
-    def __init__(
-        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
+    def __init__(self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig):
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
 
     @property
@@ -30,7 +28,7 @@ class StubUsageStats:
 
 class StubCheckpointStore:
     def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
-        return CheckpointConfig(name=name, class_name="Checkpoint")
+        return CheckpointConfig(name=name)
 
 
 class StubValidationsStore:
@@ -87,7 +85,6 @@ class StubBaseDataContext:
         ] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
-        profiler_names: Tuple[Optional[str]] = ("my_profiler",),
         validation_results_keys: Tuple[Optional[str]] = ("some_key",),
         datasource_names: Tuple[Optional[str]] = ("my_datasource",),
     ):
@@ -99,7 +96,6 @@ class StubBaseDataContext:
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
         self._checkpoint_names = checkpoint_names
         self._expectation_suite_names = expectation_suite_names
-        self._profiler_names = profiler_names
         self._validation_results_keys = validation_results_keys
         self._datasource_names = datasource_names
 
@@ -134,10 +130,7 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {
-            datasource_name: DummyDatasource()
-            for datasource_name in self._datasource_names
-        }
+        return {datasource_name: DummyDatasource() for datasource_name in self._datasource_names}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -150,17 +143,16 @@ class StubBaseDataContext:
     def list_expectation_suite_names(self) -> List[str]:
         return list(self._expectation_suite_names)
 
-    def get_expectation_suite(self, name: str) -> ExpectationSuite:
-        return ExpectationSuite(expectation_suite_name=name)
+    @property
+    def suites(self):
+        class _MockSuites:
+            def get(self, name: str) -> ExpectationSuite:
+                return ExpectationSuite(name=name)
+
+        return _MockSuites()
 
     def list_checkpoints(self) -> List[str]:
         return list(self._checkpoint_names)
-
-    def list_profilers(self) -> List[str]:
-        return list(self._profiler_names)
-
-    def get_profiler(self, name: str) -> RuleBasedProfiler:
-        return RuleBasedProfiler(name, config_version=1.0, rules={})
 
 
 @pytest.fixture
@@ -171,13 +163,9 @@ def stub_base_data_context() -> StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
-    StubBaseDataContext
-):
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
     return StubBaseDataContext(
-        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
-            enabled=False
-        )
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=False)
     )
 
 
@@ -192,6 +180,7 @@ def empty_serialized_configuration_bundle() -> dict:
         "data_context_id": "27517569-1500-4127-af68-b5bad960a492",
         "checkpoints": [],
         "data_context_variables": {
+            "checkpoint_store_name": None,
             "config_variables_file_path": None,
             "config_version": 3.0,
             "data_docs_sites": None,
@@ -202,14 +191,14 @@ def empty_serialized_configuration_bundle() -> dict:
                 "expectation_validation_result": False,
                 "globally": False,
             },
-            "notebooks": None,
             "plugins_directory": None,
-            "stores": {},
+            "profiler_store_name": None,
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
+            "validation_operators": None,
             "validations_store_name": None,
         },
         "datasources": [],
         "expectation_suites": [],
-        "profilers": [],
         "validation_results": {},
     }
 
@@ -220,20 +209,14 @@ def serialized_configuration_bundle() -> dict:
         "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
         "checkpoints": [
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
-                "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
                 "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": None,
-                "ge_cloud_id": None,
-                "profilers": [],
-                "run_name_template": None,
+                "id": None,
                 "runtime_configuration": {},
-                "template_name": None,
                 "validations": [],
             }
         ],
@@ -243,14 +226,16 @@ def serialized_configuration_bundle() -> dict:
             "data_docs_sites": None,
             "evaluation_parameter_store_name": None,
             "expectations_store_name": None,
+            "checkpoint_store_name": None,
+            "profiler_store_name": None,
             "include_rendered_content": {
                 "expectation_suite": False,
                 "expectation_validation_result": False,
                 "globally": False,
             },
-            "notebooks": None,
             "plugins_directory": None,
-            "stores": {},
+            "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
+            "validation_operators": None,
             "validations_store_name": None,
         },
         "datasources": [
@@ -267,20 +252,9 @@ def serialized_configuration_bundle() -> dict:
         ],
         "expectation_suites": [
             {
-                "data_asset_type": None,
-                "expectation_suite_name": "my_suite",
+                "name": "my_suite",
                 "expectations": [],
-                "ge_cloud_id": None,
-            }
-        ],
-        "profilers": [
-            {
-                "class_name": "RuleBasedProfiler",
-                "config_version": 1.0,
-                "module_name": "great_expectations.rule_based_profiler",
-                "name": "my_profiler",
-                "rules": {},
-                "variables": {},
+                "id": None,
             }
         ],
         "validation_results": {
@@ -301,7 +275,5 @@ def stub_serialized_configuration_bundle(
 ) -> dict:
     """Configuration bundle based on StubBaseDataContext."""
     assert "data_context_id" in serialized_configuration_bundle
-    serialized_configuration_bundle[
-        "data_context_id"
-    ] = StubBaseDataContext.DATA_CONTEXT_ID
+    serialized_configuration_bundle["data_context_id"] = StubBaseDataContext.DATA_CONTEXT_ID
     return serialized_configuration_bundle

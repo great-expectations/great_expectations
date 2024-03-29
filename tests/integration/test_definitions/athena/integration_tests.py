@@ -14,70 +14,70 @@ connecting_to_your_data = [
     IntegrationTestFixture(
         name="awsathena_test_python",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
+        user_flow_script="docs/docusaurus/docs/snippets/athena_python_example.py",
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
         util_script="tests/test_utils.py",
     ),
 ]
 
-split_data = [
+partition_data = [
     IntegrationTestFixture(
-        name="split_data_on_whole_table_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        name="partition_data_on_whole_table_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_whole_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
     IntegrationTestFixture(
-        name="split_data_on_column_value_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        name="partition_data_on_column_value_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
     IntegrationTestFixture(
-        name="split_data_on_divided_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        name="partition_data_on_divided_integer_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_divided_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
     IntegrationTestFixture(
-        name="split_data_on_mod_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        name="partition_data_on_mod_integer_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_mod_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_awsathena",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -86,41 +86,41 @@ split_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),
     #     backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     # ),
     IntegrationTestFixture(
-        name="split_data_on_multi_column_values_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        name="partition_data_on_multi_column_values_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_multi_column_values.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
     IntegrationTestFixture(
-        name="split_data_on_datetime_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        name="partition_data_on_datetime_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_datetime_and_day_part.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_awsathena",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
@@ -129,7 +129,7 @@ split_data = [
     #     util_script="tests/test_utils.py",
     #     other_files=(
     #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",  # noqa: E501
     #             "connection_string.yml",
     #         ),
     #     ),
@@ -146,7 +146,7 @@ sample_data = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "tests/integration/fixtures/partition_and_sample_data/awsathena_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -155,5 +155,5 @@ sample_data = [
 ]
 
 athena_integration_tests += connecting_to_your_data
-athena_integration_tests += split_data
+athena_integration_tests += partition_data
 athena_integration_tests += sample_data

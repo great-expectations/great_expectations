@@ -1,19 +1,23 @@
+from __future__ import annotations
+
 import json
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context.types.resource_identifiers import (
+        ValidationResultIdentifier,
+    )
 
 
 class ValidationOperatorResult(DictDot):
@@ -33,7 +37,7 @@ class ValidationOperatorResult(DictDot):
             "actions_results": {}
         }
     }
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -52,8 +56,7 @@ class ValidationOperatorResult(DictDot):
         self._validation_operator_config = validation_operator_config
         if success is None:
             self._success = all(
-                run_result["validation_result"].success
-                for run_result in run_results.values()
+                run_result["validation_result"].success for run_result in run_results.values()
             )
         else:
             self._success = success
@@ -120,7 +123,7 @@ class ValidationOperatorResult(DictDot):
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
-                    validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                    validation_result_identifier.expectation_suite_identifier.name
                     for validation_result_identifier in self.run_results.keys()
                 }
             )
@@ -137,8 +140,7 @@ class ValidationOperatorResult(DictDot):
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
-                    run_result["validation_result"]
-                    for run_result in self.run_results.values()
+                    run_result["validation_result"] for run_result in self.run_results.values()
                 ]
             return self._validation_results
         elif group_by == "validation_result_identifier":
@@ -183,17 +185,12 @@ class ValidationOperatorResult(DictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_kwargs"].get("data_asset_name")
-                        == data_asset_name
+                        if data_asset["batch_kwargs"].get("data_asset_name") == data_asset_name
                     ]
-            self._validation_results_by_data_asset_name = (
-                validation_results_by_data_asset_name
-            )
+            self._validation_results_by_data_asset_name = validation_results_by_data_asset_name
         return self._validation_results_by_data_asset_name
 
-    def list_data_assets_validated(
-        self, group_by: Optional[str] = None
-    ) -> Union[List[dict], dict]:
+    def list_data_assets_validated(self, group_by: Optional[str] = None) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:
                 self._data_assets_validated = list(
@@ -210,9 +207,7 @@ class ValidationOperatorResult(DictDot):
             for validation_result in self.list_validation_results():
                 batch_kwargs = validation_result.meta["batch_kwargs"]
                 batch_id = BatchKwargs(batch_kwargs).to_id()
-                expectation_suite_name = validation_result.meta[
-                    "expectation_suite_name"
-                ]
+                expectation_suite_name = validation_result.meta["expectation_suite_name"]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
                         "batch_kwargs": batch_kwargs,
@@ -223,9 +218,9 @@ class ValidationOperatorResult(DictDot):
                     assets_validated_by_batch_id[batch_id]["validation_results"].append(
                         validation_result
                     )
-                    assets_validated_by_batch_id[batch_id][
-                        "expectation_suite_names"
-                    ].append(expectation_suite_name)
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(
+                        expectation_suite_name
+                    )
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
         return self._data_assets_validated_by_batch_id
 
@@ -240,9 +235,7 @@ class ValidationOperatorResult(DictDot):
                     if validation_result.success
                 ]
             )
-            unsuccessful_validation_count = (
-                validation_result_count - successful_validation_count
-            )
+            unsuccessful_validation_count = validation_result_count - successful_validation_count
             successful_validation_percent = (
                 validation_result_count
                 and (successful_validation_count / validation_result_count) * 100

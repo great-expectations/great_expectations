@@ -84,10 +84,8 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
         "__none__",
     )
 
-    validation_result_identifier_no_run_id_no_batch_identifier = (
-        ValidationResultIdentifier(
-            expectation_suite_identifier, RunIdentifier(None), None
-        )
+    validation_result_identifier_no_run_id_no_batch_identifier = ValidationResultIdentifier(
+        expectation_suite_identifier, RunIdentifier(None), None
     )
     assert validation_result_identifier_no_run_id_no_batch_identifier.to_tuple() == (
         "my",

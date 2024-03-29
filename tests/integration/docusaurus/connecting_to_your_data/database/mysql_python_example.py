@@ -58,15 +58,11 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from test_ci.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
-        "reader_options": {
-            "pool_size": 5
-        }  # NOTE: create_engine arguments may be passed here
+        "reader_options": {"pool_size": 5}  # NOTE: create_engine arguments may be passed here
     },
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -79,9 +75,7 @@ batch_request = BatchRequest(
     data_asset_name="test_ci.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.

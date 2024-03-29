@@ -2,12 +2,14 @@
 """A command-line tool used to check links in docusaurus markdown documentation
 
 To check all of our markdown documentation, from the repo root run:
-python ./docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
+python ./docs/checks/docs_link_checker.py -p docs -r docs -sr static -s docs -sp static --skip-external
 
 The above command:
     - -p docs (also --path): The path to the markdown files you want to check. For example, if you wanted to check only the tutorial files, you could specify docs/tutorials
     - -r docs (also --docs-root): The root of the docs folder, used to resolve absolute and docroot paths
+    - -sr static (also --static-root): The root of the static assets folder, used to resolve absolute paths for images
     - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
+    - -sp static (also --static-prefix): The site static folder prefix, used to resolve abosulte image paths
     - --skip-external: If present, external (http) links are not checked
 """
 from __future__ import annotations
@@ -49,9 +51,11 @@ class LinkChecker:
 
     def __init__(
         self,
-        docs_path: pathlib.Path,
-        docs_root: pathlib.Path,
+        docs_path: str,
+        docs_root: str,
+        static_root: str,
         site_prefix: str,
+        static_prefix: str,
         skip_external: bool = False,
     ):
         """Initializes LinkChecker
@@ -60,11 +64,14 @@ class LinkChecker:
             docs_path: The directory of markdown (.md) files whose links you want to check
             docs_root: The root directory, used to resolve absolute and docroot paths
             site_prefix: The top-level folder (ex: /docs) used to resolve absolute links to local files
+            static_prefix: The top-level static folder (ex: /static) used to resolve absolute image links to local files
             skip_external: Whether or not to skip checking external (http..) links
         """
-        self._docs_path = docs_path
-        self._docs_root = docs_root
+        self._docs_path = docs_path.strip(os.path.sep)
+        self._docs_root = docs_root.strip(os.path.sep)
+        self._static_root = static_root.strip(os.path.sep)
         self._site_prefix = site_prefix.strip("/")
+        self._static_prefix = static_prefix.strip("/")
         self._skip_external = skip_external
 
         markdown_link_regex = r"!?\[(.*)\]\((.*?)\)"  # inline links, like [Description](link), images start with !
@@ -87,6 +94,9 @@ class LinkChecker:
         )
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
+        absolute_file_regex = rf"(?!(\/{site_prefix}\/))\/\S+\.mdx?(#[^'\"]+)?"
+        self._absolute_file_pattern = re.compile(absolute_file_regex)
+
         # docroot links start without a . or a slash
         docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
         self._docroot_link_pattern = re.compile(docroot_link_regex)
@@ -95,7 +105,7 @@ class LinkChecker:
         relative_link_regex = r"^(?P<path>\.\.?[\.\w\/-]+\.md)(?:#\S+)?$"
         self._relative_link_pattern = re.compile(relative_link_regex)
 
-        absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+\.\w{3,4})$"
+        absolute_image_regex = r"^\/(?P<path>[\w\/-]+\.\w{3,4})$"
         self._absolute_image_pattern = re.compile(absolute_image_regex)
 
         # ending with a 3-4 character suffix
@@ -147,9 +157,13 @@ class LinkChecker:
     def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
         return self._docs_root.joinpath(path).resolve()
 
-    def _get_relative_path(
-        self, file: pathlib.Path, path: pathlib.Path
-    ) -> pathlib.Path:
+    def _get_absolute_path(self, path: str) -> str:
+        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
+
+    def _get_absolute_static_path(self, path: str) -> str:
+        return os.path.join(self._static_root, self._get_os_path(path))
+
+    def _get_relative_path(self, file: str, path: str) -> str:
         # link should be relative to the location of the current file
         return file.parent / path
 
@@ -185,8 +199,8 @@ class LinkChecker:
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
-        image_file = self._get_absolute_path(path)
-        if not image_file.is_file():
+        image_file = self._get_absolute_static_path(path)
+        if not os.path.isfile(image_file):  # noqa: PTH113
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -243,6 +257,7 @@ class LinkChecker:
         - Relative links that begin with either . or .. and have a .md suffix
         - Relative images with an image suffix
         - Docroot links that begin with a character (neither . or /) are relative to the doc root (ex: /docs) and have a .md suffix
+        - Absolute file paths for markdown files
 
         Args:
             match: A positive match of a markdown link (ex: [...](...)) or image
@@ -279,6 +294,10 @@ class LinkChecker:
                     result = self._check_absolute_link(
                         link, file, match.group("path"), match.group("version")
                     )
+                elif match := self._absolute_file_pattern.match(link):  # type: ignore[assignment]
+                    # This could be more robust like the other checks, but the level of complexity will be high for versioned_docs,
+                    # and we should be able to just set onBrokenMarkdownLinks: 'error'
+                    result = None
                 else:
                     match = self._docroot_link_pattern.match(link)  # type: ignore[assignment]
                     if match:
@@ -336,27 +355,46 @@ class LinkChecker:
     help="Root to all docs for link checking",
 )
 @click.option(
+    "--static-root",
+    "-sr",
+    type=click.Path(exists=True, file_okay=False),
+    default="docs/docusaurus/static",
+    help="Root (static folder) to all images for link validating",
+)
+@click.option(
     "--site-prefix",
     "-s",
     default="docs",
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
+@click.option(
+    "--static-prefix",
+    "-sp",
+    default="static",
+    help="Top-most folder in the site URL for resolving absolute image paths",
+)
 @click.option("--skip-external", is_flag=True)
 def scan_docs_click(
-    path: pathlib.Path,
-    docs_root: Optional[pathlib.Path],
+    path: str,
+    docs_root: Optional[str],
+    static_root: str,
     site_prefix: str,
+    static_prefix: str,
     skip_external: bool,
 ) -> None:
-    code, message = scan_docs(path, docs_root, site_prefix, skip_external)
+    code, message = scan_docs(
+        path, docs_root, static_root, site_prefix, static_prefix, skip_external
+    )
     click.echo(message)
     sys.exit(code)
 
 
 def scan_docs(
-    path: pathlib.Path,
-    docs_root: pathlib.Path | None,
+    path: str,
+    docs_root: Optional[str],
+    static_root: str,
     site_prefix: str,
+    static_prefix: str,
     skip_external: bool,
 ) -> tuple[int, str]:
     if not docs_root:
@@ -365,8 +403,10 @@ def scan_docs(
         return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
-    result: List[LinkReport] = []
-    checker = LinkChecker(path, docs_root, site_prefix, skip_external)
+    result: List[LinkReport] = list()
+    checker = LinkChecker(
+        path, docs_root, static_root, site_prefix, static_prefix, skip_external
+    )
 
     if path.is_dir():
         # if the path is a directory, get all .md files within it

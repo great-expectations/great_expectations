@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import json
 from typing import Any, Set, TypeVar, Union
@@ -24,9 +26,7 @@ class IDDict(dict):
             return f"{key}={self[key]!s}"
 
         _id_dict = convert_to_json_serializable(data={k: self[k] for k in id_keys})
-        return hashlib.md5(
-            json.dumps(_id_dict, sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return hashlib.md5(json.dumps(_id_dict, sort_keys=True).encode("utf-8")).hexdigest()
 
     @override
     def __hash__(self) -> int:  # type: ignore[override]
@@ -36,21 +36,18 @@ class IDDict(dict):
 
 
 def deep_convert_properties_iterable_to_id_dict(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, IDDict]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_id_dict(source=IDDict(source))
 
-    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.  # noqa: E501
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
         element: Any
         return data_type(
-            [
-                deep_convert_properties_iterable_to_id_dict(source=element)
-                for element in source
-            ]
+            [deep_convert_properties_iterable_to_id_dict(source=element) for element in source]
         )
 
     return source
@@ -67,10 +64,7 @@ def _deep_convert_properties_iterable_to_id_dict(source: dict) -> IDDict:
 
             element: Any
             source[key] = data_type(
-                [
-                    deep_convert_properties_iterable_to_id_dict(source=element)
-                    for element in value
-                ]
+                [deep_convert_properties_iterable_to_id_dict(source=element) for element in value]
             )
 
     return IDDict(source)

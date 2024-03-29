@@ -29,7 +29,7 @@ def files_with_deprecation_warnings() -> List[str]:
         "great_expectations/compatibility/pyspark.py",
         "great_expectations/compatibility/sqlalchemy_and_pandas.py",
         "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
-        "great_expectations/rule_based_profiler/altair/encodings.py",  # ignoring because of imprecise matching logic
+        "great_expectations/rule_based_profiler/altair/encodings.py",  # ignoring because of imprecise matching logic  # noqa: E501
     ]
     for file_to_exclude in files_to_exclude:
         if file_to_exclude in files:
@@ -79,9 +79,8 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     with open(deployment_version_path) as f:
         current_version = f.read().strip()
 
-    current_parsed_version: version.Version = cast(
-        version.Version, version.parse(current_version)
-    )
+    current_parsed_version: version.Version = cast(version.Version, version.parse(current_version))
+    current_major_version: int = current_parsed_version.major
     current_minor_version: int = current_parsed_version.minor
 
     unneeded_deprecation_warnings: List[Tuple[str, str]] = []
@@ -91,23 +90,22 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
 
         matches: List[str] = regex_for_deprecation_comments.findall(contents)
         for match in matches:
-            parsed_version: version.Version = cast(
-                version.Version, version.parse(match)
-            )
+            parsed_version: version.Version = cast(version.Version, version.parse(match))
+            major_version: int = parsed_version.major
             minor_version: int = parsed_version.minor
-            if current_minor_version - minor_version > 2:
+            if (current_major_version - major_version > 0) and (
+                current_minor_version - minor_version > 2
+            ):
                 unneeded_deprecation_warning: Tuple[str, str] = (file, match)
                 unneeded_deprecation_warnings.append(unneeded_deprecation_warning)
 
     if unneeded_deprecation_warnings:
-        print(
-            "\nThe following deprecation warnings must be cleared per the code style guide:"
-        )
+        print("\nThe following deprecation warnings must be cleared per the code style guide:")
         for file, version_ in unneeded_deprecation_warnings:
             print(f"{file} - v{version_}")
 
     # Chetan - 20220316 - Once v0.16.0 lands, this should be cleaned up and made 0.
     if len(unneeded_deprecation_warnings) > UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD:
         raise ValueError(
-            f"Found {len(unneeded_deprecation_warnings)} warnings but threshold is {UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD}; please adjust accordingly"
+            f"Found {len(unneeded_deprecation_warnings)} warnings but threshold is {UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD}; please adjust accordingly"  # noqa: E501
         )

@@ -1,11 +1,14 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.compatibility.pydantic import (
+    root_validator,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -28,18 +31,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251
@@ -47,6 +38,12 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -75,8 +72,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -87,7 +82,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -98,7 +93,12 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
-    """
+    """  # noqa: E501
+
+    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -117,180 +117,24 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "strict_min",
         "strict_max",
         "mostly",
-        "auto",
-        "profiler_config",
     )
 
-    column_min_length_range_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_min_length_range_estimator",
-        metric_name="column_values.length.min",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    column_max_length_range_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_max_length_range_estimator",
-        metric_name="column_values.length.max",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_min_length_range_estimator_parameter_builder_config,
-        column_max_length_range_estimator_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_value_lengths_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_value_lengths_to_be_between_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                    "strict_min": False,
-                    "strict_max": False,
-                    "estimator": "exact",
-                    "include_estimator_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": 0,
-                        "upper_bound": None,
-                    },
-                    "round_decimals": 0,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_value_lengths_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "strict_min": f"{VARIABLES_KEY}strict_min",
-                        "strict_max": f"{VARIABLES_KEY}strict_max",
-                        "meta": {
-                            "profiler_details": {
-                                "column_min_range_estimator": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                                "column_max_range_estimator": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "min_value": None,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
-    }
     args_keys = (
         "column",
         "min_value",
         "max_value",
     )
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
-        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
-        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
-
-         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-         superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-
-        configuration = configuration or self.configuration
-
-        try:
-            assert (
-                configuration.kwargs.get("min_value") is not None
-                or configuration.kwargs.get("max_value") is not None
-            ), "min_value and max_value cannot both be None"
-            if configuration.kwargs.get("min_value"):
-                assert (
-                    isinstance(configuration.kwargs["min_value"], dict)
-                    or float(configuration.kwargs.get("min_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("min_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "min_value"
-                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
-
-            if configuration.kwargs.get("max_value"):
-                assert (
-                    isinstance(configuration.kwargs["max_value"], dict)
-                    or float(configuration.kwargs.get("max_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("max_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "max_value"
-                    ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+    @root_validator
+    def _validate_min_or_max_set(cls, values):
+        min_value = values.get("min_value")
+        max_value = values.get("max_value")
+        if min_value is None and max_value is None:
+            raise ValueError("min_value and max_value cannot both be None")
+        return values
 
     @classmethod
-    def _prescriptive_template(  # noqa: PLR0912
+    def _prescriptive_template(  # noqa: C901, PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -321,23 +165,27 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
                 if params.min_value and params.max_value:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
                 else:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params.min_value and params.max_value:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
                 elif not params.min_value:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
                 else:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -349,7 +197,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -390,28 +238,30 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."  # noqa: E501
 
                 elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."  # noqa: E501
             else:  # noqa: PLR5501
                 if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."  # noqa: E501
 
                 elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
+                    template_str = (
+                        f"values must always be {at_most_str} $max_value characters long."
+                    )
 
                 elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                    template_str = (
+                        f"values must always be {at_least_str} $min_value characters long."
+                    )
 
         if include_column_name:
             template_str = f"$column {template_str}"

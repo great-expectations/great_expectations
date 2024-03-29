@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
-#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
-#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
+#  However, right now, the Batch from the legacy design is imported into execution engines of the new design.  # noqa: E501
+#  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>  # noqa: E501
 # TODO: <Alex>See also "great_expectations/core/batch.py".</Alex>
 # TODO: <Alex>The following class is part of the new design.</Alex>
 class BatchMarkers(BatchSpec):
     """A BatchMarkers is a special type of BatchSpec (so that it has a batch_fingerprint) but it generally does
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
-    process, such as the timestamp at which a query was executed."""
+    process, such as the timestamp at which a query was executed."""  # noqa: E501
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -41,15 +41,12 @@ class BatchMarkers(BatchSpec):
 
 class PandasBatchSpecProtocol(Protocol):
     @property
-    def reader_method(self) -> str:
-        ...
+    def reader_method(self) -> str: ...
 
     @property
-    def reader_options(self) -> dict:
-        ...
+    def reader_options(self) -> dict: ...
 
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        ...
+    def to_json_dict(self) -> dict[str, JSONValues]: ...
 
 
 class PandasBatchSpec(SerializableDotDict, BatchSpec, PandasBatchSpecProtocol):
@@ -108,9 +105,7 @@ class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
         return self.get("reader_options") or {}
 
 
-FabricReaderMethods: TypeAlias = Literal[
-    "read_table", "evaluate_measure", "evaluate_dax"
-]
+FabricReaderMethods: TypeAlias = Literal["read_table", "evaluate_measure", "evaluate_dax"]
 
 
 class FabricBatchSpec(PandasBatchSpecProtocol):
@@ -149,7 +144,7 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
             return getattr(fabric, self.reader_method)
         except AttributeError:
             raise AttributeError(
-                f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"
+                f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"  # noqa: E501
             )
 
 
@@ -186,9 +181,7 @@ class RuntimeDataBatchSpec(BatchSpec):
         super().__init__(*args, **kwargs)
 
         if self.batch_data is None:
-            raise InvalidBatchSpecError(
-                "RuntimeDataBatchSpec batch_data cannot be None"
-            )
+            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")
 
     @property
     def batch_data(self):
@@ -219,13 +212,9 @@ class GlueDataCatalogBatchSpec(BatchSpec):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "database_name" not in self:
-            raise InvalidBatchSpecError(
-                "GlueDataCatalogBatchSpec requires a database_name"
-            )
+            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a database_name")
         if "table_name" not in self:
-            raise InvalidBatchSpecError(
-                "GlueDataCatalogBatchSpec requires a table_name"
-            )
+            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a table_name")
 
     @property
     def reader_method(self) -> str:

@@ -17,7 +17,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.expectations.metrics import (
     MapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (
+from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (  # noqa: E501
     _spark_column_map_condition_values,
     _sqlalchemy_column_map_condition_values,
 )
@@ -29,7 +29,7 @@ from tests.expectations.test_util import get_table_columns_metric
 def mini_taxi_df() -> pd.DataFrame:
     """
     Returns: pandas dataframe that contains a small selection of columns and rows from taxi_data, for unittesting.
-    """
+    """  # noqa: E501
     df = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4],
@@ -66,9 +66,7 @@ def sql_execution_engine_with_mini_taxi_loaded(sa, mini_taxi_df):
         con=sqlite_engine,
         index=False,
     )
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine
-    )
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(engine=sqlite_engine)
     return execution_engine
 
 
@@ -81,8 +79,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
     spark_df = spark_session.createDataFrame(
         [
             tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
+                None if isinstance(x, (float, int)) and np.isnan(x) else x for x in record.tolist()
             )
             for record in pandas_df.to_records(index=False)
         ],
@@ -96,9 +93,7 @@ def spark_execution_engine_with_mini_taxi_loaded(spark_session, mini_taxi_df):
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_table_name(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_table_name(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with `table_name`
     batch_data = SqlAlchemyBatchData(
@@ -110,9 +105,7 @@ def sql_execution_engine_with_mini_taxi_table_name(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_query(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_query(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with query
     batch_data = SqlAlchemyBatchData(
@@ -124,9 +117,7 @@ def sql_execution_engine_with_mini_taxi_query(
 
 
 @pytest.fixture
-def sql_execution_engine_with_mini_taxi_selectable(
-    sa, sql_execution_engine_with_mini_taxi_loaded
-):
+def sql_execution_engine_with_mini_taxi_selectable(sa, sql_execution_engine_with_mini_taxi_loaded):
     execution_engine = sql_execution_engine_with_mini_taxi_loaded
     # BatchData created with Selectable
     batch_data = SqlAlchemyBatchData(
@@ -138,8 +129,8 @@ def sql_execution_engine_with_mini_taxi_selectable(
 
 
 # We calculate the column_values.between.condition with min value 0.0 and max value 10.0.
-# when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).
-# when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).
+# when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).  # noqa: E501
+# when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).  # noqa: E501
 @pytest.mark.sqlite
 @pytest.mark.parametrize(
     "execution_engine_fixture_name",
@@ -180,7 +171,6 @@ def test_sqlalchemy_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "allow_cross_type_comparisons": None,
         "result_format": {
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
@@ -194,7 +184,7 @@ def test_sqlalchemy_column_map_condition_values(
         metric_value_kwargs=metric_value_kwargs,
     )
 
-    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.  # noqa: E501
     table_columns_metric, table_column_metrics_results = get_table_columns_metric(
         execution_engine=execution_engine
     )
@@ -255,7 +245,6 @@ def test_spark_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "allow_cross_type_comparisons": None,
         "result_format": {
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
@@ -269,7 +258,7 @@ def test_spark_column_map_condition_values(
         metric_value_kwargs=metric_value_kwargs,
     )
 
-    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.  # noqa: E501
     table_columns_metric, table_column_metrics_results = get_table_columns_metric(
         execution_engine=execution_engine
     )

@@ -30,9 +30,7 @@ asset = datasource.add_csv_asset(
 )
 
 # use a validator to create an expectation suite
-validator = context.get_validator(
-    datasource_name="taxi_source", data_asset_name="yellow_tripdata"
-)
+validator = context.get_validator(datasource_name="taxi_source", data_asset_name="yellow_tripdata")
 validator.expect_column_values_to_not_be_null("pickup_datetime")
 context.add_expectation_suite("yellow_tripdata_suite")
 
@@ -44,12 +42,11 @@ checkpoint = context.add_or_update_checkpoint(
 
 # add (save) the checkpoint to the data context
 context.add_or_update_checkpoint(checkpoint=checkpoint)
-cp = context.get_checkpoint(name="my_checkpoint")
+cp = context.get_legacy_checkpoint(name="my_checkpoint")
 assert cp.name == "my_checkpoint"
 
 # context = gx.get_context()
-result = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
+result = cp.run(
     batch_request={
         "datasource_name": "taxi_source",
         "data_asset_name": "yellow_tripdata",

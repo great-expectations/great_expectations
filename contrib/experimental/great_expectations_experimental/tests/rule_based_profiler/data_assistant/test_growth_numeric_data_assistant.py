@@ -1,12 +1,8 @@
 import os
-import unittest
-from typing import Dict, List, Optional, cast
-from unittest import mock
+from typing import Dict, Optional, cast
 
 import pytest
 from freezegun import freeze_time
-
-import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
@@ -16,12 +12,10 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -31,15 +25,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
-# noinspection PyUnresolvedReferences
-
 
 @pytest.fixture
 def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
-    no_usage_stats,
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -57,9 +48,9 @@ def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
 
 @pytest.fixture(scope="module")
 def bobby_growth_numeric_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -77,9 +68,9 @@ def bobby_growth_numeric_data_assistant_result(
 
 @pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -98,9 +89,9 @@ def quentin_implicit_invocation_result_actual_time(
 @pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -125,8 +116,7 @@ def test_growth_numeric_data_assistant_result_serialization(
         bobby_growth_numeric_data_assistant_result.to_dict()
     )
     assert (
-        set(growth_numeric_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
+        set(growth_numeric_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
         bobby_growth_numeric_data_assistant_result.to_json_dict()
@@ -136,30 +126,19 @@ def test_growth_numeric_data_assistant_result_serialization(
 
 
 @pytest.mark.big
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 @pytest.mark.slow  # 7.34s
 def test_growth_numeric_data_assistant_result_get_expectation_suite(
-    mock_emit,
     bobby_growth_numeric_data_assistant_result_usage_stats_enabled: GrowthNumericDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_growth_numeric_data_assistant_result_usage_stats_enabled.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+    suite: ExpectationSuite = (
+        bobby_growth_numeric_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
     )
 
     assert suite is not None and len(suite.expectations) > 0
-
-    assert mock_emit.call_count == 1
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
-    )
 
 
 @pytest.mark.big
@@ -198,9 +177,9 @@ def test_growth_numeric_data_assistant_metrics_count(
 def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_growth_numeric_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -225,7 +204,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -247,21 +226,21 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
         },
     )
     assert (
-        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
-            "variables"
-        ]["round_decimals"]
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"]["variables"][
+            "round_decimals"
+        ]
         == 15
     )
     assert (
-        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"]["variables"][
+            "false_positive_rate"
+        ]
         == 1.0e-1
     )
     assert (
-        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"]["variables"][
+            "false_positive_rate"
+        ]
         == 1.0e-1
     )
 
@@ -271,7 +250,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -303,7 +282,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     3. Running GrowthNumericDataAssistantResult and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -357,14 +336,10 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     assert len(batch_list) == 12
 
     # Running growth_numeric data assistant
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
 
     # saving resulting ExpectationSuite
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
@@ -375,25 +350,36 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2020",
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2020", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2020", "month": "01"}},
     )
 
     # configuring and running checkpoint
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -414,7 +400,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -456,20 +442,14 @@ def test_spark_happy_path_growth_numeric_data_assistant(
             "reader_method": "csv",
             "reader_options": {"header": True, "schema": schema},
         },
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2019", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2019", "month": "01"}},
     )
     batch_request: BatchRequest = multi_batch_batch_request
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 1
 
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
@@ -479,23 +459,34 @@ def test_spark_happy_path_growth_numeric_data_assistant(
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2020",
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2020", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2020", "month": "01"}},
     )
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False
 
 
@@ -519,7 +510,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -562,12 +553,8 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 13
 
-    result = data_context.assistants.growth_numeric.run(
-        batch_request=multi_batch_batch_request
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="taxi_data_2019_suite"
-    )
+    result = data_context.assistants.growth_numeric.run(batch_request=multi_batch_batch_request)
+    suite: ExpectationSuite = ExpectationSuite(expectation_suite_name="taxi_data_2019_suite")
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
@@ -584,14 +571,27 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
     }
-    data_context.add_checkpoint(**checkpoint_config)
-    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    checkpoint = data_context.add_checkpoint(**checkpoint_config)
+    results = checkpoint.run()
     assert results.success is False

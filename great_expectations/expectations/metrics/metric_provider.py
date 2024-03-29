@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple, Type, TypeVar
 from typing_extensions import ParamSpec
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -23,7 +22,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,6 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-@public_api
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
@@ -67,7 +67,6 @@ def metric_value(
     return wrapper
 
 
-@public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: MetricPartialFunctionTypes,
@@ -110,7 +109,6 @@ def metric_partial(
     return wrapper
 
 
-@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 
@@ -125,8 +123,6 @@ class MetricProvider(metaclass=MetaMetricProvider):
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
     have correct values that may simply be inherited.
 
-    They *may* optionally override the `default_kwarg_values` attribute.
-
     MetricProvider classes *must* implement the following:
         1. `_get_evaluation_dependencies`. Note that often, _get_evaluation_dependencies should
         augment dependencies provided by a parent class; consider calling super()._get_evaluation_dependencies
@@ -138,14 +134,14 @@ class MetricProvider(metaclass=MetaMetricProvider):
         1. Data Docs rendering methods decorated with the @renderer decorator. See the guide
         "How to create renderers for custom expectations" for more information.
 
-    """
+    """  # noqa: E501
 
     domain_keys: Tuple[str, ...] = tuple()
     value_keys: Tuple[str, ...] = tuple()
     default_kwarg_values: dict = {}
 
     @classmethod
-    def _register_metric_functions(cls) -> None:
+    def _register_metric_functions(cls) -> None:  # noqa: C901 - too complex
         metric_name = getattr(cls, "metric_name", None)
         if not metric_name:
             # No metric name has been defined
@@ -156,29 +152,22 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not (
-                hasattr(attr_obj, "metric_engine")
-                or hasattr(attr_obj, "_renderer_type")
-            ):
+            if not (hasattr(attr_obj, "metric_engine") or hasattr(attr_obj, "_renderer_type")):
                 # This is not a metric or renderer.
                 continue
 
             if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
-                    raise ValueError(
-                        "metric functions must be defined with an Execution Engine"
-                    )
+                    raise ValueError("metric functions must be defined with an Execution Engine")
 
                 metric_fn = attr_obj
-                metric_definition_kwargs = getattr(
-                    metric_fn, "metric_definition_kwargs", {}
-                )
+                metric_definition_kwargs = getattr(metric_fn, "metric_definition_kwargs", {})
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
                 )
-                metric_fn_type: Optional[
-                    Union[MetricFunctionTypes, MetricPartialFunctionTypes]
-                ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                metric_fn_type: Optional[Union[MetricFunctionTypes, MetricPartialFunctionTypes]] = (
+                    getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
+                )
 
                 if not metric_fn_type:
                     # This is not a metric (valid metrics possess exectly one metric function).
@@ -207,7 +196,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 of "resolved_metric_dependencies_by_metric_name" using previously declared "metric_partial_fn" key (as
                 described above), composes full metric execution configuration structure, and adds this configuration
                 to list of metrics to be resolved as one bundle (specifics pertaining to "ExecutionEngine" subclasses).
-                """
+                """  # noqa: E501
                 if metric_fn_type not in [
                     MetricFunctionTypes.VALUE,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -215,7 +204,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     raise ValueError(
                         f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
 support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
-"metric_fn_type" property."""
+"metric_fn_type" property."""  # noqa: E501
                     )
 
                 if metric_fn_type == MetricFunctionTypes.VALUE:
@@ -248,9 +237,7 @@ support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGG
                         metric_fn_type=metric_fn_type,
                     )
             elif hasattr(attr_obj, "_renderer_type"):
-                register_renderer(
-                    object_name=metric_name, parent_class=cls, renderer_fn=attr_obj
-                )
+                register_renderer(object_name=metric_name, parent_class=cls, renderer_fn=attr_obj)
 
     @classmethod
     def get_evaluation_dependencies(

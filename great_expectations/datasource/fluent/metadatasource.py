@@ -1,6 +1,7 @@
 """
 POC for dynamically bootstrapping context.sources with Datasource factory methods.
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,12 +27,12 @@ class MetaDatasource(ModelMetaclass):
         available as part of the `DataContext`.
 
         Also binds asset adding methods according to the declared `asset_types`.
-        """
+        """  # noqa: E501
         logger.debug(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
-        if cls_name == "Datasource" or cls_name.startswith("_"):
+        if cls_name in ("Datasource", "InvalidDatasource") or cls_name.startswith("_"):
             # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
             logger.debug(f"1c. Skip factory registration of base `{cls_name}`")
             return cls
@@ -43,9 +44,9 @@ class MetaDatasource(ModelMetaclass):
 
         if cls.__module__ == "__main__":
             logger.warning(
-                f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
+                f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"  # noqa: E501
             )
-        # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types
+        # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types  # noqa: E501
         cls._type_lookup = TypeLookup()
         _SourceFactories.register_datasource(cls)
         return cls

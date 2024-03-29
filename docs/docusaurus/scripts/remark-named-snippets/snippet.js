@@ -1,26 +1,33 @@
 const fs = require('fs')
 const glob = require('glob')
 const htmlparser2 = require('htmlparser2')
+const { getDirs } = require('./common')
 
 /**
  * Constructs a map associating names with snippets by parsing source code.
  *
- * @param {string} dirs - The directories of source code to traverse when constructing the map.
+ * @param {string} dir - The directory of source code to traverse when constructing the map.
  * @returns {object} The "snippet map", which is an object with name, snippet key-value pairs.
  */
-function constructSnippetMap(dirs) {
-  const snippets = parseSourceDirectories(dirs)
+function constructSnippetMap(dir) {
+  const snippets = parseSourceDirectory(dir)
+  const duplicateNames = []
 
   const snippetMap = {}
   for (const snippet of snippets) {
     const name = snippet.name
     if (name in snippetMap) {
-      throw new Error(
-        `A snippet named ${name} has already been defined elsewhere`
-      )
+      duplicateNames.push(name)
     }
     delete snippet.name // Remove duplicate filename to clean up stdout
     snippetMap[name] = snippet
+  }
+  if (duplicateNames.length > 0) {
+    console.error(`Duplicate snippet names found in ${dir}:`)
+    console.error(duplicateNames.map((name) => `  ${name}`).join('\n'))
+    throw new Error(
+      `${duplicateNames.length} duplicate snippet names found in ${dir}`
+    )
   }
 
   return snippetMap
@@ -29,15 +36,13 @@ function constructSnippetMap(dirs) {
 /**
  * Parses input directories of source code using an HTML parser to collect snippets.
  *
- * @param {string} dirs - The directories to parse for snippet definitions.
+ * @param {string} dir - The directory to parse for snippet definitions.
  * @returns {object[]} A list of snippet objects parsed from the input directory.
  */
-function parseSourceDirectories(dirs) {
+function parseSourceDirectory(dir) {
   const files = []
-  for (const dir of dirs) {
-    for (const file of glob.sync(dir + '/**/*.{py,yml,yaml}')) {
-      files.push(file)
-    }
+  for (const file of glob.sync(dir + '/**/*.{py,yml,yaml}')) {
+    files.push(file)
   }
 
   const allSnippets = []
@@ -154,25 +159,6 @@ function sanitizeText(text) {
     .trim()
 }
 
-/**
- * Organize parsed snippets by source filename.
- * If provided, input filenames will filter this output.
- *
- * Note that this is what is run if this file is invoked by Node.
- * An alias `yarn snippet-check` is defined in `package.json` for convenience.
- */
-function getDirs() {
-  // Get all directories that should be processed
-  const manualDirs = ['../../great_expectations', '../../tests']
-  const versionDirs = glob.sync('versioned_code/*/')
-  // remove v0.14.13 from processing since it does not use named snippets
-  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
-  if (index !== -1) {
-    versionDirs.splice(index, 1)
-  }
-  return manualDirs.concat(versionDirs)
-}
-
 function processVerbose() {
   const args = process.argv.slice(2)
 
@@ -184,28 +170,41 @@ function processVerbose() {
   return verbose
 }
 
+/**
+ * Organize parsed snippets by source filename.
+ * If provided, input filenames will filter this output.
+ *
+ * Note that this is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` is defined in `package.json` for convenience.
+ */
 function main(verbose = false) {
-  const snippets = parseSourceDirectories(getDirs())
   let argNum = 2
   if (verbose) { argNum = 3 }
   const targetFiles = process.argv.slice(argNum)
 
-  const out = {}
-  for (const snippet of snippets) {
-    // If no explicit args are provided, default to all snippets
-    // Else, ensure that the snippet's source file was requested by the user
-    const file = snippet.file
-    if (targetFiles.length > 0 && !(targetFiles.includes(file))) {
-      continue
+  const dirs = getDirs()
+  for (let dir of dirs) {
+    const snippets = parseSourceDirectory(dir)
+    const out = {}
+    for (const snippet of snippets) {
+      // If no explicit args are provided, default to all snippets
+      // Else, ensure that the snippet's source file was requested by the user
+      const file = snippet.file
+      if (targetFiles.length > 0 && !(targetFiles.includes(file))) {
+        continue
+      }
+      if (!(file in out)) {
+        out[file] = []
+      }
+      delete snippet.file // Remove duplicate filename to clean up stdout
+      out[file].push(snippet)
     }
-    if (!(file in out)) {
-      out[file] = []
+    if (verbose) {
+      // printing objects one dir at a time so the output is more readable
+      console.log("Snippets found in " + dir)
+      console.log("---------------------------")
+      console.log(out)
     }
-    delete snippet.file // Remove duplicate filename to clean up stdout
-    out[file].push(snippet)
-  }
-  if (verbose) {
-    console.log(out)
   }
 }
 

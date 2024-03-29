@@ -1,9 +1,7 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -22,11 +20,21 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
 class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
-    # This dictionary contains metadata for display in the public gallery
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
+
     library_metadata = {
         "maturity": "production",
         "tags": [
@@ -44,18 +52,17 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         "column_B",
         "threshold",
     )
-    default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
-        "bins_A": None,
-        "bins_B": None,
-        "n_bins_A": None,
-        "n_bins_B": None,
-        "threshold": 0.1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
+    # default_kwarg_values = {
+    #     "column_A": None,
+    #     "column_B": None,
+    #     "bins_A": None,
+    #     "bins_B": None,
+    #     "n_bins_A": None,
+    #     "n_bins_B": None,
+    #     "threshold": 0.1,
+    #     "result_format": "BASIC",
+    #     "catch_exceptions": False,
+    # }
     args_keys = (
         "column_A",
         "column_B",
@@ -76,7 +83,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         params = renderer_configuration.params
 
         if not params.column_A or not params.column_B:
-            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501
         else:
             renderer_configuration.template_str = (
                 "Values in $column_A and $column_B must be independent."
@@ -97,11 +104,9 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["column_A", "column_B"])
         if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."  # noqa: E501
         else:
             template_str = "Values in $column_A and $column_B must be independent."
 

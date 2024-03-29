@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 from great_expectations.execution_engine import (
@@ -24,9 +26,7 @@ class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex, _dialect, **kwargs):
-        regex_expression = get_dialect_regex_expression(
-            column, regex, _dialect, positive=False
-        )
+        regex_expression = get_dialect_regex_expression(column, regex, _dialect, positive=False)
         if regex_expression is None:
             logger.warning(f"Regex is not supported for dialect {_dialect!s}")
             raise NotImplementedError

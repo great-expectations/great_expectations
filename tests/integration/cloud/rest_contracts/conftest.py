@@ -11,18 +11,23 @@ import pact
 import pytest
 from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
+from great_expectations import project_manager
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
+from great_expectations.data_context import CloudDataContext
 
 if TYPE_CHECKING:
     from requests import Session
 
 
+CONSUMER_NAME: Final[str] = "great_expectations"
+PROVIDER_NAME: Final[str] = "mercury"
+
+
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[str] = str(
-    pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
-)
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__, ".."), "pacts").resolve()
+PACT_MOCK_SERVICE_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
 
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
@@ -43,7 +48,23 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
+def cloud_base_url() -> str:
+    try:
+        return os.environ["GX_CLOUD_BASE_URL"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
+
+
+@pytest.fixture
+def cloud_access_token() -> str:
+    try:
+        return os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+
+
+@pytest.fixture(scope="module")
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
@@ -52,27 +73,55 @@ def gx_cloud_session() -> Session:
     return create_session(access_token=access_token)
 
 
+@pytest.fixture
+def cloud_data_context(
+    cloud_base_url: str,
+    cloud_access_token: str,
+) -> CloudDataContext:
+    """This is a real Cloud Data Context that points to the pact mock service instead of the Mercury API."""  # noqa: E501
+    cloud_data_context = CloudDataContext(
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+    )
+    # we can't override the base url to use the mock service due to
+    # reliance on env vars, so instead we override with a real project config
+    project_config = cloud_data_context.config
+    context = CloudDataContext(
+        cloud_base_url=PACT_MOCK_SERVICE_URL,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+        project_config=project_config,
+    )
+    project_manager.set_project(cloud_data_context)
+    return context
+
+
 def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="package")
 def pact_test(request) -> pact.Pact:
+    """
+    pact_test can be used as a context manager and will:
+    1. write a new contract to the pact dir
+    2. verify the contract against the mock service
+    """
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
-    consumer_name = "great_expectations"
-    provider_name = "mercury"
 
     broker_token: str
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
-        publish_to_broker = True
+        # do not publish to broker on develop until we have integrated the 1.0 API with GX Cloud
+        publish_to_broker = False
     elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
     else:
         pytest.skip(
-            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
+            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"  # noqa: E501
         )
 
     # Adding random id to the commit hash allows us to run the build
@@ -81,24 +130,24 @@ def pact_test(request) -> pact.Pact:
     # in GH, and we run the release build process on the tagged commit.
     version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
-    pact_test: pact.Pact = pact.Consumer(
-        name=consumer_name,
+    _pact: pact.Pact = pact.Consumer(
+        name=CONSUMER_NAME,
         version=version,
         tag_with_git_branch=True,
         auto_detect_version_properties=True,
     ).has_pact_with(
-        pact.Provider(name=provider_name),
+        pact.Provider(name=PROVIDER_NAME),
         broker_base_url=pact_broker_base_url,
         broker_token=broker_token,
         host_name=PACT_MOCK_HOST,
         port=PACT_MOCK_PORT,
-        pact_dir=PACT_DIR,
+        pact_dir=str(PACT_DIR),
         publish_to_broker=publish_to_broker,
     )
 
-    pact_test.start_service()
-    yield pact_test
-    pact_test.stop_service()
+    _pact.start_service()
+    yield _pact
+    _pact.stop_service()
 
 
 class ContractInteraction(pydantic.BaseModel):
@@ -126,7 +175,7 @@ class ContractInteraction(pydantic.BaseModel):
 
     Returns:
         ContractInteraction
-    """
+    """  # noqa: E501
 
     class Config:
         arbitrary_types_allowed = True
@@ -143,7 +192,7 @@ class ContractInteraction(pydantic.BaseModel):
 
 
 @pytest.fixture
-def run_pact_test(
+def run_rest_api_pact_test(
     gx_cloud_session: Session,
     pact_test: pact.Pact,
 ) -> Callable:
@@ -159,7 +208,7 @@ def run_pact_test(
 
         Returns:
             None
-        """
+        """  # noqa: E501
 
         request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,
@@ -191,11 +240,16 @@ def run_pact_test(
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{contract_interaction.request_path}"
 
         with pact_test:
-            gx_cloud_session.request(
+            # act
+            resp = gx_cloud_session.request(
                 method=contract_interaction.method,
                 url=request_url,
                 json=contract_interaction.request_body,
                 params=contract_interaction.request_params,
             )
+
+        # assert
+        assert resp.status_code == contract_interaction.response_status
+        # TODO more unit test assertions would go here e.g. response body checks
 
     return _run_pact_test

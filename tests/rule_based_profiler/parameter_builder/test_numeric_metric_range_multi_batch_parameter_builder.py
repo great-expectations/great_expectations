@@ -8,7 +8,6 @@ from scipy import stats
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -29,9 +28,7 @@ pytestmark = pytest.mark.big
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -77,9 +74,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
@@ -95,27 +90,23 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_value: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)  # noqa: E501
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).  # noqa: E501
     rtol: float = 1.0e-2
     atol: float = 0
 
@@ -125,7 +116,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         desired=expected_value,
         rtol=rtol,
         atol=atol,
-        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",  # noqa: E501
     )
 
     expected_estimation_histogram: np.ndarray = np.asarray(
@@ -144,7 +135,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -156,9 +147,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -208,9 +197,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -225,20 +212,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -266,27 +249,25 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
 
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_multi_batch_parameter_builder_name=None,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            estimator="quantiles",
-            include_estimator_samples_histogram_in_details=True,
-            false_positive_rate=5.0e-2,
-            round_decimals=1,
-            evaluation_parameter_builder_configs=None,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="column_min_range",
+        metric_name="column.min",
+        metric_multi_batch_parameter_builder_name=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        estimator="quantiles",
+        include_estimator_samples_histogram_in_details=True,
+        false_positive_rate=5.0e-2,
+        round_decimals=1,
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
     )
 
     numeric_metric_range_parameter_builder.build_parameters(
@@ -299,20 +280,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     )
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_05 = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -344,7 +321,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -355,9 +332,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
 def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -407,9 +382,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -424,20 +397,16 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -465,7 +434,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ],
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -473,12 +442,10 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: Dict[str, str] = {
         "datasource_name": "taxi_pandas",
@@ -543,9 +510,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     expected_parameter_node_as_dict: dict = {
@@ -560,20 +525,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_01: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -601,27 +562,25 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
 
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_multi_batch_parameter_builder_name="my_column_min",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            estimator="quantiles",
-            include_estimator_samples_histogram_in_details=True,
-            false_positive_rate=5.0e-2,
-            round_decimals=1,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="column_min_range",
+        metric_name="column.min",
+        metric_multi_batch_parameter_builder_name="my_column_min",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        estimator="quantiles",
+        include_estimator_samples_histogram_in_details=True,
+        false_positive_rate=5.0e-2,
+        round_decimals=1,
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        data_context=data_context,
     )
 
     numeric_metric_range_parameter_builder.build_parameters(
@@ -634,20 +593,16 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         },
     )
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_values_05 = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
@@ -679,7 +634,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -690,9 +645,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -732,7 +685,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     error_message: str = re.escape(
         f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.  A false_positive_rate of \
 {1 - NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=error_message):
@@ -745,12 +698,10 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -790,7 +741,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     error_message: str = re.escape(
         """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but -0.05 was \
 provided.
-"""
+"""  # noqa: E501
     )
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError, match=error_message):
@@ -804,12 +755,10 @@ provided.
 
 
 @pytest.mark.slow  # 2.51s
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -849,7 +798,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     warning_message: str = re.escape(
         f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.  A false_positive_rate of \
 {NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -862,12 +811,10 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         )
 
 
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -876,11 +823,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    # a commonly used defect rate in quality control that equates to 3.4 defects per million opportunities
+    # a commonly used defect rate in quality control that equates to 3.4 defects per million opportunities  # noqa: E501
     six_sigma_false_positive_rate: float = 3.4 / 1000000.0
     assert six_sigma_false_positive_rate > NP_EPSILON
 
-    # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?
+    # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?  # noqa: E501
     smaller_than_np_epsilon_false_positive_rate: float = NP_EPSILON / 10
 
     numeric_metric_range_parameter_builder: ParameterBuilder = (
@@ -914,7 +861,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     warning_message: str = re.escape(
         f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close \
 to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
-"""
+"""  # noqa: E501
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -930,9 +877,7 @@ to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
 def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -978,9 +923,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
@@ -996,27 +939,23 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     actual_value: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop("estimation_histogram")
 
     assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)  # noqa: E501
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).  # noqa: E501
     rtol: float = 1.0e-2
     atol: float = 0
 
@@ -1026,7 +965,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         desired=expected_value,
         rtol=rtol,
         atol=atol,
-        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",  # noqa: E501
     )
 
     expected_estimation_histogram: np.ndarray = np.asarray(
@@ -1045,7 +984,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         ]
     )
 
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.  # noqa: E501
     ks_result: tuple = stats.ks_2samp(
         data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
@@ -1054,16 +993,14 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
 
 @pytest.mark.slow  # 1.12s
-def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
+def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     """
     This tests whether kde gives a wider estimate for the max
     """
 
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -1111,19 +1048,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     bootstrap_value: np.ndarray = parameter_node.pop("value")
@@ -1158,19 +1091,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     kde_value: np.ndarray = parameter_node.pop("value")
@@ -1186,9 +1115,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     This tests whether a change to bw_method results in a change to the range
     """
 
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -1236,19 +1163,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     default_bw_method_value: np.ndarray = parameter_node.pop("value")
@@ -1284,19 +1207,15 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         runtime_configuration=None,
     )
 
-    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
-        parameter_container.parameter_nodes or {}
-    )
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = parameter_container.parameter_nodes or {}
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
+    parameter_node: ParameterNode = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters=parameters,
     )
 
     other_bw_method_value: np.ndarray = parameter_node.pop("value")

@@ -4,7 +4,6 @@ import os
 from google.cloud import bigquery
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
@@ -25,7 +24,7 @@ This integration test tests the following:
 2. passing in `bigquery_temp_table` as part of `batch_spec_passthrough` will raise a DeprecationWarning.
 3. the validator.head method (and corresponding metric) will work on bigquery datasources even when temp table creation
     is turned off
-"""
+"""  # noqa: E501
 
 gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
@@ -37,7 +36,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = gx.get_context()
+context = gx.get_context()
 
 datasource_yaml: str = """
 name: my_bigquery_datasource
@@ -81,9 +80,7 @@ assert validator
 temp_table_name: str = validator.active_batch.data.selectable.description
 client: bigquery.Client = bigquery.Client()
 project: str = client.project
-dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(
-    project, bigquery_dataset
-)
+dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(project, bigquery_dataset)
 table_ref: bigquery.TableReference = dataset_ref.table(temp_table_name)
 table: bigquery.Table = client.get_table(table_ref)
 

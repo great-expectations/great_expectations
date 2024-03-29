@@ -27,9 +27,7 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
         greater than or equal to the user-specified threshold"""
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = (
-        "column_values.prediction_confidence_greater_than_or_equal_to_threshold"
-    )
+    condition_metric_name = "column_values.prediction_confidence_greater_than_or_equal_to_threshold"
 
     condition_value_keys = ("threshold",)
 
@@ -42,15 +40,10 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
         labeler = dp.DataLabeler(labeler_type="structured")
         labeler.postprocessor.set_params(is_pred_labels=False)
         results = labeler.predict(column, predict_options={"show_confidences": True})
-        return (
-            np.choose(results["pred"].astype(int, copy=False), results["conf"].T)
-            >= threshold
-        )
+        return np.choose(results["pred"].astype(int, copy=False), results["conf"].T) >= threshold
 
 
-class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
-    ColumnMapExpectation
-):
+class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(ColumnMapExpectation):
     """Expect the column values to be probabilistically greater than or equal to the specified threshold.
 
     This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
@@ -137,9 +130,7 @@ class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = (
-        "column_values.prediction_confidence_greater_than_or_equal_to_threshold"
-    )
+    map_metric = "column_values.prediction_confidence_greater_than_or_equal_to_threshold"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -151,7 +142,6 @@ class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
     default_kwarg_values = {
         "threshold": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 

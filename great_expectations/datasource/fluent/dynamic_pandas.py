@@ -51,13 +51,11 @@ except ImportError:
     # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
     # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
     CompressionDict = Dict[str, Any]
-    CompressionOptions = Optional[
-        Union[
-            Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict
-        ]
+    CompressionOptions = Optional[  # type: ignore[misc]
+        Union[Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict]
     ]
-    CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
-    StorageOptions = Optional[Dict[str, Any]]
+    CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]  # type: ignore[misc]
+    StorageOptions = Optional[Dict[str, Any]]  # type: ignore[misc]
 
 try:
     from pandas._libs.lib import _NoDefault
@@ -75,11 +73,9 @@ IndexLabel = Union[str, Sequence[str]]
 # https://github.com/pandas-dev/pandas/blob/965ceca9fd796940050d6fc817707bba1c4f9bff/pandas/_typing.py#LL373C1-L373C52
 DtypeBackend = Literal["pyarrow", "numpy_nullable"]
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
-PANDAS_VERSION: float = float(
-    f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}"
-)
+PANDAS_VERSION: float = float(f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}")
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
@@ -135,7 +131,7 @@ TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
     "Hashable": "str",
     "Sequence[Hashable]": "Sequence[str]",
     "Iterable[Hashable]": "Iterable[str]",
-    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8
+    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8  # noqa: E501
     "Sequence[tuple[int, int]]": "Sequence[Tuple[int, int]]",
     # TypeVars
     "IntStrT": "Union[int, str]",
@@ -186,7 +182,9 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     # sql
     "con": {"con": _FieldSpec(Union[ConfigStr, str, Any], ...)},  # type: ignore[arg-type]
     # misc
-    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "filepath_or_buffer": {
+        "filepath_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)  # type: ignore[arg-type]
+    },
     "io": {"io": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path": {"path": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buf": {"path_or_buf": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
@@ -262,16 +260,12 @@ def _extract_io_methods(
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
     # filter removed
     if blacklist:
-        return [
-            t
-            for t in member_functions
-            if t[0] not in blacklist and t[0].startswith("read_")
-        ]
+        return [t for t in member_functions if t[0] not in blacklist and t[0].startswith("read_")]
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
 def _extract_io_signatures(
-    io_methods: List[Tuple[str, DataFrameFactoryFn]]
+    io_methods: List[Tuple[str, DataFrameFactoryFn]],
 ) -> List[_SignatureTuple]:
     signatures = []
     for name, method in io_methods:
@@ -365,9 +359,7 @@ def _to_pydantic_fields(
             else:
                 type_ = _get_annotation_type(param)
                 if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                    logger.debug(
-                        f"`{param_name}` has no supported types. Field skipped"
-                    )
+                    logger.debug(f"`{param_name}` has no supported types. Field skipped")
                     FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
                     continue
 
@@ -429,9 +421,7 @@ def _generate_pandas_data_asset_models(
         fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
 
         type_name = signature_tuple.name.split("read_")[1]
-        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
-            type_name, f"{type_name.capitalize()}Asset"
-        )
+        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(type_name, f"{type_name.capitalize()}Asset")
 
         try:
             asset_model = _create_pandas_asset_model(
@@ -452,7 +442,7 @@ def _generate_pandas_data_asset_models(
             continue
         except TypeError as err:
             logger.info(
-                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
+                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"  # noqa: E501
             )
             logger.info(f"{model_name} fields\n{pf(fields)}")
             continue
@@ -462,7 +452,7 @@ def _generate_pandas_data_asset_models(
             asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
         except TypeError as e:
             raise DynamicAssetError(
-                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"
+                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"  # noqa: E501
             ) from e
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")

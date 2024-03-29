@@ -15,8 +15,10 @@ from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_pro
     DataProfilerProfileMetricProvider,
 )
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -24,9 +26,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class DataProfilerProfileNumericColumnsDiffLessThanOrEqualToThreshold(
     DataProfilerProfileMetricProvider
 ):
-    metric_name = (
-        "data_profiler.profile_numeric_columns_diff_less_than_or_equal_to_threshold"
-    )
+    metric_name = "data_profiler.profile_numeric_columns_diff_less_than_or_equal_to_threshold"
 
     value_keys = (
         "profile_path",
@@ -35,7 +35,7 @@ class DataProfilerProfileNumericColumnsDiffLessThanOrEqualToThreshold(
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - too complex
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
@@ -66,9 +66,7 @@ class DataProfilerProfileNumericColumnsDiffLessThanOrEqualToThreshold(
 
             # adds stats if generic stat key is provided
             numerical_diff_statistics_copy = copy.deepcopy(numerical_diff_statistics)
-            stats = replace_generic_operator_in_report_keys(
-                stats, numerical_diff_statistics_copy
-            )
+            stats = replace_generic_operator_in_report_keys(stats, numerical_diff_statistics_copy)
 
             if col not in columns:  # Makes sure column exists within profile schema
                 requested_columns[col] = "Column requested was not found."
@@ -187,9 +185,7 @@ class ExpectProfileNumericColumnsDiffLessThanOrEqualToThreshold(
 
     example_profile = dp.Profiler(df, options=profiler_opts)
 
-    profile_path = (
-        "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
-    )
+    profile_path = "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
 
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
@@ -280,9 +276,7 @@ class ExpectProfileNumericColumnsDiffLessThanOrEqualToThreshold(
         },
     ]
 
-    profile_metric = (
-        "data_profiler.profile_numeric_columns_diff_less_than_or_equal_to_threshold"
-    )
+    profile_metric = "data_profiler.profile_numeric_columns_diff_less_than_or_equal_to_threshold"
 
     success_keys = (
         "profile_path",

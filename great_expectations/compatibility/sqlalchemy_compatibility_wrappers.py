@@ -48,7 +48,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
-    """
+    """  # noqa: E501
     if is_version_less_than(pd.__version__, "2.0.0"):
         with warnings.catch_warnings():
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -112,17 +112,17 @@ def _read_sql_table_as_df(  # noqa: PLR0913
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
-    """
+    """  # noqa: E501
     if dialect == GXSqlDialect.TRINO:
         return pd.read_sql_table(
             table_name=table_name,
             con=con,
             schema=schema,
-            index_col=index_col,
+            index_col=index_col,  # type: ignore[arg-type]
             coerce_float=coerce_float,
             parse_dates=parse_dates,
             columns=columns,
-            chunksize=chunksize,
+            chunksize=chunksize,  # type: ignore[arg-type]
         )
     else:
         sql_str: str
@@ -133,10 +133,10 @@ def _read_sql_table_as_df(  # noqa: PLR0913
         return pd.read_sql_query(
             sql=sql_str,
             con=con,
-            index_col=index_col,
+            index_col=index_col,  # type: ignore[arg-type]
             coerce_float=coerce_float,
             parse_dates=parse_dates,
-            chunksize=chunksize,
+            chunksize=chunksize,  # type: ignore[arg-type]
         )
 
 
@@ -187,10 +187,8 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 * None : Uses standard SQL ``INSERT`` clause (one per row).
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
-    """
-    if sqlalchemy.sqlalchemy and is_version_less_than(
-        sqlalchemy.sqlalchemy.__version__, "2.0.0"
-    ):
+    """  # noqa: E501
+    if sqlalchemy.sqlalchemy and is_version_less_than(sqlalchemy.sqlalchemy.__version__, "2.0.0"):
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this
@@ -200,22 +198,22 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 name=name,
                 con=con,
                 schema=schema,
-                if_exists=if_exists,
+                if_exists=if_exists,  # type: ignore[arg-type]
                 index=index,
                 index_label=index_label,
                 chunksize=chunksize,
                 dtype=dtype,
-                method=method,
+                method=method,  # type: ignore[arg-type]
             )
     else:
         df.to_sql(
             name=name,
             con=con,
             schema=schema,
-            if_exists=if_exists,
+            if_exists=if_exists,  # type: ignore[arg-type]
             index=index,
             index_label=index_label,
             chunksize=chunksize,
             dtype=dtype,
-            method=method,
+            method=method,  # type: ignore[arg-type]
         )

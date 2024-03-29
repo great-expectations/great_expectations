@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import Set, Union
 
@@ -24,7 +26,6 @@ class DataContextStore(ConfigurationStore):
         DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
         DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-        DataContextVariableSchema.PROFILER_STORE_NAME,
         DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         DataContextVariableSchema.VALIDATION_OPERATORS,
     }
@@ -51,8 +52,6 @@ class DataContextStore(ConfigurationStore):
             for attr in self.cloud_exclude_field_names:
                 if attr in payload:
                     payload.pop(attr)
-                    logger.debug(
-                        f"Removed {attr} from DataContextConfig while serializing to JSON"
-                    )
+                    logger.debug(f"Removed {attr} from DataContextConfig while serializing to JSON")
 
         return payload

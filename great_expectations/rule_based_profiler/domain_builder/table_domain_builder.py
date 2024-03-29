@@ -41,7 +41,7 @@ class TableDomainBuilder(DomainBuilder):
 
     Note that for appropriate use-cases, it should be readily possible to build a multi-batch implementation, where a
     separate Domain object is emitted for each individual Batch (using its respective batch_id).  (This is future work.)
-    """
+    """  # noqa: E501
 
     @override
     def _get_domains(
@@ -52,7 +52,7 @@ class TableDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         other_table_name: Optional[str]
         try:
-            # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
             other_table_name = get_parameter_value_and_validate_return_type(
                 domain=None,
                 parameter_reference=f"{VARIABLES_KEY}table",

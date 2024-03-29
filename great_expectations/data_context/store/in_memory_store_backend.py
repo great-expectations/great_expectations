@@ -38,8 +38,8 @@ class InMemoryStoreBackend(StoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "runtime_environment": runtime_environment,
             "fixed_length_key": fixed_length_key,
@@ -59,9 +59,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        return [
-            val for key, val in self._store.items() if key != self.STORE_BACKEND_ID_KEY
-        ]
+        return [val for key, val in self._store.items() if key != self.STORE_BACKEND_ID_KEY]
 
     @override
     def _set(self, key, value, **kwargs) -> None:
@@ -96,7 +94,7 @@ class InMemoryStoreBackend(StoreBackend):
         id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataContextVariableKey:
-        """Get the store backend specific implementation of the key. id included for super class compatibility."""
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""  # noqa: E501
         return DataContextVariableKey(
             resource_name=name,
         )

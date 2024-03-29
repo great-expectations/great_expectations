@@ -5,7 +5,7 @@ services:
     image: postgres:13.7
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
-    command: [ "postgres", "-c", "log_statement=none" ]
+    command: ["postgres", "-c", "log_statement=none"]
     environment:
       POSTGRES_DB: mercury
       POSTGRES_USER: postgres
@@ -55,7 +55,6 @@ services:
       MERCURY_PASSWORD: postgres
       MERCURY_HOST: db
       MERCURY_DATABASE: mercury
-      GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
       AMQP_CONNECTION_STRING: amqp://gx_prod:password@mq:5672
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
@@ -75,7 +74,7 @@ services:
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py --workers=1
     healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
+      test: bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
       interval: 5s
       timeout: 2s
       retries: 20

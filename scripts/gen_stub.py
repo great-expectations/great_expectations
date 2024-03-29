@@ -18,7 +18,7 @@ class _Callable(Protocol):
     __call__: Callable
 
 
-def _print_method(  # noqa: PLR0912
+def _print_method(  # noqa: C901, PLR0912
     method: _Callable,
     method_name: str | None = None,
     default_override: str = "...",
@@ -59,9 +59,7 @@ def _print_method(  # noqa: PLR0912
     if return_type_override:
         return_type = return_type_override
     else:
-        return_type = getattr(
-            signature.return_annotation, "__name__", signature.return_annotation
-        )
+        return_type = getattr(signature.return_annotation, "__name__", signature.return_annotation)
     print(f") -> {return_type}:\n\t...")
 
 

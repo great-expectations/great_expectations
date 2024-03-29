@@ -57,8 +57,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             try:
                 counts.sort_index(inplace=True)
             except TypeError:
-                # Having values of multiple types in a object dtype column (e.g., strings and floats)
+                # Having values of multiple types in a object dtype column (e.g., strings and floats)  # noqa: E501
                 # raises a TypeError when the sorting method performs comparisons.
+                # Related to the noqa E721 below: numpy / pandas implements equality, see https://github.com/astral-sh/ruff/issues/9570
                 if df[column].dtype == object:
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
@@ -126,7 +127,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         results: List[sqlalchemy.Row] = execution_engine.execute_query(
             query.select_from(selectable)
         ).fetchall()
-        # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
+        # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.  # noqa: E501
         series = pd.Series(
             data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
@@ -170,7 +171,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
 
         value_counts: List[pyspark.Row] = value_counts_df.collect()
 
-        # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
+        # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.  # noqa: E501
         values: Iterable[Any]
         counts: Iterable[int]
         if len(value_counts) > 0:

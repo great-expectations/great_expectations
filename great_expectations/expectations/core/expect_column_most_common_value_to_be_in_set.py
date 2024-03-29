@@ -1,13 +1,12 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from typing import TYPE_CHECKING, Dict, Optional, Union
+
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -22,6 +21,13 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -46,8 +52,6 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -58,14 +62,17 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * observed_value field in the result object is customized for this expectation to be a list \
           representing the most common values in the column, which is often a single element... if there \
           is a tie for most common among multiple values, observed_value will contain a single copy of each \
           most common value
-    """
+    """  # noqa: E501
+
+    value_set: Union[list, set, EvaluationParameterDict, None]
+    ties_okay: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -77,54 +84,16 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.most_common_value",)
     success_keys = (
         "value_set",
         "ties_okay",
     )
-
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "ties_okay": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_distinct_values_to_contain_set`
-        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
-        or `dict`.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert isinstance(
-                configuration.kwargs["value_set"], (list, set, dict)
-            ), "value_set must be a list or a set"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set_kwarg must have "$PARAMETER" key'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
@@ -155,12 +124,12 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 param_prefix=param_prefix,
                 renderer_configuration=renderer_configuration,
             )
-            template_str += (
-                f"most common value must belong to this set: {value_set_str}."
-            )
+            template_str += f"most common value must belong to this set: {value_set_str}."
 
             if params.ties_okay:
-                template_str += " Values outside this set that are as common (but not more common) are allowed."
+                template_str += (
+                    " Values outside this set that are as common (but not more common) are allowed."
+                )
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -195,14 +164,14 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"most common value must belong to this set: {values_string}."
 
         if params.get("ties_okay"):
-            template_str += " Values outside this set that are as common (but not more common) are allowed."
+            template_str += (
+                " Values outside this set that are as common (but not more common) are allowed."
+            )
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -230,11 +199,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        configuration = self.configuration
         most_common_value = metrics.get("column.most_common_value")
         value_set = configuration.kwargs.get("value_set") or []
         expected_value_set = set(value_set)

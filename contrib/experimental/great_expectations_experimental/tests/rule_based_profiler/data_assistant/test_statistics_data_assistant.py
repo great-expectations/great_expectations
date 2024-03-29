@@ -5,8 +5,6 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 import pytest
 
-import great_expectations as gx
-
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
@@ -15,7 +13,6 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -43,11 +40,10 @@ yaml: YAMLHandler = YAMLHandler()
 @pytest.fixture()
 def bobby_statistics_data_assistant_result(
     monkeypatch,
-    no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> StatisticsDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -70,10 +66,7 @@ def test_statistics_data_assistant_result_serialization(
     statistics_data_assistant_result_as_dict: dict = (
         bobby_statistics_data_assistant_result.to_dict()
     )
-    assert (
-        set(statistics_data_assistant_result_as_dict.keys())
-        == DataAssistantResult.ALLOWED_KEYS
-    )
+    assert set(statistics_data_assistant_result_as_dict.keys()) == DataAssistantResult.ALLOWED_KEYS
     assert (
         bobby_statistics_data_assistant_result.to_json_dict()
         == statistics_data_assistant_result_as_dict
@@ -117,9 +110,9 @@ def test_statistics_data_assistant_metrics_count(
 def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_statistics_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_statistics_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -170,11 +163,9 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
-            ) = convert_metric_values_to_float_dtype_best_effort(
-                metric_values=parameter_value
-            )
+            ) = convert_metric_values_to_float_dtype_best_effort(metric_values=parameter_value)
             parameter_value_magnitude = np.linalg.norm(parameter_value)
             metrics_magnitude += parameter_value_magnitude * parameter_value_magnitude
             num_elements += 1
@@ -182,9 +173,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     metrics_magnitude = math.sqrt(metrics_magnitude)
 
     assert np.allclose(metrics_magnitude, 3.331205802908463e3)
-    assert (
-        num_elements == 153
-    )  # This quantity must be equal to the total number of metrics.
+    assert num_elements == 153  # This quantity must be equal to the total number of metrics.
 
     normalized_metrics_vector: MetricValues = []
     for (
@@ -197,11 +186,9 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
                 parameter_value = np.asarray([parameter_node.value])
 
             (
-                ndarray_is_datetime_type,
+                _ndarray_is_datetime_type,
                 parameter_value,
-            ) = convert_metric_values_to_float_dtype_best_effort(
-                metric_values=parameter_value
-            )
+            ) = convert_metric_values_to_float_dtype_best_effort(metric_values=parameter_value)
             parameter_value = parameter_value / metrics_magnitude
             normalized_metrics_vector.append(parameter_value)
 
@@ -212,9 +199,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     normalized_metrics_vector_magnitude: float = 0.0
     for parameter_value in normalized_metrics_vector:
         parameter_value_magnitude = np.linalg.norm(parameter_value)
-        normalized_metrics_vector_magnitude += (
-            parameter_value_magnitude * parameter_value_magnitude
-        )
+        normalized_metrics_vector_magnitude += parameter_value_magnitude * parameter_value_magnitude
 
     assert np.allclose(normalized_metrics_vector_magnitude, 1.0)
 
@@ -230,7 +215,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -284,18 +269,14 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     assert len(batch_list) == 12
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35
 
 
 @pytest.mark.big
 @pytest.mark.slow  # 104 seconds
-def test_sql_happy_path_statistics_data_assistant(
-    empty_data_context, test_backends, sa
-) -> None:
+def test_sql_happy_path_statistics_data_assistant(empty_data_context, test_backends, sa) -> None:
     """
     The intent of this test is to ensure that our "happy path", exercised by notebooks is in working order.
 
@@ -310,7 +291,7 @@ def test_sql_happy_path_statistics_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -354,9 +335,7 @@ def test_sql_happy_path_statistics_data_assistant(
     assert len(batch_list) == 13
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35
 
@@ -377,7 +356,7 @@ def test_spark_happy_path_statistics_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -427,17 +406,13 @@ def test_spark_happy_path_statistics_data_assistant(
             "reader_method": "csv",
             "reader_options": {"header": True, "schema": schema},
         },
-        data_connector_query={
-            "batch_filter_parameters": {"year": "2019", "month": "01"}
-        },
+        data_connector_query={"batch_filter_parameters": {"year": "2019", "month": "01"}},
     )
     batch_request: BatchRequest = multi_batch_batch_request
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 1
 
     # Running statistics data assistant
-    result = data_context.assistants.statistics.run(
-        batch_request=multi_batch_batch_request
-    )
+    result = data_context.assistants.statistics.run(batch_request=multi_batch_batch_request)
 
     assert len(result.metrics_by_domain) == 35

@@ -1,12 +1,10 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -38,12 +36,17 @@ from great_expectations.render.util import (
 from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all RegexColumnMapMetrics.
 
@@ -71,7 +74,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
-    """
+    """  # noqa: E501
 
     condition_value_keys = ()
 
@@ -84,9 +87,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
 
         if regex_expression is None:
-            logger.warning(
-                f"Regex is not supported for dialect {_dialect.dialect.name!s}"
-            )
+            logger.warning(f"Regex is not supported for dialect {_dialect.dialect.name!s}")
             raise NotImplementedError
 
         return regex_expression
@@ -96,7 +97,6 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.rlike(cls.regex)
 
 
-@public_api
 class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for RegexBasedColumnMapExpectations.
 
@@ -120,7 +120,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         regex_ (str): A valid regex pattern.
         semantic_type_name_plural (optional[str]): The plural form of a semantic type being validated by a regex pattern.
         map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
-    """
+    """  # noqa: E501
 
     @staticmethod
     def register_metric(
@@ -135,7 +135,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         Returns:
             map_metric: The constructed name of the ephemeral metric.
-        """
+        """  # noqa: E501
         regex_snake_name: str = camel_to_snake(regex_camel_name)
         map_metric: str = "column_values.match_" + regex_snake_name + "_regex"
 
@@ -151,7 +151,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
-    @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -163,17 +163,17 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         Raises:
             InvalidExpectationConfigurationError: If no `regex` or `column` specified, or if `mostly` parameter
                 incorrectly defined.
-        """
+        """  # noqa: E501
         super().validate_configuration(configuration)
         try:
             assert (
                 getattr(self, "regex", None) is not None
             ), "regex is required for RegexBasedColumnMap Expectations"
             assert (
-                "column" in configuration.kwargs
+                "column" in configuration.kwargs  # type: ignore[union-attr] # This method is being removed
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
+            if "mostly" in configuration.kwargs:  # type: ignore[union-attr] # This method is being removed
+                mostly = configuration.kwargs["mostly"]  # type: ignore[union-attr] # This method is being removed
                 assert isinstance(
                     mostly, (int, float)
                 ), "'mostly' parameter must be an integer or float"
@@ -192,44 +192,41 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         if mostly == 1 or mostly is None:
             if semantic_type_name_plural is not None:
-                return f'Are all values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
+                return f'Are all values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'  # noqa: E501
             else:
                 return f'Do all values in column "{column}" match the regular expression {regex}?'
         else:  # noqa: PLR5501
             if semantic_type_name_plural is not None:
-                return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'  # noqa: E501
             else:
-                return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
+                return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'  # noqa: E501
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
-        semantic_type_name_plural = configuration.kwargs.get(
-            "semantic_type_name_plural"
-        )
+        semantic_type_name_plural = configuration.kwargs.get("semantic_type_name_plural")
 
         if result.success:
             if mostly == 1 or mostly is None:
                 if semantic_type_name_plural is not None:
-                    return f'All values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
+                    return f'All values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'  # noqa: E501
                 else:
                     return f'All values in column "{column}" match the regular expression {regex}.'
             else:  # noqa: PLR5501
                 if semantic_type_name_plural is not None:
-                    return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'  # noqa: E501
                 else:
-                    return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'  # noqa: E501
         else:  # noqa: PLR5501
             if semantic_type_name_plural is not None:
-                return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
+                return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'  # noqa: E501
             else:
-                return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+                return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'  # noqa: E501
 
+    @override
     @classmethod
     def _prescriptive_template(
         cls,
@@ -246,13 +243,11 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         params = renderer_configuration.params
 
         if not params.regex:
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -267,8 +262,9 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return renderer_configuration
 
+    @override
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -282,22 +278,19 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
+        kwargs = configuration.kwargs if configuration else {}
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
 
         if not params.get("regex"):
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
+            template_str = "values must match a regular expression but none was specified."
         else:
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
@@ -333,13 +326,11 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from great_expectations.compatibility.sqlalchemy import (
@@ -34,9 +36,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
-            "query"
-        )
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         if not isinstance(query, str):
             raise TypeError("Query must be supplied as a string")
@@ -54,31 +54,29 @@ class QueryMultipleColumns(QueryMetricProvider):
         if isinstance(selectable, sa.Table):
             query = query.format(
                 **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                active_batch=selectable,
+                batch=selectable,
             )
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
-        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
+        ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break  # noqa: E501
             query = query.format(
                 **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                active_batch=f"({selectable})",
+                batch=f"({selectable})",
             )
         elif isinstance(
             selectable, sa.sql.Select
-        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
+        ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query  # noqa: E501
             query = query.format(
                 **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+                batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',  # noqa: E501
             )
         else:
             query = query.format(
                 **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-                active_batch=f"({selectable})",
+                batch=f"({selectable})",
             )
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(
-            sa.text(query)
-        ).fetchall()
+        result: List[sqlalchemy.Row] = execution_engine.execute_query(sa.text(query)).fetchall()
 
         return [element._asdict() for element in result]
 
@@ -91,9 +89,7 @@ class QueryMultipleColumns(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ) -> List[dict]:
-        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
-            "query"
-        )
+        query = cls._get_query_from_metric_value_kwargs(metric_value_kwargs)
 
         if not isinstance(query, str):
             raise TypeError("Query must be supplied as a string")
@@ -111,7 +107,7 @@ class QueryMultipleColumns(QueryMetricProvider):
 
         query = query.format(
             **{f"col_{i}": entry for i, entry in enumerate(columns, 1)},
-            active_batch="tmp_view",
+            batch="tmp_view",
         )
 
         engine: pyspark.SparkSession = execution_engine.spark

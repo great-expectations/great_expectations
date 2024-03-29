@@ -21,6 +21,7 @@ from pyparsing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
@@ -52,9 +53,7 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
     "condition_value"
 ) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
-) + Suppress(
-    "'"
-)
+) + Suppress("'")
 date = (
     Literal("date").setResultsName("date")
     + Suppress(Literal("("))
@@ -100,6 +99,7 @@ class RowCondition(SerializableDictDot):
     condition: str
     condition_type: RowConditionParserType
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
@@ -109,6 +109,7 @@ class RowCondition(SerializableDictDot):
             "condition_type": self.condition_type.value,
         }
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.
@@ -124,7 +125,7 @@ def _parse_great_expectations_condition(row_condition: str):
 
 
 # noinspection PyUnresolvedReferences
-def parse_condition_to_spark(  # noqa: PLR0911, PLR0912
+def parse_condition_to_spark(  # type: ignore[return] # return or raise exists for all branches  # noqa: C901, PLR0911, PLR0912
     row_condition: str,
 ) -> pyspark.Column:
     parsed = _parse_great_expectations_condition(row_condition)
@@ -138,7 +139,7 @@ def parse_condition_to_spark(  # noqa: PLR0911, PLR0912
             )
     elif "fnumber" in parsed:
         try:
-            num = int(parsed["fnumber"])
+            num: int | float = int(parsed["fnumber"])
         except ValueError:
             num = float(parsed["fnumber"])
         op = parsed["op"]
@@ -178,9 +179,7 @@ def parse_condition_to_sqlalchemy(
     if "date" in parsed:
         date_value: str = parsed["condition_value"]
         cast_as_date = f"date({date_value})"
-        return generate_condition_by_operator(
-            sa.column(column), parsed["op"], cast_as_date
-        )
+        return generate_condition_by_operator(sa.column(column), parsed["op"], cast_as_date)
 
     elif "condition_value" in parsed:
         return generate_condition_by_operator(

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from great_expectations.compatibility.typing_extensions import override
 
 """Serialize Datasource Configurations.
@@ -23,7 +25,7 @@ if TYPE_CHECKING:
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
     @override
-    def serialize(self, obj: "AbstractConfig") -> dict:
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
@@ -39,9 +41,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
         config.pop("name", None)
 
         # Remove data connector name fields
-        for data_connector_name, data_connector_config in config.get(
-            "data_connectors", {}
-        ).items():
+        for data_connector_name, data_connector_config in config.get("data_connectors", {}).items():
             data_connector_config.pop("name", None)
 
         return config
@@ -49,7 +49,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 class NamedDatasourceSerializer(AbstractConfigSerializer):
     @override
-    def serialize(self, obj: "AbstractConfig") -> dict:
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 
         Args:
@@ -57,14 +57,12 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
         Returns:
             Representation of object as a dict suitable for return in list_datasources().
-        """
+        """  # noqa: E501
 
         config: dict = self.schema.dump(obj)
 
         # Remove data connector config names
-        for data_connector_name, data_connector_config in config.get(
-            "data_connectors", {}
-        ).items():
+        for data_connector_name, data_connector_config in config.get("data_connectors", {}).items():
             data_connector_config.pop("name", None)
 
         return config
@@ -72,7 +70,7 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
 class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
     @override
-    def serialize(self, obj: "AbstractConfig") -> dict:
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize datasource config to json dict. Adds a load step to make sure
         load logic (e.g. add data connector names) is completed.
 
@@ -84,9 +82,7 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         """
 
         raw_config: dict = self.schema.dump(obj)
-        loaded_obj: AbstractConfig = cast(
-            "DatasourceConfig", self.schema.load(raw_config)
-        )
+        loaded_obj: AbstractConfig = cast("DatasourceConfig", self.schema.load(raw_config))
         config: dict = self.schema.dump(loaded_obj)
 
         json_serializable_dict: dict = convert_to_json_serializable(data=config)

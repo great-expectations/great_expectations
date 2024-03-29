@@ -19,10 +19,6 @@ def build_glossary_page(orderd_list_of_terms_tuples, glossary_file_path):
     with open(glossary_file_path, "w") as glossary_file:
         # Write the glossary page header
         glossary_file.write('---\nid: glossary\ntitle: "Glossary of Terms"\n---\n\n')
-        # Add <CLIRemoval> tag
-        glossary_file.write(
-            "import CLIRemoval from '/docs/components/warnings/_cli_removal.md'\n\n<CLIRemoval />\n\n"
-        )
         # iterate the glossary list of tuples and write glossary entries.
         for term, definition, url in orderd_list_of_terms_tuples:
             glossary_file.write(f"[**{term}:**](./{url}.md) {definition}\n\n")
@@ -35,6 +31,6 @@ def all_together_now(source_json_path, glossary_file_path):
 
 if __name__ == "__main__":
     all_together_now(
-        source_json_path="../docs/docusaurus/docs/term_tags/terms.json",
-        glossary_file_path="../docs/docusaurus/docs/glossary.md",
+        source_json_path="../docs/docusaurus/docs/reference/learn/term_tags/terms.json",
+        glossary_file_path="../docs/docusaurus/docs/reference/learn/glossary.md",
     )

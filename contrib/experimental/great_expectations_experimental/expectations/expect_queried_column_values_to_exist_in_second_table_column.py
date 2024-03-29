@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -31,7 +30,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
     query = """
     select count(1) from (
     SELECT a.{first_table_column}
-                    FROM {active_batch} a
+                    FROM {batch} a
                     LEFT JOIN {second_table_full_name} b
                     ON a.{first_table_column}=b.{second_table_column}
                     WHERE b.{second_table_column} IS NULL
@@ -49,7 +48,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "query": query,
@@ -57,7 +55,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -67,9 +64,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
 
         return {
             "success": num_of_missing_rows == 0,
-            "result": {
-                "Rows with IDs in first table missing in second table": num_of_missing_rows
-            },
+            "result": {"Rows with IDs in first table missing in second table": num_of_missing_rows},
         }
 
     examples = [
@@ -135,11 +130,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
             ],
         },
     ]
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
 
 
 if __name__ == "__main__":

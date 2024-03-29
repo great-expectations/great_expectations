@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from json import loads
 from typing import Dict
 
@@ -15,18 +17,14 @@ class JsonSiteStore(Store):
     """
     A JsonSiteStore manages the JSON artifacts of our renderers, which allows us to render them into final views in HTML by GX Cloud.
 
-    """
+    """  # noqa: E501
 
-    def __init__(
-        self, store_backend=None, runtime_environment=None, store_name=None
-    ) -> None:
+    def __init__(self, store_backend=None, runtime_environment=None, store_name=None) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
             # TODO: GG 20220815 loaded store_backend_class is not used remove this if not needed
             _ = load_class(store_backend_class_name, store_backend_module_name)
@@ -37,8 +35,8 @@ class JsonSiteStore(Store):
             store_name=store_name,
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -57,7 +55,7 @@ class JsonSiteStore(Store):
         """
         ge_cloud_json_site_id = response_json["data"]["id"]
         json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]
-        json_site_dict["ge_cloud_id"] = ge_cloud_json_site_id
+        json_site_dict["id"] = ge_cloud_json_site_id
 
         return json_site_dict
 
@@ -66,12 +64,6 @@ class JsonSiteStore(Store):
 
     def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
-
-    @override
-    def self_check(self, pretty_print) -> None:
-        NotImplementedError(
-            f"The test method is not implemented for Store class {self.__class__.__name__}."
-        )
 
     @property
     @override

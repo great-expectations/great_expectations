@@ -1,21 +1,23 @@
-import logging
-from typing import Iterator, List, Optional
+from __future__ import annotations
 
+import logging
+from typing import TYPE_CHECKING, Iterator, List, Optional
+
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
+from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (  # noqa: E501
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
 
 @public_api
-class InferredAssetAWSGlueDataCatalogDataConnector(
-    ConfiguredAssetAWSGlueDataCatalogDataConnector
-):
+class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCatalogDataConnector):
     """An Inferred Asset Data Connector used to connect to data through an AWS Glue Data Catalog.
 
     This Data Connector operates on AWS Glue Data Catalog and determines the Data Asset name
@@ -39,7 +41,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         boto3_options: Options passed to the `boto3` library.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -57,7 +59,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         id: Optional[str] = None,
     ):
         logger.warning(
-            "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
+            "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "  # noqa: E501
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
         super().__init__(
@@ -105,23 +107,17 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         super()._refresh_data_references_cache()
 
     def _refresh_introspected_assets_cache(self) -> None:
-        introspected_table_metadata = self._introspect_catalog(
-            **self.glue_introspection_directives
-        )
+        introspected_table_metadata = self._introspect_catalog(**self.glue_introspection_directives)
 
         introspected_assets: dict = {}
         for metadata in introspected_table_metadata:
             # For the inferred glue connector, the data asset name is database.table
             data_asset_name = f"{metadata['database_name']}.{metadata['table_name']}"
 
-            if (self.excluded_tables is not None) and (
-                data_asset_name in self.excluded_tables
-            ):
+            if (self.excluded_tables is not None) and (data_asset_name in self.excluded_tables):
                 continue
 
-            if (self.included_tables is not None) and (
-                data_asset_name not in self.included_tables
-            ):
+            if (self.included_tables is not None) and (data_asset_name not in self.included_tables):
                 continue
 
             data_asset_config: dict = {
@@ -147,9 +143,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         paginator = self.glue_client.get_paginator("get_tables")
         paginator_kwargs = self._get_glue_paginator_kwargs()
 
-        databases: List[str] = (
-            [database_name] if database_name else list(self._get_databases())
-        )
+        databases: List[str] = [database_name] if database_name else list(self._get_databases())
         tables: List[dict] = []
         for db in databases:
             paginator_kwargs["DatabaseName"] = db
@@ -166,6 +160,6 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
                         )
             except self.glue_client.exceptions.EntityNotFoundException:
                 raise DataConnectorError(
-                    f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."
+                    f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."  # noqa: E501
                 )
         return tables

@@ -27,7 +27,7 @@ def temp_gc_creds() -> None:
 # What does this test and why?
 # A common initial use of GX is locally, with the PandasExecutionEngine
 # A user of GCP could also have the GOOGLE_APPLICATION_CREDENTIALS set
-# This workflow was broken for a short time by PR # 3679 and then reverted with PR # 3689 and fixed with PR #3694
+# This workflow was broken for a short time by PR # 3679 and then reverted with PR # 3689 and fixed with PR #3694  # noqa: E501
 # The following test ensures that this simple workflow still works
 
 

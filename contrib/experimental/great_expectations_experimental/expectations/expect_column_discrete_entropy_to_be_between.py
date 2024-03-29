@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, Tuple
 import scipy.stats
 
 from great_expectations.core import (
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -18,6 +17,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -76,12 +78,10 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         runtime_configuration: Dict,
     ):
         (
-            df,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+            _df,
+            _compute_domain_kwargs,
+            _accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         base = metric_value_kwargs["base"]
 
         column_value_counts = metrics.get("column.value_counts")
@@ -107,11 +107,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         }
 
         dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
+            {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
@@ -154,9 +150,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                 result_format (str or None): \
                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                     For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 catch_exceptions (boolean or None): \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.
@@ -165,8 +158,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                     modification. For more detail, see :ref:`meta`.
             Returns:
                 An ExpectationSuiteValidationResult
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and :ref:`catch_exceptions`, and :ref:`meta`.
             Notes:
                 * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
                 * If min_value is None, then max_value is treated as an upper bound
@@ -180,9 +172,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                 "b": ["Jarndyce", "Jarndyce", None, None],
                 "c": ["past", "present", "future", None],
             },
-            "schemas": {
-                "spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}
-            },
+            "schemas": {"spark": {"a": "IntegerType", "b": "StringType", "c": "StringType"}},
             "tests": [
                 {
                     "title": "positive_test_min_equal_max",
@@ -266,7 +256,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "base": 2,
     }
@@ -352,14 +341,12 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.discrete.entropy",
-            configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,

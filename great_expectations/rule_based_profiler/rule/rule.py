@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 import copy
 import json
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.domain import Domain
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -14,12 +14,6 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain_builder import (
-    DomainBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
-)
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
     ReconciliationDirectives,
@@ -27,9 +21,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
@@ -42,6 +33,19 @@ from great_expectations.util import (
     measure_execution_time,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.core.batch import Batch, BatchRequestBase
+    from great_expectations.core.domain import Domain
+    from great_expectations.rule_based_profiler.domain_builder import (
+        DomainBuilder,
+    )
+    from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+        ExpectationConfigurationBuilder,
+    )
+    from great_expectations.rule_based_profiler.parameter_builder import (
+        ParameterBuilder,
+    )
+
 
 class Rule(SerializableDictDot):
     def __init__(  # noqa: PLR0913
@@ -50,9 +54,7 @@ class Rule(SerializableDictDot):
         variables: Optional[Union[ParameterContainer, Dict[str, Any]]] = None,
         domain_builder: Optional[DomainBuilder] = None,
         parameter_builders: Optional[List[ParameterBuilder]] = None,
-        expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
-        ] = None,
+        expectation_configuration_builders: Optional[List[ExpectationConfigurationBuilder]] = None,
     ) -> None:
         """
         Sets Rule name, variables, domain builder, parameters builders, configuration builders, and other instance data.
@@ -63,7 +65,7 @@ class Rule(SerializableDictDot):
             domain_builder: A Domain Builder object used to build rule data domain
             parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
             expectation_configuration_builders: A list of Expectation Configuration Builders
-        """
+        """  # noqa: E501
         self._name = name
 
         if variables is None:
@@ -74,9 +76,7 @@ class Rule(SerializableDictDot):
         if isinstance(variables, ParameterContainer):
             _variables = variables
         else:
-            _variables = build_parameter_container_for_variables(
-                variables_configs=variables
-            )
+            _variables = build_parameter_container_for_variables(variables_configs=variables)
 
         self.variables = _variables
 
@@ -112,7 +112,7 @@ class Rule(SerializableDictDot):
 
         Returns:
             RuleState representing effect of executing Rule
-        """
+        """  # noqa: E501
         if not reconciliation_directives:
             reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
 
@@ -166,9 +166,9 @@ class Rule(SerializableDictDot):
                     runtime_configuration=runtime_configuration,
                 )
 
-            expectation_configuration_builders: List[
-                ExpectationConfigurationBuilder
-            ] = (self.expectation_configuration_builders or [])
+            expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+                self.expectation_configuration_builders or []
+            )
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
 
@@ -194,7 +194,7 @@ class Rule(SerializableDictDot):
 
     @property
     def variables(self) -> ParameterContainer:
-        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
+        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.  # noqa: E501
         return copy.deepcopy(self._variables)
 
     @variables.setter
@@ -218,9 +218,9 @@ class Rule(SerializableDictDot):
     @override
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
-        parameter_builders: Optional[
-            Dict[str, ParameterBuilder]
-        ] = self._get_parameter_builders_as_dict()
+        parameter_builders: Optional[Dict[str, ParameterBuilder]] = (
+            self._get_parameter_builders_as_dict()
+        )
         parameter_builder: ParameterBuilder
         if parameter_builders is not None:
             # Roundtrip through schema validation to add/or restore any missing fields.
@@ -230,9 +230,9 @@ class Rule(SerializableDictDot):
             ]
 
         expectation_configuration_builder_configs: Optional[List[dict]] = None
-        expectation_configuration_builders: Optional[
-            Dict[str, ExpectationConfigurationBuilder]
-        ] = self._get_expectation_configuration_builders_as_dict()
+        expectation_configuration_builders: Optional[Dict[str, ExpectationConfigurationBuilder]] = (
+            self._get_expectation_configuration_builders_as_dict()
+        )
         expectation_configuration_builder: ExpectationConfigurationBuilder
         if expectation_configuration_builders is not None:
             # Roundtrip through schema validation to add/or restore any missing fields.
@@ -243,15 +243,11 @@ class Rule(SerializableDictDot):
                 for expectation_configuration_builder in expectation_configuration_builders.values()
             ]
 
-        domain_builder_configs: dict = (
-            self.domain_builder.to_dict() if self.domain_builder else {}
-        )
+        domain_builder_configs: dict = self.domain_builder.to_dict() if self.domain_builder else {}
 
         return {
             # Roundtrip through schema validation to add/or restore any missing fields.
-            "domain_builder": domainBuilderConfigSchema.load(
-                domain_builder_configs
-            ).to_dict(),
+            "domain_builder": domainBuilderConfigSchema.load(domain_builder_configs).to_dict(),
             "parameter_builders": parameter_builder_configs,
             "expectation_configuration_builders": expectation_configuration_builder_configs,
         }
@@ -264,7 +260,7 @@ class Rule(SerializableDictDot):
         reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         dict_obj: dict = self.to_dict()
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
@@ -281,7 +277,7 @@ class Rule(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -297,7 +293,7 @@ class Rule(SerializableDictDot):
         implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
-        """
+        """  # noqa: E501
         return self.__repr__()
 
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
@@ -305,8 +301,7 @@ class Rule(SerializableDictDot):
 
         parameter_builder: ParameterBuilder
         return {
-            parameter_builder.name: parameter_builder
-            for parameter_builder in parameter_builders
+            parameter_builder.name: parameter_builder for parameter_builder in parameter_builders
         }
 
     def _get_expectation_configuration_builders_as_dict(

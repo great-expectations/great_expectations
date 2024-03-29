@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -11,7 +13,9 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +35,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
         id: The unique identifier for this Data Connector used when running in cloud mode.
-    """
+    """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
@@ -61,9 +65,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         self._glob_directive = glob_directive
 
     @override
-    def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
 
@@ -75,9 +77,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         return sorted(path_list)
 
     @override
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
+    def _get_full_file_path(self, path: str, data_asset_name: Optional[str] = None) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return str(Path(self.base_directory).joinpath(path))
@@ -87,7 +87,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
-        """
+        """  # noqa: E501
         return str(
             normalize_directory_path(
                 dir_path=self._base_directory,

@@ -11,9 +11,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.skip(
-    "This is broken because Expectation._get_execution_engine_diagnostics is broken"
-)
+@pytest.mark.skip("This is broken because Expectation._get_execution_engine_diagnostics is broken")
 def test_print_diagnostic_checklist__first_iteration():
     output_message = ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 
@@ -25,14 +23,14 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
    Has at least one positive and negative example case, and all test cases pass
    Has core logic and passes tests on at least one Execution Engine
-"""
+"""  # noqa: E501
     )
 
 
 def test_print_diagnostic_checklist__second_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__SecondIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__SecondIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
@@ -52,14 +50,14 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Mat
     ✔ All 3 tests for pandas are passing
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
-"""
+"""  # noqa: E501
     )
 
 
 def test_print_diagnostic_checklist__third_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__ThirdIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(
+        column="values"
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
@@ -78,5 +76,5 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration ({Matu
     ✔ All 3 tests for pandas are passing
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
-"""
+"""  # noqa: E501
     )

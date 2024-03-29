@@ -9,8 +9,8 @@ from typing import Dict, Optional, Union
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load, pre_dump
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 
 
@@ -29,9 +29,7 @@ class RunIdentifier(DataContextKey):
         run_time: Optional[Union[datetime.datetime, str]] = None,
     ) -> None:
         super().__init__()
-        assert run_name is None or isinstance(
-            run_name, str
-        ), "run_name must be an instance of str"
+        assert run_name is None or isinstance(run_name, str), "run_name must be an instance of str"
         assert run_time is None or isinstance(run_time, (datetime.datetime, str)), (
             "run_time must be either None or " "an instance of str or datetime"
         )
@@ -72,17 +70,13 @@ class RunIdentifier(DataContextKey):
     def to_tuple(self):
         return (
             self._run_name or "__none__",
-            self._run_time.astimezone(tz=datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            ),
+            self._run_time.astimezone(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"),
         )
 
     def to_fixed_length_tuple(self):
         return (
             self._run_name or "__none__",
-            self._run_time.astimezone(tz=datetime.timezone.utc).strftime(
-                "%Y%m%dT%H%M%S.%fZ"
-            ),
+            self._run_time.astimezone(tz=datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ"),
         )
 
     def __repr__(self):
@@ -120,9 +114,7 @@ class RunIdentifier(DataContextKey):
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
-    run_time = fields.AwareDateTime(
-        format="iso", default_timezone=datetime.timezone.utc
-    )
+    run_time = fields.AwareDateTime(format="iso", default_timezone=datetime.timezone.utc)
 
     @pre_dump
     def prepare_dump(self, data, **kwargs):

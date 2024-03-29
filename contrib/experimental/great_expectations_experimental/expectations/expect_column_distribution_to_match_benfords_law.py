@@ -1,12 +1,14 @@
 import math
 from typing import Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -50,33 +52,15 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         totalVals = (column.apply(lambda x: 1.0 if x is not None else 0.0)).sum()
-        num1 = (
-            column.apply(lambda x: matchFirstDigit(x, 1) if x is not None else 0.0)
-        ).sum()
-        num2 = (
-            column.apply(lambda x: matchFirstDigit(x, 2) if x is not None else 0.0)
-        ).sum()
-        num3 = (
-            column.apply(lambda x: matchFirstDigit(x, 3) if x is not None else 0.0)
-        ).sum()
-        num4 = (
-            column.apply(lambda x: matchFirstDigit(x, 4) if x is not None else 0.0)
-        ).sum()
-        num5 = (
-            column.apply(lambda x: matchFirstDigit(x, 5) if x is not None else 0.0)
-        ).sum()
-        num6 = (
-            column.apply(lambda x: matchFirstDigit(x, 6) if x is not None else 0.0)
-        ).sum()
-        num7 = (
-            column.apply(lambda x: matchFirstDigit(x, 7) if x is not None else 0.0)
-        ).sum()
-        num8 = (
-            column.apply(lambda x: matchFirstDigit(x, 8) if x is not None else 0.0)
-        ).sum()
-        num9 = (
-            column.apply(lambda x: matchFirstDigit(x, 9) if x is not None else 0.0)
-        ).sum()
+        num1 = (column.apply(lambda x: matchFirstDigit(x, 1) if x is not None else 0.0)).sum()
+        num2 = (column.apply(lambda x: matchFirstDigit(x, 2) if x is not None else 0.0)).sum()
+        num3 = (column.apply(lambda x: matchFirstDigit(x, 3) if x is not None else 0.0)).sum()
+        num4 = (column.apply(lambda x: matchFirstDigit(x, 4) if x is not None else 0.0)).sum()
+        num5 = (column.apply(lambda x: matchFirstDigit(x, 5) if x is not None else 0.0)).sum()
+        num6 = (column.apply(lambda x: matchFirstDigit(x, 6) if x is not None else 0.0)).sum()
+        num7 = (column.apply(lambda x: matchFirstDigit(x, 7) if x is not None else 0.0)).sum()
+        num8 = (column.apply(lambda x: matchFirstDigit(x, 8) if x is not None else 0.0)).sum()
+        num9 = (column.apply(lambda x: matchFirstDigit(x, 9) if x is not None else 0.0)).sum()
         listdata = [
             num1 / totalVals,
             num2 / totalVals,
@@ -186,11 +170,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
         }
 
         dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
+            {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
@@ -256,23 +236,9 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
     #     "strict_min": None,
     #     "strict_max": None,
     #     "result_format": "BASIC",
-    #     "include_config": True,
+    #
     #     "catch_exceptions": False,
     # }
-
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
-    #     """
-    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     necessary configuration arguments have been provided for the validation of the expectation.
-
-    #     Args:
-    #         configuration (OPTIONAL[ExpectationConfiguration]): \
-    #             An optional Expectation Configuration entry that will be used to configure the expectation
-    #     Returns:
-    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-    #     """
-    #     super().validate_configuration(configuration)
-    #     # self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
@@ -337,7 +303,6 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
@@ -353,9 +318,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
         return {
             "success": metrics.get("column.custom.DistributionMatchesBenfordsLaw"),
             "result": {
-                "observed_value": metrics.get(
-                    "column.custom.DistributionMatchesBenfordsLaw"
-                )
+                "observed_value": metrics.get("column.custom.DistributionMatchesBenfordsLaw")
             },
         }
 

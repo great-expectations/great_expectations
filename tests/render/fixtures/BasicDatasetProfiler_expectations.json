@@ -1,5 +1,5 @@
 {
-  "expectation_suite_name": "default",
+  "name": "default",
   "meta": {
     "great_expectations_version": "0.7.0-beta"
   },
@@ -433,6 +433,5 @@
         "value_set": null
       }
     }
-  ],
-  "data_asset_type": "Dataset"
+  ]
 }

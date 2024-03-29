@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import Final
 
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
@@ -15,6 +18,8 @@ logger = logging.getLogger(__name__)
 import numpy as np
 from scipy import stats
 
+NP_RANDOM_GENERATOR: Final = np.random.default_rng()
+
 
 class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
@@ -23,7 +28,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
     value_keys = ("partition_object", "p", "bootstrap_sample", "bootstrap_sample_size")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: PLR0913
+    def _pandas(  # noqa: C901, PLR0913
         cls,
         column,
         partition_object=None,
@@ -35,19 +40,12 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
 
-        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object
-        if (partition_object["bins"][0] == -np.inf) or (
-            partition_object["bins"][-1] == np.inf
-        ):
+        # TODO: consider changing this into a check that tail_weights does not exist exclusively, by moving this check into is_valid_continuous_partition_object  # noqa: E501
+        if (partition_object["bins"][0] == -np.inf) or (partition_object["bins"][-1] == np.inf):
             raise ValueError("Partition endpoints must be finite.")
 
-        if (
-            "tail_weights" in partition_object
-            and np.sum(partition_object["tail_weights"]) > 0
-        ):
-            raise ValueError(
-                "Partition cannot have tail weights -- endpoints must be finite."
-            )
+        if "tail_weights" in partition_object and np.sum(partition_object["tail_weights"]) > 0:
+            raise ValueError("Partition cannot have tail weights -- endpoints must be finite.")
 
         test_cdf = np.append(np.array([0]), np.cumsum(partition_object["weights"]))
 
@@ -58,34 +56,33 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
             bootstrap_samples = 1000
 
         if bootstrap_sample_size is None:
-            # Sampling too many elements (or not bootstrapping) will make the test too sensitive to the fact that we've
+            # Sampling too many elements (or not bootstrapping) will make the test too sensitive to the fact that we've  # noqa: E501
             # compressed via a partition.
 
-            # Sampling too few elements will make the test insensitive to significant differences, especially
+            # Sampling too few elements will make the test insensitive to significant differences, especially  # noqa: E501
             # for nonoverlapping ranges.
             bootstrap_sample_size = len(partition_object["weights"]) * 2
 
         results = [
             stats.kstest(
-                np.random.choice(column, size=bootstrap_sample_size), estimated_cdf
+                NP_RANDOM_GENERATOR.choice(column, size=bootstrap_sample_size),
+                estimated_cdf,
             )[1]
             for _ in range(bootstrap_samples)
         ]
 
         test_result = (1 + sum(x >= p for x in results)) / (bootstrap_samples + 1)
 
-        hist, bin_edges = np.histogram(column, partition_object["bins"])
+        hist, _bin_edges = np.histogram(column, partition_object["bins"])
         below_partition = len(np.where(column < partition_object["bins"][0])[0])
         above_partition = len(np.where(column > partition_object["bins"][-1])[0])
 
         # Expand observed partition to report, if necessary
         if below_partition > 0 and above_partition > 0:
-            observed_bins = (
-                [np.min(column)] + partition_object["bins"] + [np.max(column)]
+            observed_bins = [np.min(column)] + partition_object["bins"] + [np.max(column)]
+            observed_weights = np.concatenate(([below_partition], hist, [above_partition])) / len(
+                column
             )
-            observed_weights = np.concatenate(
-                ([below_partition], hist, [above_partition])
-            ) / len(column)
         elif below_partition > 0:
             observed_bins = [np.min(column)] + partition_object["bins"]
             observed_weights = np.concatenate(([below_partition], hist)) / len(column)

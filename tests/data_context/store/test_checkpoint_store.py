@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
-from unittest import mock
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from unittest.mock import ANY as MOCK_ANY
 
 import pytest
 from marshmallow.exceptions import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -23,19 +22,22 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 from tests.test_utils import build_checkpoint_store_using_filesystem
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock  # noqa: TID251
+
+    from pytest_mock import MockerFixture
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMock]:
+def checkpoint_store_with_mock_backend(
+    mocker: MockerFixture,
+) -> Tuple[CheckpointStore, MagicMock]:
     store = CheckpointStore(store_name="checkpoint_store")
-    mock_backend = mock.MagicMock()
+    mock_backend = mocker.MagicMock()
     store._store_backend = mock_backend
 
     return store, mock_backend
@@ -55,14 +57,11 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
     with pytest.raises(TypeError):
-        checkpoint_store.set(
-            key="my_first_checkpoint", value="this is not a checkpoint"
-        )
+        checkpoint_store.set(key="my_first_checkpoint", value="this is not a checkpoint")
 
     assert len(checkpoint_store.list_keys()) == 0
 
     checkpoint_name_0: str = "my_checkpoint_0"
-    run_name_template_0: str = "%Y-%M-my-run-template-$VAR"
     validations_0: Union[List, Dict] = [
         {
             "batch_request": {
@@ -75,12 +74,6 @@ def test_checkpoint_store(empty_data_context):
                     "name": "store_validation_result",
                     "action": {
                         "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "StoreEvaluationParametersAction",
                     },
                 },
                 {
@@ -107,7 +100,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
-        run_name_template=run_name_template_0,
         expectation_suite_name=expectation_suite_name_0,
         evaluation_parameters=evaluation_parameters_0,
         runtime_configuration=runtime_configuration_0,
@@ -139,7 +131,6 @@ def test_checkpoint_store(empty_data_context):
     )
 
     checkpoint_name_1: str = "my_checkpoint_1"
-    run_name_template_1: str = "%Y-%M-my-run-template-$VAR"
     validations_1: Union[List, Dict] = [
         {
             "action_list": [
@@ -147,12 +138,6 @@ def test_checkpoint_store(empty_data_context):
                     "name": "store_validation_result",
                     "action": {
                         "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "StoreEvaluationParametersAction",
                     },
                 },
                 {
@@ -184,7 +169,6 @@ def test_checkpoint_store(empty_data_context):
     }
     my_checkpoint_config_1 = CheckpointConfig(
         name=checkpoint_name_1,
-        run_name_template=run_name_template_1,
         expectation_suite_name=expectation_suite_name_1,
         batch_request=batch_request_1,
         evaluation_parameters=evaluation_parameters_1,
@@ -217,74 +201,9 @@ def test_checkpoint_store(empty_data_context):
 """
     )
 
-    self_check_report: dict = convert_to_json_serializable(
-        data=checkpoint_store.self_check()
-    )
-    assert self_check_report == {
-        "keys": ["my_checkpoint_0", "my_checkpoint_1"],
-        "len_keys": 2,
-        "config": {
-            "store_name": "checkpoint_store",
-            "class_name": "CheckpointStore",
-            "module_name": "great_expectations.data_context.store.checkpoint_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "base_directory": f"{empty_data_context.root_directory}/checkpoints",
-                "platform_specific_separator": True,
-                "fixed_length_key": False,
-                "suppress_store_backend_id": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-            },
-        },
-    }
-
     checkpoint_store.remove_key(key=key_0)
     checkpoint_store.remove_key(key=key_1)
     assert len(checkpoint_store.list_keys()) == 0
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filesystem
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store.checkpoint_store
-class_name: CheckpointStore
-store_backend:
-    class_name: TupleFilesystemStoreBackend
-    base_directory: checkpoints/
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "CheckpointStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @pytest.mark.cloud
@@ -298,8 +217,6 @@ store_backend:
                     "attributes": {
                         "checkpoint_config": {
                             "name": "oss_test_checkpoint",
-                            "config_version": 1.0,
-                            "class_name": "Checkpoint",
                             "expectation_suite_name": "oss_test_expectation_suite",
                             "validations": [
                                 {
@@ -318,10 +235,8 @@ store_backend:
                 }
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
                 "validations": [
                     {"expectation_suite_name": "taxi.demo_pass"},
@@ -346,8 +261,6 @@ store_backend:
                         "attributes": {
                             "checkpoint_config": {
                                 "name": "oss_test_checkpoint",
-                                "config_version": 1.0,
-                                "class_name": "Checkpoint",
                                 "expectation_suite_name": "oss_test_expectation_suite",
                                 "validations": [
                                     {
@@ -367,10 +280,8 @@ store_backend:
                 ]
             },
             {
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "expectation_suite_name": "oss_test_expectation_suite",
-                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
                 "name": "oss_test_checkpoint",
                 "validations": [
                     {"expectation_suite_name": "taxi.demo_pass"},
@@ -399,29 +310,6 @@ def test_gx_cloud_response_json_to_object_dict(
         assert actual == expected
 
 
-@pytest.mark.unit
-def test_serialization_self_check(capsys) -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
-    with mock.patch("random.choice", lambda _: "0"):
-        store.serialization_self_check(pretty_print=True)
-
-    stdout = capsys.readouterr().out
-
-    test_key = "ConfigurationIdentifier::test-name-00000000000000000000"
-    messages = [
-        f"Attempting to add a new test key {test_key} to Checkpoint store...",
-        f"Test key {test_key} successfully added to Checkpoint store.",
-        f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store...",
-        "Test value successfully retrieved from Checkpoint store",
-        f"Cleaning up test key {test_key} and value from Checkpoint store...",
-        "Test key and value successfully removed from Checkpoint store",
-    ]
-
-    for message in messages:
-        assert message in stdout
-
-
 @pytest.mark.parametrize(
     "path,exists",
     [
@@ -444,7 +332,7 @@ def test_default_checkpoints_exist(path: str, exists: bool) -> None:
 
 @pytest.mark.unit
 def test_list_checkpoints(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -455,7 +343,7 @@ def test_list_checkpoints(
 
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -469,20 +357,18 @@ def test_list_checkpoints_cloud_mode(
 
 @pytest.mark.unit
 def test_delete_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
     store.delete_checkpoint(name="my_checkpoint")
 
-    mock_backend.remove_key.assert_called_once_with(
-        ConfigurationIdentifier("my_checkpoint")
-    )
+    mock_backend.remove_key.assert_called_once_with(ConfigurationIdentifier("my_checkpoint"))
 
 
 @pytest.mark.cloud
 def test_delete_checkpoint_with_cloud_id(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
@@ -495,7 +381,7 @@ def test_delete_checkpoint_with_cloud_id(
 
 @pytest.mark.unit
 def test_delete_checkpoint_with_invalid_key_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -506,14 +392,12 @@ def test_delete_checkpoint_with_invalid_key_raises_error(
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         store.delete_checkpoint(name="my_fake_checkpoint")
 
-    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
-        e.value
-    )
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(e.value)
 
 
 @pytest.mark.unit
 def test_get_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
     checkpoint_config: dict,
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
@@ -528,7 +412,7 @@ def test_get_checkpoint(
 
 @pytest.mark.unit
 def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -539,14 +423,13 @@ def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         store.get_checkpoint(name="my_fake_checkpoint", id=None)
 
-    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
-        e.value
-    )
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(e.value)
 
 
 @pytest.mark.unit
 def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
+    mocker: MockerFixture,
 ) -> None:
     def _raise_validation_error(_: Any) -> None:
         raise ValidationError(message="invalid config")
@@ -554,7 +437,7 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.get.return_value = {"class_name": "Checkpoint"}
 
-    with mock.patch(
+    with mocker.patch(
         "great_expectations.data_context.store.CheckpointStore.deserialize",
         side_effect=_raise_validation_error,
     ), pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
@@ -565,12 +448,12 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
 
 @pytest.mark.unit
 def test_add_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, MagicMock],
+    mocker: MockerFixture,
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
-    context = mock.MagicMock(spec=FileDataContext)
-    context._usage_statistics_handler = mock.MagicMock()
+    context = mocker.MagicMock(spec=FileDataContext)
     checkpoint_name = "my_checkpoint"
     checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 
@@ -578,5 +461,5 @@ def test_add_checkpoint(
 
     mock_backend.add.assert_called_once_with(
         (checkpoint_name,),
-        mock.ANY,  # Complex serialized payload so keeping it simple
+        MOCK_ANY,  # Complex serialized payload so keeping it simple
     )

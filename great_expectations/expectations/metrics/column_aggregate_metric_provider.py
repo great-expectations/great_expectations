@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import logging
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -32,9 +32,11 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
-@public_api
 def column_aggregate_value(
     engine: Type[ExecutionEngine],
     **kwargs,
@@ -53,7 +55,7 @@ def column_aggregate_value(
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
+    """  # noqa: E501
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
 
@@ -81,9 +83,7 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -99,13 +99,10 @@ def column_aggregate_value(
 
         return wrapper
     else:
-        raise ValueError(
-            "column_aggregate_value decorator only supports PandasExecutionEngine"
-        )
+        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")
 
 
-@public_api
-def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
+def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: C901
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
     A column_aggregate_partial must provide an aggregate function; it will be executed with the specified engine
@@ -122,10 +119,8 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
-    partial_fn_type: MetricPartialFunctionTypes = (
-        MetricPartialFunctionTypes.AGGREGATE_FN
-    )
+    """  # noqa: E501
+    partial_fn_type: MetricPartialFunctionTypes = MetricPartialFunctionTypes.AGGREGATE_FN
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
@@ -158,7 +153,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
                 (
                     selectable,
@@ -168,9 +163,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -222,7 +215,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
 
                 (
@@ -233,9 +226,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[
-                    str, sqlalchemy.quoted_name
-                ] = accessor_domain_kwargs["column"]
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
@@ -256,7 +247,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
-@public_api
 class ColumnAggregateMetricProvider(TableMetricProvider):
     """Base class for all Column Aggregate Metrics,
     which define metrics to be calculated in aggregate from a given column.
@@ -324,7 +314,5 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         return dependencies
 
 
-class ColumnMetricProvider(
-    ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider
-):
+class ColumnMetricProvider(ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider):
     _DeprecatedMetaMetricProvider__alias = ColumnAggregateMetricProvider

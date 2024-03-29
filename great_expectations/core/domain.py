@@ -57,7 +57,7 @@ class DomainKwargs(SerializableDotDict):
 
 class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
-    def __init__(
+    def __init__(  # noqa: C901 - too complex
         self,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
@@ -77,7 +77,7 @@ class Domain(SerializableDotDict):
             raise ValueError(
                 f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type "{type(domain_type)!s}" is \
 not supported).
-"""
+"""  # noqa: E501
             )
 
         if domain_kwargs is None:
@@ -85,16 +85,16 @@ not supported).
         elif isinstance(domain_kwargs, dict):
             domain_kwargs = DomainKwargs(domain_kwargs)
 
-        domain_kwargs_dot_dict: DomainKwargs = (
-            deep_convert_properties_iterable_to_domain_kwargs(source=domain_kwargs)
+        domain_kwargs_dot_dict: DomainKwargs = deep_convert_properties_iterable_to_domain_kwargs(
+            source=domain_kwargs
         )
 
         if details is None:
             details = {}
 
-        inferred_semantic_domain_type: Optional[
-            Dict[str, Union[str, SemanticDomainTypes]]
-        ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
+        inferred_semantic_domain_type: Optional[Dict[str, Union[str, SemanticDomainTypes]]] = (
+            details.get(INFERRED_SEMANTIC_TYPE_KEY)
+        )
         if inferred_semantic_domain_type:
             semantic_domain_key: str
             metric_domain_key: str
@@ -118,7 +118,7 @@ not supported).
                         f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
 "{type(domain_type)!s}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
 not exist as value of appropriate key in "domain_kwargs" dictionary.
-"""
+"""  # noqa: E501
                     )
 
         super().__init__(
@@ -136,10 +136,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
     def __eq__(self, other):
         return (other is not None) and (
-            (
-                hasattr(other, "to_json_dict")
-                and self.to_json_dict() == other.to_json_dict()
-            )
+            (hasattr(other, "to_json_dict") and self.to_json_dict() == other.to_json_dict())
             or (
                 isinstance(other, dict)
                 and deep_filter_properties_iterable(
@@ -160,25 +157,23 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         return _result_hash
 
     def is_superset(self, other: Domain) -> bool:
-        """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""
+        """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""  # noqa: E501
         if other is None:
             return True
 
         return other.is_subset(other=self)
 
     def is_subset(self, other: Domain) -> bool:
-        """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""
+        """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""  # noqa: E501
         if other is None:
             return False
 
         this_json_dict: dict = self.to_json_dict()
         other_json_dict: dict = other.to_json_dict()
 
-        return is_candidate_subset_of_target(
-            candidate=this_json_dict, target=other_json_dict
-        )
+        return is_candidate_subset_of_target(candidate=this_json_dict, target=other_json_dict)
 
-    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
+    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).  # noqa: E501
     @property
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
@@ -215,14 +210,12 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
 
 def deep_convert_properties_iterable_to_domain_kwargs(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, DomainKwargs]:
     if isinstance(source, dict):
-        return _deep_convert_properties_iterable_to_domain_kwargs(
-            source=DomainKwargs(source)
-        )
+        return _deep_convert_properties_iterable_to_domain_kwargs(source=DomainKwargs(source))
 
-    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.  # noqa: E501
     if isinstance(source, (list, set, tuple)):
         data_type: type = type(source)
 
@@ -242,9 +235,7 @@ def _deep_convert_properties_iterable_to_domain_kwargs(source: dict) -> DomainKw
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _deep_convert_properties_iterable_to_domain_kwargs(
-                source=value
-            )
+            source[key] = _deep_convert_properties_iterable_to_domain_kwargs(source=value)
         elif isinstance(value, (list, set, tuple)):
             data_type: type = type(value)
 

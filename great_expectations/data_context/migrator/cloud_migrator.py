@@ -17,6 +17,7 @@ migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 migrator.retry_migrate_validation_results()
 ```
 """
+
 from __future__ import annotations
 
 import logging
@@ -27,8 +28,6 @@ import requests
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.http import create_session
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -81,9 +80,7 @@ class CloudMigrator:
 
         # Invariant due to `get_cloud_config` raising an error if any config values are missing
         if not cloud_organization_id:
-            raise ValueError(
-                "An organization id must be present when performing a migration"
-            )
+            raise ValueError("An organization id must be present when performing a migration")
 
         self._cloud_base_url = cloud_base_url
         self._cloud_access_token = cloud_access_token
@@ -118,8 +115,6 @@ class CloudMigrator:
         Returns:
             CloudMigrator instance
         """
-        event = UsageStatsEvents.CLOUD_MIGRATE
-        event_payload = {"organization_id": cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
                 context=context,
@@ -128,23 +123,8 @@ class CloudMigrator:
                 cloud_organization_id=cloud_organization_id,
             )
             cloud_migrator._migrate_to_cloud(test_migrate)
-            if not test_migrate:  # Only send an event if this is not a test run.
-                send_usage_message(
-                    data_context=context,
-                    event=event,
-                    event_payload=event_payload,
-                    success=True,
-                )
             return cloud_migrator
         except Exception as e:
-            # Note we send an event on any exception here
-            if not test_migrate:
-                send_usage_message(
-                    data_context=context,
-                    event=event,
-                    event_payload=event_payload,
-                    success=False,
-                )
             raise gx_exceptions.MigrationError(
                 "Migration failed. Please check the error message for more details."
             ) from e
@@ -164,15 +144,9 @@ class CloudMigrator:
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
         self._print_migration_introduction_message()
 
-        configuration_bundle: ConfigurationBundle = ConfigurationBundle(
-            context=self._context
-        )
-        self._emit_log_stmts(
-            configuration_bundle=configuration_bundle, test_migrate=test_migrate
-        )
-        self._print_configuration_bundle_summary(
-            configuration_bundle=configuration_bundle
-        )
+        configuration_bundle: ConfigurationBundle = ConfigurationBundle(context=self._context)
+        self._emit_log_stmts(configuration_bundle=configuration_bundle, test_migrate=test_migrate)
+        self._print_configuration_bundle_summary(configuration_bundle=configuration_bundle)
 
         serialized_bundle = self._serialize_configuration_bundle(
             configuration_bundle=configuration_bundle
@@ -206,7 +180,7 @@ class CloudMigrator:
     def _log_about_test_migrate(self) -> None:
         logger.info(
             "This is a test run! Please pass `test_migrate=False` to begin the "
-            "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"
+            "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"  # noqa: E501
         )
 
     def _log_about_usage_stats_disabled(self) -> None:
@@ -235,7 +209,6 @@ class CloudMigrator:
             ("Datasource", configuration_bundle.datasources),
             ("Checkpoint", configuration_bundle.checkpoints),
             ("Expectation Suite", configuration_bundle.expectation_suites),
-            ("Profiler", configuration_bundle.profilers),
         )
 
         print("[Step 1/4]: Bundling context configuration")
@@ -243,9 +216,7 @@ class CloudMigrator:
             # ExpectationSuite is not AbstractConfig but contains required `name`
             self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
 
-    def _print_object_summary(
-        self, obj_name: str, obj_collection: List[AbstractConfig]
-    ) -> None:
+    def _print_object_summary(self, obj_name: str, obj_collection: List[AbstractConfig]) -> None:
         length = len(obj_collection)
 
         summary = f"  Bundled {length} {obj_name}(s)"
@@ -260,12 +231,8 @@ class CloudMigrator:
             extra = length - 10
             print(f"    ({extra} other {obj_name.lower()}(s) not displayed)")
 
-    def _serialize_configuration_bundle(
-        self, configuration_bundle: ConfigurationBundle
-    ) -> dict:
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+    def _serialize_configuration_bundle(self, configuration_bundle: ConfigurationBundle) -> dict:
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
@@ -273,9 +240,7 @@ class CloudMigrator:
         print("[Step 2/4]: Preparing validation results")
         return serialized_bundle.pop("validation_results")
 
-    def _send_configuration_bundle(
-        self, serialized_bundle: dict, test_migrate: bool
-    ) -> bool:
+    def _send_configuration_bundle(self, serialized_bundle: dict, test_migrate: bool) -> bool:
         print("[Step 3/4]: Sending context configuration")
         if test_migrate:
             return True
@@ -316,16 +281,12 @@ class CloudMigrator:
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
         resource_type = GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT
-        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
-            resource_type
-        ]
+        resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[resource_type]
         attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         unsuccessful_validations = {}
 
-        for i, (key, validation_result) in enumerate(
-            serialized_validation_results.items()
-        ):
+        for i, (key, validation_result) in enumerate(serialized_validation_results.items()):
             success: bool
             if test_migrate:
                 success = True
@@ -377,9 +338,7 @@ class CloudMigrator:
         status_code = response.status_code
         success = response.ok
 
-        return MigrationResponse(
-            message=message, status_code=status_code, success=success
-        )
+        return MigrationResponse(message=message, status_code=status_code, success=success)
 
     def _print_unsuccessful_validation_message(self) -> None:
         print(
@@ -407,7 +366,7 @@ class CloudMigrator:
     def _print_migration_conclusion_message(self, test_migrate: bool) -> None:
         if test_migrate:
             print(
-                "\nTest run completed! Please set `test_migrate=False` to perform an actual migration."
+                "\nTest run completed! Please set `test_migrate=False` to perform an actual migration."  # noqa: E501
             )
             return
 

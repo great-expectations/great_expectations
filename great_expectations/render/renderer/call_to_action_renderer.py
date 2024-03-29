@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class CallToActionRenderer:
     _document_defaults = {
         "header": "What would you like to do next?",
@@ -42,7 +45,7 @@ class CallToActionRenderer:
             "template": "$icon",
             "params": {"icon": ""},
             "tooltip": {
-                "content": "To disable this footer, set the show_how_to_buttons flag in your project's data_docs_sites config to false."
+                "content": "To disable this footer, set the show_how_to_buttons flag in your project's data_docs_sites config to false."  # noqa: E501
             },
             "styling": {
                 "params": {

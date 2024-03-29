@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 import jsonschema
@@ -39,7 +41,7 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
-        # This step insures that Spark UDF defined can be pickled; otherwise, pickle serialization exceptions may occur.
+        # This step insures that Spark UDF defined can be pickled; otherwise, pickle serialization exceptions may occur.  # noqa: E501
         json_schema = convert_to_json_serializable(data=json_schema)
 
         def matches_json_schema(val):

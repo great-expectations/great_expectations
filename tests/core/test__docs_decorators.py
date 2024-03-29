@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core._docs_decorators import (
+from great_expectations._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
     new_argument,
@@ -48,10 +48,7 @@ class TestPublicAPI:
             "        other_arg: describe other_arg\n"
             "    "
         )
-        assert (
-            _func_full_docstring_public_api.__name__
-            == "_func_full_docstring_public_api"
-        )
+        assert _func_full_docstring_public_api.__name__ == "_func_full_docstring_public_api"
 
     @pytest.mark.unit
     def test_public_api_decorator_only_summary(self):
@@ -120,10 +117,7 @@ class TestDeprecatedMethod:
             "    some_arg: describe some_arg\n"
             "    other_arg: describe other_arg\n"
         )
-        assert (
-            _func_full_docstring_deprecated.__name__
-            == "_func_full_docstring_deprecated"
-        )
+        assert _func_full_docstring_deprecated.__name__ == "_func_full_docstring_deprecated"
 
     @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_no_message(self):
@@ -144,10 +138,7 @@ class TestDeprecatedMethod:
     @pytest.mark.unit
     def test_deprecated_decorator_only_summary(self):
         assert _func_only_summary_deprecated.__doc__ == (
-            "My docstring.\n"
-            "\n"
-            ".. deprecated:: 1.2.3\n"
-            "    This is deprecated!!\n"
+            "My docstring.\n" "\n" ".. deprecated:: 1.2.3\n" "    This is deprecated!!\n"
         )
 
     @pytest.mark.unit
@@ -233,10 +224,7 @@ class TestNewMethod:
     @pytest.mark.unit
     def test_new_method_decorator_only_summary(self):
         assert _func_only_summary_new_method.__doc__ == (
-            "My docstring.\n"
-            "\n"
-            ".. versionadded:: 1.2.3\n"
-            "    Added in version 1.2.3\n"
+            "My docstring.\n" "\n" ".. versionadded:: 1.2.3\n" "    Added in version 1.2.3\n"
         )
 
     @pytest.mark.unit
@@ -383,9 +371,8 @@ class TestDeprecatedArgument:
                 """
                 pass
 
-        assert (
-            "Please specify an existing argument, you specified this_arg_doesnt_exist."
-            in str(e.value)
+        assert "Please specify an existing argument, you specified this_arg_doesnt_exist." in str(
+            e.value
         )
 
 
@@ -507,9 +494,8 @@ class TestNewArgument:
                 """
                 pass
 
-        assert (
-            "Please specify an existing argument, you specified this_arg_doesnt_exist."
-            in str(e.value)
+        assert "Please specify an existing argument, you specified this_arg_doesnt_exist." in str(
+            e.value
         )
 
 
@@ -595,7 +581,7 @@ def _func_full_docstring_all_decorators_all_sections(
 
 @pytest.mark.unit
 def test_all_decorators_full_docstring_all_sections():
-    """Makes sure that Returns and Raises are rendered correctly in the context of a full docstring."""
+    """Makes sure that Returns and Raises are rendered correctly in the context of a full docstring."""  # noqa: E501
 
     assert _func_full_docstring_all_decorators_all_sections.__doc__ == (
         "--Public API--My docstring.\n"
@@ -642,10 +628,7 @@ def test_all_decorators_full_docstring_all_sections():
 
 @pytest.mark.unit
 def test_all_decorators_do_not_change_function_name():
-    assert (
-        _func_full_docstring_all_decorators.__name__
-        == "_func_full_docstring_all_decorators"
-    )
+    assert _func_full_docstring_all_decorators.__name__ == "_func_full_docstring_all_decorators"
 
 
 # Class level decorators
@@ -684,12 +667,8 @@ class _ClassFullDocstringDeprecatedAndNewAtClassLevel:
         self.other_arg = other_arg
 
 
-@deprecated_argument(
-    argument_name="some_arg", version="1.2.3", message="This is deprecated!!"
-)
-@new_argument(
-    argument_name="other_arg", version="1.2.3", message="Added in version 1.2.3"
-)
+@deprecated_argument(argument_name="some_arg", version="1.2.3", message="This is deprecated!!")
+@new_argument(argument_name="other_arg", version="1.2.3", message="Added in version 1.2.3")
 class _ClassFullDocstringDeprecatedAndNewAtArgumentLevel:
     """Docstring summary.
 

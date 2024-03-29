@@ -22,9 +22,9 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
         X = date_range * 0
         prev_cutpoint = 0
         for param_set in trend_params:
-            X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set[
-                "beta"
-            ] * (date_range[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint)
+            X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set["beta"] * (
+                date_range[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint
+            )
             prev_cutpoint = param_set["cutpoint"]
         return X
 
@@ -60,9 +60,7 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
         """Generate a positive or negative pareto distribution."""
 
         if alpha is not None:
-            return np.random.pareto(a=alpha, size=size) * np.random.randint(
-                -1, 2, size=size
-            )
+            return np.random.pareto(a=alpha, size=size) * np.random.randint(-1, 2, size=size)
         else:
             return 0
 
@@ -81,9 +79,7 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
         date_range = np.arange(size)
 
         trend = self._generate_trend(date_range, trend_params)
-        weekly_seasonality = self._generate_weekday_seasonality(
-            date_range, weekday_dummy_params
-        )
+        weekly_seasonality = self._generate_weekday_seasonality(date_range, weekday_dummy_params)
         annual_seasonality = self._generate_annual_seasonality(
             date_range, annual_seasonality_params
         )

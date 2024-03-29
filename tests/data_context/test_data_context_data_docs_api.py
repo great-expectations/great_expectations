@@ -1,5 +1,4 @@
 import os
-import urllib
 from unittest import mock
 
 import pytest
@@ -23,9 +22,7 @@ def test_open_docs_with_no_site(mock_webbrowser, context_with_no_sites):
 
 @pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_non_existent_site_raises_error(
-    mock_webbrowser, empty_data_context
-):
+def test_open_docs_with_non_existent_site_raises_error(mock_webbrowser, empty_data_context):
     context = empty_data_context
     with pytest.raises(DataContextError):
         context.open_data_docs(site_name="foo")
@@ -90,9 +87,7 @@ def context_with_multiple_built_sites(empty_data_context):
     assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
-    assert obs[1]["site_url"].endswith(
-        "gx/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert obs[1]["site_url"].endswith("gx/uncommitted/data_docs/another_local_site/index.html")
     assert obs[1]["site_name"] == "another_local_site"
     for site in ["local_site", "another_local_site"]:
         assert os.path.isfile(  # noqa: PTH113
@@ -110,9 +105,7 @@ def context_with_multiple_built_sites(empty_data_context):
 
 @pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_two_local_sites(
-    mock_webbrowser, context_with_multiple_built_sites
-):
+def test_open_docs_with_two_local_sites(mock_webbrowser, context_with_multiple_built_sites):
     context = context_with_multiple_built_sites
     context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 2
@@ -121,9 +114,7 @@ def test_open_docs_with_two_local_sites(
     assert first_call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
     second_call = mock_webbrowser.call_args_list[1][0][0]
     assert second_call.startswith("file:///")
-    assert second_call.endswith(
-        "/gx/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert second_call.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.mark.unit
@@ -171,9 +162,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
-    obs = context.get_docs_sites_urls(
-        site_name="another_local_site", only_if_exists=False
-    )
+    obs = context.get_docs_sites_urls(site_name="another_local_site", only_if_exists=False)
     assert len(obs) == 1
     assert obs[0]["site_name"] == "another_local_site"
 
@@ -192,7 +181,7 @@ def test_clean_data_docs_on_context_with_no_sites_raises_error(
 
 
 @pytest.mark.filesystem
-def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(
+def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(  # noqa: E501
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
@@ -210,7 +199,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans
 
 
 @pytest.mark.filesystem
-def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(
+def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(  # noqa: E501
     context_with_multiple_built_sites,
 ):
     context = context_with_multiple_built_sites
@@ -236,7 +225,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_n
 
 
 @pytest.mark.filesystem
-def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
+def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(  # noqa: E501
     tmp_path_factory,
 ):
     """
@@ -419,39 +408,3 @@ def test_view_validation_result(
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
     assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
-
-
-@pytest.mark.big
-def test_view_validation_result_uses_run_name_template_env_var(
-    monkeypatch, empty_data_context
-):
-    monkeypatch.setenv("MY_ENV_VAR", "PLEASE_RENDER_ME")
-
-    context = empty_data_context
-
-    validator = context.sources.pandas_default.read_csv(
-        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-    )
-
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.save_expectation_suite()
-
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_checkpoint",
-        validator=validator,
-        run_name_template="staging-$MY_ENV_VAR",
-    )
-
-    checkpoint_result = checkpoint.run()
-    with mock.patch("webbrowser.open") as mock_open:
-        context.view_validation_result(checkpoint_result)
-
-    mock_open.assert_called_once()
-
-    url_used = mock_open.call_args[0][0]
-    assert url_used.startswith("file:///")
-    assert "staging-PLEASE_RENDER_ME" in url_used
-
-    f = urllib.request.urlopen(url_used)
-    myfile = f.read()
-    assert b"staging-PLEASE_RENDER_ME" in myfile

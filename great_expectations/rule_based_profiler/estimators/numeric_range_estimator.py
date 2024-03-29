@@ -1,20 +1,24 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
-
-import numpy as np
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-)
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    import numpy as np
+
+    from great_expectations.core.domain import Domain
+    from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+        NumericRangeEstimationResult,
+    )
+    from great_expectations.rule_based_profiler.parameter_container import (
+        ParameterContainer,
+    )
+    from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -24,7 +28,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
     """
     Parent class that incorporates the "get_numeric_range_estimate()" interface method, requiring all subclasses to
     implement the "_get_numeric_range_estimate()" method (for encapsulation reasons, the former calls the latter).
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -37,7 +41,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
             "bootstrap", "exact" (default - deterministic, incorporating entire observed value range), or "kde"
             (kernel density estimation).
             configuration: attributes needed for the estimation algorithm (subject of the inherited class) to operate.
-        """
+        """  # noqa: E501
         self._name = name
         self._configuration = configuration
 
@@ -70,7 +74,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
 
         Returns:
             "NumericRangeEstimationResult" object, containing computed "value_range" and "estimation_histogram" details.
-        """
+        """  # noqa: E501
         return self._get_numeric_range_estimate(
             metric_values=metric_values,
             domain=domain,

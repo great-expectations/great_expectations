@@ -140,9 +140,9 @@
                 "key"
             ]
         },
-        "SplitterColumnValue": {
-            "title": "SplitterColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerColumnValue": {
+            "title": "PartitionerColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -151,21 +151,20 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_column_value",
+                    "default": "partition_on_column_value",
                     "enum": [
-                        "split_on_column_value"
+                        "partition_on_column_value"
                     ],
                     "type": "string"
                 }
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "SplitterMultiColumnValue": {
-            "title": "SplitterMultiColumnValue",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerMultiColumnValue": {
+            "title": "PartitionerMultiColumnValue",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_names": {
@@ -177,77 +176,74 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_multi_column_values",
+                    "default": "partition_on_multi_column_values",
                     "enum": [
-                        "split_on_multi_column_values"
+                        "partition_on_multi_column_values"
                     ],
                     "type": "string"
                 }
             },
             "required": [
                 "column_names"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "SplitterDividedInteger": {
-            "title": "SplitterDividedInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerDividedInteger": {
+            "title": "PartitionerDividedInteger",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "split_on_divided_integer",
-                    "enum": [
-                        "split_on_divided_integer"
-                    ],
-                    "type": "string"
-                },
                 "divisor": {
                     "title": "Divisor",
                     "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "divisor"
-            ],
-            "additionalProperties": false
-        },
-        "SplitterModInteger": {
-            "title": "SplitterModInteger",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
+                },
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_mod_integer",
+                    "default": "partition_on_divided_integer",
                     "enum": [
-                        "split_on_mod_integer"
+                        "partition_on_divided_integer"
                     ],
                     "type": "string"
-                },
+                }
+            },
+            "required": [
+                "divisor",
+                "column_name"
+            ]
+        },
+        "PartitionerModInteger": {
+            "title": "PartitionerModInteger",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
                 "mod": {
                     "title": "Mod",
                     "type": "integer"
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_mod_integer",
+                    "enum": [
+                        "partition_on_mod_integer"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [
-                "column_name",
-                "mod"
-            ],
-            "additionalProperties": false
+                "mod",
+                "column_name"
+            ]
         },
-        "SplitterYear": {
-            "title": "SplitterYear",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerYear": {
+            "title": "PartitionerYear",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -256,21 +252,20 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_year",
+                    "default": "partition_on_year",
                     "enum": [
-                        "split_on_year"
+                        "partition_on_year"
                     ],
                     "type": "string"
                 }
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "SplitterYearAndMonth": {
-            "title": "SplitterYearAndMonth",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerYearAndMonth": {
+            "title": "PartitionerYearAndMonth",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -279,21 +274,20 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_year_and_month",
+                    "default": "partition_on_year_and_month",
                     "enum": [
-                        "split_on_year_and_month"
+                        "partition_on_year_and_month"
                     ],
                     "type": "string"
                 }
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "SplitterYearAndMonthAndDay": {
-            "title": "SplitterYearAndMonthAndDay",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerYearAndMonthAndDay": {
+            "title": "PartitionerYearAndMonthAndDay",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -302,48 +296,123 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_year_and_month_and_day",
+                    "default": "partition_on_year_and_month_and_day",
                     "enum": [
-                        "split_on_year_and_month_and_day"
+                        "partition_on_year_and_month_and_day"
                     ],
                     "type": "string"
                 }
             },
             "required": [
                 "column_name"
-            ],
-            "additionalProperties": false
+            ]
         },
-        "SplitterDatetimePart": {
-            "title": "SplitterDatetimePart",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "PartitionerDatetimePart": {
+            "title": "PartitionerDatetimePart",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "split_on_date_parts",
-                    "enum": [
-                        "split_on_date_parts"
-                    ],
-                    "type": "string"
-                },
                 "datetime_parts": {
                     "title": "Datetime Parts",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_date_parts",
+                    "enum": [
+                        "partition_on_date_parts"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "datetime_parts",
+                "column_name"
+            ]
+        },
+        "PartitionerConvertedDatetime": {
+            "title": "PartitionerConvertedDatetime",
+            "description": "--Public API--",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "partition_on_converted_datetime",
+                    "enum": [
+                        "partition_on_converted_datetime"
+                    ],
+                    "type": "string"
+                },
+                "date_format_string": {
+                    "title": "Date Format String",
+                    "type": "string"
                 }
             },
             "required": [
                 "column_name",
-                "datetime_parts"
-            ],
-            "additionalProperties": false
+                "date_format_string"
+            ]
+        },
+        "BatchDefinition": {
+            "title": "BatchDefinition",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "partitioner": {
+                    "title": "Partitioner",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/PartitionerColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYear"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerDatetimePart"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerConvertedDatetime"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ]
         },
         "CSVAsset": {
             "title": "CSVAsset",
@@ -379,6 +448,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -389,35 +465,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -708,6 +755,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -718,35 +772,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1043,6 +1068,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1053,35 +1085,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1196,6 +1199,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1206,35 +1216,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1355,6 +1336,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1365,35 +1353,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1491,6 +1450,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1501,35 +1467,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1633,6 +1570,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1643,35 +1587,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -1933,6 +1848,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -1943,35 +1865,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2239,6 +2132,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2249,35 +2149,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2372,6 +2243,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2382,35 +2260,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "pathGlobFilter": {
                     "title": "Pathglobfilter",
@@ -2511,6 +2360,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2521,35 +2377,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "timestampAsOf": {
                     "title": "Timestampasof",
@@ -2599,6 +2426,13 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition"
+                    }
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
@@ -2609,35 +2443,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "splitter": {
-                    "title": "Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/SplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/SplitterDatetimePart"
-                        }
-                    ]
                 },
                 "timestampAsOf": {
                     "title": "Timestampasof",

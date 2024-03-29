@@ -1,9 +1,7 @@
-from typing import Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional
+
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
@@ -11,6 +9,14 @@ from great_expectations.render import (
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
@@ -55,9 +61,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, render_object, **kwargs):
-        return super().render(
-            render_object=render_object, exception_list_content_block=True
-        )
+        return super().render(render_object=render_object, exception_list_content_block=True)
 
     @classmethod
     def _missing_content_block_fn(
@@ -91,9 +95,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                             "params": {
                                 "column": column,
                                 "expectation_type": result.expectation_config.expectation_type,
-                                "exception_message": result.exception_info[
-                                    "exception_message"
-                                ],
+                                "exception_message": result.exception_info["exception_message"],
                             },
                             "styling": styling,
                         },

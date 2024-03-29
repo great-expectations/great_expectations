@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
@@ -115,16 +117,9 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         "row_condition": None,
         "condition_parser": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = ("column", "datetime_format")
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
-        super().validate_configuration(configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -137,9 +132,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        include_column_name = include_column_name if include_column_name is not None else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -175,9 +168,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
@@ -200,9 +191,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        include_column_name = include_column_name if include_column_name is not None else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -265,11 +254,12 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        configuration = self.configuration
+
         observed_value_counts = metrics.get("column.value_counts", [])
         observed_max = metrics.get("column.max")
         observed_min = metrics.get("column.min")
@@ -279,18 +269,14 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         if datetime_format is not None:
             observed_set = set(
                 map(
-                    lambda x: datetime.strptime(x, datetime_format).strftime(
-                        "%Y-%m-%d"
-                    ),
+                    lambda x: datetime.strptime(x, datetime_format).strftime("%Y-%m-%d"),
                     observed_value_counts.index,
                 )
             )
         else:
             observed_set = set(observed_value_counts.index)
 
-        expected_set = set(
-            self._expected_list(observed_min, observed_max, configuration)
-        )
+        expected_set = set(self._expected_list(observed_min, observed_max, configuration))
 
         return {
             "success": expected_set == observed_set,

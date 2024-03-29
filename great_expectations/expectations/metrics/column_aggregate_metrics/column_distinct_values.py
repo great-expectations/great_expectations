@@ -1,14 +1,12 @@
-from typing import Any, Dict, List, Optional, Set
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
-from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -23,6 +21,14 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from great_expectations.compatibility import pyspark, sqlalchemy
+    from great_expectations.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 
 class ColumnDistinctValues(ColumnAggregateMetricProvider):
@@ -43,35 +49,27 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values depended on column.value_counts.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
         (
             selectable,
             _,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name: str = accessor_domain_kwargs["column"]
         column: sqlalchemy.ColumnClause = sa.column(column_name)
 
         distinct_values: List[sqlalchemy.Row]
         if hasattr(column, "is_not"):
             distinct_values = execution_engine.execute_query(
-                sa.select(column)
-                .where(column.is_not(None))
-                .distinct()
-                .select_from(selectable)
+                sa.select(column).where(column.is_not(None)).distinct().select_from(selectable)
             ).fetchall()
         else:
             distinct_values = execution_engine.execute_query(
-                sa.select(column)
-                .where(column.isnot(None))
-                .distinct()
-                .select_from(selectable)
+                sa.select(column).where(column.isnot(None)).distinct().select_from(selectable)
             ).fetchall()
-        # Vectorized operation is not faster here due to overhead of converting to and from numpy array
+        # Vectorized operation is not faster here due to overhead of converting to and from numpy array  # noqa: E501
         return {row[0] for row in distinct_values}
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -85,16 +83,14 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values depended on column.value_counts.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
         (
             df,
             _,
             accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
+        ) = execution_engine.get_compute_domain(metric_domain_kwargs, MetricDomainTypes.COLUMN)
         column_name: str = accessor_domain_kwargs["column"]
         distinct_values: List[pyspark.Row] = (
             df.select(F.col(column_name))
@@ -123,7 +119,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
@@ -136,7 +132,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
-        """
+        """  # noqa: E501
         return F.countDistinct(column)
 
 
@@ -155,9 +151,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        return (
-            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
-        )
+        return metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -166,9 +160,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        return (
-            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
-        )
+        return metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
 
     @classmethod
     @override

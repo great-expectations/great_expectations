@@ -74,9 +74,9 @@ context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_available_data_asset_names">
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
+    data_connector_names="whole_table"
+)["whole_table"]
 # </snippet>
 
 assert len(available_data_asset_names) == 2
@@ -127,7 +127,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
+    data_connector_names="whole_table"
+)["whole_table"]
 assert len(available_data_asset_names) == 1

@@ -1,7 +1,7 @@
 {
-  "expectation_type" : "expect_column_pair_values_A_to_be_greater_than_B",
+  "expectation_type" : "expect_column_pair_values_a_to_be_greater_than_b",
   "datasets" : [{
-    "dataset_name": "expect_column_pair_values_A_to_be_greater_than_B_1",
+    "dataset_name": "expect_column_pair_values_a_to_be_greater_than_b_1",
     "data" : {
       "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
@@ -80,21 +80,6 @@
       "out" : {
         "unexpected_list": [],
         "unexpected_index_list": [],
-        "success": true
-      }
-    },{
-      "title" : "test_parse_strings_as_datetimes_and_mostly",
-      "exact_match_out" : false,
-      "only_for": ["pandas"],
-      "in": {
-        "column_A": "a",
-        "column_B": "b",
-        "parse_strings_as_datetimes": true,
-        "mostly": 0.6
-      },
-      "out" : {
-        "unexpected_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
-        "unexpected_index_list": [{"a": "1/1/2016", "pk_index": 0, "b": "1/1/2016"}, {"a": "5/5/2016", "pk_index": 4, "b": "5/1/2020"}],
         "success": true
       }
     },{

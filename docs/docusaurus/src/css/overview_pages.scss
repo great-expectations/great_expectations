@@ -1,0 +1,57 @@
+@mixin overview-card-container {
+  background-color: #404041;
+  color: var(--ifm-footer-link-color);
+  margin-bottom: 2rem;
+  padding: 2.5rem 3rem 2rem;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+
+  &::before {
+    background: url('/img/repeating_hex_overview.png');
+    bottom: 0;
+    content: '';
+    left: 0;
+    opacity: 0.05;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+  }
+
+  @media (max-width: 996px) {
+    padding: 3rem 2rem 2rem;
+  }
+}
+
+@mixin overview-card-title {
+  font-size: var(--ifm-h1-font-size);
+  margin-bottom: var(--ifm-heading-margin-bottom);
+  max-width: 40rem;
+}
+
+@mixin overview-card-description {
+  font-size: var(--h4-font-size);
+  font-weight: normal;
+  line-height: var(--p-line-height);
+  margin-bottom: var(--ifm-heading-margin-bottom);
+  max-width: 40rem;
+}
+
+.generated-index-page {
+  & > div {
+    max-width: unset !important;
+  }
+
+  header {
+    @include overview-card-container;
+
+    h1 {
+      @include overview-card-title;
+    }
+
+    p {
+      @include overview-card-description;
+    }
+  }
+}

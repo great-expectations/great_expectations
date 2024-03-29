@@ -4,7 +4,6 @@ import copy
 import logging
 import pathlib
 from contextlib import contextmanager
-from pprint import pformat as pf
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
@@ -14,15 +13,28 @@ from typing import (
     Dict,
     Generator,
     List,
+    Literal,
     Optional,
     Tuple,
 )
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerColumnValue,
+    PartitionerDatetimePart,
+    PartitionerDividedInteger,
+    PartitionerModInteger,
+    PartitionerMultiColumnValue,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -39,8 +51,7 @@ from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    Splitter,
-    SplitterYearAndMonth,
+    SqlPartitionerYearAndMonth,
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -48,6 +59,9 @@ from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
+    from unittest.mock import Mock  # noqa: TID251
+
+    from pytest_mock import MockFixture
     from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext
@@ -69,10 +83,10 @@ def _source(
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
     data_context: Optional[AbstractDataContext] = None,
-    splitter_query_response: Optional[List[Dict[str, Any]]] = None,
+    partitioner_query_response: Optional[List[Dict[str, Any]]] = None,
     create_temp_table: bool = True,
 ) -> Generator[PostgresDatasource, None, None]:
-    splitter_response = splitter_query_response or (
+    partitioner_response = partitioner_query_response or (
         [
             {"year": year, "month": month}
             for year in _DEFAULT_TEST_YEARS
@@ -83,7 +97,7 @@ def _source(
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec,
         dialect=dialect,
-        splitter_query_response=splitter_response,
+        partitioner_query_response=partitioner_response,
     )
     original_override = PostgresDatasource.execution_engine_override  # type: ignore[misc]
     try:
@@ -125,9 +139,7 @@ def mock_test_connection(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.postgresql
 def test_construct_postgres_datasource(create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         assert source.name == "my_datasource"
         assert source.execution_engine_type is SqlAlchemyExecutionEngine
         assert source.assets == []
@@ -139,11 +151,12 @@ def assert_table_asset(
     table_name: str,
     source: PostgresDatasource,
     batch_request_options: tuple[str, ...],
+    partitioner: Optional[Partitioner] = None,
 ):
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.batch_request_options == batch_request_options
+    assert asset.get_batch_request_options_keys(partitioner=partitioner) == batch_request_options
 
 
 def assert_batch_request(
@@ -155,25 +168,19 @@ def assert_batch_request(
 
 
 @pytest.mark.postgresql
-def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+def test_add_table_asset_with_partitioner(mocker, create_source: CreateSourceFixture):
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         mocker.patch("sqlalchemy.create_engine")
         mocker.patch("sqlalchemy.engine")
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
-        get_column_names = mocker.patch(
-            "tests.sqlalchemy_test_doubles.MockSaInspector.get_columns"
-        )
+        get_column_names = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.get_columns")
         get_column_names.return_value = [{"name": "my_col"}]
-        has_table = mocker.patch(
-            "tests.sqlalchemy_test_doubles.MockSaInspector.has_table"
-        )
+        has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
         has_table.return_value = True
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
-        asset.add_splitter_year_and_month(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         assert len(source.assets) == 1
         assert asset == source.assets[0]
         assert_table_asset(
@@ -182,9 +189,12 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             table_name="my_table",
             source=source,
             batch_request_options=("year", "month"),
+            partitioner=partitioner,
         )
         assert_batch_request(
-            batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
+            batch_request=asset.build_batch_request(
+                options={"year": 2021, "month": 10}, partitioner=partitioner
+            ),
             source_name="my_datasource",
             asset_name="my_asset",
             options={"year": 2021, "month": 10},
@@ -192,10 +202,8 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
 
 
 @pytest.mark.postgresql
-def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+def test_add_table_asset_with_no_partitioner(mocker, create_source: CreateSourceFixture):
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         mocker.patch("sqlalchemy.create_engine")
         mocker.patch("sqlalchemy.engine")
         mocker.patch("sqlalchemy.inspect")
@@ -225,27 +233,21 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
 
 
 @pytest.mark.postgresql
-def test_construct_table_asset_directly_with_no_splitter(create_source):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+def test_construct_table_asset_directly_with_no_partitioner(create_source):
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         asset = TableAsset(name="my_asset", table_name="my_table")
         asset._datasource = source
-        assert_batch_request(
-            asset.build_batch_request(), "my_datasource", "my_asset", {}
-        )
+        assert_batch_request(asset.build_batch_request(), "my_datasource", "my_asset", {})
 
 
 def create_and_add_table_asset_without_testing_connection(
     source: PostgresDatasource,
     name: str,
     table_name: str,
-    splitter: Optional[Splitter] = None,
 ) -> Tuple[PostgresDatasource, TableAsset]:
     table_asset = TableAsset(
         name=name,
         table_name=table_name,
-        splitter=splitter,
     )
     # TODO: asset custom init
     table_asset._datasource = source
@@ -253,18 +255,16 @@ def create_and_add_table_asset_without_testing_connection(
     return source, table_asset
 
 
-def year_month_splitter(column_name: str) -> SplitterYearAndMonth:
-    return SplitterYearAndMonth(
+def year_month_partitioner(column_name: str) -> SqlPartitionerYearAndMonth:
+    return SqlPartitionerYearAndMonth(
         column_name=column_name,
-        method_name="split_on_year_and_month",
+        method_name="partition_on_year_and_month",
     )
 
 
 @pytest.mark.postgresql
-def test_construct_table_asset_directly_with_splitter(create_source):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+def test_construct_table_asset_directly_with_partitioner(create_source):
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
@@ -272,18 +272,19 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             source=source,
             name="my_asset",
             table_name="my_table",
-            splitter=year_month_splitter(column_name="col"),
         )
+        partitioner = PartitionerYearAndMonth(column_name="col")
         assert_table_asset(
             asset,
             "my_asset",
             "my_table",
             source,
             ("year", "month"),
+            partitioner=partitioner,
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
-            asset.build_batch_request(batch_request_options),
+            asset.build_batch_request(options=batch_request_options, partitioner=partitioner),
             "my_datasource",
             "my_asset",
             batch_request_options,
@@ -291,7 +292,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_no_splitter(empty_data_context, create_source):
+def test_datasource_gets_batch_list_no_partitioner(empty_data_context, create_source):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
             "batch_identifiers": {},
@@ -315,7 +316,7 @@ def test_datasource_gets_batch_list_no_splitter(empty_data_context, create_sourc
         source.get_batch_list_from_batch_request(asset.build_batch_request())
 
 
-def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
+def assert_batch_specs_correct_with_year_month_partitioner_defaults(batch_specs):
     # We should have 1 batch_spec per (year, month) pair
     expected_batch_spec_num = len(_DEFAULT_TEST_YEARS) * len(_DEFAULT_TEST_MONTHS)
     assert len(batch_specs) == expected_batch_spec_num
@@ -327,13 +328,13 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
                 "table_name": "my_table",
                 "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": year, "month": month}},
-                "splitter_method": "split_on_year_and_month",
-                "splitter_kwargs": {"column_name": "my_col"},
+                "partitioner_method": "partition_on_year_and_month",
+                "partitioner_kwargs": {"column_name": "my_col"},
             }
             assert spec in batch_specs
 
 
-def assert_batches_correct_with_year_month_splitter_defaults(batches):
+def assert_batches_correct_with_year_month_partitioner_defaults(batches):
     # We should have 1 batch_spec per (year, month) pair
     expected_batch_spec_num = len(_DEFAULT_TEST_YEARS) * len(_DEFAULT_TEST_MONTHS)
     assert len(batches) == expected_batch_spec_num
@@ -344,7 +345,7 @@ def assert_batches_correct_with_year_month_splitter_defaults(batches):
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
+def test_datasource_gets_batch_list_partitioner_with_unspecified_batch_request_options(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -364,16 +365,16 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
-        empty_batch_request = asset.build_batch_request()
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        empty_batch_request = asset.build_batch_request(partitioner=partitioner)
         assert empty_batch_request.options == {}
         batches = source.get_batch_list_from_batch_request(empty_batch_request)
-        assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs)
-        assert_batches_correct_with_year_month_splitter_defaults(batches)
+        assert_batch_specs_correct_with_year_month_partitioner_defaults(batch_specs)
+        assert_batches_correct_with_year_month_partitioner_defaults(batches)
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none(
+def test_datasource_gets_batch_list_partitioner_with_batch_request_options_set_to_none(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -393,20 +394,23 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
-        assert asset.batch_request_options == ("year", "month")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        assert asset.get_batch_request_options_keys(partitioner=partitioner) == (
+            "year",
+            "month",
+        )
         batch_request_with_none = asset.build_batch_request(
-            {"year": None, "month": None}
+            options={"year": None, "month": None}, partitioner=partitioner
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
         batches = source.get_batch_list_from_batch_request(batch_request_with_none)
         # We should have 1 batch_spec per (year, month) pair
-        assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs)
-        assert_batches_correct_with_year_month_splitter_defaults(batches)
+        assert_batch_specs_correct_with_year_month_partitioner_defaults(batch_specs)
+        assert_batches_correct_with_year_month_partitioner_defaults(batches)
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options(
+def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_request_options(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -420,9 +424,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[
-            {"year": year, "month": month} for month in list(range(1, 13))
-        ],
+        partitioner_query_response=[{"year": year, "month": month} for month in list(range(1, 13))],
     ) as source:
         (
             source,  # noqa: PLW2901
@@ -430,9 +432,9 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
-            asset.build_batch_request({"year": year})
+            asset.build_batch_request(options={"year": year}, partitioner=partitioner)
         )
         assert len(batch_specs) == len(_DEFAULT_TEST_MONTHS)
         for month in _DEFAULT_TEST_MONTHS:
@@ -442,8 +444,8 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
                 "table_name": "my_table",
                 "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": year, "month": month}},
-                "splitter_method": "split_on_year_and_month",
-                "splitter_kwargs": {"column_name": "my_col"},
+                "partitioner_method": "partition_on_year_and_month",
+                "partitioner_kwargs": {"column_name": "my_col"},
             }
             assert spec in batch_specs
 
@@ -466,8 +468,8 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         assert spec == {
             "batch_identifiers": {"my_col": {"month": 1, "year": 2022}},
             "data_asset_name": "my_asset",
-            "splitter_kwargs": {"column_name": "my_col"},
-            "splitter_method": "split_on_year_and_month",
+            "partitioner_kwargs": {"column_name": "my_col"},
+            "partitioner_method": "partition_on_year_and_month",
             "table_name": "my_table",
             "schema_name": None,
             "type": "table",
@@ -477,7 +479,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         validate_batch_spec=validate_batch_spec,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[{"month": month, "year": year}],
+        partitioner_query_response=[{"month": month, "year": year}],
     ) as source:
         (
             source,  # noqa: PLW2901
@@ -485,9 +487,11 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
-            asset.build_batch_request({"month": month, "year": year})
+            asset.build_batch_request(
+                options={"month": month, "year": year}, partitioner=partitioner
+            )
         )
         assert 1 == len(batches)
         assert batches[0].metadata == {"month": month, "year": year}
@@ -495,9 +499,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
 
 @pytest.mark.postgresql
 def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
@@ -505,39 +507,43 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
-        "add_splitter",
-        "add_splitter_kwargs",
+        "PartitionerClass",
+        "add_partitioner_kwargs",
         "batch_request_args",
     ],
     [
         # These bad parameters do not occur in the batch request params
-        ("add_splitter_year", {"column_name": "my_col"}, ("bad", None, None)),
-        ("add_splitter_year", {"column_name": "my_col"}, (None, "bad", None)),
-        ("add_splitter_year", {"column_name": "my_col"}, ("bad", "bad", None)),
-        # These bad parameters are request option parameters which depend on the splitter.
-        ("add_splitter_year", {"column_name": "my_col"}, (None, None, {"bad": None})),
+        (PartitionerYear, {"column_name": "my_col"}, ("bad", None, None)),
+        (PartitionerYear, {"column_name": "my_col"}, (None, "bad", None)),
+        (PartitionerYear, {"column_name": "my_col"}, ("bad", "bad", None)),
+        # These bad parameters are request option parameters which depend on the partitioner.
         (
-            "add_splitter_year_and_month",
+            PartitionerYear,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_splitter_year_and_month_and_day",
+            PartitionerYearAndMonth,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_splitter_datetime_part",
+            PartitionerYearAndMonthAndDay,
+            {"column_name": "my_col"},
+            (None, None, {"bad": None}),
+        ),
+        (
+            PartitionerDatetimePart,
             {"column_name": "my_col", "datetime_parts": ["year"]},
             (None, None, {"bad": None}),
         ),
         (
-            "add_splitter_column_value",
+            PartitionerColumnValue,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            "add_splitter_divided_integer",
+            PartitionerDividedInteger,
             {"column_name": "my_col", "divisor": 3},
             (None, None, {"bad": None}),
         ),
@@ -545,26 +551,23 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
 )
 def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     create_source: CreateSourceFixture,
-    add_splitter,
-    add_splitter_kwargs,
+    PartitionerClass,
+    add_partitioner_kwargs,
     batch_request_args,
 ):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         # We use a QueryAsset so no database connection checks are done.
         # We are mocking the database so these would fail without monkeypatching the
         # TableAsset
-        asset = source.add_query_asset(
-            name="query_asset", query="SELECT * FROM my_table"
-        )
-        getattr(asset, add_splitter)(**add_splitter_kwargs)
+        asset = source.add_query_asset(name="query_asset", query="SELECT * FROM my_table")
+        partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
         batch_request = BatchRequest(
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
+            partitioner=partitioner,
         )
         with pytest.raises(
             (
@@ -596,11 +599,12 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
             options=batch_request_options,
+            partitioner=partitioner,
         )
         # No exception should get thrown
         asset.get_batch_list_from_batch_request(batch_request)
@@ -619,21 +623,20 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
 def test_get_batch_list_from_batch_request_with_malformed_batch_request(
     create_source: CreateSourceFixture, batch_request_args
 ):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         src, ast, op = batch_request_args
         batch_request = BatchRequest(
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
+            partitioner=partitioner,
         )
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.get_batch_list_from_batch_request(batch_request)
@@ -641,18 +644,16 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
 
 @pytest.mark.postgresql
 def test_get_bad_batch_request(create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
-            asset.build_batch_request({"invalid_key": None})
+            asset.build_batch_request(options={"invalid_key": None}, partitioner=partitioner)
 
 
 @pytest.mark.postgresql
@@ -726,12 +727,13 @@ def test_sort_batch_list_by_metadata(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         asset.add_sorters(sort_keys)
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
             options={},
+            partitioner=partitioner,
         )
         batches = source.get_batch_list_from_batch_request(batch_request)
         expected_order = []
@@ -748,9 +750,7 @@ def test_sort_batch_list_by_metadata(
 
 
 @pytest.mark.postgresql
-def test_sort_batch_list_by_unknown_key(
-    empty_data_context, create_source: CreateSourceFixture
-):
+def test_sort_batch_list_by_unknown_key(empty_data_context, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
@@ -762,12 +762,13 @@ def test_sort_batch_list_by_unknown_key(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         asset.add_sorters(["yr", "month"])
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
             options={},
+            partitioner=partitioner,
         )
         with pytest.raises(KeyError):
             source.get_batch_list_from_batch_request(batch_request)
@@ -782,15 +783,13 @@ def test_sort_batch_list_by_unknown_key(
     ],
 )
 def test_table_asset_sorter_parsing(order_by: list):
-    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
+    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""  # noqa: E501
     expected_sorters = [
         Sorter(key="year"),
         Sorter(key="month", reverse=True),
     ]
 
-    table_asset = TableAsset(
-        name="SorterTest", table_name="SORTER_TEST", order_by=order_by
-    )
+    table_asset = TableAsset(name="SorterTest", table_name="SORTER_TEST", order_by=order_by)
     print(table_asset)
     pprint(f"\n{table_asset.dict()}")
 
@@ -833,9 +832,9 @@ def test_postgres_slice_batch_count(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
         batch_request = asset.build_batch_request(
-            options={"year": 2021}, batch_slice=batch_slice
+            options={"year": 2021}, batch_slice=batch_slice, partitioner=partitioner
         )
         batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
         assert len(batches) == expected_batch_count
@@ -843,16 +842,13 @@ def test_postgres_slice_batch_count(
 
 @pytest.mark.postgresql
 def test_data_source_json_has_properties(create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_json = source.json(indent=4, sort_keys=True)
         print(source_json)
@@ -863,16 +859,13 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
 
 @pytest.mark.postgresql
 def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_str = source.__str__()
         assert "order_by:" in source_str
@@ -882,16 +875,13 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
 
 @pytest.mark.postgresql
 def test_datasource_dict_has_properties(create_source):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
             asset,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_dict = source.dict()
         pprint(source_dict)
@@ -937,7 +927,7 @@ def test_validate_valid_postgres_connection_string(
         dialect="postgresql",
         connection_string=connection_string,
     ):
-        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying
+        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying  # noqa: E501
         # connection string so a direct str comparison isn't possible.
         pass
 
@@ -1026,26 +1016,74 @@ def bad_configuration_datasource(
     )
 
 
-@pytest.mark.postgresql
-def test_test_connection_failures(
-    mocker,
-    bad_configuration_datasource: PostgresDatasource,
-):
+@pytest.fixture
+def mock_create_engine(mocker: MockFixture) -> Mock:
     create_engine = mocker.patch("sqlalchemy.create_engine")
     create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
-    mocker.patch("tests.datasource.fluent.conftest.MockSaEngine.connect")
+    return create_engine
+
+
+@pytest.fixture
+def mock_inspector(
+    mocker: MockFixture,
+) -> Generator[dict[Literal["schema_names", "table_names"], list[str]], None, None]:
+    """
+    Mock the inspector to return the schema and table names we want.
+    Append the desired schema and table names (in tests) to the mock_inspector_returns dict.
+    """
+    mock_inspector_returns: dict[Literal["schema_names", "table_names"], list[str]] = {
+        "schema_names": [],
+        "table_names": [],
+    }
+    mock_inspector = MockSaInspector()
+
+    def get_table_names(schema: str | None = None) -> list[str]:
+        LOGGER.info("MockSaInspector.get_table_names() called")
+        return mock_inspector_returns["table_names"]
+
+    def get_schema_names() -> list[str]:
+        LOGGER.info("MockSaInspector.get_schema_names() called")
+        return mock_inspector_returns["schema_names"]
+
+    def has_table(table_name: str, schema: str | None = None) -> bool:
+        LOGGER.info("MockSaInspector.has_table() called")
+        return table_name in mock_inspector_returns["table_names"]
+
+    # directly patching the instance rather then using mocker.patch
+    mock_inspector.get_schema_names = get_schema_names  # type: ignore[method-assign]
+    mock_inspector.get_table_names = get_table_names  # type: ignore[method-assign]
+    mock_inspector.has_table = has_table  # type: ignore[method-assign]
+
     inspect = mocker.patch("sqlalchemy.inspect")
-    inspect.return_value = MockSaInspector()
-    get_schema_names = mocker.patch(
-        "tests.sqlalchemy_test_doubles.MockSaInspector.get_schema_names"
-    )
-    get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
-    has_table.return_value = False
-    get_table_names = mocker.patch(
-        "tests.sqlalchemy_test_doubles.MockSaInspector.get_table_names"
-    )
-    get_table_names.return_value = ["good_table", "bad_table"]
+    inspect.return_value = mock_inspector
+
+    yield mock_inspector_returns
+
+
+@pytest.fixture
+def mock_connection_execute_failure(mocker: MockFixture) -> Mock:
+    """
+    Engine execute should raise an exception when called.
+    """
+    execute = mocker.patch("tests.sqlalchemy_test_doubles._MockConnection.execute")
+
+    def execute_side_effect(*args, **kwargs):
+        LOGGER.info("MockSaEngine.execute() called")
+        raise SQLAlchemyError("Mocked exception")
+
+    execute.side_effect = execute_side_effect
+    return execute
+
+
+@pytest.mark.postgresql
+def test_test_connection_failures(
+    mock_create_engine: Mock,
+    mock_connection_execute_failure: Mock,
+    mock_inspector: dict[Literal["schema_names", "table_names"], list[str]],
+    bad_configuration_datasource: PostgresDatasource,
+):
+    mock_inspector["schema_names"].extend(["good_schema"])
+    mock_inspector["table_names"].extend(["good_table", "bad_table"])
 
     with pytest.raises(TestConnectionError):
         bad_configuration_datasource.test_connection()
@@ -1068,9 +1106,7 @@ def test_query_data_asset(empty_data_context, create_source):
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        asset = source.add_query_asset(
-            name="query_asset", query="SELECT * FROM my_table"
-        )
+        asset = source.add_query_asset(name="query_asset", query="SELECT * FROM my_table")
         assert asset.name == "query_asset"
         assert asset.query.lower() == query.lower()
         source.get_batch_list_from_batch_request(asset.build_batch_request())
@@ -1078,41 +1114,40 @@ def test_query_data_asset(empty_data_context, create_source):
 
 @pytest.mark.postgresql
 def test_non_select_query_data_asset(create_source):
-    with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
-    ) as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         with pytest.raises(ValueError):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
 
 
 @pytest.mark.filesystem
-def test_adding_splitter_persists_results(
+def test_adding_partitioner_persists_results(
     empty_data_context: FileDataContext,
     mock_test_connection,
 ):
-    gx_yaml = pathlib.Path(
-        empty_data_context.root_directory, FileDataContext.GX_YML
-    ).resolve(strict=True)
+    gx_yaml = pathlib.Path(empty_data_context.root_directory, FileDataContext.GX_YML).resolve(
+        strict=True
+    )
 
     empty_data_context.sources.add_postgres(
-        "my_datasource",
+        name="my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
     ).add_query_asset(
         name="my_asset", query="select * from table", order_by=["year"]
-    ).add_splitter_year(
-        column_name="my_col"
+    ).add_batch_definition(
+        name="my_batch_definition", partitioner=PartitionerYear(column_name="my_col")
     )
 
     final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
         gx_yaml.read_text(),
     )["fluent_datasources"]
-    print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
 
-    assert final_yaml["my_datasource"]["assets"]["my_asset"]["splitter"]
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["batch_definitions"][
+        "my_batch_definition"
+    ]["partitioner"]
 
 
 @pytest.mark.postgresql
-def test_splitter_year(
+def test_partitioner_year(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -1126,15 +1161,17 @@ def test_splitter_year(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[{"year": year} for year in years],
+        partitioner_query_response=[{"year": year} for year in years],
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year"]
         )
-        asset.add_splitter_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         for i, year in enumerate(years):
             assert "year" in batches[i].metadata
@@ -1142,12 +1179,12 @@ def test_splitter_year(
 
         assert len(batch_specs) == len(years)
         for spec in batch_specs:
-            assert "splitter_method" in spec
-            assert spec["splitter_method"] == "split_on_year"
+            assert "partitioner_method" in spec
+            assert spec["partitioner_method"] == "partition_on_year"
 
 
 @pytest.mark.postgresql
-def test_splitter_year_and_month(
+def test_partitioner_year_and_month(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -1162,7 +1199,7 @@ def test_splitter_year_and_month(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[
+        partitioner_query_response=[
             {"year": year, "month": month} for year in years for month in months
         ],
     ) as source:
@@ -1171,8 +1208,10 @@ def test_splitter_year_and_month(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year", "month"]
         )
-        asset.add_splitter_year_and_month(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years) * len(months)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
@@ -1184,12 +1223,12 @@ def test_splitter_year_and_month(
 
         assert len(batch_specs) == len(years) * len(months)
         for spec in batch_specs:
-            assert "splitter_method" in spec
-            assert spec["splitter_method"] == "split_on_year_and_month"
+            assert "partitioner_method" in spec
+            assert spec["partitioner_method"] == "partition_on_year_and_month"
 
 
 @pytest.mark.postgresql
-def test_splitter_year_and_month_and_day(
+def test_partitioner_year_and_month_and_day(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -1205,7 +1244,7 @@ def test_splitter_year_and_month_and_day(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[
+        partitioner_query_response=[
             {"year": year, "month": month, "day": day}
             for year in years
             for month in months
@@ -1219,8 +1258,10 @@ def test_splitter_year_and_month_and_day(
             query="select * from table",
             order_by=["year", "month", "day"],
         )
-        asset.add_splitter_year_and_month_and_day(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYearAndMonthAndDay(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years) * len(months) * len(days)
         for i, year in enumerate(years):
             for j, month in enumerate(months):
@@ -1235,16 +1276,16 @@ def test_splitter_year_and_month_and_day(
 
         assert len(batch_specs) == len(years) * len(months) * len(days)
         for spec in batch_specs:
-            assert "splitter_method" in spec
-            assert spec["splitter_method"] == "split_on_year_and_month_and_day"
+            assert "partitioner_method" in spec
+            assert spec["partitioner_method"] == "partition_on_year_and_month_and_day"
 
 
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
-        "add_splitter_method",
-        "splitter_kwargs",
-        "splitter_query_responses",
+        "PartitionerClass",
+        "partitioner_kwargs",
+        "partitioner_query_responses",
         "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
@@ -1253,7 +1294,7 @@ def test_splitter_year_and_month_and_day(
     ],
     [
         pytest.param(
-            "add_splitter_year",
+            PartitionerYear,
             {"column_name": "pickup_datetime"},
             [{"year": 2020}],
             ["year"],
@@ -1264,7 +1305,7 @@ def test_splitter_year_and_month_and_day(
             id="year",
         ),
         pytest.param(
-            "add_splitter_year_and_month",
+            PartitionerYearAndMonth,
             {"column_name": "pickup_datetime"},
             [{"year": 2020, "month": 1}, {"year": 2020, "month": 2}],
             ["year", "month"],
@@ -1275,7 +1316,7 @@ def test_splitter_year_and_month_and_day(
             id="year_and_month",
         ),
         pytest.param(
-            "add_splitter_year_and_month_and_day",
+            PartitionerYearAndMonthAndDay,
             {"column_name": "pickup_datetime"},
             [
                 {"year": 2020, "month": 2, "day": 10},
@@ -1289,7 +1330,7 @@ def test_splitter_year_and_month_and_day(
             id="year_and_month_and_day",
         ),
         pytest.param(
-            "add_splitter_datetime_part",
+            PartitionerDatetimePart,
             {
                 "column_name": "pickup_datetime",
                 "datetime_parts": ["year", "month", "day"],
@@ -1306,7 +1347,7 @@ def test_splitter_year_and_month_and_day(
             id="datetime_part",
         ),
         pytest.param(
-            "add_splitter_column_value",
+            PartitionerColumnValue,
             {"column_name": "passenger_count"},
             [(1,), (None,), (2,)],
             ["passenger_count"],
@@ -1317,7 +1358,7 @@ def test_splitter_year_and_month_and_day(
             id="column_value",
         ),
         pytest.param(
-            "add_splitter_divided_integer",
+            PartitionerDividedInteger,
             {"column_name": "passenger_count", "divisor": 3},
             [(1,), (2,)],
             ["quotient"],
@@ -1328,7 +1369,7 @@ def test_splitter_year_and_month_and_day(
             id="divisor",
         ),
         pytest.param(
-            "add_splitter_mod_integer",
+            PartitionerModInteger,
             {"column_name": "passenger_count", "mod": 3},
             [(1,), (2,)],
             ["remainder"],
@@ -1339,10 +1380,10 @@ def test_splitter_year_and_month_and_day(
             id="mod_integer",
         ),
         pytest.param(
-            "add_splitter_multi_column_values",
+            PartitionerMultiColumnValue,
             {"column_names": ["passenger_count", "payment_type"]},
             # These types are (passenger_count, payment_type), that is in column_names order.
-            # datetime splitters return dicts while all other splitters return tuples.
+            # datetime partitioners return dicts while all other partitioners return tuples.
             [(3, 1), (1, 1), (1, 2)],
             ["passenger_count", "payment_type"],
             3,
@@ -1353,12 +1394,12 @@ def test_splitter_year_and_month_and_day(
         ),
     ],
 )
-def test_splitter(
+def test_partitioner(
     empty_data_context,
     create_source: CreateSourceFixture,
-    add_splitter_method,
-    splitter_kwargs,
-    splitter_query_responses,
+    PartitionerClass,
+    partitioner_kwargs,
+    partitioner_query_responses,
     sorter_args,
     all_batches_cnt,
     specified_batch_request,
@@ -1369,19 +1410,19 @@ def test_splitter(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[response for response in splitter_query_responses],
+        partitioner_query_response=[response for response in partitioner_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        getattr(asset, add_splitter_method)(**splitter_kwargs)
+        partitioner = PartitionerClass(**partitioner_kwargs)
         asset.add_sorters(sorter_args)
         # Test getting all batches
         all_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request()
+            asset.build_batch_request(partitioner=partitioner)
         )
         assert len(all_batches) == all_batches_cnt
         # Test getting specified batches
         specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(specified_batch_request)
+            asset.build_batch_request(specified_batch_request, partitioner=partitioner)
         )
         assert len(specified_batches) == specified_batch_cnt
         assert specified_batches[-1].metadata == last_specified_batch_metadata
@@ -1398,15 +1439,17 @@ def test_sorting_none_in_metadata(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[{"year": year} for year in years],
+        partitioner_query_response=[{"year": year} for year in years],
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["-year"]
         )
-        asset.add_splitter_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
+        )
         assert len(batches) == len(years)
         assert batches[-1].metadata["year"] is None
 
@@ -1444,7 +1487,7 @@ def test_add_postgres_query_asset_with_batch_metadata(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[{"year": year} for year in years],
+        partitioner_query_response=[{"year": year} for year in years],
     ) as source:
         asset = source.add_query_asset(
             name="query_asset",
@@ -1453,12 +1496,12 @@ def test_add_postgres_query_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        asset.add_splitter_year(column_name="col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
-        assert len(batches) == len(years)
-        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
-            asset_specified_metadata
+        partitioner = PartitionerYear(column_name="col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
         )
+        assert len(batches) == len(years)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
         substituted_batch_metadata.update(
             {
                 "no_curly_pipeline_filename": __file__,
@@ -1478,7 +1521,6 @@ def test_add_postgres_table_asset_with_batch_metadata(
     empty_data_context.config_variables.update(my_config_variables)
 
     monkeypatch.setattr(TableAsset, "test_connection", lambda _: None)
-    monkeypatch.setattr(TableAsset, "test_splitter_connection", lambda _: None)
     years = [2021, 2022]
     asset_specified_metadata = {
         "pipeline_name": "my_pipeline",
@@ -1490,7 +1532,7 @@ def test_add_postgres_table_asset_with_batch_metadata(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
         data_context=empty_data_context,
-        splitter_query_response=[{"year": year} for year in years],
+        partitioner_query_response=[{"year": year} for year in years],
     ) as source:
         asset = source.add_table_asset(
             name="query_asset",
@@ -1499,12 +1541,12 @@ def test_add_postgres_table_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        asset.add_splitter_year(column_name="my_col")
-        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
-        assert len(batches) == len(years)
-        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
-            asset_specified_metadata
+        partitioner = PartitionerYear(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(
+            asset.build_batch_request(partitioner=partitioner)
         )
+        assert len(batches) == len(years)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
         substituted_batch_metadata.update(
             {
                 "no_curly_pipeline_filename": __file__,

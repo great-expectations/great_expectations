@@ -5,7 +5,6 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -13,7 +12,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     SimpleDateFormatStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (  # noqa: E501
     DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -29,7 +28,7 @@ pytestmark = pytest.mark.big
 def test_simple_date_format_parameter_builder_instantiation(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
@@ -46,13 +45,11 @@ def test_simple_date_format_parameter_builder_instantiation(
 def test_simple_date_format_parameter_builder_zero_batch_id_error(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
-    date_format_string_parameter: ParameterBuilder = (
-        SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
-            data_context=data_context,
-        )
+    date_format_string_parameter: ParameterBuilder = SimpleDateFormatStringParameterBuilder(
+        name="my_simple_date_format_string_parameter_builder",
+        data_context=data_context,
     )
 
     domain = Domain(
@@ -73,7 +70,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 
     assert (
         str(e.value)
-        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
+        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."  # noqa: E501
     )
 
 
@@ -81,7 +78,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 def test_simple_date_format_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -207,9 +204,7 @@ def test_simple_date_format_parameter_builder_alice(
 def test_simple_date_format_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
     candidate_strings: list[str] = [
@@ -256,8 +251,7 @@ def test_simple_date_format_parameter_builder_bobby(
     )
 
     assert (
-        parameter_container.parameter_nodes is None
-        or len(parameter_container.parameter_nodes) == 1
+        parameter_container.parameter_nodes is None or len(parameter_container.parameter_nodes) == 1
     )
 
     fully_qualified_parameter_name_for_value: str = (

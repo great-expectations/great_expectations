@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 from great_expectations.expectations.expectation import (
     BatchExpectation,
 )
 
 
-class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
-    BatchExpectation
-):
-    # This expectation is a stub - it needs migration to the modular expectation API
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
+class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(BatchExpectation):
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": [
@@ -22,5 +24,4 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
 
     metric_dependencies = tuple()
     success_keys = ()
-    default_kwarg_values = {}
     args_keys = ()

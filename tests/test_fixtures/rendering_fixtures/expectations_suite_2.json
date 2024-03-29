@@ -358,24 +358,6 @@
     "expectation_type": "expect_column_values_to_be_between",
     "kwargs": {
       "column": "y",
-      "min_value": 0,
-      "max_value": 10,
-      "allow_cross_type_comparisons": true
-    }
-  },
-  {
-    "expectation_type": "expect_column_values_to_be_between",
-    "kwargs": {
-      "column": "numeric",
-      "min_value": 0,
-      "max_value": 10,
-      "allow_cross_type_comparisons": true
-    }
-  },
-  {
-    "expectation_type": "expect_column_values_to_be_between",
-    "kwargs": {
-      "column": "y",
       "max_value": null,
       "min_value": null,
       "catch_exceptions": true
@@ -2549,14 +2531,14 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "x",
       "column_B": "w"
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "x",
       "column_B": "z",
@@ -2564,7 +2546,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "w",
       "column_B": "z",
@@ -2572,7 +2554,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "w",
       "column_B": "z",
@@ -2581,7 +2563,7 @@
     }
   },
   {
-    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
     "kwargs": {
       "column_A": "a",
       "column_B": "b",

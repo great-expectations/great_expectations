@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -21,7 +20,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
     query = """
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
-            FROM {active_batch}
+            FROM {batch}
             GROUP BY {column_list}
             HAVING count(1) > 1
             )
@@ -37,30 +36,13 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "condition_parser",
     )
     default_kwarg_values = {
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

@@ -1,6 +1,3 @@
-from typing import Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -25,7 +22,7 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - too complex
         cls,
         column,
         min_length,
@@ -37,7 +34,7 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
         max_consec_letters,
         **kwargs,
     ):
-        def matches_password_requirements(x):
+        def matches_password_requirements(x):  # noqa: C901 - too complex
             x = str(x)
             if len(x) < min_length:
                 return False
@@ -113,8 +110,6 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -125,7 +120,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """
 
     library_metadata = {
@@ -156,7 +151,6 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": True,
         "min_length": 8,
         "min_uppercase": 1,
@@ -166,12 +160,6 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "max_consec_numbers": 99,
         "max_consec_letters": 99,
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
 
     @classmethod
     @renderer(renderer_type="renderer.question")
@@ -184,9 +172,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.answer")
-    def _answer_renderer(
-        cls, configuration=None, result=None, runtime_configuration=None
-    ):
+    def _answer_renderer(cls, configuration=None, result=None, runtime_configuration=None):
         column = result.expectation_config.kwargs.get("column")
         # password = result.expectation_config.kwargs.get("password")
         mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))

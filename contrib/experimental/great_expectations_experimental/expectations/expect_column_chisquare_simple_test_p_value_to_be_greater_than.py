@@ -2,10 +2,12 @@ from typing import Dict, Optional
 
 import scipy.stats as stats
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -57,9 +59,7 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+            "table.columns": MetricConfiguration("table.columns", metric.metric_domain_kwargs),
         }
 
 
@@ -110,33 +110,15 @@ class ExpectColumnChisquareSimpleTestPValueToBeGreaterThan(BatchExpectation):
     # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        threshold = configuration["kwargs"].get("p_value_threshold")
-        chi2, p_value = metrics.get("column.p_value_greater_than_threshold")
+        threshold = self.configuration["kwargs"].get("p_value_threshold")
+        _chi2, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
 

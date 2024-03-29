@@ -19,7 +19,7 @@ RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_S
 class DummyDomain(Domain):
     """
     To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
-    """
+    """  # noqa: E501
 
     def __init__(self, domain_type=MetricDomainTypes.TABLE):
         super().__init__(domain_type=domain_type)
@@ -59,9 +59,9 @@ def empty_rule_state(
 @pytest.fixture
 def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
     false_positive_rate: np.float64 = np.float64(0.01)
-    distribution_parameters: Dict[
-        str, Dict[str, Number]
-    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_parameters: Dict[str, Dict[str, Number]] = generate_distribution_parameters(
+        false_positive_rate=false_positive_rate
+    )
     distribution_samples: pd.DataFrame = generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=1000
     )
@@ -119,12 +119,8 @@ def generate_distribution_parameters(
             ),
         ]
     )
-    bimodal_lower_quantile = np.quantile(
-        a=bimodal_approximation, q=false_positive_rate / 2
-    )
-    bimodal_upper_quantile = np.quantile(
-        a=bimodal_approximation, q=1 - false_positive_rate / 2
-    )
+    bimodal_lower_quantile = np.quantile(a=bimodal_approximation, q=false_positive_rate / 2)
+    bimodal_upper_quantile = np.quantile(a=bimodal_approximation, q=1 - false_positive_rate / 2)
 
     exponential_shape: float = 1.5
     exponential_lower_bound: int = 5000

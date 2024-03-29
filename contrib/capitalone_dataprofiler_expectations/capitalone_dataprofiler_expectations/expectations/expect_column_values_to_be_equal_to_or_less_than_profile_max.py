@@ -3,6 +3,7 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
+
 from typing import Any
 
 import dataprofiler as dp
@@ -33,9 +34,7 @@ class ColumnValuesLessThanOrEqualToProfileMax(ColumnMapMetricProvider):
     def _pandas(cls: Any, column: str, profile: Any, **kwargs) -> np.ndarray:
         columnPresent = (
             column.name
-            in profile["global_stats"][
-                "profile_schema"
-            ]  # checks to ensure column exists
+            in profile["global_stats"]["profile_schema"]  # checks to ensure column exists
         )
         transpose = np.array(column).T  # Turns column into a row format for return
         if not (columnPresent):  # Err column in user DF not present in input profile
@@ -154,7 +153,6 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
     default_kwarg_values = {
         "profile": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 
@@ -171,7 +169,5 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
 
 if __name__ == "__main__":
     # ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin().print_diagnostic_checklist()
-    diagnostics_report = (
-        ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
-    )
+    diagnostics_report = ExpectColumnValuesToBeEqualToOrLessThanProfileMax().run_diagnostics()
     print(diagnostics_report.generate_checklist())

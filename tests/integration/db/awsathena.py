@@ -11,12 +11,12 @@ yaml = YAMLHandler()
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
     raise ValueError(
-        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"  # noqa: E501
     )
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
 if not ATHENA_STAGING_S3:
     raise ValueError(
-        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"  # noqa: E501
     )
 
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
@@ -80,13 +80,13 @@ batch_request = {
 
 expectation_suite_name = "my_awsathena_expectation_suite"
 try:
-    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite = context.suites.get(name=expectation_suite_name)
     print(
-        f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
+        f'Loaded ExpectationSuite "{suite.name}" containing {len(suite.expectations)} expectations.'
     )
 except DataContextError:
     suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+    print(f'Created ExpectationSuite "{suite.name}".')
 
 validator = context.get_validator(
     batch_request=BatchRequest(**batch_request),

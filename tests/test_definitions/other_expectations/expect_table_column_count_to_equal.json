@@ -94,7 +94,7 @@
           },
           "out": {
             "success": false,
-            "traceback_substring": "must be an integer"
+            "traceback_substring": "not a valid integer"
           }
         }
       ]

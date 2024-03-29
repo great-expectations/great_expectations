@@ -5,10 +5,14 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationSuite,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
+)
+from great_expectations.expectations.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.render import (
     RenderedDocumentContent,
@@ -20,7 +24,6 @@ from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.render.view import DefaultMarkdownPageView
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -40,19 +43,16 @@ def validation_operator_result():
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result[
-                "validation_result"
-            ] = ExpectationSuiteValidationResultSchema().load(
+            validation_result["validation_result"] = ExpectationSuiteValidationResultSchema().load(
                 validation_result["validation_result"]
             )
         return validation_operator_result
 
 
 @pytest.fixture()
-def expectation_suite_to_render_with_notes(empty_data_context):
-    context: DataContext = empty_data_context
+def expectation_suite_to_render_with_notes():
     expectation_suite = ExpectationSuite(
-        expectation_suite_name="default",
+        name="default",
         meta={"great_expectations_version": "0.13.0-test"},
         expectations=[
             ExpectationConfiguration(
@@ -72,18 +72,12 @@ def expectation_suite_to_render_with_notes(empty_data_context):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_unique",
                 kwargs={"column": "testings"},
-                meta={
-                    "notes": {
-                        "content": [
-                            "Example notes about this expectation. **Markdown** `Supported`.",
-                            "Second example note **with** *Markdown*",
-                        ],
-                        "format": MetaNotesFormat.MARKDOWN,
-                    }
-                },
+                notes=[
+                    "Example notes about this expectation. **Markdown** `Supported`.",
+                    "Second example note **with** *Markdown*",
+                ],
             ),
         ],
-        data_context=context,
     )
     return expectation_suite
 
@@ -133,9 +127,7 @@ def test_render_section_page():
         ||||------------|------------|Numberofvariables|12Numberofobservations|891
         -----------------------------------------------------------
         Poweredby[GreatExpectations](https://greatexpectations.io/)
-        """.replace(
-            " ", ""
-        )
+        """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -152,9 +144,7 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     """
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
     rendered_document_content_list = (
         validation_results_page_renderer.render_validation_operator_result(
@@ -303,9 +293,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -322,9 +310,7 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
 
     rendered_document_content_list = (
         validation_results_page_renderer.render_validation_operator_result(
@@ -475,9 +461,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -524,9 +508,7 @@ Great Expectations Version  | 0.13.0-test
   * ***
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-    """.replace(
-            " ", ""
-        )
+    """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

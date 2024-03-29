@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Final
 
@@ -29,3 +31,4 @@ class GXCloudRESTResource(str, Enum):
     PROFILER = "profiler"
     RENDERED_DATA_DOC = "rendered_data_doc"
     VALIDATION_RESULT = "validation_result"
+    VALIDATION_DEFINITION = "validation_definition"

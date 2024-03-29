@@ -1,7 +1,7 @@
 """These tests exercise ConfigurationBundle including Serialization."""
+
 import pytest
 
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundle,
     ConfigurationBundleJsonSerializer,
@@ -21,7 +21,7 @@ class TestConfigurationBundleCreate:
         Make sure the configuration bundle is created successfully from a data context.
         """
 
-        context: BaseDataContext = stub_base_data_context
+        context = stub_base_data_context
 
         config_bundle = ConfigurationBundle(context)
 
@@ -29,7 +29,6 @@ class TestConfigurationBundleCreate:
         assert config_bundle._data_context_variables is not None
         assert len(config_bundle.expectation_suites) == 1
         assert len(config_bundle.checkpoints) == 1
-        assert len(config_bundle.profilers) == 1
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
@@ -41,7 +40,7 @@ class TestConfigurationBundleCreate:
         The ConfigurationBundle should handle a context that has not set the config for
          anonymous_usage_statistics.
         """
-        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+        context = stub_base_data_context_no_anonymous_usage_stats
 
         config_bundle = ConfigurationBundle(context)
 
@@ -58,9 +57,7 @@ class TestConfigurationBundleCreate:
         Make sure the configuration bundle successfully parses the usage stats settings.
         """
 
-        context: BaseDataContext = (
-            stub_base_data_context_anonymous_usage_stats_present_but_disabled
-        )
+        context = stub_base_data_context_anonymous_usage_stats_present_but_disabled
 
         config_bundle = ConfigurationBundle(context)
 
@@ -79,21 +76,21 @@ class TestConfigurationBundleSerialization:
         Ensure configuration bundle is serialized correctly.
         """
 
-        context: BaseDataContext = stub_base_data_context
+        context = stub_base_data_context
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
         expected_serialized_bundle = stub_serialized_configuration_bundle
 
-        # Remove meta before comparing since it contains the GX version
+        # Remove meta and notes before comparing since it contains the GX version
         serialized_bundle["expectation_suites"][0].pop("meta", None)
         expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+        serialized_bundle["expectation_suites"][0].pop("notes", None)
+        expected_serialized_bundle["expectation_suites"][0].pop("notes", None)
 
         assert serialized_bundle == expected_serialized_bundle
 
@@ -109,16 +106,13 @@ class TestConfigurationBundleSerialization:
         context = StubBaseDataContext(
             checkpoint_names=tuple(),
             expectation_suite_names=tuple(),
-            profiler_names=tuple(),
             validation_results_keys=tuple(),
             datasource_names=tuple(),
         )
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
@@ -139,15 +133,8 @@ class TestConfigurationBundleSerialization:
 
         config_bundle = ConfigurationBundle(context)
 
-        serializer = ConfigurationBundleJsonSerializer(
-            schema=ConfigurationBundleSchema()
-        )
+        serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
-        assert (
-            serialized_bundle["data_context_variables"].get(
-                "anonymous_usage_statistics"
-            )
-            is None
-        )
+        assert serialized_bundle["data_context_variables"].get("anonymous_usage_statistics") is None

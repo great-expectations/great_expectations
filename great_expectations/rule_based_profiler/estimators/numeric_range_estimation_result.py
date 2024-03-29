@@ -1,13 +1,18 @@
-from dataclasses import asdict, dataclass
-from typing import List, Union
+from __future__ import annotations
 
-import numpy as np
+from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING, List, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot
 
-NUM_HISTOGRAM_BINS: int = 10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+if TYPE_CHECKING:
+    import numpy as np
+
+NUM_HISTOGRAM_BINS: int = (
+    10  # Equal to "numpy.histogram()" default (can be turned into configurable argument).
+)
 
 
 @dataclass(frozen=True)
@@ -19,7 +24,7 @@ class NumericRangeEstimationResult(DictDot):
     In particular, "estimation_histogram" is "numpy.ndarray" of shape [2, NUM_HISTOGRAM_BINS + 1], containing
     [0] "histogram": (integer array of dimension [NUM_HISTOGRAM_BINS + 1] padded with 0 at right edge) histogram values;
     [1] "bin_edges": (float array of dimension [NUM_HISTOGRAM_BINS + 1]) binning edges.
-    """
+    """  # noqa: E501
 
     estimation_histogram: np.ndarray
     value_range: Union[np.ndarray, List[np.float64]]

@@ -1,5 +1,4 @@
 import datetime
-from unittest import mock
 
 import boto3
 import pytest
@@ -14,16 +13,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.util import gen_directory_tree_str
 from tests import test_utils
-from tests.core.usage_statistics.util import (
-    usage_stats_exceptions_exist,
-    usage_stats_invalid_messages_exist,
-)
 
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 @pytest.mark.aws_deps
 def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
@@ -34,7 +29,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
     conn = boto3.resource("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
 
-    # First, demonstrate that we pick up default configuration including from an S3TupleS3StoreBackend
+    # First, demonstrate that we pick up default configuration including from an S3TupleS3StoreBackend  # noqa: E501
     my_store = ValidationsStore(
         store_backend={
             "class_name": "TupleS3StoreBackend",
@@ -48,7 +43,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100",
         batch_identifier="batch_id",
@@ -60,7 +55,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200",
         batch_identifier="batch_id",
@@ -74,9 +69,9 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
     # Verify that internals are working as expected, including the default filepath
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)[
+            "Contents"
+        ]
     } == {
         "test/prefix/.ge_store_backend_id",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/batch_id.json",
@@ -160,7 +155,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
 @pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     full_test_dir = tmp_path_factory.mktemp(
@@ -250,7 +245,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
 
 
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 @pytest.mark.big
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
@@ -270,7 +265,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 
     ns_1 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_100",
         batch_identifier="batch_id",
@@ -282,7 +277,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 
     ns_2 = ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier(
-            expectation_suite_name="asset.quarantine",
+            name="asset.quarantine",
         ),
         run_id="20191007T151224.1234Z_prod_200",
         batch_identifier="batch_id",
@@ -309,55 +304,10 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
-)
-@pytest.mark.big
-def test_instantiation_with_test_yaml_config(
-    mock_emit, caplog, empty_data_context_stats_enabled
-):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store.validations_store
-class_name: ValidationsStore
-store_backend:
-    class_name: TupleFilesystemStoreBackend
-    base_directory: uncommitted/validations/
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ValidationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "TupleFilesystemStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-    # Confirm that logs do not contain any exceptions or invalid messages
-    assert not usage_stats_exceptions_exist(messages=caplog.messages)
-    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
-
-
 @pytest.mark.cloud
 def test_gx_cloud_response_json_to_object_dict() -> None:
     validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
-    validation_config = {
+    validation_definition = {
         "results": [],
         "success": True,
         "statistics": {
@@ -371,13 +321,13 @@ def test_gx_cloud_response_json_to_object_dict() -> None:
         "data": {
             "id": validation_id,
             "attributes": {
-                "result": validation_config,
+                "result": validation_definition,
             },
         }
     }
 
-    expected = validation_config
-    expected["ge_cloud_id"] = validation_id
+    expected = validation_definition
+    expected["id"] = validation_id
 
     actual = ValidationsStore.gx_cloud_response_json_to_object_dict(response_json)
 

@@ -111,15 +111,13 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         )
         self._update_attrs_with_diagnostics(diagnostics)
 
-    def _update_attrs_with_diagnostics(
-        self, diagnostics: List[ExpectationDiagnostics]
-    ) -> None:
+    def _update_attrs_with_diagnostics(self, diagnostics: List[ExpectationDiagnostics]) -> None:
         self._update_from_package_info("package_info.yml")
         self._update_expectations(diagnostics)
         self._update_dependencies("requirements.txt")
         self._update_contributors(diagnostics)
 
-    def _update_from_package_info(self, path: str) -> None:
+    def _update_from_package_info(self, path: str) -> None:  # noqa: C901 - too complex
         if not os.path.exists(path):  # noqa: PTH110
             logger.warning(f"Could not find package info file {path}")
             return
@@ -221,8 +219,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
             if requirement.specs:
                 # Stringify tuple of pins
                 version = ", ".join(
-                    "".join(symbol for symbol in pin)
-                    for pin in sorted(requirement.specs)
+                    "".join(symbol for symbol in pin) for pin in sorted(requirement.specs)
                 )
             else:
                 version = None
@@ -246,16 +243,14 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         try:
             package = GreatExpectationsContribPackageManifest._identify_user_package()
             expectations_module = (
-                GreatExpectationsContribPackageManifest._import_expectations_module(
-                    package
+                GreatExpectationsContribPackageManifest._import_expectations_module(package)
+            )
+            expectations = (
+                GreatExpectationsContribPackageManifest._retrieve_expectations_from_module(
+                    expectations_module
                 )
             )
-            expectations = GreatExpectationsContribPackageManifest._retrieve_expectations_from_module(
-                expectations_module
-            )
-            diagnostics = GreatExpectationsContribPackageManifest._gather_diagnostics(
-                expectations
-            )
+            diagnostics = GreatExpectationsContribPackageManifest._gather_diagnostics(expectations)
             return diagnostics
         except Exception as e:
             # Exceptions should not break the CLI - this behavior should be working in the background
@@ -302,11 +297,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         for name, obj in inspect.getmembers(expectations_module):
             # ProfileNumericColumnsDiffExpectation from capitalone_dataprofiler_expectations
             # is a base class that the contrib Expectations in that package all inherit from
-            if (
-                inspect.isclass(obj)
-                and issubclass(obj, Expectation)
-                and not obj.is_abstract()
-            ):
+            if inspect.isclass(obj) and issubclass(obj, Expectation) and not obj.is_abstract():
                 expectations.append(obj)
                 names.append(name)
 

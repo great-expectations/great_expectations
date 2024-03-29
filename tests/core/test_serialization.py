@@ -10,7 +10,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -19,7 +18,7 @@ from great_expectations.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
     CheckpointConfig,
-    CheckpointValidationConfig,
+    CheckpointValidationDefinition,
     DataConnectorConfig,
     DatasourceConfig,
     ExecutionEngineConfig,
@@ -58,11 +57,9 @@ def checkpoint_config_spark(
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
-        template_name="my_nested_checkpoint_template",
         expectation_suite_name="users.delivery",
         validations=[
-            CheckpointValidationConfig(
+            CheckpointValidationDefinition(
                 batch_request={
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_data_connector",
@@ -82,19 +79,15 @@ def checkpoint_config_with_schema_spark(
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
-        template_name="my_nested_checkpoint_template",
         expectation_suite_name="users.delivery",
         validations=[
-            CheckpointValidationConfig(
+            CheckpointValidationDefinition(
                 batch_request={
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_data_connector",
                     "data_asset_name": "users",
                     "data_connector_query": {"partition_index": -1},
-                    "batch_spec_passthrough": {
-                        "reader_options": {"schema": spark_schema}
-                    },
+                    "batch_spec_passthrough": {"reader_options": {"schema": spark_schema}},
                 },
                 id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
             ),
@@ -207,9 +200,7 @@ def data_connector_config_spark(spark_session) -> DataConnectorConfig:
 
 
 @pytest.fixture
-def datas_connector_config_with_schema_spark(
-    spark_session, spark_schema
-) -> DataConnectorConfig:
+def datas_connector_config_with_schema_spark(spark_session, spark_schema) -> DataConnectorConfig:
     return DataConnectorConfig(
         class_name="ConfiguredAssetFilesystemDataConnector",
         module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
@@ -347,36 +338,9 @@ def test_batch_request_deepcopy():
 
 
 @pytest.mark.filesystem
-def test_checkpoint_config_deepcopy(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-    monkeypatch,
-):
-    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"batch_data": test_df},
-        }
-    )
-
+def test_checkpoint_config_deepcopy():
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
         expectation_suite_name="users.delivery",
         validations=[
             {
@@ -398,327 +362,20 @@ def test_checkpoint_config_deepcopy(
         ],
     )
     nested_checkpoint: Checkpoint = Checkpoint(
-        data_context=context,
         **filter_properties_dict(
             properties=nested_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         ),
     )
-    substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
-        runtime_kwargs={
-            "batch_request": runtime_batch_request,
-            "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
-            "validations": [
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -4},
-                    }
-                },
-            ],
-            "run_name_template": "runtime_run_template",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
-                    },
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": None,
-                },
-                {
-                    "name": "update_data_docs_deluxe_runtime",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
-                    },
-                },
-            ],
-            "evaluation_parameters": {
-                "environment": "runtime-$GE_ENVIRONMENT",
-                "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
-                "new_runtime_eval_param": "bloopy!",
-            },
-            "runtime_configuration": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!",
-            },
-        }
-    )
-
-    checkpoint_config_copy: dict = copy.deepcopy(
-        substituted_config_template_and_runtime_kwargs
-    )
-    assert deep_filter_properties_iterable(
-        properties=checkpoint_config_copy,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=substituted_config_template_and_runtime_kwargs,
-        clean_falsy=True,
-    )
-
-
-@pytest.mark.filesystem
-def test_checkpoint_config_print(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-    monkeypatch,
-):
-    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"batch_data": test_df},
-        }
-    )
-
-    nested_checkpoint_config = CheckpointConfig(
-        name="my_nested_checkpoint",
-        config_version=1,
-        template_name="my_nested_checkpoint_template_2",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-        ],
-    )
-    nested_checkpoint: Checkpoint = Checkpoint(
-        data_context=context,
-        **filter_properties_dict(
-            properties=nested_checkpoint_config.to_json_dict(),
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        ),
-    )
-    substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
-        runtime_kwargs={
-            "batch_request": runtime_batch_request,
-            "expectation_suite_name": "runtime_suite_name",
-            "template_name": "my_nested_checkpoint_template_3",
-            "validations": [
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -4},
-                    }
-                },
-            ],
-            "run_name_template": "runtime_run_template",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
-                    },
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": None,
-                },
-                {
-                    "name": "update_data_docs_deluxe_runtime",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
-                    },
-                },
-            ],
-            "evaluation_parameters": {
-                "environment": "runtime-$GE_ENVIRONMENT",
-                "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
-                "new_runtime_eval_param": "bloopy!",
-            },
-            "runtime_configuration": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!",
-            },
-        }
-    )
-
-    expected_nested_checkpoint_config_template_and_runtime_template_name = (
-        CheckpointConfig(
-            name="my_nested_checkpoint",
-            config_version=1.0,
-            class_name="Checkpoint",
-            module_name="great_expectations.checkpoint",
-            template_name="my_nested_checkpoint_template_3",
-            run_name_template="runtime_run_template",
-            batch_request=runtime_batch_request.to_dict(),
-            expectation_suite_name="runtime_suite_name",
-            action_list=[
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
-                    },
-                },
-                {
-                    "name": "new_action_from_template_2",
-                    "action": {"class_name": "Template2SpecialAction"},
-                },
-                {
-                    "name": "new_action_from_template_3",
-                    "action": {"class_name": "Template3SpecialAction"},
-                },
-                {
-                    "name": "update_data_docs_deluxe_runtime",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
-                    },
-                },
-            ],
-            evaluation_parameters={
-                "environment": "runtime-my_ge_environment",
-                "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-1",
-                "aux_param_1": "1 + 1",
-                "template_1_key": 456,
-                "template_3_key": 123,
-                "new_runtime_eval_param": "bloopy!",
-            },
-            runtime_configuration={
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "template_1_key": 123,
-                "template_3_key": "bloopy!",
-                "new_runtime_config_key": "bleepy!",
-            },
-            validations=[
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource_template_1",
-                        "data_connector_name": "my_special_data_connector_template_1",
-                        "data_asset_name": "users_from_template_1",
-                        "data_connector_query": {"partition_index": -999},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_special_data_connector",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -1},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -2},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "data_connector_query": {"partition_index": -4},
-                    }
-                },
-            ],
-        )
-    )
+    config_dict: dict = nested_checkpoint.config.to_json_dict()
+    config_dict_copy: dict = copy.deepcopy(config_dict)
 
     assert deep_filter_properties_iterable(
-        properties=substituted_config_template_and_runtime_kwargs,
+        properties=config_dict_copy,
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_dict(),
-        clean_falsy=True,
-    )
-
-    substituted_config_template_and_runtime_kwargs_json_dict: dict = (
-        convert_to_json_serializable(
-            data=substituted_config_template_and_runtime_kwargs
-        )
-    )
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_and_runtime_kwargs_json_dict,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(),
+        properties=config_dict,
         clean_falsy=True,
     )
 
@@ -729,11 +386,9 @@ def test_checkpoint_config_print(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -746,18 +401,12 @@ def test_checkpoint_config_print(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -776,12 +425,10 @@ def test_checkpoint_config_print(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -794,19 +441,13 @@ def test_checkpoint_config_print(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "default_validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -825,12 +466,10 @@ def test_checkpoint_config_print(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
                 default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -844,19 +483,13 @@ def test_checkpoint_config_print(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "default_validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -876,11 +509,9 @@ def test_checkpoint_config_print(
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
-                config_version=1,
-                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
-                    CheckpointValidationConfig(
+                    CheckpointValidationDefinition(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
@@ -894,18 +525,12 @@ def test_checkpoint_config_print(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -928,7 +553,7 @@ def test_checkpoint_config_print(
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
-    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""
+    """CheckpointConfig and nested objects like CheckpointValidationDefinition should be serialized appropriately with/without optional params."""  # noqa: E501
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config
 
@@ -947,18 +572,12 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -967,9 +586,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                             "data_connector_query": {
                                 "partition_index": -1,
                             },
-                            "batch_spec_passthrough": {
-                                "reader_options": {"header": True}
-                            },
+                            "batch_spec_passthrough": {"reader_options": {"header": True}},
                             "datasource_name": "my_datasource",
                         },
                         "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
@@ -983,18 +600,12 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
                 "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
+                "id": None,
                 "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
                 "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
                 "validations": [
                     {
                         "batch_request": {
@@ -1075,7 +686,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -1122,7 +733,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -1169,7 +780,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
                             }
                         },
                         "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
                     }
                 },
                 "execution_engine": {
@@ -1216,7 +827,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_with_schema",
         ),
@@ -1246,7 +857,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_without_schema",
         ),
@@ -1267,9 +878,9 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
     observed_dump = dataConnectorConfigSchema.dump(obj=data_connector_config)
     assert observed_dump == expected_serialized_data_connector_config
     observed_load = dataConnectorConfigSchema.load(observed_dump)
-    assert dataConnectorConfigSchema.dump(
-        observed_load
-    ) == dataConnectorConfigSchema.dump(data_connector_config)
+    assert dataConnectorConfigSchema.dump(observed_load) == dataConnectorConfigSchema.dump(
+        data_connector_config
+    )
 
 
 @pytest.mark.parametrize(

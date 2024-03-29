@@ -30,7 +30,9 @@ data_connectors:
 """
 # </snippet>
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(
+    datasource_yaml,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python datasource_config">
@@ -52,10 +54,8 @@ datasource_config = {
 # </snippet>
 
 test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+    yaml.dump(datasource_config),
 )
-
-assert test_yaml == test_python
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py add_datasource">
 context.add_datasource(**datasource_config)
@@ -73,9 +73,9 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters[
-    "path"
-] = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+batch_request.runtime_parameters["path"] = (
+    "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 1">
 validator = context.get_validator(

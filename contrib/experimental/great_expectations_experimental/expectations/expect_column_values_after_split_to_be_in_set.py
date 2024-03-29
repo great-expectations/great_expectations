@@ -4,9 +4,8 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-from typing import List, Optional
+from typing import List
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -15,9 +14,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def are_values_after_split_in_value_set(
-    val: str, delimiter: str, value_set: List[str]
-) -> bool:
+def are_values_after_split_in_value_set(val: str, delimiter: str, value_set: List[str]) -> bool:
     all_split_values = [v.strip() for v in val.split(delimiter)]
 
     for val in all_split_values:
@@ -41,9 +38,7 @@ class ColumnValuesAfterSplitInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, delimiter, value_set, **kwargs):
         value_set = set(value_set)
-        return column.apply(
-            lambda x: are_values_after_split_in_value_set(x, delimiter, value_set)
-        )
+        return column.apply(lambda x: are_values_after_split_in_value_set(x, delimiter, value_set))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -144,34 +139,6 @@ class ExpectColumnValuesAfterSplitToBeInSet(ColumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

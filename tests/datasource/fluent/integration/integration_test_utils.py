@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
@@ -19,9 +19,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
-)
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -36,13 +33,11 @@ logger = logging.getLogger(__name__)
 
 
 def run_checkpoint_and_data_doc(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
-    context, datasource, asset, batch_request = datasource_test_data
+    context, datasource, _asset, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
@@ -55,19 +50,22 @@ def run_checkpoint_and_data_doc(
         expectation_suite_name=suite_name,
     )
     validator.expect_table_row_count_to_be_between(0, 10000)
-    validator.expect_column_max_to_be_between(
-        column="passenger_count", min_value=1, max_value=7
-    )
-    validator.expect_column_median_to_be_between(
-        column="passenger_count", min_value=1, max_value=4
-    )
+    validator.expect_column_max_to_be_between(column="passenger_count", min_value=1, max_value=7)
+    validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     # Configure and run a checkpoint
     checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
-        "validations": [
-            {"batch_request": batch_request, "expectation_suite_name": suite_name}
+        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
+        "action_list": [
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(class_name="UpdateDataDocsAction"),
+            ),
         ],
     }
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
@@ -77,7 +75,7 @@ def run_checkpoint_and_data_doc(
         checkpoint_name = (
             f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
         )
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         checkpoint_name,
         context,
         **checkpoint_config,  # type: ignore[arg-type]
@@ -87,29 +85,25 @@ def run_checkpoint_and_data_doc(
     # Verify checkpoint runs successfully
     assert checkpoint_result._success, "Running expectation suite failed"
     number_of_runs = len(checkpoint_result.run_results)
-    assert (
-        number_of_runs == 1
-    ), f"{number_of_runs} runs were done when we only expected 1"
+    assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result["run_results"][
-        list(checkpoint_result["run_results"].keys())[0]
-    ]
+    result = checkpoint_result["run_results"][list(checkpoint_result["run_results"].keys())[0]]
     validation_result = result["validation_result"]
     assert validation_result.success
 
     expected_metric_values = {
         "expect_table_row_count_to_be_between": {
             "value": 10000,
-            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",
+            "rendered_template": "Must have greater than or equal to $min_value and less than or equal to $max_value rows.",  # noqa: E501
         },
         "expect_column_max_to_be_between": {
             "value": 6,
-            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
         "expect_column_median_to_be_between": {
             "value": 1,
-            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",
+            "rendered_template": "$column median must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
         },
     }
     assert len(validation_result.results) == 3
@@ -142,13 +136,8 @@ def run_checkpoint_and_data_doc(
                 num_diagnostic_render == 1
             ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
             diagnostic_renderer = r.rendered_content[0]
-            assert (
-                diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
-            )
-            assert (
-                diagnostic_renderer.value.schema["type"]
-                == "com.superconductive.rendered.string"
-            )
+            assert diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
+            assert diagnostic_renderer.value.schema["type"] == "com.superconductive.rendered.string"
         else:
             assert r.rendered_content is None
             assert r.expectation_config.rendered_content is None
@@ -163,85 +152,13 @@ def run_checkpoint_and_data_doc(
     with open(path) as f:
         data_doc_index = f.read()
 
-    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.
+    # Checking for ge-success-icon tests the result table was generated and it was populated with a successful run.  # noqa: E501
     assert "ge-success-icon" in data_doc_index
     assert "ge-failed-icon" not in data_doc_index
 
 
-def run_data_assistant_and_checkpoint(
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ]
-):
-    context, ds, _, batch_request = datasource_test_data
-    data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(
-        context, batch_request
-    )
-    batch_num = len(
-        data_assistant_result._batch_id_to_batch_identifier_display_name_map  # type: ignore[arg-type] # could be None
-    )
-    assert batch_num == 1, f"Only expected 1 batch but found {batch_num}"
-
-    # We assert the data assistant successfully generated expectations.
-    # We don't care about the exact number since that may change as data assistants evolve.
-    expectation_num = len(data_assistant_result.expectation_configurations)  # type: ignore[arg-type] # could be None
-    assert checkpoint_result.success, "Running expectation suite failed"
-    # Verify that the number of checkpoint validations is the number of expectations generated by the data assistant
-    assert (
-        len(
-            checkpoint_result["run_results"][
-                list(checkpoint_result["run_results"].keys())[0]
-            ]["validation_result"].results
-        )
-        == expectation_num
-    )
-
-
-def run_multibatch_data_assistant_and_checkpoint(
-    multibatch_datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ]
-):
-    context, ds, _, batch_request = multibatch_datasource_test_data
-    data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(
-        context, batch_request
-    )
-    # Assert multiple batches were processed
-    batch_num = len(
-        data_assistant_result._batch_id_to_batch_identifier_display_name_map  # type: ignore[arg-type] # could be None
-    )
-    assert batch_num == 12, f"Expected exactly 12 batches but found {batch_num}"
-
-    expectation_num = len(data_assistant_result.expectation_configurations)  # type: ignore[arg-type] # could be None
-    """
-    Exact number of "ExpectationConfiguration" objects, emitted by "DataAssistant" implementation depends on "Batch"
-    schema (including, significantly, column types).  Different "ExecutionEngine" backends (even different versions
-    thereof) infer underlying "Batch" schema using their specific mechanisms, resulting in varying results, produced by
-    same "DataAssistant" (as "DataAssistant" employs "DomainBuilder", whose output dynamically depends on column types).
-
-    In this test, using "PandasExecutionEngine" yields 109 "ExpectationConfiguration" objects in all environments.
-    However, using "SparkDFExecutionEngine" yields 109 "ExpectationConfiguration" objects for some PySpark versions,
-    while 111 "ExpectationConfiguration" objects for other PySpark versions.  Using "SqlAlchemyExecutionEngine" yields
-    111 "ExpectationConfiguration" objects for all SQLAlchemy environments in test suite.  Hence, assertion is ">= 109".
-    """
-    assert expectation_num >= 109, f"{expectation_num} >= 109"
-
-    assert checkpoint_result.success, "Running expectation suite failed"
-    # Verify that the number of checkpoint validations is the number of expectations generated by the data assistant
-    assert (
-        len(
-            checkpoint_result["run_results"][
-                list(checkpoint_result["run_results"].keys())[0]
-            ]["validation_result"].results
-        )
-        == expectation_num
-    )
-
-
-def run_batch_head(  # noqa: PLR0915
-    datasource_test_data: tuple[
-        AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ],
+def run_batch_head(  # noqa: C901, PLR0915
+    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     fetch_all: bool | str,
     n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
@@ -266,9 +183,7 @@ def run_batch_head(  # noqa: PLR0915
         table_columns_metric: MetricConfiguration
         results: Dict[Tuple[str, str, str], MetricValue]
 
-        table_columns_metric, results = get_table_columns_metric(
-            execution_engine=execution_engine
-        )
+        table_columns_metric, results = get_table_columns_metric(execution_engine=execution_engine)
         metrics.update(results)
 
         metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
@@ -300,7 +215,7 @@ def run_batch_head(  # noqa: PLR0915
             # if n_rows is greater than the total_row_count, we only expect total_row_count rows
             elif n_rows > total_row_count:
                 assert head_data_row_count == total_row_count
-            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
+            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows  # noqa: E501
             elif n_rows < 0 and abs(n_rows) > total_row_count:
                 assert head_data_row_count == 0
             # if n_rows is negative, we expect all but the final abs(n_rows)
@@ -335,47 +250,4 @@ def run_batch_head(  # noqa: PLR0915
             "fetch_all\n"
             "  value is not a valid boolean (type=value_error.strictbool)"
         )
-        assert n_rows_validation_error in str(
-            e.value
-        ) or fetch_all_validation_error in str(e.value)
-
-
-def _configure_and_run_data_assistant(
-    context: AbstractDataContext,
-    batch_request: BatchRequest,
-) -> tuple[DataAssistantResult, CheckpointResult]:
-    expectation_suite_name = "my_onboarding_assistant_suite"
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    data_assistant_result = context.assistants.onboarding.run(
-        batch_request=batch_request,
-        numeric_columns_rule={
-            "estimator": "exact",
-            "random_seed": 2022080401,
-        },
-        # We exclude congestion_surcharge due to this bug:
-        # https://greatexpectations.atlassian.net/browse/GREAT-1465
-        exclude_column_names=["congestion_surcharge"],
-    )
-    expectation_suite = data_assistant_result.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
-
-    # Run a checkpoint
-    checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
-        "validations": [
-            {
-                "batch_request": batch_request,
-                "expectation_suite_name": expectation_suite_name,
-            }
-        ],
-    }
-    checkpoint = SimpleCheckpoint(
-        f"yellow_tripdata_sample_{expectation_suite_name}",
-        context,
-        **checkpoint_config,  # type: ignore[arg-type]
-    )
-    checkpoint_result = checkpoint.run()
-
-    return data_assistant_result, checkpoint_result
+        assert n_rows_validation_error in str(e.value) or fetch_all_validation_error in str(e.value)

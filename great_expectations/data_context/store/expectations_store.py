@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import random
 import uuid
-from typing import Dict
+from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -14,6 +13,7 @@ from great_expectations.data_context.store.database_store_backend import (
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -24,89 +24,15 @@ from great_expectations.util import (
     verify_dynamic_loading_support,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.expectations.expectation import Expectation
+
+    _TExpectation = TypeVar("_TExpectation", bound=Expectation)
+
 
 class ExpectationsStore(Store):
     """
     An Expectations Store provides a way to store Expectation Suites accessible to a Data Context.
-
-    --ge-feature-maturity-info--
-
-        id: expectations_store_git
-        title: Expectation Store - Git
-        icon:
-        short_description: Store Expectations in Git
-        description: Use a git repository to store expectation suites.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes
-        maturity: Production
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: N/A
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_filesystem
-        title: Expectation Store - Filesystem
-        icon:
-        short_description: Filesystem-based Expectations Store
-        description: Filesystem-based Expectations Store
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html
-        maturity: Production
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: N/A
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_s3
-        title: Expectation Store - S3
-        icon:
-        short_description: S3
-        description: Use an Amazon Web Services S3 bucket to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
-        maturity: Beta
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Complete
-            bug_risk: Low
-
-        id: expectations_store_gcs
-        title: Expectation Store - GCS
-        icon:
-        short_description: Cloud Storage
-        description: Use a Google Cloud Platform Cloud Storage bucket to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html
-        maturity: Beta
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Complete
-            unit_test_coverage: Complete
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Partial
-            bug_risk: Low
-
-        id: expectations_store_azure_blob_storage
-        title: Expectation Store - Azure
-        icon:
-        short_description: Azure Blob Storage
-        description:  Use Microsoft Azure Blob Storage to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
-        maturity: N/A
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Minimal
-            unit_test_coverage: Minimal
-            integration_infrastructure_test_coverage: Minimal
-            documentation_completeness: Minimal
-            bug_risk: Moderate
-
-    --ge-feature-maturity-info--
     """
 
     _key_class = ExpectationSuiteIdentifier
@@ -119,26 +45,20 @@ class ExpectationsStore(Store):
         data_context=None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
+        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.  # noqa: E501
         self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            store_backend_class_name = store_backend.get(
-                "class_name", "InMemoryStoreBackend"
-            )
+            store_backend_class_name = store_backend.get("class_name", "InMemoryStoreBackend")
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            store_backend_class = load_class(store_backend_class_name, store_backend_module_name)
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_suffix"] = store_backend.get(
-                    "filepath_suffix", ".json"
-                )
+                store_backend["filepath_suffix"] = store_backend.get("filepath_suffix", ".json")
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get(
@@ -154,8 +74,8 @@ class ExpectationsStore(Store):
             store_name=store_name,
         )
 
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.  # noqa: E501
         self._config = {
             "store_backend": store_backend,
             "runtime_environment": runtime_environment,
@@ -185,28 +105,190 @@ class ExpectationsStore(Store):
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
         suite_dict: Dict = suite_data["attributes"]["suite"]
-        suite_dict["ge_cloud_id"] = ge_cloud_suite_id
+        suite_dict["id"] = ge_cloud_suite_id
+
+        # Temporary fork to account for pre-V1 configs
+        suite_dict.pop("ge_cloud_id", None)
 
         return suite_dict
 
+    def add_expectation(self, suite: ExpectationSuite, expectation: _TExpectation) -> _TExpectation:
+        suite_identifier, fetched_suite = self._refresh_suite(suite)
+
+        # we need to find which ID has been added by the backend
+        old_ids = {exp.id for exp in fetched_suite.expectations}
+
+        if self.cloud_mode:
+            expectation.id = None  # flag this expectation as new for the backend
+        else:
+            expectation.id = str(uuid.uuid4())
+        fetched_suite.expectations.append(expectation)
+
+        self.update(key=suite_identifier, value=fetched_suite)
+        if self.cloud_mode:
+            # since update doesn't return the object we need (here), we refetch the suite
+            suite_identifier, fetched_suite = self._refresh_suite(suite)
+            new_ids = [exp.id for exp in fetched_suite.expectations if exp.id not in old_ids]
+            if len(new_ids) > 1:
+                # edge case: suite has been changed remotely, and one or more new expectations
+                #            have been added. Since the store doesn't return the updated object,
+                #            we have no reliable way to know which new ID belongs to this expectation,  # noqa: E501
+                #            so we raise an exception and ask the user to refresh their suite.
+                #            The Expectation should have been successfully added to the suite.
+                raise RuntimeError(
+                    "Expectation was added, however this ExpectationSuite is out of sync with the Cloud backend. "  # noqa: E501
+                    f'Please fetch the latest state of this suite by calling `context.suites.get(name="{suite.name}")`.'  # noqa: E501
+                )
+            elif len(new_ids) == 0:
+                # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,  # noqa: E501
+                #            it should have already raised an exception.
+                raise RuntimeError("Unknown error occurred and Expectation was not added.")
+            else:
+                new_id = new_ids[0]
+            expectation.id = new_id
+        return expectation
+
+    def update_expectation(self, suite: ExpectationSuite, expectation: Expectation) -> Expectation:
+        suite_identifier, fetched_suite = self._refresh_suite(suite)
+
+        if expectation.id not in {exp.id for exp in fetched_suite.expectations}:
+            raise KeyError("Cannot update Expectation because it was not found.")
+
+        for i, old_expectation in enumerate(fetched_suite.expectations):
+            if old_expectation.id == expectation.id:
+                fetched_suite.expectations[i] = expectation
+                break
+
+        self.update(key=suite_identifier, value=fetched_suite)
+        # we don't expect the backend to have made changes to the Expectation,
+        # so we don't update its in-memory reference.
+
+        return expectation
+
+    def delete_expectation(self, suite: ExpectationSuite, expectation: Expectation) -> Expectation:
+        suite_identifier, suite = self._refresh_suite(suite)
+
+        if expectation.id not in {exp.id for exp in suite.expectations}:
+            raise KeyError("Cannot delete Expectation because it was not found.")
+
+        for i, old_expectation in enumerate(suite.expectations):
+            if old_expectation.id == expectation.id:
+                del suite.expectations[i]
+                break
+
+        self.update(key=suite_identifier, value=suite)
+        return expectation
+
+    def _refresh_suite(
+        self, suite
+    ) -> tuple[Union[GXCloudIdentifier, ExpectationSuiteIdentifier], ExpectationSuite]:
+        """Get the latest state of an ExpectationSuite from the backend."""
+        suite_identifier = self.get_key(name=suite.name, id=suite.id)
+        suite_dict = self.get(key=suite_identifier)
+        suite = ExpectationSuite(**suite_dict)
+        return suite_identifier, suite
+
     def _add(self, key, value, **kwargs):
+        if not self.cloud_mode:
+            # this logic should move to the store backend, but is implemented here for now
+            value: ExpectationSuite = self._add_ids_on_create(value)
         try:
-            return super()._add(key=key, value=value, **kwargs)
+            result = super()._add(key=key, value=value, **kwargs)
+            if self.cloud_mode:
+                # cloud backend has added IDs, so we update our local state to be in sync
+                result = cast(GXCloudResourceRef, result)
+
+                suite_kwargs = result.response["data"]["attributes"]["suite"]
+
+                # Temporary fork to account for pre-V1 configs
+                if "ge_cloud_id" in suite_kwargs and "id" not in suite_kwargs:
+                    suite_kwargs["id"] = suite_kwargs.pop("ge_cloud_id")
+
+                cloud_suite = ExpectationSuite(**suite_kwargs)
+                value = self._add_cloud_ids_to_local_suite_and_expectations(
+                    local_suite=value,
+                    cloud_suite=cloud_suite,
+                )
+            return result
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
-                f"An ExpectationSuite named {value.expectation_suite_name} already exists."
+                f"An ExpectationSuite named {value.name} already exists."
             )
 
     def _update(self, key, value, **kwargs):
+        if not self.cloud_mode:
+            # this logic should move to the store backend, but is implemented here for now
+            value: ExpectationSuite = self._add_ids_on_update(value)
         try:
-            return super()._update(key=key, value=value, **kwargs)
-        except gx_exceptions.StoreBackendError:
+            # todo: `update` should return the updated object
+            super()._update(key=key, value=value, **kwargs)
+
+            if self.cloud_mode:
+                # cloud backend has added IDs, so we update our local state to be in sync
+                # todo: add back this logic when `update` returns the updated object
+                # result = cast(GXCloudResourceRef, result)
+                # cloud_suite = ExpectationSuite(
+                #     **result.response["data"]["attributes"]["suite"]
+                # )
+                _suite_identifier, cloud_suite = self._refresh_suite(value)
+                value = self._add_cloud_ids_to_local_suite_and_expectations(
+                    local_suite=value,
+                    cloud_suite=cloud_suite,
+                )
+        except gx_exceptions.StoreBackendError as exc:
+            # todo: this generic error clobbers more informative errors coming from the store
             raise gx_exceptions.ExpectationSuiteError(
-                f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
-            )
+                f"Could not find an existing ExpectationSuite named {value.name}."
+            ) from exc
+
+    def _add_ids_on_create(self, suite: ExpectationSuite) -> ExpectationSuite:
+        """This method handles adding IDs to suites and expectations for non-cloud backends.
+        In the future, this logic should be the responsibility of each non-cloud backend.
+        """
+        suite["id"] = str(uuid.uuid4())
+        if isinstance(suite, ExpectationSuite):
+            key = "expectation_configurations"
+        else:
+            # this will be true if a serialized suite is provided
+            key = "expectations"
+        for expectation_configuration in suite[key]:
+            expectation_configuration["id"] = str(uuid.uuid4())
+        return suite
+
+    def _add_ids_on_update(self, suite: ExpectationSuite) -> ExpectationSuite:
+        """This method handles adding IDs to suites and expectations for non-cloud backends.
+        In the future, this logic should be the responsibility of each non-cloud backend.
+        """
+
+        if not suite.id:
+            suite.id = str(uuid.uuid4())
+
+        # enforce that every ID in this suite is unique
+        expectation_ids = [exp.id for exp in suite.expectations if exp.id]
+        if len(expectation_ids) != len(set(expectation_ids)):
+            raise RuntimeError("Expectation IDs must be unique within a suite.")
+
+        for expectation in suite.expectations:
+            if not expectation.id:
+                expectation.id = str(uuid.uuid4())
+        return suite
+
+    def _add_cloud_ids_to_local_suite_and_expectations(
+        self, local_suite: ExpectationSuite, cloud_suite: ExpectationSuite
+    ) -> ExpectationSuite:
+        if not local_suite.id:
+            local_suite.id = cloud_suite.id
+        # We replace local expectations with those returned from the backend
+        # so remote changes are reflected in the in-memory ExpectationSuite.
+        # Note that the parent Suite of these Expectations is actually `cloud_suite`,
+        # since we aren't using the public ExpectationSuite API to add the Expectations.
+        # This means that `Expectation._save_callback` is provided by a different copy of the
+        # same ExpectationSuite.
+        local_suite.expectations = [expectation for expectation in cloud_suite.expectations]
+        return local_suite
 
     @override
-    def get(self, key) -> ExpectationSuite:
+    def get(self, key) -> dict:
         return super().get(key)  # type: ignore[return-value]
 
     @override
@@ -220,9 +302,6 @@ class ExpectationsStore(Store):
             )
         return super()._validate_key(key=key)
 
-    def remove_key(self, key):
-        return self.store_backend.remove_key(key)
-
     def serialize(self, value):
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
@@ -235,68 +314,17 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def self_check(self, pretty_print):  # noqa: PLR0912
-        return_obj = {}
-
-        if pretty_print:
-            print("Checking for existing keys...")
-
-        return_obj["keys"] = self.list_keys()
-        return_obj["len_keys"] = len(return_obj["keys"])
-        len_keys = return_obj["len_keys"]
-
-        if pretty_print:
-            if return_obj["len_keys"] == 0:
-                print(f"\t{len_keys} keys found")
-            else:
-                print(f"\t{len_keys} keys found:")
-                for key in return_obj["keys"][:10]:
-                    print(f"		{key!s}")
-            if len_keys > 10:  # noqa: PLR2004
-                print("\t\t...")
-            print()
-
-        test_key_name = "test-key-" + "".join(
-            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
-        )
+    def get_key(
+        self, name: str, id: Optional[str] = None
+    ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
+        """Given a name and optional ID, build the correct key for use in the ExpectationsStore."""
+        key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:
-            test_key: GXCloudIdentifier = self.key_class(
-                resource_type=GXCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                id=id,
+                resource_name=name,
             )
         else:
-            test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
-        test_value = ExpectationSuite(
-            expectation_suite_name=test_key_name, data_context=self._data_context
-        )
-
-        if pretty_print:
-            print(f"Attempting to add a new test key: {test_key}...")
-        self.set(key=test_key, value=test_value)
-        if pretty_print:
-            print("\tTest key successfully added.")
-            print()
-
-        if pretty_print:
-            print(
-                f"Attempting to retrieve the test value associated with key: {test_key}..."
-            )
-        test_value = self.get(
-            key=test_key,
-        )
-        if pretty_print:
-            print("\tTest value successfully retrieved.")
-            print()
-
-        if pretty_print:
-            print(f"Cleaning up test key and value: {test_key}...")
-
-        test_value = self.remove_key(
-            # key=self.key_to_tuple(test_key),
-            key=self.key_to_tuple(test_key),
-        )
-        if pretty_print:
-            print("\tTest key and value successfully removed.")
-            print()
-
-        return return_obj
+            key = ExpectationSuiteIdentifier(name=name)
+        return key

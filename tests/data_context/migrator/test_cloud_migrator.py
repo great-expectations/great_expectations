@@ -1,4 +1,5 @@
 """These tests ensure that CloudMigrator works as intended."""
+
 import logging
 from typing import Any, Callable, List
 from unittest import mock
@@ -8,7 +9,6 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
@@ -36,7 +36,7 @@ def migrator_factory(
 def migrator_with_mock_context(
     migrator_factory: Callable,
 ) -> CloudMigrator:
-    return migrator_factory(context=mock.MagicMock)
+    return migrator_factory(context=mock.MagicMock)  # noqa: TID251
 
 
 @pytest.fixture
@@ -53,8 +53,8 @@ def mock_successful_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,
@@ -83,8 +83,8 @@ def mock_failed_migration(
 ) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> mock.MagicMock:
-        context = mock.MagicMock()
+    ) -> mock.MagicMock:  # noqa: TID251
+        context = mock.MagicMock()  # noqa: TID251
 
         with mock.patch.object(
             CloudMigrator,
@@ -110,16 +110,12 @@ def mock_failed_migration(
 
 
 @pytest.mark.unit
-def assert_stdout_is_accurate_and_properly_ordered(
-    stdout: str, statements: List[str]
-) -> None:
+def assert_stdout_is_accurate_and_properly_ordered(stdout: str, statements: List[str]) -> None:
     last_position = -1
     for statement in statements:
         position = stdout.find(statement)
         assert position != -1, f"Could not find '{statement}' in stdout"
-        assert (
-            position > last_position
-        ), f"Statement '{statement}' occurred in the wrong order"
+        assert position > last_position, f"Statement '{statement}' occurred in the wrong order"
 
 
 @pytest.mark.cloud
@@ -192,55 +188,6 @@ def test__send_validation_results_sends_valid_http_request(
 
 
 @pytest.mark.cloud
-class TestUsageStats:
-    def test_migrate_successful_event(
-        self, ge_cloud_organization_id: str, mock_successful_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=True,
-        )
-
-    def test_migrate_failed_event(
-        self, ge_cloud_organization_id: str, mock_failed_migration: Callable
-    ):
-        """Test that send_usage_message is called with the right params."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=False)
-
-        mock_send_usage_message.assert_called_once_with(
-            data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE,
-            event_payload={"organization_id": ge_cloud_organization_id},
-            success=False,
-        )
-
-    def test_no_event_sent_for_migrate_test_run(
-        self, mock_successful_migration: Callable
-    ):
-        """No event should be sent for a successful test run."""
-
-        mock_send_usage_message = mock_successful_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
-
-    def test_no_event_sent_for_migrate_test_run_failure(
-        self, mock_failed_migration: Callable
-    ):
-        """No event should be sent for a failed test run."""
-
-        mock_send_usage_message = mock_failed_migration(test_migrate=True)
-
-        mock_send_usage_message.assert_not_called()
-
-
-@pytest.mark.cloud
 @pytest.mark.parametrize("test_migrate", [True, False])
 @pytest.mark.parametrize("include_datasources", [True, False])
 @pytest.mark.parametrize("enable_usage_stats", [True, False])
@@ -251,9 +198,7 @@ def test__migrate_to_cloud_outputs_warnings(
     enable_usage_stats: bool,
     caplog,
 ):
-    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(
-        enabled=enable_usage_stats
-    )
+    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(enabled=enable_usage_stats)
     datasource_names = ("my_datasource",) if include_datasources else tuple()
 
     context = StubBaseDataContext(
@@ -280,13 +225,13 @@ def test__migrate_to_cloud_outputs_warnings(
     if not enable_usage_stats:
         expected_log_count += 1
         assert (
-            "Please note that by migrating your context to GX Cloud your new Cloud Data Context will emit usage statistics."
+            "Please note that by migrating your context to GX Cloud your new Cloud Data Context will emit usage statistics."  # noqa: E501
             in aggregated_log_output
         )
     if include_datasources:
         expected_log_count += 1
         assert (
-            "Since your existing context includes one or more datasources, please note that if your credentials are included"
+            "Since your existing context includes one or more datasources, please note that if your credentials are included"  # noqa: E501
             in aggregated_log_output
         )
 
@@ -302,13 +247,12 @@ def test__migrate_to_cloud_outputs_warnings(
             [
                 "Thank you for using Great Expectations!",
                 "We will now begin the migration process to GX Cloud.",
-                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
                 "Then we will send each of your validation results.",
                 "[Step 1/4]: Bundling context configuration",
                 "Bundled 1 Datasource(s):",
                 "Bundled 1 Checkpoint(s):",
                 "Bundled 1 Expectation Suite(s):",
-                "Bundled 1 Profiler(s):",
                 "[Step 2/4]: Preparing validation results",
                 "[Step 3/4]: Sending context configuration",
                 "[Step 4/4]: Sending validation results",
@@ -320,19 +264,18 @@ def test__migrate_to_cloud_outputs_warnings(
             [
                 "Thank you for using Great Expectations!",
                 "We will now begin the migration process to GX Cloud.",
-                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
                 "Then we will send each of your validation results.",
                 "[Step 1/4]: Bundling context configuration",
                 "Bundled 1 Datasource(s):",
                 "Bundled 1 Checkpoint(s):",
                 "Bundled 1 Expectation Suite(s):",
-                "Bundled 1 Profiler(s):",
                 "[Step 2/4]: Preparing validation results",
                 "[Step 3/4]: Sending context configuration",
                 "[Step 4/4]: Sending validation results",
                 "Success!",
-                "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
-                "If you continue to use your existing Data Context your configurations could become out of sync.",
+                "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",  # noqa: E501
+                "If you continue to use your existing Data Context your configurations could become out of sync.",  # noqa: E501
             ],
         ),
     ],
@@ -349,9 +292,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
         migrator._migrate_to_cloud(test_migrate=test_migrate)
 
     stdout, _ = capsys.readouterr()
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)
 
 
 @pytest.mark.cloud
@@ -374,13 +315,12 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the Cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
         "Bundled 1 Checkpoint(s):",
         "Bundled 1 Expectation Suite(s):",
-        "Bundled 1 Profiler(s):",
         "[Step 2/4]: Preparing validation results",
         "[Step 3/4]: Sending context configuration",
         "There was an error sending your configuration to GX Cloud!",
@@ -390,9 +330,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
         "Error: Bad request!",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)
 
 
 @pytest.mark.cloud
@@ -402,12 +340,8 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
 ):
     migrator = migrator_with_stub_base_data_context
 
-    good_response = MigrationResponse(
-        message="Good request!", status_code=200, success=True
-    )
-    bad_response = MigrationResponse(
-        message="Bad request!", status_code=400, success=False
-    )
+    good_response = MigrationResponse(message="Good request!", status_code=200, success=True)
+    bad_response = MigrationResponse(message="Bad request!", status_code=400, success=False)
 
     with mock.patch(
         "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
@@ -421,25 +355,22 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the Cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",  # noqa: E501
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
         "Bundled 1 Checkpoint(s):",
         "Bundled 1 Expectation Suite(s):",
-        "Bundled 1 Profiler(s):",
         "[Step 2/4]: Preparing validation results",
         "[Step 3/4]: Sending context configuration",
         "[Step 4/4]: Sending validation results",
         "Error sending validation result 'some_key' (1/1)",
         "Partial success!",
-        "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
-        "If you continue to use your existing Data Context your configurations could become out of sync.",
+        "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",  # noqa: E501
+        "If you continue to use your existing Data Context your configurations could become out of sync.",  # noqa: E501
         "Please note that there were 1 validation result(s) that were not successfully migrated",
         "To retry uploading these validation results, you can use the following code snippet:",
         "migrator.retry_migrate_validation_results()",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(
-        stdout=stdout, statements=expected_statements
-    )
+    assert_stdout_is_accurate_and_properly_ordered(stdout=stdout, statements=expected_statements)

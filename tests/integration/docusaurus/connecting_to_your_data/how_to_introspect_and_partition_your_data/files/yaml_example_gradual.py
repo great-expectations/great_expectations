@@ -82,9 +82,7 @@ data_connectors:
             - nonexistent_group_name
 """
 
-buggy_datasource_yaml = buggy_datasource_yaml.replace(
-    "<PATH_TO_YOUR_DATA_HERE>", data_dir_path
-)
+buggy_datasource_yaml = buggy_datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
 context.test_yaml_config(buggy_datasource_yaml)
 
@@ -132,21 +130,15 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
     "<PATH_TO_BAD_DATA_DIRECTORY_HERE>", data_dir_path
 )
 
-report = context.test_yaml_config(
-    buggy_datasource_yaml, return_mode="report_object", shorten_tracebacks=True
-)
+report = context.test_yaml_config(buggy_datasource_yaml, shorten_tracebacks=True)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names">
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
-)[
-    "default_inferred_data_connector_name"
-]
+)["default_inferred_data_connector_name"]
 assert len(available_data_asset_names) == 36
 # </snippet>
 
@@ -235,11 +227,9 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 context.test_yaml_config(datasource_yaml)
 
 context.add_datasource(**yaml.load(datasource_yaml))
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(data_connector_names="configured_data_connector_name")[
-    "configured_data_connector_name"
-]
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
+    data_connector_names="configured_data_connector_name"
+)["configured_data_connector_name"]
 assert len(available_data_asset_names) == 1
 
 # noinspection PyRedeclaration
@@ -314,11 +304,9 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 context.test_yaml_config(datasource_yaml)
 
 context.add_datasource(**yaml.load(datasource_yaml))
-available_data_asset_names = context.datasources[
-    "taxi_datasource"
-].get_available_data_asset_names(data_connector_names="configured_data_connector_name")[
-    "configured_data_connector_name"
-]
+available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(
+    data_connector_names="configured_data_connector_name"
+)["configured_data_connector_name"]
 assert len(available_data_asset_names) == 2
 
 # NOTE: The following code is only for testing and can be ignored by users.

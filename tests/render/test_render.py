@@ -3,11 +3,8 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ExpectationSuitePageRenderer,
@@ -31,9 +28,7 @@ pytestmark = pytest.mark.big
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
-    with open(
-        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")
-    ) as infile:
+    with open(file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
@@ -42,32 +37,24 @@ def titanic_profiler_evrs():
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs_with_exception():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"),
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
-    context: DataContext = empty_data_context_module_scoped
+def titanic_dataset_profiler_expectations():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_expectations.json"),
     ) as infile:
         expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
-        return ExpectationSuite(**expectations_dict, data_context=context)
+        return ExpectationSuite(**expectations_dict)
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations_with_distribution(
-    empty_data_context_module_scoped,
-):
-    context: DataContext = empty_data_context_module_scoped
+def titanic_dataset_profiler_expectations_with_distribution():
     with open(
         file_relative_path(
             __file__,
@@ -77,19 +64,16 @@ def titanic_dataset_profiler_expectations_with_distribution(
         expectations_dict: dict = expectationSuiteSchema.load(
             json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
-        return ExpectationSuite(**expectations_dict, data_context=context)
+        return ExpectationSuite(**expectations_dict)
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+def titanic_profiled_expectations_1():
     with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_expectations.json"),
     ) as infile:
         expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
-        return ExpectationSuite(**expectation_suite_dict, data_context=context)
+        return ExpectationSuite(**expectation_suite_dict)
 
 
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
@@ -131,9 +115,7 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
             "w",
         ) as outfile:
             json.dump(
-                ProfilingResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
+                ProfilingResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -177,9 +159,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
             "w",
         ) as outfile:
             json.dump(
-                ValidationResultsColumnSectionRenderer()
-                .render(evrs[column])
-                .to_json_dict(),
+                ValidationResultsColumnSectionRenderer().render(evrs[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -190,7 +170,7 @@ def test_render_expectation_suite_column_section_renderer(
 ):
     # Group expectations by column
     exp_groups = {}
-    for exp in titanic_profiled_expectations_1.expectations:
+    for exp in titanic_profiled_expectations_1.expectation_configurations:
         try:
             column = exp.kwargs["column"]
             if column not in exp_groups:
@@ -203,17 +183,13 @@ def test_render_expectation_suite_column_section_renderer(
         with open(
             file_relative_path(
                 __file__,
-                "./output/test_render_expectation_suite_column_section_renderer"
-                + column
-                + ".json",
+                "./output/test_render_expectation_suite_column_section_renderer" + column + ".json",
                 strict=False,
             ),
             "w",
         ) as outfile:
             json.dump(
-                ExpectationSuiteColumnSectionRenderer()
-                .render(exp_groups[column])
-                .to_json_dict(),
+                ExpectationSuiteColumnSectionRenderer().render(exp_groups[column]).to_json_dict(),
                 outfile,
                 indent=2,
             )
@@ -266,22 +242,15 @@ def test_content_block_list_available_expectations():
         "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
-        "expect_column_pair_cramers_phi_value_to_be_less_than",
     }
-    assert known_validation_results_implemented_expectations <= set(
-        available_expectations
-    )
-    assert len(available_expectations) >= len(
-        known_validation_results_implemented_expectations
-    )
+    assert known_validation_results_implemented_expectations <= set(available_expectations)
+    assert len(available_expectations) >= len(known_validation_results_implemented_expectations)
 
 
 def test_render_profiled_fixture_expectation_suite(
     titanic_dataset_profiler_expectations,
 ):
-    rendered_content = ExpectationSuitePageRenderer().render(
-        titanic_dataset_profiler_expectations
-    )
+    rendered_content = ExpectationSuitePageRenderer().render(titanic_dataset_profiler_expectations)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
@@ -326,9 +295,7 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(
-            __file__, "./output/test_render_profiling_results.html", strict=False
-        ),
+        file_relative_path(__file__, "./output/test_render_profiling_results.html", strict=False),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -342,9 +309,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(
-            __file__, "./output/test_render_validation_results.html", strict=False
-        ),
+        file_relative_path(__file__, "./output/test_render_validation_results.html", strict=False),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -356,16 +321,14 @@ def test_render_validation_results(titanic_profiled_evrs_1):
         'Must have greater than or equal to <span class="badge badge-secondary" >0</span> rows.'
         in rendered_page
     )
-    # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
+    # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \  # noqa: E501
     #        in rendered_page
 
 
 def test_smoke_render_profiling_results_page_renderer_with_exception(
     titanic_profiler_evrs_with_exception,
 ):
-    rendered_content = ProfilingResultsPageRenderer().render(
-        titanic_profiler_evrs_with_exception
-    )
+    rendered_content = ProfilingResultsPageRenderer().render(titanic_profiler_evrs_with_exception)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
@@ -383,28 +346,9 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
     assert "exception" in rendered_page
 
 
-def test_full_oobe_flow():
-    df = gx.read_csv(file_relative_path(__file__, "../../examples/data/Titanic.csv"))
-    df.data_asset_name = "my_datasource/my_generator/my_asset"
-    df.profile(BasicDatasetProfiler)
-    evrs = df.validate()  # results
-
-    rendered_content = ProfilingResultsPageRenderer().render(evrs)
-    rendered_page = DefaultJinjaPageView().render(rendered_content)
-
-    with open(
-        file_relative_path(__file__, "./output/test_full_oobe_flow.html", strict=False),
-        "wb",
-    ) as f:
-        f.write(rendered_page.encode("utf-8"))
-
-    assert rendered_page[:15] == "<!DOCTYPE html>"
-    assert rendered_page[-7:] == "</html>"
-
-
 def test_render_string_template():
     template = {
-        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",  # noqa: E501
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
@@ -430,16 +374,14 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
     assert res == expected
 
     template = {
-        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",
+        "template": "$column Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than $threshold: $sparklines_histogram",  # noqa: E501
         "params": {
             "column": "categorical_fixed",
             "partition_object": {
@@ -465,9 +407,7 @@ def test_render_string_template():
     expected = (
         """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
-            </span>""".replace(
-            " ", ""
-        )
+            </span>""".replace(" ", "")  # noqa: E501
         .replace("\t", "")
         .replace("\n", "")
     )
