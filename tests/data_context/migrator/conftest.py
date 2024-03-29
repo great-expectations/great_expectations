@@ -43,6 +43,8 @@ class StubValidationsStore:
         # Note: Key is unused
         return ExpectationSuiteValidationResult(
             success=True,
+            results=[],
+            suite_name="empty_suite",
         )
 
 
@@ -262,8 +264,10 @@ def serialized_configuration_bundle() -> dict:
                 "evaluation_parameters": {},
                 "meta": {},
                 "results": [],
+                "suite_name": "empty_suite",
                 "statistics": {},
                 "success": True,
+                "id": None,
             }
         },
     }
