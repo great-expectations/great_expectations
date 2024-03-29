@@ -12,6 +12,7 @@ plugins = [
     ]
 files = [
     "great_expectations",
+    "docs",
     "tests/datasource/fluent",
     "tests/integration/cloud",
     "tests/integration/docusaurus",
@@ -40,9 +41,6 @@ exclude = [
     # BEGIN ALWAYS EXCLUDE SECTION #####################################################
     # If pattern should always be excluded add comment explaining why and put
     # Docs should not be type checked with the rest of the library.
-    'docs/*',
-    'docs/adr',
-    # 'docs/checks', # We ignore docs, but not any CI checks written in python
     'docs/docusaurus',
     'docs/expectation_gallery',
     'docs/readme_assets',
