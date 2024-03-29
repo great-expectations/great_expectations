@@ -2,7 +2,7 @@
 This example script demonstrates how to retrieve an existing Checkpoint
  from a Data Context and then delete it from the Data Context configuration.
 
-The <snippet> tags are used to insert the corresponding code into the
+The <snippet> tags are used to insert the corresponding code into
  GX documentation, and you can disregard them.
  
 """

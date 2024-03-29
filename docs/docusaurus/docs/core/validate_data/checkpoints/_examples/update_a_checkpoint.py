@@ -2,7 +2,7 @@
 This example script demonstrates how to update a Checkpoint's Validation Definitions
   and Actions list, and persist those changes to the Data Context.
 
-The <snippet> tags are used to insert the corresponding code into the
+The <snippet> tags are used to insert the corresponding code into
  GX documentation, and you can disregard them.
 """
 

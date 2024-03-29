@@ -2,7 +2,7 @@
 This example script demonstrates how to retrieve an existing Checkpoint
  from a Data Context by name.
 
-The <snippet> tags are used to insert the corresponding code into the
+The <snippet> tags are used to insert the corresponding code into
   GX documentation, and you can disregard them.
  
 """

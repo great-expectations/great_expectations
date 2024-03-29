@@ -2,7 +2,7 @@
 This example script demonstrates how to list the Checkpoints available
  in a Data Context and use attributes to filter the list.
 
-The <snippet> tags are used to insert the corresponding code into the
+The <snippet> tags are used to insert the corresponding code into
   GX documentation, and you can disregard them.
  
 """

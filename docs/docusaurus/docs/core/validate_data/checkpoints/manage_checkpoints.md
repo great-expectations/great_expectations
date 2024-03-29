@@ -8,13 +8,13 @@ import Tabs from '@theme/Tabs';
 
 import StepRequestADataContext from '../../_core_components/common_steps/_request_a_data_context.md';
 
-Checkpoints provide the ability to group Validation Definitions and run them together with shared parameters and automated Actions.
+You can use Checkpoints to group Validation Definitions and run them with shared parameters and automated Actions.
 
-At runtime a Checkpoint can take in dictionaries that filter the Batches in each Validation Definition and modify the parameters of the Expectations that will be validated against them.  These will apply to every Validation Definition in the Checkpoint.  Therefore, the Validation Definitions grouped together in a Checkpoint should have Batch Definitions that accept the same criteria for filtering Batches, and the Expectation Suites in each Validation Definition should share a list of valid parameters as well.
+At runtime, a Checkpoint can take in dictionaries that filter the Batches in each Validation Definition and modify the parameters of the Expectations that will be validated against them. The parameters apply to every Validation Definition in the Checkpoint.  Therefore, the Validation Definitions grouped in a Checkpoint should have Batch Definitions that accept the same Batch filtering criteria. In addition, the Expectation Suites in each Validation Definition should also share a list of valid parameters.
 
-After a Checkpoint receives Validation Results from a Validation Definition it will execute a list of Actions.  These Actions will perform some task based on the validation results that were returned.  Actions can include things such as updating Data Docs with the new Validation Results or sending alerts when validations fail.  The Actions list will be executed once for each Validation Definition in a Checkpoint.
+After a Checkpoint receives Validation Results from a Validation Definition, it executes a list of Actions. The returned Validation Results determine what task is performed for each Action. Actions can include updating Data Docs with the new Validation Results or sending alerts when validations fail.  The Actions list is executed once for each Validation Definition in a Checkpoint.
 
-If a Checkpoint's list of Actions is empty the Checkpoint can still be run and its validation results will be saved to the Data Context, but nothing else will automatically be done.
+If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. Its validation results are saved to the Data Context, but no tasks are executed.
 
 ## Create a Checkpoint
 
@@ -37,13 +37,13 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 4. Optional. Determine the Actions to add to the Checkpoint.
 
-  In this example the variable `actions` is a list containing two Actions.  The first updates your Data Docs with the results of the Validation Definition.  The second sends a Slack notification if any of the Expectations in the Validation Definition failed:
+In this example, the variable `actions` is a list of two actions. The first updates your Data Docs with the results of the Validation Definition. The second sends a Slack notification if any of the Expectations in the Validation Definition failed:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py determine actions"
   ```
 
   :::tip
-  You can find [a list of available Actions](/reference/api/checkpoint/Checkpoint_class.mdx) alongisde the Checkpoint class the in GX API documentation.
+[A list of available Actions](/reference/api/checkpoint/Checkpoint_class.mdx) is available with the Checkpoint class in the GX API documentation.
   :::
 
 5. Create the Checkpoint:
@@ -129,9 +129,9 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
   In this example the variable `context` is your Data Context.
 
-2. Determine the attributes to filter on.
+2. Determine the filter attributes.
 
-  Checkpoints associate a list of one or more Validation Definitions with a list of Actions to perform.  This means that valid attributes to filter on include the attributes for the Validation Definitions and their Batch Definitions and Expectation Suites, as well as the Checkpoint's Actions.
+Checkpoints associate a list of one or more Validation Definitions with a list of Actions to perform.  The attributes used to filter the results include the attributes for the Validation Definitions, their Batch Definitions and Expectation Suites, and the Checkpoint Actions.
 
 3. Use a list comprehension to return all Checkpoints that match the filtered attributes.
 
@@ -163,11 +163,11 @@ If a Checkpoint's list of Actions is empty the Checkpoint can still be run and i
 
 2. [Get the Checkpoint to update](#get-a-checkpoint-by-name).
 
-  In this example the variable `checkpoint` is the Checkpoint that will be updated.
+  In this example the variable `checkpoint` is the Checkpoint that is updated.
 
-3. Overwrite the Checkpoint's values with updated lists.
+3. Overwrite the Checkpoint values with updated lists.
 
-  In this example both the Validations Definitions and Actions of the Checkpoint recieve updates:
+  In this example, the Checkpoint Validations Definitions and Actions receive updates:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/update_a_checkpoint.py full update values"
   ```

@@ -2,7 +2,7 @@
 This example script demonstrates how to create a Checkpoint and add it
   to a Data Context.
 
-The <snippet> tags are used to insert the corresponding code into the
+The <snippet> tags are used to insert the corresponding code into
  GX documentation, and you can disregard them.
  
 """
