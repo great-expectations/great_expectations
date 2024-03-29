@@ -7,6 +7,7 @@ line-length = 88 # NOTE: consider changing this to 100 to match the rest of the 
 lint.extend-ignore = [
     # https://docs.astral.sh/ruff/rules/magic-value-comparison/
     "PLR2004", # can be tedious and overly verbose in docs
+    "E501", # line-too-long # don't want noqa comments in docs
 ]
 
 [lint.isort]
