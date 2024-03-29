@@ -8,6 +8,7 @@ lint.extend-ignore = [
     # https://docs.astral.sh/ruff/rules/magic-value-comparison/
     "PLR2004", # can be tedious and overly verbose in docs
     "E501", # line-too-long # don't want noqa comments in docs
+    "TID251", # this is mostly example code not core code
 ]
 
 [lint.isort]
