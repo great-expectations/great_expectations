@@ -6,6 +6,7 @@ Typical usage example:
 
   main() method provided with typical usage.
 """
+
 from __future__ import annotations
 
 import datetime

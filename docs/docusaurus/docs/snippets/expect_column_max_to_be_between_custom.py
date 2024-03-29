@@ -101,6 +101,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py docstring">
     """Expect column max to be between a given range."""
+
     # </snippet>
 
     # Defining test cases

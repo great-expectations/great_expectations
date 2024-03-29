@@ -5,9 +5,10 @@ import zipfile
 from contextlib import contextmanager
 from functools import cached_property
 from io import BytesIO
-from packaging import version
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Optional
+
+from packaging import version
 
 from docs.logging import Logger
 
@@ -83,7 +84,7 @@ class DocsBuilder:
         self._run("(cd ../../; invoke api-docs)")
 
     def _read_prior_release_version_file(self) -> str:
-        with open(self._release_version_file, "r") as file:
+        with open(self._release_version_file) as file:
             return file.read()
 
     def _write_release_version(self, content: str) -> None:

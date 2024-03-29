@@ -12,6 +12,7 @@ The above command:
     - -sp static (also --static-prefix): The site static folder prefix, used to resolve abosulte image paths
     - --skip-external: If present, external (http) links are not checked
 """
+
 from __future__ import annotations
 
 import logging
@@ -158,7 +159,7 @@ class LinkChecker:
         return self._docs_root.joinpath(path).resolve()
 
     def _get_absolute_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
+        return os.path.join(self._docs_root, self._get_os_path(path))
 
     def _get_absolute_static_path(self, path: str) -> str:
         return os.path.join(self._static_root, self._get_os_path(path))
@@ -200,7 +201,7 @@ class LinkChecker:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_static_path(path)
-        if not os.path.isfile(image_file):  # noqa: PTH113
+        if not os.path.isfile(image_file):
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:

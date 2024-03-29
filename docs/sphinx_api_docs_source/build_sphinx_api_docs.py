@@ -15,13 +15,13 @@ Typical usage example:
         doc_builder.build_docs()
         ...
 """
+
 from __future__ import annotations
 
 import ast
 import enum
 import importlib
 import logging
-import os
 import pathlib
 import shutil
 import sys
@@ -30,7 +30,6 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
-from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
 
 from docs.sphinx_api_docs_source.check_public_api_docstrings import (
     get_public_api_definitions,
@@ -40,6 +39,7 @@ from docs.sphinx_api_docs_source.public_api_report import (
     Definition,
     get_shortest_dotted_path,
 )
+from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -238,7 +238,8 @@ class SphinxInvokeDocsBuilder:
 
         # Change style to styles to avoid rendering errors
         tags_with_style = doc.find_all(
-            "col", style=lambda value: value in value  # noqa: PLR0124
+            "col",
+            style=lambda value: value in value,  # noqa: PLR0124
         )
         for tag in tags_with_style:
             style = tag["style"]
