@@ -236,7 +236,7 @@ class LinkChecker:
             return None
 
     def _check_docroot_link(
-        self, link: str, file: pathlib.Path, path: pathlib.Path
+        self, link: str, file: pathlib.Path, path: pathlib.Path | str
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking docroot link {link} in file {file}")
 
@@ -375,9 +375,9 @@ class LinkChecker:
 )
 @click.option("--skip-external", is_flag=True)
 def scan_docs_click(  # noqa: PLR0913
-    path: str,
-    docs_root: Optional[str],
-    static_root: str,
+    path: pathlib.Path,
+    docs_root: Optional[pathlib.Path],
+    static_root: pathlib.Path,
     site_prefix: str,
     static_prefix: str,
     skip_external: bool,
@@ -390,9 +390,9 @@ def scan_docs_click(  # noqa: PLR0913
 
 
 def scan_docs(  # noqa: C901, PLR0913
-    path: str,
-    docs_root: Optional[str],
-    static_root: str,
+    path: pathlib.Path,
+    docs_root: Optional[pathlib.Path],
+    static_root: pathlib.Path,
     site_prefix: str,
     static_prefix: str,
     skip_external: bool,
