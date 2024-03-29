@@ -1215,7 +1215,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @property
     def configuration(self) -> ExpectationConfiguration:
         kwargs = self.dict(exclude_defaults=True)
-        kwargs["result_format"] = self.result_format
         meta = kwargs.pop("meta", None)
         notes = kwargs.pop("notes", None)
         id = kwargs.pop("id", None)
