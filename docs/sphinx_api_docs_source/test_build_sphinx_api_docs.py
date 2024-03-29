@@ -1,10 +1,11 @@
-from docs.sphinx_api_docs_source.conf import convert_code_blocks
-from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
 import pytest
-
 from bs4 import (
     BeautifulSoup,
 )
+
+from docs.sphinx_api_docs_source.conf import convert_code_blocks
+from docs.sphinx_api_docs_source.utils import apply_markdown_adjustments
+
 
 def test_convert_code_blocks():
     name = "great_expectations.checkpoint.StoreMetricsAction"
@@ -68,17 +69,44 @@ def test_convert_code_blocks():
         "",
     ]
 
-@pytest.mark.parametrize("input_string, output_string, html_file_path", [
-    ("<section><dt><h2>One child</h2><h2>Other child</h2></dt></section>", "<section><dt><h2>One child</h2><h2>Other child</h2>\r\n</dt></section>", ""),
-    ("<section><th></th><td></td></section>", "<section><th>\r\n</th><td>\r\n</td></section>", ""),
-    ("<section><li>Item</li></section>", "<section><li>\r\nItem\r\n</li></section>", ""),
-    ("<section><dd></dd></section>", "<section>\r\n<dd>\r\n</dd></section>", ""),
-    ("<section><pre></pre></section>", "<section><pre>\r\n</pre></section>", ""),
-    ("<section><cite></cite></section>", "<section><cite>\r\n</cite></section>", "some_path/ConfiguredAssetFilesystemDataConnector.html"),
-    ("<section><span>re.console(*)</span></section>", "<section><span>re.console(&amp;#42;)</span></section>", ""),
-    ("<section><p><span>Child</span></p></section>", "<section>\r\n<p>\r\n<span>Child</span>\r\n</p></section>", "")
-])
 
+@pytest.mark.parametrize(
+    "input_string, output_string, html_file_path",
+    [
+        (
+            "<section><dt><h2>One child</h2><h2>Other child</h2></dt></section>",
+            "<section><dt><h2>One child</h2><h2>Other child</h2>\r\n</dt></section>",
+            "",
+        ),
+        (
+            "<section><th></th><td></td></section>",
+            "<section><th>\r\n</th><td>\r\n</td></section>",
+            "",
+        ),
+        (
+            "<section><li>Item</li></section>",
+            "<section><li>\r\nItem\r\n</li></section>",
+            "",
+        ),
+        ("<section><dd></dd></section>", "<section>\r\n<dd>\r\n</dd></section>", ""),
+        ("<section><pre></pre></section>", "<section><pre>\r\n</pre></section>", ""),
+        (
+            "<section><cite></cite></section>",
+            "<section><cite>\r\n</cite></section>",
+            "some_path/ConfiguredAssetFilesystemDataConnector.html",
+        ),
+        (
+            "<section><span>re.console(*)</span></section>",
+            "<section><span>re.console(&amp;#42;)</span></section>",
+            "",
+        ),
+        (
+            "<section><p><span>Child</span></p></section>",
+            "<section>\r\n<p>\r\n<span>Child</span>\r\n</p></section>",
+            "",
+        ),
+    ],
+)
 def test_apply_markdown_adjustments(input_string, output_string, html_file_path):
     soup = BeautifulSoup(input_string, "html.parser")
 

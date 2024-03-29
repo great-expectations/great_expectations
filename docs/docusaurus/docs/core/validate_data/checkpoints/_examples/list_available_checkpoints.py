@@ -4,7 +4,7 @@ This example script demonstrates how to list the Checkpoints available
 
 The <snippet> tags are used to insert the corresponding code into
   GX documentation, and you can disregard them.
- 
+
 """
 
 # <snippet name="/core/validate_data/checkpoints/_examples/list_available_checkpoints.py full example code">
