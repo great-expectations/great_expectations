@@ -149,7 +149,7 @@ def setup(app):
     app.connect("autodoc-process-docstring", custom_process_docstring)
 
 
-def convert_code_blocks(lines: list[str], name: str) -> None:
+def convert_code_blocks(lines: list[str], name: str) -> None:  # noqa: C901
     """Convert code blocks to CodeBlock components.
 
     Modify lines in place to match Sphinx functionality.

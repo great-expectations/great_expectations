@@ -196,7 +196,7 @@ class SphinxInvokeDocsBuilder:
         ]
         return files
 
-    def _parse_and_process_html_to_mdx(
+    def _parse_and_process_html_to_mdx(  # noqa: C901
         self, html_file_path: pathlib.Path, html_file_contents: str
     ) -> str:
         """Parse sphinx generated html and make changes suitable for use in docusaurus.

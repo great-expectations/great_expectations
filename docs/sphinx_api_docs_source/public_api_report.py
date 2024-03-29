@@ -837,8 +837,8 @@ def _repo_root() -> pathlib.Path:
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "docs" / "docusaurus" / "docs"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
-    return {pathlib.Path(p) for p in paths}
+    paths = base_directory.rglob("*.py")
+    return set(paths)
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:

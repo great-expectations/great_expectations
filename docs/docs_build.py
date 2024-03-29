@@ -8,12 +8,11 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Optional
 
-from packaging import version
-
 from docs.logging import Logger
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from packaging import version
 
 
 class DocsBuilder:
