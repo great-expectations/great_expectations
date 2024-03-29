@@ -287,6 +287,8 @@ lint.ignore = [
     "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
 ]
 extend-exclude = [
+    "docs/docusaurus/versioned_docs/version-0.18",
+    "docs/docusaurus/versioned_docs/version-0.17",
     "build/*",
     "versioneer*",
     "examples/*",
