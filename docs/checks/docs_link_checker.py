@@ -50,11 +50,11 @@ class LinkReport:
 class LinkChecker:
     """Checks image and file links in a set of markdown files."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 # too many arguments
         self,
-        docs_path: str,
-        docs_root: str,
-        static_root: str,
+        docs_path: pathlib.Path,
+        docs_root: pathlib.Path,
+        static_root: pathlib.Path,
         site_prefix: str,
         static_prefix: str,
         skip_external: bool = False,
@@ -68,9 +68,9 @@ class LinkChecker:
             static_prefix: The top-level static folder (ex: /static) used to resolve absolute image links to local files
             skip_external: Whether or not to skip checking external (http..) links
         """
-        self._docs_path = docs_path.strip(os.path.sep)
-        self._docs_root = docs_root.strip(os.path.sep)
-        self._static_root = static_root.strip(os.path.sep)
+        self._docs_path = docs_path
+        self._docs_root = docs_root
+        self._static_root = static_root
         self._site_prefix = site_prefix.strip("/")
         self._static_prefix = static_prefix.strip("/")
         self._skip_external = skip_external
@@ -158,13 +158,12 @@ class LinkChecker:
     def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
         return self._docs_root.joinpath(path).resolve()
 
-    def _get_absolute_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))
+    def _get_absolute_static_path(self, path: pathlib.Path) -> pathlib.Path:
+        return self._static_root / path
 
-    def _get_absolute_static_path(self, path: str) -> str:
-        return os.path.join(self._static_root, self._get_os_path(path))
-
-    def _get_relative_path(self, file: str, path: str) -> str:
+    def _get_relative_path(
+        self, file: pathlib.Path, path: pathlib.Path
+    ) -> pathlib.Path:
         # link should be relative to the location of the current file
         return file.parent / path
 
@@ -201,7 +200,7 @@ class LinkChecker:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_static_path(path)
-        if not os.path.isfile(image_file):
+        if not image_file.is_file():
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -249,7 +248,7 @@ class LinkChecker:
             logger.debug(f"Docroot link {link} in file {file} found")
             return None
 
-    def _check_link(  # noqa: PLR0912 # too complex
+    def _check_link(  # noqa: PLR0912, C901 # too complex
         self, match: re.Match, file: pathlib.Path
     ) -> Optional[LinkReport]:
         """Checks that a link is valid. Valid links are:
@@ -375,7 +374,7 @@ class LinkChecker:
     help="Top-most folder in the site URL for resolving absolute image paths",
 )
 @click.option("--skip-external", is_flag=True)
-def scan_docs_click(
+def scan_docs_click(  # noqa: PLR0913
     path: str,
     docs_root: Optional[str],
     static_root: str,
@@ -390,7 +389,7 @@ def scan_docs_click(
     sys.exit(code)
 
 
-def scan_docs(
+def scan_docs(  # noqa: C901, PLR0913
     path: str,
     docs_root: Optional[str],
     static_root: str,
