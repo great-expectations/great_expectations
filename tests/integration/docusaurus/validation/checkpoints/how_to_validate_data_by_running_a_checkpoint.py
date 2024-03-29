@@ -42,7 +42,7 @@ checkpoint = context.add_or_update_checkpoint(
 
 # add (save) the checkpoint to the data context
 context.add_or_update_checkpoint(checkpoint=checkpoint)
-cp = context.checkpoints.get(name="my_checkpoint")
+cp = context.get_legacy_checkpoint(name="my_checkpoint")
 assert cp.name == "my_checkpoint"
 
 # context = gx.get_context()

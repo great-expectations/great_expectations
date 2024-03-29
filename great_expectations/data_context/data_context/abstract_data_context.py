@@ -75,6 +75,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -325,8 +326,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._checkpoints: CheckpointFactory | None = None
         if checkpoint_store := self.stores.get(self.checkpoint_store_name):
+            # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
+            #       Upon the deletion of the old checkpoint store, the new one will be promoted.
+            v1_checkpoint_store = V1CheckpointStore()
+            v1_checkpoint_store._store_backend = (
+                checkpoint_store.store_backend
+            )  # Leverage same backend as what was configured for the old store
             self._checkpoints = CheckpointFactory(
-                store=checkpoint_store,
+                store=v1_checkpoint_store,
                 context=self,
             )
 
@@ -1594,6 +1601,49 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         return Checkpoint.DEFAULT_ACTION_LIST
+
+    def get_legacy_checkpoint(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+    ) -> Checkpoint:
+        """Retrieves a given Checkpoint by either name or id.
+        Args:
+            name: The name of the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
+        Returns:
+            The requested Checkpoint.
+        Raises:
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
+        """
+        if not name and not id:
+            raise ValueError("name and id cannot both be None")
+
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(name=name, id=id)
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config,
+            data_context=self,
+            name=name,
+        )
+
+        return checkpoint
+
+    def delete_legacy_checkpoint(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+    ) -> None:
+        """Deletes a given Checkpoint by either name or id.
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
+        Raises:
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
+        """
+        return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
         """

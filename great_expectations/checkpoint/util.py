@@ -410,9 +410,6 @@ def validate_validation_dict(validation_dict: dict, batch_request_required: bool
     if not validation_dict.get("expectation_suite_name"):
         raise gx_exceptions.CheckpointError("validation expectation_suite_name must be specified")
 
-    if not validation_dict.get("action_list"):
-        raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
-
 
 def send_sns_notification(
     sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
