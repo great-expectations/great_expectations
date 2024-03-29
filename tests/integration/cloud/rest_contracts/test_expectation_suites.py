@@ -26,106 +26,75 @@ PUT_EXPECTATION_SUITE_ID: Final[str] = "9390c24d-e8d6-4944-9411-4d0aaed14915"
 
 POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
     "data": {
-        "type": "expectation_suite",
-        "attributes": {
-            "suite": {
-                "id": None,
-                "meta": {"great_expectations_version": "0.13.23"},
-                "expectations": [
-                    {
-                        "kwargs": {"max_value": 3, "min_value": 1},
-                        "meta": {},
-                        "expectation_type": "expect_table_row_count_to_be_between",
-                    },
-                ],
-                "expectation_suite_name": "brand new suite",
+        "id": None,
+        "meta": {"great_expectations_version": "0.13.23"},
+        "expectations": [
+            {
+                "kwargs": {"max_value": 3, "min_value": 1},
+                "meta": {},
+                "expectation_type": "expect_table_row_count_to_be_between",
             },
-            "organization_id": EXISTING_ORGANIZATION_ID,
-        },
+        ],
+        "name": "brand new suite",
+        "organization_id": EXISTING_ORGANIZATION_ID,
     },
 }
 
 POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": {
-        "attributes": {
-            "created_by_id": pact.Format().uuid,
-            "organization_id": pact.Format().uuid,
-            "suite": {
-                "expectation_suite_name": "brand new suite",
-                "expectations": [
-                    {
-                        "expectation_type": "expect_table_row_count_to_be_between",
-                        "id": pact.Format().uuid,
-                        "kwargs": {"max_value": 3, "min_value": 1},
-                        "meta": {},
-                    }
-                ],
+        "created_by_id": pact.Format().uuid,
+        "organization_id": pact.Format().uuid,
+        "name": "brand new suite",
+        "expectations": [
+            {
+                "expectation_type": "expect_table_row_count_to_be_between",
                 "id": pact.Format().uuid,
-                "meta": {"great_expectations_version": "0.13.23"},
-            },
-        },
+                "kwargs": {"max_value": 3, "min_value": 1},
+                "meta": {},
+            }
+        ],
         "id": pact.Format().uuid,
-        "type": "expectation_suite",
+        "meta": {"great_expectations_version": "0.13.23"},
     }
 }
 
 GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": {
-        "attributes": {
-            "created_by_id": pact.Format().uuid,
-            "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            "suite": {
-                "expectation_suite_name": pact.Like("no_checkpoint_suite"),
-                "expectations": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "id": pact.Format().uuid,
-                        "kwargs": {
-                            "column": "passenger_count",
-                            "max_value": 5,
-                            "min_value": 0,
-                            "mostly": 0.97,
-                        },
-                        "meta": {},
-                    }
-                ],
-                "id": GET_EXPECTATION_SUITE_ID,
-                "meta": {"great_expectations_version": "0.18.3"},
-            },
-        },
+        "created_by_id": pact.Format().uuid,
+        "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+        "name": pact.Like("no_checkpoint_suite"),
+        "expectations": [
+            {
+                "expectation_type": "expect_column_values_to_be_between",
+                "id": pact.Format().uuid,
+                "kwargs": {
+                    "column": "passenger_count",
+                    "max_value": 5,
+                    "min_value": 0,
+                    "mostly": 0.97,
+                },
+                "meta": {},
+            }
+        ],
         "id": GET_EXPECTATION_SUITE_ID,
-        "type": "expectation_suite",
+        "meta": {"great_expectations_version": "0.18.3"},
     },
 }
 
 GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.EachLike(
         {
-            "attributes": {
-                "created_by_id": pact.Format().uuid,
-                "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                "suite": {
-                    # TODO(bdirks): s/expectation_suite_name/name/
-                    # This is the new 1.0.0 API. I'm leaving this as is so we still have
-                    # coverage until we update mercury.
-                    "expectation_suite_name": pact.Like("raw_health.critical_1a"),
-                    "id": pact.Format().uuid,
-                    "meta": {"great_expectations_version": pact.Like("0.13.23")},
-                },
-            },
+            "created_by_id": pact.Format().uuid,
+            "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+            "name": pact.Like("raw_health.critical_1a"),
             "id": pact.Format().uuid,
-            "type": "expectation_suite",
+            "meta": {"great_expectations_version": pact.Like("0.13.23")},
         },
         minimum=1,
     ),
 }
 
 
-@pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name",
-    strict=True,
-)
 @pytest.mark.cloud
 def test_get_expectation_suite(
     pact_test: pact.Pact,
@@ -135,8 +104,14 @@ def test_get_expectation_suite(
     provider_state = "the Expectation Suite does exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = (
-        f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{GET_EXPECTATION_SUITE_ID}"
+    path = pathlib.Path(
+        "/",
+        "api",
+        "v1",
+        "organizations",
+        EXISTING_ORGANIZATION_ID,
+        "expectation-suites",
+        GET_EXPECTATION_SUITE_ID,
     )
     status = 200
     response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
@@ -159,11 +134,6 @@ def test_get_expectation_suite(
         cloud_data_context.get_expectation_suite(id=GET_EXPECTATION_SUITE_ID)
 
 
-@pytest.mark.xfail(
-    reason="Expectation suites in 1.0.0 now have a name attribute "
-    "instead of expectation_suite_name",
-    # strict=True, # TODO: GG (kilo59) temporarily disabled strict mode
-)
 @pytest.mark.cloud
 def test_get_non_existent_expectation_suite(
     pact_test: pact.Pact,
@@ -173,7 +143,16 @@ def test_get_non_existent_expectation_suite(
     provider_state = "the Expectation Suite does not exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"  # noqa: E501
+    path = pathlib.Path(
+        "/",
+        "api",
+        "v1",
+        "organizations",
+        EXISTING_ORGANIZATION_ID,
+        "expectation-suites",
+        NON_EXISTENT_EXPECTATION_SUITE_ID,
+    )
+
     status = 404
 
     (
@@ -206,7 +185,7 @@ def test_get_expectation_suites(
     provider_state = "Expectation Suite exist"
     scenario = "a request to get Expectation Suites"
     method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    path = f"/api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
     status = 200
     response_body = GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
 
@@ -236,6 +215,8 @@ def test_get_expectation_suites(
             method="POST",
             request_path=pathlib.Path(
                 "/",
+                "api",
+                "v1",
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "expectation-suites",
@@ -244,23 +225,15 @@ def test_get_expectation_suites(
             given="the Expectation Suite does not exist",
             request_body={
                 "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            # TODO(bdirks): s/expectation_suite_name/name/
-                            # This is the new 1.0.0 API. I'm leaving this as is so we still have
-                            # coverage until we update mercury.
-                            "expectation_suite_name": "brand new suite",
-                        }
-                    },
+                    "meta": {"great_expectations_version": "0.13.23"},
+                    "expectations": [
+                        {
+                            "kwargs": {"max_value": 3, "min_value": 1},
+                            "meta": {},
+                            "expectation_type": "expect_table_row_count_to_be_between",
+                        },
+                    ],
+                    "name": "brand new suite",
                 },
             },
             response_status=201,
@@ -283,7 +256,8 @@ def test_post_expectation_suite_request(
             method="PUT",
             request_path=pathlib.Path(
                 "/",
-                "organizations",
+                "api",
+                "v1" "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "expectation-suites",
                 PUT_EXPECTATION_SUITE_ID,
@@ -292,23 +266,18 @@ def test_post_expectation_suite_request(
             given="the Expectation Suite does exist",
             request_body={
                 "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "renamed suite",
-                        }
-                    },
+                    "meta": {"great_expectations_version": "0.13.23"},
+                    "expectations": [
+                        {
+                            "kwargs": {"max_value": 3, "min_value": 1},
+                            "meta": {},
+                            "expectation_type": "expect_table_row_count_to_be_between",
+                        },
+                    ],
+                    "name": "renamed suite",
                 },
             },
-            response_status=204,
+            response_status=200,
             response_body=None,
         ),
     ],
@@ -328,6 +297,8 @@ def test_put_expectation_suite_request(
             method="PUT",
             request_path=pathlib.Path(
                 "/",
+                "api",
+                "v1",
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "expectation-suites",
@@ -337,20 +308,15 @@ def test_put_expectation_suite_request(
             given="the Expectation Suite does not exist",
             request_body={
                 "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "renamed suite",
-                        }
-                    },
+                    "meta": {"great_expectations_version": "0.13.23"},
+                    "expectations": [
+                        {
+                            "kwargs": {"max_value": 3, "min_value": 1},
+                            "meta": {},
+                            "expectation_type": "expect_table_row_count_to_be_between",
+                        },
+                    ],
+                    "name": "renamed suite",
                 },
             },
             response_status=404,
@@ -374,7 +340,7 @@ def test_delete_expectation_suite(
     provider_state = "the Expectation Suite does exist"
     scenario = "a request to delete an Expectation Suite"
     method = "DELETE"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    path = f"/api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
     query = {
         "name": "brand new suite",
     }
