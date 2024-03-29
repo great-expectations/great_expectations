@@ -610,7 +610,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     ) -> ExpectationSuiteValidationResult:
         validation_results = [result for result in self.results if not result.success]
 
-        successful_expectations = sum(exp.success for exp in validation_results)
+        successful_expectations = sum(exp.success or False for exp in validation_results)
         evaluated_expectations = len(validation_results)
         unsuccessful_expectations = evaluated_expectations - successful_expectations
         success = successful_expectations == evaluated_expectations

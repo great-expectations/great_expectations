@@ -1066,8 +1066,13 @@ class Validator:
         res = self.validate(only_return_failures=True).results  # type: ignore[union-attr] # ExpectationValidationResult has no `.results` attr
         if any(res):
             for item in res:
+                config = item.expectation_config
+                if not config:
+                    raise ValueError(
+                        "ExpectationValidationResult does not have an expectation_config"
+                    )
                 self.remove_expectation(
-                    expectation_configuration=item.expectation_config,
+                    expectation_configuration=config,
                     match_type="runtime",
                 )
             warnings.warn(f"Removed {len(res)} expectations that were 'False'")
