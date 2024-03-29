@@ -37,21 +37,24 @@ If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. 
 
 4. Optional. Determine the Actions to add to the Checkpoint.
 
-In this example, the variable `actions` is a list of two actions. The first updates your Data Docs with the results of the Validation Definition. The second sends a Slack notification if any of the Expectations in the Validation Definition failed:
+  In this example, the variable `actions` is a list of two actions. The first updates your Data Docs with the results of the Validation Definition. The second sends a Slack notification if any of the Expectations in the Validation Definition failed:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py determine actions"
   ```
 
-  :::tip
-[A list of available Actions](/reference/api/checkpoint/Checkpoint_class.mdx) is available with the Checkpoint class in the GX API documentation.
+  :::tip 
+  
+  [A list of available Actions](/reference/api/checkpoint/Checkpoint_class.mdx) is available with the Checkpoint class in the GX API documentation.
+  
   :::
+
 
 5. Create the Checkpoint:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py create checkpoint"
   ```
 
-5. Add the Checkpoint to the Data Context:
+6. Add the Checkpoint to the Data Context:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py add checkpoint"
   ```
@@ -60,7 +63,7 @@ In this example, the variable `actions` is a list of two actions. The first upda
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py full script"
+```python showLineNumbers title="Python" name="/core/validate_data/checkpoints/_examples/create_a_checkpoint.py full script"
 ```
 
 </TabItem>
@@ -86,7 +89,7 @@ In this example, the variable `actions` is a list of two actions. The first upda
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Python" name="/core/validate_data/checkpoints/_examples/list_available_checkpoints.py full example code"
+```python showLineNumbers title="Python" name="/core/validate_data/checkpoints/_examples/list_available_checkpoints.py full example code"
 ```
 
 </TabItem>
@@ -131,7 +134,7 @@ In this example, the variable `actions` is a list of two actions. The first upda
 
 2. Determine the filter attributes.
 
-Checkpoints associate a list of one or more Validation Definitions with a list of Actions to perform.  The attributes used to filter the results include the attributes for the Validation Definitions, their Batch Definitions and Expectation Suites, and the Checkpoint Actions.
+  Checkpoints associate a list of one or more Validation Definitions with a list of Actions to perform.  The attributes used to filter the results include the attributes for the Validation Definitions, their Batch Definitions and Expectation Suites, and the Checkpoint Actions.
 
 3. Use a list comprehension to return all Checkpoints that match the filtered attributes.
 
@@ -167,7 +170,7 @@ Checkpoints associate a list of one or more Validation Definitions with a list o
 
 3. Overwrite the Checkpoint values with updated lists.
 
-  In this example, the Checkpoint Validations Definitions and Actions receive updates:
+  In this example, the Checkpoint Validation Definitions and Actions receive updates:
 
   ```python title="Python" name="/core/validate_data/checkpoints/_examples/update_a_checkpoint.py full update values"
   ```
